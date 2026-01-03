@@ -1,28 +1,23 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-# Firebase config
-src/firebase.js
-
-# Environment variables
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# production
-/build
-
-# misc
-.DS_Store
+# Environment variables (SECRETS - NEVER COMMIT!)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Production
+/build
+
+# Misc
+.DS_Store
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
