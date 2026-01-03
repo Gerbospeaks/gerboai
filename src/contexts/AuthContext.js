@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from '../firebase';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const AuthContext = createContext(null);
 
@@ -47,7 +46,7 @@ export const AuthProvider = ({ children }) => {
     console.log('Verification email sent');
 
     // TEMPORARILY SKIP LOGO UPLOAD
-    let logoUrl = '';
+    //let logoUrl = '';
     console.log('3. Skipping logo upload for now');
 
     console.log('4. Creating user document...');

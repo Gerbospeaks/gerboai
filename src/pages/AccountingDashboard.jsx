@@ -41,11 +41,11 @@ import {
   TrendingUp,
   CreditCard,
   Receipt,
-  Wallet,
-  PieChart,
+  //Wallet,
+ // PieChart,
   DollarSign,
-  ClipboardList,
-  Package,
+ // ClipboardList,
+  //Package,
   Briefcase,
   Upload,
   BookOpen,
@@ -84,7 +84,6 @@ const AccountingDashboard = () => {
   const [savedInvoices, setSavedInvoices] = useState([]);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [showCustomersList, setShowCustomersList] = useState(false);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
