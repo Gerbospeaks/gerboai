@@ -3,9 +3,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
+import AboutPage from './pages/AboutPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Home from './pages/Home';  // NEW: Import Home page
+import Home from './pages/Home';  
+import ContactPage from './pages/ContactPage';
 import DashboardRouter from './components/DashboardRouter';
 
 // Your existing dashboard imports
@@ -29,6 +31,7 @@ import RealEstateDashboard from './pages/RealEstateDashboard';
 import VeterinaryDashboard from './pages/VeterinaryDashboard';
 import HVACDashboard from './pages/HVACDashboard';
 import AccountingDashboard from './pages/AccountingDashboard';  
+import {  } from 'lucide-react';
 
 function App() {
   return (
@@ -37,6 +40,8 @@ function App() {
         <Routes>
           {/* NEW: Landing Page - Public Route (Root) */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

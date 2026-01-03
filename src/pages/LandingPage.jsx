@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/img/solidflo-logo.png';
 import computer from '../assets/images/new_solidflo_bg_transp_text.png';
+import about from './AboutPage';  
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -840,7 +841,7 @@ const LandingPage = () => {
         <ul>
           <li><a href="#features" onClick={closeMobileMenu}>Features</a></li>
           <li><a href="#pricing" onClick={closeMobileMenu}>Pricing</a></li>
-          <li><a href="#about" onClick={closeMobileMenu}>About</a></li>
+          <li><a onClick={() => navigate({about})}>About</a></li>
           <li><span onClick={() => { closeMobileMenu(); handleLogin(); }}>Login</span></li>
           <li><span onClick={() => { closeMobileMenu(); handleSignup(); }} style={{ color: '#ff9d00', fontWeight: 600 }}>Sign Up Free</span></li>
         </ul>
@@ -1243,10 +1244,10 @@ const LandingPage = () => {
       <div className="footer-section">
         <h3>Company</h3>
         <ul>
-          <li><a>About Us</a></li>
+          <li><a onClick={() => navigate('/about')}>About</a></li>
           <li><a>Careers</a></li>
           <li><a>Press Kit</a></li>
-          <li><a>Contact</a></li>
+          <li><a onClick={() => navigate('/contact')}>Contact Us</a></li>
           <li><a>Partners</a></li>
         </ul>
       </div>
