@@ -10,11 +10,16 @@ import {
   updateDoc,
   doc,
   getDoc,
+  setDoc,
   orderBy,
   limit,
   getDocs,
 } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download } from "lucide-react";
+import { db } from "../firebase";
+import CustomerModal from './CustomerModal';
+import CustomersListModal from './CustomersListModal';
 import {
   ChevronDown,
   ChevronLeft,
@@ -23,89 +28,233 @@ import {
   Users,
   Calendar,
   FileText,
-  DollarSign,
+  Wrench,
   FileBarChart,
   BarChart3,
   Menu,
   Plus,
   Send,
   Edit,
-  CheckSquare,
-  Wrench,
-  ClipboardList,
-  Zap,
   LogOut,
-  Lightbulb,
-  Plug,
-  Battery,
+  CheckSquare,
+  TrendingUp,
+  CreditCard,
+  Receipt,
+  Wallet,
+  PieChart,
+  ClipboardList,
+  Package,
+  Tool,
+  Upload,
+  Zap,
+  Cog,
 } from "lucide-react";
 
-const generateInvoiceNumber = async (userId) => {
+const generateJobCardNumber = async (userId) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
 
-  const invoicesRef = collection(db, "users", userId, "invoices");
-  const q = query(invoicesRef, orderBy("createdAt", "desc"), limit(1));
+  const jobCardsRef = collection(db, "users", userId, "invoices");
+  const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(1));
   const snapshot = await getDocs(q);
 
-  let lastNumber = 1200;
+  let lastNumber = 891;
 
   if (!snapshot.empty) {
-    const lastInvoice = snapshot.docs[0].data();
-    const match = lastInvoice.invoiceNumber?.match(/(\d+)$/);
+    const lastJobCard = snapshot.docs[0].data();
+    const match = lastJobCard.jobCardNumber?.match(/(\d+)$/);
+
     if (match) {
       lastNumber = Number(match[1]);
     }
   }
 
   const nextNumber = lastNumber + 1;
-  return `ELEC-${year}-${String(nextNumber).padStart(4, "0")}`;
+  return `JC-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
 
-const ElectricalDashboard = () => {
+const EngineeringDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("Invoice");
-  const [showInvoice, setShowInvoice] = useState(false);
+  const [activeTab, setActiveTab] = useState("JobCard");
+  const [showJobCard, setShowJobCard] = useState(false);
   const { user } = useAuth();
-  const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [invoiceId, setInvoiceId] = useState(null);
+  const [jobCardNumber, setJobCardNumber] = useState("");
+  const [jobCardId, setJobCardId] = useState(null);
+  const [savedJobCards, setSavedJobCards] = useState([]);
+  const [showJobCardsList, setShowJobCardsList] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showCustomersList, setShowCustomersList] = useState(false);
+  const [savedCustomers, setSavedCustomers] = useState([]);
+  const [showCustomersListModal, setShowCustomersListModal] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   useEffect(() => {
     if (!user?.uid) return;
 
-    const loadInvoiceNumber = async () => {
-      const nextInvoice = await generateInvoiceNumber(user.uid);
-      setInvoiceNumber(nextInvoice);
+    const loadJobCardNumber = async () => {
+      const nextJobCard = await generateJobCardNumber(user.uid);
+      setJobCardNumber(nextJobCard);
     };
 
-    loadInvoiceNumber();
+    loadJobCardNumber();
+    loadSavedJobCards();
   }, [user]);
 
-  const loadInvoiceForExport = async () => {
-    if (!user?.uid || !invoiceId) return null;
+  const loadCustomers = async () => {
+    try {
+      const q = query(collection(db, "users", user.uid, "clients"), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const customersData = [];
+      
+      querySnapshot.forEach((doc) => {
+        customersData.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      
+      setCustomers(customersData);
+    } catch (error) {
+      console.error('Error loading customers:', error);
+    }
+  };
+
+  const loadSavedJobCards = async () => {
+    if (!user?.uid) return;
+
+    const db = getFirestore();
+    const jobCardsRef = collection(db, "users", user.uid, "invoices");
+    const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+
+    const cards = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setSavedJobCards(cards);
+  };
+
+  const handleAddNewCustomer = () => {
+    setSelectedCustomer(null);
+    setShowCustomerModal(true);
+  };
+
+  const handleEditCustomer = (customer) => {
+    setSelectedCustomer(customer);
+    setShowCustomerModal(true);
+  };
+
+  const loadCustomer = (customer) => {
+    setCustomerName(customer.name || "");
+    setCustomerEmail(customer.email || "");
+    setCustomerPhone(customer.phone || "");
+    setCustomerAddress(customer.address || "");
+    setCustomerId(customer.customerId || "");
+  };
+
+  const handleCustomerSaved = () => {
+    loadCustomers();
+  };
+
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
+  const loadJobCard = (jobCard) => {
+    setJobCardId(jobCard.id);
+    setJobCardNumber(jobCard.jobCardNumber || "");
+    setCustomerName(jobCard.customer?.name || "");
+    setCustomerEmail(jobCard.customer?.email || "");
+    setCustomerPhone(jobCard.customer?.phone || "");
+    setCustomerAddress(jobCard.customer?.address || "");
+    setCustomerId(jobCard.customer?.customerId || "");
+    setEquipmentType(jobCard.equipment?.type || "");
+    setEquipmentManufacturer(jobCard.equipment?.manufacturer || "");
+    setEquipmentModel(jobCard.equipment?.model || "");
+    setEquipmentSerial(jobCard.equipment?.serialNumber || "");
+    setEquipmentId(jobCard.equipment?.equipmentId || "");
+    setEquipmentLocation(jobCard.equipment?.location || "");
+    setItems(jobCard.items || []);
+    setShowJobCardsList(false);
+  };
+
+  const loadSavedCustomers = async () => {
+    if (!user?.uid) return;
+
+    const db = getFirestore();
+    const customersRef = collection(db, "users", user.uid, "clients");
+    const q = query(customersRef, orderBy("createdAt", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+
+    const customers = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setSavedCustomers(customers.filter(c => !c._placeholder));
+  };
+
+  const handleSaveCustomer = async () => {
+    if (!user?.uid) return;
+    
+    if (!customerName || !customerEmail) {
+      alert("Please enter customer name and email");
+      return;
+    }
+
+    try {
+      const db = getFirestore();
+      const customerData = {
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone,
+        address: customerAddress,
+        customerId: customerId || `CUST-${Date.now()}`,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, "users", user.uid, "clients"), customerData);
+      alert("Customer saved successfully!");
+      loadSavedCustomers();
+    } catch (error) {
+      console.error("Error saving customer:", error);
+      alert("Failed to save customer");
+    }
+  };
+
+  const loadJobCardForExport = async () => {
+    if (!user?.uid || !jobCardId) return null;
 
     const db = getFirestore();
     const snap = await getDoc(
-      doc(db, "users", user.uid, "invoices", invoiceId)
+      doc(db, "users", user.uid, "invoices", jobCardId)
     );
 
     return snap.exists() ? snap.data() : null;
   };
 
   const handleSavePDF = async () => {
-    const savedInvoice = await loadInvoiceForExport();
+    const savedJobCard = await loadJobCardForExport();
 
-    if (!savedInvoice) {
-      alert("Please save the invoice before exporting PDF");
+    if (!savedJobCard) {
+      alert("Please save the job card before exporting PDF");
       return;
     }
 
-    setInvoiceNumber(savedInvoice.invoiceNumber);
-    setItems(savedInvoice.items);
-    setClientName(savedInvoice.client.name);
-    setClientEmail(savedInvoice.client.email);
-    setClientPhone(savedInvoice.client.phone);
-    setClientAddress(savedInvoice.client.address);
+    setJobCardNumber(savedJobCard.jobCardNumber);
+    setItems(savedJobCard.items);
+    setCustomerName(savedJobCard.customer.name);
+    setCustomerEmail(savedJobCard.customer.email);
+    setCustomerPhone(savedJobCard.customer.phone);
+    setCustomerAddress(savedJobCard.customer.address);
+    setEquipmentType(savedJobCard.equipment.type);
+    setEquipmentManufacturer(savedJobCard.equipment.manufacturer);
+    setEquipmentModel(savedJobCard.equipment.model);
+    setEquipmentSerial(savedJobCard.equipment.serialNumber);
 
     setTimeout(() => {
       window.print();
@@ -120,13 +269,14 @@ const ElectricalDashboard = () => {
 
     const item = {
       description: newItem.description,
+      type: newItem.type || "Labor",
       rate,
       qty,
       amount: rate * qty,
     };
 
     setItems((prev) => [...prev, item]);
-    setNewItem({ description: "", rate: "", qty: "" });
+    setNewItem({ description: "", rate: "", qty: "", type: "Labor" });
   };
 
   useEffect(() => {
@@ -143,14 +293,121 @@ const ElectricalDashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const [clientName, setClientName] = useState("Robert Thompson");
-  const [clientId, setClientId] = useState("C-2024-8923");
-  const [clientEmail, setClientEmail] = useState("robert.thompson@example.com");
-  const [clientPhone, setClientPhone] = useState("0161 789 4567");
-  const [clientAddress, setClientAddress] = useState(
-    "156 Oxford Road, Manchester, M1 7ED"
+  const [customerName, setCustomerName] = useState("ABC Manufacturing Ltd");
+  const [customerId, setCustomerId] = useState("CUST-2024-1234");
+  const [customerEmail, setCustomerEmail] = useState("contact@abcmfg.com");
+  const [customerPhone, setCustomerPhone] = useState("082 123 4567");
+  const [customerAddress, setCustomerAddress] = useState(
+    "123 Industrial Park, Johannesburg, 2001"
   );
-  const [serviceType, setServiceType] = useState("Electrical Installation & Testing");
+  const [equipmentType, setEquipmentType] = useState("Generator");
+  const [equipmentManufacturer, setEquipmentManufacturer] = useState("Caterpillar");
+  const [equipmentModel, setEquipmentModel] = useState("C15");
+  const [equipmentSerial, setEquipmentSerial] = useState("CAT12345XYZ789");
+  const [equipmentId, setEquipmentId] = useState("EQ-2024-001");
+  const [equipmentLocation, setEquipmentLocation] = useState("Building A - Ground Floor");
+
+  const [businessInfo, setBusinessInfo] = useState({
+    businessName: "ELITE ENGINEERING SERVICES",
+    addressLine1: "45 ENGINEERING WAY",
+    addressLine2: "INDUSTRIAL PARK",
+    city: "JOHANNESBURG",
+    postalCode: "2001",
+    primaryPhone: "011 234 5678",
+    secondaryPhone: "082 345 6789",
+    logoUrl: "",
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.uid) {
+      loadBusinessInfo();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const fetchBusinessInfo = async () => {
+      if (!user?.uid) return;
+
+      try {
+        const db = getFirestore();
+        const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setBusinessInfo(docSnap.data());
+        } else {
+          console.log("No business info found");
+        }
+      } catch (error) {
+        console.error("Error fetching business info:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBusinessInfo();
+  }, [user]);
+
+  const loadBusinessInfo = async () => {
+    if (!user?.uid) return;
+
+    try {
+      const db = getFirestore();
+      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setBusinessInfo(docSnap.data());
+      }
+    } catch (error) {
+      console.error("Error loading business info:", error);
+    }
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !user?.uid) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
+    }
+
+    try {
+      const storage = getStorage();
+      const storageRef = ref(storage, `users/${user.uid}/logo/${file.name}`);
+
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+
+      setBusinessInfo({ ...businessInfo, logoUrl: downloadURL });
+      alert("Logo uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      alert("Failed to upload logo");
+    }
+  };
+
+  const handleSaveBusinessInfo = async () => {
+    if (!user?.uid) return;
+
+    try {
+      const db = getFirestore();
+      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+      await setDoc(docRef, businessInfo);
+      alert("Business information saved successfully!");
+      setShowSettings(false);
+    } catch (error) {
+      console.error("Error saving business info:", error);
+      alert("Failed to save business information");
+    }
+  };
 
   const handlePrint = () => {
     window.print();
@@ -165,33 +422,38 @@ const ElectricalDashboard = () => {
     description: "",
     rate: "",
     qty: "",
+    type: "Labor",
   });
 
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-  const vat = 0;
+  const vat = subtotal * 0.15;
   const total = subtotal + vat;
 
-  const buildInvoicePayload = (numberToUse) => ({
-    invoiceNumber: numberToUse,
+  const buildJobCardPayload = (numberToUse) => ({
+    jobCardNumber: numberToUse,
     locked: true,
     status: "pending",
 
     dates: {
-      serviceDate: "29/12/2024",
-      issuedDate: new Date().toISOString(),
-      dueDate: (() => {
-        const d = new Date();
-        d.setDate(d.getDate() + 21);
-        return d.toISOString();
-      })(),
+      serviceDate: new Date().toISOString(),
+      completedDate: null,
     },
 
-    client: {
-      name: clientName,
-      email: clientEmail,
-      phone: clientPhone,
-      address: clientAddress,
-      clientId,
+    customer: {
+      name: customerName,
+      email: customerEmail,
+      phone: customerPhone,
+      address: customerAddress,
+      customerId,
+    },
+
+    equipment: {
+      type: equipmentType,
+      manufacturer: equipmentManufacturer,
+      model: equipmentModel,
+      serialNumber: equipmentSerial,
+      equipmentId: equipmentId,
+      location: equipmentLocation,
     },
 
     items,
@@ -208,33 +470,59 @@ const ElectricalDashboard = () => {
     updatedAt: serverTimestamp(),
   });
 
-  const handleSaveInvoice = async () => {
+  const handleSaveJobCard = async () => {
     if (!user?.uid) return;
 
     const db = getFirestore();
-    let numberToUse = invoiceNumber;
+    let numberToUse = jobCardNumber;
 
-    if (!invoiceId) {
-      numberToUse = await generateInvoiceNumber(user.uid);
-      setInvoiceNumber(numberToUse);
+    if (!jobCardId) {
+      numberToUse = await generateJobCardNumber(user.uid);
+      setJobCardNumber(numberToUse);
     }
 
-    const invoiceData = buildInvoicePayload(numberToUse);
+    const jobCardData = buildJobCardPayload(numberToUse);
 
-    if (invoiceId) {
-      await updateDoc(doc(db, "users", user.uid, "invoices", invoiceId), {
-        ...invoiceData,
+    if (jobCardId) {
+      await updateDoc(doc(db, "users", user.uid, "invoices", jobCardId), {
+        ...jobCardData,
         updatedAt: serverTimestamp(),
       });
     } else {
       const ref = await addDoc(
         collection(db, "users", user.uid, "invoices"),
-        invoiceData
+        jobCardData
       );
-      setInvoiceId(ref.id);
+      setJobCardId(ref.id);
     }
 
-    alert("Invoice saved and locked");
+    alert("Job card saved and locked");
+    loadSavedJobCards();
+  };
+
+  const handleNewJobCard = () => {
+    setJobCardId(null);
+    setJobCardNumber("");
+    setCustomerName("ABC Manufacturing Ltd");
+    setCustomerId("CUST-2024-1234");
+    setCustomerEmail("contact@abcmfg.com");
+    setCustomerPhone("082 123 4567");
+    setCustomerAddress("123 Industrial Park, Johannesburg, 2001");
+    setEquipmentType("Generator");
+    setEquipmentManufacturer("Caterpillar");
+    setEquipmentModel("C15");
+    setEquipmentSerial("CAT12345XYZ789");
+    setEquipmentId("EQ-2024-001");
+    setEquipmentLocation("Building A - Ground Floor");
+    setItems([]);
+
+    const loadNewNumber = async () => {
+      if (user?.uid) {
+        const nextJobCard = await generateJobCardNumber(user.uid);
+        setJobCardNumber(nextJobCard);
+      }
+    };
+    loadNewNumber();
   };
 
   const handleLogout = async () => {
@@ -248,7 +536,7 @@ const ElectricalDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-blue-50 to-slate-100">
+    <div className="flex h-screen bg-gray-50">
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -256,93 +544,115 @@ const ElectricalDashboard = () => {
         ></div>
       )}
 
-      {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-900 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
-          <div className="flex items-center space-x-2 mb-8 bg-blue-600 rounded-lg p-3">
-            <Zap className="w-8 h-8 text-yellow-400" />
-            <span className="font-bold text-lg text-white">
-              BrightSpark Pro
+          <div className="flex items-center space-x-2 mb-8">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-semibold text-lg text-white">
+              Engineering Pro
             </span>
+            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
           </div>
 
           <nav className="space-y-1">
-            <div className="flex items-center space-x-3 px-3 py-2 text-slate-300 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
+            <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
               <Home className="w-5 h-5" />
-              <span>Dashboard</span>
+              <span>Home</span>
             </div>
-            <div className="flex items-center space-x-3 px-3 py-2 text-slate-300 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
+            <div
+              onClick={() => setShowSettings(true)}
+              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+            >
               <Settings className="w-5 h-5" />
               <span>Settings</span>
             </div>
 
             <div className="pt-4">
-              <div className="flex items-center space-x-3 px-3 py-2 text-slate-300 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
-                <Calendar className="w-5 h-5" />
-                <span>Job Schedule</span>
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+                <TrendingUp className="w-5 h-5" />
+                <span>Business Overview</span>
               </div>
 
               <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2 text-slate-300 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
+                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                   <div className="flex items-center space-x-3">
-                    <FileText className="w-5 h-5" />
-                    <span>Billing</span>
+                    <ClipboardList className="w-5 h-5" />
+                    <span>Job Cards</span>
                   </div>
                   <ChevronDown className="w-4 h-4" />
                 </div>
 
                 <div className="ml-8 mt-1 space-y-1">
-                  <div className="px-3 py-2 text-sm text-white bg-blue-600 rounded-lg cursor-pointer">
-                    Invoices
+                  <div
+                    onClick={handleNewJobCard}
+                    className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+                  >
+                    Create Job Card
                   </div>
-                  <div className="px-3 py-2 text-sm text-slate-400 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
-                    Clients
+                  <div
+                    onClick={() => setShowJobCardsList(!showJobCardsList)}
+                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+                  >
+                    All Job Cards ({savedJobCards.length})
                   </div>
-                  <div className="px-3 py-2 text-sm text-slate-400 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
-                    Quotes
+                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
+                    In Progress
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-slate-300 hover:bg-slate-700 rounded-lg cursor-pointer mt-2 transition-colors">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
                 <Users className="w-5 h-5" />
-                <span>Client Database</span>
+                <span>Customers</span>
+              </div>
+              <div className="ml-8 mt-1 space-y-1">
+                <div 
+                  onClick={handleAddNewCustomer}
+                  className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
+                >
+                  <span>Add Customer</span>
+                </div>
+                <div
+                  onClick={() => setShowCustomersListModal(true)}
+                  className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+                >
+                  All Customers ({savedCustomers.length})
+                </div>
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-slate-300 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
-                <Wrench className="w-5 h-5" />
-                <span>Electricians</span>
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+                <Cog className="w-5 h-5" />
+                <span>Equipment</span>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-slate-300 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+                <Package className="w-5 h-5" />
+                <span>Parts Inventory</span>
+              </div>
+
+              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
-                  <Battery className="w-5 h-5" />
-                  <span>Equipment</span>
+                  <Receipt className="w-5 h-5" />
+                  <span>Invoices</span>
                 </div>
                 <ChevronDown className="w-4 h-4" />
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-slate-300 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
+              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
-                  <ClipboardList className="w-5 h-5" />
-                  <span>Inspections</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-
-              <div className="flex items-center justify-between px-3 py-2 text-slate-300 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
-                <div className="flex items-center space-x-3">
-                  <DollarSign className="w-5 h-5" />
+                  <CreditCard className="w-5 h-5" />
                   <span>Payments</span>
                 </div>
                 <ChevronDown className="w-4 h-4" />
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-slate-300 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
+              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <FileBarChart className="w-5 h-5" />
                   <span>Reports</span>
@@ -350,7 +660,12 @@ const ElectricalDashboard = () => {
                 <ChevronDown className="w-4 h-4" />
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-slate-300 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+                <Calendar className="w-5 h-5" />
+                <span>Appointments</span>
+              </div>
+
+              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <BarChart3 className="w-5 h-5" />
                   <span>Analytics</span>
@@ -361,76 +676,81 @@ const ElectricalDashboard = () => {
           </nav>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
+            <div className="w-10 h-10 bg-blue-600 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "User"}
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-gray-400">
                 {user?.email || "email@example.com"}
               </div>
             </div>
-            <button onClick={handleLogout} className="text-gray-400 hover:text-white">
+            <button
+              onClick={handleLogout}
+              className="text-gray-400 hover:text-white"
+            >
               <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <div className="bg-white border-b border-slate-200 px-4 lg:px-6 py-4 shadow-sm">
+        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 lg:space-x-4">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-lg"
               >
                 <Menu className="w-5 h-5" />
               </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-slate-400" />
-              <div className="flex items-center gap-2">
-                <Zap className="w-5 h-5 text-blue-600" />
-                <h1 className="text-base lg:text-xl font-semibold">
-                  Invoice #{invoiceNumber || "— not saved yet —"}
-                </h1>
-              </div>
+              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+              <h1 className="text-base lg:text-xl font-semibold">
+                Job Card #{jobCardNumber || "— not saved yet —"}
+              </h1>
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                 <CheckSquare className="w-4 h-4" />
-                <span>Mark as Paid</span>
+                <span>Mark Complete</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
               <button
-                onClick={handleSaveInvoice}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                onClick={handleSaveJobCard}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Save Invoice
+                Save Job Card
               </button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button
+                onClick={handleNewJobCard}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                <Plus className="w-4 h-4" />
+                New
+              </button>
+
+              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 Save as PDF
               </button>
 
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <Printer className="w-4 h-4" />
                 Print
@@ -452,14 +772,13 @@ const ElectricalDashboard = () => {
           </div>
         </div>
 
-        {/* Mobile Action Buttons Bar */}
-        <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-3 print:hidden">
+        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
           <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
               <CheckSquare className="w-4 h-4" />
-              <span>Mark as Paid</span>
+              <span>Complete</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
               <Edit className="w-4 h-4" />
               <span>Edit</span>
             </button>
@@ -476,7 +795,7 @@ const ElectricalDashboard = () => {
             </button>
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
             >
               <Printer className="w-4 h-4" />
               <span>Print</span>
@@ -484,16 +803,16 @@ const ElectricalDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-slate-900 border-b border-slate-700 px-4 lg:px-6 overflow-x-auto print:hidden">
+        <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
-            {["Invoice", "History", "Notes"].map((tab) => (
+            {["JobCard", "Parts", "History", "Notes"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-4 border-b-2 transition-colors ${
+                className={`py-4 border-b-2 ${
                   activeTab === tab
-                    ? "border-blue-500 text-white"
-                    : "border-transparent text-slate-400 hover:text-slate-300"
+                    ? "border-blue-400 text-white"
+                    : "border-transparent text-gray-400 hover:text-gray-200"
                 }`}
               >
                 {tab}
@@ -503,71 +822,340 @@ const ElectricalDashboard = () => {
         </div>
 
         <div className="p-4 lg:p-6">
+          {showSettings && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                <div className="p-4 border-b flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Business Settings</h2>
+                  <button
+                    onClick={() => setShowSettings(false)}
+                    className="text-gray-500 hover:text-gray-700 text-2xl"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="overflow-auto p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Business Logo
+                      </label>
+                      <div className="flex items-center gap-4">
+                        {businessInfo.logoUrl ? (
+                          <img
+                            src={businessInfo.logoUrl}
+                            alt="Business Logo"
+                            className="w-24 h-24 object-contain border rounded-lg"
+                          />
+                        ) : (
+                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-50">
+                            <Upload className="w-8 h-8 text-gray-400" />
+                          </div>
+                        )}
+
+                        <div className="flex-1">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleLogoUpload}
+                            className="hidden"
+                            id="logo-upload"
+                          />
+                          <label
+                            htmlFor="logo-upload"
+                            className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer"
+                          >
+                            {businessInfo.logoUrl
+                              ? "Change Logo"
+                              : "Upload Logo"}
+                          </label>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Recommended: Square image, max 5MB
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Business Name
+                      </label>
+                      <input
+                        type="text"
+                        value={businessInfo.businessName}
+                        onChange={(e) =>
+                          setBusinessInfo({
+                            ...businessInfo,
+                            businessName: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 border rounded-lg"
+                        placeholder="Elite Engineering Services"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Address Line 1
+                      </label>
+                      <input
+                        type="text"
+                        value={businessInfo.addressLine1}
+                        onChange={(e) =>
+                          setBusinessInfo({
+                            ...businessInfo,
+                            addressLine1: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 border rounded-lg"
+                        placeholder="45 ENGINEERING WAY"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Address Line 2
+                      </label>
+                      <input
+                        type="text"
+                        value={businessInfo.addressLine2}
+                        onChange={(e) =>
+                          setBusinessInfo({
+                            ...businessInfo,
+                            addressLine2: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 border rounded-lg"
+                        placeholder="INDUSTRIAL PARK"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          City
+                        </label>
+                        <input
+                          type="text"
+                          value={businessInfo.city}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              city: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2 border rounded-lg"
+                          placeholder="JOHANNESBURG"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Postal Code
+                        </label>
+                        <input
+                          type="text"
+                          value={businessInfo.postalCode}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              postalCode: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2 border rounded-lg"
+                          placeholder="2001"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Primary Phone *
+                      </label>
+                      <input
+                        type="tel"
+                        value={businessInfo.primaryPhone}
+                        onChange={(e) =>
+                          setBusinessInfo({
+                            ...businessInfo,
+                            primaryPhone: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 border rounded-lg"
+                        placeholder="011 234 5678"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Secondary Phone (Optional)
+                      </label>
+                      <input
+                        type="tel"
+                        value={businessInfo.secondaryPhone}
+                        onChange={(e) =>
+                          setBusinessInfo({
+                            ...businessInfo,
+                            secondaryPhone: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 border rounded-lg"
+                        placeholder="082 345 6789"
+                      />
+                    </div>
+
+                    <button
+                      onClick={handleSaveBusinessInfo}
+                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                    >
+                      Save Business Information
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <CustomersListModal
+            showModal={showCustomersListModal}
+            setShowModal={setShowCustomersListModal}
+            customers={customers}
+            onLoadCustomer={loadCustomer}
+            onEditCustomer={handleEditCustomer}
+            onAddNewCustomer={handleAddNewCustomer}
+          />
+          
+          <CustomerModal
+            showModal={showCustomerModal}
+            setShowModal={setShowCustomerModal}
+            existingCustomer={selectedCustomer}
+            onCustomerSaved={handleCustomerSaved}
+          />
+
+          {showJobCardsList && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+                <div className="p-4 border-b flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Saved Job Cards</h2>
+                  <button
+                    onClick={() => setShowJobCardsList(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="overflow-auto p-4">
+                  {savedJobCards.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      No saved job cards yet
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {savedJobCards.map((card) => (
+                        <div
+                          key={card.id}
+                          onClick={() => loadJobCard(card)}
+                          className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="font-semibold text-lg">
+                                {card.jobCardNumber || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                Customer: {card.customer?.name || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Equipment: {card.equipment?.type || ""}{" "}
+                                {card.equipment?.manufacturer || ""}{" "}
+                                {card.equipment?.model || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Serial: {card.equipment?.serialNumber || "N/A"}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-semibold text-blue-600">
+                                R{card.totals?.total?.toFixed(2) || "0.00"}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {card.dates?.serviceDate
+                                  ? new Date(
+                                      card.dates.serviceDate
+                                    ).toLocaleDateString("en-ZA")
+                                  : "N/A"}
+                              </div>
+                              <div
+                                className={`text-xs mt-1 px-2 py-1 rounded ${
+                                  card.status === "completed"
+                                    ? "bg-green-100 text-green-700"
+                                    : card.status === "pending"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-gray-100 text-gray-700"
+                                }`}
+                              >
+                                {card.status || "unknown"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <button
-            onClick={() => setShowInvoice(!showInvoice)}
+            onClick={() => setShowJobCard(!showJobCard)}
             className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
-            {showInvoice ? "Hide Invoice" : "View Invoice"}
+            {showJobCard ? "Hide Job Card" : "View Job Card"}
           </button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div
               className={`${
-                showInvoice ? "hidden" : "block"
-              } lg:col-span-3 space-y-6 lg:block print:hidden`}
+                showJobCard ? "hidden" : "block"
+              } space-y-6 lg:block print:hidden`}
             >
-              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-l-4 border-blue-500 rounded-lg px-4 py-3 flex items-center space-x-3 shadow-sm">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                <span className="text-blue-700 font-medium">Pending</span>
-                <span className="text-blue-600">
-                  Payment due within 30 days
-                </span>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-blue-700 font-medium">In Progress</span>
+                <span className="text-blue-600">Started Today</span>
               </div>
 
-              {/* Stats Cards - Redesigned Layout */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white shadow-lg">
-                  <div className="text-sm opacity-90 mb-1">Total Amount</div>
-                  <div className="text-3xl font-bold">R2,340.00</div>
-                </div>
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white shadow-lg">
-                  <div className="text-sm opacity-90 mb-1">Paid</div>
-                  <div className="text-3xl font-bold">R0.00</div>
-                </div>
-                <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white shadow-lg">
-                  <div className="text-sm opacity-90 mb-1">Balance Due</div>
-                  <div className="text-3xl font-bold">R2,340.00</div>
-                </div>
-              </div>
-
-              {/* Date Information - Different Layout */}
-              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-blue-600" />
-                  Date Information
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-slate-600">Service Date</span>
-                    <span className="font-semibold">29/12/2024</span>
+                <div className="bg-white p-4 rounded-lg border border-gray-200">
+                  <div className="text-sm text-gray-500 mb-1">Total Amount</div>
+                  <div className="text-2xl font-semibold text-blue-600">
+                    R{total.toFixed(2)}
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-slate-600">Invoice Date</span>
-                    <span className="font-semibold">30/12/2024</span>
+                </div>
+                <div className="bg-white p-4 rounded-lg border border-gray-200">
+                  <div className="text-sm text-gray-500 mb-1">Paid</div>
+                  <div className="text-2xl font-semibold text-green-600">
+                    R0.00
                   </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-slate-600">Due Date</span>
-                    <span className="font-semibold text-blue-600">20/01/2025</span>
+                </div>
+                <div className="bg-white p-4 rounded-lg border border-gray-200">
+                  <div className="text-sm text-gray-500 mb-1">Balance Due</div>
+                  <div className="text-2xl font-semibold text-red-600">
+                    R{total.toFixed(2)}
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Users className="w-5 h-5 text-blue-600" />
-                    <span>Client Information</span>
+                    <Users className="w-5 h-5" />
+                    <span>Customer Information</span>
                   </h2>
                   <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
                     <Edit className="w-4 h-4" />
@@ -577,73 +1165,136 @@ const ElectricalDashboard = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <div className="text-sm text-slate-500">Client Name</div>
+                    <div className="text-sm text-gray-500">Customer Name</div>
                     <input
                       type="text"
-                      value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      className="w-full px-4 py-2 border rounded"
                     />
                   </div>
                   <div>
-                    <div className="text-sm text-slate-500">Client ID</div>
+                    <div className="text-sm text-gray-500">Customer ID</div>
                     <input
                       type="text"
-                      value={clientId}
-                      onChange={(e) => setClientId(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={customerId}
+                      onChange={(e) => setCustomerId(e.target.value)}
+                      className="w-full px-4 py-2 border rounded"
                     />
                   </div>
                   <div>
-                    <div className="text-sm text-slate-500">Email</div>
+                    <div className="text-sm text-gray-500">Email</div>
                     <input
                       type="text"
-                      value={clientEmail}
-                      onChange={(e) => setClientEmail(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      className="w-full px-4 py-2 border rounded"
                     />
                   </div>
                   <div>
-                    <div className="text-sm text-slate-500">Phone</div>
+                    <div className="text-sm text-gray-500">Phone</div>
                     <input
                       type="text"
-                      value={clientPhone}
-                      onChange={(e) => setClientPhone(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      className="w-full px-4 py-2 border rounded"
                     />
                   </div>
                   <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-slate-500">Service Address</div>
+                    <div className="text-sm text-gray-500">Address</div>
                     <input
                       type="text"
-                      value={clientAddress}
-                      onChange={(e) => setClientAddress(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-slate-500">Property Type</div>
-                    <div className="font-medium">Commercial</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-slate-500">Service Type</div>
-                    <input
-                      type="text"
-                      value={serviceType}
-                      onChange={(e) => setServiceType(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={customerAddress}
+                      onChange={(e) => setCustomerAddress(e.target.value)}
+                      className="w-full px-4 py-2 border rounded"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-6 mb-6 shadow-sm">
-                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Plus className="w-5 h-5 text-blue-600" />
-                  Add Service / Item
-                </h2>
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold flex items-center space-x-2">
+                    <Cog className="w-5 h-5" />
+                    <span>Equipment Information</span>
+                  </h2>
+                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-sm text-gray-500">Equipment Type</div>
+                    <input
+                      type="text"
+                      value={equipmentType}
+                      onChange={(e) => setEquipmentType(e.target.value)}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Manufacturer</div>
+                    <input
+                      type="text"
+                      value={equipmentManufacturer}
+                      onChange={(e) => setEquipmentManufacturer(e.target.value)}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Model</div>
+                    <input
+                      type="text"
+                      value={equipmentModel}
+                      onChange={(e) => setEquipmentModel(e.target.value)}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Serial Number</div>
+                    <input
+                      type="text"
+                      value={equipmentSerial}
+                      onChange={(e) => setEquipmentSerial(e.target.value)}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Equipment ID</div>
+                    <input
+                      type="text"
+                      value={equipmentId}
+                      onChange={(e) => setEquipmentId(e.target.value)}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Location</div>
+                    <input
+                      type="text"
+                      value={equipmentLocation}
+                      onChange={(e) => setEquipmentLocation(e.target.value)}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                <h2 className="text-lg font-semibold mb-4">Add Service/Part</h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                  <select
+                    value={newItem.type}
+                    onChange={(e) =>
+                      setNewItem({ ...newItem, type: e.target.value })
+                    }
+                    className="px-4 py-2 border rounded"
+                  >
+                    <option value="Labor">Labor</option>
+                    <option value="Parts">Parts</option>
+                    <option value="Materials">Materials</option>
+                    <option value="Equipment">Equipment</option>
+                  </select>
+
                   <input
                     type="text"
                     placeholder="Description"
@@ -651,7 +1302,7 @@ const ElectricalDashboard = () => {
                     onChange={(e) =>
                       setNewItem({ ...newItem, description: e.target.value })
                     }
-                    className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="px-4 py-2 border rounded"
                   />
 
                   <input
@@ -661,7 +1312,7 @@ const ElectricalDashboard = () => {
                     onChange={(e) =>
                       setNewItem({ ...newItem, rate: e.target.value })
                     }
-                    className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="px-4 py-2 border rounded"
                   />
 
                   <input
@@ -671,12 +1322,12 @@ const ElectricalDashboard = () => {
                     onChange={(e) =>
                       setNewItem({ ...newItem, qty: e.target.value })
                     }
-                    className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="px-4 py-2 border rounded"
                   />
 
                   <button
                     onClick={handleAddItem}
-                    className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2 transition-colors"
+                    className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Add
@@ -684,50 +1335,23 @@ const ElectricalDashboard = () => {
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-blue-600" />
-                    Payments
-                  </h2>
-                  <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-                    <Plus className="w-4 h-4" />
-                    <span>Add</span>
-                  </button>
-                </div>
-
-                <div className="text-center text-slate-400 py-8">
-                  <p>No payments recorded yet</p>
-                  <p className="text-sm mt-2">Payment due by 20 January 2025</p>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Lightbulb className="w-5 h-5 text-amber-600" />
-                    <span>Equipment Details</span>
-                  </h2>
+                  <h2 className="text-lg font-semibold">Payment Terms</h2>
                 </div>
 
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b border-amber-200">
-                    <span className="text-slate-600">System Type:</span>
-                    <span className="font-medium">
-                      Consumer Unit (Fuse Box)
-                    </span>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="text-gray-600">Payment Method:</span>
+                    <span className="font-medium">Cash/Card/EFT</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-amber-200">
-                    <span className="text-slate-600">Brand:</span>
-                    <span className="font-medium">Schneider Electric</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b border-amber-200">
-                    <span className="text-slate-600">Model:</span>
-                    <span className="font-medium">EasyPact CVS250</span>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="text-gray-600">Payment Terms:</span>
+                    <span className="font-medium">Due on Completion</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-slate-600">Installation Date:</span>
-                    <span className="font-medium">10/08/2021</span>
+                    <span className="text-gray-600">Warranty:</span>
+                    <span className="font-medium">12 Months Parts & Labor</span>
                   </div>
                 </div>
               </div>
@@ -735,179 +1359,254 @@ const ElectricalDashboard = () => {
 
             <div
               className={`${
-                !showInvoice ? "hidden" : "block"
-              } lg:block lg:col-span-3 mx-auto bg-white shadow-lg`}
+                !showJobCard ? "hidden" : "block"
+              } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
               style={{
                 width: "100%",
                 maxWidth: "210mm",
                 minHeight: "297mm",
-                padding: "5mm",
               }}
             >
-              <div className="lg:col-span-1 m-[10mm]">
-                <div className="bg-white rounded-lg p-4 lg:p-6 shadow-sm">
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="flex flex-col items-start">
-                      <div className="w-20 h-20 mb-2 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <Zap className="w-12 h-12 text-yellow-400" />
-                      </div>
-
-                      <div className="text-xs">
-                        <div className="font-semibold mb-1 text-blue-900">
-                          BrightSpark Electrical Ltd
-                        </div>
-                        <div className="text-slate-600">78 Portland Street</div>
-                        <div className="text-slate-600">Manchester, M1 4GU</div>
-                        <div className="text-slate-600">Tel: 0161 456 7890</div>
-                        <div className="text-slate-600">
-                          Email: info@brightspark.co.uk
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-right text-xs">
-                      <div className="text-sm font-semibold mb-1 text-blue-900">
-                        ELECTRICAL SERVICE INVOICE
-                      </div>
-                      <div>Invoice No: {invoiceNumber}</div>
-                      <div className="text-slate-500">
-                        Service Date: 29/12/2024
-                      </div>
-                      <div className="text-slate-500">
-                        Date Issued: {new Date().toLocaleDateString("en-GB")}
-                      </div>
-                      <div className="text-slate-500">
-                        Due Date:{" "}
-                        {(() => {
-                          const dueDate = new Date();
-                          dueDate.setDate(dueDate.getDate() + 21);
-                          return dueDate.toLocaleDateString("en-GB");
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-xs">
+              <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+                <div className="border-b-2 border-black pb-4 mb-4">
+                  <div className="flex justify-between items-start">
                     <div>
-                      <div className="text-blue-600 font-medium mb-1">
-                        Bill To
-                      </div>
-                      <div className="font-semibold">{clientName}</div>
-                      <div className="text-slate-600">{clientAddress}</div>
-                      <div className="text-slate-600">{clientPhone}</div>
-                      <div className="text-slate-600">{clientEmail}</div>
-                    </div>
-                    <div>
-                      <div className="text-blue-600 font-medium mb-1">
-                        Service Location
-                      </div>
-                      <div className="text-slate-600">{clientAddress}</div>
-                      <div className="text-slate-600 mt-2">
-                        Client ID: {clientId}
-                      </div>
-                      <div className="text-slate-600">Property: Commercial</div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 mb-4">
-                    <div className="bg-blue-50 rounded p-3 text-xs flex-1">
-                      <div className="font-medium mb-1 text-blue-900">
-                        Electrician Details
-                      </div>
-                      <div className="text-slate-600">
-                        Michael Davies - Cert. Electrician
-                      </div>
-                      <div className="text-slate-600">License: ECS-UK-67234</div>
-                      <div className="text-slate-600">
-                        Service Time: 08:30 - 17:00 (8.5 hours)
-                      </div>
-                    </div>
-
-                    <div className="bg-amber-50 rounded p-3 text-xs flex-1">
-                      <div className="font-medium mb-1 text-amber-900">
-                        Equipment Information
-                      </div>
-                      <div className="text-slate-600">
-                        System: Consumer Unit
-                      </div>
-                      <div className="text-slate-600">
-                        Brand: Schneider • Model: EasyPact CVS250
-                      </div>
-                      <div className="text-slate-600">Serial: SE2021-6734-ABC</div>
-                    </div>
-                  </div>
-
-                  <div className="text-xs mb-4">
-                    <div className="font-medium mb-2">Services & Materials</div>
-                    <div className="grid grid-cols-6 gap-2 font-medium mb-2 pb-2 border-b">
-                      <div className="col-span-3">Description</div>
-                      <div className="text-center">Rate</div>
-                      <div className="text-right">Qty</div>
-                      <div className="text-right">Amount</div>
-                    </div>
-
-                    {items.map((item, index) => (
-                      <div
-                        key={index}
-                        className="grid grid-cols-6 gap-2 mb-2 text-slate-700"
-                      >
-                        <div className="col-span-3">{item.description}</div>
-                        <div className="text-center text-xs">
-                          {item.rate ? `R${item.rate}/hr` : "-"}
-                        </div>
-                        <div className="text-right">{item.qty}</div>
-                        <div className="text-right">
-                          R{item.amount.toFixed(2)}
+                      <div className="flex items-center gap-3 mb-2">
+                        {loading ? (
+                          <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
+                        ) : businessInfo.logoUrl ? (
+                          <img
+                            src={businessInfo.logoUrl}
+                            alt="Business Logo"
+                            className="w-16 h-16 object-contain"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-white rounded flex items-center justify-center">
+                          </div>
+                        )}
+                        <div>
+                          <div className="text-xl font-bold">
+                            {businessInfo.businessName.split(" ")[0]}{" "}
+                            {businessInfo.businessName.split(" ")[1]}
+                          </div>
+                          <div className="text-sm font-semibold">
+                            {businessInfo.businessName
+                              .split(" ")
+                              .slice(2)
+                              .join(" ")}
+                          </div>
                         </div>
                       </div>
-                    ))}
+                      <div className="text-xs leading-relaxed">
+                        <div>{businessInfo.addressLine1}</div>
+                        <div>{businessInfo.addressLine2}</div>
+                        <div>
+                          {businessInfo.city} {businessInfo.postalCode}
+                        </div>
+                        <div className="mt-1">
+                          T: {businessInfo.primaryPhone}
+                          {businessInfo.secondaryPhone &&
+                            `, ${businessInfo.secondaryPhone}`}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-3xl font-bold mb-4">INVOICE</div>
+                      <div className="text-xs space-y-1">
+                        <div className="flex justify-between gap-8">
+                          <span className="font-semibold">INVOICE NO.</span>
+                          <span>{jobCardNumber}</span>
+                        </div>
+                        <div className="flex justify-between gap-8">
+                          <span className="font-semibold">DATE</span>
+                          <span>{new Date().toLocaleDateString("en-ZA")}</span>
+                        </div>
+                        <div className="flex justify-between gap-8">
+                          <span className="font-semibold">SERVICE CODE</span>
+                          <span>ENG-12345</span>
+                        </div>
+                        <div className="flex justify-between gap-8">
+                          <span className="font-semibold">SERVICE TYPE</span>
+                          <span>ENGINEERING</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="bg-gray-200 p-3">
+                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+                      INVOICE TO
+                    </div>
+                    <div className="text-xs space-y-1">
+                      <div>
+                        <div>{customerName}</div>
+                      </div>
+                      <div>
+                        <div className="h-16 overflow-hidden text-xs leading-tight">
+                          {customerAddress}
+                        </div>
+                      </div>
+                      <div>
+                        <div>{customerEmail}</div>
+                      </div>
+                      <div>
+                        <div>{customerPhone}</div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="border-t pt-3 space-y-1 text-xs">
-                    <div className="flex justify-between">
+                  <div className="bg-gray-200 p-3">
+                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+                      BILL TO
+                    </div>
+                    <div className="text-xs space-y-1">
+                      <div>
+                        <div>{customerName}</div>
+                      </div>
+                      <div>
+                        <div className="h-16 overflow-hidden text-xs leading-tight">
+                          {customerAddress}
+                        </div>
+                      </div>
+                      <div>
+                        <div>{customerEmail}</div>
+                      </div>
+                      <div>
+                        <div>{customerPhone}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-200 p-3">
+                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+                      EQUIPMENT DETAILS
+                    </div>
+                    <div className="text-xs space-y-1">
+                      <div className="flex justify-between">
+                        <span className="font-semibold">Type:</span>
+                        <span>{equipmentType}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold">Manufacturer:</span>
+                        <span>{equipmentManufacturer}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold">Model:</span>
+                        <span>{equipmentModel}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold">Serial No:</span>
+                        <span className="text-[9px]">{equipmentSerial}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold">Equipment ID:</span>
+                        <span className="text-[9px]">{equipmentId}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold">Location:</span>
+                        <span className="text-[9px]">{equipmentLocation}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="bg-gray-300">
+                        <th className="text-left px-2 py-1 font-bold">
+                          ITEM DESCRIPTION
+                        </th>
+                        <th className="text-center px-2 py-1 font-bold">
+                          QUANTITY
+                        </th>
+                        <th className="text-right px-2 py-1 font-bold">
+                          UNIT PRICE
+                        </th>
+                        <th className="text-right px-2 py-1 font-bold">
+                          NET PRICE
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {items.map((item, index) => (
+                        <tr key={index} className="border-b">
+                          <td className="px-2 py-2">{item.description}</td>
+                          <td className="text-center px-2 py-2">{item.qty}</td>
+                          <td className="text-right px-2 py-2">
+                            R {item.rate.toFixed(2)}
+                          </td>
+                          <td className="text-right px-2 py-2">
+                            R {item.amount.toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="flex justify-end mb-6">
+                  <div className="w-64 text-xs">
+                    <div className="flex justify-between py-1">
                       <span>Subtotal:</span>
-                      <span>R2,340.00</span>
+                      <span>R {subtotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>VAT (20%):</span>
-                      <span>R0.00</span>
+                    <div className="flex justify-between py-1">
+                      <span>VAT:</span>
+                      <span>R {vat.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between font-semibold border-t pt-2">
-                      <span>Total:</span>
-                      <span>R2,340.00</span>
-                    </div>
-                    <div className="flex justify-between text-slate-600 pt-2 border-t">
-                      <span>Amount Paid:</span>
-                      <span>R0.00</span>
-                    </div>
-                    <div className="flex justify-between font-semibold text-blue-600 border-t pt-2 text-sm">
-                      <span>Amount Due:</span>
-                      <span>R2,340.00</span>
+                    <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
+                      <span>TOTAL:</span>
+                      <span>R {total.toFixed(2)}</span>
                     </div>
                   </div>
+                </div>
 
-                  <div className="mt-6 pt-4 border-t">
-                    <div className="text-xs font-medium mb-2 text-blue-600">
-                      Payment Information
-                    </div>
-                    <div className="text-xs text-slate-600 space-y-1">
-                      <div>Bank: NatWest Bank PLC</div>
-                      <div>Account: BrightSpark Electrical Ltd</div>
-                      <div>Sort Code: 60-40-05</div>
-                      <div>Account No: 12345678</div>
-                      <div>IBAN: GB29 NWBK 6040 0512 3456 78</div>
-                      <div className="mt-2">Payment Terms: Net 30 days</div>
-                    </div>
+                <div className="grid grid-cols-3 gap-4 mb-6 text-xs">
+                  <div>
+                    <div className="font-semibold mb-1">ENGINEER SIGNATURE</div>
+                    <div className="border-b border-black h-8"></div>
                   </div>
+                  <div>
+                    <div className="font-semibold mb-1">CLIENT SIGNATURE</div>
+                    <div className="border-b border-black h-8"></div>
+                  </div>
+                  <div>
+                    <div className="font-semibold mb-1">CONTACT NUMBER:</div>
+                    <div className="border-b border-black h-8"></div>
+                  </div>
+                </div>
 
-                  <div className="mt-4 pt-4 border-t text-xs text-slate-500 space-y-1">
-                    <div>Company Reg: 98765432</div>
-                    <div>VAT Reg: GB 987 6543 21</div>
-                    <div>NICEIC Approved Contractor</div>
-                    <div className="text-center mt-3 italic text-blue-600">
-                      Thank you for choosing BrightSpark Electrical
+                <div className="bg-blue-50 border border-blue-200 p-3 mb-4">
+                  <div className="text-blue-600 font-bold text-xs mb-2">
+                    BANKING DETAILS
+                  </div>
+                  <div className="text-xs space-y-1">
+                    <div>
+                      <span className="font-semibold">Bank Name:</span> FNB
+                    </div>
+                    <div>
+                      <span className="font-semibold">Account Holder:</span> ELITE ENGINEERING SERVICES
+                    </div>
+                    <div>
+                      <span className="font-semibold">Branch Name:</span>{" "}
+                      SANDTON CITY
+                    </div>
+                    <div>
+                      <span className="font-semibold">Account Number:</span>{" "}
+                      62123456789
                     </div>
                   </div>
+                </div>
+
+                <div className="text-center text-xs text-blue-600 italic">
+                  All our services and parts carry a 12-month guarantee
                 </div>
               </div>
             </div>
@@ -920,12 +1619,11 @@ const ElectricalDashboard = () => {
                 }
                 
                 html, body {
-                  margin: 0;
-                  padding: 0;
+                  margin: 0 !important;
+                  padding: 0 !important;
                   background: white !important;
-                  overflow: hidden !important;
-                  width: 210mm;
-                  height: 297mm;
+                  width: 100% !important;
+                  height: 100% !important;
                 }
                 
                 @page {
@@ -933,43 +1631,62 @@ const ElectricalDashboard = () => {
                   margin: 0;
                 }
                 
-                .print\\:hidden,
+                .print\\:hidden {
+                  display: none !important;
+                }
+                
+                div[class*="border-b"][class*="border-gray"] {
+                  display: none !important;
+                }
+                
                 nav,
-                button,
                 [class*="sidebar"],
                 [class*="bg-slate-900"],
-                [class*="border-b"] {
+                button:not([style]) {
                   display: none !important;
                 }
                 
-                .space-y-6.lg\\:block {
+                .space-y-6 {
                   display: none !important;
                 }
                 
-                .flex.h-screen,
-                .flex-1.overflow-auto {
-                  overflow: hidden !important;
+                .flex.h-screen {
+                  display: block !important;
+                  height: auto !important;
                 }
                 
-                .grid.grid-cols-1.lg\\:grid-cols-6 {
+                .flex-1 {
                   display: block !important;
-                  grid-template-columns: 1fr !important;
-                  overflow: hidden !important;
+                  overflow: visible !important;
                 }
                 
-                .lg\\:col-span-3.mx-auto.bg-white.shadow-lg {
+                .grid.grid-cols-1 {
                   display: block !important;
-                  box-shadow: none !important;
-                  max-width: 210mm !important;
+                  grid-template-columns: none !important;
+                }
+                
+                div[style*="210mm"] {
+                  display: block !important;
                   width: 210mm !important;
+                  height: auto !important;
                   margin: 0 !important;
                   padding: 0 !important;
-                  overflow: hidden !important;
+                  box-shadow: none !important;
+                  page-break-after: avoid !important;
                 }
                 
-                .bg-white.rounded-lg {
-                  page-break-inside: avoid;
-                  break-inside: avoid;
+                .bg-white {
+                  background: white !important;
+                  box-shadow: none !important;
+                }
+                
+                table {
+                  width: 100% !important;
+                  border-collapse: collapse !important;
+                }
+                
+                tr, td, th {
+                  page-break-inside: avoid !important;
                 }
               }
             `}</style>
@@ -980,4 +1697,4 @@ const ElectricalDashboard = () => {
   );
 };
 
-export default ElectricalDashboard;
+export default EngineeringDashboard;
