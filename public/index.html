@@ -14,5 +14,25 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <script>
+  (function(d, t) {
+    var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+    v.onload = function() {
+      window.vapiSDK.run({
+        apiKey: "6fbcc6b2-c19e-4f0a-b3fb-dac4a5a4f377", 
+        assistant: "7e49f9c1-b56a-4892-8c1f-28de1bb0428c", 
+        config: {
+          position: "bottom-left", 
+          offset: "20px", // Distance from edge
+          width: "80px",
+          height: "80px"
+        }
+      })
+    }
+    v.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js"; 
+    v.type = "text/javascript";
+    s.parentNode.insertBefore(v, s);
+  })(document, 'script');
+</script>
   </body>
 </html>

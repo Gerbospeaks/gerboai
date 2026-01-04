@@ -7,6 +7,7 @@ import contact from './ContactPage';
 import blogs from './BlogPostPage';
 import privacy from './PrivacyPolicy';
 import terms from './TermsPage';
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
