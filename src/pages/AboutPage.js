@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import logo from '../assets/img/solidflo-logo.png';
+import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
+import about from './AboutPage';  
+import terms from './TermsPage';
+import contact from './ContactPage';
+import blogs from './BlogPostPage';
+import privacy from './PrivacyPolicy';
 const AboutPage = () => {
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -1067,10 +1074,10 @@ const AboutPage = () => {
           <div className="footer-section">
             <h3>Company</h3>
             <ul>
-              <li><a href="/about">About Us</a></li>
+              <li><a onClick={() => navigate('/about')}>About Us</a></li>
               <li><a>Careers</a></li>
               <li><a>Press Kit</a></li>
-              <li><a>Contact</a></li>
+              <li><a onClick={() => navigate('/contact')}>Contact Us</a></li>
               <li><a>Partners</a></li>
             </ul>
           </div>
@@ -1078,11 +1085,11 @@ const AboutPage = () => {
             <h3>Resources</h3>
             <ul>
               <li><a>Help Center</a></li>
-              <li><a>Blog</a></li>
-              <li><a>Video Tutorials</a></li>
-              <li><a>Community</a></li>
-              <li><a>Privacy Policy</a></li>
-              <li><a>Terms of Service</a></li>
+          <li><a onClick={() => navigate('/blogs')}>Blog</a></li>
+          <li><a>Video Tutorials</a></li>
+          <li><a>Community</a></li>
+          <li><a onClick={() => navigate('/privacy')}>Privacy Policy</a></li>
+          <li><a onClick={() => navigate('/terms')}>Terms And Conditions</a></li>
             </ul>
           </div>
         </div>

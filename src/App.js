@@ -8,8 +8,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';  
 import ContactPage from './pages/ContactPage';
+import BlogPostPage from './pages/BlogPostPage';  
 import DashboardRouter from './components/DashboardRouter';
-
+import PrivacyPolicy from './pages/PrivacyPolicy';  
+import TermsPage from './pages/TermsPage';
 // Your existing dashboard imports
 import InvoiceDashboard from './pages/InvoiceDashboard';
 import MechanicsDashboard from './pages/MechanicsDashboard';
@@ -42,6 +44,9 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/blogs" element={<BlogPostPage/>}/>
+          <Route path="privacy" element={<PrivacyPolicy/>}/>
+          <Route path="terms" element={<TermsPage/>}/>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

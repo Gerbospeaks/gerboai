@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../assets/img/solidflo-logo.png';
 import computer from '../assets/images/new_solidflo_bg_transp_text.png';
 import about from './AboutPage';  
-
+import contact from './ContactPage';
+import blogs from './BlogPostPage';
+import privacy from './PrivacyPolicy';
+import terms from './TermsPage';
 const LandingPage = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -1255,11 +1258,11 @@ const LandingPage = () => {
         <h3>Resources</h3>
         <ul>
           <li><a>Help Center</a></li>
-          <li><a>Blog</a></li>
+          <li><a onClick={() => navigate('/blogs')}>Blog</a></li>
           <li><a>Video Tutorials</a></li>
           <li><a>Community</a></li>
-          <li><a>Privacy Policy</a></li>
-          <li><a>Terms of Service</a></li>
+          <li><a onClick={() => navigate('/privacy')}>Privacy Policy</a></li>
+          <li><a onClick={() => navigate('/terms')}>Terms And Conditions</a></li>
         </ul>
       </div>
     </div>
