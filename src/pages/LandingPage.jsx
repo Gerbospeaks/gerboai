@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/img/solidflo-logo.png';
+import globe from '../assets/images/globe.webp'
 import computer from '../assets/images/new_solidflo_bg_transp_text.png';
 import about from './AboutPage';  
 import contact from './ContactPage';
@@ -920,7 +921,17 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
-
+ <section className="py-16 bg-white">
+      <div className="container mx-auto px-4">
+        <h2 className="text-4xl font-bold text-center mb-12 text-gray-900">
+          Our Global Footprint
+        </h2>
+        
+        <div className="w-full max-w-6xl mx-auto">
+          <img src={globe} alt="SolidFlo" />
+        </div>
+      </div>
+    </section>
       {/* Why Choose Section */}
       <section className="section">
         <div className="container">
