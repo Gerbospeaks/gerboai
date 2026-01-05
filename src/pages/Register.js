@@ -76,7 +76,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
   }
 };
   return (
-    <div className="max-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat" style={{backgroundImage: `url(${logon})`, backgroundAttachment: 'fixed', backgroundBlendMode: 'overlay'}}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat" style={{backgroundImage: `url(${logon})`, backgroundAttachment: 'fixed', backgroundBlendMode: 'overlay'}}>
       <div className="max-w-md w-full bg-gray-800 rounded-xl shadow-2xl p-8">
          <div className="flex items-center space-x-2 mb-8">
                               <img
