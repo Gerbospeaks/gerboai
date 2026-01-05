@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { dashboards } from '../config/dashboardConfig';
-import logo from '../assets/img/register.png';
+import logon from '../assets/img/register.png';
+import logo from '../assets/img/solidflo-logo.png';
 function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -75,8 +76,15 @@ const [companyLogo, setCompanyLogo] = useState(null);
   }
 };
   return (
-    <div className="max-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat" style={{backgroundImage: `url(${logo})`, backgroundAttachment: 'fixed', backgroundBlendMode: 'overlay'}}>
+    <div className="max-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat" style={{backgroundImage: `url(${logon})`, backgroundAttachment: 'fixed', backgroundBlendMode: 'overlay'}}>
       <div className="max-w-md w-full bg-gray-800 rounded-xl shadow-2xl p-8">
+         <div className="flex items-center space-x-2 mb-8">
+                              <img
+                                  src={logo}
+                                  alt="Business Logo"
+                                  className="w-16 h-12 object-contain rounded-lg"
+                                />
+                          </div>
         <h2 className="text-3xl font-bold text-white mb-6 text-center">Create Account</h2>
         
         {error && (
@@ -156,8 +164,8 @@ const [companyLogo, setCompanyLogo] = useState(null);
               ))}
             </select>
           </div>
-          <div>
-  <label className="block text-gray-300 mb-2">Company Name</label>
+          {/* <div>
+ <label className="block text-gray-300 mb-2">Company Name</label>
   <input
     type="text"
     value={companyName}
@@ -183,7 +191,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
     onChange={(e) => setCompanyLogo(e.target.files[0])}
     className="w-full text-gray-300"
   />
-</div>
+</div>*/}
 
           <button
             type="submit"
