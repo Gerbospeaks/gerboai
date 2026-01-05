@@ -327,7 +327,7 @@ const EducationDashboard = () => {
     primaryPhone: "011 234 5678",
     secondaryPhone: "082 345 6789",
     logoUrl: "",
-    principalName: "Mrs. Jane Doe",
+    principalName: "Mrs. Zoey Mor",
   });
   const [loading, setLoading] = useState(true);
 
@@ -567,26 +567,26 @@ const EducationDashboard = () => {
           </div>
 
           <nav className="space-y-1">
-            <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+            <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
               <Home className="w-5 h-5" />
               <span>Home</span>
             </div>
             <div
               onClick={() => setShowSettings(true)}
-              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer"
+              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer"
             >
               <Settings className="w-5 h-5" />
               <span>Settings</span>
             </div>
 
             <div className="pt-4">
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <TrendingUp className="w-5 h-5" />
                 <span>School Overview</span>
               </div>
 
               <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                   <div className="flex items-center space-x-3">
                     <ClipboardList className="w-5 h-5" />
                     <span>Report Cards</span>
@@ -597,54 +597,54 @@ const EducationDashboard = () => {
                 <div className="ml-8 mt-1 space-y-1">
                   <div
                     onClick={handleNewReport}
-                    className="px-3 py-2 text-sm text-white bg-indigo-800 rounded-lg cursor-pointer"
+                    className="px-3 py-2 text-sm text-white bg-gray-500 rounded-lg cursor-pointer"
                   >
                     Create Report Card
                   </div>
                   <div
                     onClick={() => setShowReportsList(!showReportsList)}
-                    className="px-3 py-2 text-sm text-gray-400 hover:bg-indigo-800 rounded-lg cursor-pointer"
+                    className="px-3 py-2 text-sm text-gray-400 hover:bg-gray-500 rounded-lg cursor-pointer"
                   >
                     All Reports ({savedReports.length})
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer mt-2">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer mt-2">
                 <Users className="w-5 h-5" />
                 <span>Students</span>
               </div>
               <div className="ml-8 mt-1 space-y-1">
                 <div 
                   onClick={handleAddNewStudent}
-                  className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-indigo-800 rounded-lg cursor-pointer mt-2"
+                  className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-500 rounded-lg cursor-pointer mt-2"
                 >
                   <span>Add Student</span>
                 </div>
                 <div
                   onClick={() => setShowStudentsListModal(true)}
-                  className="px-3 py-2 text-sm text-gray-400 hover:bg-indigo-800 rounded-lg cursor-pointer"
+                  className="px-3 py-2 text-sm text-gray-400 hover:bg-gray-500 rounded-lg cursor-pointer"
                 >
                   All Students ({savedStudents.length})
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <Calendar className="w-5 h-5" />
                 <span>Attendance</span>
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <BookOpen className="w-5 h-5" />
                 <span>Curriculum</span>
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <Award className="w-5 h-5" />
                 <span>Assessments</span>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <BarChart3 className="w-5 h-5" />
                   <span>Analytics</span>
@@ -652,7 +652,7 @@ const EducationDashboard = () => {
                 <ChevronDown className="w-4 h-4" />
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <UserCheck className="w-5 h-5" />
                 <span>Staff</span>
               </div>
@@ -660,7 +660,7 @@ const EducationDashboard = () => {
           </nav>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-indigo-700 bg-indigo-800">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-indigo-700 bg-gray-500">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
               <School className="w-6 h-6 text-white" />
@@ -702,7 +702,7 @@ const EducationDashboard = () => {
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
               <button
                 onClick={handleSaveReport}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700"
               >
                 Save Report
               </button>
@@ -715,13 +715,13 @@ const EducationDashboard = () => {
                 New
               </button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700"
               >
                 Save as PDF
               </button>
@@ -752,13 +752,13 @@ const EducationDashboard = () => {
 
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
           <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
             </button>
             <button
               onClick={handleSavePDF}
-              className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap text-sm"
             >
               <Download className="w-4 h-4" />
               <span>Save PDF</span>
@@ -834,7 +834,7 @@ const EducationDashboard = () => {
                           />
                           <label
                             htmlFor="logo-upload"
-                            className="inline-block px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
+                            className="inline-block px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
                           >
                             {schoolInfo.logoUrl
                               ? "Change Logo"
@@ -879,7 +879,7 @@ const EducationDashboard = () => {
                           })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
-                        placeholder="Mrs. Jane Doe"
+                        placeholder="Mrs. Zoey Mor"
                       />
                     </div>
 
@@ -996,7 +996,7 @@ const EducationDashboard = () => {
 
                     <button
                       onClick={handleSaveSchoolInfo}
-                      className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700"
+                      className="w-full bg-gray-500 text-white py-3 rounded-lg hover:bg-indigo-700"
                     >
                       Save School Information
                     </button>
@@ -1096,7 +1096,7 @@ const EducationDashboard = () => {
 
           <button
             onClick={() => setShowReportCard(!showReportCard)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showReportCard ? "Hide Report Card" : "View Report Card"}
@@ -1307,7 +1307,7 @@ const EducationDashboard = () => {
 
                   <button
                     onClick={handleAddSubject}
-                    className="bg-indigo-600 text-white rounded-lg px-4 py-2 hover:bg-indigo-700 flex items-center justify-center gap-2"
+                    className="bg-gray-500 text-white rounded-lg px-4 py-2 hover:bg-indigo-700 flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Add

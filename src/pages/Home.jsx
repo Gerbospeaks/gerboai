@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+
 import { db } from '../firebase';
 import { 
   Home as HomeIcon, 
@@ -40,7 +41,7 @@ export default function Home() {
       fetchBusinessStats();
     }
   }, [user]);
-
+ const [clients, setSavedClients] = useState([]);
   const fetchBusinessStats = async () => {
     try {
       const invoicesSnapshot = await db
@@ -167,7 +168,7 @@ export default function Home() {
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gray-500 rounded-lg flex items-center justify-center">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <span className="font-semibold text-lg text-white">
@@ -179,7 +180,7 @@ export default function Home() {
           <nav className="space-y-1">
             <div 
               onClick={() => navigate('/home')}
-              className="flex items-center space-x-3 px-3 py-2 text-white bg-indigo-800 rounded-lg cursor-pointer"
+              className="flex items-center space-x-3 px-3 py-2 text-white bg-gray-500 rounded-lg cursor-pointer"
             >
               <HomeIcon className="w-5 h-5" />
               <span>Home</span>
@@ -187,25 +188,25 @@ export default function Home() {
             
             <div 
               onClick={() => navigate('/dashboard')}
-              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer"
+              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer"
             >
               <TrendingUp className="w-5 h-5" />
               <span>Dashboard</span>
             </div>
 
-            <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+            <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
               <Settings className="w-5 h-5" />
               <span>Settings</span>
             </div>
 
             <div className="pt-4">
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <TrendingUp className="w-5 h-5" />
                 <span>Financial Overview</span>
               </div>
 
               <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                   <div className="flex items-center space-x-3">
                     <FileText className="w-5 h-5" />
                     <span>Invoicing</span>
@@ -216,30 +217,30 @@ export default function Home() {
                 <div className="ml-8 mt-1 space-y-1">
                   <div 
                     onClick={() => navigate('/dashboard')}
-                    className="px-3 py-2 text-sm text-gray-400 hover:bg-indigo-800 rounded-lg cursor-pointer"
+                    className="px-3 py-2 text-sm text-gray-400 hover:bg-gray-500 rounded-lg cursor-pointer"
                   >
                     Create Invoice
                   </div>
-                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-indigo-800 rounded-lg cursor-pointer">
+                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-gray-500 rounded-lg cursor-pointer">
                     All Invoices
                   </div>
-                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-indigo-800 rounded-lg cursor-pointer">
+                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-gray-500 rounded-lg cursor-pointer">
                     Recurring
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer mt-2">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer mt-2">
                 <Users className="w-5 h-5" />
                 <span>Clients</span>
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <Receipt className="w-5 h-5" />
                 <span>Expenses</span>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <CreditCard className="w-5 h-5" />
                   <span>Payments</span>
@@ -247,12 +248,12 @@ export default function Home() {
                 <ChevronDown className="w-4 h-4" />
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <Wallet className="w-5 h-5" />
                 <span>Bank Accounts</span>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <BarChart3 className="w-5 h-5" />
                   <span>Reports</span>
@@ -260,7 +261,7 @@ export default function Home() {
                 <ChevronDown className="w-4 h-4" />
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <PieChart className="w-5 h-5" />
                   <span>Tax Center</span>
@@ -268,7 +269,7 @@ export default function Home() {
                 <ChevronDown className="w-4 h-4" />
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-indigo-800 rounded-lg cursor-pointer">
+              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <BarChart3 className="w-5 h-5" />
                   <span>Analytics</span>
@@ -279,9 +280,9 @@ export default function Home() {
           </nav>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-indigo-700 bg-indigo-800">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-indigo-700 bg-gray-500">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
+            <div className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white font-semibold">
               {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
             </div>
             <div className="flex-1">
@@ -313,7 +314,7 @@ export default function Home() {
         <div className="lg:hidden fixed top-4 left-4 z-30">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 bg-indigo-600 text-white rounded-lg shadow-lg"
+            className="p-2 bg-gray-500 text-white rounded-lg shadow-lg"
           >
             {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -376,7 +377,7 @@ export default function Home() {
 
             <StatCard
               title="Active Clients"
-              value={stats.totalClients}
+              value={clients.length}
               icon="👥"
               gradient="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
               subtitle="Client base"

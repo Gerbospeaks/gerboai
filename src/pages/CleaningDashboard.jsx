@@ -53,7 +53,7 @@ const CleaningDashboard = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [activeView, setActiveView] = useState('invoice');
-  const [customerName, setCustomerName] = useState("Jane Doe");
+  const [customerName, setCustomerName] = useState("Zoey Mor");
   const [customerId, setCustomerId] = useState("CUST-2026-5678");
   const [customerEmail, setCustomerEmail] = useState("jane.doe@example.com");
   const [customerPhone, setCustomerPhone] = useState("082 765 4321");
@@ -328,7 +328,7 @@ const CleaningDashboard = () => {
    setActiveView('invoice');
     setInvoiceId(null);
     setInvoiceNumber("");
-    setCustomerName("Jane Doe");
+    setCustomerName("Zoey Mor");
     setCustomerId("CUST-2026-5678");
     setCustomerEmail("jane.doe@example.com");
     setCustomerPhone("082 765 4321");

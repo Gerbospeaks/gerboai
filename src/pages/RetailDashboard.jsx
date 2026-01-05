@@ -10,7 +10,7 @@ export default function RetailDashboard() {
             <h1 className="text-3xl font-bold text-gray-900">Retail Dashboard</h1>
             <p className="text-gray-600">Inventory & Sales Tracking</p>
           </div>
-          <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+          <button className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700">
             New Sale
           </button>
         </div>

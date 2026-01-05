@@ -145,7 +145,7 @@ const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b flex items-center justify-between bg-indigo-600 text-white">
+        <div className="p-4 border-b flex items-center justify-between bg-gray-500 text-white">
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <GraduationCap className="w-6 h-6" />
             {existingStudent ? 'Edit Student' : 'Add New Student'}
@@ -328,7 +328,7 @@ const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved
                     value={formData.emergencyContact}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Jane Doe"
+                    placeholder="Zoey Mor"
                   />
                 </div>
 
@@ -399,7 +399,7 @@ const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved
           <button
             onClick={handleSave}
             disabled={loading}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-indigo-400 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-indigo-400 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading ? (
               <>

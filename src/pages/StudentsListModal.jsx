@@ -107,7 +107,7 @@ const StudentsListModal = ({
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="p-4 border-b bg-indigo-600 text-white">
+          <div className="p-4 border-b bg-gray-500 text-white">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <GraduationCap className="w-6 h-6" />
@@ -172,7 +172,7 @@ const StudentsListModal = ({
                       onAddNewStudent();
                       handleClose();
                     }}
-                    className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="mt-4 px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                   >
                     Add Your First Student
                   </button>
