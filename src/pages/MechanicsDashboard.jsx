@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
+import logo from '../assets/img/solidflo-logo.png';
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -294,7 +295,7 @@ const handleSaveCustomer = async () => {
   }, []);
 
   const [customerName, setCustomerName] = useState("John Smith");
-  const [customerId, setCustomerId] = useState("CUST-2024-1234");
+  const [customerId, setCustomerId] = useState("CUST-2026-1234");
   const [customerEmail, setCustomerEmail] = useState("john.smith@example.com");
   const [customerPhone, setCustomerPhone] = useState("082 123 4567");
   const [customerAddress, setCustomerAddress] = useState(
@@ -501,7 +502,7 @@ const handleSaveCustomer = async () => {
     setJobCardId(null);
     setJobCardNumber("");
     setCustomerName("John Smith");
-    setCustomerId("CUST-2024-1234");
+    setCustomerId("CUST-2026-1234");
     setCustomerEmail("john.smith@example.com");
     setCustomerPhone("082 123 4567");
     setCustomerAddress("123 Main Street, Pretoria, 0001");
@@ -550,13 +551,11 @@ const handleSaveCustomer = async () => {
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center">
-              <Wrench className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">
-              Mechanics Pro
-            </span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+             <img
+                 src={logo}
+                 alt="Business Logo"
+                 className="w-16 h-12 object-contain rounded-lg"
+               />
           </div>
 
           <nav className="space-y-1">

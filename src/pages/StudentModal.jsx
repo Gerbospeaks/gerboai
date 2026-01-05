@@ -194,7 +194,7 @@ const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved
                     value={formData.studentId}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50"
-                    placeholder="STU-2024-001"
+                    placeholder="STU-2026-001"
                     required
                   />
                 </div>

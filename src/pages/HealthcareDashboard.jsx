@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
+import logo from '../assets/img/solidflo-logo.png';
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -303,7 +304,7 @@ const HealthcareDashboard = () => {
   }, []);
 
   const [patientName, setPatientName] = useState("Sarah Johnson");
-  const [patientId, setPatientId] = useState("PAT-2024-1234");
+  const [patientId, setPatientId] = useState("PAT-2026-1234");
   const [patientEmail, setPatientEmail] = useState("sarah.johnson@example.com");
   const [patientPhone, setPatientPhone] = useState("082 123 4567");
   const [patientAddress, setPatientAddress] = useState("123 Main Street, Pretoria, 0001");
@@ -516,7 +517,7 @@ const HealthcareDashboard = () => {
     setInvoiceId(null);
     setInvoiceNumber("");
     setPatientName("Sarah Johnson");
-    setPatientId("PAT-2024-1234");
+    setPatientId("PAT-2026-1234");
     setPatientEmail("sarah.johnson@example.com");
     setPatientPhone("082 123 4567");
     setPatientAddress("123 Main Street, Pretoria, 0001");
@@ -566,13 +567,11 @@ const HealthcareDashboard = () => {
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Heart className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">
-              Healthcare Pro
-            </span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+             <img
+                 src={logo}
+                 alt="Business Logo"
+                 className="w-16 h-12 object-contain rounded-lg"
+               />
           </div>
 
           <nav className="space-y-1">

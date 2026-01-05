@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
+import logo from '../assets/img/solidflo-logo.png';
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -289,13 +290,13 @@ const PhotographyDashboard = () => {
   }, []);
 
   const [customerName, setCustomerName] = useState("Sarah Johnson");
-  const [customerId, setCustomerId] = useState("CUST-2024-5678");
+  const [customerId, setCustomerId] = useState("CUST-2026-5678");
   const [customerEmail, setCustomerEmail] = useState("sarah.johnson@example.com");
   const [customerPhone, setCustomerPhone] = useState("082 456 7890");
   const [customerAddress, setCustomerAddress] = useState(
     "456 Oak Avenue, Johannesburg, 2000"
   );
-  const [eventDate, setEventDate] = useState("2024-06-15");
+  const [eventDate, setEventDate] = useState("2026-06-15");
   const [eventType, setEventType] = useState("Wedding");
   const [eventLocation, setEventLocation] = useState("Silverstar Casino, Krugersdorp");
 
@@ -494,11 +495,11 @@ const PhotographyDashboard = () => {
     setInvoiceId(null);
     setInvoiceNumber("");
     setCustomerName("Sarah Johnson");
-    setCustomerId("CUST-2024-5678");
+    setCustomerId("CUST-2026-5678");
     setCustomerEmail("sarah.johnson@example.com");
     setCustomerPhone("082 456 7890");
     setCustomerAddress("456 Oak Avenue, Johannesburg, 2000");
-    setEventDate("2024-06-15");
+    setEventDate("2026-06-15");
     setEventType("Wedding");
     setEventLocation("Silverstar Casino, Krugersdorp");
     setItems([]);
@@ -540,13 +541,11 @@ const PhotographyDashboard = () => {
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-              <Camera className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">
-              Photography Pro
-            </span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+             <img
+                 src={logo}
+                 alt="Business Logo"
+                 className="w-16 h-12 object-contain rounded-lg"
+               />
           </div>
 
           <nav className="space-y-1">

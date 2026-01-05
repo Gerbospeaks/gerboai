@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "./FinancialOverview";
+import logo from '../assets/img/solidflo-logo.png';
 import {
   getFirestore,
   collection,
@@ -301,7 +302,7 @@ const ConstructionDashboard = () => {
   }, []);
 
   const [clientName, setClientName] = useState("John Construction Ltd");
-  const [clientId, setClientId] = useState("CLI-2024-1234");
+  const [clientId, setClientId] = useState("CLI-2026-1234");
   const [clientEmail, setClientEmail] = useState("john@construction.com");
   const [clientPhone, setClientPhone] = useState("082 123 4567");
   const [clientAddress, setClientAddress] = useState("123 Main Street, Pretoria, 0001");
@@ -312,7 +313,7 @@ const ConstructionDashboard = () => {
   const [projectType, setProjectType] = useState("Renovation");
   const [projectSize, setProjectSize] = useState("500 sqm");
   const [projectDuration, setProjectDuration] = useState("3 months");
-  const [projectStartDate, setProjectStartDate] = useState("2024-02-01");
+  const [projectStartDate, setProjectStartDate] = useState("2026-02-01");
 
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "PREMIER CONSTRUCTION SERVICES",
@@ -518,7 +519,7 @@ const ConstructionDashboard = () => {
     setQuoteId(null);
     setQuoteNumber("");
     setClientName("John Construction Ltd");
-    setClientId("CLI-2024-1234");
+    setClientId("CLI-2026-1234");
     setClientEmail("john@construction.com");
     setClientPhone("082 123 4567");
     setClientAddress("123 Main Street, Pretoria, 0001");
@@ -529,7 +530,7 @@ const ConstructionDashboard = () => {
     setProjectType("Renovation");
     setProjectSize("500 sqm");
     setProjectDuration("3 months");
-    setProjectStartDate("2024-02-01");
+    setProjectStartDate("2026-02-01");
     setItems([]);
 
     const loadNewNumber = async () => {
@@ -567,13 +568,11 @@ const ConstructionDashboard = () => {
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center">
-              <HardHat className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">
-              Construction Pro
-            </span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+           <img
+      src={logo}
+      alt="Business Logo"
+      className="w-16 h-12 object-contain rounded-lg"
+    />
           </div>
 
           <nav className="space-y-1">
@@ -1725,6 +1724,11 @@ const ConstructionDashboard = () => {
             </div>
 
             <style>{`
+            .logo img {
+          height: 60px;
+          width: auto;
+          padding-left:40px;
+        }
               @media print {
                 * {
                   -webkit-print-color-adjust: exact !important;

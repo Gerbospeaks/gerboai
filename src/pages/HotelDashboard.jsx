@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
+import logo from '../assets/img/solidflo-logo.png';
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -303,7 +304,7 @@ const HotelDashboard = () => {
   }, []);
 
   const [guestName, setGuestName] = useState("John Smith");
-  const [guestId, setGuestId] = useState("GST-2024-1234");
+  const [guestId, setGuestId] = useState("GST-2026-1234");
   const [guestEmail, setGuestEmail] = useState("john.smith@example.com");
   const [guestPhone, setGuestPhone] = useState("082 123 4567");
   const [guestAddress, setGuestAddress] = useState("456 Oak Street, Cape Town, 8001");
@@ -313,8 +314,8 @@ const HotelDashboard = () => {
   const [idNumber, setIdNumber] = useState("8505155678901");
   const [roomNumber, setRoomNumber] = useState("205");
   const [roomType, setRoomType] = useState("Deluxe Double Room");
-  const [checkInDate, setCheckInDate] = useState("2024-01-10");
-  const [checkOutDate, setCheckOutDate] = useState("2024-01-15");
+  const [checkInDate, setCheckInDate] = useState("2026-01-10");
+  const [checkOutDate, setCheckOutDate] = useState("2026-01-15");
   const [numberOfGuests, setNumberOfGuests] = useState("2");
   const [numberOfNights, setNumberOfNights] = useState("5");
   const [specialRequests, setSpecialRequests] = useState("Late check-in requested");
@@ -527,7 +528,7 @@ const HotelDashboard = () => {
     setInvoiceId(null);
     setInvoiceNumber("");
     setGuestName("John Smith");
-    setGuestId("GST-2024-1234");
+    setGuestId("GST-2026-1234");
     setGuestEmail("john.smith@example.com");
     setGuestPhone("082 123 4567");
     setGuestAddress("456 Oak Street, Cape Town, 8001");
@@ -537,8 +538,8 @@ const HotelDashboard = () => {
     setIdNumber("8505155678901");
     setRoomNumber("205");
     setRoomType("Deluxe Double Room");
-    setCheckInDate("2024-01-10");
-    setCheckOutDate("2024-01-15");
+    setCheckInDate("2026-01-10");
+    setCheckOutDate("2026-01-15");
     setNumberOfGuests("2");
     setNumberOfNights("5");
     setSpecialRequests("");
@@ -579,13 +580,11 @@ const HotelDashboard = () => {
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Hotel className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">
-              Hotel Manager
-            </span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+             <img
+                 src={logo}
+                 alt="Business Logo"
+                 className="w-16 h-12 object-contain rounded-lg"
+               />
           </div>
 
           <nav className="space-y-1">

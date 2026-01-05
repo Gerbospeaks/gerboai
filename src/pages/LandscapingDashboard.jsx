@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Printer, Download } from 'lucide-react';
 import { serverTimestamp } from 'firebase/firestore';
+import logo from '../assets/img/solidflo-logo.png';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -78,7 +79,7 @@ useEffect(() => {
   }, []);
 
   const [clientName, setClientName] = useState('Emma Thompson');
-  const [clientId, setClientId] = useState('C-2024-3421');
+  const [clientId, setClientId] = useState('C-2026-3421');
   const [clientEmail, setClientEmail] = useState('emma.thompson@example.com');
   const [clientPhone, setClientPhone] = useState('0161 789 4563');
   const [clientAddress, setClientAddress] = useState('156 Wilmslow Road, Didsbury, Manchester, M20 8RY');
@@ -114,9 +115,11 @@ useEffect(() => {
       <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-900 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}>
         <div className="p-4">
          <div className="flex items-center space-x-2 mb-8">
-                     <img src="public/logo512.png" alt="Logo" className="w-8 h-8 rounded-lg object-contain" />
-                     <span className="font-semibold text-lg text-white">SolidFlo Pro</span>
-                     <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+                      <img
+                          src={logo}
+                          alt="Business Logo"
+                          className="w-16 h-12 object-contain rounded-lg"
+                        />
                    </div>
 
           <nav className="space-y-1">
@@ -365,15 +368,15 @@ useEffect(() => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <div className="text-sm text-gray-500 mb-1">Service Date</div>
-                  <div className="text-base font-medium">15/12/2024</div>
+                  <div className="text-base font-medium">15/12/2026</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500 mb-1">Invoice Date</div>
-                  <div className="text-base font-medium">16/12/2024</div>
+                  <div className="text-base font-medium">16/12/2026</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500 mb-1">Due Date</div>
-                  <div className="text-base font-medium">30/12/2024</div>
+                  <div className="text-base font-medium">30/12/2026</div>
                 </div>
               </div>
 
@@ -462,7 +465,7 @@ useEffect(() => {
                 
                 <div className="text-center text-gray-400 py-8">
                   <p>No payments recorded yet</p>
-                  <p className="text-sm mt-2">Payment due by 30 December 2024</p>
+                  <p className="text-sm mt-2">Payment due by 30 December 2026</p>
                 </div>
               </div>
 
@@ -506,7 +509,7 @@ useEffect(() => {
                   <div className="text-right mb-6">
                     <div className="text-sm font-semibold mb-1">LANDSCAPING SERVICE INVOICE</div>
                    <div className="text-xs">Invoice No: {invoiceNumber}</div>
-                    <div className="text-xs text-gray-500">Service Date: 15/12/2024</div>
+                    <div className="text-xs text-gray-500">Service Date: 15/12/2026</div>
                      <div className="text-xs text-gray-500">Date Issued : {new Date().toLocaleDateString('en-GB')}
                   </div>
                  <div className="text-xs text-gray-500">
@@ -660,7 +663,7 @@ useEffect(() => {
                       <div>Account Name: GreenScape Pro Landscaping Ltd</div>
                       <div>Sort Code: 01-23-45</div>
                       <div>Account Number: 12345678</div>
-                      <div className="pt-2">Payment Reference: LAND-2024-1256</div>
+                      <div className="pt-2">Payment Reference: LAND-2026-1256</div>
                     </div>
                   </div>
 

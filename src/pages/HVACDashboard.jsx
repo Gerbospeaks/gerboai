@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
+import logo from '../assets/img/solidflo-logo.png';
 import { getAuth, signOut } from "firebase/auth";
 import { db } from '../firebase';
 import {
@@ -160,7 +161,7 @@ const handleAddItem = () => {
   }, []);
 
   const [clientName, setClientName] = useState("Sarah Mitchell");
-  const [clientId, setClientId] = useState("C-2024-4567");
+  const [clientId, setClientId] = useState("C-2026-4567");
   const [clientEmail, setClientEmail] = useState("sarah.mitchell@example.com");
   const [clientPhone, setClientPhone] = useState("0161 123 4567");
   const [clientAddress, setClientAddress] = useState(
@@ -193,7 +194,7 @@ const total = subtotal + vat;
   status: "pending",
 
   dates: {
-    serviceDate: "28/12/2024",
+    serviceDate: "28/12/2026",
     issuedDate: new Date().toISOString(),
     dueDate: (() => {
       const d = new Date();
@@ -288,15 +289,11 @@ const total = subtotal + vat;
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <img
-              src="public/logo512.png"
-              alt="Logo"
-              className="w-8 h-8 rounded-lg object-contain"
-            />
-            <span className="font-semibold text-lg text-white">
-              SolidFlo Pro
-            </span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+              <img
+                  src={logo}
+                  alt="Business Logo"
+                  className="w-16 h-12 object-contain rounded-lg"
+                />
           </div>
 
           <nav className="space-y-1">
@@ -574,11 +571,11 @@ const total = subtotal + vat;
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <div className="text-sm text-gray-500 mb-1">Service Date</div>
-                  <div className="text-base font-medium">28/12/2024</div>
+                  <div className="text-base font-medium">28/12/2026</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500 mb-1">Invoice Date</div>
-                  <div className="text-base font-medium">29/12/2024</div>
+                  <div className="text-base font-medium">29/12/2026</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500 mb-1">Due Date</div>
@@ -793,7 +790,7 @@ const total = subtotal + vat;
                     </div>
                     <div>Invoice No: {invoiceNumber}</div>
                     <div className="text-gray-500">
-                    Service Date: 28/12/2024
+                    Service Date: 28/12/2026
                     </div>
                     <div className="text-gray-500">
                     Date Issued: {new Date().toLocaleDateString("en-GB")}

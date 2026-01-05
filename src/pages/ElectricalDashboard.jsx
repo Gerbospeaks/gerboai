@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
+import logo from '../assets/img/solidflo-logo.png';
 import {
   getFirestore,
   collection,
@@ -294,7 +295,7 @@ const EngineeringDashboard = () => {
   }, []);
 
   const [customerName, setCustomerName] = useState("ABC Manufacturing Ltd");
-  const [customerId, setCustomerId] = useState("CUST-2024-1234");
+  const [customerId, setCustomerId] = useState("CUST-2026-1234");
   const [customerEmail, setCustomerEmail] = useState("contact@abcmfg.com");
   const [customerPhone, setCustomerPhone] = useState("082 123 4567");
   const [customerAddress, setCustomerAddress] = useState(
@@ -304,7 +305,7 @@ const EngineeringDashboard = () => {
   const [equipmentManufacturer, setEquipmentManufacturer] = useState("Caterpillar");
   const [equipmentModel, setEquipmentModel] = useState("C15");
   const [equipmentSerial, setEquipmentSerial] = useState("CAT12345XYZ789");
-  const [equipmentId, setEquipmentId] = useState("EQ-2024-001");
+  const [equipmentId, setEquipmentId] = useState("EQ-2026-001");
   const [equipmentLocation, setEquipmentLocation] = useState("Building A - Ground Floor");
 
   const [businessInfo, setBusinessInfo] = useState({
@@ -504,7 +505,7 @@ const EngineeringDashboard = () => {
     setJobCardId(null);
     setJobCardNumber("");
     setCustomerName("ABC Manufacturing Ltd");
-    setCustomerId("CUST-2024-1234");
+    setCustomerId("CUST-2026-1234");
     setCustomerEmail("contact@abcmfg.com");
     setCustomerPhone("082 123 4567");
     setCustomerAddress("123 Industrial Park, Johannesburg, 2001");
@@ -512,7 +513,7 @@ const EngineeringDashboard = () => {
     setEquipmentManufacturer("Caterpillar");
     setEquipmentModel("C15");
     setEquipmentSerial("CAT12345XYZ789");
-    setEquipmentId("EQ-2024-001");
+    setEquipmentId("EQ-2026-001");
     setEquipmentLocation("Building A - Ground Floor");
     setItems([]);
 
@@ -551,13 +552,11 @@ const EngineeringDashboard = () => {
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">
-              Engineering Pro
-            </span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+              <img
+                  src={logo}
+                  alt="Business Logo"
+                  className="w-16 h-12 object-contain rounded-lg"
+                />
           </div>
 
           <nav className="space-y-1">

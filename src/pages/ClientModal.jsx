@@ -193,7 +193,7 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
                   value={formData.clientId}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="CLI-2024-0001"
+                  placeholder="CLI-2026-0001"
                   readOnly
                 />
               </div>

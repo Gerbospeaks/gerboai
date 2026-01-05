@@ -1,6 +1,7 @@
  import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
+import logo from '../assets/img/solidflo-logo.png';
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -297,7 +298,7 @@ const LogisticsDashboard = () => {
   }, []);
 
   const [customerName, setCustomerName] = useState("ABC Manufacturing Ltd");
-  const [customerId, setCustomerId] = useState("CUST-2024-9012");
+  const [customerId, setCustomerId] = useState("CUST-2026-9012");
   const [customerEmail, setCustomerEmail] = useState("logistics@abcmfg.co.za");
   const [customerPhone, setCustomerPhone] = useState("011 789 0123");
   const [customerAddress, setCustomerAddress] = useState(
@@ -305,8 +306,8 @@ const LogisticsDashboard = () => {
   );
   const [pickupLocation, setPickupLocation] = useState("Cape Town Harbour, Cape Town");
   const [deliveryLocation, setDeliveryLocation] = useState("Warehouse 5, Johannesburg");
-  const [shipmentDate, setShipmentDate] = useState("2024-06-10");
-  const [deliveryDate, setDeliveryDate] = useState("2024-06-12");
+  const [shipmentDate, setShipmentDate] = useState("2026-06-10");
+  const [deliveryDate, setDeliveryDate] = useState("2026-06-12");
   const [cargoWeight, setCargoWeight] = useState("5000");
   const [cargoDescription, setCargoDescription] = useState("Industrial machinery parts");
 
@@ -508,14 +509,14 @@ const LogisticsDashboard = () => {
     setInvoiceId(null);
     setInvoiceNumber("");
     setCustomerName("ABC Manufacturing Ltd");
-    setCustomerId("CUST-2024-9012");
+    setCustomerId("CUST-2026-9012");
     setCustomerEmail("logistics@abcmfg.co.za");
     setCustomerPhone("011 789 0123");
     setCustomerAddress("789 Industrial Road, Midrand, 1685");
     setPickupLocation("Cape Town Harbour, Cape Town");
     setDeliveryLocation("Warehouse 5, Johannesburg");
-    setShipmentDate("2024-06-10");
-    setDeliveryDate("2024-06-12");
+    setShipmentDate("2026-06-10");
+    setDeliveryDate("2026-06-12");
     setCargoWeight("5000");
     setCargoDescription("Industrial machinery parts");
     setItems([]);
@@ -557,13 +558,11 @@ const LogisticsDashboard = () => {
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Truck className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">
-              Logistics Pro
-            </span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+              <img
+                  src={logo}
+                  alt="Business Logo"
+                  className="w-16 h-12 object-contain rounded-lg"
+                />
           </div>
 
           <nav className="space-y-1">

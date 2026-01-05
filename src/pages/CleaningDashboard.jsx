@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
+import logo from '../assets/img/solidflo-logo.png';
 import {
   getFirestore,
   collection,
@@ -53,7 +54,7 @@ const CleaningDashboard = () => {
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [activeView, setActiveView] = useState('invoice');
   const [customerName, setCustomerName] = useState("Jane Doe");
-  const [customerId, setCustomerId] = useState("CUST-2024-5678");
+  const [customerId, setCustomerId] = useState("CUST-2026-5678");
   const [customerEmail, setCustomerEmail] = useState("jane.doe@example.com");
   const [customerPhone, setCustomerPhone] = useState("082 765 4321");
   const [customerAddress, setCustomerAddress] = useState("456 Oak Avenue, Pretoria, 0002");
@@ -328,7 +329,7 @@ const CleaningDashboard = () => {
     setInvoiceId(null);
     setInvoiceNumber("");
     setCustomerName("Jane Doe");
-    setCustomerId("CUST-2024-5678");
+    setCustomerId("CUST-2026-5678");
     setCustomerEmail("jane.doe@example.com");
     setCustomerPhone("082 765 4321");
     setCustomerAddress("456 Oak Avenue, Pretoria, 0002");
@@ -392,11 +393,11 @@ const CleaningDashboard = () => {
       <div className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-900 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}>
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">Cleaning Pro</span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+             <img
+      src={logo}
+      alt="Business Logo"
+      className="w-16 h-12 object-contain rounded-lg"
+    />
           </div>
 
           <nav className="space-y-1">
@@ -1028,6 +1029,10 @@ const CleaningDashboard = () => {
             </div>
 
             <style>{`
+            .logo img {
+          height: 60px;
+          width: auto;
+        }
               @media print {
                 * {
                   -webkit-print-color-adjust: exact !important;

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
+import logo from '../assets/img/solidflo-logo.png';
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -290,7 +291,7 @@ const AccountingDashboard = () => {
   }, []);
 
   const [customerName, setCustomerName] = useState("Acme Corporation");
-  const [customerId, setCustomerId] = useState("CUST-2024-5678");
+  const [customerId, setCustomerId] = useState("CUST-2026-5678");
   const [customerEmail, setCustomerEmail] = useState("accounts@acmecorp.com");
   const [customerPhone, setCustomerPhone] = useState("011 234 5678");
   const [customerAddress, setCustomerAddress] = useState(
@@ -310,7 +311,7 @@ const AccountingDashboard = () => {
     secondaryPhone: "082 456 7890",
     logoUrl: "",
     taxNumber: "VAT-9012345678",
-    registrationNumber: "2024/123456/07",
+    registrationNumber: "2026/123456/07",
   });
 
   const [loading, setLoading] = useState(true);
@@ -496,7 +497,7 @@ const AccountingDashboard = () => {
     setInvoiceId(null);
     setInvoiceNumber("");
     setCustomerName("Acme Corporation");
-    setCustomerId("CUST-2024-5678");
+    setCustomerId("CUST-2026-5678");
     setCustomerEmail("accounts@acmecorp.com");
     setCustomerPhone("011 234 5678");
     setCustomerAddress("456 Business Park, Sandton, 2196");
@@ -542,13 +543,11 @@ const AccountingDashboard = () => {
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Calculator className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">
-              Accounting Pro
-            </span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+            <img
+                 src={logo}
+                 alt="Business Logo"
+                 className="w-16 h-12 object-contain rounded-lg"
+               />
           </div>
 
           <nav className="space-y-1">
@@ -1028,7 +1027,7 @@ const AccountingDashboard = () => {
                           })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
-                        placeholder="2024/123456/07"
+                        placeholder="2026/123456/07"
                       />
                     </div>
 
@@ -1572,7 +1571,7 @@ const AccountingDashboard = () => {
                 nav,
                 button,
                 [class*="sidebar"],
-                [class*="bg-indigo-900"],
+                [class*="bg-indigo-950"],
                 [class*="border-b"] {
                   display: none !important;
                 }

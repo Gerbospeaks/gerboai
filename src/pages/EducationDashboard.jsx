@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
+import logo from '../assets/img/solidflo-logo.png';
 import {
   getFirestore,
   collection,
@@ -304,7 +305,7 @@ const EducationDashboard = () => {
   }, []);
 
   const [studentName, setStudentName] = useState("John Smith");
-  const [studentId, setStudentId] = useState("STU-2024-001");
+  const [studentId, setStudentId] = useState("STU-2026-001");
   const [gradeLevel, setGradeLevel] = useState("Grade 3");
   const [dateOfBirth, setDateOfBirth] = useState("2015-03-15");
   const [parentName, setParentName] = useState("Mary Smith");
@@ -312,7 +313,7 @@ const EducationDashboard = () => {
   const [parentPhone, setParentPhone] = useState("082 123 4567");
   const [parentAddress, setParentAddress] = useState("123 Main Street, Johannesburg, 2001");
   const [term, setTerm] = useState("Term 1");
-  const [academicYear, setAcademicYear] = useState("2024");
+  const [academicYear, setAcademicYear] = useState("2026");
   const [teacherComments, setTeacherComments] = useState("John is a hardworking student who shows great enthusiasm for learning.");
   const [attendanceDays, setAttendanceDays] = useState("65");
   const [attendancePresent, setAttendancePresent] = useState("63");
@@ -509,7 +510,7 @@ const EducationDashboard = () => {
     setReportId(null);
     setReportNumber("");
     setStudentName("John Smith");
-    setStudentId("STU-2024-001");
+    setStudentId("STU-2026-001");
     setGradeLevel("Grade 3");
     setDateOfBirth("2015-03-15");
     setParentName("Mary Smith");
@@ -517,7 +518,7 @@ const EducationDashboard = () => {
     setParentPhone("082 123 4567");
     setParentAddress("123 Main Street, Johannesburg, 2001");
     setTerm("Term 1");
-    setAcademicYear("2024");
+    setAcademicYear("2026");
     setSubjects([]);
     setTeacherComments("Student shows great enthusiasm for learning.");
     setAttendanceDays("65");
@@ -554,17 +555,15 @@ const EducationDashboard = () => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-indigo-900 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-indigo-950 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">
-              EduManage Pro
-            </span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+             <img
+                 src={logo}
+                 alt="Business Logo"
+                 className="w-16 h-12 object-contain rounded-lg"
+               />
           </div>
 
           <nav className="space-y-1">
@@ -774,7 +773,7 @@ const EducationDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-indigo-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+        <div className="bg-indigo-950 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
             {["ReportCard", "Attendance", "Behavior", "Notes"].map((tab) => (
               <button
@@ -1660,7 +1659,7 @@ const EducationDashboard = () => {
                 
                 nav,
                 [class*="sidebar"],
-                [class*="bg-indigo-900"],
+                [class*="bg-indigo-950"],
                 button:not([style]) {
                   display: none !important;
                 }

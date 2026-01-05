@@ -200,7 +200,7 @@ const GuestModal = ({ showModal, setShowModal, existingGuest, onGuestSaved }) =>
                     value={formData.guestId}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                    placeholder="GST-2024-1234"
+                    placeholder="GST-2026-1234"
                     readOnly
                   />
                 </div>

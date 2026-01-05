@@ -124,7 +124,7 @@ const SecurityDashboard = () => {
                 <Menu className="w-5 h-5" />
               </button>
               <ChevronLeft className="w-5 h-5 text-gray-400" />
-              <h1 className="text-xl font-semibold">Invoice #SEC-2024-0145</h1>
+              <h1 className="text-xl font-semibold">Invoice #SEC-2026-0145</h1>
             </div>
             <div className="flex items-center space-x-3">
               <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
@@ -196,7 +196,7 @@ const SecurityDashboard = () => {
                 </div>
                 <div>
                   <div className="text-sm text-gray-500 mb-1">Contract Period</div>
-                  <div className="text-base font-medium">December 2024</div>
+                  <div className="text-base font-medium">December 2026</div>
                 </div>
               </div>
 
@@ -255,7 +255,7 @@ const SecurityDashboard = () => {
               <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
                 <div className="text-right mb-6">
                   <div className="text-sm font-semibold mb-1">INVOICE</div>
-                  <div className="text-xs">Invoice No: SEC-2024-0145</div>
+                  <div className="text-xs">Invoice No: SEC-2026-0145</div>
                   <div className="text-xs text-gray-500">Date: 01/01/2025</div>
                   <div className="text-xs text-gray-500">Due: 08/01/2025</div>
                 </div>
@@ -289,7 +289,7 @@ const SecurityDashboard = () => {
 
                 <div className="bg-gray-50 rounded p-3 mb-4 text-xs">
                   <div className="font-medium mb-1">Contract Details</div>
-                  <div className="text-gray-600">Period: December 2024</div>
+                  <div className="text-gray-600">Period: December 2026</div>
                   <div className="text-gray-600">Type: 24/7 Security Coverage</div>
                 </div>
 

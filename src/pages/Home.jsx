@@ -163,7 +163,7 @@ export default function Home() {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-indigo-900 border-r border-gray-800 transition-transform duration-300 h-full`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-indigo-950 border-r border-gray-800 transition-transform duration-300 h-full`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
