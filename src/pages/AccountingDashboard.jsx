@@ -21,6 +21,7 @@ import { Printer, Download } from "lucide-react";
 import { db } from "../firebase";
 import CustomerModal from './CustomerModal';
 import CustomersListModal from './CustomersListModal';
+import FinancialOverview from "./FinancialOverview";
 import {
   ChevronDown,
   ChevronLeft,
@@ -89,7 +90,7 @@ const AccountingDashboard = () => {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-
+  const [activeView, setActiveView] = useState('invoice');
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -491,6 +492,7 @@ const AccountingDashboard = () => {
   };
 
   const handleNewInvoice = () => {
+    setActiveView('invoice');
     setInvoiceId(null);
     setInvoiceNumber("");
     setCustomerName("Acme Corporation");
@@ -563,7 +565,10 @@ const AccountingDashboard = () => {
             </div>
 
             <div className="pt-4">
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+             <div 
+                onClick={() => setActiveView('financial-overview')}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
                 <TrendingUp className="w-5 h-5" />
                 <span>Financial Overview</span>
               </div>
@@ -1127,7 +1132,10 @@ const AccountingDashboard = () => {
               </div>
             </div>
           )}
-
+         {activeView === 'financial-overview' && <FinancialOverview user={user} />}
+           {/* Invoice Content - Only show when activeView is 'invoice' */}
+          {activeView === 'invoice' && (
+         <>
           {/* Mobile View Invoice Button */}
           <button
             onClick={() => setShowInvoice(!showInvoice)}
@@ -1600,6 +1608,8 @@ const AccountingDashboard = () => {
                 }
               }
             `}</style>
+             </>
+             )}
           </div>
         </div>
       </div>

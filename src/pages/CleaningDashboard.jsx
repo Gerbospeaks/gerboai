@@ -20,7 +20,7 @@ import { Printer, Download, Sparkles, ChevronDown, ChevronLeft, Home, Settings, 
 import { db } from "../firebase";
 import CustomerModal from './CustomerModal';
 import CustomersListModal from './CustomersListModal';
-
+import FinancialOverview from "./FinancialOverview";
 const generateInvoiceNumber = async (userId) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
@@ -51,7 +51,7 @@ const CleaningDashboard = () => {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [savedCustomers, setSavedCustomers] = useState([]);
-
+  const [activeView, setActiveView] = useState('invoice');
   const [customerName, setCustomerName] = useState("Jane Doe");
   const [customerId, setCustomerId] = useState("CUST-2024-5678");
   const [customerEmail, setCustomerEmail] = useState("jane.doe@example.com");
@@ -324,6 +324,7 @@ const CleaningDashboard = () => {
   };
 
   const handleNewInvoice = () => {
+   setActiveView('invoice');
     setInvoiceId(null);
     setInvoiceNumber("");
     setCustomerName("Jane Doe");
@@ -409,7 +410,8 @@ const CleaningDashboard = () => {
             </div>
 
             <div className="pt-4">
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+              <div  onClick={() => setActiveView('financial-overview')}
+              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">        
                 <TrendingUp className="w-5 h-5" />
                 <span>Business Overview</span>
               </div>
@@ -713,8 +715,11 @@ const CleaningDashboard = () => {
             <FileText className="w-5 h-5" />
             {showInvoice ? "Hide Invoice" : "View Invoice"}
           </button>
-
+{activeView === 'financial-overview' && <FinancialOverview user={user} />}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+{activeView === 'invoice' && (
+         <>
             <div className={`${showInvoice ? "hidden" : "block"} space-y-6 lg:block print:hidden`}>
               <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -853,7 +858,7 @@ const CleaningDashboard = () => {
                 </div>
               </div>
             </div>
-
+              
             <div className={`${!showInvoice ? "hidden" : "block"} lg:block mx-auto bg-white shadow-lg overflow-hidden`} style={{ width: "100%", maxWidth: "210mm", minHeight: "297mm" }}>
               <div className="bg-white" style={{ padding: "15mm 20mm" }}>
                 <div className="border-b-2 border-black pb-4 mb-4">
@@ -1085,6 +1090,9 @@ const CleaningDashboard = () => {
                 }
               }
             `}</style>
+            </>
+              )
+            }
           </div>
         </div>
       </div>

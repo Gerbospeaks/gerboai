@@ -12,7 +12,7 @@ import BlogPostPage from './pages/BlogPostPage';
 import DashboardRouter from './components/DashboardRouter';
 import PrivacyPolicy from './pages/PrivacyPolicy';  
 import TermsPage from './pages/TermsPage';
-// Your existing dashboard imports
+import FinancialOverview from './pages/FinancialOverview';  
 import InvoiceDashboard from './pages/InvoiceDashboard';
 import MechanicsDashboard from './pages/MechanicsDashboard';
 import SecurityDashboard from './pages/SecurityDashboard';
@@ -189,6 +189,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <LogisticsDashboard />
+              </ProtectedRoute>
+            }
+          />  
+           <Route 
+            path="/financial-overview" 
+            element={
+              <ProtectedRoute>
+                <FinancialOverview />
               </ProtectedRoute>
             }
           />  

@@ -1,13 +1,5 @@
 export const dashboards = [
   { 
-    id: 'invoice',
-    name: 'Invoice', 
-    path: '/invoice',
-    icon: '📄', 
-    color: 'bg-orange-500',
-    description: 'Manage invoices and payments'
-  },
-  { 
     id: 'mechanics',
     name: 'Mechanics', 
     path: '/mechanics',

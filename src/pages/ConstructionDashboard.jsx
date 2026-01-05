@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
+import FinancialOverview from "./FinancialOverview";
 import {
   getFirestore,
   collection,
@@ -85,6 +86,7 @@ const ConstructionDashboard = () => {
   const [showQuotesList, setShowQuotesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showClientsList, setShowClientsList] = useState(false);
+  const [activeView, setActiveView] = useState('invoice');
   const [savedClients, setSavedClients] = useState([]);
   const [showClientsListModal, setShowClientsListModal] = useState(false);
   const [showClientModal, setShowClientModal] = useState(false);
@@ -512,6 +514,7 @@ const ConstructionDashboard = () => {
   };
 
   const handleNewQuote = () => {
+    setActiveView('invoice');
     setQuoteId(null);
     setQuoteNumber("");
     setClientName("John Construction Ltd");
@@ -587,7 +590,8 @@ const ConstructionDashboard = () => {
             </div>
 
             <div className="pt-4">
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+              <div onClick={() => setActiveView('financial-overview')}
+              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <TrendingUp className="w-5 h-5" />
                 <span>Business Overview</span>
               </div>
@@ -1161,7 +1165,9 @@ const ConstructionDashboard = () => {
               </div>
             </div>
           )}
-
+          {activeView === 'financial-overview' && <FinancialOverview user={user} />}
+           {activeView === 'invoice' && (
+    <>
           <button
             onClick={() => setShowQuote(!showQuote)}
             className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
@@ -1798,6 +1804,8 @@ const ConstructionDashboard = () => {
               }
             `}</style>
           </div>
+            </>
+           )} 
         </div>
       </div>
     </div>
