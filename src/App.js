@@ -14,29 +14,33 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsPage from './pages/TermsPage';
 import FinancialOverview from './pages/FinancialOverview';  
 import InvoiceDashboard from './pages/InvoiceDashboard';
-import MechanicsDashboard from './pages/MechanicsDashboard';
-import SecurityDashboard from './pages/SecurityDashboard';
-import HealthcareDashboard from './pages/HealthcareDashboard';
-import ElectricalDashboard from './pages/ElectricalDashboard';
-import RestaurantDashboard from './pages/RestaurantDashboard';
-import ConstructionDashboard from './pages/ConstructionDashboard';
-import CleaningDashboard from './pages/CleaningDashboard';
-import EducationDashboard from './pages/EducationDashboard';
-import HotelDashboard from './pages/HotelDashboard';  
-import LegalDashboard from './pages/LegalDashboard';
-import PlumbingDashboard from './pages/PlumbingDashboard';
-import RetailDashboard from './pages/RetailDashboard';
-import LandscapingDashboard from './pages/LandscapingDashboard';
-import LogisticsDashboard from './pages/LogisticsDashboard';
-import PhotographyDashboard from './pages/PhotographyDashboard';
-import RealEstateDashboard from './pages/RealEstateDashboard';
-import VeterinaryDashboard from './pages/VeterinaryDashboard';
-import HVACDashboard from './pages/HVACDashboard';
-import AccountingDashboard from './pages/AccountingDashboard';  
-import QuoteTemplate from './pages/QuoteTemplate';
-import PracticeOverview from './pages/PracticeOverview';
-import PendingPayments from './pages/PendingPayments';
-import AppointmentsCalendar from './pages/AppointmentsCalendar';
+import MechanicsDashboard from './pages/mechanics/MechanicsDashboard';
+import SecurityDashboard from './pages/security/SecurityDashboard';
+import HealthcareDashboard from './pages/health/HealthcareDashboard';
+import ElectricalDashboard from './pages/electrical/ElectricalDashboard';
+import RestaurantDashboard from './pages/restaurants/RestaurantDashboard';
+import ConstructionDashboard from './pages/construction/ConstructionDashboard';
+import CleaningDashboard from './pages/cleaning/CleaningDashboard';
+import EducationDashboard from './pages/education/EducationDashboard';
+import HotelDashboard from './pages/hotel/HotelDashboard';  
+import LegalDashboard from './pages/legal/LegalDashboard';
+import PlumbingDashboard from './pages/plumbing/PlumbingDashboard';
+import RetailDashboard from './pages/retail/RetailDashboard';
+import LandscapingDashboard from './pages/landscaping/LandscapingDashboard';
+import LogisticsDashboard from './pages/logistics/LogisticsDashboard';
+import PhotographyDashboard from './pages/photography/PhotographyDashboard';
+import RealEstateDashboard from './pages/realEstate/RealEstateDashboard';
+import VeterinaryDashboard from './pages/veterinary/VeterinaryDashboard';
+import HVACDashboard from './pages/hvac/HVACDashboard';
+import AccountingDashboard from './pages/accounting/AccountingDashboard';  
+import QuoteTemplate from './pages/accounting/QuoteTemplate';
+import PracticeOverview from './pages/health/PracticeOverview';
+import PendingPayments from './pages/health/PendingPayments';
+import AppointmentsCalendar from './pages/health/AppointmentsCalendar';
+import Vehicles from './pages/mechanics/Vehicles';  
+import Templates from './pages/mechanics/Templates';
+import { TemplateSelector } from './pages/mechanics/TemplateSelector';
+import PartsInventory from './pages/mechanics/PartsInventory';
 import {  } from 'lucide-react';
 
 function App() {
@@ -89,6 +93,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <MechanicsDashboard />
+              </ProtectedRoute>
+            } 
+          />
+           <Route 
+            path="/vehicles" 
+            element={
+              <ProtectedRoute>
+                <Vehicles />
+              </ProtectedRoute>
+            } 
+          />
+            <Route 
+            path="/templates" 
+            element={
+              <ProtectedRoute>
+                <Templates />
+              </ProtectedRoute>
+            } 
+          />
+           <Route 
+            path="/parts-inventory" 
+            element={
+              <ProtectedRoute>
+                <PartsInventory />
               </ProtectedRoute>
             } 
           />
