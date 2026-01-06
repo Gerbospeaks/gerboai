@@ -33,6 +33,7 @@ import RealEstateDashboard from './pages/RealEstateDashboard';
 import VeterinaryDashboard from './pages/VeterinaryDashboard';
 import HVACDashboard from './pages/HVACDashboard';
 import AccountingDashboard from './pages/AccountingDashboard';  
+import QuoteTemplate from './pages/QuoteTemplate';
 import {  } from 'lucide-react';
 
 function App() {
@@ -197,6 +198,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FinancialOverview />
+              </ProtectedRoute>
+            }
+          />  
+          <Route 
+            path="/quote-template" 
+            element={
+              <ProtectedRoute>
+                <QuoteTemplate />
               </ProtectedRoute>
             }
           />  

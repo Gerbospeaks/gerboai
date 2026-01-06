@@ -719,6 +719,7 @@ const ConstructionDashboard = () => {
       </div>
 
       <div className="flex-1 overflow-auto">
+        <div className="sticky top-0 z-40 flex flex-col">
         <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 lg:space-x-4">
@@ -841,7 +842,7 @@ const ConstructionDashboard = () => {
             ))}
           </div>
         </div>
-
+        </div>
         <div className="p-4 lg:p-6">
           {/* Company Settings Modal */}
           {showSettings && (

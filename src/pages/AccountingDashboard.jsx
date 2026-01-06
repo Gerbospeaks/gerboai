@@ -52,6 +52,7 @@ import {
   Upload,
   BookOpen,
 } from "lucide-react";
+import QuoteTemplate from "./QuoteTemplate";
 
 const generateInvoiceNumber = async (userId) => {
   const db = getFirestore();
@@ -571,7 +572,13 @@ const AccountingDashboard = () => {
                 <TrendingUp className="w-5 h-5" />
                 <span>Financial Overview</span>
               </div>
-
+               <div 
+                onClick={() => setActiveView('quote-template')}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
+                <TrendingUp className="w-5 h-5" />
+                <span>Quotes</span>
+              </div>
               <div className="mt-2">
                 <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                   <div className="flex items-center space-x-3">
@@ -684,7 +691,8 @@ const AccountingDashboard = () => {
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+       <div className="sticky top-0 z-40 flex flex-col">
+        <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 lg:space-x-4">
               <button
@@ -708,12 +716,13 @@ const AccountingDashboard = () => {
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
-              <button
+               <button
                 onClick={handleSaveInvoice}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Save Invoice
+                {activeView === 'quote-template' ? 'Save Quote' : 'Save Invoice'}
               </button>
+
 
               <button
                 onClick={handleNewInvoice}
@@ -808,7 +817,7 @@ const AccountingDashboard = () => {
             ))}
           </div>
         </div>
-
+         </div>
         <div className="p-4 lg:p-6">
           {/* Business Settings Modal */}
           {showSettings && (
@@ -1132,6 +1141,7 @@ const AccountingDashboard = () => {
             </div>
           )}
          {activeView === 'financial-overview' && <FinancialOverview user={user} />}
+         {activeView === 'quote-template' && <QuoteTemplate user={user} />}
            {/* Invoice Content - Only show when activeView is 'invoice' */}
           {activeView === 'invoice' && (
          <>
@@ -1372,6 +1382,8 @@ const AccountingDashboard = () => {
                 minHeight: "297mm",
               }}
             >
+                {activeView === 'invoice' && (
+         <>
               <div className="bg-white" style={{ padding: "15mm 20mm" }}>
                 {/* Header Section */}
                 <div className="border-b-2 border-black pb-4 mb-4">
@@ -1543,6 +1555,7 @@ const AccountingDashboard = () => {
                     </div>
                   </div>
                 </div>
+                </>)}
               </div>
             </div>
 
