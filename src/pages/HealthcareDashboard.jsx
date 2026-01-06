@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
-import logo from '../assets/img/solidflo-logo.png';
+import logo from "../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -20,8 +19,11 @@ import {
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download } from "lucide-react";
 import { db } from "../firebase";
-import PatientModal from './PatientModal';
-import PatientsListModal from './PatientsListModal';
+import PatientModal from "./PatientModal";
+import PracticeOverview from "./PracticeOverview"; // Add this
+import PatientsListModal from "./PatientsListModal";
+import PendingPayments from "./PendingPayments";
+import AppointmentsCalendar from "./AppointmentsCalendar";
 import {
   ChevronDown,
   ChevronLeft,
@@ -91,6 +93,7 @@ const HealthcareDashboard = () => {
   const [showPatientsListModal, setShowPatientsListModal] = useState(false);
   const [showPatientModal, setShowPatientModal] = useState(false);
   const [patients, setPatients] = useState([]);
+  const [activeView, setActiveView] = useState("invoice");
   const [selectedPatient, setSelectedPatient] = useState(null);
 
   useEffect(() => {
@@ -107,20 +110,23 @@ const HealthcareDashboard = () => {
 
   const loadPatients = async () => {
     try {
-      const q = query(collection(db, "users", user.uid, "patients"), orderBy('createdAt', 'desc'));
+      const q = query(
+        collection(db, "users", user.uid, "patients"),
+        orderBy("createdAt", "desc")
+      );
       const querySnapshot = await getDocs(q);
       const patientsData = [];
-      
+
       querySnapshot.forEach((doc) => {
         patientsData.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         });
       });
-      
+
       setPatients(patientsData);
     } catch (error) {
-      console.error('Error loading patients:', error);
+      console.error("Error loading patients:", error);
     }
   };
 
@@ -202,12 +208,12 @@ const HealthcareDashboard = () => {
       ...doc.data(),
     }));
 
-    setSavedPatients(patients.filter(p => !p._placeholder));
+    setSavedPatients(patients.filter((p) => !p._placeholder));
   };
 
   const handleSavePatient = async () => {
     if (!user?.uid) return;
-    
+
     if (!patientName || !patientPhone) {
       alert("Please enter patient name and phone number");
       return;
@@ -226,7 +232,7 @@ const HealthcareDashboard = () => {
         insuranceProvider,
         insuranceNumber,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       await addDoc(collection(db, "users", user.uid, "patients"), patientData);
@@ -307,13 +313,18 @@ const HealthcareDashboard = () => {
   const [patientId, setPatientId] = useState("PAT-2026-1234");
   const [patientEmail, setPatientEmail] = useState("sarah.johnson@example.com");
   const [patientPhone, setPatientPhone] = useState("082 123 4567");
-  const [patientAddress, setPatientAddress] = useState("123 Main Street, Pretoria, 0001");
+  const [patientAddress, setPatientAddress] = useState(
+    "123 Main Street, Pretoria, 0001"
+  );
   const [patientDOB, setPatientDOB] = useState("1985-05-15");
   const [patientGender, setPatientGender] = useState("Female");
-  const [insuranceProvider, setInsuranceProvider] = useState("Discovery Health");
+  const [insuranceProvider, setInsuranceProvider] =
+    useState("Discovery Health");
   const [insuranceNumber, setInsuranceNumber] = useState("DH123456789");
   const [diagnosis, setDiagnosis] = useState("Annual Health Checkup");
-  const [treatmentPlan, setTreatmentPlan] = useState("Routine examination and blood work");
+  const [treatmentPlan, setTreatmentPlan] = useState(
+    "Routine examination and blood work"
+  );
   const [prescription, setPrescription] = useState("");
 
   const [facilityInfo, setFacilityInfo] = useState({
@@ -327,6 +338,10 @@ const HealthcareDashboard = () => {
     practiceName: "Dr. John Smith & Associates",
     practiceNumber: "MP123456",
     logoUrl: "",
+    bankName: "",
+    accountHolder: "",
+    accountNumber: "",
+    branchCode: "",
   });
 
   const [loading, setLoading] = useState(true);
@@ -567,11 +582,11 @@ const HealthcareDashboard = () => {
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-             <img
-                 src={logo}
-                 alt="Business Logo"
-                 className="w-16 h-12 object-contain rounded-lg"
-               />
+            <img
+              src={logo}
+              alt="Business Logo"
+              className="w-16 h-12 object-contain rounded-lg"
+            />
           </div>
 
           <nav className="space-y-1">
@@ -588,11 +603,13 @@ const HealthcareDashboard = () => {
             </div>
 
             <div className="pt-4">
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+              <div
+                onClick={() => setActiveView("practice-overview")}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
                 <TrendingUp className="w-5 h-5" />
                 <span>Practice Overview</span>
               </div>
-
               <div className="mt-2">
                 <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                   <div className="flex items-center space-x-3">
@@ -604,7 +621,10 @@ const HealthcareDashboard = () => {
 
                 <div className="ml-8 mt-1 space-y-1">
                   <div
-                    onClick={handleNewInvoice}
+                    onClick={() => {
+                      handleNewInvoice();
+                      setActiveView("invoice");
+                    }}
                     className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
                   >
                     Create Invoice
@@ -615,7 +635,10 @@ const HealthcareDashboard = () => {
                   >
                     All Invoices ({savedInvoices.length})
                   </div>
-                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
+                  <div
+                    onClick={() => setActiveView("pending")}
+                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+                  >
                     Pending Payment
                   </div>
                 </div>
@@ -626,7 +649,7 @@ const HealthcareDashboard = () => {
                 <span>Patients</span>
               </div>
               <div className="ml-8 mt-1 space-y-1">
-                <div 
+                <div
                   onClick={handleAddNewPatient}
                   className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
                 >
@@ -640,7 +663,10 @@ const HealthcareDashboard = () => {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+              <div
+                onClick={() => setActiveView("appointments")}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
                 <Calendar className="w-5 h-5" />
                 <span>Appointments</span>
               </div>
@@ -682,7 +708,7 @@ const HealthcareDashboard = () => {
           </nav>
         </div>
 
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-blue-600 rounded-full"></div>
             <div className="flex-1">
@@ -706,97 +732,97 @@ const HealthcareDashboard = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 lg:space-x-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
-              <h1 className="text-base lg:text-xl font-semibold">
-                Invoice #{invoiceNumber || "— not saved yet —"}
-              </h1>
-            </div>
+          <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 lg:space-x-4">
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+                <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+                <h1 className="text-base lg:text-xl font-semibold">
+                  Invoice #{invoiceNumber || "— not saved yet —"}
+                </h1>
+              </div>
 
-            <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <CheckSquare className="w-4 h-4" />
-                <span>Mark Paid</span>
-              </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <Edit className="w-4 h-4" />
-                <span>Edit</span>
-              </button>
-              <button
-                onClick={handleSaveInvoice}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Save Invoice
-              </button>
+              <div className="hidden lg:flex items-center space-x-3 print:hidden">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  <CheckSquare className="w-4 h-4" />
+                  <span>Mark Paid</span>
+                </button>
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  <Edit className="w-4 h-4" />
+                  <span>Edit</span>
+                </button>
+                <button
+                  onClick={handleSaveInvoice}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Save Invoice
+                </button>
 
-              <button
-                onClick={handleNewInvoice}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                <Plus className="w-4 h-4" />
-                New
-              </button>
+                <button
+                  onClick={handleNewInvoice}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  <Plus className="w-4 h-4" />
+                  New
+                </button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                <Send className="w-4 h-4" />
-                <span>Send</span>
-              </button>
-              <button
-                onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Save as PDF
-              </button>
+                <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <Send className="w-4 h-4" />
+                  <span>Send</span>
+                </button>
+                <button
+                  onClick={handleSavePDF}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Save as PDF
+                </button>
 
-              <button
-                onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                <Printer className="w-4 h-4" />
-                Print
-              </button>
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Log Out
+                </button>
+              </div>
+
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
               >
-                Log Out
+                <span className="text-sm font-medium">Logout</span>
               </button>
             </div>
-
-            <button
-              onClick={handleLogout}
-              className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
-            >
-              <span className="text-sm font-medium">Logout</span>
-            </button>
           </div>
-        </div>
 
-        <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-          <div className="flex space-x-4 lg:space-x-8 min-w-max">
-            {["Invoice", "Medical", "History", "Notes"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 border-b-2 ${
-                  activeTab === tab
-                    ? "border-blue-400 text-white"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+          <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+            <div className="flex space-x-4 lg:space-x-8 min-w-max">
+              {["Invoice", "Medical", "History", "Notes"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`py-4 border-b-2 ${
+                    activeTab === tab
+                      ? "border-blue-400 text-white"
+                      : "border-transparent text-gray-400 hover:text-gray-200"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
         </div>
         <div className="p-4 lg:p-6">
           {/* Facility Settings Modal */}
@@ -844,7 +870,9 @@ const HealthcareDashboard = () => {
                             htmlFor="logo-upload"
                             className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer"
                           >
-                            {facilityInfo.logoUrl ? "Change Logo" : "Upload Logo"}
+                            {facilityInfo.logoUrl
+                              ? "Change Logo"
+                              : "Upload Logo"}
                           </label>
                           <p className="text-xs text-gray-500 mt-2">
                             Recommended: Square image, max 5MB
@@ -1009,6 +1037,82 @@ const HealthcareDashboard = () => {
                       />
                     </div>
 
+                    <div className="border-t pt-4 mt-6">
+                      <h3 className="text-lg font-semibold mb-4">
+                        Bank Details
+                      </h3>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Bank Name
+                          </label>
+                          <input
+                            type="text"
+                            value={facilityInfo.bankName}
+                            onChange={(e) =>
+                              setFacilityInfo({
+                                ...facilityInfo,
+                                bankName: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Account Holder
+                          </label>
+                          <input
+                            type="text"
+                            value={facilityInfo.accountHolder}
+                            onChange={(e) =>
+                              setFacilityInfo({
+                                ...facilityInfo,
+                                accountHolder: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Account Number
+                          </label>
+                          <input
+                            type="text"
+                            value={facilityInfo.accountNumber}
+                            onChange={(e) =>
+                              setFacilityInfo({
+                                ...facilityInfo,
+                                accountNumber: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Branch Code
+                          </label>
+                          <input
+                            type="text"
+                            value={facilityInfo.branchCode}
+                            onChange={(e) =>
+                              setFacilityInfo({
+                                ...facilityInfo,
+                                branchCode: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     <button
                       onClick={handleSaveFacilityInfo}
                       className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
@@ -1076,7 +1180,8 @@ const HealthcareDashboard = () => {
                                 Diagnosis: {invoice.medical?.diagnosis || "N/A"}
                               </div>
                               <div className="text-sm text-gray-600">
-                                Insurance: {invoice.patient?.insuranceProvider || "N/A"}
+                                Insurance:{" "}
+                                {invoice.patient?.insuranceProvider || "N/A"}
                               </div>
                             </div>
                             <div className="text-right">
@@ -1085,7 +1190,9 @@ const HealthcareDashboard = () => {
                               </div>
                               <div className="text-sm text-gray-500">
                                 {invoice.dates?.serviceDate
-                                  ? new Date(invoice.dates.serviceDate).toLocaleDateString("en-ZA")
+                                  ? new Date(
+                                      invoice.dates.serviceDate
+                                    ).toLocaleDateString("en-ZA")
                                   : "N/A"}
                               </div>
                               <div
@@ -1109,465 +1216,554 @@ const HealthcareDashboard = () => {
               </div>
             </div>
           )}
+          {activeView === "practice-overview" && (
+            <PracticeOverview user={user} />
+          )}
+          {activeView === "appointments" && (
+            <AppointmentsCalendar user={user} />
+          )}
+          {activeView === "pending" && <PendingPayments user={user} />}
+          {/* Invoice Content - Only show when activeView is 'invoice' */}
+          {activeView === "invoice" && (
+            <>
+              <button
+                onClick={() => setShowInvoice(!showInvoice)}
+                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <FileText className="w-5 h-5" />
+                {showInvoice ? "Hide Invoice" : "View Invoice"}
+              </button>
 
-          <button
-            onClick={() => setShowInvoice(!showInvoice)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <FileText className="w-5 h-5" />
-            {showInvoice ? "Hide Invoice" : "View Invoice"}
-          </button>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div
+                  className={`${
+                    showInvoice ? "hidden" : "block"
+                  } space-y-6 lg:block print:hidden`}
+                >
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-blue-700 font-medium">
+                      Pending Payment
+                    </span>
+                    <span className="text-blue-600">Created Today</span>
+                  </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div
-              className={`${
-                showInvoice ? "hidden" : "block"
-              } space-y-6 lg:block print:hidden`}
-            >
-              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-blue-700 font-medium">Pending Payment</span>
-                <span className="text-blue-600">Created Today</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Total Amount</div>
-                  <div className="text-2xl font-semibold text-blue-600">
-                    R{total.toFixed(2)}
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Paid</div>
-                  <div className="text-2xl font-semibold text-green-600">
-                    R0.00
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Balance Due</div>
-                  <div className="text-2xl font-semibold text-red-600">
-                    R{total.toFixed(2)}
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Users className="w-5 h-5" />
-                    <span>Patient Information</span>
-                  </h2>
-                  <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Patient Name</div>
-                    <input
-                      type="text"
-                      value={patientName}
-                      onChange={(e) => setPatientName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Patient ID</div>
-                    <input
-                      type="text"
-                      value={patientId}
-                      onChange={(e) => setPatientId(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Email</div>
-                    <input
-                      type="text"
-                      value={patientEmail}
-                      onChange={(e) => setPatientEmail(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Phone</div>
-                    <input
-                      type="text"
-                      value={patientPhone}
-                      onChange={(e) => setPatientPhone(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Date of Birth</div>
-                    <input
-                      type="date"
-                      value={patientDOB}
-                      onChange={(e) => setPatientDOB(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Gender</div>
-                    <select
-                      value={patientGender}
-                      onChange={(e) => setPatientGender(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Address</div>
-                    <input
-                      type="text"
-                      value={patientAddress}
-                      onChange={(e) => setPatientAddress(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <CreditCard className="w-5 h-5" />
-                    <span>Insurance Information</span>
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Insurance Provider</div>
-                    <input
-                      type="text"
-                      value={insuranceProvider}
-                      onChange={(e) => setInsuranceProvider(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Insurance Number</div>
-                    <input
-                      type="text"
-                      value={insuranceNumber}
-                      onChange={(e) => setInsuranceNumber(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Stethoscope className="w-5 h-5" />
-                    <span>Medical Information</span>
-                  </h2>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Diagnosis</div>
-                    <textarea
-                      value={diagnosis}
-                      onChange={(e) => setDiagnosis(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                      rows="2"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Treatment Plan</div>
-                    <textarea
-                      value={treatmentPlan}
-                      onChange={(e) => setTreatmentPlan(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                      rows="3"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Prescription</div>
-                    <textarea
-                      value={prescription}
-                      onChange={(e) => setPrescription(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                      rows="3"
-                      placeholder="Medication details..."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h2 className="text-lg font-semibold mb-4">Add Service/Procedure</h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                  <select
-                    value={newItem.type}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, type: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  >
-                    <option value="Service">Service</option>
-                    <option value="Procedure">Procedure</option>
-                    <option value="Medication">Medication</option>
-                    <option value="Test">Test</option>
-                  </select>
-
-                  <input
-                    type="text"
-                    placeholder="Description"
-                    value={newItem.description}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, description: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Rate"
-                    value={newItem.rate}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, rate: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Qty"
-                    value={newItem.qty}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, qty: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <button
-                    onClick={handleAddItem}
-                    className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Payment Terms</h2>
-                </div>
-
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">Payment Method:</span>
-                    <span className="font-medium">Cash/Card/Medical Aid</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">Payment Terms:</span>
-                    <span className="font-medium">Due on Service</span>
-                  </div>
-                  <div className="flex justify-between py-2">
-                    <span className="text-gray-600">Refund Policy:</span>
-                    <span className="font-medium">30 Days</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className={`${
-                !showInvoice ? "hidden" : "block"
-              } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-              style={{
-                width: "100%",
-                maxWidth: "210mm",
-                minHeight: "297mm",
-              }}
-            >
-              <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-                <div className="border-b-2 border-black pb-4 mb-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        {loading ? (
-                          <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-                        ) : facilityInfo.logoUrl ? (
-                          <img
-                            src={facilityInfo.logoUrl}
-                            alt="Facility Logo"
-                            className="w-16 h-16 object-contain"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
-                        )}
-                        <div>
-                          <div className="text-xl font-bold">
-                            {facilityInfo.facilityName}
-                          </div>
-                          <div className="text-sm font-semibold">
-                            {facilityInfo.practiceName}
-                          </div>
-                        </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">
+                        Total Amount
                       </div>
-                      <div className="text-xs leading-relaxed">
-                        <div>{facilityInfo.addressLine1}</div>
-                        <div>{facilityInfo.addressLine2}</div>
+                      <div className="text-2xl font-semibold text-blue-600">
+                        R{total.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">Paid</div>
+                      <div className="text-2xl font-semibold text-green-600">
+                        R0.00
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">
+                        Balance Due
+                      </div>
+                      <div className="text-2xl font-semibold text-red-600">
+                        R{total.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold flex items-center space-x-2">
+                        <Users className="w-5 h-5" />
+                        <span>Patient Information</span>
+                      </h2>
+                      <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+                        <Edit className="w-4 h-4" />
+                        <span>Edit</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Patient Name
+                        </div>
+                        <input
+                          type="text"
+                          value={patientName}
+                          onChange={(e) => setPatientName(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Patient ID</div>
+                        <input
+                          type="text"
+                          value={patientId}
+                          onChange={(e) => setPatientId(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Email</div>
+                        <input
+                          type="text"
+                          value={patientEmail}
+                          onChange={(e) => setPatientEmail(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Phone</div>
+                        <input
+                          type="text"
+                          value={patientPhone}
+                          onChange={(e) => setPatientPhone(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Date of Birth
+                        </div>
+                        <input
+                          type="date"
+                          value={patientDOB}
+                          onChange={(e) => setPatientDOB(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Gender</div>
+                        <select
+                          value={patientGender}
+                          onChange={(e) => setPatientGender(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <div className="text-sm text-gray-500">Address</div>
+                        <input
+                          type="text"
+                          value={patientAddress}
+                          onChange={(e) => setPatientAddress(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold flex items-center space-x-2">
+                        <CreditCard className="w-5 h-5" />
+                        <span>Insurance Information</span>
+                      </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Insurance Provider
+                        </div>
+                        <input
+                          type="text"
+                          value={insuranceProvider}
+                          onChange={(e) => setInsuranceProvider(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Insurance Number
+                        </div>
+                        <input
+                          type="text"
+                          value={insuranceNumber}
+                          onChange={(e) => setInsuranceNumber(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold flex items-center space-x-2">
+                        <Stethoscope className="w-5 h-5" />
+                        <span>Medical Information</span>
+                      </h2>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <div className="text-sm text-gray-500">Diagnosis</div>
+                        <textarea
+                          value={diagnosis}
+                          onChange={(e) => setDiagnosis(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                          rows="2"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Treatment Plan
+                        </div>
+                        <textarea
+                          value={treatmentPlan}
+                          onChange={(e) => setTreatmentPlan(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                          rows="3"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Prescription
+                        </div>
+                        <textarea
+                          value={prescription}
+                          onChange={(e) => setPrescription(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                          rows="3"
+                          placeholder="Medication details..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                    <h2 className="text-lg font-semibold mb-4">
+                      Add Service/Procedure
+                    </h2>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                      <select
+                        value={newItem.type}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, type: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      >
+                        <option value="Service">Service</option>
+                        <option value="Procedure">Procedure</option>
+                        <option value="Medication">Medication</option>
+                        <option value="Test">Test</option>
+                      </select>
+
+                      <input
+                        type="text"
+                        placeholder="Description"
+                        value={newItem.description}
+                        onChange={(e) =>
+                          setNewItem({
+                            ...newItem,
+                            description: e.target.value,
+                          })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Rate"
+                        value={newItem.rate}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, rate: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Qty"
+                        value={newItem.qty}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, qty: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <button
+                        onClick={handleAddItem}
+                        className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold">Payment Terms</h2>
+                    </div>
+
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">Payment Method:</span>
+                        <span className="font-medium">
+                          Cash/Card/Medical Aid
+                        </span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">Payment Terms:</span>
+                        <span className="font-medium">Due on Service</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="text-gray-600">Refund Policy:</span>
+                        <span className="font-medium">30 Days</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className={`${
+                    !showInvoice ? "hidden" : "block"
+                  } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
+                  style={{
+                    width: "100%",
+                    maxWidth: "210mm",
+                    minHeight: "297mm",
+                  }}
+                >
+                  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+                    <div className="border-b-2 border-black pb-4 mb-4">
+                      <div className="flex justify-between items-start">
                         <div>
-                          {facilityInfo.city} {facilityInfo.postalCode}
+                          <div className="flex items-center gap-3 mb-2">
+                            {loading ? (
+                              <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
+                            ) : facilityInfo.logoUrl ? (
+                              <img
+                                src={facilityInfo.logoUrl}
+                                alt="Facility Logo"
+                                className="w-16 h-16 object-contain"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
+                            )}
+                            <div>
+                              <div className="text-xl font-bold">
+                                {facilityInfo.facilityName}
+                              </div>
+                              <div className="text-sm font-semibold">
+                                {facilityInfo.practiceName}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-xs leading-relaxed">
+                            <div>{facilityInfo.addressLine1}</div>
+                            <div>{facilityInfo.addressLine2}</div>
+                            <div>
+                              {facilityInfo.city} {facilityInfo.postalCode}
+                            </div>
+                            <div className="mt-1">
+                              T: {facilityInfo.primaryPhone}
+                              {facilityInfo.secondaryPhone &&
+                                `, ${facilityInfo.secondaryPhone}`}
+                            </div>
+                            <div>
+                              Practice No: {facilityInfo.practiceNumber}
+                            </div>
+                          </div>
                         </div>
-                        <div className="mt-1">
-                          T: {facilityInfo.primaryPhone}
-                          {facilityInfo.secondaryPhone &&
-                            `, ${facilityInfo.secondaryPhone}`}
+
+                        <div className="text-right">
+                          <div className="text-3xl font-bold mb-4">INVOICE</div>
+                          <div className="text-xs space-y-1">
+                            <div className="flex justify-between gap-8">
+                              <span className="font-semibold">INVOICE NO.</span>
+                              <span>{invoiceNumber}</span>
+                            </div>
+                            <div className="flex justify-between gap-8">
+                              <span className="font-semibold">DATE</span>
+                              <span>
+                                {new Date().toLocaleDateString("en-ZA")}
+                              </span>
+                            </div>
+                            <div className="flex justify-between gap-8">
+                              <span className="font-semibold">PATIENT ID</span>
+                              <span>{patientId}</span>
+                            </div>
+                            <div className="flex justify-between gap-8">
+                              <span className="font-semibold">
+                                SERVICE TYPE
+                              </span>
+                              <span>MEDICAL</span>
+                            </div>
+                          </div>
                         </div>
-                        <div>Practice No: {facilityInfo.practiceNumber}</div>
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <div className="text-3xl font-bold mb-4">INVOICE</div>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="bg-gray-200 p-3">
+                        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+                          PATIENT DETAILS
+                        </div>
+                        <div className="text-xs space-y-1">
+                          <div>
+                            <strong>Name:</strong> {patientName}
+                          </div>
+                          <div>
+                            <strong>DOB:</strong> {patientDOB}
+                          </div>
+                          <div>
+                            <strong>Gender:</strong> {patientGender}
+                          </div>
+                          <div>
+                            <strong>Phone:</strong> {patientPhone}
+                          </div>
+                          <div>
+                            <strong>Email:</strong> {patientEmail}
+                          </div>
+                          <div className="text-xs leading-tight mt-2">
+                            <strong>Address:</strong> {patientAddress}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-200 p-3">
+                        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+                          INSURANCE DETAILS
+                        </div>
+                        <div className="text-xs space-y-1">
+                          <div>
+                            <strong>Provider:</strong> {insuranceProvider}
+                          </div>
+                          <div>
+                            <strong>Policy No:</strong> {insuranceNumber}
+                          </div>
+                          <div className="mt-4">
+                            <strong>Diagnosis:</strong>
+                            <div className="mt-1 text-xs">{diagnosis}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="bg-gray-300">
+                            <th className="text-left px-2 py-1 font-bold">
+                              SERVICE DESCRIPTION
+                            </th>
+                            <th className="text-center px-2 py-1 font-bold">
+                              QTY
+                            </th>
+                            <th className="text-right px-2 py-1 font-bold">
+                              UNIT PRICE
+                            </th>
+                            <th className="text-right px-2 py-1 font-bold">
+                              AMOUNT
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {items.map((item, index) => (
+                            <tr key={index} className="border-b">
+                              <td className="px-2 py-2">{item.description}</td>
+                              <td className="text-center px-2 py-2">
+                                {item.qty}
+                              </td>
+                              <td className="text-right px-2 py-2">
+                                R {item.amount.toFixed(2)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="flex justify-end mb-6">
+                      <div className="w-64 text-xs">
+                        <div className="flex justify-between py-1">
+                          <span>Subtotal:</span>
+                          <span>R {subtotal.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between py-1">
+                          <span>VAT (15%):</span>
+                          <span>R {vat.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between py-2 font-bold bg-blue-800 text-white px-2">
+                          <span>TOTAL:</span>
+                          <span>R {total.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
+                      <div>
+                        <div className="font-semibold mb-1">
+                          HEALTHCARE PROVIDER SIGNATURE
+                        </div>
+                        <div className="border-b border-black h-8"></div>
+                        <div className="text-xs text-gray-600 mt-1">
+                          Print Name: _________________
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-semibold mb-1">
+                          PATIENT SIGNATURE
+                        </div>
+                        <div className="border-b border-black h-8"></div>
+                        <div className="text-xs text-gray-600 mt-1">
+                          Date: {new Date().toLocaleDateString("en-ZA")}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 p-3 mb-4">
+                      <div className="text-blue-600 font-bold text-xs mb-2">
+                        PAYMENT INFORMATION
+                      </div>
                       <div className="text-xs space-y-1">
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">INVOICE NO.</span>
-                          <span>{invoiceNumber}</span>
+                        <div>
+                          <span className="font-semibold">Bank Name:</span>{" "}
+                          {facilityInfo.bankName || "-"}
                         </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">DATE</span>
-                          <span>{new Date().toLocaleDateString("en-ZA")}</span>
+                        <div>
+                          <span className="font-semibold">Account Holder:</span>{" "}
+                          {facilityInfo.accountHolder || "-"}
                         </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">PATIENT ID</span>
-                          <span>{patientId}</span>
+                        <div>
+                          <span className="font-semibold">Account Number:</span>{" "}
+                          {facilityInfo.accountNumber || "-"}
                         </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">SERVICE TYPE</span>
-                          <span>MEDICAL</span>
+                        <div>
+                          <span className="font-semibold">Branch Code:</span>{" "}
+                          {facilityInfo.branchCode || "-"}
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      PATIENT DETAILS
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div><strong>Name:</strong> {patientName}</div>
-                      <div><strong>DOB:</strong> {patientDOB}</div>
-                      <div><strong>Gender:</strong> {patientGender}</div>
-                      <div><strong>Phone:</strong> {patientPhone}</div>
-                      <div><strong>Email:</strong> {patientEmail}</div>
-                      <div className="text-xs leading-tight mt-2">
-                        <strong>Address:</strong> {patientAddress}
+                    {prescription && (
+                      <div className="bg-yellow-50 border border-yellow-200 p-3 mb-4">
+                        <div className="text-yellow-800 font-bold text-xs mb-2">
+                          PRESCRIPTION
+                        </div>
+                        <div className="text-xs whitespace-pre-line">
+                          {prescription}
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    )}
 
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      INSURANCE DETAILS
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div><strong>Provider:</strong> {insuranceProvider}</div>
-                      <div><strong>Policy No:</strong> {insuranceNumber}</div>
-                      <div className="mt-4">
-                        <strong>Diagnosis:</strong>
-                        <div className="mt-1 text-xs">{diagnosis}</div>
-                      </div>
+                    <div className="text-center text-xs text-blue-600 italic">
+                      Please retain this invoice for your medical records and
+                      insurance claims
                     </div>
                   </div>
                 </div>
 
-                <div className="mb-4">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="bg-gray-300">
-                        <th className="text-left px-2 py-1 font-bold">SERVICE DESCRIPTION</th>
-                        <th className="text-center px-2 py-1 font-bold">QTY</th>
-                        <th className="text-right px-2 py-1 font-bold">UNIT PRICE</th>
-                        <th className="text-right px-2 py-1 font-bold">AMOUNT</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map((item, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="px-2 py-2">{item.description}</td>
-                          <td className="text-center px-2 py-2">{item.qty}</td>
-                          <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="flex justify-end mb-6">
-                  <div className="w-64 text-xs">
-                    <div className="flex justify-between py-1">
-                      <span>Subtotal:</span>
-                      <span>R {subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between py-1">
-                      <span>VAT (15%):</span>
-                      <span>R {vat.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between py-2 font-bold bg-blue-800 text-white px-2">
-                      <span>TOTAL:</span>
-                      <span>R {total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
-                  <div>
-                    <div className="font-semibold mb-1">HEALTHCARE PROVIDER SIGNATURE</div>
-                    <div className="border-b border-black h-8"></div>
-                    <div className="text-xs text-gray-600 mt-1">Print Name: _________________</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold mb-1">PATIENT SIGNATURE</div>
-                    <div className="border-b border-black h-8"></div>
-                    <div className="text-xs text-gray-600 mt-1">Date: {new Date().toLocaleDateString("en-ZA")}</div>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 p-3 mb-4">
-                  <div className="text-blue-600 font-bold text-xs mb-2">
-                    PAYMENT INFORMATION
-                  </div>
-                  <div className="text-xs space-y-1">
-                    <div><span className="font-semibold">Bank Name:</span> First National Bank</div>
-                    <div><span className="font-semibold">Account Holder:</span> Wellness Medical Center</div>
-                    <div><span className="font-semibold">Account Number:</span> 62146991441</div>
-                    <div><span className="font-semibold">Branch Code:</span> 250655</div>
-                  </div>
-                </div>
-
-                {prescription && (
-                  <div className="bg-yellow-50 border border-yellow-200 p-3 mb-4">
-                    <div className="text-yellow-800 font-bold text-xs mb-2">
-                      PRESCRIPTION
-                    </div>
-                    <div className="text-xs whitespace-pre-line">{prescription}</div>
-                  </div>
-                )}
-
-                <div className="text-center text-xs text-blue-600 italic">
-                  Please retain this invoice for your medical records and insurance claims
-                </div>
-              </div>
-            </div>
-
-            <style>{`
+                <style>{`
               @media print {
                 * {
                   -webkit-print-color-adjust: exact !important;
@@ -1646,7 +1842,9 @@ const HealthcareDashboard = () => {
                 }
               }
             `}</style>
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

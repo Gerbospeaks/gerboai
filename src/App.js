@@ -34,6 +34,9 @@ import VeterinaryDashboard from './pages/VeterinaryDashboard';
 import HVACDashboard from './pages/HVACDashboard';
 import AccountingDashboard from './pages/AccountingDashboard';  
 import QuoteTemplate from './pages/QuoteTemplate';
+import PracticeOverview from './pages/PracticeOverview';
+import PendingPayments from './pages/PendingPayments';
+import AppointmentsCalendar from './pages/AppointmentsCalendar';
 import {  } from 'lucide-react';
 
 function App() {
@@ -113,11 +116,27 @@ function App() {
               </ProtectedRoute>
             } 
           />
+           <Route 
+            path="/pending-payments" 
+            element={
+              <ProtectedRoute>
+                <PendingPayments />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="/restaurant" 
             element={
               <ProtectedRoute>
                 <RestaurantDashboard />
+              </ProtectedRoute>
+            } 
+          />
+           <Route 
+            path="/appointments" 
+            element={
+              <ProtectedRoute>
+                <AppointmentsCalendar />
               </ProtectedRoute>
             } 
           />
@@ -214,6 +233,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <PhotographyDashboard />
+              </ProtectedRoute>
+            }
+          />  
+          <Route 
+            path="/practice-overview" 
+            element={
+              <ProtectedRoute>
+                <PracticeOverview />
               </ProtectedRoute>
             }
           />  
