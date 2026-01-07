@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/img/solidflo-logo.png';
 import globe from '../assets/images/globe.webp'
+import instagram from '../assets/images/instagram.png';
+import facebook from '../assets/images/facebook.png';
+import twitter from '../assets/images/twitter.png';
+import linkedin from '../assets/images/linkedin.png';
 import computer from '../assets/images/new_solidflo_bg_transp_text.png';
 import about from './AboutPage';  
 import contact from './ContactPage';
@@ -648,6 +652,7 @@ const LandingPage = () => {
           display: flex;
           transition: transform 0.5s ease-in-out;
           width: 100%;
+          transform: translateX(${-currentSlide * 100}%);
         }
 
         .slide {
@@ -1240,10 +1245,10 @@ const LandingPage = () => {
         <h3>solidflo</h3>
         <p>Free online invoicing for small businesses. Create and send invoices, track time and expenses, and accept online payments.</p>
         <div className="social-links">
-          <a href="#" aria-label="Facebook">f</a>
-          <a href="#" aria-label="Twitter">t</a>
-          <a href="#" aria-label="LinkedIn">in</a>
-          <a href="#" aria-label="Instagram">ig</a>
+          <a href="#" aria-label="Facebook"><img src={facebook} alt="Facebook" /></a>
+          <a href="#" aria-label="Twitter"><img src={twitter} alt="Twitter" /></a>
+          <a href="#" aria-label="LinkedIn"><img src={linkedin} alt="LinkedIn" /></a>
+          <a href="#" aria-label="Instagram"><img src={instagram} alt="Instagram" /></a>
         </div>
       </div>
       <div className="footer-section">
