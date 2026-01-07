@@ -20,6 +20,8 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
 import GuestModal from './GuestModal';
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import GuestsListModal from './GuestsListModal';
 import {
   ChevronDown,
@@ -83,7 +85,9 @@ const HotelDashboard = () => {
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showGuestsList, setShowGuestsList] = useState(false);
+  const [activeView, setActiveView] = useState("invoice");
   const [savedGuests, setSavedGuests] = useState([]);
+  const [activeTemplate, setActiveTemplate] = useState("classic");
   const [showGuestsListModal, setShowGuestsListModal] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [guests, setGuests] = useState([]);
@@ -652,7 +656,13 @@ const HotelDashboard = () => {
                   All Guests ({savedGuests.length})
                 </div>
               </div>
-
+               <div
+                              onClick={() => setActiveView("templates")}
+                              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                            >
+                              <FileText className="w-5 h-5" />
+                              <span>Invoice Templates</span>
+                            </div>
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <Calendar className="w-5 h-5" />
                 <span>Reservations</span>
@@ -731,6 +741,11 @@ const HotelDashboard = () => {
               <h1 className="text-base lg:text-xl font-semibold">
                 Invoice #{invoiceNumber || "— not saved yet —"}
               </h1>
+              <TemplateSelector
+                              user={user}
+                              selectedTemplate={activeTemplate}
+                              onTemplateChange={setActiveTemplate}
+                            />
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1201,7 +1216,9 @@ const HotelDashboard = () => {
               </div>
             </div>
           )}
-
+           {activeView === "templates" && <Templates user={user} />}
+                     {activeView === "invoice" && (
+                       <>
           <button
             onClick={() => setShowInvoice(!showInvoice)}
             className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -1878,6 +1895,7 @@ const HotelDashboard = () => {
               }
             `}</style>
           </div>
+          </>)}
         </div>
       </div>
     </div>

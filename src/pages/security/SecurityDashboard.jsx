@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from '../../assets/img/solidflo-logo.png';
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -80,6 +82,8 @@ const SecurityDashboard = () => {
   const [savedIncidents, setSavedIncidents] = useState([]);
   const [showIncidentsList, setShowIncidentsList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [activeView, setActiveView] = useState("invoice");
+  const [activeTemplate, setActiveTemplate] = useState("classic");
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -450,6 +454,13 @@ const SecurityDashboard = () => {
                 </div>
                 <ChevronDown className="w-4 h-4" />
               </div>
+               <div
+                              onClick={() => setActiveView("templates")}
+                              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                            >
+                              <FileText className="w-5 h-5" />
+                              <span>Invoice Templates</span>
+                            </div>
 
               <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
@@ -512,6 +523,11 @@ const SecurityDashboard = () => {
               <h1 className="text-base lg:text-xl font-semibold">
                 Incident Report #{incidentNumber || "— not saved yet —"}
               </h1>
+              <TemplateSelector
+                              user={user}
+                              selectedTemplate={activeTemplate}
+                              onTemplateChange={setActiveTemplate}
+                            />
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -843,7 +859,9 @@ const SecurityDashboard = () => {
               </div>
             </div>
           )}
-
+           {activeView === "templates" && <Templates user={user} />}
+                     {activeView === "invoice" && (
+                       <>
           <button
             onClick={() => setShowIncidentReport(!showIncidentReport)}
             className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -1325,6 +1343,7 @@ const SecurityDashboard = () => {
               }
             `}</style>
           </div>
+</>)}
         </div>
       </div>
     </div>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from '../../assets/img/solidflo-logo.png';
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -87,6 +89,8 @@ const LandscapingDashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersList, setShowCustomersList] = useState(false);
   const [savedCustomers, setSavedCustomers] = useState([]);
+  const [activeView, setActiveView] = useState("invoice");
+  const [activeTemplate, setActiveTemplate] = useState("classic");
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customers, setCustomers] = useState([]);
@@ -619,6 +623,13 @@ const LandscapingDashboard = () => {
                   All Customers ({savedCustomers.length})
                 </div>
               </div>
+               <div
+                              onClick={() => setActiveView("templates")}
+                              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                            >
+                              <FileText className="w-5 h-5" />
+                              <span>Invoice Templates</span>
+                            </div>
 
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
                 <MapPin className="w-5 h-5" />
@@ -707,6 +718,11 @@ const LandscapingDashboard = () => {
               <h1 className="text-base lg:text-xl font-semibold">
                 Work Order #{jobCardNumber || "— not saved yet —"}
               </h1>
+              <TemplateSelector
+                              user={user}
+                              selectedTemplate={activeTemplate}
+                              onTemplateChange={setActiveTemplate}
+                            />
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1106,7 +1122,9 @@ const LandscapingDashboard = () => {
               </div>
             </div>
           )}
-
+           {activeView === "templates" && <Templates user={user} />}
+                     {activeView === "invoice" && (
+                       <>
           {/* Mobile View Work Order Button */}
           <button
             onClick={() => setShowJobCard(!showJobCard)}
@@ -1682,6 +1700,7 @@ const LandscapingDashboard = () => {
               }
             `}</style>
           </div>
+                </>)}
         </div>
       </div>
     </div>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from '../../assets/img/solidflo-logo.png';
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -84,10 +86,12 @@ const RealEstateDashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersList, setShowCustomersList] = useState(false);
   const [savedCustomers, setSavedCustomers] = useState([]);
+  const [activeView, setActiveView] = useState("invoice");
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [activeTemplate, setActiveTemplate] = useState("classic");
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -627,6 +631,13 @@ const RealEstateDashboard = () => {
                 <Building2 className="w-5 h-5" />
                 <span>Properties</span>
               </div>
+               <div
+                              onClick={() => setActiveView("templates")}
+                              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                            >
+                              <FileText className="w-5 h-5" />
+                              <span>Invoice Templates</span>
+                            </div>
 
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer">
                 <Key className="w-5 h-5" />
@@ -710,6 +721,11 @@ const RealEstateDashboard = () => {
                 <h1 className="text-base lg:text-xl font-semibold">
                   Invoice #{invoiceNumber || "— not saved yet —"}
                 </h1>
+                <TemplateSelector
+                                user={user}
+                                selectedTemplate={activeTemplate}
+                                onTemplateChange={setActiveTemplate}
+                              />
               </div>
 
               <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1110,7 +1126,9 @@ const RealEstateDashboard = () => {
               </div>
             </div>
           )}
-
+           {activeView === "templates" && <Templates user={user} />}
+                     {activeView === "invoice" && (
+                       <> 
           {/* Mobile View Invoice Button */}
           <button
             onClick={() => setShowInvoice(!showInvoice)}
@@ -1579,6 +1597,7 @@ const RealEstateDashboard = () => {
               </div>
             </div>
           </div>
+          </>)}
         </div>
       </div>
     </div>

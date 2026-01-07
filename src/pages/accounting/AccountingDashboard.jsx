@@ -23,6 +23,8 @@ import { db } from "../../firebase";
 import CustomerModal from '../CustomerModal';
 import CustomersListModal from '../CustomersListModal';
 import FinancialOverview from "../FinancialOverview";
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import {
   ChevronDown,
   ChevronLeft,
@@ -92,6 +94,7 @@ const AccountingDashboard = () => {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [activeTemplate, setActiveTemplate] = useState("classic");
   const [activeView, setActiveView] = useState('invoice');
   useEffect(() => {
     if (!user?.uid) return;
@@ -625,7 +628,13 @@ const AccountingDashboard = () => {
                   All Clients ({savedCustomers.length})
                 </div>
               </div>
-
+                <div
+                               onClick={() => setActiveView("templates")}
+                               className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                             >
+                               <FileText className="w-5 h-5" />
+                               <span>Invoice Templates</span>
+                             </div>
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <DollarSign className="w-5 h-5" />
                 <span>Expenses</span>
@@ -705,6 +714,11 @@ const AccountingDashboard = () => {
               <h1 className="text-base lg:text-xl font-semibold">
                 Invoice #{invoiceNumber || "— not saved yet —"}
               </h1>
+              <TemplateSelector
+                              user={user}
+                              selectedTemplate={activeTemplate}
+                              onTemplateChange={setActiveTemplate}
+                            />
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1140,6 +1154,7 @@ const AccountingDashboard = () => {
               </div>
             </div>
           )}
+          {activeView === "templates" && <Templates user={user} />}
          {activeView === 'financial-overview' && <FinancialOverview user={user} />}
          {activeView === 'quote-template' && <QuoteTemplate user={user} />}
            {/* Invoice Content - Only show when activeView is 'invoice' */}

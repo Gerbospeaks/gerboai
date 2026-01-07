@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import logo from '../../assets/img/solidflo-logo.png';
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import {
   getFirestore,
   collection,
@@ -88,8 +90,10 @@ const EngineeringDashboard = () => {
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState("classic");
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [activeView, setActiveView] = useState("invoice");
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -589,7 +593,7 @@ const EngineeringDashboard = () => {
 
                 <div className="ml-8 mt-1 space-y-1">
                   <div
-                    onClick={handleNewJobCard}
+                    onClick={() => setActiveView("invoice")}
                     className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
                   >
                     Create Job Card
@@ -624,7 +628,13 @@ const EngineeringDashboard = () => {
                   All Customers ({savedCustomers.length})
                 </div>
               </div>
-
+                <div
+                onClick={() => setActiveView("templates")}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
+                <FileText className="w-5 h-5" />
+                <span>Invoice Templates</span>
+              </div>
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <Cog className="w-5 h-5" />
                 <span>Equipment</span>
@@ -695,8 +705,9 @@ const EngineeringDashboard = () => {
           </div>
         </div>
       </div>
-      <div className="sticky top-0 z-40 flex flex-col">
+      
       <div className="flex-1 overflow-auto">
+        <div className="sticky top-0 z-40 flex flex-col">
         <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 lg:space-x-4">
@@ -710,6 +721,11 @@ const EngineeringDashboard = () => {
               <h1 className="text-base lg:text-xl font-semibold">
                 Job Card #{jobCardNumber || "— not saved yet —"}
               </h1>
+              <TemplateSelector
+                              user={user}
+                              selectedTemplate={activeTemplate}
+                              onTemplateChange={setActiveTemplate}
+                            />
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -801,6 +817,7 @@ const EngineeringDashboard = () => {
             </button>
           </div>
         </div>
+
 
         <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
@@ -1108,7 +1125,10 @@ const EngineeringDashboard = () => {
               </div>
             </div>
           )}
-
+          
+          {activeView === "templates" && <Templates user={user} />}
+                    {activeView === "invoice" && (
+                      <>
           <button
             onClick={() => setShowJobCard(!showJobCard)}
             className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -1689,7 +1709,9 @@ const EngineeringDashboard = () => {
                 }
               }
             `}</style>
+
           </div>
+</>)}
         </div>
       </div>
     </div>

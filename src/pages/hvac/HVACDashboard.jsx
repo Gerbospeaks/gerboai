@@ -17,6 +17,8 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { Printer, Download } from "lucide-react";
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import {
   ChevronDown,
   ChevronLeft,
@@ -71,7 +73,9 @@ const HVACDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Invoice");
   const [showInvoice, setShowInvoice] = useState(false);
+  const [activeView, setActiveView] = useState("invoice");
   const { user } = useAuth();
+  const [activeTemplate, setActiveTemplate] = useState("classic");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceId, setInvoiceId] = useState(null);
 
@@ -359,6 +363,13 @@ const total = subtotal + vat;
                 </div>
                 <ChevronDown className="w-4 h-4" />
               </div>
+               <div
+                              onClick={() => setActiveView("templates")}
+                              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                            >
+                              <FileText className="w-5 h-5" />
+                              <span>Invoice Templates</span>
+                            </div>
 
               <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-gray-800 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
@@ -421,7 +432,11 @@ const total = subtotal + vat;
               <h1 className="text-base lg:text-xl font-semibold">
                 Invoice #{invoiceNumber || "— not saved yet —"}
                 </h1>
-
+              <TemplateSelector
+                              user={user}
+                              selectedTemplate={activeTemplate}
+                              onTemplateChange={setActiveTemplate}
+                            />
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -535,7 +550,9 @@ const total = subtotal + vat;
             <FileText className="w-5 h-5" />
             {showInvoice ? "Hide Invoice" : "View Invoice"}
           </button>
-
+             {activeView === "templates" && <Templates user={user} />}
+                     {activeView === "invoice" && (
+                       <>
           <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
             <div
               className={`${
@@ -998,6 +1015,7 @@ const total = subtotal + vat;
               }
             `}</style>
           </div>
+           </>)}
         </div>
       </div>
     </div>

@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import logo from '../../assets/img/solidflo-logo.png';
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import {
   getFirestore,
   collection,
@@ -86,7 +88,9 @@ const EducationDashboard = () => {
   const [savedStudents, setSavedStudents] = useState([]);
   const [showStudentsListModal, setShowStudentsListModal] = useState(false);
   const [showStudentModal, setShowStudentModal] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState("classic");
   const [students, setStudents] = useState([]);
+  const [activeView, setActiveView] = useState("invoice");
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
@@ -596,7 +600,7 @@ const EducationDashboard = () => {
 
                 <div className="ml-8 mt-1 space-y-1">
                   <div
-                    onClick={handleNewReport}
+                   onClick={() => setActiveView("reportCard")}
                     className="px-3 py-2 text-sm text-white bg-gray-500 rounded-lg cursor-pointer"
                   >
                     Create Report Card
@@ -609,7 +613,13 @@ const EducationDashboard = () => {
                   </div>
                 </div>
               </div>
-
+               <div
+                              onClick={() => setActiveView("templates")}
+                              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                            >
+                              <FileText className="w-5 h-5" />
+                              <span>Invoice Templates</span>
+                            </div>
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer mt-2">
                 <Users className="w-5 h-5" />
                 <span>Students</span>
@@ -698,6 +708,11 @@ const EducationDashboard = () => {
               <h1 className="text-base lg:text-xl font-semibold">
                 Report Card #{reportNumber || "— not saved yet —"}
               </h1>
+              <TemplateSelector
+                              user={user}
+                              selectedTemplate={activeTemplate}
+                              onTemplateChange={setActiveTemplate}
+                            />
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1095,6 +1110,9 @@ const EducationDashboard = () => {
             </div>
           )}
 
+       {activeView === "templates" && <Templates user={user} />}
+                    {activeView === "reportCard" && (
+          <>
           <button
             onClick={() => setShowReportCard(!showReportCard)}
             className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 transition-colors"
@@ -1235,7 +1253,7 @@ const EducationDashboard = () => {
                   </div>
                 </div>
               </div>
-
+              
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold flex items-center space-x-2">
@@ -1709,7 +1727,10 @@ const EducationDashboard = () => {
                 }
               }
             `}</style>
+
+
           </div>
+            </>)}
         </div>
       </div>
     </div>

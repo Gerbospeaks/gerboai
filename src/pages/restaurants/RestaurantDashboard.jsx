@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import {
   DollarSign,
   ShoppingCart,
@@ -35,7 +37,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 const RestaurantDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Overview');
-  
+  const [activeView, setActiveView] = useState("invoice");
   const user = {
     uid: 'demo-user',
     displayName: 'Restaurant Owner',
@@ -351,6 +353,13 @@ const RestaurantDashboard = () => {
                 <Users className="w-5 h-5" />
                 <span>Customers</span>
               </div>
+               <div
+                              onClick={() => setActiveView("templates")}
+                              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                            >
+                              <FileText className="w-5 h-5" />
+                              <span>Invoice Templates</span>
+                            </div>
 
               <div
                 onClick={() => setActiveTab('Analytics')}

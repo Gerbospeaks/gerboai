@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import logo from "../../assets/img/solidflo-logo.png";
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import {
   getFirestore,
   collection,
@@ -79,6 +81,7 @@ const CleaningDashboard = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [activeView, setActiveView] = useState("invoice");
+  const [activeTemplate, setActiveTemplate] = useState("classic");
   const [customerName, setCustomerName] = useState("Zoey Mor");
   const [customerId, setCustomerId] = useState("CUST-2026-5678");
   const [customerEmail, setCustomerEmail] = useState("jane.doe@example.com");
@@ -521,7 +524,13 @@ const CleaningDashboard = () => {
                 <Building className="w-5 h-5" />
                 <span>Properties</span>
               </div>
-
+                 <div
+                                onClick={() => setActiveView("templates")}
+                                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                              >
+                                <FileText className="w-5 h-5" />
+                                <span>Invoice Templates</span>
+                              </div>
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <Package className="w-5 h-5" />
                 <span>Supplies</span>
@@ -595,6 +604,11 @@ const CleaningDashboard = () => {
               <h1 className="text-base lg:text-xl font-semibold">
                 Invoice #{invoiceNumber || "— not saved yet —"}
               </h1>
+              <TemplateSelector
+                              user={user}
+                              selectedTemplate={activeTemplate}
+                              onTemplateChange={setActiveTemplate}
+                            />
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -982,6 +996,8 @@ const CleaningDashboard = () => {
             <FileText className="w-5 h-5" />
             {showInvoice ? "Hide Invoice" : "View Invoice"}
           </button>
+          {activeView === "templates" && <Templates user={user} />}
+                  
           {activeView === "financial-overview" && (
             <FinancialOverview user={user} />
           )}

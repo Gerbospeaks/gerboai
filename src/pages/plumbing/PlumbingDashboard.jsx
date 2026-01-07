@@ -21,6 +21,8 @@ import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from '../CustomerModal';
 import CustomersListModal from '../CustomersListModal';
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import {
   ChevronDown,
   ChevronLeft,
@@ -84,6 +86,8 @@ const PlumbingDashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersList, setShowCustomersList] = useState(false);
   const [savedCustomers, setSavedCustomers] = useState([]);
+  const [activeTemplate, setActiveTemplate] = useState("classic");
+  const [activeView, setActiveView] = useState("invoice");
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customers, setCustomers] = useState([]);
@@ -618,6 +622,13 @@ const PlumbingDashboard = () => {
                   All Customers ({savedCustomers.length})
                 </div>
               </div>
+               <div
+                              onClick={() => setActiveView("templates")}
+                              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                            >
+                              <FileText className="w-5 h-5" />
+                              <span>Invoice Templates</span>
+                            </div>
 
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer">
                 <MapPin className="w-5 h-5" />
@@ -706,6 +717,11 @@ const PlumbingDashboard = () => {
               <h1 className="text-base lg:text-xl font-semibold">
                 Work Order #{jobCardNumber || "— not saved yet —"}
               </h1>
+              <TemplateSelector
+                              user={user}
+                              selectedTemplate={activeTemplate}
+                              onTemplateChange={setActiveTemplate}
+                            />
               {emergencyService && (
                 <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded">
                   EMERGENCY
@@ -1115,7 +1131,9 @@ const PlumbingDashboard = () => {
               </div>
             </div>
           )}
-
+           {activeView === "templates" && <Templates user={user} />}
+                     {activeView === "invoice" && (
+                       <>
           {/* Mobile View Work Order Button */}
           <button
             onClick={() => setShowJobCard(!showJobCard)}
@@ -1645,6 +1663,7 @@ const PlumbingDashboard = () => {
               }
             `}</style>
           </div>
+         </>)}  
         </div>
       </div>
     </div>

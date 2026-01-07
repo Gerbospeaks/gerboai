@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
+import Templates from "./Templates";
+import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
 import {
   getFirestore,
   collection,
@@ -90,6 +92,7 @@ const HealthcareDashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showPatientsList, setShowPatientsList] = useState(false);
   const [savedPatients, setSavedPatients] = useState([]);
+  const [activeTemplate, setActiveTemplate] = useState("classic");
   const [showPatientsListModal, setShowPatientsListModal] = useState(false);
   const [showPatientModal, setShowPatientModal] = useState(false);
   const [patients, setPatients] = useState([]);
@@ -643,7 +646,13 @@ const HealthcareDashboard = () => {
                   </div>
                 </div>
               </div>
-
+ <div
+                onClick={() => setActiveView("templates")}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
+                <FileText className="w-5 h-5" />
+                <span>Invoice Templates</span>
+              </div>
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
                 <Users className="w-5 h-5" />
                 <span>Patients</span>
@@ -745,6 +754,11 @@ const HealthcareDashboard = () => {
                 <h1 className="text-base lg:text-xl font-semibold">
                   Invoice #{invoiceNumber || "— not saved yet —"}
                 </h1>
+                <TemplateSelector
+                                user={user}
+                                selectedTemplate={activeTemplate}
+                                onTemplateChange={setActiveTemplate}
+                              />
               </div>
 
               <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1223,9 +1237,9 @@ const HealthcareDashboard = () => {
             <AppointmentsCalendar user={user} />
           )}
           {activeView === "pending" && <PendingPayments user={user} />}
-          {/* Invoice Content - Only show when activeView is 'invoice' */}
-          {activeView === "invoice" && (
-            <>
+          {activeView === "templates" && <Templates user={user} />}
+                    {activeView === "invoice" && (
+                      <>
               <button
                 onClick={() => setShowInvoice(!showInvoice)}
                 className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
