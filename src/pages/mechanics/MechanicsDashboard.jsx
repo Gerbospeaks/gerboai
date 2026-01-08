@@ -894,7 +894,7 @@ const MechanicsDashboard = () => {
             </button>
           </div>
         </div>
-
+ <div className="sticky top-0 z-40 flex flex-col">
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
           <div className="flex gap-2 overflow-x-auto pb-2">
             <button  onClick={handleConvertToInvoice}
@@ -940,7 +940,7 @@ const MechanicsDashboard = () => {
             </button>
           </div>
         </div>
-
+          
         <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
             {["JobCard", "Parts", "History", "Notes"].map((tab) => (
@@ -963,7 +963,7 @@ const MechanicsDashboard = () => {
             ))}
           </div>
         </div>
-
+</div>
         <div className="p-4 lg:p-6">
           {showSettings && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
