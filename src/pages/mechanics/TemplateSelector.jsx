@@ -130,7 +130,8 @@ export const DefaultTemplate = ({
   items,
   subtotal,
   vat,
-  total
+  total,
+  documentType = 'invoice' // NEW: Default to invoice
 }) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     {/* Header Section */}
@@ -171,10 +172,12 @@ export const DefaultTemplate = ({
         </div>
 
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">INVOICE</div>
+          <div className="text-3xl font-bold mb-4">
+            {documentType === 'quote' ? 'QUOTE' : 'INVOICE'}
+          </div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">{documentType === 'quote' ? 'QUOTE NO.' : 'INVOICE NO.'}</span>
               <span>{jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -197,7 +200,9 @@ export const DefaultTemplate = ({
     {/* Three Column Section */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">INVOICE TO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          {documentType === 'quote' ? 'QUOTE TO' : 'INVOICE TO'}
+        </div>
         <div className="text-xs space-y-1">
           <div>{customerName}</div>
           <div>ABC Limited</div>
@@ -328,7 +333,10 @@ export const DefaultTemplate = ({
 
     {/* Footer Note */}
     <div className="text-center text-xs text-red-600 italic">
-      NB: All our parts and workmanship have 12 months or 15000KM Guarantee
+      {documentType === 'quote' 
+        ? 'This quote is valid for 30 days. All our parts and workmanship have 12 months or 15000KM Guarantee'
+        : 'NB: All our parts and workmanship have 12 months or 15000KM Guarantee'
+      }
     </div>
   </div>
 );
@@ -354,10 +362,12 @@ export const ClassicTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">INVOICE</div>
+          <div className="text-3xl font-bold mb-4">
+            {props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}
+          </div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">{props.documentType === 'quote' ? 'QUOTE NO.' : 'INVOICE NO.'}</span>
               <span>{props.jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -392,7 +402,7 @@ export const ClassicTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SERVICE INFO</div>
         <div className="text-xs space-y-1">
           <div>Date: {new Date().toLocaleDateString()}</div>
-          <div>Status: In Progress</div>
+          <div>Status: {props.documentType === 'quote' ? 'Quote Pending' : 'In Progress'}</div>
         </div>
       </div>
     </div>
@@ -434,8 +444,8 @@ export const ClassicTemplate = (props) => (
         </div>
       </div>
     </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+
+    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded mt-6">
       <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
       <div className="text-xs space-y-1 text-gray-700">
         <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
@@ -445,9 +455,11 @@ export const ClassicTemplate = (props) => (
       </div>
     </div>
 
-    {/* Footer Note */}
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
+      {props.documentType === 'quote' 
+        ? 'This quote is valid for 30 days from the date above.'
+        : 'Thank you for your business. Payment is due within 30 days of invoice date.'
+      }
     </div>
   </div>
 );
@@ -469,9 +481,13 @@ export const ModernTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-5xl font-bold text-blue-500 mb-4">INVOICE</div>
+          <div className="text-5xl font-bold text-blue-500 mb-4">
+            {props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}
+          </div>
           <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-            <div className="text-sm"><span className="font-semibold">Invoice #:</span> {props.jobCardNumber}</div>
+            <div className="text-sm">
+              <span className="font-semibold">{props.documentType === 'quote' ? 'Quote' : 'Invoice'} #:</span> {props.jobCardNumber}
+            </div>
             <div className="text-sm"><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</div>
           </div>
         </div>
@@ -480,7 +496,9 @@ export const ModernTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div className="bg-gray-50 p-4 rounded-lg">
-        <div className="text-sm font-bold text-gray-500 mb-3">BILL TO</div>
+        <div className="text-sm font-bold text-gray-500 mb-3">
+          {props.documentType === 'quote' ? 'QUOTE FOR' : 'BILL TO'}
+        </div>
         <div className="space-y-1 text-sm">
           <div className="font-semibold text-lg">{props.customerName}</div>
           <div>{props.customerAddress}</div>
@@ -537,8 +555,8 @@ export const ModernTemplate = (props) => (
         </div>
       </div>
     </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+
+    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded mt-6">
       <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
       <div className="text-xs space-y-1 text-gray-700">
         <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
@@ -548,9 +566,11 @@ export const ModernTemplate = (props) => (
       </div>
     </div>
 
-    {/* Footer Note */}
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
+      {props.documentType === 'quote' 
+        ? 'This quote is valid for 30 days from the date above.'
+        : 'Thank you for your business. Payment is due within 30 days of invoice date.'
+      }
     </div>
   </div>
 );
@@ -565,13 +585,17 @@ export const ElegantTemplate = (props) => (
         )}
         <div className="text-4xl font-serif font-bold text-purple-900 mb-2">{props.businessInfo.businessName}</div>
         <div className="text-sm text-gray-600">{props.businessInfo.addressLine1} • {props.businessInfo.city}</div>
-        <div className="text-2xl font-serif text-purple-700 mt-4">INVOICE</div>
+        <div className="text-2xl font-serif text-purple-700 mt-4">
+          {props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}
+        </div>
         <div className="text-sm text-gray-500 mt-1">#{props.jobCardNumber}</div>
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
-          <div className="font-serif font-bold text-purple-900 mb-2">BILLED TO</div>
+          <div className="font-serif font-bold text-purple-900 mb-2">
+            {props.documentType === 'quote' ? 'QUOTE FOR' : 'BILLED TO'}
+          </div>
           <div className="text-sm space-y-1">
             <div className="font-semibold">{props.customerName}</div>
             <div>{props.customerAddress}</div>
@@ -625,21 +649,23 @@ export const ElegantTemplate = (props) => (
           </div>
         </div>
       </div>
-      {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
-      </div>
-    </div>
 
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
-    </div>
+      <div className="bg-purple-50 border border-purple-200 p-4 mb-4 rounded mt-6">
+        <div className="text-purple-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-xs space-y-1 text-gray-700">
+          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
+          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
+          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+        </div>
+      </div>
+
+      <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+        {props.documentType === 'quote' 
+          ? 'This quote is valid for 30 days from the date above.'
+          : 'Thank you for your business. Payment is due within 30 days of invoice date.'
+        }
+      </div>
     </div>
   </div>
 );
@@ -657,7 +683,9 @@ export const SpeedTemplate = (props) => (
           <div className="text-sm text-gray-400">{props.businessInfo.addressLine1}</div>
         </div>
         <div className="text-right">
-          <div className="text-5xl font-black text-red-600 mb-4 italic">INVOICE</div>
+          <div className="text-5xl font-black text-red-600 mb-4 italic">
+            {props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}
+          </div>
           <div className="bg-red-600 p-4 rounded space-y-1">
             <div className="text-sm font-bold">#{props.jobCardNumber}</div>
             <div className="text-sm">{new Date().toLocaleDateString()}</div>
@@ -688,41 +716,42 @@ export const SpeedTemplate = (props) => (
         <tr className="bg-red-600">
           <th className="text-left px-4 py-3 font-black">DESCRIPTION</th>
           <th className="text-center px-4 py-3 font-black">QTY</th>
-<th className="text-right px-4 py-3 font-black">PRICE</th>
-<th className="text-right px-4 py-3 font-black">TOTAL</th>
-</tr>
-</thead>
-<tbody>
-{props.items.map((item, i) => (
-<tr key={i} className="border-b border-gray-800">
-<td className="px-4 py-3">{item.description}</td>
-<td className="text-center px-4 py-3">{item.qty}</td>
-<td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-<td className="text-right px-4 py-3 font-bold">R {item.amount.toFixed(2)}</td>
-</tr>
-))}
-</tbody>
-</table>
-<div className="flex justify-end">
-  <div className="w-80">
-    <div className="flex justify-between py-2 text-gray-400">
-      <span>Subtotal:</span>
-      <span>R {props.subtotal.toFixed(2)}</span>
+          <th className="text-right px-4 py-3 font-black">PRICE</th>
+          <th className="text-right px-4 py-3 font-black">TOTAL</th>
+        </tr>
+      </thead>
+      <tbody>
+        {props.items.map((item, i) => (
+          <tr key={i} className="border-b border-gray-800">
+            <td className="px-4 py-3">{item.description}</td>
+            <td className="text-center px-4 py-3">{item.qty}</td>
+            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+            <td className="text-right px-4 py-3 font-bold">R {item.amount.toFixed(2)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <div className="flex justify-end">
+      <div className="w-80">
+        <div className="flex justify-between py-2 text-gray-400">
+          <span>Subtotal:</span>
+          <span>R {props.subtotal.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between py-2 text-gray-400">
+          <span>VAT:</span>
+          <span>R {props.vat.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between py-3 text-xl font-black bg-red-600 px-4 rounded">
+          <span>TOTAL:</span>
+          <span>R {props.total.toFixed(2)}</span>
+        </div>
+      </div>
     </div>
-    <div className="flex justify-between py-2 text-gray-400">
-      <span>VAT:</span>
-      <span>R {props.vat.toFixed(2)}</span>
-    </div>
-    <div className="flex justify-between py-3 text-xl font-black bg-red-600 px-4 rounded">
-      <span>TOTAL:</span>
-      <span>R {props.total.toFixed(2)}</span>
-    </div>
-  </div>
-</div>
-{/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
+
+    <div className="bg-gray-900 border border-red-600 p-4 mb-4 rounded mt-6">
+      <div className="text-red-600 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-xs space-y-1 text-gray-400">
         <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
         <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
         <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
@@ -730,12 +759,15 @@ export const SpeedTemplate = (props) => (
       </div>
     </div>
 
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
+    <div className="text-center text-xs text-gray-500 italic border-t border-gray-800 pt-3">
+      {props.documentType === 'quote' 
+        ? 'This quote is valid for 30 days from the date above.'
+        : 'Thank you for your business. Payment is due within 30 days of invoice date.'
+      }
     </div>
-</div>
+  </div>
 );
+
 // Diagnostic Template
 export const DiagnosticTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
@@ -750,76 +782,83 @@ export const DiagnosticTemplate = (props) => (
           <div className="text-sm text-gray-600">{props.businessInfo.city}</div>
         </div>
         <div className="text-right">
-          <div className="text-4xl font-bold text-green-600 mb-4">SERVICE INVOICE</div>
+          <div className="text-4xl font-bold text-green-600 mb-4">
+            {props.documentType === 'quote' ? 'SERVICE QUOTE' : 'SERVICE INVOICE'}
+          </div>
           <div className="bg-green-50 border-2 border-green-600 p-3 rounded">
-            <div className="text-sm"><span className="font-bold">Invoice:</span> {props.jobCardNumber}</div>
+            <div className="text-sm">
+              <span className="font-bold">{props.documentType === 'quote' ? 'Quote:' : 'Invoice:'}</span> {props.jobCardNumber}
+            </div>
             <div className="text-sm"><span className="font-bold">Date:</span> {new Date().toLocaleDateString()}</div>
           </div>
         </div>
       </div>
     </div>
-<div className="grid grid-cols-2 gap-6 mb-6">
-  <div className="border-2 border-green-600 p-4 rounded">
-    <div className="text-sm font-bold text-green-600 mb-3">CUSTOMER DETAILS</div>
-    <div className="text-sm space-y-1">
-      <div><span className="font-semibold">Name:</span> {props.customerName}</div>
-      <div><span className="font-semibold">Email:</span> {props.customerEmail}</div>
-      <div><span className="font-semibold">Phone:</span> {props.customerPhone}</div>
-    </div>
-  </div>
-  <div className="border-2 border-green-600 p-4 rounded">
-    <div className="text-sm font-bold text-green-600 mb-3">VEHICLE DETAILS</div>
-    <div className="text-sm space-y-1">
-      <div><span className="font-semibold">Vehicle:</span> {props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
-      <div><span className="font-semibold">Registration:</span> {props.vehicleReg}</div>
-      <div><span className="font-semibold">Odometer:</span> {props.vehicleMileage} km</div>
-    </div>
-  </div>
-</div>
 
-<div className="mb-6">
-  <div className="bg-green-600 text-white px-4 py-2 font-bold">SERVICES PERFORMED</div>
-  <table className="w-full">
-    <thead>
-      <tr className="bg-green-50 border-b-2 border-green-600">
-        <th className="text-left px-4 py-2 text-sm">Description</th>
-        <th className="text-center px-4 py-2 text-sm">Qty</th>
-        <th className="text-right px-4 py-2 text-sm">Unit Price</th>
-        <th className="text-right px-4 py-2 text-sm">Amount</th>
-      </tr>
-    </thead>
-    <tbody>
-      {props.items.map((item, i) => (
-        <tr key={i} className="border-b">
-          <td className="px-4 py-3">{item.description}</td>
-          <td className="text-center px-4 py-3">{item.qty}</td>
-          <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-          <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
+    <div className="grid grid-cols-2 gap-6 mb-6">
+      <div className="border-2 border-green-600 p-4 rounded">
+        <div className="text-sm font-bold text-green-600 mb-3">CUSTOMER DETAILS</div>
+        <div className="text-sm space-y-1">
+          <div><span className="font-semibold">Name:</span> {props.customerName}</div>
+          <div><span className="font-semibold">Email:</span> {props.customerEmail}</div>
+          <div><span className="font-semibold">Phone:</span> {props.customerPhone}</div>
+        </div>
+      </div>
+      <div className="border-2 border-green-600 p-4 rounded">
+        <div className="text-sm font-bold text-green-600 mb-3">VEHICLE DETAILS</div>
+        <div className="text-sm space-y-1">
+          <div><span className="font-semibold">Vehicle:</span> {props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
+          <div><span className="font-semibold">Registration:</span> {props.vehicleReg}</div>
+          <div><span className="font-semibold">Odometer:</span> {props.vehicleMileage} km</div>
+        </div>
+      </div>
+    </div>
 
-<div className="flex justify-end">
-  <div className="w-80 border-2 border-green-600 p-4 rounded">
-    <div className="flex justify-between py-2">
-      <span>Subtotal:</span>
-      <span>R {props.subtotal.toFixed(2)}</span>
+    <div className="mb-6">
+      <div className="bg-green-600 text-white px-4 py-2 font-bold">
+        {props.documentType === 'quote' ? 'QUOTED SERVICES' : 'SERVICES PERFORMED'}
+      </div>
+      <table className="w-full">
+        <thead>
+          <tr className="bg-green-50 border-b-2 border-green-600">
+            <th className="text-left px-4 py-2 text-sm">Description</th>
+            <th className="text-center px-4 py-2 text-sm">Qty</th>
+            <th className="text-right px-4 py-2 text-sm">Unit Price</th>
+            <th className="text-right px-4 py-2 text-sm">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {props.items.map((item, i) => (
+            <tr key={i} className="border-b">
+              <td className="px-4 py-3">{item.description}</td>
+              <td className="text-center px-4 py-3">{item.qty}</td>
+              <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
-    <div className="flex justify-between py-2">
-      <span>VAT (15%):</span>
-      <span>R {props.vat.toFixed(2)}</span>
+
+    <div className="flex justify-end">
+      <div className="w-80 border-2 border-green-600 p-4 rounded">
+        <div className="flex justify-between py-2">
+          <span>Subtotal:</span>
+          <span>R {props.subtotal.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between py-2">
+          <span>VAT (15%):</span>
+          <span>R {props.vat.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between py-3 text-xl font-bold bg-green-600 text-white px-4 rounded">
+          <span>{props.documentType === 'quote' ? 'QUOTE TOTAL:' : 'TOTAL DUE:'}</span>
+          <span>R {props.total.toFixed(2)}</span>
+        </div>
+      </div>
     </div>
-    <div className="flex justify-between py-3 text-xl font-bold bg-green-600 text-white px-4 rounded">
-      <span>TOTAL DUE:</span>
-      <span>R {props.total.toFixed(2)}</span>
-    </div>
-  </div>
-</div>
-{/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+
+    <div className="bg-green-50 border border-green-200 p-4 mb-4 rounded mt-6">
+      <div className="text-green-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
       <div className="text-xs space-y-1 text-gray-700">
         <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
         <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
@@ -828,30 +867,37 @@ export const DiagnosticTemplate = (props) => (
       </div>
     </div>
 
-    {/* Footer Note */}
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
+      {props.documentType === 'quote' 
+        ? 'This quote is valid for 30 days from the date above. Price subject to change after expiry.'
+        : 'Thank you for your business. Payment is due within 30 days of invoice date.'
+      }
     </div>
   </div>
 );
+
 // Template Renderer
-export const TemplateRenderer = ({ templateId, ...props }) => {
-switch (templateId) {
-case 'default':
-return <DefaultTemplate {...props} />;
-case 'classic':
-return <ClassicTemplate {...props} />;
-case 'modern':
-return <ModernTemplate {...props} />;
-case 'elegant':
-case 'premium':
-return <ElegantTemplate {...props} />;
-case 'speed':
-return <SpeedTemplate {...props} />;
-case 'diagnostic':
-return <DiagnosticTemplate {...props} />;
-default:
-return <DefaultTemplate {...props} />;
-}
+export const TemplateRenderer = ({ templateId, documentType = 'invoice', ...props }) => {
+  // Pass documentType to all templates
+  const templateProps = { ...props, documentType };
+  
+  switch (templateId) {
+    case 'default':
+      return <DefaultTemplate {...templateProps} />;
+    case 'classic':
+      return <ClassicTemplate {...templateProps} />;
+    case 'modern':
+      return <ModernTemplate {...templateProps} />;
+    case 'elegant':
+    case 'premium':
+      return <ElegantTemplate {...templateProps} />;
+    case 'speed':
+      return <SpeedTemplate {...templateProps} />;
+    case 'diagnostic':
+      return <DiagnosticTemplate {...templateProps} />;
+    default:
+      return <DefaultTemplate {...templateProps} />;
+  }
 };
-export default TemplateSelector
+
+export default TemplateSelector;

@@ -27,6 +27,9 @@ import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
+import HistoryView from './HistoryView';
+import NotesView from './NotesView';
+import { logHistory } from './historyLogger';
 import {
   ChevronDown,
   ChevronLeft,
@@ -56,11 +59,15 @@ import {
   Upload,
 } from "lucide-react";
 
-const generateJobCardNumber = async (userId) => {
+const generateJobCardNumber = async (userId, documentType) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
+  
+  // Use different collection based on document type
+  const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
+  const prefix = documentType === 'quote' ? 'QT' : 'JC';
 
-  const jobCardsRef = collection(db, "users", userId, "invoices");
+  const jobCardsRef = collection(db, "users", userId, collectionName);
   const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(1));
   const snapshot = await getDocs(q);
 
@@ -76,7 +83,7 @@ const generateJobCardNumber = async (userId) => {
   }
 
   const nextNumber = lastNumber + 1;
-  return `JC-${year}-${String(nextNumber).padStart(4, "0")}`;
+  return `${prefix}-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
 
 const MechanicsDashboard = () => {
@@ -91,6 +98,7 @@ const MechanicsDashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersList, setShowCustomersList] = useState(false);
   const [activeView, setActiveView] = useState("invoice");
+  const [currentJobCardId, setCurrentJobCardId] = useState(null);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
@@ -98,18 +106,22 @@ const MechanicsDashboard = () => {
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  
+  // NEW: Document type state (quote or invoice)
+  const [documentType, setDocumentType] = useState('invoice');
 
   useEffect(() => {
     if (!user?.uid) return;
 
     const loadJobCardNumber = async () => {
-      const nextJobCard = await generateJobCardNumber(user.uid);
+      const nextJobCard = await generateJobCardNumber(user.uid, documentType);
       setJobCardNumber(nextJobCard);
     };
 
     loadJobCardNumber();
     loadSavedJobCards();
-  }, [user]);
+  }, [user, documentType]);
+
   const loadCustomers = async () => {
     try {
       const q = query(
@@ -136,7 +148,8 @@ const MechanicsDashboard = () => {
     if (!user?.uid) return;
 
     const db = getFirestore();
-    const jobCardsRef = collection(db, "users", user.uid, "invoices");
+    const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
+    const jobCardsRef = collection(db, "users", user.uid, collectionName);
     const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(50));
     const snapshot = await getDocs(q);
 
@@ -153,15 +166,12 @@ const MechanicsDashboard = () => {
     setShowCustomerModal(true);
   };
 
-  // Handle editing existing customer
   const handleEditCustomer = (customer) => {
     setSelectedCustomer(customer);
     setShowCustomerModal(true);
   };
 
-  // Handle loading customer into form (your existing function)
   const loadCustomer = (customer) => {
-    // Your existing logic here
     setCustomerName(customer.name || "");
     setCustomerEmail(customer.email || "");
     setCustomerPhone(customer.phone || "");
@@ -169,14 +179,14 @@ const MechanicsDashboard = () => {
     setCustomerId(customer.customerId || "");
   };
 
-  // Callback after customer is saved
   const handleCustomerSaved = () => {
-    loadCustomers(); // Reload the customer list
+    loadCustomers();
   };
 
   useEffect(() => {
     loadCustomers();
   }, []);
+
   const loadJobCard = (jobCard) => {
     setJobCardId(jobCard.id);
     setJobCardNumber(jobCard.jobCardNumber || "");
@@ -194,6 +204,7 @@ const MechanicsDashboard = () => {
     setItems(jobCard.items || []);
     setShowJobCardsList(false);
   };
+
   const loadSavedCustomers = async () => {
     if (!user?.uid) return;
 
@@ -243,8 +254,9 @@ const MechanicsDashboard = () => {
     if (!user?.uid || !jobCardId) return null;
 
     const db = getFirestore();
+    const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
     const snap = await getDoc(
-      doc(db, "users", user.uid, "invoices", jobCardId)
+      doc(db, "users", user.uid, collectionName, jobCardId)
     );
 
     return snap.exists() ? snap.data() : null;
@@ -254,7 +266,7 @@ const MechanicsDashboard = () => {
     const savedJobCard = await loadJobCardForExport();
 
     if (!savedJobCard) {
-      alert("Please save the job card before exporting PDF");
+      alert(`Please save the ${documentType} before exporting PDF`);
       return;
     }
 
@@ -331,19 +343,21 @@ const MechanicsDashboard = () => {
     logoUrl: "",
   });
   
-        const tabViewMap = {
-  "JobCard": "invoice",
-  "Parts": "parts-inventory",
-  // Add other mappings as needed
-  // "History": "history-view",
-  // "Notes": "notes-view",
-};
+  const tabViewMap = {
+    "JobCard": "invoice",
+    "Parts": "parts-inventory",
+    "History": "history-view",
+    "Notes": "notes-view",
+  };
+
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (user?.uid) {
       loadBusinessInfo();
     }
   }, [user]);
+
   useEffect(() => {
     const fetchBusinessInfo = async () => {
       if (!user?.uid) return;
@@ -367,6 +381,7 @@ const MechanicsDashboard = () => {
 
     fetchBusinessInfo();
   }, [user]);
+
   const loadBusinessInfo = async () => {
     if (!user?.uid) return;
 
@@ -451,6 +466,7 @@ const MechanicsDashboard = () => {
     jobCardNumber: numberToUse,
     locked: true,
     status: "pending",
+    documentType: documentType, // NEW: Store document type
 
     dates: {
       serviceDate: new Date().toISOString(),
@@ -495,27 +511,96 @@ const MechanicsDashboard = () => {
     let numberToUse = jobCardNumber;
 
     if (!jobCardId) {
-      numberToUse = await generateJobCardNumber(user.uid);
+      numberToUse = await generateJobCardNumber(user.uid, documentType);
       setJobCardNumber(numberToUse);
     }
 
     const jobCardData = buildJobCardPayload(numberToUse);
+    
+    // NEW: Save to different collection based on document type
+    const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
 
     if (jobCardId) {
-      await updateDoc(doc(db, "users", user.uid, "invoices", jobCardId), {
+      await updateDoc(doc(db, "users", user.uid, collectionName, jobCardId), {
         ...jobCardData,
         updatedAt: serverTimestamp(),
       });
     } else {
       const ref = await addDoc(
-        collection(db, "users", user.uid, "invoices"),
+        collection(db, "users", user.uid, collectionName),
         jobCardData
       );
       setJobCardId(ref.id);
     }
 
-    alert("Job card saved and locked");
+    alert(`${documentType === 'quote' ? 'Quote' : 'Job card'} saved and locked`);
     loadSavedJobCards();
+  };
+
+  // NEW: Convert Quote to Invoice
+  const handleConvertToInvoice = async () => {
+    if (!user?.uid) return;
+    
+    if (!jobCardId) {
+      alert('Please save the quote first before converting to invoice');
+      return;
+    }
+
+    if (!window.confirm('Convert this quote to an invoice? This will create a new invoice with the same details.')) {
+      return;
+    }
+
+    try {
+      const db = getFirestore();
+      
+      // Generate new invoice number
+      const newInvoiceNumber = await generateJobCardNumber(user.uid, 'invoice');
+      
+      // Create invoice data from current quote
+      const invoiceData = buildJobCardPayload(newInvoiceNumber);
+      invoiceData.documentType = 'invoice';
+      invoiceData.convertedFromQuote = jobCardId;
+      invoiceData.convertedFromQuoteNumber = jobCardNumber;
+      invoiceData.convertedAt = serverTimestamp();
+      
+      // Save to invoices collection
+      const invoiceRef = await addDoc(
+        collection(db, "users", user.uid, "invoices"),
+        invoiceData
+      );
+      
+      // Update quote to mark as converted
+      await updateDoc(doc(db, "users", user.uid, "quotations", jobCardId), {
+        convertedToInvoice: true,
+        convertedToInvoiceId: invoiceRef.id,
+        convertedToInvoiceNumber: newInvoiceNumber,
+        convertedAt: serverTimestamp(),
+        status: 'converted'
+      });
+      
+      // Switch to invoice mode
+      setDocumentType('invoice');
+      setJobCardId(invoiceRef.id);
+      setJobCardNumber(newInvoiceNumber);
+      
+      alert(`Quote successfully converted to Invoice ${newInvoiceNumber}`);
+      loadSavedJobCards();
+    } catch (error) {
+      console.error('Error converting quote to invoice:', error);
+      alert('Failed to convert quote to invoice');
+    }
+  };
+
+  // NEW: Handle creating new quote
+  const handleNewQuote = () => {
+    setDocumentType('quote');
+    handleNewJobCard();
+  };
+
+  // NEW: Handle creating new invoice/job card
+  const handleNewInvoice = () => {
+    setDocumentType('invoice');
+    handleNewJobCard();
   };
 
   const handleNewJobCard = () => {
@@ -536,7 +621,7 @@ const MechanicsDashboard = () => {
 
     const loadNewNumber = async () => {
       if (user?.uid) {
-        const nextJobCard = await generateJobCardNumber(user.uid);
+        const nextJobCard = await generateJobCardNumber(user.uid, documentType);
         setJobCardNumber(nextJobCard);
       }
     };
@@ -555,7 +640,6 @@ const MechanicsDashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -563,7 +647,6 @@ const MechanicsDashboard = () => {
         ></div>
       )}
 
-      {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -612,7 +695,16 @@ const MechanicsDashboard = () => {
                 <div className="ml-8 mt-1 space-y-1">
                   <div
                     onClick={() => {
-                      handleNewJobCard();
+                      handleNewQuote();
+                      setActiveView("invoice");
+                    }}
+                    className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+                  >
+                    Create Quote
+                  </div>
+                  <div
+                    onClick={() => {
+                      handleNewInvoice();
                       setActiveView("invoice");
                     }}
                     className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
@@ -623,7 +715,7 @@ const MechanicsDashboard = () => {
                     onClick={() => setShowJobCardsList(!showJobCardsList)}
                     className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
                   >
-                    All Job Cards ({savedJobCards.length})
+                    All {documentType === 'quote' ? 'Quotes' : 'Job Cards'} ({savedJobCards.length})
                   </div>
                   <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
                     In Progress
@@ -733,7 +825,6 @@ const MechanicsDashboard = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
@@ -746,9 +837,8 @@ const MechanicsDashboard = () => {
               </button>
               <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
               <h1 className="text-base lg:text-xl font-semibold">
-                Job Card #{jobCardNumber || "— not saved yet —"}
+                {documentType === 'quote' ? 'Quote' : 'Job Card'} #{jobCardNumber || "— not saved yet —"}
               </h1>
-             
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -760,6 +850,18 @@ const MechanicsDashboard = () => {
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
+              
+              {/* NEW: Convert to Invoice Button (only shows for quotes) */}
+              {documentType === 'quote' && jobCardId && (
+                <button
+                  onClick={handleConvertToInvoice}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <FileText className="w-4 h-4" />
+                  Convert to Invoice
+                </button>
+              )}
+              
               <button
                 onClick={handlePrint}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
@@ -769,7 +871,7 @@ const MechanicsDashboard = () => {
               </button>
 
               <button
-                onClick={handleNewJobCard}
+                onClick={documentType === 'quote' ? handleNewQuote : handleNewInvoice}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
                 <Plus className="w-4 h-4" />
@@ -786,7 +888,7 @@ const MechanicsDashboard = () => {
               >
                 Save as PDF
               </button>
-                 <button
+              <button
                 onClick={handleSaveJobCard}
                 className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
               >
@@ -801,7 +903,6 @@ const MechanicsDashboard = () => {
               </button>
             </div>
 
-            {/* Mobile Action Buttons */}
             <button
               onClick={handleLogout}
               className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
@@ -811,19 +912,31 @@ const MechanicsDashboard = () => {
           </div>
         </div>
 
-        {/* Mobile Action Buttons Bar */}
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
           <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
+            <button  onClick={handleConvertToInvoice}
+            className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
               <CheckSquare className="w-4 h-4" />
-              <span>Complete</span>
+              <span>Convert to Invoice</span>
             </button>
+            
+            {/* NEW: Convert to Invoice Button for Mobile (only shows for quotes) */}
+            {documentType === 'quote' && jobCardId && (
               <button
-                onClick={handleSaveJobCard}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                onClick={handleConvertToInvoice}
+                className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
               >
-                Save
+                <FileText className="w-4 h-4" />
+                <span>To Invoice</span>
               </button>
+            )}
+            
+            <button
+              onClick={handleSaveJobCard}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+            >
+              Save
+            </button>
             <button className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
@@ -845,32 +958,30 @@ const MechanicsDashboard = () => {
           </div>
         </div>
 
-
-<div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-  <div className="flex space-x-4 lg:space-x-8 min-w-max">
-    {["JobCard", "Parts", "History", "Notes"].map((tab) => (
-      <button
-        key={tab}
-        onClick={() => {
-          setActiveTab(tab);
-          if (tabViewMap[tab]) {
-            setActiveView(tabViewMap[tab]);
-          }
-        }}
-        className={`py-4 border-b-2 ${
-          activeTab === tab
-            ? "border-orange-400 text-white"
-            : "border-transparent text-gray-400 hover:text-gray-200"
-        }`}
-      >
-        {tab}
-      </button>
-    ))}
-  </div>
-</div>
+        <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+          <div className="flex space-x-4 lg:space-x-8 min-w-max">
+            {["JobCard", "Parts", "History", "Notes"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => {
+                  setActiveTab(tab);
+                  if (tabViewMap[tab]) {
+                    setActiveView(tabViewMap[tab]);
+                  }
+                }}
+                className={`py-4 border-b-2 ${
+                  activeTab === tab
+                    ? "border-orange-400 text-white"
+                    : "border-transparent text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="p-4 lg:p-6">
-          {/* Business Settings Modal */}
           {showSettings && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
               <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
@@ -886,7 +997,6 @@ const MechanicsDashboard = () => {
 
                 <div className="overflow-auto p-6">
                   <div className="space-y-4">
-                    {/* Logo Upload Section */}
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         Business Logo
@@ -916,9 +1026,7 @@ const MechanicsDashboard = () => {
                             htmlFor="logo-upload"
                             className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer"
                           >
-                            {businessInfo.logoUrl
-                              ? "Change Logo"
-                              : "Upload Logo"}
+                            {businessInfo.logoUrl ? "Change Logo" : "Upload Logo"}
                           </label>
                           <p className="text-xs text-gray-500 mt-2">
                             Recommended: Square image, max 5MB
@@ -928,17 +1036,12 @@ const MechanicsDashboard = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Business Name
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Business Name</label>
                       <input
                         type="text"
                         value={businessInfo.businessName}
                         onChange={(e) =>
-                          setBusinessInfo({
-                            ...businessInfo,
-                            businessName: e.target.value,
-                          })
+                          setBusinessInfo({ ...businessInfo, businessName: e.target.value })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
                         placeholder="V8 Powered Auto Service"
@@ -946,17 +1049,12 @@ const MechanicsDashboard = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Address Line 1
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Address Line 1</label>
                       <input
                         type="text"
                         value={businessInfo.addressLine1}
                         onChange={(e) =>
-                          setBusinessInfo({
-                            ...businessInfo,
-                            addressLine1: e.target.value,
-                          })
+                          setBusinessInfo({ ...businessInfo, addressLine1: e.target.value })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
                         placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
@@ -964,17 +1062,12 @@ const MechanicsDashboard = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Address Line 2
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Address Line 2</label>
                       <input
                         type="text"
                         value={businessInfo.addressLine2}
                         onChange={(e) =>
-                          setBusinessInfo({
-                            ...businessInfo,
-                            addressLine2: e.target.value,
-                          })
+                          setBusinessInfo({ ...businessInfo, addressLine2: e.target.value })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
                         placeholder="WYNBERG"
@@ -983,17 +1076,12 @@ const MechanicsDashboard = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2">
-                          City
-                        </label>
+                        <label className="block text-sm font-medium mb-2">City</label>
                         <input
                           type="text"
                           value={businessInfo.city}
                           onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              city: e.target.value,
-                            })
+                            setBusinessInfo({ ...businessInfo, city: e.target.value })
                           }
                           className="w-full px-4 py-2 border rounded-lg"
                           placeholder="SANDTON"
@@ -1001,17 +1089,12 @@ const MechanicsDashboard = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Postal Code
-                        </label>
+                        <label className="block text-sm font-medium mb-2">Postal Code</label>
                         <input
                           type="text"
                           value={businessInfo.postalCode}
                           onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              postalCode: e.target.value,
-                            })
+                            setBusinessInfo({ ...businessInfo, postalCode: e.target.value })
                           }
                           className="w-full px-4 py-2 border rounded-lg"
                           placeholder="2090"
@@ -1020,17 +1103,12 @@ const MechanicsDashboard = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Primary Phone *
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Primary Phone *</label>
                       <input
                         type="tel"
                         value={businessInfo.primaryPhone}
                         onChange={(e) =>
-                          setBusinessInfo({
-                            ...businessInfo,
-                            primaryPhone: e.target.value,
-                          })
+                          setBusinessInfo({ ...businessInfo, primaryPhone: e.target.value })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
                         placeholder="082 514 4509"
@@ -1039,17 +1117,12 @@ const MechanicsDashboard = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Secondary Phone (Optional)
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Secondary Phone (Optional)</label>
                       <input
                         type="tel"
                         value={businessInfo.secondaryPhone}
                         onChange={(e) =>
-                          setBusinessInfo({
-                            ...businessInfo,
-                            secondaryPhone: e.target.value,
-                          })
+                          setBusinessInfo({ ...businessInfo, secondaryPhone: e.target.value })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
                         placeholder="084 583 9929"
@@ -1067,6 +1140,7 @@ const MechanicsDashboard = () => {
               </div>
             </div>
           )}
+
           <CustomersListModal
             showModal={showCustomersListModal}
             setShowModal={setShowCustomersListModal}
@@ -1075,19 +1149,21 @@ const MechanicsDashboard = () => {
             onEditCustomer={handleEditCustomer}
             onAddNewCustomer={handleAddNewCustomer}
           />
-          {/* Customer Modal */}
+
           <CustomerModal
             showModal={showCustomerModal}
             setShowModal={setShowCustomerModal}
             existingCustomer={selectedCustomer}
             onCustomerSaved={handleCustomerSaved}
           />
-          {/* Saved Job Cards List Modal */}
+
           {showJobCardsList && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
               <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
                 <div className="p-4 border-b flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Saved Job Cards</h2>
+                  <h2 className="text-xl font-semibold">
+                    Saved {documentType === 'quote' ? 'Quotes' : 'Job Cards'}
+                  </h2>
                   <button
                     onClick={() => setShowJobCardsList(false)}
                     className="text-gray-500 hover:text-gray-700"
@@ -1099,7 +1175,7 @@ const MechanicsDashboard = () => {
                 <div className="overflow-auto p-4">
                   {savedJobCards.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
-                      No saved job cards yet
+                      No saved {documentType === 'quote' ? 'quotes' : 'job cards'} yet
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -1118,13 +1194,11 @@ const MechanicsDashboard = () => {
                                 Customer: {card.customer?.name || "N/A"}
                               </div>
                               <div className="text-sm text-gray-600">
-                                Vehicle: {card.vehicle?.year || ""}{" "}
-                                {card.vehicle?.make || ""}{" "}
+                                Vehicle: {card.vehicle?.year || ""} {card.vehicle?.make || ""}{" "}
                                 {card.vehicle?.model || "N/A"}
                               </div>
                               <div className="text-sm text-gray-600">
-                                Registration:{" "}
-                                {card.vehicle?.registration || "N/A"}
+                                Registration: {card.vehicle?.registration || "N/A"}
                               </div>
                             </div>
                             <div className="text-right">
@@ -1133,9 +1207,7 @@ const MechanicsDashboard = () => {
                               </div>
                               <div className="text-sm text-gray-500">
                                 {card.dates?.serviceDate
-                                  ? new Date(
-                                      card.dates.serviceDate
-                                    ).toLocaleDateString("en-ZA")
+                                  ? new Date(card.dates.serviceDate).toLocaleDateString("en-ZA")
                                   : "N/A"}
                               </div>
                               <div
@@ -1159,56 +1231,45 @@ const MechanicsDashboard = () => {
               </div>
             </div>
           )}
-          {activeView === "financial-overview" && (
-            <FinancialOverview user={user} />
-          )}
+
+          {activeView === "financial-overview" && <FinancialOverview user={user} />}
           {activeView === "parts-inventory" && <PartsInventory user={user} />}
+          {activeView === "history-view" && <HistoryView user={user} />}
+          {activeView === "notes-view" && <NotesView user={user} />}
           {activeView === "vehicles" && <Vehicles user={user} />}
           {activeView === "templates" && <Templates user={user} />}
+          
           {activeView === "invoice" && (
             <>
-              {/* Mobile View Job Card Button */}
               <button
                 onClick={() => setShowJobCard(!showJobCard)}
                 className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
               >
                 <FileText className="w-5 h-5" />
-                {showJobCard ? "Hide Job Card" : "View Job Card"}
+                {showJobCard ? `Hide ${documentType === 'quote' ? 'Quote' : 'Job Card'}` : `View ${documentType === 'quote' ? 'Quote' : 'Job Card'}`}
               </button>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div
-                  className={`${
-                    showJobCard ? "hidden" : "block"
-                  } space-y-6 lg:block print:hidden`}
-                >
+                <div className={`${showJobCard ? "hidden" : "block"} space-y-6 lg:block print:hidden`}>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-blue-700 font-medium">
-                      In Progress
-                    </span>
+                    <span className="text-blue-700 font-medium">In Progress</span>
                     <span className="text-blue-600">Started Today</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="text-sm text-gray-500 mb-1">
-                        Total Amount
-                      </div>
+                      <div className="text-sm text-gray-500 mb-1">Total Amount</div>
                       <div className="text-2xl font-semibold text-orange-600">
                         R{total.toFixed(2)}
                       </div>
                     </div>
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
                       <div className="text-sm text-gray-500 mb-1">Paid</div>
-                      <div className="text-2xl font-semibold text-green-600">
-                        R0.00
-                      </div>
+                      <div className="text-2xl font-semibold text-green-600">R0.00</div>
                     </div>
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="text-sm text-gray-500 mb-1">
-                        Balance Due
-                      </div>
+                      <div className="text-sm text-gray-500 mb-1">Balance Due</div>
                       <div className="text-2xl font-semibold text-red-600">
                         R{total.toFixed(2)}
                       </div>
@@ -1229,9 +1290,7 @@ const MechanicsDashboard = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <div className="text-sm text-gray-500">
-                          Customer Name
-                        </div>
+                        <div className="text-sm text-gray-500">Customer Name</div>
                         <input
                           type="text"
                           value={customerName}
@@ -1315,9 +1374,7 @@ const MechanicsDashboard = () => {
                         />
                       </div>
                       <div>
-                        <div className="text-sm text-gray-500">
-                          Registration
-                        </div>
+                        <div className="text-sm text-gray-500">Registration</div>
                         <input
                           type="text"
                           value={vehicleReg}
@@ -1335,9 +1392,7 @@ const MechanicsDashboard = () => {
                         />
                       </div>
                       <div>
-                        <div className="text-sm text-gray-500">
-                          Mileage (km)
-                        </div>
+                        <div className="text-sm text-gray-500">Mileage (km)</div>
                         <input
                           type="text"
                           value={vehicleMileage}
@@ -1349,16 +1404,12 @@ const MechanicsDashboard = () => {
                   </div>
 
                   <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                    <h2 className="text-lg font-semibold mb-4">
-                      Add Service/Part
-                    </h2>
+                    <h2 className="text-lg font-semibold mb-4">Add Service/Part</h2>
 
                     <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
                       <select
                         value={newItem.type}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, type: e.target.value })
-                        }
+                        onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
                         className="px-4 py-2 border rounded"
                       >
                         <option value="Labor">Labor</option>
@@ -1370,10 +1421,7 @@ const MechanicsDashboard = () => {
                         placeholder="Description"
                         value={newItem.description}
                         onChange={(e) =>
-                          setNewItem({
-                            ...newItem,
-                            description: e.target.value,
-                          })
+                          setNewItem({ ...newItem, description: e.target.value })
                         }
                         className="px-4 py-2 border rounded"
                       />
@@ -1382,9 +1430,7 @@ const MechanicsDashboard = () => {
                         type="number"
                         placeholder="Rate"
                         value={newItem.rate}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, rate: e.target.value })
-                        }
+                        onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })}
                         className="px-4 py-2 border rounded"
                       />
 
@@ -1392,9 +1438,7 @@ const MechanicsDashboard = () => {
                         type="number"
                         placeholder="Qty"
                         value={newItem.qty}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, qty: e.target.value })
-                        }
+                        onChange={(e) => setNewItem({ ...newItem, qty: e.target.value })}
                         className="px-4 py-2 border rounded"
                       />
 
@@ -1424,150 +1468,133 @@ const MechanicsDashboard = () => {
                       </div>
                       <div className="flex justify-between py-2">
                         <span className="text-gray-600">Warranty:</span>
-                        <span className="font-medium">
-                          90 Days Parts & Labor
-                        </span>
+                        <span className="font-medium">90 Days Parts & Labor</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                {activeView === "templates" && <Templates user={user} />}
+
                 <div
                   className={`${
                     !showJobCard ? "hidden" : "block"
                   } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-                  style={{
-                    width: "100%",
-                    maxWidth: "210mm",
-                    minHeight: "297mm",
-                  }}
+                  style={{ width: "100%", maxWidth: "210mm", minHeight: "297mm" }}
                 >
-                 {activeView === 'invoice' && (
-  <>
-    {/* Add Template Selector */}
-    <div className="mb-4">
-      <TemplateSelector 
-        user={user} 
-        selectedTemplate={selectedTemplate}
-        onTemplateChange={setSelectedTemplate}
-      />
-    </div>
+                  <div className="mb-4">
+                    <TemplateSelector 
+                      user={user} 
+                      selectedTemplate={selectedTemplate}
+                      onTemplateChange={setSelectedTemplate}
+                    />
+                  </div>
 
-    {/* Use Template Renderer instead of hardcoded invoice */}
-    <TemplateRenderer
-      templateId={selectedTemplate}
-      businessInfo={businessInfo}
-      loading={loading}
-      jobCardNumber={jobCardNumber}
-      customerName={customerName}
-      customerCompany="ABC Limited"
-      customerEmail={customerEmail}
-      customerPhone={customerPhone}
-      customerAddress={customerAddress}
-      vehicleReg={vehicleReg}
-      vehicleMake={vehicleMake}
-      vehicleModel={vehicleModel}
-      vehicleYear={vehicleYear}
-      vehicleVin={vehicleVin}
-      vehicleMileage={vehicleMileage}
-      preAuth="AUTH123"
-      authCode="456789"
-      items={items}
-      subtotal={subtotal}
-      vat={vat}
-      total={total}
-      merchantCode="V8PA-12345"
-      serviceType="SERVICE"
-      documentType="automotive"
-    />
-  </>
-)}
-
+                  <TemplateRenderer
+                    templateId={selectedTemplate}
+                    businessInfo={businessInfo}
+                    loading={loading}
+                    jobCardNumber={jobCardNumber}
+                    customerName={customerName}
+                    customerCompany="ABC Limited"
+                    customerEmail={customerEmail}
+                    customerPhone={customerPhone}
+                    customerAddress={customerAddress}
+                    vehicleReg={vehicleReg}
+                    vehicleMake={vehicleMake}
+                    vehicleModel={vehicleModel}
+                    vehicleYear={vehicleYear}
+                    vehicleVin={vehicleVin}
+                    vehicleMileage={vehicleMileage}
+                    preAuth="AUTH123"
+                    authCode="456789"
+                    items={items}
+                    subtotal={subtotal}
+                    vat={vat}
+                    total={total}
+                    merchantCode="V8PA-12345"
+                    serviceType="SERVICE"
+                    documentType={documentType}
+                  />
                 </div>
 
                 <style>{`
-              @media print {
-                * {
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                }
-                
-                html, body {
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  background: white !important;
-                  width: 100% !important;
-                  height: 100% !important;
-                }
-                
-                @page {
-                  size: A4;
-                  margin: 0;
-                }
-                
-                .print\\:hidden {
-                  display: none !important;
-                }
-                
-                /* Hide all navigation and headers */
-                div[class*="border-b"][class*="border-gray"] {
-                  display: none !important;
-                }
-                
-                nav,
-                [class*="sidebar"],
-                [class*="bg-slate-900"],
-                button:not([style]) {
-                  display: none !important;
-                }
-                
-                .space-y-6 {
-                  display: none !important;
-                }
-                
-                /* Show only the invoice section */
-                .flex.h-screen {
-                  display: block !important;
-                  height: auto !important;
-                }
-                
-                .flex-1 {
-                  display: block !important;
-                  overflow: visible !important;
-                }
-                
-                .grid.grid-cols-1 {
-                  display: block !important;
-                  grid-template-columns: none !important;
-                }
-                
-                /* Invoice container styling */
-                div[style*="210mm"] {
-                  display: block !important;
-                  width: 210mm !important;
-                  height: auto !important;
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  box-shadow: none !important;
-                  page-break-after: avoid !important;
-                }
-                
-                .bg-white {
-                  background: white !important;
-                  box-shadow: none !important;
-                }
-                
-                /* Ensure table displays */
-                table {
-                  width: 100% !important;
-                  border-collapse: collapse !important;
-                }
-                
-                tr, td, th {
-                  page-break-inside: avoid !important;
-                }
-              }
-            `}</style>
+                  @media print {
+                    * {
+                      -webkit-print-color-adjust: exact !important;
+                      print-color-adjust: exact !important;
+                    }
+                    
+                    html, body {
+                      margin: 0 !important;
+                      padding: 0 !important;
+                      background: white !important;
+                      width: 100% !important;
+                      height: 100% !important;
+                    }
+                    
+                    @page {
+                      size: A4;
+                      margin: 0;
+                    }
+                    
+                    .print\\:hidden {
+                      display: none !important;
+                    }
+                    
+                    div[class*="border-b"][class*="border-gray"] {
+                      display: none !important;
+                    }
+                    
+                    nav,
+                    [class*="sidebar"],
+                    [class*="bg-slate-900"],
+                    button:not([style]) {
+                      display: none !important;
+                    }
+                    
+                    .space-y-6 {
+                      display: none !important;
+                    }
+                    
+                    .flex.h-screen {
+                      display: block !important;
+                      height: auto !important;
+                    }
+                    
+                    .flex-1 {
+                      display: block !important;
+                      overflow: visible !important;
+                    }
+                    
+                    .grid.grid-cols-1 {
+                      display: block !important;
+                      grid-template-columns: none !important;
+                    }
+                    
+                    div[style*="210mm"] {
+                      display: block !important;
+                      width: 210mm !important;
+                      height: auto !important;
+                      margin: 0 !important;
+                      padding: 0 !important;
+                      box-shadow: none !important;
+                      page-break-after: avoid !important;
+                    }
+                    
+                    .bg-white {
+                      background: white !important;
+                      box-shadow: none !important;
+                    }
+                    
+                    table {
+                      width: 100% !important;
+                      border-collapse: collapse !important;
+                    }
+                    
+                    tr, td, th {
+                      page-break-inside: avoid !important;
+                    }
+                  }
+                `}</style>
               </div>
             </>
           )}

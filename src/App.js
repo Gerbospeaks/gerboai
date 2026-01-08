@@ -41,6 +41,9 @@ import Vehicles from './pages/mechanics/Vehicles';
 import Templates from './pages/mechanics/Templates';
 import TemplateSelector from './pages/accounting/TemplateSelector';
 import PartsInventory from './pages/mechanics/PartsInventory';
+import HistoryView from './pages/mechanics/HistoryView';
+import NotesView from './pages/mechanics/NotesView';
+
 import {  } from 'lucide-react';
 
 function App() {
@@ -100,6 +103,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <MechanicsDashboard />
+              </ProtectedRoute>
+            } 
+          />
+            <Route 
+            path="/history-view" 
+            element={
+              <ProtectedRoute>
+                <HistoryView />
+              </ProtectedRoute>
+            } 
+          />
+           <Route 
+            path="/notes-view" 
+            element={
+              <ProtectedRoute>
+                <NotesView />
               </ProtectedRoute>
             } 
           />
