@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Check } from 'lucide-react';
+import v8logo from "../../assets/img/v8-logo.png";
 import {
   getFirestore,
   doc,
@@ -139,9 +140,9 @@ export const DefaultTemplate = ({
           <div className="flex items-center gap-3 mb-2">
             {loading ? (
               <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-            ) : businessInfo.logoUrl ? (
+            ) : v8logo ? (
               <img
-                src={businessInfo.logoUrl}
+                src={v8logo}
                 alt="Business Logo"
                 className="w-16 h-16 object-contain"
               />
@@ -339,8 +340,8 @@ export const ClassicTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+            {props.v8logo && (
+              <img src={props.v8logo} alt="Logo" className="w-16 h-16 object-contain" />
             )}
             <div>
               <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
@@ -457,8 +458,8 @@ export const ModernTemplate = (props) => (
     <div className="border-b-4 border-blue-500 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
-          {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+          {props.v8logo && (
+            <img src={props.v8logo} alt="Logo" className="w-20 h-20 object-contain mb-3" />
           )}
           <div className="text-3xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
           <div className="text-sm text-gray-600 space-y-1">
@@ -559,8 +560,8 @@ export const ElegantTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     <div className="border-4 border-purple-900 p-8">
       <div className="text-center border-b-2 border-purple-900 pb-6 mb-6">
-        {props.businessInfo.logoUrl && (
-          <img src={props.businessInfo.logoUrl} alt="Logo" className="w-24 h-24 object-contain mx-auto mb-4" />
+        {props.v8logo && (
+          <img src={props.v8logo} alt="Logo" className="w-24 h-24 object-contain mx-auto mb-4" />
         )}
         <div className="text-4xl font-serif font-bold text-purple-900 mb-2">{props.businessInfo.businessName}</div>
         <div className="text-sm text-gray-600">{props.businessInfo.addressLine1} • {props.businessInfo.city}</div>
@@ -649,8 +650,8 @@ export const SpeedTemplate = (props) => (
     <div className="border-b-4 border-red-600 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
-          {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3 brightness-0 invert" />
+          {props.v8logo && (
+            <img src={props.v8logo} alt="Logo" className="w-20 h-20 object-contain mb-3 brightness-0 invert" />
           )}
           <div className="text-3xl font-black text-red-600 mb-2">{props.businessInfo.businessName}</div>
           <div className="text-sm text-gray-400">{props.businessInfo.addressLine1}</div>
@@ -741,8 +742,8 @@ export const DiagnosticTemplate = (props) => (
     <div className="border-b-4 border-green-600 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
-          {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+          {props.v8logo && (
+            <img src={props.v8logo} alt="Logo" className="w-20 h-20 object-contain mb-3" />
           )}
           <div className="text-2xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
           <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
