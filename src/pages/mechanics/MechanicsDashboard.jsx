@@ -780,26 +780,9 @@ const MechanicsDashboard = () => {
                 <ChevronDown className="w-4 h-4" />
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <FileBarChart className="w-5 h-5" />
-                  <span>Reports</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
+             
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <Calendar className="w-5 h-5" />
-                <span>Appointments</span>
-              </div>
-
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <BarChart3 className="w-5 h-5" />
-                  <span>Analytics</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
+             
             </div>
           </nav>
         </div>
