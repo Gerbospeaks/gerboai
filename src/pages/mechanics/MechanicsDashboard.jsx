@@ -436,7 +436,7 @@ const MechanicsDashboard = () => {
   });
 
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-  const vat = subtotal * 0.15;
+  const vat = subtotal * 0.00;
   const total = subtotal + vat;
 
   const buildJobCardPayload = (numberToUse) => ({
