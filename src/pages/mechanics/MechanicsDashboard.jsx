@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
+import v8logo from "../../assets/img/v8-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Vehicles from "./Vehicles";
@@ -752,10 +753,11 @@ const MechanicsDashboard = () => {
                 <span>Edit</span>
               </button>
               <button
-                onClick={handleSaveJobCard}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                onClick={handlePrint}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
-                Save
+                <Printer className="w-4 h-4" />
+                Print
               </button>
 
               <button
@@ -776,14 +778,13 @@ const MechanicsDashboard = () => {
               >
                 Save as PDF
               </button>
-
-              <button
-                onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                 <button
+                onClick={handleSaveJobCard}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
               >
-                <Printer className="w-4 h-4" />
-                Print
+                Save
               </button>
+             
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
