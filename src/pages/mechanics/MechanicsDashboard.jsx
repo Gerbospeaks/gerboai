@@ -706,7 +706,7 @@ const MechanicsDashboard = () => {
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-orange-600 rounded-full"><img src={v8logo} alt="" /></div>
+            <div className="w-10 h-10 bg-white rounded-full"><img src={v8logo} alt="" /></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "User"}
