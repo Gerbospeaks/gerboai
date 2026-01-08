@@ -810,10 +810,12 @@ const MechanicsDashboard = () => {
               <CheckSquare className="w-4 h-4" />
               <span>Complete</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
-              <Edit className="w-4 h-4" />
-              <span>Edit</span>
-            </button>
+              <button
+                onClick={handleSaveJobCard}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+              >
+                Save
+              </button>
             <button className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
