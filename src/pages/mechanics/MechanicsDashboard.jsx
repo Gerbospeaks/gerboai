@@ -330,6 +330,14 @@ const MechanicsDashboard = () => {
     secondaryPhone: "084 583 9929",
     logoUrl: "",
   });
+  
+        const tabViewMap = {
+  "JobCard": "invoice",
+  "Parts": "parts-inventory",
+  // Add other mappings as needed
+  // "History": "history-view",
+  // "Notes": "notes-view",
+};
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (user?.uid) {
@@ -837,23 +845,29 @@ const MechanicsDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-          <div className="flex space-x-4 lg:space-x-8 min-w-max">
-            {["JobCard", "Parts", "History", "Notes"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 border-b-2 ${
-                  activeTab === tab
-                    ? "border-orange-400 text-white"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
+
+<div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+  <div className="flex space-x-4 lg:space-x-8 min-w-max">
+    {["JobCard", "Parts", "History", "Notes"].map((tab) => (
+      <button
+        key={tab}
+        onClick={() => {
+          setActiveTab(tab);
+          if (tabViewMap[tab]) {
+            setActiveView(tabViewMap[tab]);
+          }
+        }}
+        className={`py-4 border-b-2 ${
+          activeTab === tab
+            ? "border-orange-400 text-white"
+            : "border-transparent text-gray-400 hover:text-gray-200"
+        }`}
+      >
+        {tab}
+      </button>
+    ))}
+  </div>
+</div>
 
         <div className="p-4 lg:p-6">
           {/* Business Settings Modal */}
