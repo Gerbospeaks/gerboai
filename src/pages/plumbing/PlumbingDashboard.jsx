@@ -22,7 +22,7 @@ import { db } from "../../firebase";
 import CustomerModal from '../CustomerModal';
 import CustomersListModal from '../CustomersListModal';
 import Templates from "./Templates";
-import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
+import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import {
   ChevronDown,
   ChevronLeft,
@@ -90,6 +90,7 @@ const PlumbingDashboard = () => {
   const [activeView, setActiveView] = useState("invoice");
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
@@ -1335,248 +1336,40 @@ const PlumbingDashboard = () => {
                 minHeight: "297mm",
               }}
             >
-              <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-                {/* Header Section */}
-                <div className="border-b-2 border-black pb-4 mb-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        {loading ? (
-                          <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-                        ) : businessInfo.logoUrl ? (
-                          <img
-                            src={businessInfo.logoUrl}
-                            alt="Business Logo"
-                            className="w-16 h-16 object-contain"
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                              e.target.nextSibling.style.display = "flex";
-                            }}
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-white rounded flex items-center justify-center">
-                            <Droplets className="w-8 h-8 text-blue-600" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="text-xl font-bold">
-                            {businessInfo.businessName.split(" ")[0]}{" "}
-                            {businessInfo.businessName.split(" ")[1]}
-                          </div>
-                          <div className="text-sm font-semibold">
-                            {businessInfo.businessName
-                              .split(" ")
-                              .slice(2)
-                              .join(" ")}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-xs leading-relaxed">
-                        <div>{businessInfo.addressLine1}</div>
-                        <div>{businessInfo.addressLine2}</div>
-                        <div>
-                          {businessInfo.city} {businessInfo.postalCode}
-                        </div>
-                        <div className="mt-1">
-                          T: {businessInfo.primaryPhone}
-                          {businessInfo.secondaryPhone &&
-                            `, ${businessInfo.secondaryPhone}`}
-                        </div>
-                      </div>
-                    </div>
+              {activeView === 'invoice' && (
+  <>
+    {/* Add Template Selector */}
+    <div className="mb-4">
+      <TemplateSelector 
+        user={user} 
+        selectedTemplate={selectedTemplate}
+        onTemplateChange={setSelectedTemplate}
+      />
+    </div>
 
-                    <div className="text-right">
-                      <div className="text-3xl font-bold mb-4">INVOICE</div>
-                      <div className="text-xs space-y-1">
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">INVOICE NO.</span>
-                          <span>{jobCardNumber}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">DATE</span>
-                          <span>{new Date().toLocaleDateString("en-GB")}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">SERVICE TYPE</span>
-                          <span>PLUMBING</span>
-                        </div>
-                        {emergencyService && (
-                          <div className="flex justify-between gap-8">
-                            <span className="font-semibold text-red-600">EMERGENCY</span>
-                            <span className="text-red-600">YES</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Three Column Section */}
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  {/* Invoice To */}
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      INVOICE TO
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div>
-                        <div>{customerName}</div>
-                      </div>
-                      <div>
-                        <div className="h-16 overflow-hidden text-xs leading-tight">
-                          {customerAddress}
-                        </div>
-                      </div>
-                      <div>
-                        <div>{customerEmail}</div>
-                      </div>
-                      <div>
-                        <div>{customerPhone}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bill To */}
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      BILL TO
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div>
-                        <div>{customerName}</div>
-                      </div>
-                      <div>
-                        <div className="h-16 overflow-hidden text-xs leading-tight">
-                          {customerAddress}
-                        </div>
-                      </div>
-                      <div>
-                        <div>{customerEmail}</div>
-                      </div>
-                      <div>
-                        <div>{customerPhone}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Property Details */}
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      PROPERTY DETAILS
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Type:</span>
-                        <span>{propertyType}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-semibold">Address:</span>
-                        <span className="text-[9px] mt-1">{propertyAddress}</span>
-                      </div>
-                      <div className="flex flex-col mt-2">
-                        <span className="font-semibold">Access:</span>
-                        <span className="text-[9px] mt-1">{accessDetails}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Items Table */}
-                <div className="mb-4">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="bg-gray-300">
-                        <th className="text-left px-2 py-1 font-bold">
-                          ITEM DESCRIPTION
-                        </th>
-                        <th className="text-center px-2 py-1 font-bold">
-                          QUANTITY
-                        </th>
-                        <th className="text-right px-2 py-1 font-bold">
-                          UNIT PRICE
-                        </th>
-                        <th className="text-right px-2 py-1 font-bold">
-                          NET PRICE
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map((item, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="px-2 py-2">{item.description}</td>
-                          <td className="text-center px-2 py-2">{item.qty}</td>
-                          <td className="text-right px-2 py-2">
-                            R{item.rate.toFixed(2)}
-                          </td>
-                          <td className="text-right px-2 py-2">
-                            R{item.amount.toFixed(2)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Totals */}
-                <div className="flex justify-end mb-6">
-                  <div className="w-64 text-xs">
-                    <div className="flex justify-between py-1">
-                      <span>Subtotal:</span>
-                      <span>R{subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between py-1">
-                      <span>VAT (20%):</span>
-                      <span>R{vat.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
-                      <span>TOTAL:</span>
-                      <span>R{total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Signatures */}
-                <div className="grid grid-cols-3 gap-4 mb-6 text-xs">
-                  <div>
-                    <div className="font-semibold mb-1">PLUMBER SIGNATURE</div>
-                    <div className="border-b border-black h-8"></div>
-                  </div>
-                  <div>
-                    <div className="font-semibold mb-1">CLIENT SIGNATURE</div>
-                    <div className="border-b border-black h-8"></div>
-                  </div>
-                  <div>
-                    <div className="font-semibold mb-1">CONTACT NUMBER:</div>
-                    <div className="border-b border-black h-8"></div>
-                  </div>
-                </div>
-
-                {/* Banking Details */}
-                <div className="bg-blue-50 border border-blue-200 p-3 mb-4">
-                  <div className="text-blue-600 font-bold text-xs mb-2">
-                    BANKING DETAILS
-                  </div>
-                  <div className="text-xs space-y-1">
-                    <div>
-                      <span className="font-semibold">Bank Name:</span> Barclays
-                    </div>
-                    <div>
-                      <span className="font-semibold">Account Holder:</span> {businessInfo.businessName}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Sort Code:</span> 20-00-00
-                    </div>
-                    <div>
-                      <span className="font-semibold">Account Number:</span> 12345678
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer Note */}
-                <div className="text-center text-xs text-blue-600 italic">
-                  NB: All our parts and workmanship have 12 months guarantee
-                </div>
-              </div>
+    {/* Use Template Renderer instead of hardcoded invoice */}
+    <TemplateRenderer
+      templateId={selectedTemplate}
+      businessInfo={businessInfo}
+      loading={loading}
+      jobCardNumber={jobCardNumber}
+      customerName={customerName}
+      customerEmail={customerEmail}
+      customerPhone={customerPhone}
+      customerAddress={customerAddress}
+      propertyType={propertyType}
+      propertyAddress={propertyAddress}
+      accessDetails={accessDetails}
+      emergencyService={emergencyService}
+      items={items}
+      subtotal={subtotal}
+      vat={vat}
+      total={total}
+      documentType="plumbing"
+      serviceType="PLUMBING"
+    />
+  </>
+)}
             </div>
 
             <style>{`

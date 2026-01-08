@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar, Users, DollarSign, PawPrint } from 'lucide-react';
 import Templates from "./Templates";
-import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
+import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 export default function VeterinaryDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Templates from "./Templates";
-import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
+import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import {
   DollarSign,
   ShoppingCart,
@@ -38,6 +38,7 @@ const RestaurantDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Overview');
   const [activeView, setActiveView] = useState("invoice");
+  const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const user = {
     uid: 'demo-user',
     displayName: 'Restaurant Owner',

@@ -18,7 +18,7 @@ import {
 } from "firebase/firestore";
 import { Printer, Download } from "lucide-react";
 import Templates from "./Templates";
-import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
+import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import {
   ChevronDown,
   ChevronLeft,
@@ -76,6 +76,7 @@ const HVACDashboard = () => {
   const [activeView, setActiveView] = useState("invoice");
   const { user } = useAuth();
   const [activeTemplate, setActiveTemplate] = useState("classic");
+  const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceId, setInvoiceId] = useState(null);
 

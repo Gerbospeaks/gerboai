@@ -4,7 +4,7 @@ import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import Templates from "./Templates";
-import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
+import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import {
   getFirestore,
   collection,
@@ -95,6 +95,7 @@ const HealthcareDashboard = () => {
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [showPatientsListModal, setShowPatientsListModal] = useState(false);
   const [showPatientModal, setShowPatientModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [patients, setPatients] = useState([]);
   const [activeView, setActiveView] = useState("invoice");
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -1547,234 +1548,43 @@ const HealthcareDashboard = () => {
                     minHeight: "297mm",
                   }}
                 >
-                  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-                    <div className="border-b-2 border-black pb-4 mb-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            {loading ? (
-                              <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-                            ) : facilityInfo.logoUrl ? (
-                              <img
-                                src={facilityInfo.logoUrl}
-                                alt="Facility Logo"
-                                className="w-16 h-16 object-contain"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
-                            )}
-                            <div>
-                              <div className="text-xl font-bold">
-                                {facilityInfo.facilityName}
-                              </div>
-                              <div className="text-sm font-semibold">
-                                {facilityInfo.practiceName}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-xs leading-relaxed">
-                            <div>{facilityInfo.addressLine1}</div>
-                            <div>{facilityInfo.addressLine2}</div>
-                            <div>
-                              {facilityInfo.city} {facilityInfo.postalCode}
-                            </div>
-                            <div className="mt-1">
-                              T: {facilityInfo.primaryPhone}
-                              {facilityInfo.secondaryPhone &&
-                                `, ${facilityInfo.secondaryPhone}`}
-                            </div>
-                            <div>
-                              Practice No: {facilityInfo.practiceNumber}
-                            </div>
-                          </div>
-                        </div>
+                 {activeView === 'invoice' && (
+  <>
+    {/* Add Template Selector */}
+    <div className="mb-4">
+      <TemplateSelector 
+        user={user} 
+        selectedTemplate={selectedTemplate}
+        onTemplateChange={setSelectedTemplate}
+      />
+    </div>
 
-                        <div className="text-right">
-                          <div className="text-3xl font-bold mb-4">INVOICE</div>
-                          <div className="text-xs space-y-1">
-                            <div className="flex justify-between gap-8">
-                              <span className="font-semibold">INVOICE NO.</span>
-                              <span>{invoiceNumber}</span>
-                            </div>
-                            <div className="flex justify-between gap-8">
-                              <span className="font-semibold">DATE</span>
-                              <span>
-                                {new Date().toLocaleDateString("en-ZA")}
-                              </span>
-                            </div>
-                            <div className="flex justify-between gap-8">
-                              <span className="font-semibold">PATIENT ID</span>
-                              <span>{patientId}</span>
-                            </div>
-                            <div className="flex justify-between gap-8">
-                              <span className="font-semibold">
-                                SERVICE TYPE
-                              </span>
-                              <span>MEDICAL</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="bg-gray-200 p-3">
-                        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                          PATIENT DETAILS
-                        </div>
-                        <div className="text-xs space-y-1">
-                          <div>
-                            <strong>Name:</strong> {patientName}
-                          </div>
-                          <div>
-                            <strong>DOB:</strong> {patientDOB}
-                          </div>
-                          <div>
-                            <strong>Gender:</strong> {patientGender}
-                          </div>
-                          <div>
-                            <strong>Phone:</strong> {patientPhone}
-                          </div>
-                          <div>
-                            <strong>Email:</strong> {patientEmail}
-                          </div>
-                          <div className="text-xs leading-tight mt-2">
-                            <strong>Address:</strong> {patientAddress}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-gray-200 p-3">
-                        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                          INSURANCE DETAILS
-                        </div>
-                        <div className="text-xs space-y-1">
-                          <div>
-                            <strong>Provider:</strong> {insuranceProvider}
-                          </div>
-                          <div>
-                            <strong>Policy No:</strong> {insuranceNumber}
-                          </div>
-                          <div className="mt-4">
-                            <strong>Diagnosis:</strong>
-                            <div className="mt-1 text-xs">{diagnosis}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <table className="w-full text-xs">
-                        <thead>
-                          <tr className="bg-gray-300">
-                            <th className="text-left px-2 py-1 font-bold">
-                              SERVICE DESCRIPTION
-                            </th>
-                            <th className="text-center px-2 py-1 font-bold">
-                              QTY
-                            </th>
-                            <th className="text-right px-2 py-1 font-bold">
-                              UNIT PRICE
-                            </th>
-                            <th className="text-right px-2 py-1 font-bold">
-                              AMOUNT
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {items.map((item, index) => (
-                            <tr key={index} className="border-b">
-                              <td className="px-2 py-2">{item.description}</td>
-                              <td className="text-center px-2 py-2">
-                                {item.qty}
-                              </td>
-                              <td className="text-right px-2 py-2">
-                                R {item.amount.toFixed(2)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <div className="flex justify-end mb-6">
-                      <div className="w-64 text-xs">
-                        <div className="flex justify-between py-1">
-                          <span>Subtotal:</span>
-                          <span>R {subtotal.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between py-1">
-                          <span>VAT (15%):</span>
-                          <span>R {vat.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between py-2 font-bold bg-blue-800 text-white px-2">
-                          <span>TOTAL:</span>
-                          <span>R {total.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
-                      <div>
-                        <div className="font-semibold mb-1">
-                          HEALTHCARE PROVIDER SIGNATURE
-                        </div>
-                        <div className="border-b border-black h-8"></div>
-                        <div className="text-xs text-gray-600 mt-1">
-                          Print Name: _________________
-                        </div>
-                      </div>
-                      <div>
-                        <div className="font-semibold mb-1">
-                          PATIENT SIGNATURE
-                        </div>
-                        <div className="border-b border-black h-8"></div>
-                        <div className="text-xs text-gray-600 mt-1">
-                          Date: {new Date().toLocaleDateString("en-ZA")}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-blue-50 border border-blue-200 p-3 mb-4">
-                      <div className="text-blue-600 font-bold text-xs mb-2">
-                        PAYMENT INFORMATION
-                      </div>
-                      <div className="text-xs space-y-1">
-                        <div>
-                          <span className="font-semibold">Bank Name:</span>{" "}
-                          {facilityInfo.bankName || "-"}
-                        </div>
-                        <div>
-                          <span className="font-semibold">Account Holder:</span>{" "}
-                          {facilityInfo.accountHolder || "-"}
-                        </div>
-                        <div>
-                          <span className="font-semibold">Account Number:</span>{" "}
-                          {facilityInfo.accountNumber || "-"}
-                        </div>
-                        <div>
-                          <span className="font-semibold">Branch Code:</span>{" "}
-                          {facilityInfo.branchCode || "-"}
-                        </div>
-                      </div>
-                    </div>
-
-                    {prescription && (
-                      <div className="bg-yellow-50 border border-yellow-200 p-3 mb-4">
-                        <div className="text-yellow-800 font-bold text-xs mb-2">
-                          PRESCRIPTION
-                        </div>
-                        <div className="text-xs whitespace-pre-line">
-                          {prescription}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="text-center text-xs text-blue-600 italic">
-                      Please retain this invoice for your medical records and
-                      insurance claims
-                    </div>
-                  </div>
+    {/* Use Template Renderer instead of hardcoded invoice */}
+    <TemplateRenderer
+      templateId={selectedTemplate}
+      businessInfo={facilityInfo}
+      loading={loading}
+      jobCardNumber={invoiceNumber}
+      customerName={patientName}
+      customerEmail={patientEmail}
+      customerPhone={patientPhone}
+      customerAddress={patientAddress}
+      patientId={patientId}
+      patientDOB={patientDOB}
+      patientGender={patientGender}
+      insuranceProvider={insuranceProvider}
+      insuranceNumber={insuranceNumber}
+      diagnosis={diagnosis}
+      prescription={prescription}
+      items={items}
+      subtotal={subtotal}
+      vat={vat}
+      total={total}
+      serviceType="MEDICAL"
+      documentType="medical"
+    />
+  </>
+)}
                 </div>
 
                 <style>{`

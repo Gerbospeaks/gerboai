@@ -4,7 +4,7 @@ import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
-import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
+import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import logo from '../../assets/img/solidflo-logo.png';
 import {
   getFirestore,
@@ -95,6 +95,7 @@ const ConstructionDashboard = () => {
   const [showClientsListModal, setShowClientsListModal] = useState(false);
   const [showClientModal, setShowClientModal] = useState(false);
   const [clients, setClients] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [selectedClient, setSelectedClient] = useState(null);
 
   useEffect(() => {
@@ -1473,272 +1474,42 @@ const ConstructionDashboard = () => {
                 minHeight: "297mm",
               }}
             >
-              <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-                {/* Header Section */}
-                <div className="border-b-2 border-black pb-4 mb-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        {loading ? (
-                          <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-                        ) : companyInfo.logoUrl ? (
-                          <img
-                            src={companyInfo.logoUrl}
-                            alt="Company Logo"
-                            className="w-16 h-16 object-contain"
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                            }}
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
-                        )}
-                        <div>
-                          <div className="text-xl font-bold">
-                            {companyInfo.companyName.split(" ")[0]}{" "}
-                            {companyInfo.companyName.split(" ")[1]}
-                          </div>
-                          <div className="text-sm font-semibold">
-                            {companyInfo.companyName.split(" ").slice(2).join(" ")}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-xs leading-relaxed">
-                        <div>{companyInfo.addressLine1}</div>
-                        <div>{companyInfo.addressLine2}</div>
-                        <div>
-                          {companyInfo.city} {companyInfo.postalCode}
-                        </div>
-                        <div className="mt-1">
-                          T: {companyInfo.primaryPhone}
-                          {companyInfo.secondaryPhone &&
-                            `, ${companyInfo.secondaryPhone}`}
-                        </div>
-                        <div>Reg: {companyInfo.registrationNumber}</div>
-                        <div>VAT: {companyInfo.vatNumber}</div>
-                      </div>
-                    </div>
+              {activeView === 'quotation' && (
+  <>
+    {/* Add Template Selector */}
+    <div className="mb-4">
+      <TemplateSelector 
+        user={user} 
+        selectedTemplate={selectedTemplate}
+        onTemplateChange={setSelectedTemplate}
+      />
+    </div>
 
-                    <div className="text-right">
-                      <div className="text-3xl font-bold mb-4">QUOTATION</div>
-                      <div className="text-xs space-y-1">
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">QUOTE NO.</span>
-                          <span>{quoteNumber}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">DATE</span>
-                          <span>{new Date().toLocaleDateString("en-ZA")}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">VALID UNTIL</span>
-                          <span>
-                            {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en-ZA")}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Three Column Section */}
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  {/* Quote To */}
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      QUOTE TO
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div>
-                        <div>{clientName}</div>
-                      </div>
-                      <div>
-                        <div>{clientCompany}</div>
-                      </div>
-                      <div>
-                        <div className="h-16 overflow-hidden text-xs leading-tight">
-                          {clientAddress}
-                        </div>
-                      </div>
-                      <div>
-                        <div>{clientEmail}</div>
-                      </div>
-                      <div>
-                        <div>{clientPhone}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bill To */}
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      BILL TO
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div>
-                        <div>{clientName}</div>
-                      </div>
-                      <div>
-                        <div>{clientCompany}</div>
-                      </div>
-                      <div>
-                        <div className="h-16 overflow-hidden text-xs leading-tight">
-                          {clientAddress}
-                        </div>
-                      </div>
-                      <div>
-                        <div>{clientEmail}</div>
-                      </div>
-                      <div>
-                        <div>{clientPhone}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Project Details */}
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      PROJECT DETAILS
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div>
-                        <span className="font-semibold">Project:</span>
-                        <div className="text-[9px] mt-1">{projectName}</div>
-                      </div>
-                      <div>
-                        <span className="font-semibold">Location:</span>
-                        <div className="text-[9px] mt-1">{projectAddress}</div>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Type:</span>
-                        <span>{projectType}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Size:</span>
-                        <span>{projectSize}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Duration:</span>
-                        <span>{projectDuration}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Start Date:</span>
-                        <span>{new Date(projectStartDate).toLocaleDateString("en-ZA")}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Items Table */}
-                <div className="mb-4">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="bg-gray-300">
-                        <th className="text-left px-2 py-1 font-bold">
-                          DESCRIPTION
-                        </th>
-                        <th className="text-center px-2 py-1 font-bold">
-                          QTY
-                        </th>
-                        <th className="text-right px-2 py-1 font-bold">
-                          RATE
-                        </th>
-                        <th className="text-right px-2 py-1 font-bold">
-                          AMOUNT
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map((item, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="px-2 py-2">
-                            <div className="font-semibold">{item.type}</div>
-                            <div className="text-gray-600">{item.description}</div>
-                          </td>
-                          <td className="text-center px-2 py-2">{item.qty}</td>
-                          <td className="text-right px-2 py-2">
-                            R {item.rate.toFixed(2)}
-                          </td>
-                          <td className="text-right px-2 py-2">
-                            R {item.amount.toFixed(2)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Totals */}
-                <div className="flex justify-end mb-6">
-                  <div className="w-64 text-xs">
-                    <div className="flex justify-between py-1">
-                      <span>Subtotal:</span>
-                      <span>R {subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between py-1">
-                      <span>VAT (15%):</span>
-                      <span>R {vat.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
-                      <span>TOTAL:</span>
-                      <span>R {total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Signatures */}
-                <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
-                  <div>
-                    <div className="font-semibold mb-1">CONTRACTOR SIGNATURE</div>
-                    <div className="border-b border-black h-8"></div>
-                    <div className="text-[10px] text-gray-600 mt-1">Date: __________</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold mb-1">CLIENT SIGNATURE</div>
-                    <div className="border-b border-black h-8"></div>
-                    <div className="text-[10px] text-gray-600 mt-1">Date: __________</div>
-                  </div>
-                </div>
-
-                {/* Banking Details */}
-                <div className="bg-orange-50 border border-orange-200 p-3 mb-4">
-                  <div className="text-orange-700 font-bold text-xs mb-2">
-                    BANKING DETAILS
-                  </div>
-                  <div className="text-xs space-y-1">
-                    <div>
-                      <span className="font-semibold">Bank Name:</span> FNB
-                    </div>
-                    <div>
-                      <span className="font-semibold">Account Holder:</span> PREMIER CONSTRUCTION SERVICES
-                    </div>
-                    <div>
-                      <span className="font-semibold">Branch Name:</span> SANDTON CITY
-                    </div>
-                    <div>
-                      <span className="font-semibold">Account Number:</span> 62789456123
-                    </div>
-                  </div>
-                </div>
-
-                {/* Terms & Conditions */}
-                <div className="border-t pt-3">
-                  <div className="text-xs font-bold mb-2">TERMS & CONDITIONS</div>
-                  <div className="text-[10px] leading-relaxed space-y-1">
-                    <div>• Quote valid for 30 days from date of issue</div>
-                    <div>• 50% deposit required upon acceptance of quote</div>
-                    <div>• Balance due upon completion of work</div>
-                    <div>• All materials and workmanship guaranteed for 12 months</div>
-                    <div>• Client to provide access to site and utilities</div>
-                    <div>• Any variations to be quoted separately</div>
-                  </div>
-                </div>
-
-                {/* Footer Note */}
-                <div className="text-center text-xs text-orange-600 italic mt-4">
-                  Thank you for considering {companyInfo.companyName.split(" ")[0]} {companyInfo.companyName.split(" ")[1]} for your construction needs
-                </div>
-              </div>
+    {/* Use Template Renderer instead of hardcoded quotation */}
+    <TemplateRenderer
+      templateId={selectedTemplate}
+      businessInfo={companyInfo}
+      loading={loading}
+      jobCardNumber={quoteNumber}
+      customerName={clientName}
+      customerCompany={clientCompany}
+      customerEmail={clientEmail}
+      customerPhone={clientPhone}
+      customerAddress={clientAddress}
+      projectName={projectName}
+      projectAddress={projectAddress}
+      projectType={projectType}
+      projectSize={projectSize}
+      projectDuration={projectDuration}
+      projectStartDate={projectStartDate}
+      items={items}
+      subtotal={subtotal}
+      vat={vat}
+      total={total}
+      documentType="quotation"
+    />
+  </>
+)}
             </div>
 
             <style>{`

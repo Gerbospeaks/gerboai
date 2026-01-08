@@ -3,7 +3,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { serverTimestamp } from 'firebase/firestore';
 import { getAuth, signOut } from 'firebase/auth';
 import Templates from "./Templates";
-import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
+import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
+
 import logo from '../../assets/img/solidflo-logo.png';
 import {
   getFirestore,
@@ -61,6 +62,7 @@ const RetailDashboard = () => {
   const [products, setProducts] = useState([]);
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [productForm, setProductForm] = useState({
     name: '',
     sku: '',

@@ -21,7 +21,7 @@ import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
 import GuestModal from './GuestModal';
 import Templates from "./Templates";
-import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
+import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import GuestsListModal from './GuestsListModal';
 import {
   ChevronDown,
@@ -89,6 +89,7 @@ const HotelDashboard = () => {
   const [savedGuests, setSavedGuests] = useState([]);
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [showGuestsListModal, setShowGuestsListModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [guests, setGuests] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
@@ -1546,273 +1547,46 @@ const HotelDashboard = () => {
                 minHeight: "297mm",
               }}
             >
-              <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-                {/* Header Section */}
-                <div className="border-b-2 border-black pb-4 mb-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        {loading ? (
-                          <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-                        ) : propertyInfo.logoUrl ? (
-                          <img
-                            src={propertyInfo.logoUrl}
-                            alt="Property Logo"
-                            className="w-16 h-16 object-contain"
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                            }}
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
-                        )}
-                        <div>
-                          <div className="text-xl font-bold">
-                            {propertyInfo.propertyName.split(" ")[0]}{" "}
-                            {propertyInfo.propertyName.split(" ")[1]}
-                          </div>
-                          <div className="text-sm font-semibold">
-                            {propertyInfo.propertyName.split(" ").slice(2).join(" ")}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-xs leading-relaxed">
-                        <div>{propertyInfo.addressLine1}</div>
-                        <div>{propertyInfo.addressLine2}</div>
-                        <div>
-                          {propertyInfo.city} {propertyInfo.postalCode}
-                        </div>
-                        <div className="mt-1">
-                          T: {propertyInfo.primaryPhone}
-                          {propertyInfo.secondaryPhone &&
-                            `, ${propertyInfo.secondaryPhone}`}
-                        </div>
-                        {propertyInfo.email && <div>E: {propertyInfo.email}</div>}
-                        {propertyInfo.website && <div>W: {propertyInfo.website}</div>}
-                        <div>Reg: {propertyInfo.registrationNumber}</div>
-                        <div>VAT: {propertyInfo.vatNumber}</div>
-                      </div>
-                    </div>
+          {activeView === 'invoice' && (
+  <>
+    {/* Add Template Selector */}
+    <div className="mb-4">
+      <TemplateSelector 
+        user={user} 
+        selectedTemplate={selectedTemplate}
+        onTemplateChange={setSelectedTemplate}
+      />
+    </div>
 
-                    <div className="text-right">
-                      <div className="text-3xl font-bold mb-4">INVOICE</div>
-                      <div className="text-xs space-y-1">
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">INVOICE NO.</span>
-                          <span>{invoiceNumber}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">DATE</span>
-                          <span>{new Date().toLocaleDateString("en-ZA")}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">DUE DATE</span>
-                          <span>
-                            {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString("en-ZA")}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Three Column Section */}
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  {/* Bill To */}
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      BILL TO
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div>
-                        <div>{guestName}</div>
-                      </div>
-                      <div>
-                        <div>ID: {guestId}</div>
-                      </div>
-                      <div>
-                        <div className="h-16 overflow-hidden text-xs leading-tight">
-                          {guestAddress}
-                        </div>
-                      </div>
-                      <div>
-                        <div>{guestEmail}</div>
-                      </div>
-                      <div>
-                        <div>{guestPhone}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Guest Details */}
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      GUEST DETAILS
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div className="flex justify-between">
-                        <span className="font-semibold">DOB:</span>
-                        <span>{new Date(guestDOB).toLocaleDateString("en-ZA")}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Nationality:</span>
-                        <span>{guestNationality}</span>
-                      </div>
-                      <div>
-                        <span className="font-semibold">ID Type:</span>
-                        <div className="text-[9px] mt-1">{idType}</div>
-                      </div>
-                      <div>
-                        <span className="font-semibold">ID Number:</span>
-                        <div className="text-[9px] mt-1">{idNumber}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Booking Details */}
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      BOOKING DETAILS
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Room:</span>
-                        <span>{roomNumber}</span>
-                      </div>
-                      <div>
-                        <span className="font-semibold">Type:</span>
-                        <div className="text-[9px] mt-1">{roomType}</div>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Check-in:</span>
-                        <span>{new Date(checkInDate).toLocaleDateString("en-ZA")}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Check-out:</span>
-                        <span>{new Date(checkOutDate).toLocaleDateString("en-ZA")}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Guests:</span>
-                        <span>{numberOfGuests}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Nights:</span>
-                        <span>{numberOfNights}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Items Table */}
-                <div className="mb-4">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="bg-gray-300">
-                        <th className="text-left px-2 py-1 font-bold">
-                          DESCRIPTION
-                        </th>
-                        <th className="text-center px-2 py-1 font-bold">
-                          QTY
-                        </th>
-                        <th className="text-right px-2 py-1 font-bold">
-                          RATE
-                        </th>
-                        <th className="text-right px-2 py-1 font-bold">
-                          AMOUNT
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map((item, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="px-2 py-2">
-                            <div className="font-semibold">{item.type}</div>
-                            <div className="text-gray-600">{item.description}</div>
-                          </td>
-                          <td className="text-center px-2 py-2">{item.qty}</td>
-                          <td className="text-right px-2 py-2">
-                            R {item.rate.toFixed(2)}
-                          </td>
-                          <td className="text-right px-2 py-2">
-                            R {item.amount.toFixed(2)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Totals */}
-                <div className="flex justify-end mb-6">
-                  <div className="w-64 text-xs">
-                    <div className="flex justify-between py-1">
-                      <span>Subtotal:</span>
-                      <span>R {subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between py-1">
-                      <span>VAT (15%):</span>
-                      <span>R {vat.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
-                      <span>TOTAL:</span>
-                      <span>R {total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Signatures */}
-                <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
-                  <div>
-                    <div className="font-semibold mb-1">PROPERTY MANAGER</div>
-                    <div className="border-b border-black h-8"></div>
-                    <div className="text-[10px] text-gray-600 mt-1">Date: __________</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold mb-1">GUEST SIGNATURE</div>
-                    <div className="border-b border-black h-8"></div>
-                    <div className="text-[10px] text-gray-600 mt-1">Date: __________</div>
-                  </div>
-                </div>
-
-                {/* Banking Details */}
-                <div className="bg-blue-50 border border-blue-200 p-3 mb-4">
-                  <div className="text-blue-700 font-bold text-xs mb-2">
-                    BANKING DETAILS
-                  </div>
-                  <div className="text-xs space-y-1">
-                    <div>
-                      <span className="font-semibold">Bank Name:</span> FNB
-                    </div>
-                    <div>
-                      <span className="font-semibold">Account Holder:</span> {propertyInfo.propertyName}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Branch Name:</span> SANDTON CITY
-                    </div>
-                    <div>
-                      <span className="font-semibold">Account Number:</span> 62789456123
-                    </div>
-                  </div>
-                </div>
-
-                {/* Terms & Conditions */}
-                <div className="border-t pt-3">
-                  <div className="text-xs font-bold mb-2">TERMS & CONDITIONS</div>
-                  <div className="text-[10px] leading-relaxed space-y-1">
-                    <div>• Payment due upon check-out or as agreed</div>
-                    <div>• Cancellation must be made 48 hours prior to arrival</div>
-                    <div>• Check-in time: 2:00 PM, Check-out time: 11:00 AM</div>
-                    <div>• Late check-out subject to availability and additional charges</div>
-                    <div>• Guest is liable for any damages to property</div>
-                    <div>• Management reserves the right to refuse service</div>
-                  </div>
-                </div>
-
-                {/* Footer Note */}
-                <div className="text-center text-xs text-blue-600 italic mt-4">
-                  Thank you for staying with {propertyInfo.propertyName}. We hope to welcome you again soon!
-                </div>
-              </div>
+    {/* Use Template Renderer instead of hardcoded invoice */}
+    <TemplateRenderer
+      templateId={selectedTemplate}
+      businessInfo={propertyInfo}
+      loading={loading}
+      jobCardNumber={invoiceNumber}
+      customerName={guestName}
+      customerEmail={guestEmail}
+      customerPhone={guestPhone}
+      customerAddress={guestAddress}
+      guestId={guestId}
+      guestDOB={guestDOB}
+      guestNationality={guestNationality}
+      idType={idType}
+      idNumber={idNumber}
+      roomNumber={roomNumber}
+      roomType={roomType}
+      checkInDate={checkInDate}
+      checkOutDate={checkOutDate}
+      numberOfGuests={numberOfGuests}
+      numberOfNights={numberOfNights}
+      items={items}
+      subtotal={subtotal}
+      vat={vat}
+      total={total}
+      documentType="hospitality"
+    />
+  </>
+)}
             </div>
 
             <style>{`

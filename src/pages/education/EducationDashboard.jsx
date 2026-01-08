@@ -4,7 +4,7 @@ import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import logo from '../../assets/img/solidflo-logo.png';
 import Templates from "./Templates";
-import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
+import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import {
   getFirestore,
   collection,
@@ -90,6 +90,7 @@ const EducationDashboard = () => {
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [students, setStudents] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [activeView, setActiveView] = useState("invoice");
   const [selectedStudent, setSelectedStudent] = useState(null);
 
@@ -1386,266 +1387,41 @@ const EducationDashboard = () => {
                 minHeight: "297mm",
               }}
             >
-              <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-                <div className="border-b-2 border-indigo-600 pb-4 mb-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        {loading ? (
-                          <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-                        ) : schoolInfo.logoUrl ? (
-                          <img
-                            src={schoolInfo.logoUrl}
-                            alt="School Logo"
-                            className="w-16 h-16 object-contain"
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                            }}
-                          />
-                        ) : (
-                          <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
-                            <GraduationCap className="w-10 h-10 text-indigo-600" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="text-2xl font-bold text-indigo-900">
-                            {schoolInfo.schoolName}
-                          </div>
-                          <div className="text-sm text-gray-600">
-                            Excellence in Education
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-xs leading-relaxed">
-                        <div>{schoolInfo.addressLine1}</div>
-                        <div>{schoolInfo.addressLine2}</div>
-                        <div>
-                          {schoolInfo.city} {schoolInfo.postalCode}
-                        </div>
-                        <div className="mt-1">
-                          T: {schoolInfo.primaryPhone}
-                          {schoolInfo.secondaryPhone &&
-                            `, ${schoolInfo.secondaryPhone}`}
-                        </div>
-                      </div>
-                    </div>
+             {activeView === 'reportCard' && (
+  <>
+    {/* Add Template Selector */}
+    <div className="mb-4">
+      <TemplateSelector 
+        user={user} 
+        selectedTemplate={selectedTemplate}
+        onTemplateChange={setSelectedTemplate}
+      />
+    </div>
 
-                    <div className="text-right">
-                      <div className="text-3xl font-bold mb-4 text-indigo-900">REPORT CARD</div>
-                      <div className="text-xs space-y-1">
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">REPORT NO.</span>
-                          <span>{reportNumber}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">TERM</span>
-                          <span>{term}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">YEAR</span>
-                          <span>{academicYear}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">DATE</span>
-                          <span>{new Date().toLocaleDateString("en-ZA")}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-indigo-50 p-3 rounded">
-                    <div className="font-bold text-xs mb-2 bg-indigo-200 px-2 py-1 text-indigo-900">
-                      STUDENT INFORMATION
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Name:</span>
-                        <span>{studentName}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Student ID:</span>
-                        <span>{studentId}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Grade:</span>
-                        <span>{gradeLevel}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Date of Birth:</span>
-                        <span>{new Date(dateOfBirth).toLocaleDateString("en-ZA")}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-indigo-50 p-3 rounded">
-                    <div className="font-bold text-xs mb-2 bg-indigo-200 px-2 py-1 text-indigo-900">
-                      PARENT/GUARDIAN
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Name:</span>
-                        <span>{parentName}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Phone:</span>
-                        <span>{parentPhone}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">Email:</span>
-                        <span className="text-[9px]">{parentEmail}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <div className="bg-indigo-100 px-3 py-2 font-bold text-sm text-indigo-900 mb-2">
-                    ACADEMIC PERFORMANCE
-                  </div>
-                  <table className="w-full text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-indigo-200">
-                        <th className="text-left px-3 py-2 font-bold border border-indigo-300">
-                          SUBJECT
-                        </th>
-                        <th className="text-center px-3 py-2 font-bold border border-indigo-300">
-                          MARK (%)
-                        </th>
-                        <th className="text-center px-3 py-2 font-bold border border-indigo-300">
-                          GRADE
-                        </th>
-                        <th className="text-left px-3 py-2 font-bold border border-indigo-300">
-                          COMMENTS
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {subjects.map((subject, index) => (
-                        <tr key={index} className="border border-gray-300">
-                          <td className="px-3 py-2 border border-gray-300">{subject.name}</td>
-                          <td className="text-center px-3 py-2 border border-gray-300">{subject.mark}</td>
-                          <td className="text-center px-3 py-2 border border-gray-300 font-bold">
-                            {subject.grade}
-                          </td>
-                          <td className="px-3 py-2 border border-gray-300 text-[10px]">
-                            {subject.comments || "—"}
-                          </td>
-                        </tr>
-                      ))}
-                      {subjects.length === 0 && (
-                        <tr>
-                          <td colSpan="4" className="text-center py-4 text-gray-400">
-                            No subjects added yet
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-
-                  <div className="mt-2 bg-yellow-50 border border-yellow-200 p-3 rounded">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-sm">OVERALL AVERAGE:</span>
-                      <span className="text-2xl font-bold text-indigo-600">{calculateAverage()}%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <div className="bg-indigo-100 px-3 py-2 font-bold text-sm text-indigo-900 mb-2">
-                    ATTENDANCE RECORD
-                  </div>
-                  <div className="bg-white border border-gray-300 p-3">
-                    <div className="grid grid-cols-3 gap-4 text-xs">
-                      <div>
-                        <span className="font-semibold">Total Days:</span> {attendanceDays}
-                      </div>
-                      <div>
-                        <span className="font-semibold">Present:</span> {attendancePresent}
-                      </div>
-                      <div>
-                        <span className="font-semibold">Attendance Rate:</span>{" "}
-                        {((Number(attendancePresent) / Number(attendanceDays)) * 100).toFixed(1)}%
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <div className="bg-indigo-100 px-3 py-2 font-bold text-sm text-indigo-900 mb-2">
-                    TEACHER'S COMMENTS
-                  </div>
-                  <div className="bg-white border border-gray-300 p-3 min-h-[80px] text-xs">
-                    {teacherComments}
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <div className="bg-indigo-100 px-3 py-2 font-bold text-sm text-indigo-900 mb-2">
-                    GRADING SCALE
-                  </div>
-                  <div className="grid grid-cols-5 gap-2 text-xs">
-                    <div className="bg-green-100 border border-green-300 p-2 text-center">
-                      <div className="font-bold">A</div>
-                      <div className="text-[10px]">80-100%</div>
-                      <div className="text-[10px]">Outstanding</div>
-                    </div>
-                    <div className="bg-blue-100 border border-blue-300 p-2 text-center">
-                      <div className="font-bold">B</div>
-                      <div className="text-[10px]">70-79%</div>
-                      <div className="text-[10px]">Good</div>
-                    </div>
-                    <div className="bg-yellow-100 border border-yellow-300 p-2 text-center">
-                      <div className="font-bold">C</div>
-                      <div className="text-[10px]">60-69%</div>
-                      <div className="text-[10px]">Satisfactory</div>
-                    </div>
-                    <div className="bg-orange-100 border border-orange-300 p-2 text-center">
-                      <div className="font-bold">D</div>
-                      <div className="text-[10px]">50-59%</div>
-                      <div className="text-[10px]">Needs Improvement</div>
-                    </div>
-                    <div className="bg-red-100 border border-red-300 p-2 text-center">
-                      <div className="font-bold">E</div>
-                      <div className="text-[10px]">0-49%</div>
-                      <div className="text-[10px]">Unsatisfactory</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 mb-4 text-xs">
-                  <div>
-                    <div className="font-semibold mb-1">CLASS TEACHER</div>
-                    <div className="border-b border-black h-8 mb-1"></div>
-                    <div className="text-center text-[10px]">Signature</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold mb-1">PRINCIPAL</div>
-                    <div className="border-b border-black h-8 mb-1"></div>
-                    <div className="text-center text-[10px]">Signature</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold mb-1">PARENT/GUARDIAN</div>
-                    <div className="border-b border-black h-8 mb-1"></div>
-                    <div className="text-center text-[10px]">Signature</div>
-                  </div>
-                </div>
-
-                <div className="bg-indigo-50 border-2 border-indigo-300 p-3 rounded">
-                  <div className="text-center text-xs">
-                    <div className="font-bold text-indigo-900 mb-1">
-                      {schoolInfo.schoolName}
-                    </div>
-                    <div className="text-indigo-700">
-                      Principal: {schoolInfo.principalName}
-                    </div>
-                    <div className="text-indigo-600 mt-2">
-                      "Nurturing Young Minds for a Brighter Tomorrow"
-                    </div>
-                  </div>
-                </div>
-              </div>
+    {/* Use Template Renderer instead of hardcoded report card */}
+    <TemplateRenderer
+      templateId={selectedTemplate}
+      businessInfo={schoolInfo}
+      loading={loading}
+      jobCardNumber={reportNumber}
+      term={term}
+      academicYear={academicYear}
+      studentName={studentName}
+      studentId={studentId}
+      gradeLevel={gradeLevel}
+      dateOfBirth={dateOfBirth}
+      parentName={parentName}
+      parentPhone={parentPhone}
+      parentEmail={parentEmail}
+      subjects={subjects}
+      attendanceDays={attendanceDays}
+      attendancePresent={attendancePresent}
+      teacherComments={teacherComments}
+      calculateAverage={calculateAverage}
+      documentType="reportCard"
+    />
+  </>
+)}
             </div>
 
             <style>{`

@@ -39,7 +39,7 @@ import PendingPayments from './pages/health/PendingPayments';
 import AppointmentsCalendar from './pages/health/AppointmentsCalendar';
 import Vehicles from './pages/mechanics/Vehicles';  
 import Templates from './pages/mechanics/Templates';
-import { TemplateSelector } from './pages/mechanics/TemplateSelector';
+import TemplateSelector from './pages/accounting/TemplateSelector';
 import PartsInventory from './pages/mechanics/PartsInventory';
 import {  } from 'lucide-react';
 
@@ -78,7 +78,14 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          
+           <Route 
+            path="/template-renderer" 
+            element={
+              <ProtectedRoute>
+                <TemplateSelector />
+              </ProtectedRoute>
+            } 
+          />
           {/* Protected Dashboard Routes */}
           <Route 
             path="/invoice" 

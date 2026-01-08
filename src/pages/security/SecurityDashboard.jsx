@@ -3,7 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from '../../assets/img/solidflo-logo.png';
 import Templates from "./Templates";
-import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
+import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -84,6 +84,7 @@ const SecurityDashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [activeView, setActiveView] = useState("invoice");
   const [activeTemplate, setActiveTemplate] = useState("classic");
+  const [selectedTemplate, setSelectedTemplate] = useState('professional');
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -1086,194 +1087,42 @@ const SecurityDashboard = () => {
                 minHeight: "297mm",
               }}
             >
-              <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-                <div className="border-b-2 border-black pb-4 mb-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        {loading ? (
-                          <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-                        ) : businessInfo.logoUrl ? (
-                          <img
-                            src={businessInfo.logoUrl}
-                            alt="Business Logo"
-                            className="w-16 h-16 object-contain"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-blue-600 rounded flex items-center justify-center">
-                            <Shield className="w-8 h-8 text-white" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="text-xl font-bold">
-                            {businessInfo.businessName}
-                          </div>
-                          <div className="text-xs text-gray-600">
-                            PSIRA Reg: {businessInfo.psiraReg}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-xs leading-relaxed">
-                        <div>{businessInfo.addressLine1}</div>
-                        <div>{businessInfo.addressLine2}</div>
-                        <div>
-                          {businessInfo.city} {businessInfo.postalCode}
-                        </div>
-                        <div className="mt-1">
-                          T: {businessInfo.primaryPhone}
-                          {businessInfo.secondaryPhone &&
-                            `, ${businessInfo.secondaryPhone}`}
-                        </div>
-                      </div>
-                    </div>
+              {activeView === 'incidentReport' && (
+  <>
+    {/* Add Template Selector */}
+    <div className="mb-4">
+      <TemplateSelector 
+        user={user} 
+        selectedTemplate={selectedTemplate}
+        onTemplateChange={setSelectedTemplate}
+      />
+    </div>
 
-                    <div className="text-right">
-                      <div className="text-3xl font-bold mb-4 text-red-600">
-                        INCIDENT REPORT
-                      </div>
-                      <div className="text-xs space-y-1">
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">REPORT NO.</span>
-                          <span>{incidentNumber}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">DATE</span>
-                          <span>{incidentDate}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">TIME</span>
-                          <span>{incidentTime}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">TYPE</span>
-                          <span>{incidentType}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      CLIENT INFORMATION
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div>
-                        <span className="font-semibold">Name:</span>
-                        <div>{clientName}</div>
-                      </div>
-                      <div>
-                        <span className="font-semibold">Contact:</span>
-                        <div>{clientContact}</div>
-                      </div>
-                      <div>
-                        <span className="font-semibold">Email:</span>
-                        <div>{clientEmail}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      SITE INFORMATION
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div>
-                        <span className="font-semibold">Site Name:</span>
-                        <div>{siteName}</div>
-                      </div>
-                      <div>
-                        <span className="font-semibold">Address:</span>
-                        <div className="text-xs leading-tight">
-                          {siteAddress}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      GUARD ON DUTY
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div>
-                        <span className="font-semibold">Name:</span>
-                        <div>{guardName}</div>
-                      </div>
-                      <div>
-                        <span className="font-semibold">Guard ID:</span>
-                        <div>{guardId}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-4 border border-gray-300 p-4">
-                  <div className="font-bold text-sm mb-3 bg-red-100 px-2 py-1">
-                    INCIDENT DETAILS
-                  </div>
-                  <div className="text-xs space-y-3">
-                    <div>
-                      <span className="font-semibold">Incident Type:</span> {incidentType}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Date & Time:</span> {incidentDate} at {incidentTime}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Description:</span>
-                      <div className="mt-1 whitespace-pre-wrap">
-                        {incidentDescription || "No description provided"}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Immediate Actions Taken:</span>
-                      <div className="mt-1 whitespace-pre-wrap">
-                        {actionsTaken || "No actions recorded"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {(witnessName || witnessContact) && (
-                  <div className="mb-4 border border-gray-300 p-4">
-                    <div className="font-bold text-sm mb-3 bg-blue-100 px-2 py-1">
-                      WITNESS INFORMATION
-                    </div>
-                    <div className="text-xs space-y-2">
-                      <div>
-                        <span className="font-semibold">Name:</span> {witnessName || "N/A"}
-                      </div>
-                      <div>
-                        <span className="font-semibold">Contact:</span> {witnessContact || "N/A"}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-3 gap-4 mb-6 text-xs mt-8">
-                  <div>
-                    <div className="font-semibold mb-1">GUARD SIGNATURE</div>
-                    <div className="border-b border-black h-8"></div>
-                    <div className="mt-1 text-[10px]">Date: _____________</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold mb-1">SUPERVISOR SIGNATURE</div>
-                    <div className="border-b border-black h-8"></div>
-                    <div className="mt-1 text-[10px]">Date: _____________</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold mb-1">CLIENT SIGNATURE</div>
-                    <div className="border-b border-black h-8"></div>
-                    <div className="mt-1 text-[10px]">Date: _____________</div>
-                  </div>
-                </div>
-
-                <div className="border-t-2 border-gray-300 pt-3 text-center text-xs text-gray-600">
-                  This is an official incident report. Any false information provided may result in legal action.
-                  <div className="mt-1">For emergency assistance, contact SAPS: 10111 | Emergency Services: 112</div>
-                </div>
-              </div>
+    {/* Use Template Renderer instead of hardcoded incident report */}
+    <TemplateRenderer
+      templateId={selectedTemplate}
+      businessInfo={businessInfo}
+      loading={loading}
+      jobCardNumber={incidentNumber}
+      incidentDate={incidentDate}
+      incidentTime={incidentTime}
+      incidentType={incidentType}
+      incidentDescription={incidentDescription}
+      actionsTaken={actionsTaken}
+      clientName={clientName}
+      clientContact={clientContact}
+      clientEmail={clientEmail}
+      siteName={siteName}
+      siteAddress={siteAddress}
+      guardName={guardName}
+      guardId={guardId}
+      witnessName={witnessName}
+      witnessContact={witnessContact}
+      documentType="incidentReport"
+      serviceType="SECURITY"
+    />
+  </>
+)}
             </div>
 
             <style>{`

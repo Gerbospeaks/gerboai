@@ -433,6 +433,21 @@ export const ClassicTemplate = (props) => (
         </div>
       </div>
     </div>
+    {/* Payment Information */}
+    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-xs space-y-1 text-gray-700">
+        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
+        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+      </div>
+    </div>
+
+    {/* Footer Note */}
+    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+      Thank you for your business. Payment is due within 30 days of invoice date.
+    </div>
   </div>
 );
 
@@ -521,6 +536,21 @@ export const ModernTemplate = (props) => (
         </div>
       </div>
     </div>
+    {/* Payment Information */}
+    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-xs space-y-1 text-gray-700">
+        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
+        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+      </div>
+    </div>
+
+    {/* Footer Note */}
+    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+      Thank you for your business. Payment is due within 30 days of invoice date.
+    </div>
   </div>
 );
 
@@ -594,6 +624,21 @@ export const ElegantTemplate = (props) => (
           </div>
         </div>
       </div>
+      {/* Payment Information */}
+    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-xs space-y-1 text-gray-700">
+        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
+        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+      </div>
+    </div>
+
+    {/* Footer Note */}
+    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+      Thank you for your business. Payment is due within 30 days of invoice date.
+    </div>
     </div>
   </div>
 );
@@ -673,6 +718,21 @@ export const SpeedTemplate = (props) => (
     </div>
   </div>
 </div>
+{/* Payment Information */}
+    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-xs space-y-1 text-gray-700">
+        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
+        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+      </div>
+    </div>
+
+    {/* Footer Note */}
+    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+      Thank you for your business. Payment is due within 30 days of invoice date.
+    </div>
 </div>
 );
 // Diagnostic Template
@@ -756,6 +816,21 @@ export const DiagnosticTemplate = (props) => (
     </div>
   </div>
 </div>
+{/* Payment Information */}
+    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-xs space-y-1 text-gray-700">
+        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
+        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+      </div>
+    </div>
+
+    {/* Footer Note */}
+    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+      Thank you for your business. Payment is due within 30 days of invoice date.
+    </div>
   </div>
 );
 // Template Renderer
@@ -778,3 +853,4 @@ default:
 return <DefaultTemplate {...props} />;
 }
 };
+export default TemplateSelector

@@ -361,7 +361,7 @@ export const ProfessionalTemplate = (props) => (
       </tbody>
     </table>
 
-    <div className="flex justify-end">
+    <div className="flex justify-end mb-6">
       <div className="w-72 text-sm">
         <div className="flex justify-between py-2">
           <span>Subtotal:</span>
@@ -376,6 +376,22 @@ export const ProfessionalTemplate = (props) => (
           <span>R {props.total.toFixed(2)}</span>
         </div>
       </div>
+    </div>
+
+    {/* Payment Information */}
+    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-xs space-y-1 text-gray-700">
+        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
+        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+      </div>
+    </div>
+
+    {/* Footer Note */}
+    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+      Thank you for your business. Payment is due within 30 days of invoice date.
     </div>
   </div>
 );
@@ -448,7 +464,7 @@ export const ModernTemplate = (props) => (
       </tbody>
     </table>
 
-    <div className="flex justify-end">
+    <div className="flex justify-end mb-6">
       <div className="w-80 space-y-2">
         <div className="flex justify-between py-2 text-gray-600">
           <span>Subtotal:</span>
@@ -463,6 +479,22 @@ export const ModernTemplate = (props) => (
           <span>R {props.total.toFixed(2)}</span>
         </div>
       </div>
+    </div>
+
+    {/* Payment Information */}
+    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-xs space-y-1 text-gray-700">
+        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
+        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+      </div>
+    </div>
+
+    {/* Footer Note */}
+    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+      Thank you for your business. Payment is due within 30 days of invoice date.
     </div>
   </div>
 );
@@ -523,7 +555,7 @@ export const CorporateTemplate = (props) => (
         </tbody>
       </table>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end mb-6">
         <div className="w-72">
           <div className="flex justify-between py-2">
             <span>Subtotal:</span>
@@ -538,6 +570,22 @@ export const CorporateTemplate = (props) => (
             <span>R {props.total.toFixed(2)}</span>
           </div>
         </div>
+      </div>
+
+      {/* Payment Information */}
+      <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+        <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-xs space-y-1 text-gray-700">
+          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
+          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
+          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+        </div>
+      </div>
+
+      {/* Footer Note */}
+      <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+        Thank you for your business. Payment is due within 30 days of invoice date.
       </div>
     </div>
   </div>
@@ -606,7 +654,7 @@ export const ContemporaryTemplate = (props) => (
         </tbody>
       </table>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end mb-6">
         <div className="w-80">
           <div className="flex justify-between py-2 text-gray-600">
             <span>Subtotal:</span>
@@ -621,6 +669,22 @@ export const ContemporaryTemplate = (props) => (
             <span>R {props.total.toFixed(2)}</span>
           </div>
         </div>
+      </div>
+
+      {/* Payment Information */}
+      <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+        <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-xs space-y-1 text-gray-700">
+          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
+          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
+          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+        </div>
+      </div>
+
+      {/* Footer Note */}
+      <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+        Thank you for your business. Payment is due within 30 days of invoice date.
       </div>
     </div>
   </div>
@@ -696,7 +760,7 @@ export const DetailedTemplate = (props) => (
       </table>
     </div>
 
-    <div className="flex justify-end">
+    <div className="flex justify-end mb-6">
       <div className="w-80 border-2 border-teal-600 p-4 rounded">
         <div className="flex justify-between py-2">
           <span>Subtotal:</span>
@@ -713,9 +777,20 @@ export const DetailedTemplate = (props) => (
       </div>
     </div>
 
-    <div className="mt-6 text-center text-xs text-gray-500 border-t pt-4">
-      <p>Please remit payment within 30 days. Late payments may incur additional charges.</p>
-      <p className="mt-1">Thank you for your business.</p>
+    {/* Payment Information */}
+    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-xs space-y-1 text-gray-700">
+        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
+        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+      </div>
+    </div>
+
+    {/* Footer Note */}
+    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+      Thank you for your business. Payment is due within 30 days of invoice date.
     </div>
   </div>
 );
@@ -740,3 +815,5 @@ export const TemplateRenderer = ({ templateId, ...props }) => {
       return <DefaultTemplate {...props} />;
   }
 };
+
+export default TemplateSelector

@@ -24,7 +24,7 @@ import CustomerModal from '../CustomerModal';
 import CustomersListModal from '../CustomersListModal';
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
-import { TemplateSelector, TemplateRenderer } from "./TemplateSelector";
+import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import {
   ChevronDown,
   ChevronLeft,
@@ -96,6 +96,7 @@ const AccountingDashboard = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [activeView, setActiveView] = useState('invoice');
+  const [selectedTemplate, setSelectedTemplate] = useState('contemporary');
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -1154,7 +1155,7 @@ const AccountingDashboard = () => {
               </div>
             </div>
           )}
-          {activeView === "templates" && <Templates user={user} />}
+         {activeView === "templates" && <Templates user={user} />}
          {activeView === 'financial-overview' && <FinancialOverview user={user} />}
          {activeView === 'quote-template' && <QuoteTemplate user={user} />}
            {/* Invoice Content - Only show when activeView is 'invoice' */}
@@ -1397,180 +1398,38 @@ const AccountingDashboard = () => {
                 minHeight: "297mm",
               }}
             >
+               
                 {activeView === 'invoice' && (
-         <>
-              <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-                {/* Header Section */}
-                <div className="border-b-2 border-black pb-4 mb-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        {loading ? (
-                          <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-                        ) : businessInfo.logoUrl ? (
-                          <img
-                            src={businessInfo.logoUrl}
-                            alt="Business Logo"
-                            className="w-16 h-16 object-contain"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-blue-100 rounded flex items-center justify-center">
-                            <Calculator className="w-8 h-8 text-blue-600" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="text-xl font-bold">
-                            {businessInfo.businessName}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-xs leading-relaxed">
-                        <div>{businessInfo.addressLine1}</div>
-                        <div>{businessInfo.addressLine2}</div>
-                        <div>
-                          {businessInfo.city} {businessInfo.postalCode}
-                        </div>
-                        <div className="mt-1">
-                          T: {businessInfo.primaryPhone}
-                          {businessInfo.secondaryPhone &&
-                            `, ${businessInfo.secondaryPhone}`}
-                        </div>
-                        {businessInfo.taxNumber && (
-                          <div>VAT: {businessInfo.taxNumber}</div>
-                        )}
-                        {businessInfo.registrationNumber && (
-                          <div>Reg: {businessInfo.registrationNumber}</div>
-                        )}
-                      </div>
-                    </div>
+  <>
+    {/* Add Template Selector */}
+    <div className="mb-4">
+      <TemplateSelector 
+        user={user} 
+        selectedTemplate={selectedTemplate}
+        onTemplateChange={setSelectedTemplate}
+      />
+    </div>
 
-                    <div className="text-right">
-                      <div className="text-3xl font-bold mb-4">INVOICE</div>
-                      <div className="text-xs space-y-1">
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">INVOICE NO.</span>
-                          <span>{invoiceNumber}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">DATE</span>
-                          <span>{new Date(invoiceDate).toLocaleDateString("en-ZA")}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">DUE DATE</span>
-                          <span>{dueDate ? new Date(dueDate).toLocaleDateString("en-ZA") : 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between gap-8">
-                          <span className="font-semibold">TERMS</span>
-                          <span>{paymentTerms}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Client Details */}
-                <div className="grid grid-cols-1 gap-4 mb-4">
-                  <div className="bg-gray-200 p-3">
-                    <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-                      BILL TO
-                    </div>
-                    <div className="text-xs space-y-1">
-                      <div className="font-semibold">{customerName}</div>
-                      <div className="h-12 overflow-hidden text-xs leading-tight">
-                        {customerAddress}
-                      </div>
-                      <div>{customerEmail}</div>
-                      <div>{customerPhone}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Items Table */}
-                <div className="mb-4">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="bg-gray-300">
-                        <th className="text-left px-2 py-1 font-bold">
-                          DESCRIPTION
-                        </th>
-                        <th className="text-center px-2 py-1 font-bold">
-                          QTY
-                        </th>
-                        <th className="text-right px-2 py-1 font-bold">
-                          RATE
-                        </th>
-                        <th className="text-right px-2 py-1 font-bold">
-                          AMOUNT
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map((item, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="px-2 py-2">
-                            <div className="font-medium">{item.type}</div>
-                            <div className="text-gray-600">{item.description}</div>
-                          </td>
-                          <td className="text-center px-2 py-2">{item.qty}</td>
-                          <td className="text-right px-2 py-2">
-                            R {item.rate.toFixed(2)}
-                          </td>
-                          <td className="text-right px-2 py-2">
-                            R {item.amount.toFixed(2)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                  <div className="border-t pt-3 space-y-1 text-xs">
-                    <div className="flex justify-between">
-                      <span>Subtotal:</span>
-                      <span>R{subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>VAT (20%):</span>
-                      <span>R{vat.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between font-semibold border-t pt-2">
-                      <span>Total:</span>
-                      <span>R{total.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-gray-600 pt-2 border-t">
-                      <span>Amount Paid:</span>
-                      <span>R0.00</span>
-                    </div>
-                    <div className="flex justify-between font-semibold text-indigo-600 border-t pt-2 text-sm">
-                      <span>Amount Due:</span>
-                      <span>R{total.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t">
-                    <div className="text-xs font-medium mb-2 text-indigo-600">
-                      Payment Information
-                    </div>
-                    <div className="text-xs text-gray-600 space-y-1">
-                      <div>Bank: Barclays Bank PLC</div>
-                      <div>Account: AccounTech Pro Ltd</div>
-                      <div>Sort Code: 20-00-00</div>
-                      <div>Account No: 12345678</div>
-                      <div>IBAN: GB29 BARC 2000 0012 3456 78</div>
-                      <div className="mt-2">Payment Terms: Net 21 days</div>
-                      <div>Reference: {invoiceNumber}</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t text-xs text-gray-500 space-y-1">
-                    <div>Company Reg: 87654321</div>
-                    <div>VAT Reg: GB 987 6543 21</div>
-                    <div className="text-center mt-3 italic">
-                      Thank you for your business
-                    </div>
-                  </div>
-                </div>
-                </>)}
+    {/* Use Template Renderer instead of hardcoded invoice */}
+    <TemplateRenderer
+      templateId={selectedTemplate}
+      businessInfo={businessInfo}
+      loading={loading}
+      jobCardNumber={invoiceNumber}
+      customerName={customerName}
+      customerEmail={customerEmail}
+      customerPhone={customerPhone}
+      customerAddress={customerAddress}
+      invoiceDate={invoiceDate || ''}
+      dueDate={dueDate || ''}
+      paymentTerms={paymentTerms || ''}
+      items={items}
+      subtotal={subtotal}
+      vat={vat}
+      total={total}
+    />
+  </>
+)}
               </div>
             </div>
 
