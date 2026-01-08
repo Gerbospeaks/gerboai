@@ -715,7 +715,7 @@ const MechanicsDashboard = () => {
                     onClick={() => setShowJobCardsList(!showJobCardsList)}
                     className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
                   >
-                    All {documentType === 'quote' ? 'Quotes' : 'Job Cards'} ({savedJobCards.length})
+                    All {documentType === 'quote' ? 'Quotes' : 'Invoices'} ({savedJobCards.length})
                   </div>
                   <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
                     In Progress
