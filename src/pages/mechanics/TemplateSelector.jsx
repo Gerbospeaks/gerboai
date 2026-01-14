@@ -118,6 +118,10 @@ export const DefaultTemplate = ({
   loading,
   jobCardNumber, 
   customerName, 
+  billName,
+  billEmail,
+  billPhone,
+  billAddress,
   customerEmail, 
   customerPhone, 
   customerAddress,
@@ -215,11 +219,11 @@ export const DefaultTemplate = ({
       <div className="bg-gray-200 p-3">
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">BILL TO</div>
         <div className="text-xs space-y-1">
-          <div>{customerName}</div>
+          <div>{billName}</div>
           <div></div>
-          <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
-          <div>{customerEmail}</div>
-          <div>{customerPhone}</div>
+          <div className="h-16 overflow-hidden text-xs leading-tight">{billAddress}</div>
+          <div>{billEmail}</div>
+          <div>{billPhone}</div>
         </div>
       </div>
 
@@ -387,6 +391,11 @@ export const ClassicTemplate = (props) => (
           <div>{props.customerAddress}</div>
           <div>{props.customerEmail}</div>
           <div>{props.customerPhone}</div>
+       
+          <div>{props.billName}</div>
+          <div>{props.billAddress}</div>
+          <div>{props.billEmail}</div>
+          <div>{props.billPhone}</div>
         </div>
       </div>
       <div className="bg-gray-200 p-3">
@@ -504,6 +513,12 @@ export const ModernTemplate = (props) => (
           <div>{props.customerAddress}</div>
           <div>{props.customerEmail}</div>
           <div>{props.customerPhone}</div>
+       
+      
+          <div className="font-semibold text-lg">{props.billName}</div>
+          <div>{props.billAddress}</div>
+          <div>{props.billEmail}</div>
+          <div>{props.billPhone}</div>
         </div>
       </div>
       <div className="bg-blue-50 p-4 rounded-lg">
@@ -600,6 +615,16 @@ export const ElegantTemplate = (props) => (
             <div className="font-semibold">{props.customerName}</div>
             <div>{props.customerAddress}</div>
             <div>{props.customerEmail}</div>
+          </div>
+        </div>
+         <div>
+          <div className="font-serif font-bold text-purple-900 mb-2">
+            {props.documentType === 'quote' ? 'QUOTE FOR' : 'BILLED TO'}
+          </div>
+          <div className="text-sm space-y-1">
+            <div className="font-semibold">{props.billName}</div>
+            <div>{props.billAddress}</div>
+            <div>{props.billEmail}</div>
           </div>
         </div>
         <div>
@@ -703,6 +728,13 @@ export const SpeedTemplate = (props) => (
         </div>
       </div>
       <div className="bg-gray-900 p-4 rounded">
+        <div className="text-sm font-bold text-red-600 mb-3">CLIENT</div>
+        <div className="text-sm space-y-1">
+          <div className="font-bold">{props.billName}</div>
+          <div className="text-gray-400">{props.billAddress}</div>
+        </div>
+      </div>
+      <div className="bg-gray-900 p-4 rounded">
         <div className="text-sm font-bold text-red-600 mb-3">VEHICLE</div>
         <div className="text-sm">
           <div className="font-bold">{props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
@@ -802,6 +834,14 @@ export const DiagnosticTemplate = (props) => (
           <div><span className="font-semibold">Name:</span> {props.customerName}</div>
           <div><span className="font-semibold">Email:</span> {props.customerEmail}</div>
           <div><span className="font-semibold">Phone:</span> {props.customerPhone}</div>
+        </div>
+      </div>
+      <div className="border-2 border-green-600 p-4 rounded">
+        <div className="text-sm font-bold text-green-600 mb-3">CUSTOMER DETAILS</div>
+        <div className="text-sm space-y-1">
+          <div><span className="font-semibold">Name:</span> {props.billName}</div>
+          <div><span className="font-semibold">Email:</span> {props.billEmail}</div>
+          <div><span className="font-semibold">Phone:</span> {props.billPhone}</div>
         </div>
       </div>
       <div className="border-2 border-green-600 p-4 rounded">
