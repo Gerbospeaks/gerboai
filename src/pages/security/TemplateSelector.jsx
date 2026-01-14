@@ -148,15 +148,15 @@ export const DefaultTemplate = ({
             ) : (
               <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
             )}
-            <div>
-              <div className="text-xl font-bold">
-                {businessInfo.businessName.split(" ")[0]}{" "}
-                {businessInfo.businessName.split(" ")[1]}
-              </div>
-              <div className="text-sm font-semibold">
-                {businessInfo.businessName.split(" ").slice(2).join(" ")}
-              </div>
-            </div>
+           <div>
+  <div className="text-xl font-bold">
+    {businessInfo?.businessName?.split(" ")[0] || ""}{" "}
+    {businessInfo?.businessName?.split(" ")[1] || ""}
+  </div>
+  <div className="text-sm font-semibold">
+    {businessInfo?.businessName?.split(" ").slice(2).join(" ") || ""}
+  </div>
+</div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{businessInfo.addressLine1}</div>

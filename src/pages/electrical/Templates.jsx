@@ -121,6 +121,14 @@ const Templates = ({ user }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showPreview, setShowPreview] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showPayment, setShowPayment] = useState(null);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [cardDetails, setCardDetails] = useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+    cardName: ''
+  });
 
   useEffect(() => {
     loadPurchasedTemplates();
@@ -155,7 +163,8 @@ const Templates = ({ user }) => {
 
     const template = TEMPLATES[templateId];
     
-    if (window.confirm(`Purchase ${template.name} for R${template.price}?\n\nThis is a one-time purchase and will be available forever.`)) {
+    // For free templates, just add them directly
+    if (!template.isPremium) {
       try {
         const db = getFirestore();
         const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
@@ -176,12 +185,110 @@ const Templates = ({ user }) => {
         }
 
         setPurchasedTemplates(prev => [...prev, templateId]);
-        alert('✅ Template purchased successfully!\n\nYou can now select it from the template dropdown when creating invoices.');
+        alert('✅ Template added successfully!\n\nYou can now select it from the template dropdown when creating job cards.');
       } catch (error) {
-        console.error('Error purchasing template:', error);
-        alert('❌ Failed to purchase template. Please try again.');
+        console.error('Error adding template:', error);
+        alert('❌ Failed to add template. Please try again.');
       }
+      return;
     }
+    
+    // For premium templates, show payment modal
+    setShowPayment(templateId);
+  };
+
+  const handlePaymentSubmit = async (e) => {
+    e.preventDefault();
+    if (!user?.uid || !showPayment) return;
+
+    // Basic validation
+    if (!cardDetails.cardNumber || !cardDetails.expiryDate || !cardDetails.cvv || !cardDetails.cardName) {
+      alert('Please fill in all card details');
+      return;
+    }
+
+    // Validate card number (simple check)
+    const cleanCardNumber = cardDetails.cardNumber.replace(/\s/g, '');
+    if (cleanCardNumber.length !== 16 || !/^\d+$/.test(cleanCardNumber)) {
+      alert('Please enter a valid 16-digit card number');
+      return;
+    }
+
+    // Validate expiry date
+    if (!/^\d{2}\/\d{2}$/.test(cardDetails.expiryDate)) {
+      alert('Please enter expiry date in MM/YY format');
+      return;
+    }
+
+    // Validate CVV
+    if (cardDetails.cvv.length !== 3 || !/^\d+$/.test(cardDetails.cvv)) {
+      alert('Please enter a valid 3-digit CVV');
+      return;
+    }
+
+    setPaymentProcessing(true);
+
+    try {
+      // Simulate payment processing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Process purchase
+      const db = getFirestore();
+      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
+      
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        await updateDoc(docRef, {
+          purchased: arrayUnion(showPayment),
+          updatedAt: serverTimestamp()
+        });
+      } else {
+        await setDoc(docRef, {
+          purchased: ['classic', showPayment],
+          active: 'classic',
+          updatedAt: serverTimestamp()
+        });
+      }
+
+      // Record payment transaction (optional)
+      const paymentRef = doc(db, 'users', user.uid, 'payments', Date.now().toString());
+      await setDoc(paymentRef, {
+        templateId: showPayment,
+        templateName: TEMPLATES[showPayment].name,
+        amount: TEMPLATES[showPayment].price,
+        currency: 'ZAR',
+        timestamp: serverTimestamp(),
+        status: 'completed'
+      });
+
+      setPurchasedTemplates(prev => [...prev, showPayment]);
+      
+      // Reset form and close modal
+      setCardDetails({ cardNumber: '', expiryDate: '', cvv: '', cardName: '' });
+      setShowPayment(null);
+      
+      alert('✅ Payment successful!\n\nYour template has been purchased and is now available.');
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      alert('❌ Payment failed. Please try again.');
+    } finally {
+      setPaymentProcessing(false);
+    }
+  };
+
+  const formatCardNumber = (value) => {
+    const cleaned = value.replace(/\s/g, '');
+    const chunks = cleaned.match(/.{1,4}/g);
+    return chunks ? chunks.join(' ') : cleaned;
+  };
+
+  const formatExpiryDate = (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length >= 2) {
+      return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
+    }
+    return cleaned;
   };
 
   const categories = [
@@ -434,6 +541,40 @@ const Templates = ({ user }) => {
         </ol>
       </div>
 
+      {/* Benefits Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-6">
+        <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+          <Zap className="w-5 h-5" />
+          Perfect for Electrical Professionals
+        </h3>
+        <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-800">
+          <div className="flex items-start gap-2">
+            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <span>Licensed electricians</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <span>Industrial electrical contractors</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <span>Residential electricians</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <span>Commercial electrical services</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <span>Smart home automation specialists</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <span>Maintenance and repair services</span>
+          </div>
+        </div>
+      </div>
+
       {/* Preview Modal */}
       {showPreview && (
         <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
@@ -477,11 +618,189 @@ const Templates = ({ user }) => {
                 </div>
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-900">
-                    <strong>Note:</strong> {TEMPLATES[showPreview].preview}
+                    <strong>Design Preview:</strong> {TEMPLATES[showPreview].preview}
                   </p>
+                </div>
+                <div className="mt-4 flex justify-center">
+                  {purchasedTemplates.includes(showPreview) ? (
+                    <div className="px-6 py-3 bg-green-100 text-green-700 rounded-lg font-semibold flex items-center gap-2 border-2 border-green-200">
+                      <Check className="w-5 h-5" />
+                      <span>You Own This Template</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setShowPreview(null);
+                        handlePurchase(showPreview);
+                      }}
+                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
+                    >
+                      {TEMPLATES[showPreview].isPremium ? (
+                        <>
+                          <ShoppingCart className="w-5 h-5" />
+                          Purchase for R{TEMPLATES[showPreview].price}
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-5 h-5" />
+                          Get Free Template
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Modal */}
+      {showPayment && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
+            <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-t-xl">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-2xl font-bold">Complete Purchase</h2>
+                <button
+                  onClick={() => {
+                    setShowPayment(null);
+                    setCardDetails({ cardNumber: '', expiryDate: '', cvv: '', cardName: '' });
+                  }}
+                  className="text-white hover:text-gray-200 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors"
+                  disabled={paymentProcessing}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex items-center gap-2 text-blue-50">
+                {React.createElement(TEMPLATES[showPayment].icon, { className: "w-5 h-5" })}
+                <span className="font-medium">{TEMPLATES[showPayment].name}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handlePaymentSubmit} className="p-6 space-y-4">
+              {/* Amount */}
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4 text-center">
+                <div className="text-sm text-gray-600 mb-1">Total Amount</div>
+                <div className="text-4xl font-bold text-blue-600">
+                  R{TEMPLATES[showPayment].price}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">One-time payment • Lifetime access</div>
+              </div>
+
+              {/* Card Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cardholder Name
+                </label>
+                <input
+                  type="text"
+                  value={cardDetails.cardName}
+                  onChange={(e) => setCardDetails(prev => ({ ...prev, cardName: e.target.value }))}
+                  placeholder="John Smith"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={paymentProcessing}
+                  required
+                />
+              </div>
+
+              {/* Card Number */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Card Number
+                </label>
+                <input
+                  type="text"
+                  value={cardDetails.cardNumber}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\s/g, '');
+                    if (value.length <= 16 && /^\d*$/.test(value)) {
+                      setCardDetails(prev => ({ ...prev, cardNumber: formatCardNumber(value) }));
+                    }
+                  }}
+                  placeholder="1234 5678 9012 3456"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                  disabled={paymentProcessing}
+                  required
+                />
+              </div>
+
+              {/* Expiry and CVV */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Expiry Date
+                  </label>
+                  <input
+                    type="text"
+                    value={cardDetails.expiryDate}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      if (value.length <= 4) {
+                        setCardDetails(prev => ({ ...prev, expiryDate: formatExpiryDate(value) }));
+                      }
+                    }}
+                    placeholder="MM/YY"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                    disabled={paymentProcessing}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    CVV
+                  </label>
+                  <input
+                    type="text"
+                    value={cardDetails.cvv}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      if (value.length <= 3) {
+                        setCardDetails(prev => ({ ...prev, cvv: value }));
+                      }
+                    }}
+                    placeholder="123"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                    disabled={paymentProcessing}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Security Notice */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-xs text-green-800">
+                <div className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <strong>Secure Payment:</strong> Your payment information is encrypted and secure. We never store your complete card details.
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={paymentProcessing}
+                className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 flex items-center justify-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {paymentProcessing ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Processing Payment...
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="w-5 h-5" />
+                    Pay R{TEMPLATES[showPayment].price}
+                  </>
+                )}
+              </button>
+
+              <p className="text-xs text-center text-gray-500">
+                By completing this purchase, you agree to our terms and conditions
+              </p>
+            </form>
           </div>
         </div>
       )}

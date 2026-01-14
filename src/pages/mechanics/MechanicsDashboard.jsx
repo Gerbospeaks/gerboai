@@ -1477,7 +1477,7 @@ const MechanicsDashboard = () => {
                     loading={loading}
                     jobCardNumber={jobCardNumber}
                     customerName={customerName}
-                    customerCompany="ABC Limited"
+                    customerCompany=""
                     customerEmail={customerEmail}
                     customerPhone={customerPhone}
                     customerAddress={customerAddress}

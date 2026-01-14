@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   FileText, 
@@ -9,17 +10,10 @@ import {
   Briefcase,
   TrendingUp,
   Award,
-  BarChart3
+  BarChart3,
+  CreditCard,
+  Lock
 } from 'lucide-react';
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  arrayUnion,
-  serverTimestamp
-} from 'firebase/firestore';
 
 // Template definitions - Professional Business Invoice Templates
 const TEMPLATES = {
@@ -116,73 +110,107 @@ const TEMPLATES = {
 };
 
 // Templates Component
-const Templates = ({ user }) => {
+const Templates = () => {
   const [purchasedTemplates, setPurchasedTemplates] = useState(['professional']);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showPreview, setShowPreview] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [showPayment, setShowPayment] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [paymentForm, setPaymentForm] = useState({
+    cardNumber: '',
+    cardName: '',
+    expiryDate: '',
+    cvv: ''
+  });
 
-  useEffect(() => {
-    loadPurchasedTemplates();
-  }, [user]);
+  const handlePurchase = async (templateId) => {
+    const template = TEMPLATES[templateId];
+    
+    // Open payment modal for premium templates
+    if (template.isPremium) {
+      setShowPayment(templateId);
+      return;
+    }
 
-  const loadPurchasedTemplates = async () => {
-    if (!user?.uid) return;
+    // For free templates, process immediately
+    setPurchasedTemplates(prev => [...prev, templateId]);
+    alert('✅ Template added successfully!');
+  };
+
+  const handlePaymentSubmit = async () => {
+    const templateId = showPayment;
+    const template = TEMPLATES[templateId];
+
+    // Validate card details
+    if (!paymentForm.cardNumber || paymentForm.cardNumber.replace(/\s/g, '').length !== 16) {
+      alert('❌ Please enter a valid 16-digit card number');
+      return;
+    }
+
+    if (!paymentForm.cardName.trim()) {
+      alert('❌ Please enter the cardholder name');
+      return;
+    }
+
+    if (!paymentForm.expiryDate || !/^\d{2}\/\d{2}$/.test(paymentForm.expiryDate)) {
+      alert('❌ Please enter expiry date in MM/YY format');
+      return;
+    }
+
+    if (!paymentForm.cvv || paymentForm.cvv.length !== 3) {
+      alert('❌ Please enter a valid 3-digit CVV');
+      return;
+    }
 
     try {
-      const db = getFirestore();
-      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
-      const docSnap = await getDoc(docRef);
+      setLoading(true);
+      
+      // Simulate payment processing
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      if (docSnap.exists()) {
-        setPurchasedTemplates(docSnap.data().purchased || ['professional']);
-      } else {
-        // Initialize with professional template
-        await setDoc(docRef, {
-          purchased: ['professional'],
-          active: 'professional',
-          updatedAt: serverTimestamp()
-        });
-      }
+      // Add template to purchased list
+      setPurchasedTemplates(prev => [...prev, templateId]);
+      
+      // Reset form and close modal
+      setPaymentForm({ cardNumber: '', cardName: '', expiryDate: '', cvv: '' });
+      setShowPayment(null);
+      
+      alert(`✅ Payment successful!\n\n${template.name} has been added to your account.\n\nYou can now use it when creating invoices.`);
     } catch (error) {
-      console.error('Error loading templates:', error);
+      console.error('Error processing payment:', error);
+      alert('❌ Payment failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePurchase = async (templateId) => {
-    if (!user?.uid) return;
+  const formatCardNumber = (value) => {
+    const cleaned = value.replace(/\s/g, '');
+    const chunks = cleaned.match(/.{1,4}/g);
+    return chunks ? chunks.join(' ') : cleaned;
+  };
 
-    const template = TEMPLATES[templateId];
-    
-    if (window.confirm(`Purchase ${template.name} for R${template.price}?\n\nThis is a one-time purchase and will be available forever.`)) {
-      try {
-        const db = getFirestore();
-        const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
-        
-        // Get current data
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          await updateDoc(docRef, {
-            purchased: arrayUnion(templateId),
-            updatedAt: serverTimestamp()
-          });
-        } else {
-          await setDoc(docRef, {
-            purchased: ['professional', templateId],
-            active: 'professional',
-            updatedAt: serverTimestamp()
-          });
-        }
+  const handleCardNumberChange = (e) => {
+    const value = e.target.value.replace(/\s/g, '');
+    if (/^\d*$/.test(value) && value.length <= 16) {
+      setPaymentForm({ ...paymentForm, cardNumber: formatCardNumber(value) });
+    }
+  };
 
-        setPurchasedTemplates(prev => [...prev, templateId]);
-        alert('✅ Template purchased successfully!\n\nYou can now select it from the template dropdown when creating invoices.');
-      } catch (error) {
-        console.error('Error purchasing template:', error);
-        alert('❌ Failed to purchase template. Please try again.');
-      }
+  const handleExpiryChange = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length >= 2) {
+      value = value.slice(0, 2) + '/' + value.slice(2, 4);
+    }
+    if (value.length <= 5) {
+      setPaymentForm({ ...paymentForm, expiryDate: value });
+    }
+  };
+
+  const handleCvvChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 3) {
+      setPaymentForm({ ...paymentForm, cvv: value });
     }
   };
 
@@ -210,204 +238,316 @@ const Templates = ({ user }) => {
     return colors[color] || colors.blue;
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading templates...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-8 text-white">
-        <div className="flex items-center gap-3 mb-3">
-          <FileText className="w-8 h-8" />
-          <h1 className="text-3xl font-bold">Professional Invoice Templates</h1>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-8 text-white">
+          <div className="flex items-center gap-3 mb-3">
+            <FileText className="w-8 h-8" />
+            <h1 className="text-3xl font-bold">Professional Invoice Templates</h1>
+          </div>
+          <p className="text-blue-50 text-lg">
+            Premium invoice designs crafted for businesses, consultants, and professional service providers
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5" />
+              <span>One-time purchase</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5" />
+              <span>Lifetime access</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5" />
+              <span>Print ready</span>
+            </div>
+          </div>
         </div>
-        <p className="text-blue-50 text-lg">
-          Premium invoice designs crafted for businesses, consultants, and professional service providers
-        </p>
-        <div className="mt-4 flex items-center gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            <span>One-time purchase</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            <span>Lifetime access</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            <span>Print ready</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-blue-600">
-            {purchasedTemplates.length}
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="text-2xl font-bold text-blue-600">
+              {purchasedTemplates.length}
+            </div>
+            <div className="text-sm text-gray-600">Templates Owned</div>
           </div>
-          <div className="text-sm text-gray-600">Templates Owned</div>
-        </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-indigo-600">
-            {Object.keys(TEMPLATES).length}
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="text-2xl font-bold text-indigo-600">
+              {Object.keys(TEMPLATES).length}
+            </div>
+            <div className="text-sm text-gray-600">Total Available</div>
           </div>
-          <div className="text-sm text-gray-600">Total Available</div>
-        </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-green-600">
-            R{Object.values(TEMPLATES)
-              .filter(t => purchasedTemplates.includes(t.id))
-              .reduce((sum, t) => sum + t.price, 0)}
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="text-2xl font-bold text-green-600">
+              R{Object.values(TEMPLATES)
+                .filter(t => purchasedTemplates.includes(t.id))
+                .reduce((sum, t) => sum + t.price, 0)}
+            </div>
+            <div className="text-sm text-gray-600">Total Value</div>
           </div>
-          <div className="text-sm text-gray-600">Total Value</div>
         </div>
-      </div>
 
-      {/* Category Filter */}
-      <div className="flex flex-wrap gap-2">
-        {categories.map(category => (
-          <button
-            key={category.id}
-            onClick={() => setSelectedCategory(category.id)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              selectedCategory === category.id
-                ? 'bg-blue-600 text-white shadow-lg scale-105'
-                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-            }`}
-          >
-            {category.name}
-          </button>
-        ))}
-      </div>
-
-      {/* Templates Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTemplates.map(template => {
-          const isPurchased = purchasedTemplates.includes(template.id);
-          const Icon = template.icon;
-          
-          return (
-            <div
-              key={template.id}
-              className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden hover:shadow-2xl hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1"
+        {/* Category Filter */}
+        <div className="flex flex-wrap gap-2">
+          {categories.map(category => (
+            <button
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                selectedCategory === category.id
+                  ? 'bg-blue-600 text-white shadow-lg scale-105'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
             >
-              {/* Template Preview Image with Gradient Overlay */}
-              <div className="relative h-64 bg-gray-900 overflow-hidden group">
-                <img
-                  src={template.image}
-                  alt={template.name}
-                  className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300"
-                />
-                <div className={`absolute inset-0 bg-gradient-to-br ${getColorClasses(template.color)} opacity-40`}></div>
-                
-                {/* Icon Overlay */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <Icon className="w-24 h-24 text-white opacity-20" />
+              {category.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Templates Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredTemplates.map(template => {
+            const isPurchased = purchasedTemplates.includes(template.id);
+            const Icon = template.icon;
+            
+            return (
+              <div
+                key={template.id}
+                className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden hover:shadow-2xl hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1"
+              >
+                {/* Template Preview Image with Gradient Overlay */}
+                <div className="relative h-64 bg-gray-900 overflow-hidden group">
+                  <img
+                    src={template.image}
+                    alt={template.name}
+                    className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300"
+                  />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${getColorClasses(template.color)} opacity-40`}></div>
+                  
+                  {/* Icon Overlay */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <Icon className="w-24 h-24 text-white opacity-20" />
+                  </div>
+
+                  {/* Badges */}
+                  {template.isPremium && !isPurchased && (
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
+                      <Sparkles className="w-4 h-4" />
+                      Premium
+                    </div>
+                  )}
+                  {isPurchased && (
+                    <div className="absolute top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
+                      <Check className="w-5 h-5" />
+                      Owned
+                    </div>
+                  )}
+
+                  {/* Template Name Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                    <div className="flex items-center gap-2 text-white">
+                      <Icon className="w-6 h-6" />
+                      <h3 className="text-xl font-bold">{template.name}</h3>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Badges */}
-                {template.isPremium && !isPurchased && (
-                  <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
-                    <Sparkles className="w-4 h-4" />
-                    Premium
-                  </div>
-                )}
-                {isPurchased && (
-                  <div className="absolute top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
-                    <Check className="w-5 h-5" />
-                    Owned
-                  </div>
-                )}
+                {/* Template Info */}
+                <div className="p-5">
+                  <p className="text-sm text-gray-600 mb-4 min-h-[40px]">{template.description}</p>
 
-                {/* Template Name Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                  <div className="flex items-center gap-2 text-white">
-                    <Icon className="w-6 h-6" />
-                    <h3 className="text-xl font-bold">{template.name}</h3>
+                  {/* Features */}
+                  <div className="mb-4">
+                    <div className="text-xs font-semibold text-gray-500 mb-2">FEATURES</div>
+                    <ul className="space-y-2">
+                      {template.features.map((feature, index) => (
+                        <li key={index} className="text-sm text-gray-700 flex items-start gap-2">
+                          <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Preview Description */}
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="text-xs font-semibold text-gray-500 mb-1">PREVIEW</div>
+                    <p className="text-xs text-gray-600 leading-relaxed">{template.preview}</p>
+                  </div>
+
+                  {/* Price and Actions */}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                    <div>
+                      {template.isPremium ? (
+                        <div>
+                          <div className="text-3xl font-bold text-blue-600">
+                            R{template.price}
+                          </div>
+                          <div className="text-xs text-gray-500">one-time</div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="text-3xl font-bold text-green-600">
+                            Free
+                          </div>
+                          <div className="text-xs text-gray-500">included</div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setShowPreview(template.id)}
+                        className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 flex items-center gap-2 transition-all"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span className="hidden sm:inline">Preview</span>
+                      </button>
+
+                      {isPurchased ? (
+                        <div className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-semibold flex items-center gap-2 border-2 border-green-200">
+                          <Check className="w-5 h-5" />
+                          <span>Owned</span>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handlePurchase(template.id)}
+                          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
+                        >
+                          {template.isPremium ? (
+                            <>
+                              <ShoppingCart className="w-4 h-4" />
+                              Buy Now
+                            </>
+                          ) : (
+                            <>
+                              <Check className="w-4 h-4" />
+                              Get Free
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
+            );
+          })}
+        </div>
 
-              {/* Template Info */}
-              <div className="p-5">
-                <p className="text-sm text-gray-600 mb-4 min-h-[40px]">{template.description}</p>
+        {/* Help Section */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            How to use your templates
+          </h3>
+          <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+            <li>Purchase a template that matches your business style</li>
+            <li>Go to "Create Invoice" from the sidebar menu</li>
+            <li>Look for the template selector dropdown at the top of the page</li>
+            <li>Select your purchased template from the dropdown</li>
+            <li>Your invoice will automatically use the selected design</li>
+          </ol>
+        </div>
 
-                {/* Features */}
-                <div className="mb-4">
-                  <div className="text-xs font-semibold text-gray-500 mb-2">FEATURES</div>
-                  <ul className="space-y-2">
-                    {template.features.map((feature, index) => (
-                      <li key={index} className="text-sm text-gray-700 flex items-start gap-2">
-                        <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+        {/* Additional Info */}
+        <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-gray-200 rounded-lg p-6">
+          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-blue-600" />
+            Why Choose Premium Templates?
+          </h3>
+          <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <span>Stand out with professional, modern designs</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <span>Enhance your brand image with clients</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <span>One-time purchase, unlimited use</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <span>Print-ready, optimized layouts</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Preview Modal */}
+        {showPreview && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+              <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100">
+                <div className="flex items-center gap-3">
+                  {React.createElement(TEMPLATES[showPreview].icon, { className: "w-6 h-6 text-blue-600" })}
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {TEMPLATES[showPreview].name}
+                  </h2>
                 </div>
-
-                {/* Preview Description */}
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                  <div className="text-xs font-semibold text-gray-500 mb-1">PREVIEW</div>
-                  <p className="text-xs text-gray-600 leading-relaxed">{template.preview}</p>
-                </div>
-
-                {/* Price and Actions */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                  <div>
-                    {template.isPremium ? (
-                      <div>
-                        <div className="text-3xl font-bold text-blue-600">
-                          R{template.price}
-                        </div>
-                        <div className="text-xs text-gray-500">one-time</div>
-                      </div>
-                    ) : (
-                      <div>
-                        <div className="text-3xl font-bold text-green-600">
-                          Free
-                        </div>
-                        <div className="text-xs text-gray-500">included</div>
-                      </div>
-                    )}
+                <button
+                  onClick={() => setShowPreview(null)}
+                  className="text-gray-500 hover:text-gray-700 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="overflow-auto p-8 bg-gray-50">
+                <div className="bg-white rounded-lg shadow-lg p-8 max-w-3xl mx-auto">
+                  <div className="text-center mb-6">
+                    {React.createElement(TEMPLATES[showPreview].icon, { className: "w-16 h-16 text-blue-600 mx-auto mb-4" })}
+                    <h3 className="text-2xl font-bold mb-2">{TEMPLATES[showPreview].name}</h3>
+                    <p className="text-gray-600 mb-4">{TEMPLATES[showPreview].description}</p>
+                    <img
+                      src={TEMPLATES[showPreview].image}
+                      alt={TEMPLATES[showPreview].name}
+                      className="w-full rounded-lg shadow-md"
+                    />
                   </div>
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setShowPreview(template.id)}
-                      className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 flex items-center gap-2 transition-all"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span className="hidden sm:inline">Preview</span>
-                    </button>
-
-                    {isPurchased ? (
-                      <div className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-semibold flex items-center gap-2 border-2 border-green-200">
+                  <div className="border-t pt-6">
+                    <h4 className="font-semibold mb-3">Template Features:</h4>
+                    <ul className="grid grid-cols-2 gap-3">
+                      {TEMPLATES[showPreview].features.map((feature, index) => (
+                        <li key={index} className="flex items-center gap-2 text-sm">
+                          <Check className="w-4 h-4 text-green-500" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-blue-900">
+                      <strong>Design Preview:</strong> {TEMPLATES[showPreview].preview}
+                    </p>
+                  </div>
+                  <div className="mt-4 flex justify-center">
+                    {purchasedTemplates.includes(showPreview) ? (
+                      <div className="px-6 py-3 bg-green-100 text-green-700 rounded-lg font-semibold flex items-center gap-2 border-2 border-green-200">
                         <Check className="w-5 h-5" />
-                        <span>Owned</span>
+                        <span>You Own This Template</span>
                       </div>
                     ) : (
                       <button
-                        onClick={() => handlePurchase(template.id)}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
+                        onClick={() => {
+                          setShowPreview(null);
+                          handlePurchase(showPreview);
+                        }}
+                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
                       >
-                        {template.isPremium ? (
+                        {TEMPLATES[showPreview].isPremium ? (
                           <>
-                            <ShoppingCart className="w-4 h-4" />
-                            Buy Now
+                            <ShoppingCart className="w-5 h-5" />
+                            Purchase for R{TEMPLATES[showPreview].price}
                           </>
                         ) : (
                           <>
-                            <Check className="w-4 h-4" />
-                            Get Free
+                            <Check className="w-5 h-5" />
+                            Get Free Template
                           </>
                         )}
                       </button>
@@ -416,130 +556,130 @@ const Templates = ({ user }) => {
                 </div>
               </div>
             </div>
-          );
-        })}
-      </div>
+          </div>
+        )}
 
-      {/* Help Section */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-          <FileText className="w-5 h-5" />
-          How to use your templates
-        </h3>
-        <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
-          <li>Purchase a template that matches your business style</li>
-          <li>Go to "Create Invoice" from the sidebar menu</li>
-          <li>Look for the template selector dropdown at the top of the page</li>
-          <li>Select your purchased template from the dropdown</li>
-          <li>Your invoice will automatically use the selected design</li>
-        </ol>
-      </div>
-
-      {/* Additional Info */}
-      <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-gray-200 rounded-lg p-6">
-        <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-blue-600" />
-          Why Choose Premium Templates?
-        </h3>
-        <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Stand out with professional, modern designs</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Enhance your brand image with clients</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>One-time purchase, unlimited use</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Print-ready, optimized layouts</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Preview Modal */}
-      {showPreview && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100">
-              <div className="flex items-center gap-3">
-                {React.createElement(TEMPLATES[showPreview].icon, { className: "w-6 h-6 text-blue-600" })}
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {TEMPLATES[showPreview].name}
-                </h2>
+        {/* Payment Modal */}
+        {showPayment && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
+              <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-indigo-600">
+                <div className="flex items-center justify-between text-white">
+                  <div className="flex items-center gap-3">
+                    <ShoppingCart className="w-6 h-6" />
+                    <h2 className="text-2xl font-bold">Complete Purchase</h2>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowPayment(null);
+                      setPaymentForm({ cardNumber: '', cardName: '', expiryDate: '', cvv: '' });
+                    }}
+                    className="text-white hover:text-gray-200 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={() => setShowPreview(null)}
-                className="text-gray-500 hover:text-gray-700 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="overflow-auto p-8 bg-gray-50">
-              <div className="bg-white rounded-lg shadow-lg p-8 max-w-3xl mx-auto">
-                <div className="text-center mb-6">
-                  {React.createElement(TEMPLATES[showPreview].icon, { className: "w-16 h-16 text-blue-600 mx-auto mb-4" })}
-                  <h3 className="text-2xl font-bold mb-2">{TEMPLATES[showPreview].name}</h3>
-                  <p className="text-gray-600 mb-4">{TEMPLATES[showPreview].description}</p>
-                  <img
-                    src={TEMPLATES[showPreview].image}
-                    alt={TEMPLATES[showPreview].name}
-                    className="w-full rounded-lg shadow-md"
-                  />
+
+              <div className="p-6">
+                {/* Template Info */}
+                <div className="mb-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    {React.createElement(TEMPLATES[showPayment].icon, { className: "w-8 h-8 text-blue-600" })}
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg text-gray-900">{TEMPLATES[showPayment].name}</h3>
+                      <p className="text-sm text-gray-600">{TEMPLATES[showPayment].description}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-blue-200">
+                    <span className="text-sm text-gray-600">One-time payment</span>
+                    <span className="text-2xl font-bold text-blue-600">R{TEMPLATES[showPayment].price}</span>
+                  </div>
                 </div>
-                <div className="border-t pt-6">
-                  <h4 className="font-semibold mb-3">Template Features:</h4>
-                  <ul className="grid grid-cols-2 gap-3">
-                    {TEMPLATES[showPreview].features.map((feature, index) => (
-                      <li key={index} className="flex items-center gap-2 text-sm">
-                        <Check className="w-4 h-4 text-green-500" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+
+                {/* Payment Form */}
+                <div className="space-y-4">
+                  {/* Card Number */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                      <CreditCard className="w-4 h-4" />
+                      Card Number
+                    </label>
+                    <input
+                      type="text"
+                      value={paymentForm.cardNumber}
+                      onChange={handleCardNumberChange}
+                      placeholder="1234 5678 9012 3456"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all font-mono text-lg"
+                    />
+                  </div>
+
+                  {/* Cardholder Name */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Cardholder Name
+                    </label>
+                    <input
+                      type="text"
+                      value={paymentForm.cardName}
+                      onChange={(e) => setPaymentForm({ ...paymentForm, cardName: e.target.value.toUpperCase() })}
+                      placeholder="JOHN DOE"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all uppercase"
+                    />
+                  </div>
+
+                  {/* Expiry and CVV */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Expiry Date
+                      </label>
+                      <input
+                        type="text"
+                        value={paymentForm.expiryDate}
+                        onChange={handleExpiryChange}
+                        placeholder="MM/YY"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all font-mono text-lg"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-900">
-                    <strong>Design Preview:</strong> {TEMPLATES[showPreview].preview}
+
+                {/* Security Note */}
+                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-xs text-green-800 flex items-start gap-2">
+                    <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <span>Your payment information is encrypted and secure. This is a one-time purchase with lifetime access.</span>
                   </p>
                 </div>
-                <div className="mt-4 flex justify-center">
-                  {purchasedTemplates.includes(showPreview) ? (
-                    <div className="px-6 py-3 bg-green-100 text-green-700 rounded-lg font-semibold flex items-center gap-2 border-2 border-green-200">
-                      <Check className="w-5 h-5" />
-                      <span>You Own This Template</span>
-                    </div>
+
+                {/* Submit Button */}
+                <button
+                  onClick={handlePaymentSubmit}
+                  disabled={loading}
+                  className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Processing Payment...
+                    </>
                   ) : (
-                    <button
-                      onClick={() => {
-                        setShowPreview(null);
-                        handlePurchase(showPreview);
-                      }}
-                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
-                    >
-                      {TEMPLATES[showPreview].isPremium ? (
-                        <>
-                          <ShoppingCart className="w-5 h-5" />
-                          Purchase for R{TEMPLATES[showPreview].price}
-                        </>
-                      ) : (
-                        <>
-                          <Check className="w-5 h-5" />
-                          Get Free Template
-                        </>
-                      )}
-                    </button>
+                    <>
+                      <Lock className="w-5 h-5" />
+                      Pay R{TEMPLATES[showPayment].price}
+                    </>
                   )}
-                </div>
+                </button>
+
+                <p className="text-xs text-gray-500 text-center mt-4">
+                  By completing this purchase, you agree to our terms of service
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

@@ -151,14 +151,14 @@ export const DefaultTemplate = ({
               <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
             )}
             <div>
-              <div className="text-xl font-bold">
-                {businessInfo.businessName.split(" ")[0]}{" "}
-                {businessInfo.businessName.split(" ")[1]}
-              </div>
-              <div className="text-sm font-semibold">
-                {businessInfo.businessName.split(" ").slice(2).join(" ")}
-              </div>
-            </div>
+  <div className="text-xl font-bold">
+    {businessInfo?.businessName?.split(" ")[0] || ""}{" "}
+    {businessInfo?.businessName?.split(" ")[1] || ""}
+  </div>
+  <div className="text-sm font-semibold">
+    {businessInfo?.businessName?.split(" ").slice(2).join(" ") || ""}
+  </div>
+</div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{businessInfo.addressLine1}</div>
@@ -205,7 +205,7 @@ export const DefaultTemplate = ({
         </div>
         <div className="text-xs space-y-1">
           <div>{customerName}</div>
-          <div>ABC Limited</div>
+          <div></div>
           <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
           <div>{customerEmail}</div>
           <div>{customerPhone}</div>
@@ -216,7 +216,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">BILL TO</div>
         <div className="text-xs space-y-1">
           <div>{customerName}</div>
-          <div>ABC Limited</div>
+          <div></div>
           <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
           <div>{customerEmail}</div>
           <div>{customerPhone}</div>

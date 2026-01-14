@@ -622,7 +622,11 @@ const HotelDashboard = () => {
 
                 <div className="ml-8 mt-1 space-y-1">
                   <div
-                    onClick={handleNewInvoice}
+                    
+                     onClick={() => {
+                      handleNewInvoice();
+                      setActiveView("invoice");
+                    }}
                     className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
                   >
                     Create Invoice
