@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { FileText, Check } from 'lucide-react';
 import v8logo from "../../assets/img/v8-logo.png";
+import SignatureStamp from './SignatureStamp';
 import {
   getFirestore,
   doc,
@@ -135,7 +137,11 @@ export const DefaultTemplate = ({
   subtotal,
   vat,
   total,
-  documentType = 'invoice' // NEW: Default to invoice
+  documentType = 'invoice',
+  showStamp = true,
+  stampText = "APPROVED",
+  stampColor = "#d32f2f",
+  showStampDate = true
 }) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     {/* Header Section */}
@@ -155,14 +161,14 @@ export const DefaultTemplate = ({
               <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
             )}
             <div>
-  <div className="text-xl font-bold">
-    {businessInfo?.businessName?.split(" ")[0] || ""}{" "}
-    {businessInfo?.businessName?.split(" ")[1] || ""}
-  </div>
-  <div className="text-sm font-semibold">
-    {businessInfo?.businessName?.split(" ").slice(2).join(" ") || ""}
-  </div>
-</div>
+              <div className="text-xl font-bold">
+                {businessInfo?.businessName?.split(" ")[0] || ""}{" "}
+                {businessInfo?.businessName?.split(" ")[1] || ""}
+              </div>
+              <div className="text-sm font-semibold">
+                {businessInfo?.businessName?.split(" ").slice(2).join(" ") || ""}
+              </div>
+            </div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{businessInfo.addressLine1}</div>
@@ -314,6 +320,7 @@ export const DefaultTemplate = ({
         <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
         <div className="border-b border-black h-8"></div>
       </div>
+     
       <div>
         <div className="font-semibold mb-1">CLIENT SIGNATURE</div>
         <div className="border-b border-black h-8"></div>
@@ -333,6 +340,25 @@ export const DefaultTemplate = ({
         <div><span className="font-semibold">Branch Name:</span> LIFESTYLE CENTURION</div>
         <div><span className="font-semibold">Account Number:</span> 62146991441</div>
       </div>
+    </div>
+
+    {/* Signatures and Stamp */}
+    <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
+      <div>
+        <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
+        <div className="border-b border-black h-8"></div>
+      </div>
+      {showStamp && (
+        <div className="flex justify-end">
+          <SignatureStamp 
+            text={stampText}
+            color={stampColor}
+            showDate={showStampDate}
+            rotation={-5}
+            size="small"
+          />
+        </div>
+      )}
     </div>
 
     {/* Footer Note */}
@@ -391,7 +417,11 @@ export const ClassicTemplate = (props) => (
           <div>{props.customerAddress}</div>
           <div>{props.customerEmail}</div>
           <div>{props.customerPhone}</div>
-       
+        </div>
+      </div>
+      <div className="bg-gray-200 p-3">
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">BILL TO</div>
+        <div className="text-xs space-y-1">
           <div>{props.billName}</div>
           <div>{props.billAddress}</div>
           <div>{props.billEmail}</div>
@@ -405,13 +435,6 @@ export const ClassicTemplate = (props) => (
           <div>Reg: {props.vehicleReg}</div>
           <div>VIN: {props.vehicleVin}</div>
           <div>Mileage: {props.vehicleMileage} km</div>
-        </div>
-      </div>
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SERVICE INFO</div>
-        <div className="text-xs space-y-1">
-          <div>Date: {new Date().toLocaleDateString()}</div>
-          <div>Status: {props.documentType === 'quote' ? 'Quote Pending' : 'In Progress'}</div>
         </div>
       </div>
     </div>
@@ -464,6 +487,24 @@ export const ClassicTemplate = (props) => (
       </div>
     </div>
 
+    {props.showStamp && (
+      <div className="text-center mb-4">
+        <div className="mb-4">
+          <SignatureStamp 
+            text={props.stampText}
+            color={props.stampColor}
+            showDate={props.showStampDate}
+            rotation={-5}
+            size="medium"
+          />
+        </div>
+        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
+          <p className="text-sm font-semibold">Authorized Signature</p>
+          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+        </div>
+      </div>
+    )}
+
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {props.documentType === 'quote' 
         ? 'This quote is valid for 30 days from the date above.'
@@ -513,9 +554,7 @@ export const ModernTemplate = (props) => (
           <div>{props.customerAddress}</div>
           <div>{props.customerEmail}</div>
           <div>{props.customerPhone}</div>
-       
-      
-          <div className="font-semibold text-lg">{props.billName}</div>
+          <div className="font-semibold text-lg mt-3">{props.billName}</div>
           <div>{props.billAddress}</div>
           <div>{props.billEmail}</div>
           <div>{props.billPhone}</div>
@@ -581,7 +620,24 @@ export const ModernTemplate = (props) => (
       </div>
     </div>
 
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+    <div className="mt-8 flex justify-between items-center">
+      <div className="text-sm text-gray-500">
+        <p className="font-semibold">Terms:</p>
+        <p>Payment due within 30 days</p>
+      </div>
+      
+      {props.showStamp && (
+        <SignatureStamp 
+          text={props.stampText}
+          color={props.stampColor}
+          showDate={props.showStampDate}
+          rotation={-5}
+          size="medium"
+        />
+      )}
+    </div>
+
+    <div className="text-center text-xs text-gray-500 italic border-t pt-3 mt-4">
       {props.documentType === 'quote' 
         ? 'This quote is valid for 30 days from the date above.'
         : 'Thank you for your business. Payment is due within 30 days of invoice date.'
@@ -589,7 +645,6 @@ export const ModernTemplate = (props) => (
     </div>
   </div>
 );
-
 // Elegant/Premium Template
 export const ElegantTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
@@ -684,7 +739,22 @@ export const ElegantTemplate = (props) => (
           <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
         </div>
       </div>
-
+       <div className="mt-8 flex justify-between items-center">
+      <div className="text-sm text-gray-500">
+        <p className="font-semibold">Terms:</p>
+        <p>Payment due within 30 days</p>
+      </div>
+      
+      {props.showStamp && (
+        <SignatureStamp 
+          text={props.stampText}
+          color={props.stampColor}
+          showDate={props.showStampDate}
+          rotation={-5}
+          size="medium"
+        />
+      )}
+    </div>
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
         {props.documentType === 'quote' 
           ? 'This quote is valid for 30 days from the date above.'
@@ -692,6 +762,8 @@ export const ElegantTemplate = (props) => (
         }
       </div>
     </div>
+   
+
   </div>
 );
 
@@ -790,14 +862,31 @@ export const SpeedTemplate = (props) => (
         <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
-
+<div className="mt-8 flex justify-between items-center">
+      <div className="text-sm text-gray-500">
+        <p className="font-semibold">Terms:</p>
+        <p>Payment due within 30 days</p>
+      </div>
+      
+      {props.showStamp && (
+        <SignatureStamp 
+          text={props.stampText}
+          color={props.stampColor}
+          showDate={props.showStampDate}
+          rotation={-5}
+          size="medium"
+        />
+      )}
+    </div>
     <div className="text-center text-xs text-gray-500 italic border-t border-gray-800 pt-3">
       {props.documentType === 'quote' 
         ? 'This quote is valid for 30 days from the date above.'
         : 'Thank you for your business. Payment is due within 30 days of invoice date.'
       }
     </div>
-  </div>
+  
+</div>
+  
 );
 
 // Diagnostic Template
@@ -906,20 +995,50 @@ export const DiagnosticTemplate = (props) => (
         <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
-
+<div className="mt-8 flex justify-between items-center">
+      <div className="text-sm text-gray-500">
+        <p className="font-semibold">Terms:</p>
+        <p>Payment due within 30 days</p>
+      </div>
+      
+      {props.showStamp && (
+        <SignatureStamp 
+          text={props.stampText}
+          color={props.stampColor}
+          showDate={props.showStampDate}
+          rotation={-5}
+          size="medium"
+        />
+      )}
+    </div>
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {props.documentType === 'quote' 
         ? 'This quote is valid for 30 days from the date above. Price subject to change after expiry.'
         : 'Thank you for your business. Payment is due within 30 days of invoice date.'
       }
     </div>
+   
   </div>
 );
 
 // Template Renderer
-export const TemplateRenderer = ({ templateId, documentType = 'invoice', ...props }) => {
+export const TemplateRenderer = ({ 
+  templateId, 
+  documentType = 'invoice',
+  stampText = "APPROVED",
+  stampColor = "#d32f2f",
+  showStampDate = true,
+  showStamp = true,
+  ...props }) => {
   // Pass documentType to all templates
-  const templateProps = { ...props, documentType };
+  const templateProps = { 
+    ...props, 
+    documentType,
+    stampText,
+    stampColor,
+    showStampDate,
+    showStamp
+   };
   
   switch (templateId) {
     case 'default':

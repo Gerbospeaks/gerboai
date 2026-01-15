@@ -30,6 +30,7 @@ import CustomersListModal from "../CustomersListModal";
 import HistoryView from './HistoryView';
 import NotesView from './NotesView';
 import { logHistory } from './historyLogger';
+import SignatureStamp from './SignatureStamp';
 import {
   ChevronDown,
   ChevronLeft,
@@ -106,6 +107,13 @@ const MechanicsDashboard = () => {
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  
+  const [stampSettings, setStampSettings] = useState({
+  text: "APPROVED",
+  color: "#d32f2f",
+  showDate: true,
+  enabled: true
+});
   
   // NEW: Document type state (quote or invoice)
   const [documentType, setDocumentType] = useState('invoice');
@@ -402,7 +410,11 @@ const MechanicsDashboard = () => {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
+        const data = docSnap.data();
         setBusinessInfo(docSnap.data());
+        if (data.stampSettings) {
+        setStampSettings(data.stampSettings);
+      }
       }
     } catch (error) {
       console.error("Error loading business info:", error);
@@ -444,7 +456,7 @@ const MechanicsDashboard = () => {
     try {
       const db = getFirestore();
       const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-      await setDoc(docRef, businessInfo);
+      await setDoc(docRef, { ...businessInfo, stampSettings });
       alert("Business information saved successfully!");
       setShowSettings(false);
     } catch (error) {
@@ -1122,6 +1134,83 @@ const MechanicsDashboard = () => {
                         placeholder="084 583 9929"
                       />
                     </div>
+                    {/* Add this in your Business Settings modal, after phone fields */}
+<div className="border-t pt-6 mt-6">
+  <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>
+  
+  <div className="space-y-4">
+    <div>
+      <label className="flex items-center space-x-2 mb-4">
+        <input
+          type="checkbox"
+          checked={stampSettings.enabled}
+          onChange={(e) => setStampSettings({...stampSettings, enabled: e.target.checked})}
+          className="w-4 h-4 rounded"
+        />
+        <span className="text-sm font-medium">Show approval stamp on invoices and quotes</span>
+      </label>
+    </div>
+
+    {stampSettings.enabled && (
+      <>
+        <div>
+          <label className="block text-sm font-medium mb-2">Stamp Text</label>
+          <input
+            type="text"
+            value={stampSettings.text}
+            onChange={(e) => setStampSettings({...stampSettings, text: e.target.value.toUpperCase()})}
+            className="w-full px-4 py-2 border rounded-lg uppercase"
+            placeholder="APPROVED"
+            maxLength={15}
+          />
+          <p className="text-xs text-gray-500 mt-1">Max 15 characters</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Stamp Color</label>
+          <select
+            value={stampSettings.color}
+            onChange={(e) => setStampSettings({...stampSettings, color: e.target.value})}
+            className="w-full px-4 py-2 border rounded-lg"
+          >
+            <option value="#d32f2f">🔴 Red (Traditional)</option>
+            <option value="#1976d2">🔵 Blue (Professional)</option>
+            <option value="#388e3c">🟢 Green (Approved)</option>
+            <option value="#7b1fa2">🟣 Purple (Premium)</option>
+            <option value="#000000">⚫ Black (Formal)</option>
+            <option value="#f57c00">🟠 Orange (Attention)</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={stampSettings.showDate}
+              onChange={(e) => setStampSettings({...stampSettings, showDate: e.target.checked})}
+              className="w-4 h-4 rounded"
+            />
+            <span className="text-sm font-medium">Include date on stamp</span>
+          </label>
+        </div>
+
+        {/* Preview */}
+        <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
+          <div className="flex justify-center">
+            <SignatureStamp 
+              text={stampSettings.text}
+              color={stampSettings.color}
+              showDate={stampSettings.showDate}
+              rotation={-5}
+              size="medium"
+            />
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+</div>
 
                     <button
                       onClick={handleSaveBusinessInfo}
@@ -1557,7 +1646,12 @@ const MechanicsDashboard = () => {
                     merchantCode="V8PA-12345"
                     serviceType="SERVICE"
                     documentType={documentType}
+                    stampText={stampSettings.text}
+                    stampColor={stampSettings.color}
+                    showStampDate={stampSettings.showDate}
+                    showStamp={stampSettings.enabled}
                   />
+                  
                 </div>
 
                 <style>{`

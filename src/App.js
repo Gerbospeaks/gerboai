@@ -43,6 +43,7 @@ import TemplateSelector from './pages/accounting/TemplateSelector';
 import PartsInventory from './pages/mechanics/PartsInventory';
 import HistoryView from './pages/mechanics/HistoryView';
 import NotesView from './pages/mechanics/NotesView';
+import SignatureStamp from './pages/mechanics/SignatureStamp';
 
 import {  } from 'lucide-react';
 
@@ -111,6 +112,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <HistoryView />
+              </ProtectedRoute>
+            } 
+          />
+           <Route 
+            path="/signature" 
+            element={
+              <ProtectedRoute>
+                <SignatureStamp />
               </ProtectedRoute>
             } 
           />

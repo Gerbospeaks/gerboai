@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Upload } from "lucide-react";
-
+import SignatureStamp from './mechanics/SignatureStamp';
 const UserBusinessSettings = () => {
   const { user } = useAuth();
   const [businessInfo, setBusinessInfo] = useState({
@@ -19,7 +19,12 @@ const UserBusinessSettings = () => {
   });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-
+const [stampSettings, setStampSettings] = useState({
+  text: "APPROVED",
+  color: "#d32f2f",
+  showDate: true,
+  enabled: true
+});
   useEffect(() => {
     if (user?.uid) {
       loadBusinessInfo();
@@ -213,7 +218,7 @@ const UserBusinessSettings = () => {
             placeholder="084 583 9929"
           />
         </div>
-
+        
         <button
           onClick={handleSave}
           disabled={loading}
