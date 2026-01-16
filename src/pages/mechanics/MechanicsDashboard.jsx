@@ -184,12 +184,12 @@ const MechanicsDashboard = () => {
     setCustomerEmail(customer.email || "");
     setCustomerPhone(customer.phone || "");
     setCustomerAddress(customer.address || "");
-    setCustomerId(customer.customerId || "");
+    setCustomerId(customer.merchant_code || "");
     setBillName(customer.name || "");
     setBillEmail(customer.email || "");
     setBillPhone(customer.phone || "");
     setBillAddress(customer.address || "");
-    setCustomerId(customer.customerId || "");
+    setCustomerId(customer.merchant_code || "");
   };
 
   const handleCustomerSaved = () => {
@@ -207,7 +207,7 @@ const MechanicsDashboard = () => {
     setCustomerEmail(jobCard.customer?.email || "");
     setCustomerPhone(jobCard.customer?.phone || "");
     setCustomerAddress(jobCard.customer?.address || "");
-    setCustomerId(jobCard.customer?.customerId || "");
+    setCustomerId(jobCard.customer?.merchant_code || "");
     setVehicleMake(jobCard.vehicle?.make || "");
     setVehicleModel(jobCard.vehicle?.model || "");
     setVehicleYear(jobCard.vehicle?.year || "");
@@ -251,7 +251,7 @@ const MechanicsDashboard = () => {
         email: customerEmail,
         phone: customerPhone,
         address: customerAddress,
-        customerId: customerId || `CUST-${Date.now()}`,
+        merchant_code: merchant_code || `CUST-${Date.now()}`,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
@@ -334,7 +334,7 @@ const MechanicsDashboard = () => {
   }, []);
 
   const [customerName, setCustomerName] = useState("John Smith");
-  const [customerId, setCustomerId] = useState("CUST-2026-1234");
+  const [merchant_code, setCustomerId] = useState("V*R-9890");
   const [customerEmail, setCustomerEmail] = useState("john.smith@example.com");
   const [customerPhone, setCustomerPhone] = useState("082 123 4567");
   const [customerAddress, setCustomerAddress] = useState(
@@ -505,7 +505,7 @@ const MechanicsDashboard = () => {
       email: customerEmail,
       phone: customerPhone,
       address: customerAddress,
-      customerId,
+      merchant_code:merchant_code,
     },
 
     vehicle: {
@@ -1460,7 +1460,7 @@ const MechanicsDashboard = () => {
                         <div className="text-sm text-gray-500">Customer ID</div>
                         <input
                           type="text"
-                          value={customerId}
+                          value={merchant_code}
                           onChange={(e) => setCustomerId(e.target.value)}
                           className="w-full px-4 py-2 border rounded"
                         />
@@ -1509,7 +1509,7 @@ const MechanicsDashboard = () => {
                         <div className="text-sm text-gray-500">Customer ID</div>
                         <input
                           type="text"
-                          value={customerId}
+                          value={merchant_code}
                           onChange={(e) => setCustomerId(e.target.value)}
                           className="w-full px-4 py-2 border rounded"
                         />
@@ -1723,7 +1723,7 @@ const MechanicsDashboard = () => {
                     billEmail={billEmail}
                     billPhone={billPhone}
                     billAddress={billAddress}
-                    customerId={customerId}
+                    merchant_code={merchant_code}
                     customerCompany=""
                     customerEmail={customerEmail}
                     customerPhone={customerPhone}
@@ -1740,7 +1740,7 @@ const MechanicsDashboard = () => {
                     subtotal={subtotal}
                     vat={vat}
                     total={total}
-                    merchantCode="V8PA-12345"
+                    merchantCode="{merchant_code}"
                     serviceType="SERVICE"
                     documentType={documentType}
                     stampText={stampSettings.text}

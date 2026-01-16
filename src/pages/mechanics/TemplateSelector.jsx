@@ -134,7 +134,7 @@ export const DefaultTemplate = ({
   vehicleVin,
   authCode,
   preAuth,
-  merchantCode,
+  merchant_code,
   vehicleMileage,
   items,
   subtotal,
@@ -191,7 +191,7 @@ export const DefaultTemplate = ({
             </div>
             <div className="flex justify-between gap-8">
               <span className="font-semibold">MERCHANT CODE</span>
-              <span>{merchantCode}</span>
+              <span>{merchant_code}</span>
             </div>
             <div className="flex justify-between gap-8">
               <span className="font-semibold">SERVICE TYPE</span>
