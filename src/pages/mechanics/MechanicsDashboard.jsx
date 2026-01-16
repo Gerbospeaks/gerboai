@@ -918,7 +918,7 @@ const MechanicsDashboard = () => {
           </div>
         </div>
  <div className="sticky top-0 z-40 flex flex-col">
-        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
+        <div className="sticky top-0 z-40 lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
           <div className="flex gap-2 overflow-x-auto pb-2">
             <button  onClick={handleConvertToInvoice}
             className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">

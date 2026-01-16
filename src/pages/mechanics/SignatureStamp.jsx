@@ -35,6 +35,7 @@ const SignatureStamp = ({
     >
       <div style={{
         fontWeight: 'bold',
+        outline: `2px solid ${color}`,
         fontSize: sizeConfig.fontSize,
         color: color,
         textTransform: 'uppercase',
