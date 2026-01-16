@@ -132,6 +132,9 @@ export const DefaultTemplate = ({
   vehicleModel,
   vehicleYear,
   vehicleVin,
+  authCode,
+  preAuth,
+  merchantCode,
   vehicleMileage,
   items,
   subtotal,
@@ -155,20 +158,12 @@ export const DefaultTemplate = ({
               <img
                 src={v8logo}
                 alt="Business Logo"
-                className="w-16 h-16 object-contain"
+                className="w-32 h-18 object-contain"
               />
             ) : (
               <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
             )}
-            <div>
-              <div className="text-xl font-bold">
-                {businessInfo?.businessName?.split(" ")[0] || ""}{" "}
-                {businessInfo?.businessName?.split(" ")[1] || ""}
-              </div>
-              <div className="text-sm font-semibold">
-                {businessInfo?.businessName?.split(" ").slice(2).join(" ") || ""}
-              </div>
-            </div>
+           
           </div>
           <div className="text-xs leading-relaxed">
             <div>{businessInfo.addressLine1}</div>
@@ -196,7 +191,7 @@ export const DefaultTemplate = ({
             </div>
             <div className="flex justify-between gap-8">
               <span className="font-semibold">MERCHANT CODE</span>
-              <span>V8PA-12345</span>
+              <span>{merchantCode}</span>
             </div>
             <div className="flex justify-between gap-8">
               <span className="font-semibold">SERVICE TYPE</span>
@@ -262,11 +257,11 @@ export const DefaultTemplate = ({
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Pre Auth:</span>
-            <span>AUTH123</span>
+            <span>{preAuth}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Auth Code:</span>
-            <span>456789</span>
+            <span>{authCode}</span>
           </div>
         </div>
       </div>
@@ -379,10 +374,10 @@ export const ClassicTemplate = (props) => (
         <div>
           <div className="flex items-center gap-3 mb-2">
             {props.v8logo && (
-              <img src={props.v8logo} alt="Logo" className="w-16 h-16 object-contain" />
+              <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain" />
             )}
             <div>
-              <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
+             
             </div>
           </div>
           <div className="text-xs leading-relaxed">
@@ -521,7 +516,7 @@ export const ModernTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.v8logo && (
-            <img src={props.v8logo} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+            <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain mb-3" />
           )}
           <div className="text-3xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
           <div className="text-sm text-gray-600 space-y-1">
@@ -651,7 +646,7 @@ export const ElegantTemplate = (props) => (
     <div className="border-4 border-purple-900 p-8">
       <div className="text-center border-b-2 border-purple-900 pb-6 mb-6">
         {props.v8logo && (
-          <img src={props.v8logo} alt="Logo" className="w-24 h-24 object-contain mx-auto mb-4" />
+          <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain mx-auto mb-4" />
         )}
         <div className="text-4xl font-serif font-bold text-purple-900 mb-2">{props.businessInfo.businessName}</div>
         <div className="text-sm text-gray-600">{props.businessInfo.addressLine1} • {props.businessInfo.city}</div>
@@ -774,7 +769,7 @@ export const SpeedTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.v8logo && (
-            <img src={props.v8logo} alt="Logo" className="w-20 h-20 object-contain mb-3 brightness-0 invert" />
+            <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain mb-3 brightness-0 invert" />
           )}
           <div className="text-3xl font-black text-red-600 mb-2">{props.businessInfo.businessName}</div>
           <div className="text-sm text-gray-400">{props.businessInfo.addressLine1}</div>
@@ -896,7 +891,7 @@ export const DiagnosticTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.v8logo && (
-            <img src={props.v8logo} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+            <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain mb-3" />
           )}
           <div className="text-2xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
           <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>

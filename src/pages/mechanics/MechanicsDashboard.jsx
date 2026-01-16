@@ -213,6 +213,8 @@ const MechanicsDashboard = () => {
     setVehicleYear(jobCard.vehicle?.year || "");
     setVehicleReg(jobCard.vehicle?.registration || "");
     setVehicleVin(jobCard.vehicle?.vin || "");
+    setPreAuth(jobCard.vehicle?.preAuth || "");
+    setAuthCode(jobCard.vehicle?.authCode || "");
     setVehicleMileage(jobCard.vehicle?.mileage || "");
     setItems(jobCard.items || []);
     setShowJobCardsList(false);
@@ -350,6 +352,8 @@ const MechanicsDashboard = () => {
   const [vehicleReg, setVehicleReg] = useState("ABC 123 GP");
   const [vehicleVin, setVehicleVin] = useState("1HGBH41JXMN109186");
   const [vehicleMileage, setVehicleMileage] = useState("45000");
+  const [preAuth, setPreAuth] = useState("AUTH123");
+  const [authCode, setAuthCode] = useState("456789");
 
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "V8 POWERED AUTO SERVICE",
@@ -1603,6 +1607,24 @@ const MechanicsDashboard = () => {
                           className="w-full px-4 py-2 border rounded"
                         />
                       </div>
+                       <div>
+                        <div className="text-sm text-gray-500">VIN</div>
+                        <input
+                          type="text"
+                          value={preAuth}
+                          onChange={(e) => setPreAuth(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Mileage (km)</div>
+                        <input
+                          type="text"
+                          value={authCode}
+                          onChange={(e) => setAuthCode(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -1712,8 +1734,8 @@ const MechanicsDashboard = () => {
                     vehicleYear={vehicleYear}
                     vehicleVin={vehicleVin}
                     vehicleMileage={vehicleMileage}
-                    preAuth="AUTH123"
-                    authCode="456789"
+                    preAuth={preAuth}
+                    authCode={authCode}
                     items={items}
                     subtotal={subtotal}
                     vat={vat}
