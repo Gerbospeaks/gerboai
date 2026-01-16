@@ -335,10 +335,10 @@ export const DefaultTemplate = ({
     <div className="bg-red-50 border border-red-200 p-3 mb-4">
       <div className="text-red-600 font-bold text-xs mb-2">BANKING DETAILS</div>
       <div className="text-xs space-y-1">
-        <div><span className="font-semibold">Bank Name:</span> First National Bank</div>
-        <div><span className="font-semibold">Account Holder:</span> V8 POWERED AUTO</div>
-        <div><span className="font-semibold">Branch Name:</span> LIFESTYLE CENTURION(260216)</div>
-        <div><span className="font-semibold">Account Number:</span> 63149991431</div>
+         <div><span className="font-semibold">Bank Name:</span> {businessInfo.bankName || 'First National Bank'}</div>
+        <div><span className="font-semibold">Account Holder:</span> {businessInfo.businessName}</div>
+        <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber || '63149991431'}</div>
+        <div><span className="font-semibold">Branch Code:</span> {businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
 
