@@ -1134,6 +1134,81 @@ const MechanicsDashboard = () => {
                         placeholder="084 583 9929"
                       />
                     </div>
+                     <div className="border-t pt-4 mt-6">
+                      <h3 className="text-lg font-semibold mb-4">
+                        Bank Details
+                      </h3>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Bank Name
+                          </label>
+                          <input
+                            type="text"
+                            value={businessInfo.bankName}
+                            onChange={(e) =>
+                              setBusinessInfo({
+                                ...businessInfo,
+                                bankName: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Account Holder
+                          </label>
+                          <input
+                            type="text"
+                            value={businessInfo.accountHolder}
+                            onChange={(e) =>
+                              setBusinessInfo({
+                                ...businessInfo,
+                                accountHolder: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Account Number
+                          </label>
+                          <input
+                            type="text"
+                            value={businessInfo.accountNumber}
+                            onChange={(e) =>
+                              setBusinessInfo({
+                                ...businessInfo,
+                                accountNumber: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Branch Code
+                          </label>
+                          <input
+                            type="text"
+                            value={businessInfo.branchCode}
+                            onChange={(e) =>
+                              setBusinessInfo({
+                                ...businessInfo,
+                                branchCode: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
                     {/* Add this in your Business Settings modal, after phone fields */}
 <div className="border-t pt-6 mt-6">
   <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>

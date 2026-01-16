@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Check } from 'lucide-react';
+import SignatureStamp from '../SignatureStamp';
 import {
   getFirestore,
   doc,
@@ -129,7 +130,11 @@ export const DefaultTemplate = ({
   items,
   subtotal,
   vat,
-  total
+  total,
+  showStamp = true,
+  stampText = "APPROVED",
+  stampColor = "#d32f2f",
+  showStampDate = true
 }) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     {/* Header Section */}
@@ -261,7 +266,7 @@ export const DefaultTemplate = ({
         </div>
       </div>
     </div>
-
+    
     {/* Payment Information */}
     <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
       <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
@@ -271,6 +276,24 @@ export const DefaultTemplate = ({
         <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber || '62146991441'}</div>
         <div><span className="font-semibold">Branch Code:</span> {businessInfo.branchCode || '250655'}</div>
       </div>
+    </div>
+        {/* Signatures and Stamp */}
+    <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
+      <div>
+        <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
+        <div className="border-b border-black h-8"></div>
+      </div>
+      {showStamp && (
+        <div className="flex justify-end">
+          <SignatureStamp 
+            text={stampText}
+            color={stampColor}
+            showDate={showStampDate}
+            rotation={-5}
+            size="small"
+          />
+        </div>
+      )}
     </div>
 
     {/* Footer Note */}
@@ -388,7 +411,23 @@ export const ProfessionalTemplate = (props) => (
         <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
-
+ {props.showStamp && (
+      <div className="text-center mb-4">
+        <div className="mb-4">
+          <SignatureStamp 
+            text={props.stampText}
+            color={props.stampColor}
+            showDate={props.showStampDate}
+            rotation={-5}
+            size="medium"
+          />
+        </div>
+        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
+          <p className="text-sm font-semibold">Authorized Signature</p>
+          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+        </div>
+      </div>
+    )}
     {/* Footer Note */}
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       Thank you for your business. Payment is due within 30 days of invoice date.
@@ -491,7 +530,23 @@ export const ModernTemplate = (props) => (
         <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
-
+ {props.showStamp && (
+      <div className="text-center mb-4">
+        <div className="mb-4">
+          <SignatureStamp 
+            text={props.stampText}
+            color={props.stampColor}
+            showDate={props.showStampDate}
+            rotation={-5}
+            size="medium"
+          />
+        </div>
+        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
+          <p className="text-sm font-semibold">Authorized Signature</p>
+          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+        </div>
+      </div>
+    )}
     {/* Footer Note */}
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       Thank you for your business. Payment is due within 30 days of invoice date.
@@ -582,7 +637,23 @@ export const CorporateTemplate = (props) => (
           <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
         </div>
       </div>
-
+ {props.showStamp && (
+      <div className="text-center mb-4">
+        <div className="mb-4">
+          <SignatureStamp 
+            text={props.stampText}
+            color={props.stampColor}
+            showDate={props.showStampDate}
+            rotation={-5}
+            size="medium"
+          />
+        </div>
+        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
+          <p className="text-sm font-semibold">Authorized Signature</p>
+          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+        </div>
+      </div>
+    )}
       {/* Footer Note */}
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
         Thank you for your business. Payment is due within 30 days of invoice date.
@@ -681,7 +752,23 @@ export const ContemporaryTemplate = (props) => (
           <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
         </div>
       </div>
-
+ {props.showStamp && (
+      <div className="text-center mb-4">
+        <div className="mb-4">
+          <SignatureStamp 
+            text={props.stampText}
+            color={props.stampColor}
+            showDate={props.showStampDate}
+            rotation={-5}
+            size="medium"
+          />
+        </div>
+        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
+          <p className="text-sm font-semibold">Authorized Signature</p>
+          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+        </div>
+      </div>
+    )}
       {/* Footer Note */}
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
         Thank you for your business. Payment is due within 30 days of invoice date.
@@ -787,7 +874,23 @@ export const DetailedTemplate = (props) => (
         <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
-
+ {props.showStamp && (
+      <div className="text-center mb-4">
+        <div className="mb-4">
+          <SignatureStamp 
+            text={props.stampText}
+            color={props.stampColor}
+            showDate={props.showStampDate}
+            rotation={-5}
+            size="medium"
+          />
+        </div>
+        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
+          <p className="text-sm font-semibold">Authorized Signature</p>
+          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+        </div>
+      </div>
+    )}
     {/* Footer Note */}
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       Thank you for your business. Payment is due within 30 days of invoice date.
@@ -796,23 +899,39 @@ export const DetailedTemplate = (props) => (
 );
 
 // Template Renderer
-export const TemplateRenderer = ({ templateId, ...props }) => {
+export const TemplateRenderer = ({
+  templateId, 
+  documentType = 'invoice',
+  stampText = "APPROVED",
+  stampColor = "#d32f2f",
+  showStampDate = true,
+  showStamp = true,
+  ...props 
+}) => {
+   const templateProps = { 
+    ...props, 
+    documentType,
+    stampText,
+    stampColor,
+    showStampDate,
+    showStamp
+   };
   switch (templateId) {
     case 'default':
-      return <DefaultTemplate {...props} />;
+      return <DefaultTemplate {...templateProps} />;
     case 'professional':
-      return <ProfessionalTemplate {...props} />;
+      return <ProfessionalTemplate {...templateProps} />;
     case 'modern':
-      return <ModernTemplate {...props} />;
+      return <ModernTemplate {...templateProps} />;
     case 'corporate':
     case 'premium':
-      return <CorporateTemplate {...props} />;
+      return <CorporateTemplate {...templateProps} />;
     case 'contemporary':
-      return <ContemporaryTemplate {...props} />;
+      return <ContemporaryTemplate {...templateProps} />;
     case 'detailed':
-      return <DetailedTemplate {...props} />;
+      return <DetailedTemplate {...templateProps} />;
     default:
-      return <DefaultTemplate {...props} />;
+      return <DefaultTemplate {...templateProps} />;
   }
 };
 

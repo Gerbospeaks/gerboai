@@ -24,6 +24,7 @@ import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
 import ClientModal from './ClientModal';
 import ClientsListModal from '../ClientsListModal';
+import SignatureStamp from '../SignatureStamp';
 import {
   ChevronDown,
   ChevronLeft,
@@ -97,7 +98,12 @@ const ConstructionDashboard = () => {
   const [clients, setClients] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [selectedClient, setSelectedClient] = useState(null);
-
+const [stampSettings, setStampSettings] = useState({
+    text: "APPROVED",
+    color: "#d32f2f",
+    showDate: true,
+    enabled: true
+  });
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -1078,7 +1084,157 @@ const ConstructionDashboard = () => {
                         placeholder="082 345 6789"
                       />
                     </div>
+                     <div className="border-t pt-4 mt-6">
+                      <h3 className="text-lg font-semibold mb-4">
+                        Bank Details
+                      </h3>
 
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Bank Name
+                          </label>
+                          <input
+                            type="text"
+                            value={companyInfo.bankName}
+                            onChange={(e) =>
+                              setCompanyInfo({
+                                ...companyInfo,
+                                bankName: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Account Holder
+                          </label>
+                          <input
+                            type="text"
+                            value={companyInfo.accountHolder}
+                            onChange={(e) =>
+                              setCompanyInfo({
+                                ...companyInfo,
+                                accountHolder: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Account Number
+                          </label>
+                          <input
+                            type="text"
+                            value={companyInfo.accountNumber}
+                            onChange={(e) =>
+                              setCompanyInfo({
+                                ...companyInfo,
+                                accountNumber: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Branch Code
+                          </label>
+                          <input
+                            type="text"
+                            value={companyInfo.branchCode}
+                            onChange={(e) =>
+                              setCompanyInfo({
+                                ...companyInfo,
+                                branchCode: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+<div className="border-t pt-6 mt-6">
+  <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>
+  
+  <div className="space-y-4">
+    <div>
+      <label className="flex items-center space-x-2 mb-4">
+        <input
+          type="checkbox"
+          checked={stampSettings.enabled}
+          onChange={(e) => setStampSettings({...stampSettings, enabled: e.target.checked})}
+          className="w-4 h-4 rounded"
+        />
+        <span className="text-sm font-medium">Show approval stamp on invoices and quotes</span>
+      </label>
+    </div>
+
+    {stampSettings.enabled && (
+      <>
+        <div>
+          <label className="block text-sm font-medium mb-2">Stamp Text</label>
+          <input
+            type="text"
+            value={stampSettings.text}
+            onChange={(e) => setStampSettings({...stampSettings, text: e.target.value.toUpperCase()})}
+            className="w-full px-4 py-2 border rounded-lg uppercase"
+            placeholder="APPROVED"
+            maxLength={15}
+          />
+          <p className="text-xs text-gray-500 mt-1">Max 15 characters</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Stamp Color</label>
+          <select
+            value={stampSettings.color}
+            onChange={(e) => setStampSettings({...stampSettings, color: e.target.value})}
+            className="w-full px-4 py-2 border rounded-lg"
+          >
+            <option value="#d32f2f">🔴 Red (Traditional)</option>
+            <option value="#1976d2">🔵 Blue (Professional)</option>
+            <option value="#388e3c">🟢 Green (Approved)</option>
+            <option value="#7b1fa2">🟣 Purple (Premium)</option>
+            <option value="#000000">⚫ Black (Formal)</option>
+            <option value="#f57c00">🟠 Orange (Attention)</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={stampSettings.showDate}
+              onChange={(e) => setStampSettings({...stampSettings, showDate: e.target.checked})}
+              className="w-4 h-4 rounded"
+            />
+            <span className="text-sm font-medium">Include date on stamp</span>
+          </label>
+        </div>
+
+        {/* Preview */}
+        <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
+          <div className="flex justify-center">
+            <SignatureStamp 
+              text={stampSettings.text}
+              color={stampSettings.color}
+              showDate={stampSettings.showDate}
+              rotation={-5}
+              size="medium"
+            />
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+</div>
                     <button
                       onClick={handleSaveCompanyInfo}
                       className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700"
