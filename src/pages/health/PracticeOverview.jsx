@@ -229,19 +229,19 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             <span>Revenue Overview</span>
           </h3>
           <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+            <div className="flex justify-between items-center p-3 bg-gray-300 rounded">
               <span className="text-sm text-gray-600">This Month</span>
               <span className="text-lg font-semibold text-green-600">
                 {formatCurrency(stats.monthlyRevenue)}
               </span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+            <div className="flex justify-between items-center p-3 bg-gray-300 rounded">
               <span className="text-sm text-gray-600">Total Revenue</span>
               <span className="text-lg font-semibold text-blue-600">
                 {formatCurrency(stats.totalRevenue)}
               </span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+            <div className="flex justify-between items-center p-3 bg-gray-300 rounded">
               <span className="text-sm text-gray-600">Average Invoice</span>
               <span className="text-lg font-semibold text-purple-600">
                 {formatCurrency(stats.averageInvoiceValue)}
@@ -305,7 +305,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             {recentActivity.map((activity) => (
               <div 
                 key={activity.id}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                className="flex items-center justify-between p-4 bg-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div className="flex items-center space-x-4">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${

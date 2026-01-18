@@ -81,7 +81,7 @@ const PatientsListModal = ({
         </div>
 
         {/* Search and Filter Bar */}
-        <div className="p-4 border-b bg-gray-50">
+        <div className="p-4 border-b bg-gray-300">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -244,7 +244,7 @@ const PatientsListModal = ({
                     </button>
                     <button
                       onClick={() => onEditPatient(patient)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
                     >
                       Edit Details
                     </button>
@@ -263,7 +263,7 @@ const PatientsListModal = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t bg-gray-50 flex justify-between items-center">
+        <div className="p-4 border-t bg-gray-300 flex justify-between items-center">
           <div className="text-sm text-gray-600">
             Showing {filteredPatients.length} of {patients.length} total patients
           </div>

@@ -51,7 +51,7 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-4 border-b flex items-center justify-between bg-slate-900 text-white">
+        <div className="p-4 border-b flex items-center justify-between bg-gray-800 text-white">
           <div className="flex items-center gap-3">
             <User className="w-6 h-6" />
             <h2 className="text-xl font-semibold">Clients ({clients.length})</h2>
@@ -64,7 +64,7 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
           </button>
         </div>
 
-        <div className="p-4 border-b bg-gray-50 space-y-3">
+        <div className="p-4 border-b bg-gray-300 space-y-3">
           <div className="flex gap-3 flex-wrap">
             <div className="flex-1 min-w-[200px] relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -93,7 +93,7 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
                 className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
                   filterType === type
                     ? 'bg-orange-600 text-white'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-300'
                 }`}
               >
                 {type}
@@ -180,7 +180,7 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
                     </button>
                     <button
                       onClick={() => onEditClient(client)}
-                      className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
@@ -203,7 +203,7 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
           )}
         </div>
 
-        <div className="p-4 border-t bg-gray-50 flex justify-between items-center">
+        <div className="p-4 border-t bg-gray-300 flex justify-between items-center">
           <div className="text-sm text-gray-600">
             Showing {filteredClients.length} of {clients.length} clients
           </div>

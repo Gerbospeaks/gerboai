@@ -265,7 +265,7 @@ const FinancialOverview = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-300 p-4 md:p-6">
       {loading ? (
         <div className="flex items-center justify-center h-screen">
           <div className="text-center">
@@ -287,7 +287,7 @@ const FinancialOverview = ({ user }) => {
             <button
               onClick={() => setTimeRange('week')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                timeRange === 'week' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                timeRange === 'week' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
               }`}
             >
               Week
@@ -295,7 +295,7 @@ const FinancialOverview = ({ user }) => {
             <button
               onClick={() => setTimeRange('month')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                timeRange === 'month' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                timeRange === 'month' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
               }`}
             >
               Month
@@ -303,7 +303,7 @@ const FinancialOverview = ({ user }) => {
             <button
               onClick={() => setTimeRange('year')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                timeRange === 'year' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                timeRange === 'year' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
               }`}
             >
               Year

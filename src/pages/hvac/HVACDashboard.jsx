@@ -282,7 +282,7 @@ const total = subtotal + vat;
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-300">
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
@@ -446,11 +446,11 @@ const total = subtotal + vat;
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
                 <CheckSquare className="w-4 h-4" />
                 <span>Mark as Paid</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
@@ -500,11 +500,11 @@ const total = subtotal + vat;
         {/* Mobile Action Buttons Bar */}
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
           <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
               <CheckSquare className="w-4 h-4" />
               <span>Mark as Paid</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
               <Edit className="w-4 h-4" />
               <span>Edit</span>
             </button>
@@ -855,7 +855,7 @@ const total = subtotal + vat;
 
                   <div className="flex gap-4 mb-4">
   {/* Technician Details */}
-  <div className="bg-gray-50 rounded p-3 text-xs flex-1">
+  <div className="bg-gray-300 rounded p-3 text-xs flex-1">
     <div className="font-medium mb-1">Technician Details</div>
     <div className="text-gray-600">
       James Anderson - Cert. HVAC Technician
@@ -991,7 +991,7 @@ const total = subtotal + vat;
                 }
                 
                 /* Hide main container overflow */
-                .flex.h-screen.bg-gray-50,
+                .flex.h-screen.bg-gray-300,
                 .flex-1.overflow-auto {
                   overflow: hidden !important;
                 }

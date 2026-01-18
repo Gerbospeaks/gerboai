@@ -412,7 +412,7 @@ const AppointmentsCalendar = ({ user }) => {
 
             <button
               onClick={loadAppointments}
-              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -426,7 +426,7 @@ const AppointmentsCalendar = ({ user }) => {
                 className={`px-4 py-2 rounded-lg capitalize ${
                   viewMode === mode
                     ? "bg-blue-600 text-white"
-                    : "border border-gray-300 hover:bg-gray-50"
+                    : "border border-gray-300 hover:bg-gray-300"
                 }`}
               >
                 {mode}
@@ -534,7 +534,7 @@ const AppointmentsCalendar = ({ user }) => {
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300"
               >
                 Today
               </button>
@@ -578,7 +578,7 @@ const AppointmentsCalendar = ({ user }) => {
                       ? "bg-blue-50 border-blue-500"
                       : isSelected
                       ? "bg-blue-100 border-blue-400"
-                      : "hover:bg-gray-50 border-gray-200"
+                      : "hover:bg-gray-300 border-gray-200"
                   }`}
                 >
                   <div
@@ -624,7 +624,7 @@ const AppointmentsCalendar = ({ user }) => {
             </h2>
             <button
               onClick={() => setViewMode("month")}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300"
             >
               Back to Month
             </button>
@@ -644,7 +644,7 @@ const AppointmentsCalendar = ({ user }) => {
                     setSelectedAppointment(apt);
                     setShowDetailsModal(true);
                   }}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-300 cursor-pointer"
                 >
                   <div className="flex items-center space-x-4">
                     <div className="w-16 text-center">
@@ -909,7 +909,7 @@ const AppointmentsCalendar = ({ user }) => {
             </div>
 
             <div className="overflow-auto p-6 space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-gray-300 rounded-lg">
                 <div>
                   <div className="text-2xl font-bold">
                     {selectedAppointment.patientName}

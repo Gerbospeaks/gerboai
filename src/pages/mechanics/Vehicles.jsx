@@ -219,7 +219,7 @@ const Vehicles = ({ user }) => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Vehicles</h1>
@@ -405,7 +405,7 @@ const Vehicles = ({ user }) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(vehicle)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 transition-colors text-sm"
                   >
                     <Edit className="w-4 h-4" />
                     Edit
@@ -700,7 +700,7 @@ const Vehicles = ({ user }) => {
                       setShowModal(false);
                       resetForm();
                     }}
-                    className="flex-1 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex-1 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-300 transition-colors"
                   >
                     Cancel
                   </button>

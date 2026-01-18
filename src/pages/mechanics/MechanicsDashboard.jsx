@@ -666,7 +666,7 @@ const MechanicsDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-300">
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -677,7 +677,7 @@ const MechanicsDashboard = () => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-900 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -689,13 +689,13 @@ const MechanicsDashboard = () => {
           </div>
 
           <nav className="space-y-1">
-            <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+            <div className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer">
               <Home className="w-5 h-5" />
               <span>Home</span>
             </div>
             <div
               onClick={() => setShowSettings(true)}
-              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer"
             >
               <Settings className="w-5 h-5" />
               <span>Settings</span>
@@ -704,14 +704,14 @@ const MechanicsDashboard = () => {
             <div className="pt-4">
               <div
                 onClick={() => setActiveView("financial-overview")}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer"
               >
                 <TrendingUp className="w-5 h-5" />
                 <span>Business Overview</span>
               </div>
 
               <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+                <div className="flex items-center justify-between px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer">
                   <div className="flex items-center space-x-3">
                     <ClipboardList className="w-5 h-5" />
                     <span>Job Cards</span>
@@ -736,7 +736,7 @@ const MechanicsDashboard = () => {
                     }}
                     className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
                   >
-                    Create Job Card
+                    Create Invoice
                   </div>
                   <div
                     onClick={() => setShowJobCardsList(!showJobCardsList)}
@@ -749,11 +749,16 @@ const MechanicsDashboard = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
+                <div className="mt-2">
+              <div className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
+                <div className="flex items-center space-x-3">
                 <Users className="w-5 h-5" />
                 <span>Customers</span>
+                </div>
+                 <ChevronDown className="w-4 h-4" />
+
               </div>
+
               <div className="ml-8 mt-1 space-y-1">
                 <div
                   onClick={handleAddNewCustomer}
@@ -768,16 +773,17 @@ const MechanicsDashboard = () => {
                   All Customers ({savedCustomers.length})
                 </div>
               </div>
+               </div>
               <div
                 onClick={() => setActiveView("templates")}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer"
               >
                 <FileText className="w-5 h-5" />
                 <span>Invoice Templates</span>
               </div>
               <div
                 onClick={() => setActiveView("vehicles")}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer"
               >
                 <Car className="w-5 h-5" />
                 <span>Vehicles</span>
@@ -785,21 +791,15 @@ const MechanicsDashboard = () => {
 
               <div
                 onClick={() => setActiveView("parts-inventory")}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer"
               >
                 <Package className="w-5 h-5" />
                 <span>Parts Inventory</span>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <Receipt className="w-5 h-5" />
-                  <span>Invoices </span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
+             
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+              <div className="flex items-center justify-between px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <CreditCard className="w-5 h-5" />
                   <span>Payments</span>
@@ -836,7 +836,7 @@ const MechanicsDashboard = () => {
       </div>
 
       <div className="flex-1 overflow-auto">
-        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+        <div className="bg-gray-200 border-b border-gray-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 lg:space-x-4">
               <button
@@ -847,16 +847,16 @@ const MechanicsDashboard = () => {
               </button>
               <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
               <h1 className="text-base lg:text-xl font-semibold">
-                {documentType === 'quote' ? 'Quote' : 'Job Card'} #{jobCardNumber || "— not saved yet —"}
+                {documentType === 'quote' ? 'Quote' : 'Invoice'} #{jobCardNumber || "— not saved yet —"}
               </h1>
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
                 <CheckSquare className="w-4 h-4" />
                 <span>Mark Complete</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
@@ -925,7 +925,7 @@ const MechanicsDashboard = () => {
         <div className="sticky top-0 z-40 lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
           <div className="flex gap-2 overflow-x-auto pb-2">
             <button  onClick={handleConvertToInvoice}
-            className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
+            className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
               <CheckSquare className="w-4 h-4" />
               <span>Convert to Invoice</span>
             </button>
@@ -953,7 +953,7 @@ const MechanicsDashboard = () => {
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-orange-300 text-white rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap text-sm"
             >
               <Download className="w-4 h-4" />
               <span>Save PDF</span>
@@ -968,7 +968,7 @@ const MechanicsDashboard = () => {
           </div>
         </div>
           
-        <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+        <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
             {["JobCard", "Parts", "History", "Notes"].map((tab) => (
               <button
@@ -1019,7 +1019,7 @@ const MechanicsDashboard = () => {
                             className="w-24 h-24 object-contain border rounded-lg"
                           />
                         ) : (
-                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-50">
+                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
                             <Upload className="w-8 h-8 text-gray-400" />
                           </div>
                         )}
@@ -1274,7 +1274,7 @@ const MechanicsDashboard = () => {
         </div>
 
         {/* Preview */}
-        <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+        <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
           <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
           <div className="flex justify-center">
             <SignatureStamp 
@@ -1345,7 +1345,7 @@ const MechanicsDashboard = () => {
                         <div
                           key={card.id}
                           onClick={() => loadJobCard(card)}
-                          className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1438,7 +1438,7 @@ const MechanicsDashboard = () => {
                     </div>
                   </div>
 
-                  <div className="bg-gray-500 border border-gray-200 rounded-lg p-6">
+                  <div className="bg-gray-300 border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold flex items-center space-x-2">
                         <Users className="w-5 h-5" />
@@ -1544,7 +1544,7 @@ const MechanicsDashboard = () => {
                     </div>
                   </div>
 
-                  <div className="bg-gray-500 border border-gray-200 rounded-lg p-6">
+                  <div className="bg-gray-300 border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold flex items-center space-x-2">
                         <Car className="w-5 h-5" />
@@ -1781,7 +1781,7 @@ const MechanicsDashboard = () => {
                     
                     nav,
                     [class*="sidebar"],
-                    [class*="bg-slate-900"],
+                    [class*="bg-gray-800"],
                     button:not([style]) {
                       display: none !important;
                     }

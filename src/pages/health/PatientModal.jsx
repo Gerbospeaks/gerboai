@@ -410,7 +410,7 @@ const PatientModal = ({ showModal, setShowModal, existingPatient, onPatientSaved
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 transition-colors"
               disabled={loading}
             >
               Cancel

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 function InvoiceDashboard() {
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-300">
       {/* Sidebar */}
       <div className="w-64 bg-white border-r border-gray-200">
         <div className="p-4">
@@ -69,7 +69,7 @@ function InvoiceDashboard() {
               <h2 className="text-lg font-semibold">Recent Invoices</h2>
             </div>
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-300">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice #</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
@@ -79,21 +79,21 @@ function InvoiceDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                <tr className="hover:bg-gray-50">
+                <tr className="hover:bg-gray-300">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">INV-001</td>
                   <td className="px-6 py-4 text-sm text-gray-500">Acme Corp</td>
                   <td className="px-6 py-4 text-sm text-gray-900">$5,280.00</td>
                   <td className="px-6 py-4 text-sm"><span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Paid</span></td>
                   <td className="px-6 py-4 text-sm text-gray-500">Jan 15, 2026</td>
                 </tr>
-                <tr className="hover:bg-gray-50">
+                <tr className="hover:bg-gray-300">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">INV-002</td>
                   <td className="px-6 py-4 text-sm text-gray-500">TechStart Inc</td>
                   <td className="px-6 py-4 text-sm text-gray-900">$3,420.00</td>
                   <td className="px-6 py-4 text-sm"><span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Pending</span></td>
                   <td className="px-6 py-4 text-sm text-gray-500">Jan 10, 2026</td>
                 </tr>
-                <tr className="hover:bg-gray-50">
+                <tr className="hover:bg-gray-300">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">INV-003</td>
                   <td className="px-6 py-4 text-sm text-gray-500">Global Solutions</td>
                   <td className="px-6 py-4 text-sm text-gray-900">$8,750.00</td>

@@ -462,7 +462,7 @@ const Templates = ({ user }) => {
                 </div>
 
                 {/* Preview Description */}
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                <div className="mb-4 p-3 bg-gray-300 rounded-lg">
                   <div className="text-xs font-semibold text-gray-500 mb-1">PREVIEW</div>
                   <p className="text-xs text-gray-600 leading-relaxed">{template.preview}</p>
                 </div>
@@ -490,7 +490,7 @@ const Templates = ({ user }) => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setShowPreview(template.id)}
-                      className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 flex items-center gap-2 transition-all"
+                      className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-300 hover:border-gray-400 flex items-center gap-2 transition-all"
                     >
                       <Eye className="w-4 h-4" />
                       <span className="hidden sm:inline">Preview</span>
@@ -594,7 +594,7 @@ const Templates = ({ user }) => {
                 ✕
               </button>
             </div>
-            <div className="overflow-auto p-8 bg-gray-50">
+            <div className="overflow-auto p-8 bg-gray-300">
               <div className="bg-white rounded-lg shadow-lg p-8 max-w-3xl mx-auto">
                 <div className="text-center mb-6">
                   {React.createElement(TEMPLATES[showPreview].icon, { className: "w-16 h-16 text-purple-600 mx-auto mb-4" })}

@@ -199,7 +199,7 @@ const GuestModal = ({ showModal, setShowModal, existingGuest, onGuestSaved }) =>
                     name="guestId"
                     value={formData.guestId}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-300"
                     placeholder="GST-2026-1234"
                     readOnly
                   />
@@ -352,7 +352,7 @@ const GuestModal = ({ showModal, setShowModal, existingGuest, onGuestSaved }) =>
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
+        <div className="p-6 border-t bg-gray-300 flex justify-end gap-3">
           <button
             type="button"
             onClick={handleClose}

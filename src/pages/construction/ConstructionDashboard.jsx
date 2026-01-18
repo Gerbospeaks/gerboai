@@ -109,6 +109,8 @@ const ConstructionDashboard = () => {
   const [quoteId, setQuoteId] = useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [showQuotesList, setShowQuotesList] = useState(false);
+  const [savedInvoices, setSavedInvoices] = useState([]);
+  const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showClientsList, setShowClientsList] = useState(false);
   const [activeView, setActiveView] = useState("invoice");
@@ -142,6 +144,7 @@ const ConstructionDashboard = () => {
 
     loadDocumentNumber();
     loadSavedQuotes();
+    loadSavedInvoices();  
   }, [user, documentType]);
 
   const loadClients = async () => {
@@ -180,6 +183,21 @@ const ConstructionDashboard = () => {
     }));
 
     setSavedQuotes(quotes);
+  };
+ const loadSavedInvoices = async () => {
+    if (!user?.uid) return;
+
+    const db = getFirestore();
+    const invoicesRef = collection(db, "users", user.uid, "invoices");
+    const q = query(invoicesRef, orderBy("createdAt", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+
+    const invoices = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setSavedInvoices(invoices);
   };
 
   const handleAddNewClient = () => {
@@ -696,7 +714,7 @@ const ConstructionDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-300">
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -707,7 +725,7 @@ const ConstructionDashboard = () => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-900 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -783,8 +801,9 @@ const ConstructionDashboard = () => {
                   >
                     Create Invoice
                   </div>
-                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
-                    All Invoices
+                  <div  onClick={() => setShowInvoicesList(!showInvoicesList)}
+                  className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
+                    All Invoices({savedInvoices.length})
                   </div>
                   <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
                     Pending Payment
@@ -912,11 +931,11 @@ const ConstructionDashboard = () => {
               </div>
 
               <div className="hidden lg:flex items-center space-x-3 print:hidden">
-                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
                   <CheckSquare className="w-4 h-4" />
                   <span>Approve</span>
                 </button>
-                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
                   <Edit className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
@@ -974,11 +993,11 @@ const ConstructionDashboard = () => {
 
           <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
             <div className="flex gap-2 overflow-x-auto pb-2">
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
                 <CheckSquare className="w-4 h-4" />
                 <span>Approve</span>
               </button>
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
@@ -1003,7 +1022,7 @@ const ConstructionDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+          <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
             <div className="flex space-x-4 lg:space-x-8 min-w-max">
               {[
                 documentType === "quote" ? "Quote" : "Invoice",
@@ -1055,7 +1074,7 @@ const ConstructionDashboard = () => {
                             className="w-24 h-24 object-contain border rounded-lg"
                           />
                         ) : (
-                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-50">
+                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
                             <Upload className="w-8 h-8 text-gray-400" />
                           </div>
                         )}
@@ -1426,7 +1445,7 @@ const ConstructionDashboard = () => {
                             </div>
 
                             {/* Preview */}
-                            <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                            <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
                               <p className="text-sm font-medium mb-4 text-center text-gray-600">
                                 Preview:
                               </p>
@@ -1497,7 +1516,7 @@ const ConstructionDashboard = () => {
                         <div
                           key={quote.id}
                           onClick={() => loadQuote(quote)}
-                          className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1960,7 +1979,7 @@ const ConstructionDashboard = () => {
                     
                     nav,
                     [class*="sidebar"],
-                    [class*="bg-slate-900"],
+                    [class*="bg-gray-800"],
                     button:not([style]) {
                       display: none !important;
                     }

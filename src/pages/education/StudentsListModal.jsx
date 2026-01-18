@@ -279,7 +279,7 @@ const StudentsListModal = ({
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t bg-gray-50">
+          <div className="p-4 border-t bg-gray-300">
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-600">
                 Showing {filteredStudents.length} of {students.length} students
@@ -309,7 +309,7 @@ const StudentsListModal = ({
               </div>
             </div>
 
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mb-6 p-4 bg-gray-300 rounded-lg">
               <p className="text-sm text-gray-700 mb-2">
                 Are you sure you want to delete this student?
               </p>

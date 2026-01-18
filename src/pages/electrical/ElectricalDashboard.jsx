@@ -548,7 +548,7 @@ const [stampSettings, setStampSettings] = useState({
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-300">
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -559,7 +559,7 @@ const [stampSettings, setStampSettings] = useState({
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-900 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -718,11 +718,11 @@ const [stampSettings, setStampSettings] = useState({
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
                 <CheckSquare className="w-4 h-4" />
                 <span>Mark Complete</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
@@ -778,11 +778,11 @@ const [stampSettings, setStampSettings] = useState({
 
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
           <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
               <CheckSquare className="w-4 h-4" />
               <span>Complete</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
               <Edit className="w-4 h-4" />
               <span>Edit</span>
             </button>
@@ -808,7 +808,7 @@ const [stampSettings, setStampSettings] = useState({
         </div>
 
 
-        <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+        <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
             {["JobCard", "Parts", "History", "Notes"].map((tab) => (
               <button
@@ -854,7 +854,7 @@ const [stampSettings, setStampSettings] = useState({
                             className="w-24 h-24 object-contain border rounded-lg"
                           />
                         ) : (
-                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-50">
+                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
                             <Upload className="w-8 h-8 text-gray-400" />
                           </div>
                         )}
@@ -1145,7 +1145,7 @@ const [stampSettings, setStampSettings] = useState({
         </div>
 
         {/* Preview */}
-        <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+        <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
           <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
           <div className="flex justify-center">
             <SignatureStamp 
@@ -1213,7 +1213,7 @@ const [stampSettings, setStampSettings] = useState({
                         <div
                           key={card.id}
                           onClick={() => loadJobCard(card)}
-                          className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1594,7 +1594,7 @@ const [stampSettings, setStampSettings] = useState({
                 
                 nav,
                 [class*="sidebar"],
-                [class*="bg-slate-900"],
+                [class*="bg-gray-800"],
                 button:not([style]) {
                   display: none !important;
                 }

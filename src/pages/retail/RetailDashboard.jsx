@@ -346,7 +346,7 @@ const RetailDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-300">
       {/* Sidebar Overlay */}
       {sidebarOpen && (
         <div
@@ -599,7 +599,7 @@ const RetailDashboard = () => {
                     </thead>
                     <tbody>
                       {orders.slice(0, 5).map((order) => (
-                        <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-300">
                           <td className="py-3 px-2 text-sm font-medium text-gray-900">{order.id}</td>
                           <td className="py-3 px-2 text-sm text-gray-600">{order.customerName || 'N/A'}</td>
                           <td className="py-3 px-2 text-sm font-medium text-gray-900">${order.total || 0}</td>
@@ -701,7 +701,7 @@ const RetailDashboard = () => {
                   </thead>
                   <tbody>
                     {orders.map((order) => (
-                      <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-300">
                         <td className="py-3 px-2 text-sm font-medium text-gray-900">{order.id}</td>
                         <td className="py-3 px-2 text-sm text-gray-600">
                           {order.createdAt?.toDate?.().toLocaleDateString() || 'N/A'}
@@ -751,7 +751,7 @@ const RetailDashboard = () => {
                         className="w-24 h-24 object-cover rounded-lg border"
                       />
                     ) : (
-                      <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-50">
+                      <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
                         <Upload className="w-8 h-8 text-gray-400" />
                       </div>
                     )}
@@ -908,7 +908,7 @@ const RetailDashboard = () => {
                         className="w-24 h-24 object-contain border rounded-lg"
                       />
                     ) : (
-                      <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-50">
+                      <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
                         <Upload className="w-8 h-8 text-gray-400" />
                       </div>
                     )}

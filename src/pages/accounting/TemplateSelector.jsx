@@ -69,7 +69,7 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-300"
       >
         <FileText className="w-4 h-4" />
         <span className="hidden sm:inline">{templateNames[selectedTemplate] || 'Select Template'}</span>
@@ -94,7 +94,7 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
                 <button
                   key={templateId}
                   onClick={() => handleSelectTemplate(templateId)}
-                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center justify-between ${
+                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-300 flex items-center justify-between ${
                     selectedTemplate === templateId ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
                   }`}
                 >
@@ -353,7 +353,7 @@ export const ProfessionalTemplate = (props) => (
           <div>{props.customerPhone}</div>
         </div>
       </div>
-      <div className="bg-gray-50 p-4 rounded">
+      <div className="bg-gray-300 p-4 rounded">
         <div className="font-bold text-sm mb-2 text-gray-700">PAYMENT TERMS</div>
         <div className="text-xs space-y-1">
           <div>Terms: Net 30 Days</div>
@@ -463,7 +463,7 @@ export const ModernTemplate = (props) => (
     </div>
 
     <div className="grid grid-cols-2 gap-6 mb-6">
-      <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="bg-gray-300 p-4 rounded-lg">
         <div className="text-sm font-bold text-gray-500 mb-3">BILL TO</div>
         <div className="space-y-1 text-sm">
           <div className="font-semibold text-lg">{props.customerName}</div>
@@ -493,7 +493,7 @@ export const ModernTemplate = (props) => (
       </thead>
       <tbody>
         {props.items.map((item, i) => (
-          <tr key={i} className="border-b hover:bg-gray-50">
+          <tr key={i} className="border-b hover:bg-gray-300">
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
             <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
@@ -715,7 +715,7 @@ export const ContemporaryTemplate = (props) => (
         </thead>
         <tbody>
           {props.items.map((item, i) => (
-            <tr key={i} className="border-b border-gray-200 hover:bg-gray-50">
+            <tr key={i} className="border-b border-gray-200 hover:bg-gray-300">
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
               <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>

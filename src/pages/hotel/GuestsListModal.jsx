@@ -167,7 +167,7 @@ const GuestsListModal = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="px-6 py-3 border-b bg-gray-50 flex justify-between items-center">
+        <div className="px-6 py-3 border-b bg-gray-300 flex justify-between items-center">
           <div className="flex gap-2">
             <button
               onClick={onAddNewGuest}
@@ -227,7 +227,7 @@ const GuestsListModal = ({
                 >
                   <div 
                     onClick={() => handleLoadGuest(guest)}
-                    className="p-5 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="p-5 cursor-pointer hover:bg-gray-300 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-start gap-3">
@@ -285,7 +285,7 @@ const GuestsListModal = ({
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="px-5 py-3 bg-gray-50 border-t flex justify-end gap-2">
+                  <div className="px-5 py-3 bg-gray-300 border-t flex justify-end gap-2">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -314,7 +314,7 @@ const GuestsListModal = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t bg-gray-50 text-center text-sm text-gray-600">
+        <div className="p-4 border-t bg-gray-300 text-center text-sm text-gray-600">
           Tip: Click on any guest card to load their details into the invoice form
         </div>
       </div>

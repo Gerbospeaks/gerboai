@@ -302,7 +302,7 @@ const PartsInventory = ({ user }) => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-300 border-b border-gray-200">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Part Number
@@ -332,7 +332,7 @@ const PartsInventory = ({ user }) => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredParts.map((part) => (
-                  <tr key={part.id} className="hover:bg-gray-50">
+                  <tr key={part.id} className="hover:bg-gray-300">
                     <td className="px-4 py-3 text-sm font-medium text-gray-900">
                       {part.partNumber}
                     </td>
@@ -563,7 +563,7 @@ const PartsInventory = ({ user }) => {
                 </button>
                 <button
                   onClick={resetForm}
-                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-300"
                 >
                   Cancel
                 </button>

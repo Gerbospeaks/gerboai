@@ -112,7 +112,7 @@ const [stampSettings, setStampSettings] = useState({
                 className="w-24 h-24 object-contain border rounded-lg"
               />
             ) : (
-              <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-50">
+              <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
                 <Upload className="w-8 h-8 text-gray-400" />
               </div>
             )}

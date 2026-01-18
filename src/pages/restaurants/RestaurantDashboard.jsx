@@ -285,7 +285,7 @@ const RestaurantDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-300">
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -543,7 +543,7 @@ const RestaurantDashboard = () => {
                     </thead>
                     <tbody>
                       {orders.slice(0, 5).map((order) => (
-                        <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-300">
                           <td className="py-3 px-2 text-sm font-medium text-gray-900">#{order.id.slice(0, 8)}</td>
                           <td className="py-3 px-2 text-sm text-gray-600">{order.customerName || 'Guest'}</td>
                           <td className="py-3 px-2 text-sm text-gray-600">{order.itemCount || 0} items</td>
@@ -649,7 +649,7 @@ const RestaurantDashboard = () => {
                   </thead>
                   <tbody>
                     {orders.map((order) => (
-                      <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-300">
                         <td className="py-3 px-2 text-sm font-medium text-gray-900">#{order.id}</td>
                         <td className="py-3 px-2 text-sm text-gray-600">
                           {order.createdAt.toLocaleDateString()}
@@ -894,10 +894,10 @@ const RestaurantDashboard = () => {
               </div>
             </div>
 
-            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-6 flex gap-3">
+            <div className="sticky bottom-0 bg-gray-300 border-t border-gray-200 p-6 flex gap-3">
               <button
                 onClick={() => setShowMenuModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300"
               >
                 Cancel
               </button>
@@ -1058,10 +1058,10 @@ const RestaurantDashboard = () => {
               </div>
             </div>
 
-            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-6 flex gap-3">
+            <div className="sticky bottom-0 bg-gray-300 border-t border-gray-200 p-6 flex gap-3">
               <button
                 onClick={() => setShowSettings(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300"
               >
                 Cancel
               </button>

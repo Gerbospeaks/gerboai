@@ -263,7 +263,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-300 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Invoice
@@ -293,7 +293,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
                   return (
                     <tr
                       key={invoice.id}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-gray-300 transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -404,7 +404,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
 
             <div className="overflow-auto p-6 space-y-6">
               {/* Invoice Info */}
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-gray-300 rounded-lg p-4">
                 <h3 className="font-semibold text-lg mb-3 flex items-center space-x-2">
                   <DollarSign className="w-5 h-5 text-orange-600" />
                   <span>Invoice Information</span>
@@ -468,7 +468,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
               </div>
 
               {/* Services */}
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-gray-300 rounded-lg p-4">
                 <h3 className="font-semibold text-lg mb-3">Services</h3>
                 <div className="space-y-2">
                   {selectedInvoice.items?.map((item, index) => (

@@ -192,7 +192,7 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
                   name="clientId"
                   value={formData.clientId}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="CLI-2026-0001"
                   readOnly
                 />
@@ -253,7 +253,7 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
             <div className="flex gap-3 pt-4">
               <button
                 onClick={handleClose}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
                 disabled={saving}
               >
                 Cancel

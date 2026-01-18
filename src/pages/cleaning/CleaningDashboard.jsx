@@ -681,7 +681,7 @@ const CleaningDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-300">
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -692,7 +692,7 @@ const CleaningDashboard = () => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-900 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -868,7 +868,7 @@ const CleaningDashboard = () => {
 
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 flex flex-col">
-          <div className="bg-gray-50 border-b border-gray-200 px-4 lg:px-6 py-4">
+          <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 lg:space-x-4">
                 <button
@@ -898,11 +898,11 @@ const CleaningDashboard = () => {
                     Convert to Invoice
                   </button>
                 )}
-                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
                   <CheckSquare className="w-4 h-4" />
                   <span>Mark Complete</span>
                 </button>
-                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
                   <Edit className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
@@ -964,11 +964,11 @@ const CleaningDashboard = () => {
                   <span>To Invoice</span>
                 </button>
               )}
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
                 <CheckSquare className="w-4 h-4" />
                 <span>Complete</span>
               </button>
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
@@ -993,7 +993,7 @@ const CleaningDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+          <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
             <div className="flex space-x-4 lg:space-x-8 min-w-max">
               {[isQuoteMode ? "Quote" : "Invoice", "Services", "History", "Notes"].map((tab) => (
                 <button
@@ -1041,7 +1041,7 @@ const CleaningDashboard = () => {
                             className="w-24 h-24 object-contain border rounded-lg"
                           />
                         ) : (
-                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-50">
+                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
                             <Upload className="w-8 h-8 text-gray-400" />
                           </div>
                         )}
@@ -1242,7 +1242,7 @@ const CleaningDashboard = () => {
                               </label>
                             </div>
 
-                            <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                            <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
                               <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
                               <div className="flex justify-center">
                                 <SignatureStamp 
@@ -1309,7 +1309,7 @@ const CleaningDashboard = () => {
                         <div
                           key={inv.id}
                           onClick={() => loadInvoice(inv)}
-                          className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1363,7 +1363,7 @@ const CleaningDashboard = () => {
                         <div
                           key={quote.id}
                           onClick={() => loadQuote(quote)}
-                          className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1712,7 +1712,7 @@ const CleaningDashboard = () => {
                     div[class*="border-b"][class*="border-gray"] {
                       display: none !important;
                     }
-                    nav, [class*="sidebar"], [class*="bg-slate-900"], button:not([style]) {
+                    nav, [class*="sidebar"], [class*="bg-gray-800"], button:not([style]) {
                       display: none !important;
                     }
                     .space-y-6 {
