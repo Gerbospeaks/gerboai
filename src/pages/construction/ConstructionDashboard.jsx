@@ -4,8 +4,8 @@ import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
-import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
-import logo from '../../assets/img/solidflo-logo.png';
+import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
+import logo from "../../assets/img/solidflo-logo.png";
 import {
   getFirestore,
   collection,
@@ -22,9 +22,9 @@ import {
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
-import ClientModal from './ClientModal';
-import ClientsListModal from '../ClientsListModal';
-import SignatureStamp from '../SignatureStamp';
+import ClientModal from "./ClientModal";
+import ClientsListModal from "../ClientsListModal";
+import SignatureStamp from "../SignatureStamp";
 import {
   ChevronDown,
   ChevronLeft,
@@ -60,7 +60,7 @@ const generateQuoteNumber = async (userId) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
 
-  const quotesRef = collection(db, "users", userId, "quotes");
+  const quotesRef = collection(db, "users", userId, "quotations"); // Changed from "quotes"
   const q = query(quotesRef, orderBy("createdAt", "desc"), limit(1));
   const snapshot = await getDocs(q);
 
@@ -78,7 +78,28 @@ const generateQuoteNumber = async (userId) => {
   const nextNumber = lastNumber + 1;
   return `QT-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
+const generateInvoiceNumber = async (userId) => {
+  const db = getFirestore();
+  const year = new Date().getFullYear();
 
+  const invoicesRef = collection(db, "users", userId, "invoices");
+  const q = query(invoicesRef, orderBy("createdAt", "desc"), limit(1));
+  const snapshot = await getDocs(q);
+
+  let lastNumber = 1000;
+
+  if (!snapshot.empty) {
+    const lastInvoice = snapshot.docs[0].data();
+    const match = lastInvoice.invoiceNumber?.match(/(\d+)$/);
+
+    if (match) {
+      lastNumber = Number(match[1]);
+    }
+  }
+
+  const nextNumber = lastNumber + 1;
+  return `INV-${year}-${String(nextNumber).padStart(4, "0")}`;
+};
 const ConstructionDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Quote");
@@ -90,48 +111,58 @@ const ConstructionDashboard = () => {
   const [showQuotesList, setShowQuotesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showClientsList, setShowClientsList] = useState(false);
-  const [activeView, setActiveView] = useState('invoice');
+  const [activeView, setActiveView] = useState("invoice");
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [savedClients, setSavedClients] = useState([]);
   const [showClientsListModal, setShowClientsListModal] = useState(false);
   const [showClientModal, setShowClientModal] = useState(false);
   const [clients, setClients] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState('professional');
+  const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [selectedClient, setSelectedClient] = useState(null);
-const [stampSettings, setStampSettings] = useState({
+  const [documentType, setDocumentType] = useState("invoice"); // 'invoice' or 'quote'
+  const [showConvertModal, setShowConvertModal] = useState(false);
+  const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
     showDate: true,
-    enabled: true
+    enabled: true,
   });
   useEffect(() => {
     if (!user?.uid) return;
 
-    const loadQuoteNumber = async () => {
-      const nextQuote = await generateQuoteNumber(user.uid);
-      setQuoteNumber(nextQuote);
+    const loadDocumentNumber = async () => {
+      if (documentType === "quote") {
+        const nextQuote = await generateQuoteNumber(user.uid);
+        setQuoteNumber(nextQuote);
+      } else {
+        const nextInvoice = await generateInvoiceNumber(user.uid);
+        setQuoteNumber(nextInvoice);
+      }
     };
 
-    loadQuoteNumber();
+    loadDocumentNumber();
     loadSavedQuotes();
-  }, [user]);
+  }, [user, documentType]);
 
   const loadClients = async () => {
     try {
-      const q = query(collection(db, "users", user.uid, "clients"), orderBy('createdAt', 'desc'));
+      const q = query(
+        collection(db, "users", user.uid, "clients"),
+        orderBy("createdAt", "desc"),
+      );
       const querySnapshot = await getDocs(q);
       const clientsData = [];
-      
+
       querySnapshot.forEach((doc) => {
         clientsData.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         });
       });
-      
+
       setClients(clientsData);
     } catch (error) {
-      console.error('Error loading clients:', error);
+      console.error("Error loading clients:", error);
     }
   };
 
@@ -212,12 +243,12 @@ const [stampSettings, setStampSettings] = useState({
       ...doc.data(),
     }));
 
-    setSavedClients(clients.filter(c => !c._placeholder));
+    setSavedClients(clients.filter((c) => !c._placeholder));
   };
 
   const handleSaveClient = async () => {
     if (!user?.uid) return;
-    
+
     if (!clientName || !clientPhone) {
       alert("Please enter client name and phone number");
       return;
@@ -234,7 +265,7 @@ const [stampSettings, setStampSettings] = useState({
         company: clientCompany,
         clientType,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       await addDoc(collection(db, "users", user.uid, "clients"), clientData);
@@ -250,9 +281,7 @@ const [stampSettings, setStampSettings] = useState({
     if (!user?.uid || !quoteId) return null;
 
     const db = getFirestore();
-    const snap = await getDoc(
-      doc(db, "users", user.uid, "quotes", quoteId)
-    );
+    const snap = await getDoc(doc(db, "users", user.uid, "quotes", quoteId));
 
     return snap.exists() ? snap.data() : null;
   };
@@ -315,11 +344,15 @@ const [stampSettings, setStampSettings] = useState({
   const [clientId, setClientId] = useState("CLI-2026-1234");
   const [clientEmail, setClientEmail] = useState("john@construction.com");
   const [clientPhone, setClientPhone] = useState("082 123 4567");
-  const [clientAddress, setClientAddress] = useState("123 Main Street, Pretoria, 0001");
+  const [clientAddress, setClientAddress] = useState(
+    "123 Main Street, Pretoria, 0001",
+  );
   const [clientCompany, setClientCompany] = useState("John Construction Ltd");
   const [clientType, setClientType] = useState("Commercial");
   const [projectName, setProjectName] = useState("Office Building Renovation");
-  const [projectAddress, setProjectAddress] = useState("456 Business Park, Sandton, 2196");
+  const [projectAddress, setProjectAddress] = useState(
+    "456 Business Park, Sandton, 2196",
+  );
   const [projectType, setProjectType] = useState("Renovation");
   const [projectSize, setProjectSize] = useState("500 sqm");
   const [projectDuration, setProjectDuration] = useState("3 months");
@@ -451,12 +484,14 @@ const [stampSettings, setStampSettings] = useState({
   const total = subtotal + vat;
 
   const buildQuotePayload = (numberToUse) => ({
-    quoteNumber: numberToUse,
+    [documentType === "quote" ? "quoteNumber" : "invoiceNumber"]: numberToUse,
+    documentType: documentType,
     locked: true,
     status: "pending",
 
     dates: {
-      quoteDate: new Date().toISOString(),
+      [documentType === "quote" ? "quoteDate" : "invoiceDate"]:
+        new Date().toISOString(),
       validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       startDate: projectStartDate,
     },
@@ -499,33 +534,103 @@ const [stampSettings, setStampSettings] = useState({
 
     const db = getFirestore();
     let numberToUse = quoteNumber;
+    const collectionName = documentType === "quote" ? "quotations" : "invoices";
 
     if (!quoteId) {
-      numberToUse = await generateQuoteNumber(user.uid);
+      if (documentType === "quote") {
+        numberToUse = await generateQuoteNumber(user.uid);
+      } else {
+        numberToUse = await generateInvoiceNumber(user.uid);
+      }
       setQuoteNumber(numberToUse);
     }
 
-    const quoteData = buildQuotePayload(numberToUse);
+    const documentData = buildQuotePayload(numberToUse);
 
     if (quoteId) {
-      await updateDoc(doc(db, "users", user.uid, "quotes", quoteId), {
-        ...quoteData,
+      await updateDoc(doc(db, "users", user.uid, collectionName, quoteId), {
+        ...documentData,
         updatedAt: serverTimestamp(),
       });
     } else {
       const ref = await addDoc(
-        collection(db, "users", user.uid, "quotes"),
-        quoteData
+        collection(db, "users", user.uid, collectionName),
+        documentData,
       );
       setQuoteId(ref.id);
     }
 
-    alert("Quote saved and locked");
+    alert(`${documentType === "quote" ? "Quote" : "Invoice"} saved and locked`);
+
+    if (documentType === "quote") {
+      setShowConvertModal(true);
+    }
+
     loadSavedQuotes();
+  };
+  const handleConvertToInvoice = async () => {
+    if (!user?.uid || !quoteId) return;
+
+    try {
+      const db = getFirestore();
+
+      const invoiceNumber = await generateInvoiceNumber(user.uid);
+
+      const quoteRef = doc(db, "users", user.uid, "quotations", quoteId);
+      const quoteSnap = await getDoc(quoteRef);
+
+      if (!quoteSnap.exists()) {
+        alert("Quote not found");
+        return;
+      }
+
+      const quoteData = quoteSnap.data();
+
+      const invoiceData = {
+        ...quoteData,
+        invoiceNumber: invoiceNumber,
+        documentType: "invoice",
+        convertedFrom: quoteId,
+        originalQuoteNumber: quoteData.quoteNumber,
+        dates: {
+          ...quoteData.dates,
+          invoiceDate: new Date().toISOString(),
+          convertedDate: new Date().toISOString(),
+        },
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      delete invoiceData.quoteNumber;
+      delete invoiceData.quoteDate;
+
+      const invoiceRef = await addDoc(
+        collection(db, "users", user.uid, "invoices"),
+        invoiceData,
+      );
+
+      await updateDoc(quoteRef, {
+        convertedToInvoice: true,
+        invoiceId: invoiceRef.id,
+        invoiceNumber: invoiceNumber,
+        updatedAt: serverTimestamp(),
+      });
+
+      alert(`Quote converted to Invoice ${invoiceNumber} successfully!`);
+
+      setDocumentType("invoice");
+      setQuoteId(invoiceRef.id);
+      setQuoteNumber(invoiceNumber);
+      setShowConvertModal(false);
+    } catch (error) {
+      console.error("Error converting quote to invoice:", error);
+      alert("Failed to convert quote to invoice");
+    }
   };
 
   const handleNewQuote = () => {
-    setActiveView('invoice');
+    setActiveView("invoice");
+    setDocumentType("quote"); // Added this line
     setQuoteId(null);
     setQuoteNumber("");
     setClientName("John Construction Ltd");
@@ -552,6 +657,34 @@ const [stampSettings, setStampSettings] = useState({
     loadNewNumber();
   };
 
+  const handleNewInvoice = () => {
+    setActiveView("invoice");
+    setDocumentType("invoice");
+    setQuoteId(null);
+    setQuoteNumber("");
+    setClientName("John Construction Ltd");
+    setClientId("CLI-2026-1234");
+    setClientEmail("john@construction.com");
+    setClientPhone("082 123 4567");
+    setClientAddress("123 Main Street, Pretoria, 0001");
+    setClientCompany("John Construction Ltd");
+    setClientType("Commercial");
+    setProjectName("Office Building Renovation");
+    setProjectAddress("456 Business Park, Sandton, 2196");
+    setProjectType("Renovation");
+    setProjectSize("500 sqm");
+    setProjectDuration("3 months");
+    setProjectStartDate("2026-02-01");
+    setItems([]);
+
+    const loadNewNumber = async () => {
+      if (user?.uid) {
+        const nextInvoice = await generateInvoiceNumber(user.uid);
+        setQuoteNumber(nextInvoice);
+      }
+    };
+    loadNewNumber();
+  };
   const handleLogout = async () => {
     const auth = getAuth();
     try {
@@ -578,11 +711,11 @@ const [stampSettings, setStampSettings] = useState({
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-           <img
-      src={logo}
-      alt="Business Logo"
-      className="w-16 h-12 object-contain rounded-lg"
-    />
+            <img
+              src={logo}
+              alt="Business Logo"
+              className="w-16 h-12 object-contain rounded-lg"
+            />
           </div>
 
           <nav className="space-y-1">
@@ -599,8 +732,10 @@ const [stampSettings, setStampSettings] = useState({
             </div>
 
             <div className="pt-4">
-              <div onClick={() => setActiveView('financial-overview')}
-              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+              <div
+                onClick={() => setActiveView("financial-overview")}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
                 <TrendingUp className="w-5 h-5" />
                 <span>Business Overview</span>
               </div>
@@ -632,13 +767,36 @@ const [stampSettings, setStampSettings] = useState({
                   </div>
                 </div>
               </div>
+              <div className="mt-2">
+                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <Receipt className="w-5 h-5" />
+                    <span>Invoices</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
 
+                <div className="ml-8 mt-1 space-y-1">
+                  <div
+                    onClick={handleNewInvoice}
+                    className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+                  >
+                    Create Invoice
+                  </div>
+                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
+                    All Invoices
+                  </div>
+                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
+                    Pending Payment
+                  </div>
+                </div>
+              </div>
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
                 <Users className="w-5 h-5" />
                 <span>Clients</span>
               </div>
               <div className="ml-8 mt-1 space-y-1">
-                <div 
+                <div
                   onClick={handleAddNewClient}
                   className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
                 >
@@ -656,14 +814,14 @@ const [stampSettings, setStampSettings] = useState({
                 <Building2 className="w-5 h-5" />
                 <span>Projects</span>
               </div>
-               <div
-                              onClick={() => setActiveView("templates")}
-                              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-                            >
-                              <FileText className="w-5 h-5" />
-                              <span>Invoice Templates</span>
-                            </div>
-
+              <div
+                onClick={() => setActiveView("templates")}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
+                <FileText className="w-5 h-5" />
+                <span>Invoice Templates</span>
+              </div>
+ {/* 
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <Package className="w-5 h-5" />
                 <span>Materials</span>
@@ -674,15 +832,9 @@ const [stampSettings, setStampSettings] = useState({
                 <span>Equipment</span>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <Receipt className="w-5 h-5" />
-                  <span>Invoices</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+
+             <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <CreditCard className="w-5 h-5" />
                   <span>Payments</span>
@@ -710,6 +862,7 @@ const [stampSettings, setStampSettings] = useState({
                 </div>
                 <ChevronDown className="w-4 h-4" />
               </div>
+ */}
             </div>
           </nav>
         </div>
@@ -737,133 +890,141 @@ const [stampSettings, setStampSettings] = useState({
 
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 lg:space-x-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
-              <h1 className="text-base lg:text-xl font-semibold">
-                Quote #{quoteNumber || "— not saved yet —"}
-              </h1>
-              <TemplateSelector
-                              user={user}
-                              selectedTemplate={activeTemplate}
-                              onTemplateChange={setActiveTemplate}
-                            />
-            </div>
+          <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 lg:space-x-4">
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+                <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+                <h1 className="text-base lg:text-xl font-semibold">
+                  {documentType === "quote" ? "Quote" : "Invoice"} #
+                  {quoteNumber || "— not saved yet —"}
+                </h1>
+                <TemplateSelector
+                  user={user}
+                  selectedTemplate={activeTemplate}
+                  onTemplateChange={setActiveTemplate}
+                />
+              </div>
 
-            <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <div className="hidden lg:flex items-center space-x-3 print:hidden">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  <CheckSquare className="w-4 h-4" />
+                  <span>Approve</span>
+                </button>
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  <Edit className="w-4 h-4" />
+                  <span>Edit</span>
+                </button>
+                <button
+                  onClick={handleSaveQuote}
+                  className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                >
+                  Save {documentType === "quote" ? "Quote" : "Invoice"}
+                </button>
+
+                <button
+                  onClick={
+                    documentType === "quote" ? handleNewQuote : handleNewInvoice
+                  }
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  <Plus className="w-4 h-4" />
+                  New {documentType === "quote" ? "Quote" : "Invoice"}
+                </button>
+
+                <button className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                  <Send className="w-4 h-4" />
+                  <span>Send</span>
+                </button>
+                <button
+                  onClick={handleSavePDF}
+                  className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                >
+                  Save as PDF
+                </button>
+
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Log Out
+                </button>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
+              >
+                <span className="text-sm font-medium">Logout</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
                 <CheckSquare className="w-4 h-4" />
                 <span>Approve</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
-              <button
-                onClick={handleSaveQuote}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-              >
-                Save Quote
-              </button>
-
-              <button
-                onClick={handleNewQuote}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                <Plus className="w-4 h-4" />
-                New
-              </button>
-
-              <button className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+              <button className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 whitespace-nowrap text-sm">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
-                onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                onClick={handleSave}
+                className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap text-sm"
               >
-                Save as PDF
+                <Download className="w-4 h-4" />
+                <span>Save PDF</span>
               </button>
-
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
               >
                 <Printer className="w-4 h-4" />
-                Print
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Log Out
+                <span>Print</span>
               </button>
             </div>
-
-            <button
-              onClick={handleLogout}
-              className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
-            >
-              <span className="text-sm font-medium">Logout</span>
-            </button>
           </div>
-        </div>
 
-        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
-              <CheckSquare className="w-4 h-4" />
-              <span>Approve</span>
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
-              <Edit className="w-4 h-4" />
-              <span>Edit</span>
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 whitespace-nowrap text-sm">
-              <Send className="w-4 h-4" />
-              <span>Send</span>
-            </button>
-            <button
-              onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Download className="w-4 h-4" />
-              <span>Save PDF</span>
-            </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Print</span>
-            </button>
+          <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+            <div className="flex space-x-4 lg:space-x-8 min-w-max">
+              {[
+                documentType === "quote" ? "Quote" : "Invoice",
+                "Materials",
+                "Timeline",
+                "Notes",
+              ].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`py-4 border-b-2 ${
+                    activeTab === tab
+                      ? "border-orange-400 text-white"
+                      : "border-transparent text-gray-400 hover:text-gray-200"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-
-        <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-          <div className="flex space-x-4 lg:space-x-8 min-w-max">
-            {["Quote", "Materials", "Timeline", "Notes"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 border-b-2 ${
-                  activeTab === tab
-                    ? "border-orange-400 text-white"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
         </div>
         <div className="p-4 lg:p-6">
           {/* Company Settings Modal */}
@@ -911,7 +1072,9 @@ const [stampSettings, setStampSettings] = useState({
                             htmlFor="logo-upload"
                             className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer"
                           >
-                            {companyInfo.logoUrl ? "Change Logo" : "Upload Logo"}
+                            {companyInfo.logoUrl
+                              ? "Change Logo"
+                              : "Upload Logo"}
                           </label>
                           <p className="text-xs text-gray-500 mt-2">
                             Recommended: Square image, max 5MB
@@ -1084,7 +1247,7 @@ const [stampSettings, setStampSettings] = useState({
                         placeholder="082 345 6789"
                       />
                     </div>
-                     <div className="border-t pt-4 mt-6">
+                    <div className="border-t pt-4 mt-6">
                       <h3 className="text-lg font-semibold mb-4">
                         Bank Details
                       </h3>
@@ -1159,82 +1322,128 @@ const [stampSettings, setStampSettings] = useState({
                         </div>
                       </div>
                     </div>
-<div className="border-t pt-6 mt-6">
-  <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>
-  
-  <div className="space-y-4">
-    <div>
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={stampSettings.enabled}
-          onChange={(e) => setStampSettings({...stampSettings, enabled: e.target.checked})}
-          className="w-4 h-4 rounded"
-        />
-        <span className="text-sm font-medium">Show approval stamp on invoices and quotes</span>
-      </label>
-    </div>
+                    <div className="border-t pt-6 mt-6">
+                      <h3 className="text-lg font-semibold mb-4">
+                        📋 Invoice Stamp Settings
+                      </h3>
 
-    {stampSettings.enabled && (
-      <>
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Text</label>
-          <input
-            type="text"
-            value={stampSettings.text}
-            onChange={(e) => setStampSettings({...stampSettings, text: e.target.value.toUpperCase()})}
-            className="w-full px-4 py-2 border rounded-lg uppercase"
-            placeholder="APPROVED"
-            maxLength={15}
-          />
-          <p className="text-xs text-gray-500 mt-1">Max 15 characters</p>
-        </div>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="flex items-center space-x-2 mb-4">
+                            <input
+                              type="checkbox"
+                              checked={stampSettings.enabled}
+                              onChange={(e) =>
+                                setStampSettings({
+                                  ...stampSettings,
+                                  enabled: e.target.checked,
+                                })
+                              }
+                              className="w-4 h-4 rounded"
+                            />
+                            <span className="text-sm font-medium">
+                              Show approval stamp on invoices and quotes
+                            </span>
+                          </label>
+                        </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Color</label>
-          <select
-            value={stampSettings.color}
-            onChange={(e) => setStampSettings({...stampSettings, color: e.target.value})}
-            className="w-full px-4 py-2 border rounded-lg"
-          >
-            <option value="#d32f2f">🔴 Red (Traditional)</option>
-            <option value="#1976d2">🔵 Blue (Professional)</option>
-            <option value="#388e3c">🟢 Green (Approved)</option>
-            <option value="#7b1fa2">🟣 Purple (Premium)</option>
-            <option value="#000000">⚫ Black (Formal)</option>
-            <option value="#f57c00">🟠 Orange (Attention)</option>
-          </select>
-        </div>
+                        {stampSettings.enabled && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                Stamp Text
+                              </label>
+                              <input
+                                type="text"
+                                value={stampSettings.text}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    text: e.target.value.toUpperCase(),
+                                  })
+                                }
+                                className="w-full px-4 py-2 border rounded-lg uppercase"
+                                placeholder="APPROVED"
+                                maxLength={15}
+                              />
+                              <p className="text-xs text-gray-500 mt-1">
+                                Max 15 characters
+                              </p>
+                            </div>
 
-        <div>
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={stampSettings.showDate}
-              onChange={(e) => setStampSettings({...stampSettings, showDate: e.target.checked})}
-              className="w-4 h-4 rounded"
-            />
-            <span className="text-sm font-medium">Include date on stamp</span>
-          </label>
-        </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                Stamp Color
+                              </label>
+                              <select
+                                value={stampSettings.color}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    color: e.target.value,
+                                  })
+                                }
+                                className="w-full px-4 py-2 border rounded-lg"
+                              >
+                                <option value="#d32f2f">
+                                  🔴 Red (Traditional)
+                                </option>
+                                <option value="#1976d2">
+                                  🔵 Blue (Professional)
+                                </option>
+                                <option value="#388e3c">
+                                  🟢 Green (Approved)
+                                </option>
+                                <option value="#7b1fa2">
+                                  🟣 Purple (Premium)
+                                </option>
+                                <option value="#000000">
+                                  ⚫ Black (Formal)
+                                </option>
+                                <option value="#f57c00">
+                                  🟠 Orange (Attention)
+                                </option>
+                              </select>
+                            </div>
 
-        {/* Preview */}
-        <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
-          <div className="flex justify-center">
-            <SignatureStamp 
-              text={stampSettings.text}
-              color={stampSettings.color}
-              showDate={stampSettings.showDate}
-              rotation={-5}
-              size="medium"
-            />
-          </div>
-        </div>
-      </>
-    )}
-  </div>
-</div>
+                            <div>
+                              <label className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={stampSettings.showDate}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      showDate: e.target.checked,
+                                    })
+                                  }
+                                  className="w-4 h-4 rounded"
+                                />
+                                <span className="text-sm font-medium">
+                                  Include date on stamp
+                                </span>
+                              </label>
+                            </div>
+
+                            {/* Preview */}
+                            <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                              <p className="text-sm font-medium mb-4 text-center text-gray-600">
+                                Preview:
+                              </p>
+                              <div className="flex justify-center">
+                                <SignatureStamp
+                                  text={stampSettings.text}
+                                  color={stampSettings.color}
+                                  showDate={stampSettings.showDate}
+                                  rotation={-5}
+                                  size="medium"
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
                     <button
                       onClick={handleSaveCompanyInfo}
                       className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700"
@@ -1312,7 +1521,7 @@ const [stampSettings, setStampSettings] = useState({
                               <div className="text-sm text-gray-500">
                                 {quote.dates?.quoteDate
                                   ? new Date(
-                                      quote.dates.quoteDate
+                                      quote.dates.quoteDate,
                                     ).toLocaleDateString("en-ZA")
                                   : "N/A"}
                               </div>
@@ -1321,8 +1530,8 @@ const [stampSettings, setStampSettings] = useState({
                                   quote.status === "approved"
                                     ? "bg-green-100 text-green-700"
                                     : quote.status === "pending"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : "bg-gray-100 text-gray-700"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-gray-100 text-gray-700"
                                 }`}
                               >
                                 {quote.status || "unknown"}
@@ -1337,424 +1546,472 @@ const [stampSettings, setStampSettings] = useState({
               </div>
             </div>
           )}
-          {activeView === 'financial-overview' && <FinancialOverview user={user} />}
-          {activeView === "templates" && <Templates user={user} />}
-                    {activeView === "invoice" && (
-                      
-    <>
-          <button
-            onClick={() => setShowQuote(!showQuote)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-          >
-            <FileText className="w-5 h-5" />
-            {showQuote ? "Hide Quote" : "View Quote"}
-          </button>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div
-              className={`${
-                showQuote ? "hidden" : "block"
-              } space-y-6 lg:block print:hidden`}
-            >
-              <div className="bg-orange-50 border border-orange-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span className="text-orange-700 font-medium">Draft</span>
-                <span className="text-orange-600">Created Today</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Quote Amount</div>
-                  <div className="text-2xl font-semibold text-orange-600">
-                    R{total.toFixed(2)}
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Duration</div>
-                  <div className="text-2xl font-semibold text-blue-600">
-                    {projectDuration}
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Valid Until</div>
-                  <div className="text-lg font-semibold text-gray-700">
-                    {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en-ZA")}
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Users className="w-5 h-5" />
-                    <span>Client Information</span>
-                  </h2>
-                  <button className="flex items-center space-x-2 text-orange-600 hover:text-orange-700">
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Client Name</div>
-                    <input
-                      type="text"
-                      value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Client Type</div>
-                    <select
-                      value={clientType}
-                      onChange={(e) => setClientType(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    >
-                      <option value="Residential">Residential</option>
-                      <option value="Commercial">Commercial</option>
-                      <option value="Industrial">Industrial</option>
-                      <option value="Government">Government</option>
-                    </select>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Company Name</div>
-                    <input
-                      type="text"
-                      value={clientCompany}
-                      onChange={(e) => setClientCompany(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Client ID</div>
-                    <input
-                      type="text"
-                      value={clientId}
-                      onChange={(e) => setClientId(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Email</div>
-                    <input
-                      type="text"
-                      value={clientEmail}
-                      onChange={(e) => setClientEmail(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Phone</div>
-                    <input
-                      type="text"
-                      value={clientPhone}
-                      onChange={(e) => setClientPhone(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Address</div>
-                    <input
-                      type="text"
-                      value={clientAddress}
-                      onChange={(e) => setClientAddress(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Building2 className="w-5 h-5" />
-                    <span>Project Information</span>
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Project Name</div>
-                    <input
-                      type="text"
-                      value={projectName}
-                      onChange={(e) => setProjectName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Project Address</div>
-                    <input
-                      type="text"
-                      value={projectAddress}
-                      onChange={(e) => setProjectAddress(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Project Type</div>
-                    <select
-                      value={projectType}
-                      onChange={(e) => setProjectType(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    >
-                      <option value="">Select Type</option>
-                      <option value="New Build">New Build</option>
-                      <option value="Renovation">Renovation</option>
-                      <option value="Extension">Extension</option>
-                      <option value="Repairs">Repairs</option>
-                      <option value="Maintenance">Maintenance</option>
-                    </select>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Project Size</div>
-                    <input
-                      type="text"
-                      value={projectSize}
-                      onChange={(e) => setProjectSize(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                      placeholder="e.g., 500 sqm"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Duration</div>
-                    <input
-                      type="text"
-                      value={projectDuration}
-                      onChange={(e) => setProjectDuration(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                      placeholder="e.g., 3 months"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Start Date</div>
-                    <input
-                      type="date"
-                      value={projectStartDate}
-                      onChange={(e) => setProjectStartDate(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h2 className="text-lg font-semibold mb-4">Add Line Item</h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                  <select
-                    value={newItem.type}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, type: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  >
-                    <option value="Labor">Labor</option>
-                    <option value="Materials">Materials</option>
-                    <option value="Equipment">Equipment</option>
-                    <option value="Subcontractor">Subcontractor</option>
-                  </select>
-
-                  <input
-                    type="text"
-                    placeholder="Description"
-                    value={newItem.description}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, description: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Rate"
-                    value={newItem.rate}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, rate: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Qty"
-                    value={newItem.qty}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, qty: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
+          {showConvertModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg max-w-md w-full p-6">
+                <h2 className="text-xl font-semibold mb-4">
+                  Quote Saved Successfully!
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Would you like to convert this quote to an invoice?
+                </p>
+                <div className="flex gap-3">
                   <button
-                    onClick={handleAddItem}
-                    className="bg-orange-600 text-white rounded-lg px-4 py-2 hover:bg-orange-700 flex items-center justify-center gap-2"
+                    onClick={handleConvertToInvoice}
+                    className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
                   >
-                    <Plus className="w-4 h-4" />
-                    Add
+                    Convert to Invoice
+                  </button>
+                  <button
+                    onClick={() => setShowConvertModal(false)}
+                    className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                  >
+                    Later
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+          {activeView === "financial-overview" && (
+            <FinancialOverview user={user} />
+          )}
+          {activeView === "templates" && <Templates user={user} />}
+          {activeView === "invoice" && (
+            <>
+              <button
+                onClick={() => setShowQuote(!showQuote)}
+                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              >
+                <FileText className="w-5 h-5" />
+                {showQuote ? "Hide Quote" : "View Quote"}
+              </button>
 
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Terms & Conditions</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div
+                  className={`${
+                    showQuote ? "hidden" : "block"
+                  } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
+                >
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg px-4 py-3 flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span className="text-orange-700 font-medium">Draft</span>
+                    <span className="text-orange-600">Created Today</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">
+                        {documentType === "quote" ? "Quote" : "Invoice"} Amount
+                      </div>
+                      <div className="text-2xl font-semibold text-orange-600">
+                        R{total.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">Duration</div>
+                      <div className="text-2xl font-semibold text-blue-600">
+                        {projectDuration}
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">
+                        Valid Until
+                      </div>
+                      <div className="text-lg font-semibold text-gray-700">
+                        {new Date(
+                          Date.now() + 30 * 24 * 60 * 60 * 1000,
+                        ).toLocaleDateString("en-ZA")}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold flex items-center space-x-2">
+                        <Users className="w-5 h-5" />
+                        <span>Client Information</span>
+                      </h2>
+                      <button className="flex items-center space-x-2 text-orange-600 hover:text-orange-700">
+                        <Edit className="w-4 h-4" />
+                        <span>Edit</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-gray-500">Client Name</div>
+                        <input
+                          type="text"
+                          value={clientName}
+                          onChange={(e) => setClientName(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Client Type</div>
+                        <select
+                          value={clientType}
+                          onChange={(e) => setClientType(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        >
+                          <option value="Residential">Residential</option>
+                          <option value="Commercial">Commercial</option>
+                          <option value="Industrial">Industrial</option>
+                          <option value="Government">Government</option>
+                        </select>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Company Name
+                        </div>
+                        <input
+                          type="text"
+                          value={clientCompany}
+                          onChange={(e) => setClientCompany(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Client ID</div>
+                        <input
+                          type="text"
+                          value={clientId}
+                          onChange={(e) => setClientId(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Email</div>
+                        <input
+                          type="text"
+                          value={clientEmail}
+                          onChange={(e) => setClientEmail(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Phone</div>
+                        <input
+                          type="text"
+                          value={clientPhone}
+                          onChange={(e) => setClientPhone(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <div className="text-sm text-gray-500">Address</div>
+                        <input
+                          type="text"
+                          value={clientAddress}
+                          onChange={(e) => setClientAddress(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold flex items-center space-x-2">
+                        <Building2 className="w-5 h-5" />
+                        <span>Project Information</span>
+                      </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="col-span-1 sm:col-span-2">
+                        <div className="text-sm text-gray-500">
+                          Project Name
+                        </div>
+                        <input
+                          type="text"
+                          value={projectName}
+                          onChange={(e) => setProjectName(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <div className="text-sm text-gray-500">
+                          Project Address
+                        </div>
+                        <input
+                          type="text"
+                          value={projectAddress}
+                          onChange={(e) => setProjectAddress(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Project Type
+                        </div>
+                        <select
+                          value={projectType}
+                          onChange={(e) => setProjectType(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        >
+                          <option value="">Select Type</option>
+                          <option value="New Build">New Build</option>
+                          <option value="Renovation">Renovation</option>
+                          <option value="Extension">Extension</option>
+                          <option value="Repairs">Repairs</option>
+                          <option value="Maintenance">Maintenance</option>
+                        </select>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Project Size
+                        </div>
+                        <input
+                          type="text"
+                          value={projectSize}
+                          onChange={(e) => setProjectSize(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                          placeholder="e.g., 500 sqm"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Duration</div>
+                        <input
+                          type="text"
+                          value={projectDuration}
+                          onChange={(e) => setProjectDuration(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                          placeholder="e.g., 3 months"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Start Date</div>
+                        <input
+                          type="date"
+                          value={projectStartDate}
+                          onChange={(e) => setProjectStartDate(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                    <h2 className="text-lg font-semibold mb-4">
+                      Add Line Item
+                    </h2>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                      <select
+                        value={newItem.type}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, type: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      >
+                        <option value="Labor">Labor</option>
+                        <option value="Materials">Materials</option>
+                        <option value="Equipment">Equipment</option>
+                        <option value="Subcontractor">Subcontractor</option>
+                      </select>
+
+                      <input
+                        type="text"
+                        placeholder="Description"
+                        value={newItem.description}
+                        onChange={(e) =>
+                          setNewItem({
+                            ...newItem,
+                            description: e.target.value,
+                          })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Rate"
+                        value={newItem.rate}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, rate: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Qty"
+                        value={newItem.qty}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, qty: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <button
+                        onClick={handleAddItem}
+                        className="bg-orange-600 text-white rounded-lg px-4 py-2 hover:bg-orange-700 flex items-center justify-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold">
+                        Terms & Conditions
+                      </h2>
+                    </div>
+
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">Payment Terms:</span>
+                        <span className="font-medium">
+                          50% Deposit, Balance on Completion
+                        </span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">Quote Valid:</span>
+                        <span className="font-medium">30 Days</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="text-gray-600">Warranty:</span>
+                        <span className="font-medium">
+                          12 Months Workmanship
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">Payment Terms:</span>
-                    <span className="font-medium">50% Deposit, Balance on Completion</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">Quote Valid:</span>
-                    <span className="font-medium">30 Days</span>
-                  </div>
-                  <div className="flex justify-between py-2">
-                    <span className="text-gray-600">Warranty:</span>
-                    <span className="font-medium">12 Months Workmanship</span>
-                  </div>
+                {/* Quote Preview/Print Section */}
+                <div
+                  className={`${
+                    !showQuote ? "hidden" : "block"
+                  } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
+                  style={{
+                    width: "100%",
+                    maxWidth: "210mm",
+                    minHeight: "297mm",
+                  }}
+                >
+                  <div className="mb-4">
+                                     <TemplateSelector 
+                                       user={user} 
+                                       selectedTemplate={selectedTemplate}
+                                       onTemplateChange={setSelectedTemplate}
+                                     />
+                                   </div>
+                      <TemplateRenderer
+                        templateId={selectedTemplate}
+                        businessInfo={companyInfo}
+                        loading={loading}
+                        jobCardNumber={quoteNumber}
+                        customerName={clientName}
+                        customerCompany={clientCompany}
+                        customerEmail={clientEmail}
+                        customerPhone={clientPhone}
+                        customerAddress={clientAddress}
+                        projectName={projectName}
+                        projectAddress={projectAddress}
+                        projectType={projectType}
+                        projectSize={projectSize}
+                        projectDuration={projectDuration}
+                        projectStartDate={projectStartDate}
+                        items={items}
+                        subtotal={subtotal}
+                        vat={vat}
+                        total={total}
+                        
+                        documentType={documentType}
+                    stampText={stampSettings.text}
+                    stampColor={stampSettings.color}
+                    showStampDate={stampSettings.showDate}
+                    showStamp={stampSettings.enabled}
+                      />
+                 
                 </div>
+
+                <style>{`
+                  @media print {
+                    * {
+                      -webkit-print-color-adjust: exact !important;
+                      print-color-adjust: exact !important;
+                    }
+                    
+                    html, body {
+                      margin: 0 !important;
+                      padding: 0 !important;
+                      background: white !important;
+                      width: 100% !important;
+                      height: 100% !important;
+                    }
+                    
+                    @page {
+                      size: A4;
+                      margin: 0;
+                    }
+                    
+                    .print\\:hidden {
+                      display: none !important;
+                    }
+                    
+                    div[class*="border-b"][class*="border-gray"] {
+                      display: none !important;
+                    }
+                    
+                    nav,
+                    [class*="sidebar"],
+                    [class*="bg-slate-900"],
+                    button:not([style]) {
+                      display: none !important;
+                    }
+                    
+                    .space-y-6 {
+                      display: none !important;
+                    }
+                    
+                    .flex.h-screen {
+                      display: block !important;
+                      height: auto !important;
+                    }
+                    
+                    .flex-1 {
+                      display: block !important;
+                      overflow: visible !important;
+                    }
+                    
+                    .grid.grid-cols-1 {
+                      display: block !important;
+                      grid-template-columns: none !important;
+                    }
+                    
+                    div[style*="210mm"] {
+                      display: block !important;
+                      width: 210mm !important;
+                      height: auto !important;
+                      margin: 0 !important;
+                      padding: 0 !important;
+                      box-shadow: none !important;
+                      page-break-after: avoid !important;
+                    }
+                    
+                    .bg-white {
+                      background: white !important;
+                      box-shadow: none !important;
+                    }
+                    
+                    table {
+                      width: 100% !important;
+                      border-collapse: collapse !important;
+                    }
+                    
+                    tr, td, th {
+                      page-break-inside: avoid !important;
+                    }
+                  }
+                `}</style>
               </div>
-            </div>
-
-            {/* Quote Preview/Print Section */}
-            <div
-              className={`${
-                !showQuote ? "hidden" : "block"
-              } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-              style={{
-                width: "100%",
-                maxWidth: "210mm",
-                minHeight: "297mm",
-              }}
-            >
-              {activeView === 'quotation' && (
-  <>
-    {/* Add Template Selector */}
-    <div className="mb-4">
-      <TemplateSelector 
-        user={user} 
-        selectedTemplate={selectedTemplate}
-        onTemplateChange={setSelectedTemplate}
-      />
-    </div>
-
-    {/* Use Template Renderer instead of hardcoded quotation */}
-    <TemplateRenderer
-      templateId={selectedTemplate}
-      businessInfo={companyInfo}
-      loading={loading}
-      jobCardNumber={quoteNumber}
-      customerName={clientName}
-      customerCompany={clientCompany}
-      customerEmail={clientEmail}
-      customerPhone={clientPhone}
-      customerAddress={clientAddress}
-      projectName={projectName}
-      projectAddress={projectAddress}
-      projectType={projectType}
-      projectSize={projectSize}
-      projectDuration={projectDuration}
-      projectStartDate={projectStartDate}
-      items={items}
-      subtotal={subtotal}
-      vat={vat}
-      total={total}
-      documentType="quotation"
-    />
-  </>
-)}
-            </div>
-
-            <style>{`
-            .logo img {
-          height: 60px;
-          width: auto;
-          padding-left:40px;
-        }
-              @media print {
-                * {
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                }
-                
-                html, body {
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  background: white !important;
-                  width: 100% !important;
-                  height: 100% !important;
-                }
-                
-                @page {
-                  size: A4;
-                  margin: 0;
-                }
-                
-                .print\\:hidden {
-                  display: none !important;
-                }
-                
-                div[class*="border-b"][class*="border-gray"] {
-                  display: none !important;
-                }
-                
-                nav,
-                [class*="sidebar"],
-                [class*="bg-slate-900"],
-                button:not([style]) {
-                  display: none !important;
-                }
-                
-                .space-y-6 {
-                  display: none !important;
-                }
-                
-                .flex.h-screen {
-                  display: block !important;
-                  height: auto !important;
-                }
-                
-                .flex-1 {
-                  display: block !important;
-                  overflow: visible !important;
-                }
-                
-                .grid.grid-cols-1 {
-                  display: block !important;
-                  grid-template-columns: none !important;
-                }
-                
-                div[style*="210mm"] {
-                  display: block !important;
-                  width: 210mm !important;
-                  height: auto !important;
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  box-shadow: none !important;
-                  page-break-after: avoid !important;
-                }
-                
-                .bg-white {
-                  background: white !important;
-                  box-shadow: none !important;
-                }
-                
-                table {
-                  width: 100% !important;
-                  border-collapse: collapse !important;
-                }
-                
-                tr, td, th {
-                  page-break-inside: avoid !important;
-                }
-              }
-            `}</style>
-          </div>
             </>
-           )} 
+          )}
         </div>
       </div>
     </div>

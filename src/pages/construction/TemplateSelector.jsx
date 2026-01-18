@@ -16,12 +16,12 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 
   const templateNames = {
     default: 'Default (Original)',
-    classic: 'Classic Workshop',
+    classic: 'Classic Professional',
     modern: 'Modern Minimalist',
     elegant: 'Elegant Business',
-    premium: 'Premium Auto Service',
-    speed: 'Speed Shop Pro',
-    diagnostic: 'Diagnostic Specialist'
+    premium: 'Premium Construction',
+    industrial: 'Industrial Bold',
+    architect: 'Architect Refined'
   };
 
   useEffect(() => {
@@ -112,25 +112,27 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
   );
 };
 
-// Default Template (Your Original)
+// Default Template (Original Construction)
 export const DefaultTemplate = ({ 
   businessInfo, 
   loading,
   jobCardNumber, 
   customerName, 
+  customerCompany,
   customerEmail, 
   customerPhone, 
   customerAddress,
-  vehicleReg,
-  vehicleMake,
-  vehicleModel,
-  vehicleYear,
-  vehicleVin,
-  vehicleMileage,
+  projectName,
+  projectAddress,
+  projectType,
+  projectSize,
+  projectDuration,
+  projectStartDate,
   items,
   subtotal,
   vat,
   total,
+  documentType = 'quote',
   showStamp = true,
   stampText = "APPROVED",
   stampColor = "#d32f2f",
@@ -154,14 +156,8 @@ export const DefaultTemplate = ({
               <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
             )}
             <div>
-  <div className="text-xl font-bold">
-    {businessInfo?.businessName?.split(" ")[0] || ""}{" "}
-    {businessInfo?.businessName?.split(" ")[1] || ""}
-  </div>
-  <div className="text-sm font-semibold">
-    {businessInfo?.businessName?.split(" ").slice(2).join(" ") || ""}
-  </div>
-</div>
+              <div className="text-xl font-bold">{businessInfo.companyName}</div>
+            </div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{businessInfo.addressLine1}</div>
@@ -175,10 +171,10 @@ export const DefaultTemplate = ({
         </div>
 
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">INVOICE</div>
+          <div className="text-3xl font-bold mb-4">{documentType === 'quote' ? 'QUOTATION' : 'INVOICE'}</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">{documentType === 'quote' ? 'QUOTE NO.' : 'INVOICE NO.'}</span>
               <span>{jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -186,12 +182,12 @@ export const DefaultTemplate = ({
               <span>{new Date().toLocaleDateString("en-ZA")}</span>
             </div>
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">MERCHANT CODE</span>
-              <span>V8PA-12345</span>
+              <span className="font-semibold">REG NO.</span>
+              <span>{businessInfo.registrationNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">SERVICE TYPE</span>
-              <span>SERVICE</span>
+              <span className="font-semibold">VAT NO.</span>
+              <span>{businessInfo.vatNumber}</span>
             </div>
           </div>
         </div>
@@ -201,61 +197,46 @@ export const DefaultTemplate = ({
     {/* Three Column Section */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">INVOICE TO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CLIENT DETAILS</div>
         <div className="text-xs space-y-1">
-          <div>{customerName}</div>
-          <div>ABC Limited</div>
-          <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
+          <div className="font-semibold">{customerName}</div>
+          <div>{customerCompany}</div>
+          <div className="h-12 overflow-hidden text-xs leading-tight">{customerAddress}</div>
           <div>{customerEmail}</div>
           <div>{customerPhone}</div>
         </div>
       </div>
 
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">BILL TO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">PROJECT INFORMATION</div>
         <div className="text-xs space-y-1">
-          <div>{customerName}</div>
-          <div>ABC Limited</div>
-          <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
-          <div>{customerEmail}</div>
-          <div>{customerPhone}</div>
+          <div className="font-semibold">{projectName}</div>
+          <div className="h-12 overflow-hidden text-xs leading-tight">{projectAddress}</div>
+          <div className="flex justify-between">
+            <span className="font-semibold">Type:</span>
+            <span>{projectType}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-semibold">Size:</span>
+            <span>{projectSize}</span>
+          </div>
         </div>
       </div>
 
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">VEHICLE DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">PROJECT SCHEDULE</div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
-            <span className="font-semibold">Reg Number:</span>
-            <span>{vehicleReg}</span>
+            <span className="font-semibold">Duration:</span>
+            <span>{projectDuration}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold">Make:</span>
-            <span>{vehicleMake}</span>
+            <span className="font-semibold">Start Date:</span>
+            <span>{new Date(projectStartDate).toLocaleDateString("en-ZA")}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold">Model:</span>
-            <span>{vehicleModel}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Engine No:</span>
-            <span>{vehicleYear}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">VIN Number:</span>
-            <span className="text-[9px]">{vehicleVin}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Odometer:</span>
-            <span>{vehicleMileage} km</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Pre Auth:</span>
-            <span>AUTH123</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Auth Code:</span>
-            <span>456789</span>
+            <span className="font-semibold">Valid Until:</span>
+            <span>{new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en-ZA")}</span>
           </div>
         </div>
       </div>
@@ -266,16 +247,18 @@ export const DefaultTemplate = ({
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-gray-300">
-            <th className="text-left px-2 py-1 font-bold">ITEM DESCRIPTION</th>
+            <th className="text-left px-2 py-1 font-bold">DESCRIPTION</th>
+            <th className="text-center px-2 py-1 font-bold">TYPE</th>
             <th className="text-center px-2 py-1 font-bold">QUANTITY</th>
             <th className="text-right px-2 py-1 font-bold">UNIT PRICE</th>
-            <th className="text-right px-2 py-1 font-bold">NET PRICE</th>
+            <th className="text-right px-2 py-1 font-bold">AMOUNT</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, index) => (
             <tr key={index} className="border-b">
               <td className="px-2 py-2">{item.description}</td>
+              <td className="text-center px-2 py-2">{item.type}</td>
               <td className="text-center px-2 py-2">{item.qty}</td>
               <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
               <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
@@ -293,7 +276,7 @@ export const DefaultTemplate = ({
           <span>R {subtotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-1">
-          <span>VAT:</span>
+          <span>VAT (15%):</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
@@ -303,36 +286,23 @@ export const DefaultTemplate = ({
       </div>
     </div>
 
-    {/* Signatures */}
-    <div className="grid grid-cols-3 gap-4 mb-6 text-xs">
-      <div>
-        <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-      <div>
-        <div className="font-semibold mb-1">CLIENT SIGNATURE</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-      <div>
-        <div className="font-semibold mb-1">CONTACT NUMBER:</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-    </div>
-
     {/* Banking Details */}
-    <div className="bg-red-50 border border-red-200 p-3 mb-4">
-      <div className="text-red-600 font-bold text-xs mb-2">BANKING DETAILS</div>
-      <div className="text-xs space-y-1">
-        <div><span className="font-semibold">Bank Name:</span> FNB</div>
-        <div><span className="font-semibold">Account Holder:</span> V8 POWERED AUTO</div>
-        <div><span className="font-semibold">Branch Name:</span> LIFESTYLE CENTURION</div>
-        <div><span className="font-semibold">Account Number:</span> 62146991441</div>
+    {businessInfo.bankName && (
+      <div className="bg-orange-50 border border-orange-200 p-3 mb-4">
+        <div className="text-orange-600 font-bold text-xs mb-2">BANKING DETAILS</div>
+        <div className="text-xs space-y-1">
+          <div><span className="font-semibold">Bank Name:</span> {businessInfo.bankName}</div>
+          <div><span className="font-semibold">Account Holder:</span> {businessInfo.accountHolder}</div>
+          <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber}</div>
+          <div><span className="font-semibold">Branch Code:</span> {businessInfo.branchCode}</div>
+        </div>
       </div>
-    </div>
-   {/* Signatures and Stamp */}
+    )}
+
+    {/* Signatures and Stamp */}
     <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
       <div>
-        <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
+        <div className="font-semibold mb-1">AUTHORIZED SIGNATURE</div>
         <div className="border-b border-black h-8"></div>
       </div>
       {showStamp && (
@@ -349,13 +319,15 @@ export const DefaultTemplate = ({
     </div>
 
     {/* Footer Note */}
-    <div className="text-center text-xs text-red-600 italic">
-      NB: All our parts and workmanship have 12 months or 15000KM Guarantee
+    <div className="text-center text-xs text-gray-600 italic">
+      {documentType === 'quote' 
+        ? 'This quotation is valid for 30 days from the date of issue'
+        : 'Payment terms: Net 30 days. All work guaranteed for 12 months'}
     </div>
   </div>
 );
 
-// Classic Template
+// Classic Professional Template
 export const ClassicTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     <div className="border-b-2 border-black pb-4 mb-4">
@@ -366,7 +338,7 @@ export const ClassicTemplate = (props) => (
               <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
             )}
             <div>
-              <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
+              <div className="text-xl font-bold">{props.businessInfo.companyName}</div>
             </div>
           </div>
           <div className="text-xs leading-relaxed">
@@ -376,10 +348,10 @@ export const ClassicTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">INVOICE</div>
+          <div className="text-3xl font-bold mb-4">{props.documentType === 'quote' ? 'QUOTATION' : 'INVOICE'}</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">{props.documentType === 'quote' ? 'QUOTE #' : 'INVOICE #'}</span>
               <span>{props.jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -391,30 +363,25 @@ export const ClassicTemplate = (props) => (
       </div>
     </div>
 
-    <div className="grid grid-cols-3 gap-4 mb-4">
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CUSTOMER</div>
+    <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="bg-gray-100 p-3">
+        <div className="font-bold text-xs mb-2">CLIENT</div>
         <div className="text-xs space-y-1">
-          <div>{props.customerName}</div>
+          <div className="font-semibold">{props.customerName}</div>
+          <div>{props.customerCompany}</div>
           <div>{props.customerAddress}</div>
           <div>{props.customerEmail}</div>
           <div>{props.customerPhone}</div>
         </div>
       </div>
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">VEHICLE</div>
+      <div className="bg-gray-100 p-3">
+        <div className="font-bold text-xs mb-2">PROJECT</div>
         <div className="text-xs space-y-1">
-          <div>{props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
-          <div>Reg: {props.vehicleReg}</div>
-          <div>VIN: {props.vehicleVin}</div>
-          <div>Mileage: {props.vehicleMileage} km</div>
-        </div>
-      </div>
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SERVICE INFO</div>
-        <div className="text-xs space-y-1">
-          <div>Date: {new Date().toLocaleDateString()}</div>
-          <div>Status: In Progress</div>
+          <div className="font-semibold">{props.projectName}</div>
+          <div>{props.projectAddress}</div>
+          <div>Type: {props.projectType}</div>
+          <div>Size: {props.projectSize}</div>
+          <div>Duration: {props.projectDuration}</div>
         </div>
       </div>
     </div>
@@ -423,6 +390,7 @@ export const ClassicTemplate = (props) => (
       <thead>
         <tr className="bg-gray-300">
           <th className="text-left px-2 py-1 font-bold">Description</th>
+          <th className="text-center px-2 py-1 font-bold">Type</th>
           <th className="text-center px-2 py-1 font-bold">Qty</th>
           <th className="text-right px-2 py-1 font-bold">Unit Price</th>
           <th className="text-right px-2 py-1 font-bold">Amount</th>
@@ -432,6 +400,7 @@ export const ClassicTemplate = (props) => (
         {props.items.map((item, i) => (
           <tr key={i} className="border-b">
             <td className="px-2 py-2">{item.description}</td>
+            <td className="text-center px-2 py-2">{item.type}</td>
             <td className="text-center px-2 py-2">{item.qty}</td>
             <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
             <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
@@ -440,7 +409,7 @@ export const ClassicTemplate = (props) => (
       </tbody>
     </table>
 
-    <div className="flex justify-end">
+    <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
         <div className="flex justify-between py-1">
           <span>Subtotal:</span>
@@ -456,50 +425,53 @@ export const ClassicTemplate = (props) => (
         </div>
       </div>
     </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
-      </div>
-    </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp 
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+
+    {props.businessInfo.bankName && (
+      <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
+        <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-xs space-y-1 text-gray-700">
+          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName}</div>
+          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.accountHolder}</div>
+          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber}</div>
+          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode}</div>
         </div>
       </div>
     )}
-    {/* Footer Note */}
+
+    {props.showStamp && (
+      <div className="flex justify-between items-end mb-4">
+        <div>
+          <div className="font-semibold text-xs mb-1">AUTHORIZED SIGNATURE</div>
+          <div className="border-b-2 border-gray-800 pt-2" style={{ minWidth: '200px', height: '40px' }}></div>
+        </div>
+        <SignatureStamp 
+          text={props.stampText}
+          color={props.stampColor}
+          showDate={props.showStampDate}
+          rotation={-5}
+          size="medium"
+        />
+      </div>
+    )}
+
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
+      {props.documentType === 'quote' 
+        ? 'Quote valid for 30 days. Terms and conditions apply.'
+        : 'Payment due within 30 days. Thank you for your business.'}
     </div>
   </div>
 );
 
-// Modern Template
+// Modern Minimalist Template  
 export const ModernTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-    <div className="border-b-4 border-blue-500 pb-6 mb-6">
+    <div className="border-b-4 border-orange-500 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
           {props.businessInfo.logoUrl && (
             <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
           )}
-          <div className="text-3xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
+          <div className="text-3xl font-bold text-gray-900 mb-2">{props.businessInfo.companyName}</div>
           <div className="text-sm text-gray-600 space-y-1">
             <div>{props.businessInfo.addressLine1}</div>
             <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
@@ -507,9 +479,9 @@ export const ModernTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-5xl font-bold text-blue-500 mb-4">INVOICE</div>
-          <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-            <div className="text-sm"><span className="font-semibold">Invoice #:</span> {props.jobCardNumber}</div>
+          <div className="text-5xl font-bold text-orange-500 mb-4">{props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}</div>
+          <div className="bg-orange-50 p-4 rounded-lg space-y-2">
+            <div className="text-sm"><span className="font-semibold">Number:</span> {props.jobCardNumber}</div>
             <div className="text-sm"><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</div>
           </div>
         </div>
@@ -518,32 +490,34 @@ export const ModernTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div className="bg-gray-50 p-4 rounded-lg">
-        <div className="text-sm font-bold text-gray-500 mb-3">BILL TO</div>
+        <div className="text-sm font-bold text-gray-500 mb-3">CLIENT</div>
         <div className="space-y-1 text-sm">
           <div className="font-semibold text-lg">{props.customerName}</div>
+          <div>{props.customerCompany}</div>
           <div>{props.customerAddress}</div>
           <div>{props.customerEmail}</div>
           <div>{props.customerPhone}</div>
         </div>
       </div>
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <div className="text-sm font-bold text-blue-700 mb-3">VEHICLE INFORMATION</div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div><span className="font-semibold">Make:</span> {props.vehicleMake}</div>
-          <div><span className="font-semibold">Model:</span> {props.vehicleModel}</div>
-          <div><span className="font-semibold">Year:</span> {props.vehicleYear}</div>
-          <div><span className="font-semibold">Reg:</span> {props.vehicleReg}</div>
-          <div className="col-span-2"><span className="font-semibold">Mileage:</span> {props.vehicleMileage} km</div>
+      <div className="bg-orange-50 p-4 rounded-lg">
+        <div className="text-sm font-bold text-orange-700 mb-3">PROJECT</div>
+        <div className="space-y-1 text-sm">
+          <div className="font-semibold">{props.projectName}</div>
+          <div>{props.projectAddress}</div>
+          <div>Type: {props.projectType}</div>
+          <div>Size: {props.projectSize}</div>
+          <div>Duration: {props.projectDuration}</div>
         </div>
       </div>
     </div>
 
     <table className="w-full mb-6">
       <thead>
-        <tr className="bg-blue-500 text-white">
+        <tr className="bg-orange-500 text-white">
           <th className="text-left px-4 py-3 rounded-l-lg">Description</th>
+          <th className="text-center px-4 py-3">Type</th>
           <th className="text-center px-4 py-3">Qty</th>
-          <th className="text-right px-4 py-3">Unit Price</th>
+          <th className="text-right px-4 py-3">Price</th>
           <th className="text-right px-4 py-3 rounded-r-lg">Amount</th>
         </tr>
       </thead>
@@ -551,6 +525,7 @@ export const ModernTemplate = (props) => (
         {props.items.map((item, i) => (
           <tr key={i} className="border-b hover:bg-gray-50">
             <td className="px-4 py-3">{item.description}</td>
+            <td className="text-center px-4 py-3">{item.type}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
             <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
             <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
@@ -559,7 +534,7 @@ export const ModernTemplate = (props) => (
       </tbody>
     </table>
 
-    <div className="flex justify-end">
+    <div className="flex justify-end mb-6">
       <div className="w-80 space-y-2">
         <div className="flex justify-between py-2 text-gray-600">
           <span>Subtotal:</span>
@@ -569,46 +544,37 @@ export const ModernTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 text-xl font-bold bg-blue-500 text-white px-4 rounded-lg">
+        <div className="flex justify-between py-3 text-xl font-bold bg-orange-500 text-white px-4 rounded-lg">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
       </div>
     </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
-      </div>
-    </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp 
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+
+    {props.businessInfo.bankName && (
+      <div className="bg-orange-50 border border-orange-200 p-4 mb-4 rounded">
+        <div className="text-orange-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-xs space-y-1 text-gray-700">
+          <div><span className="font-semibold">Bank:</span> {props.businessInfo.bankName}</div>
+          <div><span className="font-semibold">Account:</span> {props.businessInfo.accountNumber}</div>
+          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode}</div>
         </div>
       </div>
     )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
-    </div>
+
+    {props.showStamp && (
+      <div className="text-center mb-4">
+        <SignatureStamp 
+          text={props.stampText}
+          color={props.stampColor}
+          showDate={props.showStampDate}
+          rotation={-5}
+          size="medium"
+        />
+      </div>
+    )}
   </div>
 );
-
 // Elegant/Premium Template
 export const ElegantTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>

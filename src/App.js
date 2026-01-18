@@ -33,7 +33,6 @@ import RealEstateDashboard from './pages/realEstate/RealEstateDashboard';
 import VeterinaryDashboard from './pages/veterinary/VeterinaryDashboard';
 import HVACDashboard from './pages/hvac/HVACDashboard';
 import AccountingDashboard from './pages/accounting/AccountingDashboard';  
-import QuoteTemplate from './pages/accounting/QuoteTemplate';
 import PracticeOverview from './pages/health/PracticeOverview';
 import PendingPayments from './pages/health/PendingPayments';
 import AppointmentsCalendar from './pages/health/AppointmentsCalendar';
@@ -280,14 +279,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <FinancialOverview />
-              </ProtectedRoute>
-            }
-          />  
-          <Route 
-            path="/quote-template" 
-            element={
-              <ProtectedRoute>
-                <QuoteTemplate />
               </ProtectedRoute>
             }
           />  

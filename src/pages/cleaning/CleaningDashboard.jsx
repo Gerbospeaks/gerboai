@@ -45,12 +45,15 @@ import {
   ClipboardList,
   Package,
   Upload,
+  RefreshCw,
 } from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import FinancialOverview from "../FinancialOverview";
 import SignatureStamp from '../SignatureStamp';
+
+// Generate Invoice Number
 const generateInvoiceNumber = async (userId) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
@@ -64,6 +67,22 @@ const generateInvoiceNumber = async (userId) => {
     if (match) lastNumber = Number(match[1]);
   }
   return `INV-${year}-${String(lastNumber + 1).padStart(4, "0")}`;
+};
+
+// Generate Quote Number
+const generateQuoteNumber = async (userId) => {
+  const db = getFirestore();
+  const year = new Date().getFullYear();
+  const quotesRef = collection(db, "users", userId, "quotations");
+  const q = query(quotesRef, orderBy("createdAt", "desc"), limit(1));
+  const snapshot = await getDocs(q);
+  let lastNumber = 100;
+  if (!snapshot.empty) {
+    const lastQuote = snapshot.docs[0].data();
+    const match = lastQuote.quoteNumber?.match(/(\d+)$/);
+    if (match) lastNumber = Number(match[1]);
+  }
+  return `QUO-${year}-${String(lastNumber + 1).padStart(4, "0")}`;
 };
 
 const CleaningDashboard = () => {
@@ -83,6 +102,14 @@ const CleaningDashboard = () => {
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [activeView, setActiveView] = useState("invoice");
   const [activeTemplate, setActiveTemplate] = useState("classic");
+  
+  // Quote-specific states
+  const [isQuoteMode, setIsQuoteMode] = useState(false);
+  const [quoteId, setQuoteId] = useState(null);
+  const [savedQuotes, setSavedQuotes] = useState([]);
+  const [showQuotesList, setShowQuotesList] = useState(false);
+  const [showConvertButton, setShowConvertButton] = useState(false);
+  
   const [customerName, setCustomerName] = useState("Zoey Mor");
   const [customerId, setCustomerId] = useState("CUST-2026-5678");
   const [customerEmail, setCustomerEmail] = useState("jane.doe@example.com");
@@ -97,7 +124,7 @@ const CleaningDashboard = () => {
   const [propertyBathrooms, setPropertyBathrooms] = useState("2");
   const [propertyFloors, setPropertyFloors] = useState("1");
   const [serviceFrequency, setServiceFrequency] = useState("Weekly");
-const [stampSettings, setStampSettings] = useState({
+  const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
     showDate: true,
@@ -130,14 +157,20 @@ const [stampSettings, setStampSettings] = useState({
   useEffect(() => {
     if (!user?.uid) return;
     const loadNumber = async () => {
-      const next = await generateInvoiceNumber(user.uid);
-      setInvoiceNumber(next);
+      if (isQuoteMode) {
+        const next = await generateQuoteNumber(user.uid);
+        setInvoiceNumber(next);
+      } else {
+        const next = await generateInvoiceNumber(user.uid);
+        setInvoiceNumber(next);
+      }
     };
     loadNumber();
     loadSavedInvoices();
+    loadSavedQuotes();
     loadCustomers();
     loadSavedCustomers();
-  }, [user]);
+  }, [user, isQuoteMode]);
 
   useEffect(() => {
     if (user?.uid) loadBusinessInfo();
@@ -197,6 +230,16 @@ const [stampSettings, setStampSettings] = useState({
     setSavedInvoices(invs);
   };
 
+  const loadSavedQuotes = async () => {
+    if (!user?.uid) return;
+    const db = getFirestore();
+    const quotesRef = collection(db, "users", user.uid, "quotations");
+    const q = query(quotesRef, orderBy("createdAt", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+    const quotes = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    setSavedQuotes(quotes);
+  };
+
   const loadSavedCustomers = async () => {
     if (!user?.uid) return;
     const db = getFirestore();
@@ -243,7 +286,10 @@ const [stampSettings, setStampSettings] = useState({
   };
 
   const loadInvoice = (invoice) => {
+    setIsQuoteMode(false);
     setInvoiceId(invoice.id);
+    setQuoteId(null);
+    setShowConvertButton(false);
     setInvoiceNumber(invoice.invoiceNumber || "");
     setCustomerName(invoice.customer?.name || "");
     setCustomerEmail(invoice.customer?.email || "");
@@ -258,6 +304,29 @@ const [stampSettings, setStampSettings] = useState({
     setServiceFrequency(invoice.property?.serviceFrequency || "");
     setItems(invoice.items || []);
     setShowInvoicesList(false);
+    setActiveView("invoice");
+  };
+
+  const loadQuote = (quote) => {
+    setIsQuoteMode(true);
+    setQuoteId(quote.id);
+    setInvoiceId(null);
+    setShowConvertButton(true);
+    setInvoiceNumber(quote.quoteNumber || "");
+    setCustomerName(quote.customer?.name || "");
+    setCustomerEmail(quote.customer?.email || "");
+    setCustomerPhone(quote.customer?.phone || "");
+    setCustomerAddress(quote.customer?.address || "");
+    setCustomerId(quote.customer?.customerId || "");
+    setPropertyType(quote.property?.type || "");
+    setPropertySize(quote.property?.size || "");
+    setPropertyRooms(quote.property?.rooms || "");
+    setPropertyBathrooms(quote.property?.bathrooms || "");
+    setPropertyFloors(quote.property?.floors || "");
+    setServiceFrequency(quote.property?.serviceFrequency || "");
+    setItems(quote.items || []);
+    setShowQuotesList(false);
+    setActiveView("invoice");
   };
 
   const handleLogoUpload = async (e) => {
@@ -313,69 +382,206 @@ const [stampSettings, setStampSettings] = useState({
     setNewItem({ description: "", rate: "", qty: "", type: "Service" });
   };
 
-  const buildInvoicePayload = (numberToUse) => ({
-    invoiceNumber: numberToUse,
-    locked: true,
-    status: "pending",
-    dates: {
-      serviceDate: new Date().toISOString(),
-      completedDate: null,
-    },
-    customer: {
-      name: customerName,
-      email: customerEmail,
-      phone: customerPhone,
-      address: customerAddress,
-      customerId,
-    },
-    property: {
-      type: propertyType,
-      size: propertySize,
-      rooms: propertyRooms,
-      bathrooms: propertyBathrooms,
-      floors: propertyFloors,
-      serviceFrequency: serviceFrequency,
-    },
-    items,
-    totals: {
-      subtotal,
-      vat,
-      total,
-      paid: 0,
-      due: total,
-    },
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
-
   const handleSaveInvoice = async () => {
     if (!user?.uid) return;
     const db = getFirestore();
     let numberToUse = invoiceNumber;
-    if (!invoiceId) {
-      numberToUse = await generateInvoiceNumber(user.uid);
-      setInvoiceNumber(numberToUse);
-    }
-    const invoiceData = buildInvoicePayload(numberToUse);
-    if (invoiceId) {
-      await updateDoc(doc(db, "users", user.uid, "invoices", invoiceId), {
-        ...invoiceData,
+    
+    if (isQuoteMode) {
+      // Saving as Quote
+      if (!quoteId) {
+        numberToUse = await generateQuoteNumber(user.uid);
+        setInvoiceNumber(numberToUse);
+      }
+      const quoteData = {
+        quoteNumber: numberToUse,
+        locked: true,
+        status: "pending",
+        dates: {
+          quoteDate: new Date().toISOString(),
+          validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+        customer: {
+          name: customerName,
+          email: customerEmail,
+          phone: customerPhone,
+          address: customerAddress,
+          customerId,
+        },
+        property: {
+          type: propertyType,
+          size: propertySize,
+          rooms: propertyRooms,
+          bathrooms: propertyBathrooms,
+          floors: propertyFloors,
+          serviceFrequency: serviceFrequency,
+        },
+        items,
+        totals: {
+          subtotal,
+          vat,
+          total,
+        },
+        createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+      
+      if (quoteId) {
+        await updateDoc(doc(db, "users", user.uid, "quotations", quoteId), {
+          ...quoteData,
+          updatedAt: serverTimestamp(),
+        });
+      } else {
+        const ref = await addDoc(
+          collection(db, "users", user.uid, "quotations"),
+          quoteData
+        );
+        setQuoteId(ref.id);
+        setShowConvertButton(true);
+      }
+      alert("Quote saved successfully");
+      loadSavedQuotes();
     } else {
+      // Saving as Invoice
+      if (!invoiceId) {
+        numberToUse = await generateInvoiceNumber(user.uid);
+        setInvoiceNumber(numberToUse);
+      }
+      const invoiceData = {
+        invoiceNumber: numberToUse,
+        locked: true,
+        status: "pending",
+        dates: {
+          serviceDate: new Date().toISOString(),
+          completedDate: null,
+        },
+        customer: {
+          name: customerName,
+          email: customerEmail,
+          phone: customerPhone,
+          address: customerAddress,
+          customerId,
+        },
+        property: {
+          type: propertyType,
+          size: propertySize,
+          rooms: propertyRooms,
+          bathrooms: propertyBathrooms,
+          floors: propertyFloors,
+          serviceFrequency: serviceFrequency,
+        },
+        items,
+        totals: {
+          subtotal,
+          vat,
+          total,
+          paid: 0,
+          due: total,
+        },
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+      
+      if (invoiceId) {
+        await updateDoc(doc(db, "users", user.uid, "invoices", invoiceId), {
+          ...invoiceData,
+          updatedAt: serverTimestamp(),
+        });
+      } else {
+        const ref = await addDoc(
+          collection(db, "users", user.uid, "invoices"),
+          invoiceData
+        );
+        setInvoiceId(ref.id);
+      }
+      alert("Invoice saved successfully");
+      loadSavedInvoices();
+    }
+  };
+
+  const handleConvertToInvoice = async () => {
+    if (!user?.uid || !quoteId) {
+      alert("Please save the quote first");
+      return;
+    }
+    
+    if (!window.confirm("Are you sure you want to convert this quote to an invoice?")) {
+      return;
+    }
+
+    try {
+      const db = getFirestore();
+      const invoiceNumber = await generateInvoiceNumber(user.uid);
+      
+      const invoiceData = {
+        invoiceNumber,
+        locked: true,
+        status: "pending",
+        convertedFromQuote: quoteId,
+        dates: {
+          serviceDate: new Date().toISOString(),
+          completedDate: null,
+        },
+        customer: {
+          name: customerName,
+          email: customerEmail,
+          phone: customerPhone,
+          address: customerAddress,
+          customerId,
+        },
+        property: {
+          type: propertyType,
+          size: propertySize,
+          rooms: propertyRooms,
+          bathrooms: propertyBathrooms,
+          floors: propertyFloors,
+          serviceFrequency: serviceFrequency,
+        },
+        items,
+        totals: {
+          subtotal,
+          vat,
+          total,
+          paid: 0,
+          due: total,
+        },
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
       const ref = await addDoc(
         collection(db, "users", user.uid, "invoices"),
         invoiceData
       );
+
+      // Update quote status
+      await updateDoc(doc(db, "users", user.uid, "quotations", quoteId), {
+        status: "converted",
+        convertedToInvoice: ref.id,
+        updatedAt: serverTimestamp(),
+      });
+
+      setIsQuoteMode(false);
       setInvoiceId(ref.id);
+      setQuoteId(null);
+      setInvoiceNumber(invoiceNumber);
+      setShowConvertButton(false);
+      
+      alert("Quote converted to invoice successfully!");
+      loadSavedInvoices();
+      loadSavedQuotes();
+    } catch (error) {
+      console.error("Error converting quote:", error);
+      alert("Failed to convert quote to invoice");
     }
-    alert("Invoice saved successfully");
-    loadSavedInvoices();
   };
 
   const handleNewInvoice = () => {
     setActiveView("invoice");
+    setIsQuoteMode(false);
     setInvoiceId(null);
+    setQuoteId(null);
+    setShowConvertButton(false);
     setInvoiceNumber("");
     setCustomerName("Zoey Mor");
     setCustomerId("CUST-2026-5678");
@@ -398,6 +604,34 @@ const [stampSettings, setStampSettings] = useState({
     loadNewNumber();
   };
 
+  const handleNewQuote = () => {
+    setActiveView("invoice");
+    setIsQuoteMode(true);
+    setInvoiceId(null);
+    setQuoteId(null);
+    setShowConvertButton(false);
+    setInvoiceNumber("");
+    setCustomerName("Zoey Mor");
+    setCustomerId("CUST-2026-5678");
+    setCustomerEmail("jane.doe@example.com");
+    setCustomerPhone("082 765 4321");
+    setCustomerAddress("456 Oak Avenue, Pretoria, 0002");
+    setPropertyType("Residential");
+    setPropertySize("120");
+    setPropertyRooms("3");
+    setPropertyBathrooms("2");
+    setPropertyFloors("1");
+    setServiceFrequency("Weekly");
+    setItems([]);
+    const loadNewNumber = async () => {
+      if (user?.uid) {
+        const next = await generateQuoteNumber(user.uid);
+        setInvoiceNumber(next);
+      }
+    };
+    loadNewNumber();
+  };
+
   const handlePrint = () => window.print();
   const handleLogout = async () => {
     const auth = getAuth();
@@ -409,29 +643,40 @@ const [stampSettings, setStampSettings] = useState({
   };
 
   const loadInvoiceForExport = async () => {
-    if (!user?.uid || !invoiceId) return null;
+    if (!user?.uid) return null;
     const db = getFirestore();
-    const snap = await getDoc(
-      doc(db, "users", user.uid, "invoices", invoiceId)
-    );
-    return snap.exists() ? snap.data() : null;
+    
+    if (isQuoteMode && quoteId) {
+      const snap = await getDoc(doc(db, "users", user.uid, "quotations", quoteId));
+      return snap.exists() ? snap.data() : null;
+    } else if (invoiceId) {
+      const snap = await getDoc(doc(db, "users", user.uid, "invoices", invoiceId));
+      return snap.exists() ? snap.data() : null;
+    }
+    return null;
   };
 
   const handleSavePDF = async () => {
-    const savedInvoice = await loadInvoiceForExport();
-    if (!savedInvoice) {
-      alert("Please save the invoice before exporting PDF");
+    const savedDoc = await loadInvoiceForExport();
+    if (!savedDoc) {
+      alert(`Please save the ${isQuoteMode ? 'quote' : 'invoice'} before exporting PDF`);
       return;
     }
-    setInvoiceNumber(savedInvoice.invoiceNumber);
-    setItems(savedInvoice.items);
-    setCustomerName(savedInvoice.customer.name);
-    setCustomerEmail(savedInvoice.customer.email);
-    setCustomerPhone(savedInvoice.customer.phone);
-    setCustomerAddress(savedInvoice.customer.address);
-    setPropertyType(savedInvoice.property.type);
-    setPropertySize(savedInvoice.property.size);
-    setPropertyRooms(savedInvoice.property.rooms);
+    
+    if (isQuoteMode) {
+      setInvoiceNumber(savedDoc.quoteNumber);
+    } else {
+      setInvoiceNumber(savedDoc.invoiceNumber);
+    }
+    
+    setItems(savedDoc.items);
+    setCustomerName(savedDoc.customer.name);
+    setCustomerEmail(savedDoc.customer.email);
+    setCustomerPhone(savedDoc.customer.phone);
+    setCustomerAddress(savedDoc.customer.address);
+    setPropertyType(savedDoc.property.type);
+    setPropertySize(savedDoc.property.size);
+    setPropertyRooms(savedDoc.property.rooms);
     setTimeout(() => window.print(), 300);
   };
 
@@ -508,6 +753,31 @@ const [stampSettings, setStampSettings] = useState({
                 </div>
               </div>
 
+              <div className="mt-2">
+                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <Receipt className="w-5 h-5" />
+                    <span>Quotes</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+
+                <div className="ml-8 mt-1 space-y-1">
+                  <div
+                    onClick={handleNewQuote}
+                    className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+                  >
+                    Create Quote
+                  </div>
+                  <div
+                    onClick={() => setShowQuotesList(!showQuotesList)}
+                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+                  >
+                    All Quotes ({savedQuotes.length})
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
                 <Users className="w-5 h-5" />
                 <span>Customers</span>
@@ -531,13 +801,13 @@ const [stampSettings, setStampSettings] = useState({
                 <Building className="w-5 h-5" />
                 <span>Properties</span>
               </div>
-                 <div
-                                onClick={() => setActiveView("templates")}
-                                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-                              >
-                                <FileText className="w-5 h-5" />
-                                <span>Invoice Templates</span>
-                              </div>
+              <div
+                onClick={() => setActiveView("templates")}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
+                <FileText className="w-5 h-5" />
+                <span>Invoice Templates</span>
+              </div>
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <Package className="w-5 h-5" />
                 <span>Supplies</span>
@@ -598,132 +868,152 @@ const [stampSettings, setStampSettings] = useState({
 
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 flex flex-col">
-        <div className="bg-gray-50 border-b border-gray-200 px-4 lg:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 lg:space-x-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
-              <h1 className="text-base lg:text-xl font-semibold">
-                Invoice #{invoiceNumber || "— not saved yet —"}
-              </h1>
-              <TemplateSelector
-                              user={user}
-                              selectedTemplate={activeTemplate}
-                              onTemplateChange={setActiveTemplate}
-                            />
-            </div>
+          <div className="bg-gray-50 border-b border-gray-200 px-4 lg:px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 lg:space-x-4">
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+                <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+                <h1 className="text-base lg:text-xl font-semibold">
+                  {isQuoteMode ? 'Quote' : 'Invoice'} #{invoiceNumber || "— not saved yet —"}
+                </h1>
+                <TemplateSelector
+                  user={user}
+                  selectedTemplate={activeTemplate}
+                  onTemplateChange={setActiveTemplate}
+                />
+              </div>
 
-            <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <CheckSquare className="w-4 h-4" />
-                <span>Mark Complete</span>
+              <div className="hidden lg:flex items-center space-x-3 print:hidden">
+                {showConvertButton && (
+                  <button
+                    onClick={handleConvertToInvoice}
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Convert to Invoice
+                  </button>
+                )}
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  <CheckSquare className="w-4 h-4" />
+                  <span>Mark Complete</span>
+                </button>
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  <Edit className="w-4 h-4" />
+                  <span>Edit</span>
+                </button>
+                <button
+                  onClick={handleSaveInvoice}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Save {isQuoteMode ? 'Quote' : 'Invoice'}
+                </button>
+                <button
+                  onClick={isQuoteMode ? handleNewQuote : handleNewInvoice}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  <Plus className="w-4 h-4" />
+                  New
+                </button>
+                <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <Send className="w-4 h-4" />
+                  <span>Send</span>
+                </button>
+                <button
+                  onClick={handleSavePDF}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Save as PDF
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Log Out
+                </button>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
+              >
+                <span className="text-sm font-medium">Logout</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+            </div>
+          </div>
+
+          <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {showConvertButton && (
+                <button
+                  onClick={handleConvertToInvoice}
+                  className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 whitespace-nowrap text-sm"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>To Invoice</span>
+                </button>
+              )}
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
+                <CheckSquare className="w-4 h-4" />
+                <span>Complete</span>
+              </button>
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
-              <button
-                onClick={handleSaveInvoice}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Save Invoice
-              </button>
-              <button
-                onClick={handleNewInvoice}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                <Plus className="w-4 h-4" />
-                New
-              </button>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <button className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
               >
-                Save as PDF
+                <Download className="w-4 h-4" />
+                <span>Save PDF</span>
               </button>
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
               >
                 <Printer className="w-4 h-4" />
-                Print
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Log Out
+                <span>Print</span>
               </button>
             </div>
+          </div>
 
-            <button
-              onClick={handleLogout}
-              className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
-            >
-              <span className="text-sm font-medium">Logout</span>
-            </button>
+          <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+            <div className="flex space-x-4 lg:space-x-8 min-w-max">
+              {[isQuoteMode ? "Quote" : "Invoice", "Services", "History", "Notes"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`py-4 border-b-2 ${
+                    activeTab === tab || (tab === "Quote" && isQuoteMode) || (tab === "Invoice" && !isQuoteMode)
+                      ? "border-blue-400 text-white"
+                      : "border-transparent text-gray-400 hover:text-gray-200"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
-              <CheckSquare className="w-4 h-4" />
-              <span>Complete</span>
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap text-sm">
-              <Edit className="w-4 h-4" />
-              <span>Edit</span>
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
-              <Send className="w-4 h-4" />
-              <span>Send</span>
-            </button>
-            <button
-              onClick={handleSavePDF}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Download className="w-4 h-4" />
-              <span>Save PDF</span>
-            </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Print</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-          <div className="flex space-x-4 lg:space-x-8 min-w-max">
-            {["Invoice", "Services", "History", "Notes"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 border-b-2 ${
-                  activeTab === tab
-                    ? "border-blue-400 text-white"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-          </div>
         <div className="p-4 lg:p-6">
+          {/* Settings Modal */}
           {showSettings && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
               <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
@@ -768,9 +1058,7 @@ const [stampSettings, setStampSettings] = useState({
                             htmlFor="logo-upload"
                             className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer"
                           >
-                            {businessInfo.logoUrl
-                              ? "Change Logo"
-                              : "Upload Logo"}
+                            {businessInfo.logoUrl ? "Change Logo" : "Upload Logo"}
                           </label>
                           <p className="text-xs text-gray-500 mt-2">
                             Recommended: Square image, max 5MB
@@ -780,271 +1068,197 @@ const [stampSettings, setStampSettings] = useState({
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Business Name
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Business Name</label>
                       <input
                         type="text"
                         value={businessInfo.businessName}
-                        onChange={(e) =>
-                          setBusinessInfo({
-                            ...businessInfo,
-                            businessName: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setBusinessInfo({...businessInfo, businessName: e.target.value})}
                         className="w-full px-4 py-2 border rounded-lg"
                       />
                     </div>
+
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Address Line 1
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Address Line 1</label>
                       <input
                         type="text"
                         value={businessInfo.addressLine1}
-                        onChange={(e) =>
-                          setBusinessInfo({
-                            ...businessInfo,
-                            addressLine1: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setBusinessInfo({...businessInfo, addressLine1: e.target.value})}
                         className="w-full px-4 py-2 border rounded-lg"
                       />
                     </div>
+
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Address Line 2
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Address Line 2</label>
                       <input
                         type="text"
                         value={businessInfo.addressLine2}
-                        onChange={(e) =>
-                          setBusinessInfo({
-                            ...businessInfo,
-                            addressLine2: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setBusinessInfo({...businessInfo, addressLine2: e.target.value})}
                         className="w-full px-4 py-2 border rounded-lg"
                       />
                     </div>
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2">
-                          City
-                        </label>
+                        <label className="block text-sm font-medium mb-2">City</label>
                         <input
                           type="text"
                           value={businessInfo.city}
-                          onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              city: e.target.value,
-                            })
-                          }
+                          onChange={(e) => setBusinessInfo({...businessInfo, city: e.target.value})}
                           className="w-full px-4 py-2 border rounded-lg"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Postal Code
-                        </label>
+                        <label className="block text-sm font-medium mb-2">Postal Code</label>
                         <input
                           type="text"
                           value={businessInfo.postalCode}
-                          onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              postalCode: e.target.value,
-                            })
-                          }
+                          onChange={(e) => setBusinessInfo({...businessInfo, postalCode: e.target.value})}
                           className="w-full px-4 py-2 border rounded-lg"
                         />
                       </div>
                     </div>
+
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Primary Phone
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Primary Phone</label>
                       <input
                         type="tel"
                         value={businessInfo.primaryPhone}
-                        onChange={(e) =>
-                          setBusinessInfo({
-                            ...businessInfo,
-                            primaryPhone: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setBusinessInfo({...businessInfo, primaryPhone: e.target.value})}
                         className="w-full px-4 py-2 border rounded-lg"
                         required
                       />
                     </div>
+
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Secondary Phone (Optional)
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Secondary Phone (Optional)</label>
                       <input
                         type="tel"
                         value={businessInfo.secondaryPhone}
-                        onChange={(e) =>
-                          setBusinessInfo({
-                            ...businessInfo,
-                            secondaryPhone: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setBusinessInfo({...businessInfo, secondaryPhone: e.target.value})}
                         className="w-full px-4 py-2 border rounded-lg"
                       />
                     </div>
-                      <div className="border-t pt-4 mt-6">
-                      <h3 className="text-lg font-semibold mb-4">
-                        Bank Details
-                      </h3>
 
+                    <div className="border-t pt-4 mt-6">
+                      <h3 className="text-lg font-semibold mb-4">Bank Details</h3>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium mb-2">
-                            Bank Name
-                          </label>
+                          <label className="block text-sm font-medium mb-2">Bank Name</label>
                           <input
                             type="text"
                             value={businessInfo.bankName}
-                            onChange={(e) =>
-                              setBusinessInfo({
-                                ...businessInfo,
-                                bankName: e.target.value,
-                              })
-                            }
+                            onChange={(e) => setBusinessInfo({...businessInfo, bankName: e.target.value})}
                             className="w-full px-4 py-2 border rounded-lg"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-2">
-                            Account Holder
-                          </label>
+                          <label className="block text-sm font-medium mb-2">Account Holder</label>
                           <input
                             type="text"
                             value={businessInfo.accountHolder}
-                            onChange={(e) =>
-                              setBusinessInfo({
-                                ...businessInfo,
-                                accountHolder: e.target.value,
-                              })
-                            }
+                            onChange={(e) => setBusinessInfo({...businessInfo, accountHolder: e.target.value})}
                             className="w-full px-4 py-2 border rounded-lg"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-2">
-                            Account Number
-                          </label>
+                          <label className="block text-sm font-medium mb-2">Account Number</label>
                           <input
                             type="text"
                             value={businessInfo.accountNumber}
-                            onChange={(e) =>
-                              setBusinessInfo({
-                                ...businessInfo,
-                                accountNumber: e.target.value,
-                              })
-                            }
+                            onChange={(e) => setBusinessInfo({...businessInfo, accountNumber: e.target.value})}
                             className="w-full px-4 py-2 border rounded-lg"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-2">
-                            Branch Code
-                          </label>
+                          <label className="block text-sm font-medium mb-2">Branch Code</label>
                           <input
                             type="text"
                             value={businessInfo.branchCode}
-                            onChange={(e) =>
-                              setBusinessInfo({
-                                ...businessInfo,
-                                branchCode: e.target.value,
-                              })
-                            }
+                            onChange={(e) => setBusinessInfo({...businessInfo, branchCode: e.target.value})}
                             className="w-full px-4 py-2 border rounded-lg"
                           />
                         </div>
                       </div>
                     </div>
+
                     <div className="border-t pt-6 mt-6">
-  <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>
-  
-  <div className="space-y-4">
-    <div>
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={stampSettings.enabled}
-          onChange={(e) => setStampSettings({...stampSettings, enabled: e.target.checked})}
-          className="w-4 h-4 rounded"
-        />
-        <span className="text-sm font-medium">Show approval stamp on invoices and quotes</span>
-      </label>
-    </div>
+                      <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="flex items-center space-x-2 mb-4">
+                            <input
+                              type="checkbox"
+                              checked={stampSettings.enabled}
+                              onChange={(e) => setStampSettings({...stampSettings, enabled: e.target.checked})}
+                              className="w-4 h-4 rounded"
+                            />
+                            <span className="text-sm font-medium">Show approval stamp on invoices and quotes</span>
+                          </label>
+                        </div>
 
-    {stampSettings.enabled && (
-      <>
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Text</label>
-          <input
-            type="text"
-            value={stampSettings.text}
-            onChange={(e) => setStampSettings({...stampSettings, text: e.target.value.toUpperCase()})}
-            className="w-full px-4 py-2 border rounded-lg uppercase"
-            placeholder="APPROVED"
-            maxLength={15}
-          />
-          <p className="text-xs text-gray-500 mt-1">Max 15 characters</p>
-        </div>
+                        {stampSettings.enabled && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Stamp Text</label>
+                              <input
+                                type="text"
+                                value={stampSettings.text}
+                                onChange={(e) => setStampSettings({...stampSettings, text: e.target.value.toUpperCase()})}
+                                className="w-full px-4 py-2 border rounded-lg uppercase"
+                                placeholder="APPROVED"
+                                maxLength={15}
+                              />
+                              <p className="text-xs text-gray-500 mt-1">Max 15 characters</p>
+                            </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Color</label>
-          <select
-            value={stampSettings.color}
-            onChange={(e) => setStampSettings({...stampSettings, color: e.target.value})}
-            className="w-full px-4 py-2 border rounded-lg"
-          >
-            <option value="#d32f2f">🔴 Red (Traditional)</option>
-            <option value="#1976d2">🔵 Blue (Professional)</option>
-            <option value="#388e3c">🟢 Green (Approved)</option>
-            <option value="#7b1fa2">🟣 Purple (Premium)</option>
-            <option value="#000000">⚫ Black (Formal)</option>
-            <option value="#f57c00">🟠 Orange (Attention)</option>
-          </select>
-        </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Stamp Color</label>
+                              <select
+                                value={stampSettings.color}
+                                onChange={(e) => setStampSettings({...stampSettings, color: e.target.value})}
+                                className="w-full px-4 py-2 border rounded-lg"
+                              >
+                                <option value="#d32f2f">🔴 Red (Traditional)</option>
+                                <option value="#1976d2">🔵 Blue (Professional)</option>
+                                <option value="#388e3c">🟢 Green (Approved)</option>
+                                <option value="#7b1fa2">🟣 Purple (Premium)</option>
+                                <option value="#000000">⚫ Black (Formal)</option>
+                                <option value="#f57c00">🟠 Orange (Attention)</option>
+                              </select>
+                            </div>
 
-        <div>
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={stampSettings.showDate}
-              onChange={(e) => setStampSettings({...stampSettings, showDate: e.target.checked})}
-              className="w-4 h-4 rounded"
-            />
-            <span className="text-sm font-medium">Include date on stamp</span>
-          </label>
-        </div>
+                            <div>
+                              <label className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={stampSettings.showDate}
+                                  onChange={(e) => setStampSettings({...stampSettings, showDate: e.target.checked})}
+                                  className="w-4 h-4 rounded"
+                                />
+                                <span className="text-sm font-medium">Include date on stamp</span>
+                              </label>
+                            </div>
 
-        {/* Preview */}
-        <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
-          <div className="flex justify-center">
-            <SignatureStamp 
-              text={stampSettings.text}
-              color={stampSettings.color}
-              showDate={stampSettings.showDate}
-              rotation={-5}
-              size="medium"
-            />
-          </div>
-        </div>
-      </>
-    )}
-  </div>
-</div>
+                            <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                              <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
+                              <div className="flex justify-center">
+                                <SignatureStamp 
+                                  text={stampSettings.text}
+                                  color={stampSettings.color}
+                                  showDate={stampSettings.showDate}
+                                  rotation={-5}
+                                  size="medium"
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
                     <button
                       onClick={handleSaveBusinessInfo}
                       className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
@@ -1057,6 +1271,7 @@ const [stampSettings, setStampSettings] = useState({
             </div>
           )}
 
+          {/* Customer Modals */}
           <CustomersListModal
             showModal={showCustomersListModal}
             setShowModal={setShowCustomersListModal}
@@ -1072,6 +1287,7 @@ const [stampSettings, setStampSettings] = useState({
             onCustomerSaved={handleCustomerSaved}
           />
 
+          {/* Invoices List Modal */}
           {showInvoicesList && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
               <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
@@ -1086,9 +1302,7 @@ const [stampSettings, setStampSettings] = useState({
                 </div>
                 <div className="overflow-auto p-4">
                   {savedInvoices.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      No saved invoices yet
-                    </div>
+                    <div className="text-center py-8 text-gray-500">No saved invoices yet</div>
                   ) : (
                     <div className="space-y-2">
                       {savedInvoices.map((inv) => (
@@ -1099,41 +1313,21 @@ const [stampSettings, setStampSettings] = useState({
                         >
                           <div className="flex justify-between items-start">
                             <div>
-                              <div className="font-semibold text-lg">
-                                {inv.invoiceNumber || "N/A"}
-                              </div>
-                              <div className="text-sm text-gray-600 mt-1">
-                                Customer: {inv.customer?.name || "N/A"}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                Property: {inv.property?.type || "N/A"} -{" "}
-                                {inv.property?.size || ""}m²
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                Frequency:{" "}
-                                {inv.property?.serviceFrequency || "N/A"}
-                              </div>
+                              <div className="font-semibold text-lg">{inv.invoiceNumber || "N/A"}</div>
+                              <div className="text-sm text-gray-600 mt-1">Customer: {inv.customer?.name || "N/A"}</div>
+                              <div className="text-sm text-gray-600">Property: {inv.property?.type || "N/A"} - {inv.property?.size || ""}m²</div>
+                              <div className="text-sm text-gray-600">Frequency: {inv.property?.serviceFrequency || "N/A"}</div>
                             </div>
                             <div className="text-right">
-                              <div className="text-lg font-semibold text-blue-600">
-                                R{inv.totals?.total?.toFixed(2) || "0.00"}
-                              </div>
+                              <div className="text-lg font-semibold text-blue-600">R{inv.totals?.total?.toFixed(2) || "0.00"}</div>
                               <div className="text-sm text-gray-500">
-                                {inv.dates?.serviceDate
-                                  ? new Date(
-                                      inv.dates.serviceDate
-                                    ).toLocaleDateString("en-ZA")
-                                  : "N/A"}
+                                {inv.dates?.serviceDate ? new Date(inv.dates.serviceDate).toLocaleDateString("en-ZA") : "N/A"}
                               </div>
-                              <div
-                                className={`text-xs mt-1 px-2 py-1 rounded ${
-                                  inv.status === "completed"
-                                    ? "bg-green-100 text-green-700"
-                                    : inv.status === "pending"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : "bg-gray-100 text-gray-700"
-                                }`}
-                              >
+                              <div className={`text-xs mt-1 px-2 py-1 rounded ${
+                                inv.status === "completed" ? "bg-green-100 text-green-700" :
+                                inv.status === "pending" ? "bg-blue-100 text-blue-700" :
+                                "bg-gray-100 text-gray-700"
+                              }`}>
                                 {inv.status || "unknown"}
                               </div>
                             </div>
@@ -1147,59 +1341,116 @@ const [stampSettings, setStampSettings] = useState({
             </div>
           )}
 
+          {/* Quotes List Modal */}
+          {showQuotesList && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+                <div className="p-4 border-b flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Saved Quotes</h2>
+                  <button
+                    onClick={() => setShowQuotesList(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="overflow-auto p-4">
+                  {savedQuotes.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">No saved quotes yet</div>
+                  ) : (
+                    <div className="space-y-2">
+                      {savedQuotes.map((quote) => (
+                        <div
+                          key={quote.id}
+                          onClick={() => loadQuote(quote)}
+                          className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="font-semibold text-lg">{quote.quoteNumber || "N/A"}</div>
+                              <div className="text-sm text-gray-600 mt-1">Customer: {quote.customer?.name || "N/A"}</div>
+                              <div className="text-sm text-gray-600">Property: {quote.property?.type || "N/A"} - {quote.property?.size || ""}m²</div>
+                              <div className="text-sm text-gray-600">Frequency: {quote.property?.serviceFrequency || "N/A"}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-semibold text-purple-600">R{quote.totals?.total?.toFixed(2) || "0.00"}</div>
+                              <div className="text-sm text-gray-500">
+                                {quote.dates?.quoteDate ? new Date(quote.dates.quoteDate).toLocaleDateString("en-ZA") : "N/A"}
+                              </div>
+                              <div className={`text-xs mt-1 px-2 py-1 rounded ${
+                                quote.status === "converted" ? "bg-green-100 text-green-700" :
+                                quote.status === "pending" ? "bg-purple-100 text-purple-700" :
+                                "bg-gray-100 text-gray-700"
+                              }`}>
+                                {quote.status || "unknown"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Invoice Toggle Button */}
           <button
             onClick={() => setShowInvoice(!showInvoice)}
             className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
-            {showInvoice ? "Hide Invoice" : "View Invoice"}
+            {showInvoice ? `Hide ${isQuoteMode ? 'Quote' : 'Invoice'}` : `View ${isQuoteMode ? 'Quote' : 'Invoice'}`}
           </button>
+
+          {/* Templates View */}
           {activeView === "templates" && <Templates user={user} />}
                   
-          {activeView === "financial-overview" && (
-            <FinancialOverview user={user} />
-          )}
+          {/* Financial Overview */}
+          {activeView === "financial-overview" && <FinancialOverview user={user} />}
+
+          {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {activeView === "invoice" && (
               <>
-                <div
-                  className={`${
-                    showInvoice ? "hidden" : "block"
-                  } space-y-6 lg:block print:hidden`}
-                >
+                {/* Left Panel - Form */}
+                <div className={`${showInvoice ? "hidden" : "block"} space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-blue-700 font-medium">Scheduled</span>
+                    <span className="text-blue-700 font-medium">{isQuoteMode ? 'Quote' : 'Scheduled'}</span>
                     <span className="text-blue-600">
-                      Service Date: {new Date().toLocaleDateString("en-ZA")}
+                      {isQuoteMode ? 'Valid Until: ' : 'Service Date: '}
+                      {new Date(isQuoteMode ? Date.now() + 30 * 24 * 60 * 60 * 1000 : Date.now()).toLocaleDateString("en-ZA")}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="text-sm text-gray-500 mb-1">
-                        Total Amount
-                      </div>
-                      <div className="text-2xl font-semibold text-blue-600">
-                        R{total.toFixed(2)}
-                      </div>
+                      <div className="text-sm text-gray-500 mb-1">Total Amount</div>
+                      <div className="text-2xl font-semibold text-blue-600">R{total.toFixed(2)}</div>
                     </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="text-sm text-gray-500 mb-1">Paid</div>
-                      <div className="text-2xl font-semibold text-green-600">
-                        R0.00
+                    {!isQuoteMode && (
+                      <>
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <div className="text-sm text-gray-500 mb-1">Paid</div>
+                          <div className="text-2xl font-semibold text-green-600">R0.00</div>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <div className="text-sm text-gray-500 mb-1">Balance Due</div>
+                          <div className="text-2xl font-semibold text-red-600">R{total.toFixed(2)}</div>
+                        </div>
+                      </>
+                    )}
+                    {isQuoteMode && (
+                      <div className="bg-white p-4 rounded-lg border border-gray-200 col-span-2">
+                        <div className="text-sm text-gray-500 mb-1">Quote Status</div>
+                        <div className="text-lg font-semibold text-purple-600">Pending</div>
                       </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="text-sm text-gray-500 mb-1">
-                        Balance Due
-                      </div>
-                      <div className="text-2xl font-semibold text-red-600">
-                        R{total.toFixed(2)}
-                      </div>
-                    </div>
+                    )}
                   </div>
 
+                  {/* Customer Information */}
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold flex items-center space-x-2">
@@ -1213,9 +1464,7 @@ const [stampSettings, setStampSettings] = useState({
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <div className="text-sm text-gray-500">
-                          Customer Name
-                        </div>
+                        <div className="text-sm text-gray-500">Customer Name</div>
                         <input
                           type="text"
                           value={customerName}
@@ -1262,6 +1511,7 @@ const [stampSettings, setStampSettings] = useState({
                     </div>
                   </div>
 
+                  {/* Property Information */}
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold flex items-center space-x-2">
@@ -1271,9 +1521,7 @@ const [stampSettings, setStampSettings] = useState({
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <div className="text-sm text-gray-500">
-                          Property Type
-                        </div>
+                        <div className="text-sm text-gray-500">Property Type</div>
                         <select
                           value={propertyType}
                           onChange={(e) => setPropertyType(e.target.value)}
@@ -1321,9 +1569,7 @@ const [stampSettings, setStampSettings] = useState({
                         />
                       </div>
                       <div>
-                        <div className="text-sm text-gray-500">
-                          Service Frequency
-                        </div>
+                        <div className="text-sm text-gray-500">Service Frequency</div>
                         <select
                           value={serviceFrequency}
                           onChange={(e) => setServiceFrequency(e.target.value)}
@@ -1338,16 +1584,13 @@ const [stampSettings, setStampSettings] = useState({
                     </div>
                   </div>
 
+                  {/* Add Service/Item */}
                   <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                    <h2 className="text-lg font-semibold mb-4">
-                      Add Service/Item
-                    </h2>
+                    <h2 className="text-lg font-semibold mb-4">Add Service/Item</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
                       <select
                         value={newItem.type}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, type: e.target.value })
-                        }
+                        onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
                         className="px-4 py-2 border rounded"
                       >
                         <option value="Service">Service</option>
@@ -1357,30 +1600,21 @@ const [stampSettings, setStampSettings] = useState({
                         type="text"
                         placeholder="Description"
                         value={newItem.description}
-                        onChange={(e) =>
-                          setNewItem({
-                            ...newItem,
-                            description: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setNewItem({...newItem, description: e.target.value})}
                         className="px-4 py-2 border rounded"
                       />
                       <input
                         type="number"
                         placeholder="Rate"
                         value={newItem.rate}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, rate: e.target.value })
-                        }
+                        onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })}
                         className="px-4 py-2 border rounded"
                       />
                       <input
                         type="number"
                         placeholder="Qty"
                         value={newItem.qty}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, qty: e.target.value })
-                        }
+                        onChange={(e) => setNewItem({ ...newItem, qty: e.target.value })}
                         className="px-4 py-2 border rounded"
                       />
                       <button
@@ -1393,6 +1627,7 @@ const [stampSettings, setStampSettings] = useState({
                     </div>
                   </div>
 
+                  {/* Payment Terms */}
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold">Payment Terms</h2>
@@ -1404,133 +1639,119 @@ const [stampSettings, setStampSettings] = useState({
                       </div>
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-gray-600">Payment Terms:</span>
-                        <span className="font-medium">Due on Completion</span>
+                        <span className="font-medium">{isQuoteMode ? 'Quote Valid 30 Days' : 'Due on Completion'}</span>
                       </div>
                       <div className="flex justify-between py-2">
-                        <span className="text-gray-600">
-                          Service Guarantee:
-                        </span>
-                        <span className="font-medium">
-                          7 Day Satisfaction Guarantee
-                        </span>
+                        <span className="text-gray-600">Service Guarantee:</span>
+                        <span className="font-medium">7 Day Satisfaction Guarantee</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
+                {/* Right Panel - Invoice/Quote Preview */}
                 <div
-                  className={`${
-                    !showInvoice ? "hidden" : "block"
-                  } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-                  style={{
-                    width: "100%",
-                    maxWidth: "210mm",
-                    minHeight: "297mm",
-                  }}
+                  className={`${!showInvoice ? "hidden" : "block"} lg:block mx-auto bg-white shadow-lg overflow-hidden`}
+                  style={{width: "100%", maxWidth: "210mm", minHeight: "297mm"}}
                 >
-                  {activeView === 'invoice' && (
-  <>
-    {/* Add Template Selector */}
-    <div className="mb-4">
-      <TemplateSelector 
-        user={user} 
-        selectedTemplate={selectedTemplate}
-        onTemplateChange={setSelectedTemplate}
-      />
-    </div>
+                  <div className="mb-4">
+                    <TemplateSelector 
+                      user={user} 
+                      selectedTemplate={selectedTemplate}
+                      onTemplateChange={setSelectedTemplate}
+                    />
+                  </div>
 
-    {/* Use Template Renderer instead of hardcoded invoice */}
-    <TemplateRenderer
-      templateId={selectedTemplate}
-      businessInfo={businessInfo}
-      loading={loading}
-      jobCardNumber={invoiceNumber}
-      customerName={customerName}
-      customerEmail={customerEmail}
-      customerPhone={customerPhone}
-      customerAddress={customerAddress}
-      propertyType={propertyType}
-      propertySize={propertySize}
-      propertyRooms={propertyRooms}
-      propertyBathrooms={propertyBathrooms}
-      propertyFloors={propertyFloors}
-      serviceFrequency={serviceFrequency}
-      items={items}
-      subtotal={subtotal}
-      vat={vat}
-      total={total}
-    />
-  </>
-)}
+                  <TemplateRenderer
+                    templateId={selectedTemplate}
+                    businessInfo={businessInfo}
+                    loading={loading}
+                    jobCardNumber={invoiceNumber}
+                    customerName={customerName}
+                    customerEmail={customerEmail}
+                    customerPhone={customerPhone}
+                    customerAddress={customerAddress}
+                    propertyType={propertyType}
+                    propertySize={propertySize}
+                    propertyRooms={propertyRooms}
+                    propertyBathrooms={propertyBathrooms}
+                    propertyFloors={propertyFloors}
+                    serviceFrequency={serviceFrequency}
+                    items={items}
+                    subtotal={subtotal}
+                    vat={vat}
+                    total={total}
+                  />
                 </div>
 
+                {/* Print Styles */}
                 <style>{`
-            .logo img {
-          height: 60px;
-          width: auto;
-        }
-              @media print {
-                * {
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                }
-                html, body {
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  background: white !important;
-                  width: 100% !important;
-                  height: 100% !important;
-                }
-                @page {
-                  size: A4;
-                  margin: 0;
-                }
-                .print\\:hidden {
-                  display: none !important;
-                }
-                div[class*="border-b"][class*="border-gray"] {
-                  display: none !important;
-                }
-                nav, [class*="sidebar"], [class*="bg-slate-900"], button:not([style]) {
-                  display: none !important;
-                }
-                .space-y-6 {
-                  display: none !important;
-                }
-                .flex.h-screen {
-                  display: block !important;
-                  height: auto !important;
-                }
-                .flex-1 {
-                  display: block !important;
-                  overflow: visible !important;
-                }
-                .grid.grid-cols-1 {
-                  display: block !important;
-                  grid-template-columns: none !important;
-                }
-                div[style*="210mm"] {
-                  display: block !important;
-                  width: 210mm !important;
-                  height: auto !important;
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  box-shadow: none !important;
-                  page-break-after: avoid !important;
-                }
-                .bg-white {
-                  background: white !important;
-                  box-shadow: none !important;
-                }
-                table {
-                  width: 100% !important;
-                  border-collapse: collapse !important;
-                }
-                tr, td, th {
-                  page-break-inside: avoid !important;
-                }
-              }
-            `}</style>
+                  .logo img {
+                    height: 60px;
+                    width: auto;
+                  }
+                  @media print {
+                    * {
+                      -webkit-print-color-adjust: exact !important;
+                      print-color-adjust: exact !important;
+                    }
+                    html, body {
+                      margin: 0 !important;
+                      padding: 0 !important;
+                      background: white !important;
+                      width: 100% !important;
+                      height: 100% !important;
+                    }
+                    @page {
+                      size: A4;
+                      margin: 0;
+                    }
+                    .print\\:hidden {
+                      display: none !important;
+                    }
+                    div[class*="border-b"][class*="border-gray"] {
+                      display: none !important;
+                    }
+                    nav, [class*="sidebar"], [class*="bg-slate-900"], button:not([style]) {
+                      display: none !important;
+                    }
+                    .space-y-6 {
+                      display: none !important;
+                    }
+                    .flex.h-screen {
+                      display: block !important;
+                      height: auto !important;
+                    }
+                    .flex-1 {
+                      display: block !important;
+                      overflow: visible !important;
+                    }
+                    .grid.grid-cols-1 {
+                      display: block !important;
+                      grid-template-columns: none !important;
+                    }
+                    div[style*="210mm"] {
+                      display: block !important;
+                      width: 210mm !important;
+                      height: auto !important;
+                      margin: 0 !important;
+                      padding: 0 !important;
+                      box-shadow: none !important;
+                      page-break-after: avoid !important;
+                    }
+                    .bg-white {
+                      background: white !important;
+                      box-shadow: none !important;
+                    }
+                    table {
+                      width: 100% !important;
+                      border-collapse: collapse !important;
+                    }
+                    tr, td, th {
+                      page-break-inside: avoid !important;
+                    }
+                  }
+                `}</style>
               </>
             )}
           </div>

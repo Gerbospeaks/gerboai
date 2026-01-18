@@ -1282,7 +1282,7 @@ const [stampSettings, setStampSettings] = useState({
             <div
               className={`${
                 showReportCard ? "hidden" : "block"
-              } space-y-6 lg:block print:hidden`}
+              } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
             >
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                 <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>

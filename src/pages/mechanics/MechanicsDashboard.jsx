@@ -1412,7 +1412,7 @@ const MechanicsDashboard = () => {
               </button>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className={`${showJobCard ? "hidden" : "block"} space-y-6 lg:block print:hidden`}>
+                <div className={`${showJobCard ? "hidden" : "block"} space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     <span className="text-blue-700 font-medium">In Progress</span>

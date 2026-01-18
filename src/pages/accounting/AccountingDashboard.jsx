@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
@@ -18,7 +17,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, RefreshCw } from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from '../CustomerModal';
 import CustomersListModal from '../CustomersListModal';
@@ -45,17 +44,38 @@ import {
   TrendingUp,
   CreditCard,
   Receipt,
-  //Wallet,
- // PieChart,
   DollarSign,
- // ClipboardList,
-  //Package,
   Briefcase,
   Upload,
   BookOpen,
 } from "lucide-react";
-import QuoteTemplate from "./QuoteTemplate";
 import SignatureStamp from '../SignatureStamp';
+
+// Generate Quote Number
+const generateQuoteNumber = async (userId) => {
+  const db = getFirestore();
+  const year = new Date().getFullYear();
+
+  const quotesRef = collection(db, "users", userId, "quotations");
+  const q = query(quotesRef, orderBy("createdAt", "desc"), limit(1));
+  const snapshot = await getDocs(q);
+
+  let lastNumber = 1000;
+
+  if (!snapshot.empty) {
+    const lastQuote = snapshot.docs[0].data();
+    const match = lastQuote.quoteNumber?.match(/(\d+)$/);
+
+    if (match) {
+      lastNumber = Number(match[1]);
+    }
+  }
+
+  const nextNumber = lastNumber + 1;
+  return `QTE-${year}-${String(nextNumber).padStart(4, "0")}`;
+};
+
+// Generate Invoice Number
 const generateInvoiceNumber = async (userId) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
@@ -84,10 +104,12 @@ const AccountingDashboard = () => {
   const [activeTab, setActiveTab] = useState("Invoice");
   const [showInvoice, setShowInvoice] = useState(false);
   const { user } = useAuth();
-  const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [invoiceId, setInvoiceId] = useState(null);
+  const [documentNumber, setDocumentNumber] = useState("");
+  const [documentId, setDocumentId] = useState(null);
   const [savedInvoices, setSavedInvoices] = useState([]);
+  const [savedQuotes, setSavedQuotes] = useState([]);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
+  const [showQuotesList, setShowQuotesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
@@ -97,23 +119,32 @@ const AccountingDashboard = () => {
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [activeView, setActiveView] = useState('invoice');
   const [selectedTemplate, setSelectedTemplate] = useState('contemporary');
+  const [documentType, setDocumentType] = useState('invoice'); // 'invoice' or 'quote'
+  const [showConvertButton, setShowConvertButton] = useState(false);
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
     showDate: true,
     enabled: true
   });
+
   useEffect(() => {
     if (!user?.uid) return;
 
-    const loadInvoiceNumber = async () => {
-      const nextInvoice = await generateInvoiceNumber(user.uid);
-      setInvoiceNumber(nextInvoice);
+    const loadDocumentNumber = async () => {
+      if (documentType === 'quote') {
+        const nextQuote = await generateQuoteNumber(user.uid);
+        setDocumentNumber(nextQuote);
+      } else {
+        const nextInvoice = await generateInvoiceNumber(user.uid);
+        setDocumentNumber(nextInvoice);
+      }
     };
 
-    loadInvoiceNumber();
+    loadDocumentNumber();
     loadSavedInvoices();
-  }, [user]);
+    loadSavedQuotes();
+  }, [user, documentType]);
 
   const loadCustomers = async () => {
     try {
@@ -150,6 +181,22 @@ const AccountingDashboard = () => {
     setSavedInvoices(invoices);
   };
 
+  const loadSavedQuotes = async () => {
+    if (!user?.uid) return;
+
+    const db = getFirestore();
+    const quotesRef = collection(db, "users", user.uid, "quotations");
+    const q = query(quotesRef, orderBy("createdAt", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+
+    const quotes = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setSavedQuotes(quotes);
+  };
+
   const handleAddNewCustomer = () => {
     setSelectedCustomer(null);
     setShowCustomerModal(true);
@@ -177,8 +224,9 @@ const AccountingDashboard = () => {
   }, []);
 
   const loadInvoice = (invoice) => {
-    setInvoiceId(invoice.id);
-    setInvoiceNumber(invoice.invoiceNumber || "");
+    setDocumentType('invoice');
+    setDocumentId(invoice.id);
+    setDocumentNumber(invoice.invoiceNumber || "");
     setCustomerName(invoice.customer?.name || "");
     setCustomerEmail(invoice.customer?.email || "");
     setCustomerPhone(invoice.customer?.phone || "");
@@ -189,6 +237,26 @@ const AccountingDashboard = () => {
     setPaymentTerms(invoice.payment?.terms || "Net 30");
     setItems(invoice.items || []);
     setShowInvoicesList(false);
+    setShowConvertButton(false);
+    setActiveView('invoice');
+  };
+
+  const loadQuote = (quote) => {
+    setDocumentType('quote');
+    setDocumentId(quote.id);
+    setDocumentNumber(quote.quoteNumber || "");
+    setCustomerName(quote.customer?.name || "");
+    setCustomerEmail(quote.customer?.email || "");
+    setCustomerPhone(quote.customer?.phone || "");
+    setCustomerAddress(quote.customer?.address || "");
+    setCustomerId(quote.customer?.customerId || "");
+    setInvoiceDate(quote.dates?.quoteDate || new Date().toISOString().split('T')[0]);
+    setDueDate(quote.dates?.validUntil || "");
+    setPaymentTerms(quote.payment?.terms || "Net 30");
+    setItems(quote.items || []);
+    setShowQuotesList(false);
+    setShowConvertButton(true);
+    setActiveView('invoice');
   };
 
   const loadSavedCustomers = async () => {
@@ -236,33 +304,42 @@ const AccountingDashboard = () => {
     }
   };
 
-  const loadInvoiceForExport = async () => {
-    if (!user?.uid || !invoiceId) return null;
+  const loadDocumentForExport = async () => {
+    if (!user?.uid || !documentId) return null;
 
     const db = getFirestore();
+    const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
     const snap = await getDoc(
-      doc(db, "users", user.uid, "invoices", invoiceId)
+      doc(db, "users", user.uid, collectionName, documentId)
     );
 
     return snap.exists() ? snap.data() : null;
   };
 
   const handleSavePDF = async () => {
-    const savedInvoice = await loadInvoiceForExport();
+    const savedDocument = await loadDocumentForExport();
 
-    if (!savedInvoice) {
-      alert("Please save the invoice before exporting PDF");
+    if (!savedDocument) {
+      alert(`Please save the ${documentType} before exporting PDF`);
       return;
     }
 
-    setInvoiceNumber(savedInvoice.invoiceNumber);
-    setItems(savedInvoice.items);
-    setCustomerName(savedInvoice.customer.name);
-    setCustomerEmail(savedInvoice.customer.email);
-    setCustomerPhone(savedInvoice.customer.phone);
-    setCustomerAddress(savedInvoice.customer.address);
-    setInvoiceDate(savedInvoice.dates.invoiceDate);
-    setDueDate(savedInvoice.dates.dueDate);
+    if (documentType === 'quote') {
+      setDocumentNumber(savedDocument.quoteNumber);
+      setInvoiceDate(savedDocument.dates.quoteDate);
+      setDueDate(savedDocument.dates.validUntil);
+    } else {
+      setDocumentNumber(savedDocument.invoiceNumber);
+      setInvoiceDate(savedDocument.dates.invoiceDate);
+      setDueDate(savedDocument.dates.dueDate);
+    }
+    
+    setItems(savedDocument.items);
+    setCustomerName(savedDocument.customer.name);
+    setCustomerEmail(savedDocument.customer.email);
+    setCustomerPhone(savedDocument.customer.phone);
+    setCustomerAddress(savedDocument.customer.address);
+    setPaymentTerms(savedDocument.payment.terms);
 
     setTimeout(() => {
       window.print();
@@ -437,76 +514,186 @@ const AccountingDashboard = () => {
   const vat = subtotal * 0.15;
   const total = subtotal + vat;
 
-  const buildInvoicePayload = (numberToUse) => ({
-    invoiceNumber: numberToUse,
-    locked: true,
-    status: "pending",
+  const buildDocumentPayload = (numberToUse) => {
+    const basePayload = {
+      locked: true,
+      status: "pending",
+      customer: {
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone,
+        address: customerAddress,
+        customerId,
+      },
+      payment: {
+        terms: paymentTerms,
+      },
+      items,
+      totals: {
+        subtotal,
+        vat,
+        total,
+        paid: 0,
+        due: total,
+      },
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
 
-    dates: {
-      invoiceDate: invoiceDate,
-      dueDate: dueDate,
-    },
+    if (documentType === 'quote') {
+      return {
+        ...basePayload,
+        quoteNumber: numberToUse,
+        dates: {
+          quoteDate: invoiceDate,
+          validUntil: dueDate,
+        },
+      };
+    } else {
+      return {
+        ...basePayload,
+        invoiceNumber: numberToUse,
+        dates: {
+          invoiceDate: invoiceDate,
+          dueDate: dueDate,
+        },
+      };
+    }
+  };
 
-    customer: {
-      name: customerName,
-      email: customerEmail,
-      phone: customerPhone,
-      address: customerAddress,
-      customerId,
-    },
-
-    payment: {
-      terms: paymentTerms,
-    },
-
-    items,
-
-    totals: {
-      subtotal,
-      vat,
-      total,
-      paid: 0,
-      due: total,
-    },
-
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
-
-  const handleSaveInvoice = async () => {
+  const handleSaveDocument = async () => {
     if (!user?.uid) return;
 
     const db = getFirestore();
-    let numberToUse = invoiceNumber;
+    let numberToUse = documentNumber;
 
-    if (!invoiceId) {
-      numberToUse = await generateInvoiceNumber(user.uid);
-      setInvoiceNumber(numberToUse);
+    if (!documentId) {
+      if (documentType === 'quote') {
+        numberToUse = await generateQuoteNumber(user.uid);
+      } else {
+        numberToUse = await generateInvoiceNumber(user.uid);
+      }
+      setDocumentNumber(numberToUse);
     }
 
-    const invoiceData = buildInvoicePayload(numberToUse);
+    const documentData = buildDocumentPayload(numberToUse);
+    const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
 
-    if (invoiceId) {
-      await updateDoc(doc(db, "users", user.uid, "invoices", invoiceId), {
-        ...invoiceData,
+    try {
+      if (documentId) {
+        await updateDoc(doc(db, "users", user.uid, collectionName, documentId), {
+          ...documentData,
+          updatedAt: serverTimestamp(),
+        });
+      } else {
+        const ref = await addDoc(
+          collection(db, "users", user.uid, collectionName),
+          documentData
+        );
+        setDocumentId(ref.id);
+        
+        // Show convert button after saving a quote
+        if (documentType === 'quote') {
+          setShowConvertButton(true);
+        }
+      }
+
+      alert(`${documentType === 'quote' ? 'Quote' : 'Invoice'} saved successfully`);
+      
+      if (documentType === 'quote') {
+        loadSavedQuotes();
+      } else {
+        loadSavedInvoices();
+      }
+    } catch (error) {
+      console.error("Error saving document:", error);
+      alert("Failed to save document");
+    }
+  };
+
+  const handleConvertToInvoice = async () => {
+    if (!documentId || documentType !== 'quote') {
+      alert("Please save the quote first");
+      return;
+    }
+
+    if (!window.confirm("Convert this quote to an invoice? This will create a new invoice.")) {
+      return;
+    }
+
+    try {
+      const db = getFirestore();
+      
+      // Generate new invoice number
+      const newInvoiceNumber = await generateInvoiceNumber(user.uid);
+      
+      // Create invoice payload from current quote data
+      const invoiceData = {
+        invoiceNumber: newInvoiceNumber,
+        locked: true,
+        status: "pending",
+        convertedFromQuote: documentNumber,
+        dates: {
+          invoiceDate: new Date().toISOString().split('T')[0],
+          dueDate: dueDate,
+        },
+        customer: {
+          name: customerName,
+          email: customerEmail,
+          phone: customerPhone,
+          address: customerAddress,
+          customerId,
+        },
+        payment: {
+          terms: paymentTerms,
+        },
+        items,
+        totals: {
+          subtotal,
+          vat,
+          total,
+          paid: 0,
+          due: total,
+        },
+        createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
-    } else {
-      const ref = await addDoc(
+      };
+
+      // Save as new invoice
+      const invoiceRef = await addDoc(
         collection(db, "users", user.uid, "invoices"),
         invoiceData
       );
-      setInvoiceId(ref.id);
-    }
 
-    alert("Invoice saved successfully");
-    loadSavedInvoices();
+      // Update quote status to converted
+      await updateDoc(doc(db, "users", user.uid, "quotations", documentId), {
+        status: "converted",
+        convertedToInvoice: newInvoiceNumber,
+        updatedAt: serverTimestamp(),
+      });
+
+      alert(`Quote converted to Invoice ${newInvoiceNumber} successfully!`);
+      
+      // Switch to invoice mode and load the new invoice
+      setDocumentType('invoice');
+      setDocumentId(invoiceRef.id);
+      setDocumentNumber(newInvoiceNumber);
+      setInvoiceDate(new Date().toISOString().split('T')[0]);
+      setShowConvertButton(false);
+      
+      loadSavedInvoices();
+      loadSavedQuotes();
+    } catch (error) {
+      console.error("Error converting quote to invoice:", error);
+      alert("Failed to convert quote to invoice");
+    }
   };
 
-  const handleNewInvoice = () => {
+  const handleNewDocument = (type = 'invoice') => {
+    setDocumentType(type);
     setActiveView('invoice');
-    setInvoiceId(null);
-    setInvoiceNumber("");
+    setDocumentId(null);
+    setDocumentNumber("");
     setCustomerName("Acme Corporation");
     setCustomerId("CUST-2026-5678");
     setCustomerEmail("accounts@acmecorp.com");
@@ -516,11 +703,17 @@ const AccountingDashboard = () => {
     setDueDate("");
     setPaymentTerms("Net 30");
     setItems([]);
+    setShowConvertButton(false);
 
     const loadNewNumber = async () => {
       if (user?.uid) {
-        const nextInvoice = await generateInvoiceNumber(user.uid);
-        setInvoiceNumber(nextInvoice);
+        if (type === 'quote') {
+          const nextQuote = await generateQuoteNumber(user.uid);
+          setDocumentNumber(nextQuote);
+        } else {
+          const nextInvoice = await generateInvoiceNumber(user.uid);
+          setDocumentNumber(nextInvoice);
+        }
       }
     };
     loadNewNumber();
@@ -582,13 +775,34 @@ const AccountingDashboard = () => {
                 <TrendingUp className="w-5 h-5" />
                 <span>Financial Overview</span>
               </div>
-               <div 
-                onClick={() => setActiveView('quote-template')}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-              >
-                <TrendingUp className="w-5 h-5" />
-                <span>Quotes</span>
+              
+              {/* Quotes Section */}
+              <div className="mt-2">
+                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="w-5 h-5" />
+                    <span>Quotes</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+
+                <div className="ml-8 mt-1 space-y-1">
+                  <div
+                    onClick={() => handleNewDocument('quote')}
+                    className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+                  >
+                    Create Quote
+                  </div>
+                  <div
+                    onClick={() => setShowQuotesList(!showQuotesList)}
+                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+                  >
+                    All Quotes ({savedQuotes.length})
+                  </div>
+                </div>
               </div>
+
+              {/* Invoices Section */}
               <div className="mt-2">
                 <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                   <div className="flex items-center space-x-3">
@@ -600,7 +814,7 @@ const AccountingDashboard = () => {
 
                 <div className="ml-8 mt-1 space-y-1">
                   <div
-                    onClick={handleNewInvoice}
+                    onClick={() => handleNewDocument('invoice')}
                     className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
                   >
                     Create Invoice
@@ -616,12 +830,15 @@ const AccountingDashboard = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
-                <Users className="w-5 h-5" />
-                <span>Clients</span>
-              </div>
-              <div className="ml-8 mt-1 space-y-1">
+ <div className="mt-2">
+                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <Receipt className="w-5 h-5" />
+                    <span>Clients</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+               <div className="ml-8 mt-1 space-y-1">
                 <div 
                   onClick={handleAddNewCustomer}
                   className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
@@ -635,16 +852,13 @@ const AccountingDashboard = () => {
                   All Clients ({savedCustomers.length})
                 </div>
               </div>
-                <div
-                               onClick={() => setActiveView("templates")}
-                               className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-                             >
-                               <FileText className="w-5 h-5" />
-                               <span>Invoice Templates</span>
-                             </div>
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <DollarSign className="w-5 h-5" />
-                <span>Expenses</span>
+              </div>
+              <div
+                onClick={() => setActiveView("templates")}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
+                <FileText className="w-5 h-5" />
+                <span>Invoice Templates</span>
               </div>
 
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
@@ -719,13 +933,13 @@ const AccountingDashboard = () => {
               </button>
               <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
               <h1 className="text-base lg:text-xl font-semibold">
-                Invoice #{invoiceNumber || "— not saved yet —"}
+                {documentType === 'quote' ? 'Quote' : 'Invoice'} #{documentNumber || "— not saved yet —"}
               </h1>
               <TemplateSelector
-                              user={user}
-                              selectedTemplate={activeTemplate}
-                              onTemplateChange={setActiveTemplate}
-                            />
+                user={user}
+                selectedTemplate={activeTemplate}
+                onTemplateChange={setActiveTemplate}
+              />
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -737,16 +951,25 @@ const AccountingDashboard = () => {
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
-               <button
-                onClick={handleSaveInvoice}
+              <button
+                onClick={handleSaveDocument}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                {activeView === 'quote-template' ? 'Save Quote' : 'Save Invoice'}
+                Save {documentType === 'quote' ? 'Quote' : 'Invoice'}
               </button>
 
+              {showConvertButton && documentType === 'quote' && (
+                <button
+                  onClick={handleConvertToInvoice}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Convert to Invoice
+                </button>
+              )}
 
               <button
-                onClick={handleNewInvoice}
+                onClick={() => handleNewDocument(documentType)}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
                 <Plus className="w-4 h-4" />
@@ -800,6 +1023,21 @@ const AccountingDashboard = () => {
               <Edit className="w-4 h-4" />
               <span>Edit</span>
             </button>
+            <button
+              onClick={handleSaveDocument}
+              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
+            >
+              Save {documentType === 'quote' ? 'Quote' : 'Invoice'}
+            </button>
+            {showConvertButton && documentType === 'quote' && (
+              <button
+                onClick={handleConvertToInvoice}
+                className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap text-sm"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Convert
+              </button>
+            )}
             <button className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
@@ -823,7 +1061,7 @@ const AccountingDashboard = () => {
 
         <div className="bg-slate-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
-            {["Invoice", "Payments", "History", "Notes"].map((tab) => (
+            {[documentType === 'quote' ? "Quote" : "Invoice", "Payments", "History", "Notes"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -1060,7 +1298,7 @@ const AccountingDashboard = () => {
                         placeholder="2026/123456/07"
                       />
                     </div>
-                     <div className="border-t pt-4 mt-6">
+                    <div className="border-t pt-4 mt-6">
                       <h3 className="text-lg font-semibold mb-4">
                         Bank Details
                       </h3>
@@ -1135,82 +1373,82 @@ const AccountingDashboard = () => {
                         </div>
                       </div>
                     </div>
-<div className="border-t pt-6 mt-6">
-  <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>
-  
-  <div className="space-y-4">
-    <div>
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={stampSettings.enabled}
-          onChange={(e) => setStampSettings({...stampSettings, enabled: e.target.checked})}
-          className="w-4 h-4 rounded"
-        />
-        <span className="text-sm font-medium">Show approval stamp on invoices and quotes</span>
-      </label>
-    </div>
+                    <div className="border-t pt-6 mt-6">
+                      <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label className="flex items-center space-x-2 mb-4">
+                            <input
+                              type="checkbox"
+                              checked={stampSettings.enabled}
+                              onChange={(e) => setStampSettings({...stampSettings, enabled: e.target.checked})}
+                              className="w-4 h-4 rounded"
+                            />
+                            <span className="text-sm font-medium">Show approval stamp on invoices and quotes</span>
+                          </label>
+                        </div>
 
-    {stampSettings.enabled && (
-      <>
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Text</label>
-          <input
-            type="text"
-            value={stampSettings.text}
-            onChange={(e) => setStampSettings({...stampSettings, text: e.target.value.toUpperCase()})}
-            className="w-full px-4 py-2 border rounded-lg uppercase"
-            placeholder="APPROVED"
-            maxLength={15}
-          />
-          <p className="text-xs text-gray-500 mt-1">Max 15 characters</p>
-        </div>
+                        {stampSettings.enabled && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Stamp Text</label>
+                              <input
+                                type="text"
+                                value={stampSettings.text}
+                                onChange={(e) => setStampSettings({...stampSettings, text: e.target.value.toUpperCase()})}
+                                className="w-full px-4 py-2 border rounded-lg uppercase"
+                                placeholder="APPROVED"
+                                maxLength={15}
+                              />
+                              <p className="text-xs text-gray-500 mt-1">Max 15 characters</p>
+                            </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Color</label>
-          <select
-            value={stampSettings.color}
-            onChange={(e) => setStampSettings({...stampSettings, color: e.target.value})}
-            className="w-full px-4 py-2 border rounded-lg"
-          >
-            <option value="#d32f2f">🔴 Red (Traditional)</option>
-            <option value="#1976d2">🔵 Blue (Professional)</option>
-            <option value="#388e3c">🟢 Green (Approved)</option>
-            <option value="#7b1fa2">🟣 Purple (Premium)</option>
-            <option value="#000000">⚫ Black (Formal)</option>
-            <option value="#f57c00">🟠 Orange (Attention)</option>
-          </select>
-        </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Stamp Color</label>
+                              <select
+                                value={stampSettings.color}
+                                onChange={(e) => setStampSettings({...stampSettings, color: e.target.value})}
+                                className="w-full px-4 py-2 border rounded-lg"
+                              >
+                                <option value="#d32f2f">🔴 Red (Traditional)</option>
+                                <option value="#1976d2">🔵 Blue (Professional)</option>
+                                <option value="#388e3c">🟢 Green (Approved)</option>
+                                <option value="#7b1fa2">🟣 Purple (Premium)</option>
+                                <option value="#000000">⚫ Black (Formal)</option>
+                                <option value="#f57c00">🟠 Orange (Attention)</option>
+                              </select>
+                            </div>
 
-        <div>
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={stampSettings.showDate}
-              onChange={(e) => setStampSettings({...stampSettings, showDate: e.target.checked})}
-              className="w-4 h-4 rounded"
-            />
-            <span className="text-sm font-medium">Include date on stamp</span>
-          </label>
-        </div>
+                            <div>
+                              <label className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={stampSettings.showDate}
+                                  onChange={(e) => setStampSettings({...stampSettings, showDate: e.target.checked})}
+                                  className="w-4 h-4 rounded"
+                                />
+                                <span className="text-sm font-medium">Include date on stamp</span>
+                              </label>
+                            </div>
 
-        {/* Preview */}
-        <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
-          <div className="flex justify-center">
-            <SignatureStamp 
-              text={stampSettings.text}
-              color={stampSettings.color}
-              showDate={stampSettings.showDate}
-              rotation={-5}
-              size="medium"
-            />
-          </div>
-        </div>
-      </>
-    )}
-  </div>
-</div>
+                            {/* Preview */}
+                            <div className="mt-4 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                              <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
+                              <div className="flex justify-center">
+                                <SignatureStamp 
+                                  text={stampSettings.text}
+                                  color={stampSettings.color}
+                                  showDate={stampSettings.showDate}
+                                  rotation={-5}
+                                  size="medium"
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
                     <button
                       onClick={handleSaveBusinessInfo}
                       className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
@@ -1277,6 +1515,11 @@ const AccountingDashboard = () => {
                               <div className="text-sm text-gray-600">
                                 Email: {invoice.customer?.email || "N/A"}
                               </div>
+                              {invoice.convertedFromQuote && (
+                                <div className="text-xs text-blue-600 mt-1">
+                                  📝 Converted from {invoice.convertedFromQuote}
+                                </div>
+                              )}
                             </div>
                             
                             <div className="text-right">
@@ -1311,351 +1554,436 @@ const AccountingDashboard = () => {
               </div>
             </div>
           )}
-         {activeView === "templates" && <Templates user={user} />}
-         {activeView === 'financial-overview' && <FinancialOverview user={user} />}
-         {activeView === 'quote-template' && <QuoteTemplate user={user} />}
-           {/* Invoice Content - Only show when activeView is 'invoice' */}
-          {activeView === 'invoice' && (
-         <>
-          {/* Mobile View Invoice Button */}
-          <button
-            onClick={() => setShowInvoice(!showInvoice)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <FileText className="w-5 h-5" />
-            {showInvoice ? "Hide Invoice" : "View Invoice"}
-          </button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div
-              className={`${
-                showInvoice ? "hidden" : "block"
-              } space-y-6 lg:block print:hidden`}
-            >
-              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-blue-700 font-medium">Pending Payment</span>
-                <span className="text-blue-600">Due: {dueDate || 'Not set'}</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Total Amount</div>
-                  <div className="text-2xl font-semibold text-blue-600">
-                    R{total.toFixed(2)}
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Paid</div>
-                  <div className="text-2xl font-semibold text-green-600">
-                    R0.00
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Balance Due</div>
-                  <div className="text-2xl font-semibold text-red-600">
-                    R{total.toFixed(2)}
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Users className="w-5 h-5" />
-                    <span>Client Information</span>
-                  </h2>
-                  <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Client Name</div>
-                    <input
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Client ID</div>
-                    <input
-                      type="text"
-                      value={customerId}
-                      onChange={(e) => setCustomerId(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Email</div>
-                    <input
-                      type="text"
-                      value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Phone</div>
-                    <input
-                      type="text"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Address</div>
-                    <input
-                      type="text"
-                      value={customerAddress}
-                      onChange={(e) => setCustomerAddress(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Calendar className="w-5 h-5" />
-                    <span>Invoice Details</span>
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Invoice Date</div>
-                    <input
-                      type="date"
-                      value={invoiceDate}
-                      onChange={(e) => setInvoiceDate(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Due Date</div>
-                    <input
-                      type="date"
-                      value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Payment Terms</div>
-                    <select
-                      value={paymentTerms}
-                      onChange={(e) => setPaymentTerms(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    >
-                      <option value="Due on Receipt">Due on Receipt</option>
-                      <option value="Net 15">Net 15</option>
-                      <option value="Net 30">Net 30</option>
-                      <option value="Net 60">Net 60</option>
-                      <option value="Net 90">Net 90</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h2 className="text-lg font-semibold mb-4">Add Line Item</h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                  <select
-                    value={newItem.type}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, type: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  >
-                    <option value="Service">Service</option>
-                    <option value="Consultation">Consultation</option>
-                    <option value="Bookkeeping">Bookkeeping</option>
-                    <option value="Tax Preparation">Tax Preparation</option>
-                    <option value="Audit">Audit</option>
-                  </select>
-
-                  <input
-                    type="text"
-                    placeholder="Description"
-                    value={newItem.description}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, description: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Rate"
-                    value={newItem.rate}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, rate: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Qty"
-                    value={newItem.qty}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, qty: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
+          {/* Saved Quotes List Modal */}
+          {showQuotesList && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+                <div className="p-4 border-b flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Saved Quotes</h2>
                   <button
-                    onClick={handleAddItem}
-                    className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                    onClick={() => setShowQuotesList(false)}
+                    className="text-gray-500 hover:text-gray-700"
                   >
-                    <Plus className="w-4 h-4" />
-                    Add
+                    ✕
                   </button>
                 </div>
-              </div>
 
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Payment Information</h2>
-                </div>
-
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">Payment Method:</span>
-                    <span className="font-medium">EFT/Card/Cash</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">Payment Terms:</span>
-                    <span className="font-medium">{paymentTerms}</span>
-                  </div>
-                  <div className="flex justify-between py-2">
-                    <span className="text-gray-600">Late Fee:</span>
-                    <span className="font-medium">2% per month</span>
-                  </div>
+                <div className="overflow-auto p-4">
+                  {savedQuotes.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      No saved quotes yet
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {savedQuotes.map((quote) => (
+                        <div
+                          key={quote.id}
+                          onClick={() => loadQuote(quote)}
+                          className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="font-semibold text-lg">
+                                {quote.quoteNumber || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                Client: {quote.customer?.name || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Email: {quote.customer?.email || "N/A"}
+                              </div>
+                              {quote.convertedToInvoice && (
+                                <div className="text-xs text-green-600 mt-1">
+                                  ✅ Converted to {quote.convertedToInvoice}
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="text-right">
+                              <div className="text-lg font-semibold text-purple-600">
+                                R{quote.totals?.total?.toFixed(2) || "0.00"}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {quote.dates?.quoteDate
+                                  ? new Date(
+                                      quote.dates.quoteDate
+                                    ).toLocaleDateString("en-ZA")
+                                  : "N/A"}
+                              </div>
+                              <div
+                                className={`text-xs mt-1 px-2 py-1 rounded ${
+                                  quote.status === "converted"
+                                    ? "bg-green-100 text-green-700"
+                                    : quote.status === "pending"
+                                    ? "bg-purple-100 text-purple-700"
+                                    : quote.status === "accepted"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-gray-100 text-gray-700"
+                                }`}
+                              >
+                                {quote.status || "pending"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
+          )}
 
-            <div
-              className={`${
-                !showInvoice ? "hidden" : "block"
-              } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-              style={{
-                width: "100%",
-                maxWidth: "210mm",
-                minHeight: "297mm",
-              }}
-            >
-               
-                {activeView === 'invoice' && (
-  <>
-    {/* Add Template Selector */}
-    <div className="mb-4">
-      <TemplateSelector 
-        user={user} 
-        selectedTemplate={selectedTemplate}
-        onTemplateChange={setSelectedTemplate}
-      />
-    </div>
+          {activeView === "templates" && <Templates user={user} />}
+          {activeView === 'financial-overview' && <FinancialOverview user={user} />}
+          
+          {/* Invoice/Quote Content - Only show when activeView is 'invoice' */}
+          {activeView === 'invoice' && (
+            <>
+              {/* Mobile View Invoice Button */}
+              <button
+                onClick={() => setShowInvoice(!showInvoice)}
+                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <FileText className="w-5 h-5" />
+                {showInvoice ? `Hide ${documentType === 'quote' ? 'Quote' : 'Invoice'}` : `View ${documentType === 'quote' ? 'Quote' : 'Invoice'}`}
+              </button>
 
-    {/* Use Template Renderer instead of hardcoded invoice */}
-    <TemplateRenderer
-      templateId={selectedTemplate}
-      businessInfo={businessInfo}
-      loading={loading}
-      jobCardNumber={invoiceNumber}
-      customerName={customerName}
-      customerEmail={customerEmail}
-      customerPhone={customerPhone}
-      customerAddress={customerAddress}
-      invoiceDate={invoiceDate || ''}
-      dueDate={dueDate || ''}
-      paymentTerms={paymentTerms || ''}
-      items={items}
-      subtotal={subtotal}
-      vat={vat}
-      total={total}
-    />
-  </>
-)}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div
+                  className={`${
+                    showInvoice ? "hidden" : "block"
+                  } space-y-6 lg:block print:hidden
+                  max-h-[calc(100vh-120px)] overflow-y-auto`}
+                >
+                  <div className={`${
+                    documentType === 'quote' ? 'bg-purple-50 border-purple-200' : 'bg-blue-50 border-blue-200'
+                  } border rounded-lg px-4 py-3 flex items-center space-x-3`}>
+                    <div className={`w-2 h-2 ${documentType === 'quote' ? 'bg-purple-500' : 'bg-blue-500'} rounded-full`}></div>
+                    <span className={`${documentType === 'quote' ? 'text-purple-700' : 'text-blue-700'} font-medium`}>
+                      {documentType === 'quote' ? 'Quote Pending' : 'Pending Payment'}
+                    </span>
+                    <span className={`${documentType === 'quote' ? 'text-purple-600' : 'text-blue-600'}`}>
+                      {documentType === 'quote' ? `Valid Until: ${dueDate || 'Not set'}` : `Due: ${dueDate || 'Not set'}`}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">Total Amount</div>
+                      <div className={`text-2xl font-semibold ${documentType === 'quote' ? 'text-purple-600' : 'text-blue-600'}`}>
+                        R{total.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">Paid</div>
+                      <div className="text-2xl font-semibold text-green-600">
+                        R0.00
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">Balance Due</div>
+                      <div className="text-2xl font-semibold text-red-600">
+                        R{total.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold flex items-center space-x-2">
+                        <Users className="w-5 h-5" />
+                        <span>Client Information</span>
+                      </h2>
+                      <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+                        <Edit className="w-4 h-4" />
+                        <span>Edit</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-gray-500">Client Name</div>
+                        <input
+                          type="text"
+                          value={customerName}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Client ID</div>
+                        <input
+                          type="text"
+                          value={customerId}
+                          onChange={(e) => setCustomerId(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Email</div>
+                        <input
+                          type="text"
+                          value={customerEmail}
+                          onChange={(e) => setCustomerEmail(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Phone</div>
+                        <input
+                          type="text"
+                          value={customerPhone}
+                          onChange={(e) => setCustomerPhone(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <div className="text-sm text-gray-500">Address</div>
+                        <input
+                          type="text"
+                          value={customerAddress}
+                          onChange={(e) => setCustomerAddress(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold flex items-center space-x-2">
+                        <Calendar className="w-5 h-5" />
+                        <span>{documentType === 'quote' ? 'Quote' : 'Invoice'} Details</span>
+                      </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          {documentType === 'quote' ? 'Quote Date' : 'Invoice Date'}
+                        </div>
+                        <input
+                          type="date"
+                          value={invoiceDate}
+                          onChange={(e) => setInvoiceDate(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          {documentType === 'quote' ? 'Valid Until' : 'Due Date'}
+                        </div>
+                        <input
+                          type="date"
+                          value={dueDate}
+                          onChange={(e) => setDueDate(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <div className="text-sm text-gray-500">Payment Terms</div>
+                        <select
+                          value={paymentTerms}
+                          onChange={(e) => setPaymentTerms(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        >
+                          <option value="Due on Receipt">Due on Receipt</option>
+                          <option value="Net 15">Net 15</option>
+                          <option value="Net 30">Net 30</option>
+                          <option value="Net 60">Net 60</option>
+                          <option value="Net 90">Net 90</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                    <h2 className="text-lg font-semibold mb-4">Add Line Item</h2>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                      <select
+                        value={newItem.type}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, type: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      >
+                        <option value="Service">Service</option>
+                        <option value="Consultation">Consultation</option>
+                        <option value="Bookkeeping">Bookkeeping</option>
+                        <option value="Tax Preparation">Tax Preparation</option>
+                        <option value="Audit">Audit</option>
+                      </select>
+
+                      <input
+                        type="text"
+                        placeholder="Description"
+                        value={newItem.description}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, description: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Rate"
+                        value={newItem.rate}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, rate: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Qty"
+                        value={newItem.qty}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, qty: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <button
+                        onClick={handleAddItem}
+                        className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold">Payment Information</h2>
+                    </div>
+
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">Payment Method:</span>
+                        <span className="font-medium">EFT/Card/Cash</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">Payment Terms:</span>
+                        <span className="font-medium">{paymentTerms}</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="text-gray-600">Late Fee:</span>
+                        <span className="font-medium">2% per month</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className={`${
+                    !showInvoice ? "hidden" : "block"
+                  } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
+                  style={{
+                    width: "100%",
+                    maxWidth: "210mm",
+                    minHeight: "297mm",
+                  }}
+                >
+                  <div className="mb-4">
+                    <TemplateSelector 
+                      user={user} 
+                      selectedTemplate={selectedTemplate}
+                      onTemplateChange={setSelectedTemplate}
+                    />
+                  </div>
+
+                  <TemplateRenderer
+                    templateId={selectedTemplate}
+                    businessInfo={businessInfo}
+                    loading={loading}
+                    jobCardNumber={documentNumber}
+                    customerName={customerName}
+                    customerEmail={customerEmail}
+                    customerPhone={customerPhone}
+                    customerAddress={customerAddress}
+                    invoiceDate={invoiceDate || ''}
+                    dueDate={dueDate || ''}
+                    paymentTerms={paymentTerms || ''}
+                    items={items}
+                    subtotal={subtotal}
+                    vat={vat}
+                    total={total}
+                    documentType={documentType}
+                  />
+                </div>
               </div>
-            </div>
 
-            <style>{`
-              @media print {
-                * {
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
+              <style>{`
+                @media print {
+                  * {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                  }
+                  
+                  html, body {
+                    margin: 0;
+                    padding: 0;
+                    background: white !important;
+                    overflow: hidden !important;
+                    width: 210mm;
+                    height: 297mm;
+                  }
+                  
+                  @page {
+                    size: A4;
+                    margin: 0;
+                  }
+                  
+                  .print\\:hidden,
+                  nav,
+                  button,
+                  [class*="sidebar"],
+                  [class*="bg-indigo-950"],
+                  [class*="border-b"] {
+                    display: none !important;
+                  }
+                  
+                  .space-y-6.lg\\:block {
+                    display: none !important;
+                  }
+                  
+                  .flex.h-screen.bg-gray-50,
+                  .flex-1.overflow-auto {
+                    overflow: hidden !important;
+                  }
+                  
+                  .grid.grid-cols-1.lg\\:grid-cols-2 {
+                    display: block !important;
+                    grid-template-columns: 1fr !important;
+                    overflow: hidden !important;
+                  }
+                  
+                  .lg\\:block.mx-auto.bg-white.shadow-lg {
+                    display: block !important;
+                    box-shadow: none !important;
+                    max-width: 210mm !important;
+                    width: 210mm !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    overflow: hidden !important;
+                  }
+                  
+                  .bg-white.rounded-lg {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                  }
                 }
-                
-                html, body {
-                  margin: 0;
-                  padding: 0;
-                  background: white !important;
-                  overflow: hidden !important;
-                  width: 210mm;
-                  height: 297mm;
-                }
-                
-                @page {
-                  size: A4;
-                  margin: 0;
-                }
-                
-                .print\\:hidden,
-                nav,
-                button,
-                [class*="sidebar"],
-                [class*="bg-indigo-950"],
-                [class*="border-b"] {
-                  display: none !important;
-                }
-                
-                .space-y-6.lg\\:block {
-                  display: none !important;
-                }
-                
-                .flex.h-screen.bg-gray-50,
-                .flex-1.overflow-auto {
-                  overflow: hidden !important;
-                }
-                
-                .grid.grid-cols-1.lg\\:grid-cols-2 {
-                  display: block !important;
-                  grid-template-columns: 1fr !important;
-                  overflow: hidden !important;
-                }
-                
-                .lg\\:block.mx-auto.bg-white.shadow-lg {
-                  display: block !important;
-                  box-shadow: none !important;
-                  max-width: 210mm !important;
-                  width: 210mm !important;
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  overflow: hidden !important;
-                }
-                
-                .bg-white.rounded-lg {
-                  page-break-inside: avoid;
-                  break-inside: avoid;
-                }
-              }
-            `}</style>
-             </>
-             )}
-          </div>
+              `}</style>
+            </>
+          )}
         </div>
       </div>
-   
+    </div>
   );
 };
 
