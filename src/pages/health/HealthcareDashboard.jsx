@@ -102,9 +102,9 @@ const HealthcareDashboard = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
 const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
-    color: "#d32f2f",
-    showDate: true,
-    enabled: true
+  color: "#d32f2f",
+  showDate: false,
+  enabled: false
   });
   useEffect(() => {
     if (!user?.uid) return;

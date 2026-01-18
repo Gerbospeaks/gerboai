@@ -126,9 +126,9 @@ const CleaningDashboard = () => {
   const [serviceFrequency, setServiceFrequency] = useState("Weekly");
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
-    color: "#d32f2f",
-    showDate: true,
-    enabled: true
+  color: "#d32f2f",
+  showDate: false,
+  enabled: false
   });
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "SPARKLE CLEAN SERVICES",

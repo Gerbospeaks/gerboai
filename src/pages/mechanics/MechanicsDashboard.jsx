@@ -111,8 +111,8 @@ const MechanicsDashboard = () => {
   const [stampSettings, setStampSettings] = useState({
   text: "APPROVED",
   color: "#d32f2f",
-  showDate: true,
-  enabled: true
+  showDate: false,
+  enabled: false
 });
   
   // NEW: Document type state (quote or invoice)
