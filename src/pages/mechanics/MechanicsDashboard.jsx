@@ -1608,7 +1608,7 @@ const MechanicsDashboard = () => {
                         />
                       </div>
                        <div>
-                        <div className="text-sm text-gray-500">VIN</div>
+                        <div className="text-sm text-gray-500">Pre Auth</div>
                         <input
                           type="text"
                           value={preAuth}
@@ -1617,7 +1617,7 @@ const MechanicsDashboard = () => {
                         />
                       </div>
                       <div>
-                        <div className="text-sm text-gray-500">Mileage (km)</div>
+                        <div className="text-sm text-gray-500">Auth Code</div>
                         <input
                           type="text"
                           value={authCode}
