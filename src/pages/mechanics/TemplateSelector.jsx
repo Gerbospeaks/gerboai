@@ -141,7 +141,7 @@ export const DefaultTemplate = ({
   vat,
   total,
   documentType = 'invoice',
-  showStamp = true,
+  showStamp = false,
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true
@@ -1022,8 +1022,8 @@ export const TemplateRenderer = ({
   documentType = 'invoice',
   stampText = "APPROVED",
   stampColor = "#d32f2f",
-  showStampDate = true,
-  showStamp = true,
+  showStampDate = false,
+  showStamp = false,
   ...props }) => {
   // Pass documentType to all templates
   const templateProps = { 

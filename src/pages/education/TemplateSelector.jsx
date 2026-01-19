@@ -1,13 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
 import { FileText, Check } from 'lucide-react';
-import SignatureStamp from '../SignatureStamp';
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  updateDoc,
-  serverTimestamp
-} from 'firebase/firestore';
 
 // Template Selector Dropdown Component
 export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) => {
@@ -15,61 +8,22 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
   const [isOpen, setIsOpen] = useState(false);
 
   const templateNames = {
-    default: 'Default (Original)',
-    classic: 'Classic Workshop',
-    modern: 'Modern Minimalist',
-    elegant: 'Elegant Business',
-    premium: 'Premium Auto Service',
-    speed: 'Speed Shop Pro',
-    diagnostic: 'Diagnostic Specialist'
+    classic: 'Classic',
+    modern: 'Modern',
+    professional: 'Professional',
+    colorful: 'Colorful'
   };
 
-  useEffect(() => {
-    loadPurchasedTemplates();
-  }, [user]);
-
-  const loadPurchasedTemplates = async () => {
-    if (!user?.uid) return;
-
-    try {
-      const db = getFirestore();
-      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        setPurchasedTemplates(['default', ...(docSnap.data().purchased || ['classic'])]);
-      } else {
-        setPurchasedTemplates(['default', 'classic']);
-      }
-    } catch (error) {
-      console.error('Error loading templates:', error);
-    }
-  };
-
-  const handleSelectTemplate = async (templateId) => {
-    if (!user?.uid) return;
-
-    try {
-      const db = getFirestore();
-      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
-      
-      await updateDoc(docRef, {
-        active: templateId,
-        updatedAt: serverTimestamp()
-      });
-
-      onTemplateChange(templateId);
-      setIsOpen(false);
-    } catch (error) {
-      console.error('Error updating template:', error);
-    }
+  const handleSelectTemplate = (templateId) => {
+    onTemplateChange(templateId);
+    setIsOpen(false);
   };
 
   return (
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-300"
+        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
       >
         <FileText className="w-4 h-4" />
         <span className="hidden sm:inline">{templateNames[selectedTemplate] || 'Select Template'}</span>
@@ -90,12 +44,12 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
               <div className="text-xs font-semibold text-gray-500 px-3 py-2">
                 Your Templates
               </div>
-              {purchasedTemplates.map(templateId => (
+              {Object.keys(templateNames).map(templateId => (
                 <button
                   key={templateId}
                   onClick={() => handleSelectTemplate(templateId)}
-                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-300 flex items-center justify-between ${
-                    selectedTemplate === templateId ? 'bg-orange-50 text-orange-600' : 'text-gray-700'
+                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center justify-between ${
+                    selectedTemplate === templateId ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700'
                   }`}
                 >
                   <span>{templateNames[templateId]}</span>
@@ -112,837 +66,575 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
   );
 };
 
-// Default Template (Your Original)
-export const DefaultTemplate = ({ 
-  businessInfo, 
-  loading,
-  jobCardNumber, 
-  customerName, 
-  customerEmail, 
-  customerPhone, 
-  customerAddress,
-  vehicleReg,
-  vehicleMake,
-  vehicleModel,
-  vehicleYear,
-  vehicleVin,
-  vehicleMileage,
-  items,
-  subtotal,
-  vat,
-  total,
-  showStamp = true,
-  stampText = "APPROVED",
-  stampColor = "#d32f2f",
-  showStampDate = true
-}) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-    {/* Header Section */}
-    <div className="border-b-2 border-black pb-4 mb-4">
-      <div className="flex justify-between items-start">
+// Classic Template Component
+export const ClassicTemplate = ({
+  businessInfo,
+  jobCardNumber,
+  term,
+  academicYear,
+  studentName,
+  studentId,
+  gradeLevel,
+  dateOfBirth,
+  parentName,
+  parentPhone,
+  parentEmail,
+  subjects = [],
+  attendanceDays,
+  attendancePresent,
+  teacherComments,
+  calculateAverage
+}) => {
+  const safeSubjects = subjects || [];
+
+  return (
+    <div className="bg-white p-8">
+      {/* Header */}
+      <div className="text-center border-b-2 border-gray-800 pb-6 mb-6">
+        {businessInfo.logoUrl && (
+          <img
+            src={businessInfo.logoUrl}
+            alt="School Logo"
+            className="w-20 h-20 mx-auto mb-4 object-contain"
+          />
+        )}
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          {businessInfo.schoolName || 'SCHOOL NAME'}
+        </h1>
+        <p className="text-sm text-gray-600">
+          {businessInfo.addressLine1}, {businessInfo.city}
+        </p>
+        <p className="text-sm text-gray-600">
+          Tel: {businessInfo.primaryPhone}
+        </p>
+        <h2 className="text-xl font-semibold text-gray-700 mt-4">
+          STUDENT REPORT CARD
+        </h2>
+      </div>
+
+      {/* Report Info */}
+      <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            {loading ? (
-              <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-            ) : businessInfo.logoUrl ? (
+          <strong>Report Number:</strong> {jobCardNumber}
+        </div>
+        <div>
+          <strong>Academic Period:</strong> {term} {academicYear}
+        </div>
+      </div>
+
+      {/* Student Information */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold bg-gray-200 px-4 py-2 mb-3">
+          Student Information
+        </h3>
+        <div className="grid grid-cols-2 gap-3 text-sm px-4">
+          <div><strong>Name:</strong> {studentName}</div>
+          <div><strong>Student ID:</strong> {studentId}</div>
+          <div><strong>Grade:</strong> {gradeLevel}</div>
+          <div><strong>Date of Birth:</strong> {dateOfBirth}</div>
+        </div>
+      </div>
+
+      {/* Parent Information */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold bg-gray-200 px-4 py-2 mb-3">
+          Parent/Guardian Information
+        </h3>
+        <div className="grid grid-cols-2 gap-3 text-sm px-4">
+          <div><strong>Name:</strong> {parentName}</div>
+          <div><strong>Phone:</strong> {parentPhone}</div>
+          <div className="col-span-2"><strong>Email:</strong> {parentEmail}</div>
+        </div>
+      </div>
+
+      {/* Grades Table */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold bg-gray-200 px-4 py-2 mb-3">
+          Academic Performance
+        </h3>
+        <table className="w-full border-collapse border border-gray-300">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 px-4 py-2 text-left">Subject</th>
+              <th className="border border-gray-300 px-4 py-2 text-center">Mark (%)</th>
+              <th className="border border-gray-300 px-4 py-2 text-center">Grade</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Comments</th>
+            </tr>
+          </thead>
+          <tbody>
+            {safeSubjects.map((subject, index) => (
+              <tr key={index}>
+                <td className="border border-gray-300 px-4 py-2">{subject.name}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center">{subject.mark}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center font-semibold">{subject.grade}</td>
+                <td className="border border-gray-300 px-4 py-2">{subject.comments}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="bg-gray-100 font-semibold">
+              <td className="border border-gray-300 px-4 py-2">AVERAGE</td>
+              <td className="border border-gray-300 px-4 py-2 text-center" colSpan="3">
+                {calculateAverage ? calculateAverage() : '0'}%
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      {/* Attendance */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold bg-gray-200 px-4 py-2 mb-3">
+          Attendance Record
+        </h3>
+        <div className="px-4 text-sm">
+          <p><strong>Total School Days:</strong> {attendanceDays}</p>
+          <p><strong>Days Present:</strong> {attendancePresent}</p>
+          <p><strong>Attendance Rate:</strong> {
+            attendanceDays && attendancePresent
+              ? ((attendancePresent / attendanceDays) * 100).toFixed(1)
+              : '0'
+          }%</p>
+        </div>
+      </div>
+
+      {/* Teacher Comments */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold bg-gray-200 px-4 py-2 mb-3">
+          Teacher Comments
+        </h3>
+        <p className="px-4 text-sm">{teacherComments}</p>
+      </div>
+
+      {/* Signature Section */}
+      <div className="grid grid-cols-2 gap-8 mt-12 pt-6 border-t border-gray-300">
+        <div>
+          <div className="border-t border-gray-400 pt-2 text-center">
+            <p className="text-sm font-semibold">Teacher Signature</p>
+            <p className="text-xs text-gray-600">Date: _______________</p>
+          </div>
+        </div>
+        <div>
+          <div className="border-t border-gray-400 pt-2 text-center">
+            <p className="text-sm font-semibold">Principal: {businessInfo.principalName}</p>
+            <p className="text-xs text-gray-600">Date: _______________</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Modern Template Component
+export const ModernTemplate = (props) => {
+  const safeSubjects = props.subjects || [];
+  
+  return (
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
+      {/* Header with logo and info side by side */}
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            {props.businessInfo.logoUrl && (
               <img
-                src={businessInfo.logoUrl}
-                alt="Business Logo"
+                src={props.businessInfo.logoUrl}
+                alt="School Logo"
                 className="w-16 h-16 object-contain"
               />
-            ) : (
-              <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
             )}
             <div>
-  <div className="text-xl font-bold">
-    {businessInfo?.businessName?.split(" ")[0] || ""}{" "}
-    {businessInfo?.businessName?.split(" ")[1] || ""}
-  </div>
-  <div className="text-sm font-semibold">
-    {businessInfo?.businessName?.split(" ").slice(2).join(" ") || ""}
-  </div>
-</div>
-          </div>
-          <div className="text-xs leading-relaxed">
-            <div>{businessInfo.addressLine1}</div>
-            <div>{businessInfo.addressLine2}</div>
-            <div>{businessInfo.city} {businessInfo.postalCode}</div>
-            <div className="mt-1">
-              T: {businessInfo.primaryPhone}
-              {businessInfo.secondaryPhone && `, ${businessInfo.secondaryPhone}`}
+              <h1 className="text-2xl font-bold text-indigo-900">
+                {props.businessInfo.schoolName || 'SCHOOL NAME'}
+              </h1>
+              <p className="text-sm text-gray-600">{props.businessInfo.addressLine1}</p>
             </div>
           </div>
-        </div>
-
-        <div className="text-right">
-          <div className="text-3xl font-bold mb-4">INVOICE</div>
-          <div className="text-xs space-y-1">
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
-              <span>{jobCardNumber}</span>
-            </div>
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">DATE</span>
-              <span>{new Date().toLocaleDateString("en-ZA")}</span>
-            </div>
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">MERCHANT CODE</span>
-              <span>V8PA-12345</span>
-            </div>
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">SERVICE TYPE</span>
-              <span>SERVICE</span>
+          <div className="text-right">
+            <div className="bg-indigo-100 px-4 py-2 rounded">
+              <p className="text-xs text-indigo-600 font-semibold">REPORT CARD</p>
+              <p className="text-sm font-bold text-indigo-900">{props.jobCardNumber}</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    {/* Three Column Section */}
-    <div className="grid grid-cols-3 gap-4 mb-4">
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">INVOICE TO</div>
-        <div className="text-xs space-y-1">
-          <div>{customerName}</div>
-          <div>ABC Limited</div>
-          <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
-          <div>{customerEmail}</div>
-          <div>{customerPhone}</div>
+      {/* Student and Academic Info Cards */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-indigo-500 rounded"></span>
+            Student Information
+          </h3>
+          <div className="space-y-2 text-sm">
+            <p><span className="text-gray-600">Name:</span> <strong>{props.studentName}</strong></p>
+            <p><span className="text-gray-600">ID:</span> {props.studentId}</p>
+            <p><span className="text-gray-600">Grade:</span> {props.gradeLevel}</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-indigo-500 rounded"></span>
+            Academic Period
+          </h3>
+          <div className="space-y-2 text-sm">
+            <p><span className="text-gray-600">Term:</span> <strong>{props.term}</strong></p>
+            <p><span className="text-gray-600">Year:</span> {props.academicYear}</p>
+            <p><span className="text-gray-600">Average:</span> <strong className="text-indigo-600">{props.calculateAverage ? props.calculateAverage() : '0'}%</strong></p>
+          </div>
         </div>
       </div>
 
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">BILL TO</div>
-        <div className="text-xs space-y-1">
-          <div>{customerName}</div>
-          <div>ABC Limited</div>
-          <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
-          <div>{customerEmail}</div>
-          <div>{customerPhone}</div>
-        </div>
-      </div>
-
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">VEHICLE DETAILS</div>
-        <div className="text-xs space-y-1">
-          <div className="flex justify-between">
-            <span className="font-semibold">Reg Number:</span>
-            <span>{vehicleReg}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Make:</span>
-            <span>{vehicleMake}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Model:</span>
-            <span>{vehicleModel}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Engine No:</span>
-            <span>{vehicleYear}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">VIN Number:</span>
-            <span className="text-[9px]">{vehicleVin}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Odometer:</span>
-            <span>{vehicleMileage} km</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Pre Auth:</span>
-            <span>AUTH123</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Auth Code:</span>
-            <span>456789</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {/* Items Table */}
-    <div className="mb-4">
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="bg-gray-300">
-            <th className="text-left px-2 py-1 font-bold">ITEM DESCRIPTION</th>
-            <th className="text-center px-2 py-1 font-bold">QUANTITY</th>
-            <th className="text-right px-2 py-1 font-bold">UNIT PRICE</th>
-            <th className="text-right px-2 py-1 font-bold">NET PRICE</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item, index) => (
-            <tr key={index} className="border-b">
-              <td className="px-2 py-2">{item.description}</td>
-              <td className="text-center px-2 py-2">{item.qty}</td>
-              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
-            </tr>
+      {/* Grades */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 className="text-lg font-bold text-indigo-900 mb-4">Academic Performance</h3>
+        <div className="space-y-2">
+          {safeSubjects.map((subject, index) => (
+            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors">
+              <div className="flex-1">
+                <p className="font-semibold text-gray-800">{subject.name}</p>
+                {subject.comments && <p className="text-xs text-gray-600 mt-1">{subject.comments}</p>}
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="text-lg font-bold text-indigo-600">{subject.mark}%</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                  subject.grade === 'A' ? 'bg-green-100 text-green-700' :
+                  subject.grade === 'B' ? 'bg-blue-100 text-blue-700' :
+                  subject.grade === 'C' ? 'bg-yellow-100 text-yellow-700' :
+                  'bg-red-100 text-red-700'
+                }`}>
+                  {subject.grade}
+                </span>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
-    </div>
-
-    {/* Totals */}
-    <div className="flex justify-end mb-6">
-      <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
-          <span>Subtotal:</span>
-          <span>R {subtotal.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-1">
-          <span>VAT:</span>
-          <span>R {vat.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
-          <span>TOTAL:</span>
-          <span>R {total.toFixed(2)}</span>
         </div>
       </div>
-    </div>
 
-    {/* Signatures */}
-    <div className="grid grid-cols-3 gap-4 mb-6 text-xs">
-      <div>
-        <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-      <div>
-        <div className="font-semibold mb-1">CLIENT SIGNATURE</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-      <div>
-        <div className="font-semibold mb-1">CONTACT NUMBER:</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-    </div>
-
-    {/* Banking Details */}
-    <div className="bg-red-50 border border-red-200 p-3 mb-4">
-      <div className="text-red-600 font-bold text-xs mb-2">BANKING DETAILS</div>
-      <div className="text-xs space-y-1">
-        <div><span className="font-semibold">Bank Name:</span> FNB</div>
-        <div><span className="font-semibold">Account Holder:</span> V8 POWERED AUTO</div>
-        <div><span className="font-semibold">Branch Name:</span> LIFESTYLE CENTURION</div>
-        <div><span className="font-semibold">Account Number:</span> 62146991441</div>
-      </div>
-    </div>
-    {/* Signatures and Stamp */}
-    <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
-      <div>
-        <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-      {showStamp && (
-        <div className="flex justify-end">
-          <SignatureStamp 
-            text={stampText}
-            color={stampColor}
-            showDate={showStampDate}
-            rotation={-5}
-            size="small"
-          />
+      {/* Attendance and Comments */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="text-sm font-bold text-indigo-900 mb-3">Attendance</h3>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-indigo-600 mb-1">
+              {props.attendanceDays && props.attendancePresent
+                ? ((props.attendancePresent / props.attendanceDays) * 100).toFixed(1)
+                : '0'}%
+            </div>
+            <p className="text-xs text-gray-600">{props.attendancePresent} / {props.attendanceDays} days</p>
+          </div>
         </div>
-      )}
-    </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="text-sm font-bold text-indigo-900 mb-3">Teacher Comments</h3>
+          <p className="text-xs text-gray-700">{props.teacherComments}</p>
+        </div>
+      </div>
 
-    {/* Footer Note */}
-    <div className="text-center text-xs text-red-600 italic">
-      NB: All our parts and workmanship have 12 months or 15000KM Guarantee
+      {/* Signatures */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="grid grid-cols-2 gap-8">
+          <div className="text-center">
+            <div className="border-t-2 border-gray-300 pt-2 mt-8">
+              <p className="text-sm font-semibold">Teacher Signature</p>
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="border-t-2 border-gray-300 pt-2 mt-8">
+              <p className="text-sm font-semibold">Principal: {props.businessInfo.principalName}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-// Classic Template
-export const ClassicTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-    <div className="border-b-2 border-black pb-4 mb-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
+// Professional Template Component
+export const ProfessionalTemplate = (props) => {
+  const safeSubjects = props.subjects || [];
+  
+  return (
+    <div className="bg-white p-8">
+      {/* Letterhead */}
+      <div className="border-b-4 border-gray-800 pb-6 mb-6">
+        <div className="flex justify-between items-start">
+          <div>
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="School Logo"
+                className="w-24 h-24 object-contain mb-2"
+              />
             )}
-            <div>
-              <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
-            </div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {props.businessInfo.schoolName || 'SCHOOL NAME'}
+            </h1>
+            <p className="text-xs text-gray-600 mt-1">
+              {props.businessInfo.addressLine1}<br />
+              {props.businessInfo.city} {props.businessInfo.postalCode}<br />
+              Tel: {props.businessInfo.primaryPhone}
+            </p>
           </div>
-          <div className="text-xs leading-relaxed">
-            <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
-            <div>T: {props.businessInfo.primaryPhone}</div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-3xl font-bold mb-4">INVOICE</div>
-          <div className="text-xs space-y-1">
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
-              <span>{props.jobCardNumber}</span>
-            </div>
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">DATE</span>
-              <span>{new Date().toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-3 gap-4 mb-4">
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CUSTOMER</div>
-        <div className="text-xs space-y-1">
-          <div>{props.customerName}</div>
-          <div>{props.customerAddress}</div>
-          <div>{props.customerEmail}</div>
-          <div>{props.customerPhone}</div>
-        </div>
-      </div>
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">VEHICLE</div>
-        <div className="text-xs space-y-1">
-          <div>{props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
-          <div>Reg: {props.vehicleReg}</div>
-          <div>VIN: {props.vehicleVin}</div>
-          <div>Mileage: {props.vehicleMileage} km</div>
-        </div>
-      </div>
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SERVICE INFO</div>
-        <div className="text-xs space-y-1">
-          <div>Date: {new Date().toLocaleDateString()}</div>
-          <div>Status: In Progress</div>
-        </div>
-      </div>
-    </div>
-
-    <table className="w-full text-xs mb-4">
-      <thead>
-        <tr className="bg-gray-300">
-          <th className="text-left px-2 py-1 font-bold">Description</th>
-          <th className="text-center px-2 py-1 font-bold">Qty</th>
-          <th className="text-right px-2 py-1 font-bold">Unit Price</th>
-          <th className="text-right px-2 py-1 font-bold">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        {props.items.map((item, i) => (
-          <tr key={i} className="border-b">
-            <td className="px-2 py-2">{item.description}</td>
-            <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-
-    <div className="flex justify-end">
-      <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
-          <span>Subtotal:</span>
-          <span>R {props.subtotal.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-1">
-          <span>VAT (15%):</span>
-          <span>R {props.vat.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
-          <span>TOTAL:</span>
-          <span>R {props.total.toFixed(2)}</span>
-        </div>
-      </div>
-    </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
-      </div>
-    </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp 
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
-        </div>
-      </div>
-    )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
-    </div>
-  </div>
-);
-
-// Modern Template
-export const ModernTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-    <div className="border-b-4 border-blue-500 pb-6 mb-6">
-      <div className="flex justify-between items-start">
-        <div>
-          {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
-          )}
-          <div className="text-3xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
-          <div className="text-sm text-gray-600 space-y-1">
-            <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
-            <div>{props.businessInfo.primaryPhone}</div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-5xl font-bold text-blue-500 mb-4">INVOICE</div>
-          <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-            <div className="text-sm"><span className="font-semibold">Invoice #:</span> {props.jobCardNumber}</div>
-            <div className="text-sm"><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-2 gap-6 mb-6">
-      <div className="bg-gray-300 p-4 rounded-lg">
-        <div className="text-sm font-bold text-gray-500 mb-3">BILL TO</div>
-        <div className="space-y-1 text-sm">
-          <div className="font-semibold text-lg">{props.customerName}</div>
-          <div>{props.customerAddress}</div>
-          <div>{props.customerEmail}</div>
-          <div>{props.customerPhone}</div>
-        </div>
-      </div>
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <div className="text-sm font-bold text-blue-700 mb-3">VEHICLE INFORMATION</div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div><span className="font-semibold">Make:</span> {props.vehicleMake}</div>
-          <div><span className="font-semibold">Model:</span> {props.vehicleModel}</div>
-          <div><span className="font-semibold">Year:</span> {props.vehicleYear}</div>
-          <div><span className="font-semibold">Reg:</span> {props.vehicleReg}</div>
-          <div className="col-span-2"><span className="font-semibold">Mileage:</span> {props.vehicleMileage} km</div>
-        </div>
-      </div>
-    </div>
-
-    <table className="w-full mb-6">
-      <thead>
-        <tr className="bg-blue-500 text-white">
-          <th className="text-left px-4 py-3 rounded-l-lg">Description</th>
-          <th className="text-center px-4 py-3">Qty</th>
-          <th className="text-right px-4 py-3">Unit Price</th>
-          <th className="text-right px-4 py-3 rounded-r-lg">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        {props.items.map((item, i) => (
-          <tr key={i} className="border-b hover:bg-gray-300">
-            <td className="px-4 py-3">{item.description}</td>
-            <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-
-    <div className="flex justify-end">
-      <div className="w-80 space-y-2">
-        <div className="flex justify-between py-2 text-gray-600">
-          <span>Subtotal:</span>
-          <span>R {props.subtotal.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-2 text-gray-600">
-          <span>VAT (15%):</span>
-          <span>R {props.vat.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-3 text-xl font-bold bg-blue-500 text-white px-4 rounded-lg">
-          <span>TOTAL:</span>
-          <span>R {props.total.toFixed(2)}</span>
-        </div>
-      </div>
-    </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
-      </div>
-    </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp 
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
-        </div>
-      </div>
-    )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
-    </div>
-  </div>
-);
-
-// Elegant/Premium Template
-export const ElegantTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-    <div className="border-4 border-purple-900 p-8">
-      <div className="text-center border-b-2 border-purple-900 pb-6 mb-6">
-        {props.businessInfo.logoUrl && (
-          <img src={props.businessInfo.logoUrl} alt="Logo" className="w-24 h-24 object-contain mx-auto mb-4" />
-        )}
-        <div className="text-4xl font-serif font-bold text-purple-900 mb-2">{props.businessInfo.businessName}</div>
-        <div className="text-sm text-gray-600">{props.businessInfo.addressLine1} • {props.businessInfo.city}</div>
-        <div className="text-2xl font-serif text-purple-700 mt-4">INVOICE</div>
-        <div className="text-sm text-gray-500 mt-1">#{props.jobCardNumber}</div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-6 mb-6">
-        <div>
-          <div className="font-serif font-bold text-purple-900 mb-2">BILLED TO</div>
-          <div className="text-sm space-y-1">
-            <div className="font-semibold">{props.customerName}</div>
-            <div>{props.customerAddress}</div>
-            <div>{props.customerEmail}</div>
-          </div>
-        </div>
-        <div>
-          <div className="font-serif font-bold text-purple-900 mb-2">VEHICLE</div>
-          <div className="text-sm space-y-1">
-            <div>{props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
-            <div>Registration: {props.vehicleReg}</div>
-            <div>Mileage: {props.vehicleMileage} km</div>
+          <div className="text-right">
+            <h2 className="text-lg font-bold text-gray-800">ACADEMIC REPORT</h2>
+            <p className="text-sm text-gray-600 mt-1">Report No: {props.jobCardNumber}</p>
+            <p className="text-sm text-gray-600">{props.term} {props.academicYear}</p>
           </div>
         </div>
       </div>
 
-      <table className="w-full mb-6">
-        <thead>
-          <tr className="border-b-2 border-purple-900">
-            <th className="text-left py-2 font-serif">Service</th>
-            <th className="text-center py-2 font-serif">Qty</th>
-            <th className="text-right py-2 font-serif">Price</th>
-            <th className="text-right py-2 font-serif">Total</th>
-          </tr>
-        </thead>
+      {/* Student Details Table */}
+      <table className="w-full mb-6 text-sm">
         <tbody>
-          {props.items.map((item, i) => (
-            <tr key={i} className="border-b border-gray-200">
-              <td className="py-3">{item.description}</td>
-              <td className="text-center py-3">{item.qty}</td>
-              <td className="text-right py-3">R {item.rate.toFixed(2)}</td>
-              <td className="text-right py-3">R {item.amount.toFixed(2)}</td>
-            </tr>
-          ))}
+          <tr className="border-b">
+            <td className="py-2 font-semibold w-1/4">Student Name:</td>
+            <td className="py-2">{props.studentName}</td>
+            <td className="py-2 font-semibold w-1/4">Student ID:</td>
+            <td className="py-2">{props.studentId}</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-2 font-semibold">Grade Level:</td>
+            <td className="py-2">{props.gradeLevel}</td>
+            <td className="py-2 font-semibold">Date of Birth:</td>
+            <td className="py-2">{props.dateOfBirth}</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-2 font-semibold">Parent/Guardian:</td>
+            <td className="py-2">{props.parentName}</td>
+            <td className="py-2 font-semibold">Contact:</td>
+            <td className="py-2">{props.parentPhone}</td>
+          </tr>
         </tbody>
       </table>
 
-      <div className="flex justify-end">
-        <div className="w-64">
-          <div className="flex justify-between py-2">
-            <span>Subtotal:</span>
-            <span>R {props.subtotal.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between py-2">
-            <span>VAT:</span>
-            <span>R {props.vat.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between py-3 font-bold text-lg bg-purple-900 text-white px-4">
-            <span>TOTAL:</span>
-            <span>R {props.total.toFixed(2)}</span>
-          </div>
-        </div>
+      {/* Performance Summary */}
+      <div className="mb-6">
+        <h3 className="text-md font-bold text-gray-800 border-b-2 border-gray-300 pb-2 mb-4">
+          ACADEMIC PERFORMANCE SUMMARY
+        </h3>
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="bg-gray-800 text-white">
+              <th className="border border-gray-600 px-3 py-2 text-left">SUBJECT</th>
+              <th className="border border-gray-600 px-3 py-2 text-center w-24">MARK (%)</th>
+              <th className="border border-gray-600 px-3 py-2 text-center w-20">GRADE</th>
+              <th className="border border-gray-600 px-3 py-2 text-left">REMARKS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {safeSubjects.map((subject, index) => (
+              <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                <td className="border border-gray-300 px-3 py-2 font-medium">{subject.name}</td>
+                <td className="border border-gray-300 px-3 py-2 text-center font-semibold">{subject.mark}</td>
+                <td className="border border-gray-300 px-3 py-2 text-center font-bold">{subject.grade}</td>
+                <td className="border border-gray-300 px-3 py-2 text-xs">{subject.comments}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="bg-gray-200 font-bold">
+              <td className="border border-gray-400 px-3 py-2">OVERALL AVERAGE</td>
+              <td className="border border-gray-400 px-3 py-2 text-center text-lg" colSpan="3">
+                {props.calculateAverage ? props.calculateAverage() : '0'}%
+              </td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
-      {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
-      </div>
-    </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp 
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
-        </div>
-      </div>
-    )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
-    </div>
-    </div>
-  </div>
-);
 
-// Speed Shop Template
-export const SpeedTemplate = (props) => (
-  <div className="bg-black text-white" style={{ padding: "15mm 20mm" }}>
-    <div className="border-b-4 border-red-600 pb-6 mb-6">
-      <div className="flex justify-between items-start">
+      {/* Attendance Section */}
+      <div className="mb-6">
+        <h3 className="text-md font-bold text-gray-800 border-b-2 border-gray-300 pb-2 mb-3">
+          ATTENDANCE RECORD
+        </h3>
+        <div className="grid grid-cols-3 gap-4 text-sm">
+          <div className="bg-gray-50 p-3 border border-gray-300">
+            <p className="text-gray-600 text-xs mb-1">Total School Days</p>
+            <p className="font-bold text-lg">{props.attendanceDays}</p>
+          </div>
+          <div className="bg-gray-50 p-3 border border-gray-300">
+            <p className="text-gray-600 text-xs mb-1">Days Present</p>
+            <p className="font-bold text-lg">{props.attendancePresent}</p>
+          </div>
+          <div className="bg-gray-50 p-3 border border-gray-300">
+            <p className="text-gray-600 text-xs mb-1">Attendance Rate</p>
+            <p className="font-bold text-lg">
+              {props.attendanceDays && props.attendancePresent
+                ? ((props.attendancePresent / props.attendanceDays) * 100).toFixed(1)
+                : '0'}%
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Comments */}
+      <div className="mb-8">
+        <h3 className="text-md font-bold text-gray-800 border-b-2 border-gray-300 pb-2 mb-3">
+          TEACHER'S REMARKS
+        </h3>
+        <div className="bg-gray-50 border border-gray-300 p-4 min-h-[80px]">
+          <p className="text-sm text-gray-800">{props.teacherComments}</p>
+        </div>
+      </div>
+
+      {/* Signature Section */}
+      <div className="grid grid-cols-2 gap-12 mt-12">
         <div>
-          {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3 brightness-0 invert" />
-          )}
-          <div className="text-3xl font-black text-red-600 mb-2">{props.businessInfo.businessName}</div>
-          <div className="text-sm text-gray-400">{props.businessInfo.addressLine1}</div>
-        </div>
-        <div className="text-right">
-          <div className="text-5xl font-black text-red-600 mb-4 italic">INVOICE</div>
-          <div className="bg-red-600 p-4 rounded space-y-1">
-            <div className="text-sm font-bold">#{props.jobCardNumber}</div>
-            <div className="text-sm">{new Date().toLocaleDateString()}</div>
+          <div className="border-t border-gray-400 pt-2">
+            <p className="text-xs text-gray-600">Class Teacher</p>
+            <p className="text-sm font-semibold mt-4">_______________________</p>
+            <p className="text-xs text-gray-600 mt-1">Signature & Date</p>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-2 gap-6 mb-6">
-      <div className="bg-gray-900 p-4 rounded">
-        <div className="text-sm font-bold text-red-600 mb-3">CLIENT</div>
-        <div className="text-sm space-y-1">
-          <div className="font-bold">{props.customerName}</div>
-          <div className="text-gray-400">{props.customerAddress}</div>
-        </div>
-      </div>
-      <div className="bg-gray-900 p-4 rounded">
-        <div className="text-sm font-bold text-red-600 mb-3">VEHICLE</div>
-        <div className="text-sm">
-          <div className="font-bold">{props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
-          <div className="text-gray-400">Reg: {props.vehicleReg}</div>
-        </div>
-      </div>
-    </div>
-
-    <table className="w-full mb-6">
-      <thead>
-        <tr className="bg-red-600">
-          <th className="text-left px-4 py-3 font-black">DESCRIPTION</th>
-          <th className="text-center px-4 py-3 font-black">QTY</th>
-<th className="text-right px-4 py-3 font-black">PRICE</th>
-<th className="text-right px-4 py-3 font-black">TOTAL</th>
-</tr>
-</thead>
-<tbody>
-{props.items.map((item, i) => (
-<tr key={i} className="border-b border-gray-800">
-<td className="px-4 py-3">{item.description}</td>
-<td className="text-center px-4 py-3">{item.qty}</td>
-<td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-<td className="text-right px-4 py-3 font-bold">R {item.amount.toFixed(2)}</td>
-</tr>
-))}
-</tbody>
-</table>
-<div className="flex justify-end">
-  <div className="w-80">
-    <div className="flex justify-between py-2 text-gray-400">
-      <span>Subtotal:</span>
-      <span>R {props.subtotal.toFixed(2)}</span>
-    </div>
-    <div className="flex justify-between py-2 text-gray-400">
-      <span>VAT:</span>
-      <span>R {props.vat.toFixed(2)}</span>
-    </div>
-    <div className="flex justify-between py-3 text-xl font-black bg-red-600 px-4 rounded">
-      <span>TOTAL:</span>
-      <span>R {props.total.toFixed(2)}</span>
-    </div>
-  </div>
-</div>
-{/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
-      </div>
-    </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp 
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
-        </div>
-      </div>
-    )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
-    </div>
-</div>
-);
-// Diagnostic Template
-export const DiagnosticTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-    <div className="border-b-4 border-green-600 pb-6 mb-6">
-      <div className="flex justify-between items-start">
         <div>
-          {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
-          )}
-          <div className="text-2xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
-          <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
-          <div className="text-sm text-gray-600">{props.businessInfo.city}</div>
-        </div>
-        <div className="text-right">
-          <div className="text-4xl font-bold text-green-600 mb-4">SERVICE INVOICE</div>
-          <div className="bg-green-50 border-2 border-green-600 p-3 rounded">
-            <div className="text-sm"><span className="font-bold">Invoice:</span> {props.jobCardNumber}</div>
-            <div className="text-sm"><span className="font-bold">Date:</span> {new Date().toLocaleDateString()}</div>
+          <div className="border-t border-gray-400 pt-2">
+            <p className="text-xs text-gray-600">Principal</p>
+            <p className="text-sm font-semibold mt-1">{props.businessInfo.principalName}</p>
+            <p className="text-sm mt-3">_______________________</p>
+            <p className="text-xs text-gray-600 mt-1">Signature & Date</p>
           </div>
         </div>
       </div>
     </div>
-<div className="grid grid-cols-2 gap-6 mb-6">
-  <div className="border-2 border-green-600 p-4 rounded">
-    <div className="text-sm font-bold text-green-600 mb-3">CUSTOMER DETAILS</div>
-    <div className="text-sm space-y-1">
-      <div><span className="font-semibold">Name:</span> {props.customerName}</div>
-      <div><span className="font-semibold">Email:</span> {props.customerEmail}</div>
-      <div><span className="font-semibold">Phone:</span> {props.customerPhone}</div>
-    </div>
-  </div>
-  <div className="border-2 border-green-600 p-4 rounded">
-    <div className="text-sm font-bold text-green-600 mb-3">VEHICLE DETAILS</div>
-    <div className="text-sm space-y-1">
-      <div><span className="font-semibold">Vehicle:</span> {props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
-      <div><span className="font-semibold">Registration:</span> {props.vehicleReg}</div>
-      <div><span className="font-semibold">Odometer:</span> {props.vehicleMileage} km</div>
-    </div>
-  </div>
-</div>
+  );
+};
 
-<div className="mb-6">
-  <div className="bg-green-600 text-white px-4 py-2 font-bold">SERVICES PERFORMED</div>
-  <table className="w-full">
-    <thead>
-      <tr className="bg-green-50 border-b-2 border-green-600">
-        <th className="text-left px-4 py-2 text-sm">Description</th>
-        <th className="text-center px-4 py-2 text-sm">Qty</th>
-        <th className="text-right px-4 py-2 text-sm">Unit Price</th>
-        <th className="text-right px-4 py-2 text-sm">Amount</th>
-      </tr>
-    </thead>
-    <tbody>
-      {props.items.map((item, i) => (
-        <tr key={i} className="border-b">
-          <td className="px-4 py-3">{item.description}</td>
-          <td className="text-center px-4 py-3">{item.qty}</td>
-          <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-          <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
-
-<div className="flex justify-end">
-  <div className="w-80 border-2 border-green-600 p-4 rounded">
-    <div className="flex justify-between py-2">
-      <span>Subtotal:</span>
-      <span>R {props.subtotal.toFixed(2)}</span>
-    </div>
-    <div className="flex justify-between py-2">
-      <span>VAT (15%):</span>
-      <span>R {props.vat.toFixed(2)}</span>
-    </div>
-    <div className="flex justify-between py-3 text-xl font-bold bg-green-600 text-white px-4 rounded">
-      <span>TOTAL DUE:</span>
-      <span>R {props.total.toFixed(2)}</span>
-    </div>
-  </div>
-</div>
-{/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
-      </div>
-    </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp 
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+// Colorful Template Component
+export const ColorfulTemplate = (props) => {
+  const safeSubjects = props.subjects || [];
+  
+  return (
+    <div className="bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 p-8">
+      {/* Header */}
+      <div className="bg-white rounded-2xl shadow-xl p-6 mb-6 border-4 border-purple-300">
+        <div className="text-center">
+          {props.businessInfo.logoUrl && (
+            <img
+              src={props.businessInfo.logoUrl}
+              alt="School Logo"
+              className="w-20 h-20 mx-auto mb-3 object-contain"
+            />
+          )}
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            {props.businessInfo.schoolName || 'SCHOOL NAME'}
+          </h1>
+          <div className="inline-block bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-6 py-2 rounded-full font-bold text-lg">
+            ⭐ REPORT CARD ⭐
+          </div>
+          <p className="text-sm text-gray-600 mt-3">{props.jobCardNumber}</p>
         </div>
       </div>
-    )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
+
+      {/* Student Info Cards */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-gradient-to-br from-blue-400 to-blue-600 text-white rounded-xl shadow-lg p-4">
+          <p className="text-xs opacity-90 mb-1">Student</p>
+          <p className="font-bold text-lg">{props.studentName}</p>
+          <p className="text-xs opacity-75">{props.gradeLevel}</p>
+        </div>
+        <div className="bg-gradient-to-br from-green-400 to-green-600 text-white rounded-xl shadow-lg p-4">
+          <p className="text-xs opacity-90 mb-1">Academic Period</p>
+          <p className="font-bold text-lg">{props.term}</p>
+          <p className="text-xs opacity-75">{props.academicYear}</p>
+        </div>
+        <div className="bg-gradient-to-br from-orange-400 to-red-500 text-white rounded-xl shadow-lg p-4">
+          <p className="text-xs opacity-90 mb-1">Average</p>
+          <p className="font-bold text-3xl">{props.calculateAverage ? props.calculateAverage() : '0'}%</p>
+        </div>
+      </div>
+
+      {/* Subjects */}
+      <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+        <h3 className="text-xl font-bold text-purple-700 mb-4 flex items-center gap-2">
+          📚 Subjects & Grades
+        </h3>
+        <div className="space-y-3">
+          {safeSubjects.map((subject, index) => (
+            <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-200">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="font-bold text-gray-800 text-lg">{subject.name}</p>
+                  {subject.comments && (
+                    <p className="text-sm text-gray-600 mt-1">{subject.comments}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-center">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-xl">{subject.mark}</span>
+                    </div>
+                  </div>
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center font-bold text-2xl shadow-lg ${
+                    subject.grade === 'A' ? 'bg-gradient-to-br from-green-400 to-green-600 text-white' :
+                    subject.grade === 'B' ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-white' :
+                    subject.grade === 'C' ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white' :
+                    'bg-gradient-to-br from-red-400 to-red-600 text-white'
+                  }`}>
+                    {subject.grade}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Attendance and Comments */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+          <h3 className="text-lg font-bold text-purple-700 mb-4">📅 Attendance</h3>
+          <div className="inline-block bg-gradient-to-br from-green-400 to-emerald-500 text-white rounded-full w-24 h-24 flex items-center justify-center shadow-lg mb-3">
+            <div>
+              <p className="text-3xl font-bold">
+                {props.attendanceDays && props.attendancePresent
+                  ? ((props.attendancePresent / props.attendanceDays) * 100).toFixed(0)
+                  : '0'}
+              </p>
+              <p className="text-xs">%</p>
+            </div>
+          </div>
+          <p className="text-sm text-gray-600">
+            {props.attendancePresent} out of {props.attendanceDays} days
+          </p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <h3 className="text-lg font-bold text-purple-700 mb-3">💬 Teacher Comments</h3>
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border-2 border-purple-200">
+            <p className="text-sm text-gray-700">{props.teacherComments}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Signatures */}
+      <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="grid grid-cols-2 gap-8">
+          <div className="text-center">
+            <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-4">
+              <div className="border-t-2 border-purple-400 pt-4 mt-8">
+                <p className="text-sm font-semibold text-gray-800">Teacher Signature</p>
+                <p className="text-xs text-gray-600 mt-1">Date: _______________</p>
+              </div>
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-4">
+              <div className="border-t-2 border-purple-400 pt-4 mt-8">
+                <p className="text-sm font-semibold text-gray-800">Principal: {props.businessInfo.principalName}</p>
+                <p className="text-xs text-gray-600 mt-1">Date: _______________</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 // Template Renderer
 export const TemplateRenderer = ({templateId, 
   documentType = 'invoice',
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true,
-  showStamp = true,
+  showStamp = false,
   ...props 
 }) => {
    const templateProps = { 
@@ -955,20 +647,20 @@ export const TemplateRenderer = ({templateId,
    };
 switch (templateId) {
 case 'default':
-return <DefaultTemplate {...templateProps} />;
+return <ClassicTemplate {...templateProps} />;
 case 'classic':
 return <ClassicTemplate {...templateProps} />;
 case 'modern':
 return <ModernTemplate {...templateProps} />;
 case 'elegant':
 case 'premium':
-return <ElegantTemplate {...templateProps} />;
+return <ProfessionalTemplate {...templateProps} />;
 case 'speed':
-return <SpeedTemplate {...templateProps} />;
+return <ColorfulTemplate {...templateProps} />;
 case 'diagnostic':
-return <DiagnosticTemplate {...templateProps} />;
+return <ClassicTemplate {...templateProps} />;
 default:
-return <DefaultTemplate {...templateProps} />;
+return <ModernTemplate {...templateProps} />;
 }
 };
 export default TemplateSelector

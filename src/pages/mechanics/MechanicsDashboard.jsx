@@ -865,7 +865,7 @@ const MechanicsDashboard = () => {
               {documentType === 'quote' && jobCardId && (
                 <button
                   onClick={handleConvertToInvoice}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <FileText className="w-4 h-4" />
                   Convert to Invoice
@@ -934,7 +934,7 @@ const MechanicsDashboard = () => {
             {documentType === 'quote' && jobCardId && (
               <button
                 onClick={handleConvertToInvoice}
-                className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
               >
                 <FileText className="w-4 h-4" />
                 <span>To Invoice</span>

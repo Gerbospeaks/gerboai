@@ -338,7 +338,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors">
             <FileText className="w-5 h-5" />
             <span>Create Invoice</span>
           </button>

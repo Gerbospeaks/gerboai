@@ -76,6 +76,29 @@ const generateJobCardNumber = async (userId) => {
   const nextNumber = lastNumber + 1;
   return `JC-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
+const generateQuoteNumber = async (userId) => {
+  const db = getFirestore();
+  const year = new Date().getFullYear();
+
+  const quotesRef = collection(db, "users", userId, "quotations"); // Changed from "quotes"
+  const q = query(quotesRef, orderBy("createdAt", "desc"), limit(1));
+  const snapshot = await getDocs(q);
+
+  let lastNumber = 1000;
+
+  if (!snapshot.empty) {
+    const lastQuote = snapshot.docs[0].data();
+    const match = lastQuote.quoteNumber?.match(/(\d+)$/);
+
+    if (match) {
+      lastNumber = Number(match[1]);
+    }
+  }
+
+  const nextNumber = lastNumber + 1;
+  return `QT-${year}-${String(nextNumber).padStart(4, "0")}`;
+};
+
 
 const EngineeringDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -83,9 +106,14 @@ const EngineeringDashboard = () => {
   const [showJobCard, setShowJobCard] = useState(false);
   const { user } = useAuth();
   const [jobCardNumber, setJobCardNumber] = useState("");
+  const [quoteNumber, setQuoteNumber] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
   const [jobCardId, setJobCardId] = useState(null);
+  const [quoteId, setQuoteId] = useState(null);
   const [savedJobCards, setSavedJobCards] = useState([]);
+  const [savedQuotes, setSavedQuotes] = useState([]); 
   const [showJobCardsList, setShowJobCardsList] = useState(false);
+  const [showQuotesList, setShowQuotesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersList, setShowCustomersList] = useState(false);
   const [savedCustomers, setSavedCustomers] = useState([]);
@@ -96,6 +124,9 @@ const EngineeringDashboard = () => {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [activeView, setActiveView] = useState("invoice");
+  const [documentType, setDocumentType] = useState('invoice'); // 'invoice' or 'quote'
+const [showConvertModal, setShowConvertModal] = useState(false);
+
 const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
   color: "#d32f2f",
@@ -113,6 +144,23 @@ const [stampSettings, setStampSettings] = useState({
     loadJobCardNumber();
     loadSavedJobCards();
   }, [user]);
+useEffect(() => {
+  if (!user?.uid) return;
+
+  const loadDocumentNumber = async () => {
+    if (documentType === 'quote') {
+      const nextQuote = await generateQuoteNumber(user.uid);
+      setQuoteNumber(nextQuote);
+    } else {
+      const nextInvoice = await generateJobCardNumber(user.uid);
+      setQuoteNumber(nextInvoice);
+    }
+  };
+
+  loadDocumentNumber();
+  loadSavedQuotes();
+}, [user, documentType]); // Added documentType dependency
+
 
   const loadCustomers = async () => {
     try {
@@ -138,6 +186,21 @@ const [stampSettings, setStampSettings] = useState({
 
     const db = getFirestore();
     const jobCardsRef = collection(db, "users", user.uid, "invoices");
+    const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+
+    const cards = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setSavedJobCards(cards);
+  };
+const loadSavedQuotes = async () => {
+    if (!user?.uid) return;
+
+    const db = getFirestore();
+    const jobCardsRef = collection(db, "users", user.uid, "quotations");
     const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(50));
     const snapshot = await getDocs(q);
 
@@ -192,7 +255,23 @@ const [stampSettings, setStampSettings] = useState({
     setItems(jobCard.items || []);
     setShowJobCardsList(false);
   };
-
+const loadQuote = (quote) => {
+    setQuoteId(quote.id);
+    setQuoteNumber(quote.jobCardNumber || "");
+    setCustomerName(quote.customer?.name || "");
+    setCustomerEmail(quote.customer?.email || "");
+    setCustomerPhone(quote.customer?.phone || "");
+    setCustomerAddress(quote.customer?.address || "");
+    setCustomerId(quote.customer?.customerId || "");
+    setEquipmentType(quote.equipment?.type || "");
+    setEquipmentManufacturer(quote.equipment?.manufacturer || "");
+    setEquipmentModel(quote.equipment?.model || "");
+    setEquipmentSerial(quote.equipment?.serialNumber || "");
+    setEquipmentId(quote.equipment?.equipmentId || "");
+    setEquipmentLocation(quote.equipment?.location || "");
+    setItems(quote.items || []);
+    setShowQuotesList(false);
+  };
   const loadSavedCustomers = async () => {
     if (!user?.uid) return;
 
@@ -442,9 +521,11 @@ const [stampSettings, setStampSettings] = useState({
   const total = subtotal + vat;
 
   const buildJobCardPayload = (numberToUse) => ({
-    jobCardNumber: numberToUse,
-    locked: true,
-    status: "pending",
+     [documentType === 'quote' ? 'quoteNumber' : 'invoiceNumber']: numberToUse,
+  documentType: documentType,
+  locked: true,
+  status: "pending",
+
 
     dates: {
       serviceDate: new Date().toISOString(),
@@ -511,6 +592,105 @@ const [stampSettings, setStampSettings] = useState({
     alert("Job card saved and locked");
     loadSavedJobCards();
   };
+const handleSaveQuote = async () => {
+  if (!user?.uid) return;
+
+  const db = getFirestore();
+  let numberToUse = quoteNumber;
+  const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
+
+  if (!quoteId) {
+    if (documentType === 'quote') {
+      numberToUse = await generateQuoteNumber(user.uid);
+    } else {
+      numberToUse = await generateJobCardNumber(user.uid);
+    }
+    setQuoteNumber(numberToUse);
+  }
+
+  const documentData = buildJobCardPayload(numberToUse);
+
+  if (quoteId) {
+    await updateDoc(doc(db, "users", user.uid, collectionName, quoteId), {
+      ...documentData,
+      updatedAt: serverTimestamp(),
+    });
+  } else {
+    const ref = await addDoc(
+      collection(db, "users", user.uid, collectionName),
+      documentData
+    );
+    setQuoteId(ref.id);
+  }
+
+  alert(`${documentType === 'quote' ? 'Quote' : 'Invoice'} saved and locked`);
+  
+  if (documentType === 'quote') {
+    setShowConvertModal(true);
+  }
+  
+  loadSavedQuotes();
+};
+const handleConvertToInvoice = async () => {
+  if (!user?.uid || !quoteId) return;
+
+  try {
+    const db = getFirestore();
+    
+    const invoiceNumber = await generateJobCardNumber(user.uid);
+    
+    const quoteRef = doc(db, "users", user.uid, "quotations", quoteId);
+    const quoteSnap = await getDoc(quoteRef);
+    
+    if (!quoteSnap.exists()) {
+      alert("Quote not found");
+      return;
+    }
+    
+    const quoteData = quoteSnap.data();
+    
+    const invoiceData = {
+      ...quoteData,
+      invoiceNumber: invoiceNumber,
+      documentType: 'invoice',
+      convertedFrom: quoteId,
+      originalQuoteNumber: quoteData.quoteNumber,
+      dates: {
+        ...quoteData.dates,
+        invoiceDate: new Date().toISOString(),
+        convertedDate: new Date().toISOString()
+      },
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+    
+    delete invoiceData.quoteNumber;
+    delete invoiceData.quoteDate;
+    
+    const invoiceRef = await addDoc(
+      collection(db, "users", user.uid, "invoices"),
+      invoiceData
+    );
+    
+    await updateDoc(quoteRef, {
+      convertedToInvoice: true,
+      invoiceId: invoiceRef.id,
+      invoiceNumber: invoiceNumber,
+      updatedAt: serverTimestamp()
+    });
+    
+    alert(`Quote converted to Invoice ${invoiceNumber} successfully!`);
+    
+    setDocumentType('invoice');
+    setQuoteId(invoiceRef.id);
+    setQuoteNumber(invoiceNumber);
+    setShowConvertModal(false);
+    
+  } catch (error) {
+    console.error("Error converting quote to invoice:", error);
+    alert("Failed to convert quote to invoice");
+  }
+};
 
   const handleNewJobCard = () => {
     setJobCardId(null);
@@ -536,7 +716,30 @@ const [stampSettings, setStampSettings] = useState({
     };
     loadNewNumber();
   };
+const handleNewQuote = () => {
+    setJobCardId(null);
+    setJobCardNumber("");
+    setCustomerName("ABC Manufacturing Ltd");
+    setCustomerId("CUST-2026-1234");
+    setCustomerEmail("contact@abcmfg.com");
+    setCustomerPhone("082 123 4567");
+    setCustomerAddress("123 Industrial Park, Johannesburg, 2001");
+    setEquipmentType("Generator");
+    setEquipmentManufacturer("Caterpillar");
+    setEquipmentModel("C15");
+    setEquipmentSerial("CAT12345XYZ789");
+    setEquipmentId("EQ-2026-001");
+    setEquipmentLocation("Building A - Ground Floor");
+    setItems([]);
 
+    const loadNewNumber = async () => {
+      if (user?.uid) {
+        const nextQuote = await generateQuoteNumber(user.uid);
+        setJobCardNumber(nextQuote);
+      }
+    };
+    loadNewNumber();
+  };
   const handleLogout = async () => {
     const auth = getAuth();
     try {
@@ -593,29 +796,57 @@ const [stampSettings, setStampSettings] = useState({
                 <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                   <div className="flex items-center space-x-3">
                     <ClipboardList className="w-5 h-5" />
-                    <span>Job Cards</span>
+                    <span>Quotes</span>
                   </div>
                   <ChevronDown className="w-4 h-4" />
                 </div>
 
                 <div className="ml-8 mt-1 space-y-1">
                   <div
-                    onClick={() => setActiveView("invoice")}
+                    onClick={() => {
+                      handleNewQuote();
+                      setActiveView("invoice");
+                    }}
                     className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
                   >
-                    Create Job Card
+                    Create Quote
                   </div>
                   <div
-                    onClick={() => setShowJobCardsList(!showJobCardsList)}
+                    onClick={() => setShowJobCardsList(!showQuotesList)}
                     className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
                   >
-                    All Job Cards ({savedJobCards.length})
+                    All Quotes ({savedQuotes.length})
                   </div>
-                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
-                    In Progress
-                  </div>
+                  
                 </div>
               </div>
+               <div className="mt-2">
+  <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+    <div className="flex items-center space-x-3">
+      <Receipt className="w-5 h-5" />
+      <span>Invoices</span>
+    </div>
+    <ChevronDown className="w-4 h-4" />
+  </div>
+
+  <div className="ml-8 mt-1 space-y-1">
+    <div
+      onClick={() => {
+                      handleNewJobCard();
+                      setActiveView("invoice");
+                    }}
+      className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+    >
+      Create Invoice
+    </div>
+    <div 
+    onClick={() => setShowJobCardsList(!showJobCardsList)}
+    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
+      All Invoices({savedJobCards.length})
+    </div>
+   
+  </div>
+</div>
 
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
                 <Users className="w-5 h-5" />
@@ -652,21 +883,8 @@ const [stampSettings, setStampSettings] = useState({
                 <span>Parts Inventory</span>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <Receipt className="w-5 h-5" />
-                  <span>Invoices</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
+              
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <CreditCard className="w-5 h-5" />
-                  <span>Payments</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
 
              
 
@@ -676,7 +894,7 @@ const [stampSettings, setStampSettings] = useState({
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full"></div>
+            <div className="w-10 h-10 bg-gray-800 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "User"}
@@ -707,9 +925,10 @@ const [stampSettings, setStampSettings] = useState({
                 <Menu className="w-5 h-5" />
               </button>
               <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
-              <h1 className="text-base lg:text-xl font-semibold">
-                Job Card #{jobCardNumber || "— not saved yet —"}
-              </h1>
+             <h1 className="text-base lg:text-xl font-semibold">
+  {documentType === 'quote' ? 'Quote' : 'Invoice'} #{quoteNumber || "— not saved yet —"}
+</h1>
+
               <TemplateSelector
                               user={user}
                               selectedTemplate={activeTemplate}
@@ -727,27 +946,29 @@ const [stampSettings, setStampSettings] = useState({
                 <span>Edit</span>
               </button>
               <button
-                onClick={handleSaveJobCard}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Save Job Card
-              </button>
+  onClick={handleSaveQuote}
+  className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+>
+  Save {documentType === 'quote' ? 'Quote' : 'Invoice'}
+</button>
+
 
               <button
-                onClick={handleNewJobCard}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                <Plus className="w-4 h-4" />
-                New
-              </button>
+  onClick={documentType === 'quote' ? handleNewQuote : handleNewJobCard}
+  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+>
+  <Plus className="w-4 h-4" />
+  New {documentType === 'quote' ? 'Quote' : 'Invoice'}
+</button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+
+              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
               >
                 Save as PDF
               </button>
@@ -786,13 +1007,13 @@ const [stampSettings, setStampSettings] = useState({
               <Edit className="w-4 h-4" />
               <span>Edit</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
             >
               <Download className="w-4 h-4" />
               <span>Save PDF</span>
@@ -1163,7 +1384,7 @@ const [stampSettings, setStampSettings] = useState({
 </div>
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Business Information
                     </button>
@@ -1188,7 +1409,30 @@ const [stampSettings, setStampSettings] = useState({
             existingCustomer={selectedCustomer}
             onCustomerSaved={handleCustomerSaved}
           />
-
+           {showConvertModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-lg max-w-md w-full p-6">
+      <h2 className="text-xl font-semibold mb-4">Quote Saved Successfully!</h2>
+      <p className="text-gray-600 mb-6">
+        Would you like to convert this quote to an invoice?
+      </p>
+      <div className="flex gap-3">
+        <button
+          onClick={handleConvertToInvoice}
+          className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
+        >
+          Convert to Invoice
+        </button>
+        <button
+          onClick={() => setShowConvertModal(false)}
+          className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+        >
+          Later
+        </button>
+      </div>
+    </div>
+  </div>
+)}
           {showJobCardsList && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
               <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
@@ -1264,13 +1508,87 @@ const [stampSettings, setStampSettings] = useState({
               </div>
             </div>
           )}
-          
+            {showQuotesList && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+                <div className="p-4 border-b flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Saved Quotes</h2>
+                  <button
+                    onClick={() => setShowQuotesList(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="overflow-auto p-4">
+                  {savedQuotes.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      No saved quotes yet
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {savedQuotes.map((card) => (
+                        <div
+                          key={card.id}
+                          onClick={() => loadQuote(card)}
+                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="font-semibold text-lg">
+                                {card.jobCardNumber || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                Customer: {card.customer?.name || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Equipment: {card.equipment?.type || ""}{" "}
+                                {card.equipment?.manufacturer || ""}{" "}
+                                {card.equipment?.model || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Serial: {card.equipment?.serialNumber || "N/A"}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-semibold text-blue-600">
+                                R{card.totals?.total?.toFixed(2) || "0.00"}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {card.dates?.serviceDate
+                                  ? new Date(
+                                      card.dates.serviceDate
+                                    ).toLocaleDateString("en-ZA")
+                                  : "N/A"}
+                              </div>
+                              <div
+                                className={`text-xs mt-1 px-2 py-1 rounded ${
+                                  card.status === "completed"
+                                    ? "bg-green-100 text-green-700"
+                                    : card.status === "pending"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-gray-100 text-gray-700"
+                                }`}
+                              >
+                                {card.status || "unknown"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           {activeView === "templates" && <Templates user={user} />}
                     {activeView === "invoice" && (
                       <>
           <button
             onClick={() => setShowJobCard(!showJobCard)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showJobCard ? "Hide Job Card" : "View Job Card"}
@@ -1302,11 +1620,14 @@ const [stampSettings, setStampSettings] = useState({
                   </div>
                 </div>
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Balance Due</div>
-                  <div className="text-2xl font-semibold text-red-600">
-                    R{total.toFixed(2)}
-                  </div>
-                </div>
+  <div className="text-sm text-gray-500 mb-1">
+    {documentType === 'quote' ? 'Quote' : 'Invoice'} Amount
+  </div>
+  <div className="text-2xl font-semibold text-orange-600">
+    R{total.toFixed(2)}
+  </div>
+</div>
+
               </div>
 
               <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -1485,7 +1806,7 @@ const [stampSettings, setStampSettings] = useState({
 
                   <button
                     onClick={handleAddItem}
-                    className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                    className="bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Add

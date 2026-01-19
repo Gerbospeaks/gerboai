@@ -88,7 +88,7 @@ const CustomersListModal = ({
                           onLoadCustomer(customer);
                           setShowModal(false);
                         }}
-                        className="flex items-center gap-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="flex items-center gap-1 px-3 py-2 text-sm bg-gray-800 text-white rounded-lg hover:bg-blue-700"
                       >
                         <Upload className="w-4 h-4" />
                         Load

@@ -131,7 +131,7 @@ export const DefaultTemplate = ({
   subtotal,
   vat,
   total,
-  showStamp = true,
+  showStamp = false,
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true
@@ -942,7 +942,7 @@ export const TemplateRenderer = ({  templateId,
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true,
-  showStamp = true,
+  showStamp = false,
   ...props 
 }) => {
    const templateProps = { 

@@ -813,26 +813,6 @@ const CleaningDashboard = () => {
                 <span>Supplies</span>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <CreditCard className="w-5 h-5" />
-                  <span>Payments</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <FileBarChart className="w-5 h-5" />
-                  <span>Reports</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <Calendar className="w-5 h-5" />
-                <span>Schedule</span>
-              </div>
 
               <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
@@ -847,7 +827,7 @@ const CleaningDashboard = () => {
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full"></div>
+            <div className="w-10 h-10 bg-gray-800 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "User"}
@@ -881,11 +861,7 @@ const CleaningDashboard = () => {
                 <h1 className="text-base lg:text-xl font-semibold">
                   {isQuoteMode ? 'Quote' : 'Invoice'} #{invoiceNumber || "— not saved yet —"}
                 </h1>
-                <TemplateSelector
-                  user={user}
-                  selectedTemplate={activeTemplate}
-                  onTemplateChange={setActiveTemplate}
-                />
+               
               </div>
 
               <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -908,7 +884,7 @@ const CleaningDashboard = () => {
                 </button>
                 <button
                   onClick={handleSaveInvoice}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
                 >
                   Save {isQuoteMode ? 'Quote' : 'Invoice'}
                 </button>
@@ -919,13 +895,13 @@ const CleaningDashboard = () => {
                   <Plus className="w-4 h-4" />
                   New
                 </button>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700">
                   <Send className="w-4 h-4" />
                   <span>Send</span>
                 </button>
                 <button
                   onClick={handleSavePDF}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
                 >
                   Save as PDF
                 </button>
@@ -972,13 +948,13 @@ const CleaningDashboard = () => {
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
-              <button className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Save PDF</span>
@@ -1261,7 +1237,7 @@ const CleaningDashboard = () => {
 
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Business Information
                     </button>
@@ -1398,7 +1374,7 @@ const CleaningDashboard = () => {
           {/* Mobile Invoice Toggle Button */}
           <button
             onClick={() => setShowInvoice(!showInvoice)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showInvoice ? `Hide ${isQuoteMode ? 'Quote' : 'Invoice'}` : `View ${isQuoteMode ? 'Quote' : 'Invoice'}`}
@@ -1619,7 +1595,7 @@ const CleaningDashboard = () => {
                       />
                       <button
                         onClick={handleAddItem}
-                        className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                        className="bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                       >
                         <Plus className="w-4 h-4" />
                         Add

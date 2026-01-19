@@ -656,7 +656,7 @@ const RetailDashboard = () => {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleEditProduct(product)}
-                              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 text-sm"
                             >
                               <Edit className="w-4 h-4" />
                               Edit

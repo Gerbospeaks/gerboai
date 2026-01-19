@@ -4,7 +4,7 @@ import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import Templates from "./Templates";
-import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
+import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import {
   getFirestore,
   collection,
@@ -26,7 +26,8 @@ import PracticeOverview from "./PracticeOverview"; // Add this
 import PatientsListModal from "./PatientsListModal";
 import PendingPayments from "./PendingPayments";
 import AppointmentsCalendar from "./AppointmentsCalendar";
-import SignatureStamp from '../SignatureStamp';
+import SignatureStamp from "../SignatureStamp";
+import SickNoteModal from "./SickNoteModal";
 import {
   ChevronDown,
   ChevronLeft,
@@ -94,18 +95,29 @@ const HealthcareDashboard = () => {
   const [showPatientsList, setShowPatientsList] = useState(false);
   const [savedPatients, setSavedPatients] = useState([]);
   const [activeTemplate, setActiveTemplate] = useState("classic");
+  const [showSickNoteModal, setShowSickNoteModal] = useState(false);
   const [showPatientsListModal, setShowPatientsListModal] = useState(false);
   const [showPatientModal, setShowPatientModal] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState('professional');
+  const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [patients, setPatients] = useState([]);
   const [activeView, setActiveView] = useState("invoice");
   const [selectedPatient, setSelectedPatient] = useState(null);
-const [stampSettings, setStampSettings] = useState({
+  const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
-  color: "#d32f2f",
-  showDate: false,
-  enabled: false
+    color: "#d32f2f",
+    showDate: false,
+    enabled: false,
   });
+  const [showSickNote, setShowSickNote] = useState(false);
+  const [dateFrom, setDateFrom] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [dateTo, setDateTo] = useState(
+    new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+  );
+  const [doctorName, setDoctorName] = useState("Dr. Jane Smith");
+  const [practiceNumber, setPracticeNumber] = useState("MP123456");
+  const [additionalNotes, setAdditionalNotes] = useState("");
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -122,7 +134,7 @@ const [stampSettings, setStampSettings] = useState({
     try {
       const q = query(
         collection(db, "users", user.uid, "patients"),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
       );
       const querySnapshot = await getDocs(q);
       const patientsData = [];
@@ -259,7 +271,7 @@ const [stampSettings, setStampSettings] = useState({
 
     const db = getFirestore();
     const snap = await getDoc(
-      doc(db, "users", user.uid, "invoices", invoiceId)
+      doc(db, "users", user.uid, "invoices", invoiceId),
     );
 
     return snap.exists() ? snap.data() : null;
@@ -324,7 +336,7 @@ const [stampSettings, setStampSettings] = useState({
   const [patientEmail, setPatientEmail] = useState("sarah.johnson@example.com");
   const [patientPhone, setPatientPhone] = useState("082 123 4567");
   const [patientAddress, setPatientAddress] = useState(
-    "123 Main Street, Pretoria, 0001"
+    "123 Main Street, Pretoria, 0001",
   );
   const [patientDOB, setPatientDOB] = useState("1985-05-15");
   const [patientGender, setPatientGender] = useState("Female");
@@ -333,7 +345,7 @@ const [stampSettings, setStampSettings] = useState({
   const [insuranceNumber, setInsuranceNumber] = useState("DH123456789");
   const [diagnosis, setDiagnosis] = useState("Annual Health Checkup");
   const [treatmentPlan, setTreatmentPlan] = useState(
-    "Routine examination and blood work"
+    "Routine examination and blood work",
   );
   const [prescription, setPrescription] = useState("");
 
@@ -529,7 +541,7 @@ const [stampSettings, setStampSettings] = useState({
     } else {
       const ref = await addDoc(
         collection(db, "users", user.uid, "invoices"),
-        invoiceData
+        invoiceData,
       );
       setInvoiceId(ref.id);
     }
@@ -653,7 +665,7 @@ const [stampSettings, setStampSettings] = useState({
                   </div>
                 </div>
               </div>
- <div
+              <div
                 onClick={() => setActiveView("templates")}
                 className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
               >
@@ -726,7 +738,7 @@ const [stampSettings, setStampSettings] = useState({
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full"></div>
+            <div className="w-10 h-10 bg-gray-800 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "Dr. User"}
@@ -756,16 +768,12 @@ const [stampSettings, setStampSettings] = useState({
                   className="p-2 hover:bg-gray-100 rounded-lg"
                 >
                   <Menu className="w-5 h-5" />
+                
                 </button>
-                <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+                
                 <h1 className="text-base lg:text-xl font-semibold">
                   Invoice #{invoiceNumber || "— not saved yet —"}
                 </h1>
-                <TemplateSelector
-                                user={user}
-                                selectedTemplate={activeTemplate}
-                                onTemplateChange={setActiveTemplate}
-                              />
               </div>
 
               <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -779,7 +787,7 @@ const [stampSettings, setStampSettings] = useState({
                 </button>
                 <button
                   onClick={handleSaveInvoice}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
                 >
                   Save Invoice
                 </button>
@@ -792,13 +800,13 @@ const [stampSettings, setStampSettings] = useState({
                   New
                 </button>
 
-                <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700">
                   <Send className="w-4 h-4" />
                   <span>Send</span>
                 </button>
                 <button
                   onClick={handleSavePDF}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
                 >
                   Save as PDF
                 </button>
@@ -1133,85 +1141,131 @@ const [stampSettings, setStampSettings] = useState({
                         </div>
                       </div>
                     </div>
-<div className="border-t pt-6 mt-6">
-  <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>
-  
-  <div className="space-y-4">
-    <div>
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={stampSettings.enabled}
-          onChange={(e) => setStampSettings({...stampSettings, enabled: e.target.checked})}
-          className="w-4 h-4 rounded"
-        />
-        <span className="text-sm font-medium">Show approval stamp on invoices and quotes</span>
-      </label>
-    </div>
+                    <div className="border-t pt-6 mt-6">
+                      <h3 className="text-lg font-semibold mb-4">
+                        📋 Invoice Stamp Settings
+                      </h3>
 
-    {stampSettings.enabled && (
-      <>
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Text</label>
-          <input
-            type="text"
-            value={stampSettings.text}
-            onChange={(e) => setStampSettings({...stampSettings, text: e.target.value.toUpperCase()})}
-            className="w-full px-4 py-2 border rounded-lg uppercase"
-            placeholder="APPROVED"
-            maxLength={15}
-          />
-          <p className="text-xs text-gray-500 mt-1">Max 15 characters</p>
-        </div>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="flex items-center space-x-2 mb-4">
+                            <input
+                              type="checkbox"
+                              checked={stampSettings.enabled}
+                              onChange={(e) =>
+                                setStampSettings({
+                                  ...stampSettings,
+                                  enabled: e.target.checked,
+                                })
+                              }
+                              className="w-4 h-4 rounded"
+                            />
+                            <span className="text-sm font-medium">
+                              Show approval stamp on invoices and quotes
+                            </span>
+                          </label>
+                        </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Color</label>
-          <select
-            value={stampSettings.color}
-            onChange={(e) => setStampSettings({...stampSettings, color: e.target.value})}
-            className="w-full px-4 py-2 border rounded-lg"
-          >
-            <option value="#d32f2f">🔴 Red (Traditional)</option>
-            <option value="#1976d2">🔵 Blue (Professional)</option>
-            <option value="#388e3c">🟢 Green (Approved)</option>
-            <option value="#7b1fa2">🟣 Purple (Premium)</option>
-            <option value="#000000">⚫ Black (Formal)</option>
-            <option value="#f57c00">🟠 Orange (Attention)</option>
-          </select>
-        </div>
+                        {stampSettings.enabled && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                Stamp Text
+                              </label>
+                              <input
+                                type="text"
+                                value={stampSettings.text}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    text: e.target.value.toUpperCase(),
+                                  })
+                                }
+                                className="w-full px-4 py-2 border rounded-lg uppercase"
+                                placeholder="APPROVED"
+                                maxLength={15}
+                              />
+                              <p className="text-xs text-gray-500 mt-1">
+                                Max 15 characters
+                              </p>
+                            </div>
 
-        <div>
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={stampSettings.showDate}
-              onChange={(e) => setStampSettings({...stampSettings, showDate: e.target.checked})}
-              className="w-4 h-4 rounded"
-            />
-            <span className="text-sm font-medium">Include date on stamp</span>
-          </label>
-        </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                Stamp Color
+                              </label>
+                              <select
+                                value={stampSettings.color}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    color: e.target.value,
+                                  })
+                                }
+                                className="w-full px-4 py-2 border rounded-lg"
+                              >
+                                <option value="#d32f2f">
+                                  🔴 Red (Traditional)
+                                </option>
+                                <option value="#1976d2">
+                                  🔵 Blue (Professional)
+                                </option>
+                                <option value="#388e3c">
+                                  🟢 Green (Approved)
+                                </option>
+                                <option value="#7b1fa2">
+                                  🟣 Purple (Premium)
+                                </option>
+                                <option value="#000000">
+                                  ⚫ Black (Formal)
+                                </option>
+                                <option value="#f57c00">
+                                  🟠 Orange (Attention)
+                                </option>
+                              </select>
+                            </div>
 
-        {/* Preview */}
-        <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
-          <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
-          <div className="flex justify-center">
-            <SignatureStamp 
-              text={stampSettings.text}
-              color={stampSettings.color}
-              showDate={stampSettings.showDate}
-              rotation={-5}
-              size="medium"
-            />
-          </div>
-        </div>
-      </>
-    )}
-  </div>
-</div>
+                            <div>
+                              <label className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={stampSettings.showDate}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      showDate: e.target.checked,
+                                    })
+                                  }
+                                  className="w-4 h-4 rounded"
+                                />
+                                <span className="text-sm font-medium">
+                                  Include date on stamp
+                                </span>
+                              </label>
+                            </div>
+
+                            {/* Preview */}
+                            <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
+                              <p className="text-sm font-medium mb-4 text-center text-gray-600">
+                                Preview:
+                              </p>
+                              <div className="flex justify-center">
+                                <SignatureStamp
+                                  text={stampSettings.text}
+                                  color={stampSettings.color}
+                                  showDate={stampSettings.showDate}
+                                  rotation={-5}
+                                  size="medium"
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
                     <button
                       onClick={handleSaveFacilityInfo}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Facility Information
                     </button>
@@ -1236,7 +1290,15 @@ const [stampSettings, setStampSettings] = useState({
             existingPatient={selectedPatient}
             onPatientSaved={handlePatientSaved}
           />
-
+          <SickNoteModal
+            isOpen={showSickNoteModal}
+            onClose={() => setShowSickNoteModal(false)}
+            facilityInfo={facilityInfo}
+            patientName={patientName}
+            patientId={patientId}
+            patientDOB={patientDOB}
+            diagnosis={diagnosis}
+          />
           {/* Saved Invoices List Modal */}
           {showInvoicesList && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -1287,7 +1349,7 @@ const [stampSettings, setStampSettings] = useState({
                               <div className="text-sm text-gray-500">
                                 {invoice.dates?.serviceDate
                                   ? new Date(
-                                      invoice.dates.serviceDate
+                                      invoice.dates.serviceDate,
                                     ).toLocaleDateString("en-ZA")
                                   : "N/A"}
                               </div>
@@ -1296,8 +1358,8 @@ const [stampSettings, setStampSettings] = useState({
                                   invoice.status === "completed"
                                     ? "bg-green-100 text-green-700"
                                     : invoice.status === "pending"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : "bg-gray-100 text-gray-700"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-gray-100 text-gray-700"
                                 }`}
                               >
                                 {invoice.status || "unknown"}
@@ -1320,11 +1382,11 @@ const [stampSettings, setStampSettings] = useState({
           )}
           {activeView === "pending" && <PendingPayments user={user} />}
           {activeView === "templates" && <Templates user={user} />}
-                    {activeView === "invoice" && (
-                      <>
+          {activeView === "invoice" && (
+            <>
               <button
                 onClick={() => setShowInvoice(!showInvoice)}
-                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <FileText className="w-5 h-5" />
                 {showInvoice ? "Hide Invoice" : "View Invoice"}
@@ -1492,9 +1554,40 @@ const [stampSettings, setStampSettings] = useState({
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Stethoscope className="w-5 h-5" />
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
                         <span>Medical Information</span>
                       </h2>
+                      <button
+                        onClick={() => setShowSickNoteModal(true)}
+                        className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                        Generate Sick Note
+                      </button>
                     </div>
 
                     <div className="space-y-4">
@@ -1587,7 +1680,7 @@ const [stampSettings, setStampSettings] = useState({
 
                       <button
                         onClick={handleAddItem}
-                        className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                        className="bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                       >
                         <Plus className="w-4 h-4" />
                         Add
@@ -1629,43 +1722,43 @@ const [stampSettings, setStampSettings] = useState({
                     minHeight: "297mm",
                   }}
                 >
-                 {activeView === 'invoice' && (
-  <>
-    {/* Add Template Selector */}
-    <div className="mb-4">
-      <TemplateSelector 
-        user={user} 
-        selectedTemplate={selectedTemplate}
-        onTemplateChange={setSelectedTemplate}
-      />
-    </div>
+                  {activeView === "invoice" && (
+                    <>
+                      {/* Add Template Selector */}
+                      <div className="mb-4">
+                        <TemplateSelector
+                          user={user}
+                          selectedTemplate={selectedTemplate}
+                          onTemplateChange={setSelectedTemplate}
+                        />
+                      </div>
 
-    {/* Use Template Renderer instead of hardcoded invoice */}
-    <TemplateRenderer
-      templateId={selectedTemplate}
-      businessInfo={facilityInfo}
-      loading={loading}
-      jobCardNumber={invoiceNumber}
-      customerName={patientName}
-      customerEmail={patientEmail}
-      customerPhone={patientPhone}
-      customerAddress={patientAddress}
-      patientId={patientId}
-      patientDOB={patientDOB}
-      patientGender={patientGender}
-      insuranceProvider={insuranceProvider}
-      insuranceNumber={insuranceNumber}
-      diagnosis={diagnosis}
-      prescription={prescription}
-      items={items}
-      subtotal={subtotal}
-      vat={vat}
-      total={total}
-      serviceType="MEDICAL"
-      documentType="medical"
-    />
-  </>
-)}
+                      {/* Use Template Renderer instead of hardcoded invoice */}
+                      <TemplateRenderer
+                        templateId={selectedTemplate}
+                        businessInfo={facilityInfo}
+                        loading={loading}
+                        jobCardNumber={invoiceNumber}
+                        customerName={patientName}
+                        customerEmail={patientEmail}
+                        customerPhone={patientPhone}
+                        customerAddress={patientAddress}
+                        patientId={patientId}
+                        patientDOB={patientDOB}
+                        patientGender={patientGender}
+                        insuranceProvider={insuranceProvider}
+                        insuranceNumber={insuranceNumber}
+                        diagnosis={diagnosis}
+                        prescription={prescription}
+                        items={items}
+                        subtotal={subtotal}
+                        vat={vat}
+                        total={total}
+                        serviceType="MEDICAL"
+                        documentType="medical"
+                      />
+                    </>
+                  )}
                 </div>
 
                 <style>{`

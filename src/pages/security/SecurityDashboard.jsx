@@ -495,7 +495,7 @@ const [stampSettings, setStampSettings] = useState({
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center">
               <Shield className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
@@ -540,7 +540,7 @@ const [stampSettings, setStampSettings] = useState({
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
               <button
                 onClick={handleSaveIncident}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
               >
                 Save Report
               </button>
@@ -937,7 +937,7 @@ const [stampSettings, setStampSettings] = useState({
 </div>
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Business Information
                     </button>
@@ -1021,7 +1021,7 @@ const [stampSettings, setStampSettings] = useState({
                        <>
           <button
             onClick={() => setShowIncidentReport(!showIncidentReport)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showIncidentReport ? "Hide Report" : "View Report"}

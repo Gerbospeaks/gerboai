@@ -100,13 +100,16 @@ const generateInvoiceNumber = async (userId) => {
   const nextNumber = lastNumber + 1;
   return `INV-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
+
 const ConstructionDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("Quote");
+  const [activeTab, setActiveTab] = useState("quote");
   const [showQuote, setShowQuote] = useState(false);
   const { user } = useAuth();
   const [quoteNumber, setQuoteNumber] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
   const [quoteId, setQuoteId] = useState(null);
+  const [invoiceId, setInvoiceId] = useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [showQuotesList, setShowQuotesList] = useState(false);
   const [savedInvoices, setSavedInvoices] = useState([]);
@@ -138,7 +141,7 @@ const ConstructionDashboard = () => {
         setQuoteNumber(nextQuote);
       } else {
         const nextInvoice = await generateInvoiceNumber(user.uid);
-        setQuoteNumber(nextInvoice);
+        setInvoiceNumber(nextInvoice);
       }
     };
 
@@ -173,7 +176,7 @@ const ConstructionDashboard = () => {
     if (!user?.uid) return;
 
     const db = getFirestore();
-    const quotesRef = collection(db, "users", user.uid, "quotes");
+    const quotesRef = collection(db, "users", user.uid, "quotations");
     const q = query(quotesRef, orderBy("createdAt", "desc"), limit(50));
     const snapshot = await getDocs(q);
 
@@ -247,7 +250,25 @@ const ConstructionDashboard = () => {
     setItems(quote.items || []);
     setShowQuotesList(false);
   };
-
+const loadInvoice = (invoice) => {
+    setInvoiceId(invoice.id);
+    setInvoiceNumber(invoice.quoteNumber || "");
+    setClientName(invoice.client?.name || "");
+    setClientEmail(invoice.client?.email || "");
+    setClientPhone(invoice.client?.phone || "");
+    setClientAddress(invoice.client?.address || "");
+    setClientId(invoice.client?.clientId || "");
+    setClientCompany(invoice.client?.company || "");
+    setClientType(invoice.client?.clientType || "Residential");
+    setProjectName(invoice.project?.name || "");
+    setProjectAddress(invoice.project?.address || "");
+    setProjectType(invoice.project?.type || "");
+    setProjectSize(invoice.project?.size || "");
+    setProjectDuration(invoice.project?.duration || "");
+    setProjectStartDate(invoice.project?.startDate || "");
+    setItems(invoice.items || []);
+    setShowInvoicesList(false);
+  };
   const loadSavedClients = async () => {
     if (!user?.uid) return;
 
@@ -303,15 +324,28 @@ const ConstructionDashboard = () => {
 
     return snap.exists() ? snap.data() : null;
   };
+ const loadInvoiceForExport = async () => {
+    if (!user?.uid || !invoiceId) return null;
 
+    const db = getFirestore();
+    const snap = await getDoc(doc(db, "users", user.uid, "invoices", invoiceId));
+    return snap.exists() ? snap.data() : null;
+  };
   const handleSavePDF = async () => {
     const savedQuote = await loadQuoteForExport();
-
+    const savedInvoice = await loadInvoiceForExport();
     if (!savedQuote) {
       alert("Please save the quote before exporting PDF");
       return;
     }
-
+    setInvoiceNumber(savedInvoice.invoiceNumber);
+    setItems(savedInvoice.items);
+    setClientName(savedInvoice.client.name);
+    setClientEmail(savedInvoice.client.email);
+    setClientPhone(savedInvoice.client.phone);
+    setClientAddress(savedInvoice.client.address);
+    setProjectName(savedInvoice.project.name);
+    setProjectAddress(savedInvoice.project.address);
     setQuoteNumber(savedQuote.quoteNumber);
     setItems(savedQuote.items);
     setClientName(savedQuote.client.name);
@@ -780,9 +814,7 @@ const ConstructionDashboard = () => {
                   >
                     All Quotes ({savedQuotes.length})
                   </div>
-                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
-                    Pending Approval
-                  </div>
+                 
                 </div>
               </div>
               <div className="mt-2">
@@ -923,11 +955,7 @@ const ConstructionDashboard = () => {
                   {documentType === "quote" ? "Quote" : "Invoice"} #
                   {quoteNumber || "— not saved yet —"}
                 </h1>
-                <TemplateSelector
-                  user={user}
-                  selectedTemplate={activeTemplate}
-                  onTemplateChange={setActiveTemplate}
-                />
+               
               </div>
 
               <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1554,6 +1582,80 @@ const ConstructionDashboard = () => {
                                 }`}
                               >
                                 {quote.status || "unknown"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Saved Invoices List Modal */}
+          {showInvoicesList && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+                <div className="p-4 border-b flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Saved Invoices</h2>
+                  <button
+                    onClick={() => setShowInvoicesList(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="overflow-auto p-4">
+                  {savedInvoices.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      No saved invoices yet
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {savedInvoices.map((invoice) => (
+                        <div
+                          key={invoice.id}
+                          onClick={() => loadInvoice(invoice)}
+                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="font-semibold text-lg">
+                                {invoice.invoiceNumber || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                Client: {invoice.client?.name || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Project: {invoice.project?.name || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Location: {invoice.project?.address || "N/A"}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-semibold text-orange-600">
+                                R{invoice.totals?.total?.toFixed(2) || "0.00"}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {invoice.dates?.quoteDate
+                                  ? new Date(
+                                      invoice.dates.quoteDate,
+                                    ).toLocaleDateString("en-ZA")
+                                  : "N/A"}
+                              </div>
+                              <div
+                                className={`text-xs mt-1 px-2 py-1 rounded ${
+                                  invoice.status === "approved"
+                                    ? "bg-green-100 text-green-700"
+                                    : invoice.status === "pending"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-gray-100 text-gray-700"
+                                }`}
+                              >
+                                {invoice.status || "unknown"}
                               </div>
                             </div>
                           </div>

@@ -131,7 +131,7 @@ export const DefaultTemplate = ({
   subtotal,
   vat,
   total,
-  showStamp = true,
+  showStamp = false,
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true
@@ -394,7 +394,7 @@ export const ProfessionalTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 font-bold bg-blue-600 text-white px-4 rounded">
+        <div className="flex justify-between py-3 font-bold bg-gray-800 text-white px-4 rounded">
           <span>TOTAL DUE:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
@@ -905,7 +905,7 @@ export const TemplateRenderer = ({
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true,
-  showStamp = true,
+  showStamp = false,
   ...props 
 }) => {
    const templateProps = { 

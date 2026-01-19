@@ -900,7 +900,7 @@ const AccountingDashboard = () => {
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full"></div>
+            <div className="w-10 h-10 bg-gray-800 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "User"}
@@ -953,7 +953,7 @@ const AccountingDashboard = () => {
               </button>
               <button
                 onClick={handleSaveDocument}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
               >
                 Save {documentType === 'quote' ? 'Quote' : 'Invoice'}
               </button>
@@ -976,13 +976,13 @@ const AccountingDashboard = () => {
                 New
               </button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
               >
                 Save as PDF
               </button>
@@ -1025,7 +1025,7 @@ const AccountingDashboard = () => {
             </button>
             <button
               onClick={handleSaveDocument}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
             >
               Save {documentType === 'quote' ? 'Quote' : 'Invoice'}
             </button>
@@ -1038,13 +1038,13 @@ const AccountingDashboard = () => {
                 Convert
               </button>
             )}
-            <button className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
             >
               <Download className="w-4 h-4" />
               <span>Save PDF</span>
@@ -1451,7 +1451,7 @@ const AccountingDashboard = () => {
                     </div>
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Business Information
                     </button>
@@ -1644,7 +1644,7 @@ const AccountingDashboard = () => {
               {/* Mobile View Invoice Button */}
               <button
                 onClick={() => setShowInvoice(!showInvoice)}
-                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <FileText className="w-5 h-5" />
                 {showInvoice ? `Hide ${documentType === 'quote' ? 'Quote' : 'Invoice'}` : `View ${documentType === 'quote' ? 'Quote' : 'Invoice'}`}
@@ -1849,7 +1849,7 @@ const AccountingDashboard = () => {
 
                       <button
                         onClick={handleAddItem}
-                        className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                        className="bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                       >
                         <Plus className="w-4 h-4" />
                         Add

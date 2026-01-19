@@ -298,7 +298,7 @@ const Templates = () => {
               onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
                 selectedCategory === category.id
-                  ? 'bg-blue-600 text-white shadow-lg scale-105'
+                  ? 'bg-gray-800 text-white shadow-lg scale-105'
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
               }`}
             >
