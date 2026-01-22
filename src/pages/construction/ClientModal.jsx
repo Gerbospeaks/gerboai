@@ -117,7 +117,7 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-4 border-b flex items-center justify-between bg-orange-600 text-white">
+        <div className="p-4 border-b flex items-center justify-between bg-gray-600 text-white">
           <h2 className="text-xl font-semibold">
             {existingClient ? 'Edit Client' : 'Add New Client'}
           </h2>
@@ -260,7 +260,7 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
               </button>
               <button
                 onClick={handleSubmit}
-                className="flex-1 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={saving}
               >
                 <Save className="w-4 h-4" />

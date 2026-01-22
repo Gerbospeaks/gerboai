@@ -226,7 +226,7 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
             <button
               onClick={handleSaveCustomer}
               disabled={loading}
-              className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <Save className="w-5 h-5" />
               {loading ? 'Saving...' : existingCustomer ? 'Update Customer' : 'Save Customer'}

@@ -1536,12 +1536,8 @@ const [stampSettings, setStampSettings] = useState({
             <div
               className={`${
                 !showReportCard ? "hidden" : "block"
-              } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-              style={{
-                width: "100%",
-                maxWidth: "210mm",
-                minHeight: "297mm",
-              }}
+              } lg:block mx-auto bg-white shadow-lg overflow-y-auto`}
+              style={{width: "100%",maxWidth: "210mm",maxHeight: "90vh",}}
             >
              {activeView === 'reportCard' && (
   <>

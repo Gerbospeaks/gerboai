@@ -1627,8 +1627,8 @@ const CleaningDashboard = () => {
 
                 {/* Right Panel - Invoice/Quote Preview */}
                 <div
-                  className={`${!showInvoice ? "hidden" : "block"} lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-                  style={{width: "100%", maxWidth: "210mm", minHeight: "297mm"}}
+                  className={`${!showInvoice ? "hidden" : "block"} lg:block mx-auto bg-white shadow-lg overflow-y-auto`}
+              style={{width: "100%",maxWidth: "210mm",maxHeight: "90vh",}}
                 >
                   <div className="mb-4">
                     <TemplateSelector 

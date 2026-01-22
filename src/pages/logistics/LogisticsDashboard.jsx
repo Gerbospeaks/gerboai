@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
-import logo from '../../assets/img/solidflo-logo.png';
+import logo from "../../assets/img/solidflo-logo.png";
+import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
-import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
+import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -21,9 +22,11 @@ import {
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
-import CustomerModal from '../CustomerModal';
-import CustomersListModal from '../CustomersListModal';
-import SignatureStamp from '../SignatureStamp';
+import CustomerModal from "../CustomerModal";
+import CustomersListModal from "../CustomersListModal";
+import InTransitModal from "./InTransitModal";
+import WaybillStickerModal from "./WaybillStickerModal";
+import SignatureStamp from "../SignatureStamp";
 import {
   ChevronDown,
   ChevronLeft,
@@ -92,14 +95,17 @@ const LogisticsDashboard = () => {
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState('professional');
+  const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [customers, setCustomers] = useState([]);
+  const [showInTransitModal, setShowInTransitModal] = useState(false);
+  const [showWaybillSticker, setShowWaybillSticker] = useState(false);
+  const [savedWaybillData, setSavedWaybillData] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-const [stampSettings, setStampSettings] = useState({
-   text: "APPROVED",
-  color: "#d32f2f",
-  showDate: false,
-  enabled: false
+  const [stampSettings, setStampSettings] = useState({
+    text: "APPROVED",
+    color: "#d32f2f",
+    showDate: false,
+    enabled: false,
   });
   useEffect(() => {
     if (!user?.uid) return;
@@ -115,23 +121,40 @@ const [stampSettings, setStampSettings] = useState({
 
   const loadCustomers = async () => {
     try {
-      const q = query(collection(db, "users", user.uid, "clients"), orderBy('createdAt', 'desc'));
+      const q = query(
+        collection(db, "users", user.uid, "clients"),
+        orderBy("createdAt", "desc"),
+      );
       const querySnapshot = await getDocs(q);
       const customersData = [];
-      
+
       querySnapshot.forEach((doc) => {
         customersData.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         });
       });
-      
+
       setCustomers(customersData);
     } catch (error) {
-      console.error('Error loading customers:', error);
+      console.error("Error loading customers:", error);
     }
   };
+  const handleViewWaybillDetails = (waybill) => {
+    // Close the in-transit modal
+    setShowInTransitModal(false);
 
+    // Load the waybill data into the form
+    loadWaybill(waybill);
+
+    // Switch to invoice view
+    setActiveView("invoice");
+  };
+
+  const handlePrintWaybillLabel = (waybill) => {
+    setSavedWaybillData(waybill);
+    setShowWaybillSticker(true);
+  };
   const loadSavedWaybills = async () => {
     if (!user?.uid) return;
 
@@ -209,12 +232,12 @@ const [stampSettings, setStampSettings] = useState({
       ...doc.data(),
     }));
 
-    setSavedCustomers(customers.filter(c => !c._placeholder));
+    setSavedCustomers(customers.filter((c) => !c._placeholder));
   };
 
   const handleSaveCustomer = async () => {
     if (!user?.uid) return;
-    
+
     if (!senderName || !senderEmail) {
       alert("Please enter sender name and email");
       return;
@@ -229,7 +252,7 @@ const [stampSettings, setStampSettings] = useState({
         address: senderAddress,
         customerId: customerId || `CUST-${Date.now()}`,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       await addDoc(collection(db, "users", user.uid, "clients"), customerData);
@@ -246,7 +269,7 @@ const [stampSettings, setStampSettings] = useState({
 
     const db = getFirestore();
     const snap = await getDoc(
-      doc(db, "users", user.uid, "waybills", waybillId)
+      doc(db, "users", user.uid, "waybills", waybillId),
     );
 
     return snap.exists() ? snap.data() : null;
@@ -314,13 +337,17 @@ const [stampSettings, setStampSettings] = useState({
   const [customerId, setCustomerId] = useState("CUST-2026-1234");
   const [senderEmail, setSenderEmail] = useState("john.smith@example.com");
   const [senderPhone, setSenderPhone] = useState("082 123 4567");
-  const [senderAddress, setSenderAddress] = useState("123 Main Street, Pretoria, 0001");
-  
+  const [senderAddress, setSenderAddress] = useState(
+    "123 Main Street, Pretoria, 0001",
+  );
+
   const [receiverName, setReceiverName] = useState("Jane Doe");
   const [receiverEmail, setReceiverEmail] = useState("jane.doe@example.com");
   const [receiverPhone, setReceiverPhone] = useState("083 987 6543");
-  const [receiverAddress, setReceiverAddress] = useState("456 Oak Avenue, Johannesburg, 2000");
-  
+  const [receiverAddress, setReceiverAddress] = useState(
+    "456 Oak Avenue, Johannesburg, 2000",
+  );
+
   const [origin, setOrigin] = useState("Pretoria");
   const [destination, setDestination] = useState("Johannesburg");
   const [cargoType, setCargoType] = useState("General Cargo");
@@ -338,7 +365,7 @@ const [stampSettings, setStampSettings] = useState({
     secondaryPhone: "084 583 9929",
     logoUrl: "",
   });
-  
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -520,13 +547,19 @@ const [stampSettings, setStampSettings] = useState({
     } else {
       const ref = await addDoc(
         collection(db, "users", user.uid, "waybills"),
-        waybillData
+        waybillData,
       );
       setWaybillId(ref.id);
     }
 
+    // Save the waybill data for the sticker
+    setSavedWaybillData(waybillData);
+
     alert("Waybill saved and locked");
     loadSavedWaybills();
+
+    // Show the sticker modal after saving
+    setShowWaybillSticker(true);
   };
 
   const handleNewWaybill = () => {
@@ -586,11 +619,11 @@ const [stampSettings, setStampSettings] = useState({
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-             <img
-                 src={logo}
-                 alt="Business Logo"
-                 className="w-16 h-12 object-contain rounded-lg"
-               />
+            <img
+              src={logo}
+              alt="Business Logo"
+              className="w-16 h-12 object-contain rounded-lg"
+            />
           </div>
 
           <nav className="space-y-1">
@@ -607,7 +640,10 @@ const [stampSettings, setStampSettings] = useState({
             </div>
 
             <div className="pt-4">
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+              <div
+                onClick={() => setActiveView("financial-overview")}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
                 <TrendingUp className="w-5 h-5" />
                 <span>Business Overview</span>
               </div>
@@ -623,10 +659,13 @@ const [stampSettings, setStampSettings] = useState({
 
                 <div className="ml-8 mt-1 space-y-1">
                   <div
-                    onClick={handleNewWaybill}
+                    onClick={() => {
+                      handleNewWaybill();
+                      setActiveView("invoice");
+                    }}
                     className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
                   >
-                    Create Waybill
+                    Create Invoice
                   </div>
                   <div
                     onClick={() => setShowWaybillsList(!showWaybillsList)}
@@ -634,7 +673,10 @@ const [stampSettings, setStampSettings] = useState({
                   >
                     All Waybills ({savedWaybills.length})
                   </div>
-                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
+                  <div
+                    onClick={() => setShowInTransitModal(true)}
+                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+                  >
                     In Transit
                   </div>
                 </div>
@@ -644,28 +686,28 @@ const [stampSettings, setStampSettings] = useState({
                 <Users className="w-5 h-5" />
                 <span>Customers</span>
               </div>
-               <div className="ml-8 mt-1 space-y-1">
-                  <div 
-                    onClick={handleAddNewCustomer}
-                    className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
-                  >
-                    <span>Add Customer</span>
-                  </div>
-                  <div
-                    onClick={() => setShowCustomersListModal(true)}
-                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
-                  >
-                    All Customers ({savedCustomers.length})
-                  </div>
+              <div className="ml-8 mt-1 space-y-1">
+                <div
+                  onClick={handleAddNewCustomer}
+                  className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
+                >
+                  <span>Add Customer</span>
                 </div>
-                 <div
-                                onClick={() => setActiveView("templates")}
-                                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-                              >
-                                <FileText className="w-5 h-5" />
-                                <span>Invoice Templates</span>
-                              </div>
-              
+                <div
+                  onClick={() => setShowCustomersListModal(true)}
+                  className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+                >
+                  All Customers ({savedCustomers.length})
+                </div>
+              </div>
+              <div
+                onClick={() => setActiveView("templates")}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
+                <FileText className="w-5 h-5" />
+                <span>Invoice Templates</span>
+              </div>
+
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <Truck className="w-5 h-5" />
                 <span>Fleet</span>
@@ -704,21 +746,13 @@ const [stampSettings, setStampSettings] = useState({
                 <Calendar className="w-5 h-5" />
                 <span>Schedule</span>
               </div>
-
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <BarChart3 className="w-5 h-5" />
-                  <span>Analytics</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
             </div>
           </nav>
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-orange-600 rounded-full"></div>
+            <div className="w-10 h-10 bg-gray-600 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "User"}
@@ -739,136 +773,132 @@ const [stampSettings, setStampSettings] = useState({
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <div className ="sticky top-0 z-40">
-        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 lg:space-x-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
-              <h1 className="text-base lg:text-xl font-semibold">
-                Waybill #{waybillNumber || "— not saved yet —"}
-              </h1>
-              <TemplateSelector
-                              user={user}
-                              selectedTemplate={activeTemplate}
-                              onTemplateChange={setActiveTemplate}
-                            />
-            </div>
+        <div className="sticky top-0 z-40">
+          <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 lg:space-x-4">
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+                <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+                <h1 className="text-base lg:text-xl font-semibold">
+                  Waybill #{waybillNumber || "— not saved yet —"}
+                </h1>
+                
+              </div>
 
-            <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
-                <CheckSquare className="w-4 h-4" />
-                <span>Mark Delivered</span>
+              <div className="hidden lg:flex items-center space-x-3 print:hidden">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+                  <CheckSquare className="w-4 h-4" />
+                  <span>Mark Delivered</span>
+                </button>
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+                  <Edit className="w-4 h-4" />
+                  <span>Edit</span>
+                </button>
+                <button
+                  onClick={handleSaveWaybill}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700"
+                >
+                  Save Waybill
+                </button>
+
+                <button
+                  onClick={handleNewWaybill}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  <Plus className="w-4 h-4" />
+                  New
+                </button>
+
+                <button className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700">
+                  <Send className="w-4 h-4" />
+                  <span>Send</span>
+                </button>
+                <button
+                  onClick={handleSavePDF}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700"
+                >
+                  Save as PDF
+                </button>
+
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Log Out
+                </button>
+              </div>
+
+              {/* Mobile Action Buttons */}
+              <button
+                onClick={handleLogout}
+                className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
+              >
+                <span className="text-sm font-medium">Logout</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+            </div>
+          </div>
+
+          {/* Mobile Action Buttons Bar */}
+          <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
+                <CheckSquare className="w-4 h-4" />
+                <span>Delivered</span>
+              </button>
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
-              <button
-                onClick={handleSaveWaybill}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-              >
-                Save Waybill
-              </button>
-
-              <button
-                onClick={handleNewWaybill}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                <Plus className="w-4 h-4" />
-                New
-              </button>
-
-              <button className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+              <button className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700 whitespace-nowrap text-sm">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
-                onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                onClick={handleSave}
+                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap text-sm"
               >
-                Save as PDF
+                <Download className="w-4 h-4" />
+                <span>Save PDF</span>
               </button>
-
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
               >
                 <Printer className="w-4 h-4" />
-                Print
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Log Out
+                <span>Print</span>
               </button>
             </div>
-
-            {/* Mobile Action Buttons */}
-            <button
-              onClick={handleLogout}
-              className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
-            >
-              <span className="text-sm font-medium">Logout</span>
-            </button>
           </div>
-        </div>
 
-        {/* Mobile Action Buttons Bar */}
-        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
-              <CheckSquare className="w-4 h-4" />
-              <span>Delivered</span>
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
-              <Edit className="w-4 h-4" />
-              <span>Edit</span>
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 whitespace-nowrap text-sm">
-              <Send className="w-4 h-4" />
-              <span>Send</span>
-            </button>
-            <button
-              onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Download className="w-4 h-4" />
-              <span>Save PDF</span>
-            </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Print</span>
-            </button>
+          <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+            <div className="flex space-x-4 lg:space-x-8 min-w-max">
+              {["Waybill", "Cargo", "History", "Notes"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`py-4 border-b-2 ${
+                    activeTab === tab
+                      ? "border-orange-400 text-white"
+                      : "border-transparent text-gray-400 hover:text-gray-200"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-
-        <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-          <div className="flex space-x-4 lg:space-x-8 min-w-max">
-            {["Waybill", "Cargo", "History", "Notes"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 border-b-2 ${
-                  activeTab === tab
-                    ? "border-orange-400 text-white"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
         </div>
         <div className="p-4 lg:p-6">
           {/* Business Settings Modal */}
@@ -1056,7 +1086,7 @@ const [stampSettings, setStampSettings] = useState({
                         placeholder="084 583 9929"
                       />
                     </div>
-                     <div className="border-t pt-4 mt-6">
+                    <div className="border-t pt-4 mt-6">
                       <h3 className="text-lg font-semibold mb-4">
                         Bank Details
                       </h3>
@@ -1131,85 +1161,131 @@ const [stampSettings, setStampSettings] = useState({
                         </div>
                       </div>
                     </div>
-<div className="border-t pt-6 mt-6">
-  <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>
-  
-  <div className="space-y-4">
-    <div>
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={stampSettings.enabled}
-          onChange={(e) => setStampSettings({...stampSettings, enabled: e.target.checked})}
-          className="w-4 h-4 rounded"
-        />
-        <span className="text-sm font-medium">Show approval stamp on invoices and quotes</span>
-      </label>
-    </div>
+                    <div className="border-t pt-6 mt-6">
+                      <h3 className="text-lg font-semibold mb-4">
+                        📋 Invoice Stamp Settings
+                      </h3>
 
-    {stampSettings.enabled && (
-      <>
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Text</label>
-          <input
-            type="text"
-            value={stampSettings.text}
-            onChange={(e) => setStampSettings({...stampSettings, text: e.target.value.toUpperCase()})}
-            className="w-full px-4 py-2 border rounded-lg uppercase"
-            placeholder="APPROVED"
-            maxLength={15}
-          />
-          <p className="text-xs text-gray-500 mt-1">Max 15 characters</p>
-        </div>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="flex items-center space-x-2 mb-4">
+                            <input
+                              type="checkbox"
+                              checked={stampSettings.enabled}
+                              onChange={(e) =>
+                                setStampSettings({
+                                  ...stampSettings,
+                                  enabled: e.target.checked,
+                                })
+                              }
+                              className="w-4 h-4 rounded"
+                            />
+                            <span className="text-sm font-medium">
+                              Show approval stamp on invoices and quotes
+                            </span>
+                          </label>
+                        </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Color</label>
-          <select
-            value={stampSettings.color}
-            onChange={(e) => setStampSettings({...stampSettings, color: e.target.value})}
-            className="w-full px-4 py-2 border rounded-lg"
-          >
-            <option value="#d32f2f">🔴 Red (Traditional)</option>
-            <option value="#1976d2">🔵 Blue (Professional)</option>
-            <option value="#388e3c">🟢 Green (Approved)</option>
-            <option value="#7b1fa2">🟣 Purple (Premium)</option>
-            <option value="#000000">⚫ Black (Formal)</option>
-            <option value="#f57c00">🟠 Orange (Attention)</option>
-          </select>
-        </div>
+                        {stampSettings.enabled && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                Stamp Text
+                              </label>
+                              <input
+                                type="text"
+                                value={stampSettings.text}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    text: e.target.value.toUpperCase(),
+                                  })
+                                }
+                                className="w-full px-4 py-2 border rounded-lg uppercase"
+                                placeholder="APPROVED"
+                                maxLength={15}
+                              />
+                              <p className="text-xs text-gray-500 mt-1">
+                                Max 15 characters
+                              </p>
+                            </div>
 
-        <div>
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={stampSettings.showDate}
-              onChange={(e) => setStampSettings({...stampSettings, showDate: e.target.checked})}
-              className="w-4 h-4 rounded"
-            />
-            <span className="text-sm font-medium">Include date on stamp</span>
-          </label>
-        </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                Stamp Color
+                              </label>
+                              <select
+                                value={stampSettings.color}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    color: e.target.value,
+                                  })
+                                }
+                                className="w-full px-4 py-2 border rounded-lg"
+                              >
+                                <option value="#d32f2f">
+                                  🔴 Red (Traditional)
+                                </option>
+                                <option value="#1976d2">
+                                  🔵 Blue (Professional)
+                                </option>
+                                <option value="#388e3c">
+                                  🟢 Green (Approved)
+                                </option>
+                                <option value="#7b1fa2">
+                                  🟣 Purple (Premium)
+                                </option>
+                                <option value="#000000">
+                                  ⚫ Black (Formal)
+                                </option>
+                                <option value="#f57c00">
+                                  🟠 Orange (Attention)
+                                </option>
+                              </select>
+                            </div>
 
-        {/* Preview */}
-        <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
-          <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
-          <div className="flex justify-center">
-            <SignatureStamp 
-              text={stampSettings.text}
-              color={stampSettings.color}
-              showDate={stampSettings.showDate}
-              rotation={-5}
-              size="medium"
-            />
-          </div>
-        </div>
-      </>
-    )}
-  </div>
-</div>
+                            <div>
+                              <label className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={stampSettings.showDate}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      showDate: e.target.checked,
+                                    })
+                                  }
+                                  className="w-4 h-4 rounded"
+                                />
+                                <span className="text-sm font-medium">
+                                  Include date on stamp
+                                </span>
+                              </label>
+                            </div>
+
+                            {/* Preview */}
+                            <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
+                              <p className="text-sm font-medium mb-4 text-center text-gray-600">
+                                Preview:
+                              </p>
+                              <div className="flex justify-center">
+                                <SignatureStamp
+                                  text={stampSettings.text}
+                                  color={stampSettings.color}
+                                  showDate={stampSettings.showDate}
+                                  rotation={-5}
+                                  size="medium"
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700"
+                      className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-orange-700"
                     >
                       Save Business Information
                     </button>
@@ -1218,24 +1294,36 @@ const [stampSettings, setStampSettings] = useState({
               </div>
             </div>
           )}
-
-        <CustomersListModal
-          showModal={showCustomersListModal}
-          setShowModal={setShowCustomersListModal}
-          customers={customers}
-          onLoadCustomer={loadCustomer}
-          onEditCustomer={handleEditCustomer}
-          onAddNewCustomer={handleAddNewCustomer}
-        />
-
-        {/* Customer Modal */}
-        <CustomerModal
-          showModal={showCustomerModal}
-          setShowModal={setShowCustomerModal}
-          existingCustomer={selectedCustomer}
-          onCustomerSaved={handleCustomerSaved}
-        />
-
+          <CustomersListModal
+            showModal={showCustomersListModal}
+            setShowModal={setShowCustomersListModal}
+            customers={customers}
+            onLoadCustomer={loadCustomer}
+            onEditCustomer={handleEditCustomer}
+            onAddNewCustomer={handleAddNewCustomer}
+          />
+          {/* Customer Modal */}
+          <CustomerModal
+            showModal={showCustomerModal}
+            setShowModal={setShowCustomerModal}
+            existingCustomer={selectedCustomer}
+            onCustomerSaved={handleCustomerSaved}
+          />
+          {/* Waybill Sticker Modal */}
+          <WaybillStickerModal
+            isOpen={showWaybillSticker}
+            onClose={() => setShowWaybillSticker(false)}
+            waybillData={savedWaybillData}
+            businessInfo={businessInfo}
+          />{" "}
+          {/* In Transit Modal */}
+          <InTransitModal
+            isOpen={showInTransitModal}
+            onClose={() => setShowInTransitModal(false)}
+            user={user}
+            onViewDetails={handleViewWaybillDetails}
+            onPrintLabel={handlePrintWaybillLabel}
+          />
           {/* Saved Waybills List Modal */}
           {showWaybillsList && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -1275,7 +1363,8 @@ const [stampSettings, setStampSettings] = useState({
                                 Receiver: {bill.receiver?.name || "N/A"}
                               </div>
                               <div className="text-sm text-gray-600">
-                                Route: {bill.shipment?.origin || ""} → {bill.shipment?.destination || "N/A"}
+                                Route: {bill.shipment?.origin || ""} →{" "}
+                                {bill.shipment?.destination || "N/A"}
                               </div>
                             </div>
                             <div className="text-right">
@@ -1285,17 +1374,26 @@ const [stampSettings, setStampSettings] = useState({
                               <div className="text-sm text-gray-500">
                                 {bill.dates?.shipmentDate
                                   ? new Date(
-                                      bill.dates.shipmentDate
+                                      bill.dates.shipmentDate,
                                     ).toLocaleDateString("en-ZA")
                                   : "N/A"}
                               </div>
+                              <button
+                                onClick={() => {
+                                  setSavedWaybillData(bill);
+                                  setShowWaybillSticker(true);
+                                }}
+                                className="text-white bg-gray-600 hover:text-blue-800 text-sm px-2 py-1 rounded"
+                              >
+                                Print Label
+                              </button>
                               <div
                                 className={`text-xs mt-1 px-2 py-1 rounded ${
                                   bill.status === "delivered"
                                     ? "bg-green-100 text-green-700"
                                     : bill.status === "pending"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : "bg-gray-100 text-gray-700"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-gray-100 text-gray-700"
                                 }`}
                               >
                                 {bill.status || "unknown"}
@@ -1310,358 +1408,378 @@ const [stampSettings, setStampSettings] = useState({
               </div>
             </div>
           )}
-           {activeView === "templates" && <Templates user={user} />}
-                     {activeView === "invoice" && (
-                       <>
-          {/* Mobile View Waybill Button */}
-          <button
-            onClick={() => setShowWaybill(!showWaybill)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-          >
-            <FileText className="w-5 h-5" />
-            {showWaybill ? "Hide Waybill" : "View Waybill"}
-          </button>
+          {activeView === "financial-overview" && (
+            <FinancialOverview user={user} />
+          )}
+          {activeView === "templates" && <Templates user={user} />}
+          {activeView === "invoice" && (
+            <>
+              {/* Mobile View Waybill Button */}
+              <button
+                onClick={() => setShowWaybill(!showWaybill)}
+                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              >
+                <FileText className="w-5 h-5" />
+                {showWaybill ? "Hide Waybill" : "View Waybill"}
+              </button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div
-              className={`${
-                showWaybill ? "hidden" : "block"
-              } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
-            >
-              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-blue-700 font-medium">In Transit</span>
-                <span className="text-blue-600">Shipped Today</span>
-              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div
+                  className={`${
+                    showWaybill ? "hidden" : "block"
+                  } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
+                >
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-blue-700 font-medium">
+                      In Transit
+                    </span>
+                    <span className="text-blue-600">Shipped Today</span>
+                  </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Total Amount</div>
-                  <div className="text-2xl font-semibold text-orange-600">
-                    R{total.toFixed(2)}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">
+                        Total Amount
+                      </div>
+                      <div className="text-2xl font-semibold text-orange-600">
+                        R{total.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">Paid</div>
+                      <div className="text-2xl font-semibold text-green-600">
+                        R0.00
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-sm text-gray-500 mb-1">
+                        Balance Due
+                      </div>
+                      <div className="text-2xl font-semibold text-red-600">
+                        R{total.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold flex items-center space-x-2">
+                        <Users className="w-5 h-5" />
+                        <span>Sender Information</span>
+                      </h2>
+                      <button className="flex items-center space-x-2 text-orange-600 hover:text-orange-700">
+                        <Edit className="w-4 h-4" />
+                        <span>Edit</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-gray-500">Sender Name</div>
+                        <input
+                          type="text"
+                          value={senderName}
+                          onChange={(e) => setSenderName(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Customer ID</div>
+                        <input
+                          type="text"
+                          value={customerId}
+                          onChange={(e) => setCustomerId(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Email</div>
+                        <input
+                          type="text"
+                          value={senderEmail}
+                          onChange={(e) => setSenderEmail(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Phone</div>
+                        <input
+                          type="text"
+                          value={senderPhone}
+                          onChange={(e) => setSenderPhone(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <div className="text-sm text-gray-500">Address</div>
+                        <input
+                          type="text"
+                          value={senderAddress}
+                          onChange={(e) => setSenderAddress(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold flex items-center space-x-2">
+                        <Users className="w-5 h-5" />
+                        <span>Receiver Information</span>
+                      </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Receiver Name
+                        </div>
+                        <input
+                          type="text"
+                          value={receiverName}
+                          onChange={(e) => setReceiverName(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Email</div>
+                        <input
+                          type="text"
+                          value={receiverEmail}
+                          onChange={(e) => setReceiverEmail(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Phone</div>
+                        <input
+                          type="text"
+                          value={receiverPhone}
+                          onChange={(e) => setReceiverPhone(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <div className="text-sm text-gray-500">Address</div>
+                        <input
+                          type="text"
+                          value={receiverAddress}
+                          onChange={(e) => setReceiverAddress(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold flex items-center space-x-2">
+                        <Package className="w-5 h-5" />
+                        <span>Shipment Information</span>
+                      </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-gray-500">Origin</div>
+                        <input
+                          type="text"
+                          value={origin}
+                          onChange={(e) => setOrigin(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Destination</div>
+                        <input
+                          type="text"
+                          value={destination}
+                          onChange={(e) => setDestination(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Cargo Type</div>
+                        <input
+                          type="text"
+                          value={cargoType}
+                          onChange={(e) => setCargoType(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Weight (kg)</div>
+                        <input
+                          type="text"
+                          value={weight}
+                          onChange={(e) => setWeight(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Dimensions</div>
+                        <input
+                          type="text"
+                          value={dimensions}
+                          onChange={(e) => setDimensions(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Tracking Number
+                        </div>
+                        <input
+                          type="text"
+                          value={trackingNumber}
+                          onChange={(e) => setTrackingNumber(e.target.value)}
+                          className="w-full px-4 py-2 border rounded"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                    <h2 className="text-lg font-semibold mb-4">
+                      Add Service/Charge
+                    </h2>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                      <select
+                        value={newItem.type}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, type: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      >
+                        <option value="Freight">Freight</option>
+                        <option value="Insurance">Insurance</option>
+                        <option value="Handling">Handling</option>
+                        <option value="Storage">Storage</option>
+                      </select>
+
+                      <input
+                        type="text"
+                        placeholder="Description"
+                        value={newItem.description}
+                        onChange={(e) =>
+                          setNewItem({
+                            ...newItem,
+                            description: e.target.value,
+                          })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Rate"
+                        value={newItem.rate}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, rate: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Qty"
+                        value={newItem.qty}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, qty: e.target.value })
+                        }
+                        className="px-4 py-2 border rounded"
+                      />
+
+                      <button
+                        onClick={handleAddItem}
+                        className="bg-gray-600 text-white rounded-lg px-4 py-2 hover:bg-orange-700 flex items-center justify-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold">Payment Terms</h2>
+                    </div>
+
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">Payment Method:</span>
+                        <span className="font-medium">Cash/Card/EFT</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b">
+                        <span className="text-gray-600">Payment Terms:</span>
+                        <span className="font-medium">Due on Delivery</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="text-gray-600">Insurance:</span>
+                        <span className="font-medium">
+                          Optional Coverage Available
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Paid</div>
-                  <div className="text-2xl font-semibold text-green-600">
-                    R0.00
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Balance Due</div>
-                  <div className="text-2xl font-semibold text-red-600">
-                    R{total.toFixed(2)}
-                  </div>
-                </div>
-              </div>
 
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Users className="w-5 h-5" />
-                    <span>Sender Information</span>
-                  </h2>
-                  <button className="flex items-center space-x-2 text-orange-600 hover:text-orange-700">
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
-                </div>
+                <div
+                  className={`${
+                    !showWaybill ? "hidden" : "block"
+                  } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
+                  style={{
+                    width: "100%",
+                    maxWidth: "210mm",
+                    maxHeight: "90vh",
+                  }}
+                >
+                  {activeView === "invoice" && (
+                    <>
+                      {/* Add Template Selector */}
+                      <div className="mb-4">
+                        <TemplateSelector
+                          user={user}
+                          selectedTemplate={selectedTemplate}
+                          onTemplateChange={setSelectedTemplate}
+                        />
+                      </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Sender Name</div>
-                    <input
-                      type="text"
-                      value={senderName}
-                      onChange={(e) => setSenderName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Customer ID</div>
-                    <input
-                      type="text"
-                      value={customerId}
-                      onChange={(e) => setCustomerId(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Email</div>
-                    <input
-                      type="text"
-                      value={senderEmail}
-                      onChange={(e) => setSenderEmail(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Phone</div>
-                    <input
-                      type="text"
-                      value={senderPhone}
-                      onChange={(e) => setSenderPhone(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Address</div>
-                    <input
-                      type="text"
-                      value={senderAddress}
-                      onChange={(e) => setSenderAddress(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Users className="w-5 h-5" />
-                    <span>Receiver Information</span>
-                  </h2>
+                      {/* Use Template Renderer instead of hardcoded waybill */}
+                      <TemplateRenderer
+                        templateId={selectedTemplate}
+                        businessInfo={businessInfo}
+                        loading={loading}
+                        jobCardNumber={waybillNumber}
+                        trackingNumber={trackingNumber}
+                        senderName={senderName}
+                        senderEmail={senderEmail}
+                        senderPhone={senderPhone}
+                        senderAddress={senderAddress}
+                        receiverName={receiverName}
+                        receiverEmail={receiverEmail}
+                        receiverPhone={receiverPhone}
+                        receiverAddress={receiverAddress}
+                        origin={origin}
+                        destination={destination}
+                        cargoType={cargoType}
+                        weight={weight}
+                        dimensions={dimensions}
+                        items={items}
+                        subtotal={subtotal}
+                        vat={vat}
+                        total={total}
+                        documentType="freight"
+                        serviceType="FREIGHT"
+                      />
+                    </>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Receiver Name</div>
-                    <input
-                      type="text"
-                      value={receiverName}
-                      onChange={(e) => setReceiverName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Email</div>
-                    <input
-                      type="text"
-                      value={receiverEmail}
-                      onChange={(e) => setReceiverEmail(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Phone</div>
-                    <input
-                      type="text"
-                      value={receiverPhone}
-                      onChange={(e) => setReceiverPhone(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Address</div>
-                    <input
-                      type="text"
-                      value={receiverAddress}
-                      onChange={(e) => setReceiverAddress(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Package className="w-5 h-5" />
-                    <span>Shipment Information</span>
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Origin</div>
-                    <input
-                      type="text"
-                      value={origin}
-                      onChange={(e) => setOrigin(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Destination</div>
-                    <input
-                      type="text"
-                      value={destination}
-                      onChange={(e) => setDestination(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Cargo Type</div>
-                    <input
-                      type="text"
-                      value={cargoType}
-                      onChange={(e) => setCargoType(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Weight (kg)</div>
-                    <input
-                      type="text"
-                      value={weight}
-                      onChange={(e) => setWeight(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Dimensions</div>
-                    <input
-                      type="text"
-                      value={dimensions}
-                      onChange={(e) => setDimensions(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Tracking Number</div>
-                    <input
-                      type="text"
-                      value={trackingNumber}
-                      onChange={(e) => setTrackingNumber(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h2 className="text-lg font-semibold mb-4">Add Service/Charge</h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                  <select
-                    value={newItem.type}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, type: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  >
-                    <option value="Freight">Freight</option>
-                    <option value="Insurance">Insurance</option>
-                    <option value="Handling">Handling</option>
-                    <option value="Storage">Storage</option>
-                  </select>
-
-                  <input
-                    type="text"
-                    placeholder="Description"
-                    value={newItem.description}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, description: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Rate"
-                    value={newItem.rate}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, rate: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Qty"
-                    value={newItem.qty}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, qty: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <button
-                    onClick={handleAddItem}
-                    className="bg-orange-600 text-white rounded-lg px-4 py-2 hover:bg-orange-700 flex items-center justify-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Payment Terms</h2>
-                </div>
-
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">Payment Method:</span>
-                    <span className="font-medium">Cash/Card/EFT</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">Payment Terms:</span>
-                    <span className="font-medium">Due on Delivery</span>
-                  </div>
-                  <div className="flex justify-between py-2">
-                    <span className="text-gray-600">Insurance:</span>
-                    <span className="font-medium">Optional Coverage Available</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className={`${
-                !showWaybill ? "hidden" : "block"
-              } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-              style={{
-                width: "100%",
-                maxWidth: "210mm",
-                minHeight: "297mm",
-              }}
-            >
-              {activeView === 'waybill' && (
-  <>
-    {/* Add Template Selector */}
-    <div className="mb-4">
-      <TemplateSelector 
-        user={user} 
-        selectedTemplate={selectedTemplate}
-        onTemplateChange={setSelectedTemplate}
-      />
-    </div>
-
-    {/* Use Template Renderer instead of hardcoded waybill */}
-    <TemplateRenderer
-      templateId={selectedTemplate}
-      businessInfo={businessInfo}
-      loading={loading}
-      jobCardNumber={waybillNumber}
-      trackingNumber={trackingNumber}
-      senderName={senderName}
-      senderEmail={senderEmail}
-      senderPhone={senderPhone}
-      senderAddress={senderAddress}
-      receiverName={receiverName}
-      receiverEmail={receiverEmail}
-      receiverPhone={receiverPhone}
-      receiverAddress={receiverAddress}
-      origin={origin}
-      destination={destination}
-      cargoType={cargoType}
-      weight={weight}
-      dimensions={dimensions}
-      items={items}
-      subtotal={subtotal}
-      vat={vat}
-      total={total}
-      documentType="freight"
-      serviceType="FREIGHT"
-    />
-  </>
-)}
-            </div>
-
-            <style>{`
+                <style>{`
               @media print {
                 * {
                   -webkit-print-color-adjust: exact !important;
@@ -1744,9 +1862,9 @@ const [stampSettings, setStampSettings] = useState({
                 }
               }
             `}</style>
-
-          </div>
-          </>)} 
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

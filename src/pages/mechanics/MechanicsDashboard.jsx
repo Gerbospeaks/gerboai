@@ -888,19 +888,19 @@ const MechanicsDashboard = () => {
                 New
               </button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700"
               >
                 Save as PDF
               </button>
               <button
                 onClick={handleSaveJobCard}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700"
               >
                 Save
               </button>
@@ -943,11 +943,11 @@ const MechanicsDashboard = () => {
             
             <button
               onClick={handleSaveJobCard}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700"
             >
               Save
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
             </button>
@@ -1293,7 +1293,7 @@ const MechanicsDashboard = () => {
 
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700"
+                      className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-orange-700"
                     >
                       Save Business Information
                     </button>
@@ -1405,7 +1405,7 @@ const MechanicsDashboard = () => {
             <>
               <button
                 onClick={() => setShowJobCard(!showJobCard)}
-                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
               >
                 <FileText className="w-5 h-5" />
                 {showJobCard ? `Hide ${documentType === 'quote' ? 'Quote' : 'Job Card'}` : `View ${documentType === 'quote' ? 'Quote' : 'Job Card'}`}
@@ -1669,7 +1669,7 @@ const MechanicsDashboard = () => {
 
                       <button
                         onClick={handleAddItem}
-                        className="bg-orange-600 text-white rounded-lg px-4 py-2 hover:bg-orange-700 flex items-center justify-center gap-2"
+                        className="bg-gray-600 text-white rounded-lg px-4 py-2 hover:bg-orange-700 flex items-center justify-center gap-2"
                       >
                         <Plus className="w-4 h-4" />
                         Add

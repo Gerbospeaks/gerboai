@@ -6,6 +6,7 @@ import instagram from '../assets/images/instagram.png';
 import facebook from '../assets/images/facebook.png';
 import twitter from '../assets/images/twitter.png';
 import linkedin from '../assets/images/linkedin.png';
+import greylogo from '../assets/images/grey-logo.png';
 import computer from '../assets/images/new_solidflo_bg_transp_text.png';
 import about from './AboutPage';  
 import contact from './ContactPage';
@@ -39,6 +40,37 @@ const LandingPage = () => {
     }, 2000);
     return () => clearInterval(slideInterval);
   }, [slides.length]);
+
+  useEffect(() => {
+    // Dynamic mask-image following mouse position
+    const footerContainer = document.querySelector('.grey-logo-container');
+
+    if (footerContainer) {
+      const handleMouseMove = (e) => {
+        const rect = footerContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        footerContainer.style.maskImage = `radial-gradient(circle at ${x}px ${y}px, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 60%)`;
+        footerContainer.style.webkitMaskImage = `radial-gradient(circle at ${x}px ${y}px, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 60%)`;
+      };
+
+      const handleMouseLeave = () => {
+        footerContainer.style.maskImage =
+          'radial-gradient(circle at 1004px -170.984px, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 60%)';
+        footerContainer.style.webkitMaskImage =
+          'radial-gradient(circle at 1004px -170.984px, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 60%)';
+      };
+
+      footerContainer.addEventListener('mousemove', handleMouseMove);
+      footerContainer.addEventListener('mouseleave', handleMouseLeave);
+
+      return () => {
+        footerContainer.removeEventListener('mousemove', handleMouseMove);
+        footerContainer.removeEventListener('mouseleave', handleMouseLeave);
+      };
+    }
+  }, []);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -374,6 +406,11 @@ const LandingPage = () => {
         .container {
           max-width: 1200px;
           margin: 0 auto;
+        }
+
+        .grey-logo-container {
+          background: #23273b;
+          transition: mask-image 0.1s ease-out, -webkit-mask-image 0.1s ease-out;
         }
 
         .section-title {
@@ -1238,6 +1275,11 @@ const LandingPage = () => {
           </p>
         </div>
       </section>
+      <section className="py-16 bg-white grey-logo-container">
+   <div className="w-full max-w-6xl mx-auto">
+          <img src={greylogo} alt="SolidFlo" />
+        </div>
+</section>
       {/* Footer */}
   <footer>
     <div className="footer-content">

@@ -935,11 +935,7 @@ const AccountingDashboard = () => {
               <h1 className="text-base lg:text-xl font-semibold">
                 {documentType === 'quote' ? 'Quote' : 'Invoice'} #{documentNumber || "— not saved yet —"}
               </h1>
-              <TemplateSelector
-                user={user}
-                selectedTemplate={activeTemplate}
-                onTemplateChange={setActiveTemplate}
-              />
+             
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1882,12 +1878,8 @@ const AccountingDashboard = () => {
                 <div
                   className={`${
                     !showInvoice ? "hidden" : "block"
-                  } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-                  style={{
-                    width: "100%",
-                    maxWidth: "210mm",
-                    minHeight: "297mm",
-                  }}
+                  } lg:block mx-auto bg-white shadow-lg overflow-y-auto`}
+              style={{width: "100%",maxWidth: "210mm",maxHeight: "90vh",}}
                 >
                   <div className="mb-4">
                     <TemplateSelector 

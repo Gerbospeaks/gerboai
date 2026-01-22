@@ -15,13 +15,13 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
   const [isOpen, setIsOpen] = useState(false);
 
   const templateNames = {
-    default: 'Default (Original)',
-    classic: 'Classic Workshop',
-    modern: 'Modern Minimalist',
-    elegant: 'Elegant Business',
-    premium: 'Premium Auto Service',
-    speed: 'Speed Shop Pro',
-    diagnostic: 'Diagnostic Specialist'
+    default: 'Default Freight Bill',
+    classic: 'Classic Logistics',
+    modern: 'Modern Express',
+    elegant: 'Professional Courier',
+    premium: 'Premium Freight',
+    speed: 'Fast Track Delivery',
+    diagnostic: 'Detailed Shipping'
   };
 
   useEffect(() => {
@@ -112,29 +112,34 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
   );
 };
 
-// Default Template (Your Original)
+// Default Freight Bill Template
 export const DefaultTemplate = ({ 
   businessInfo, 
   loading,
-  jobCardNumber, 
-  customerName, 
-  customerEmail, 
-  customerPhone, 
-  customerAddress,
-  vehicleReg,
-  vehicleMake,
-  vehicleModel,
-  vehicleYear,
-  vehicleVin,
-  vehicleMileage,
+  jobCardNumber,
+  trackingNumber,
+  senderName,
+  senderEmail,
+  senderPhone,
+  senderAddress,
+  receiverName,
+  receiverEmail,
+  receiverPhone,
+  receiverAddress,
+  origin,
+  destination,
+  cargoType,
+  weight,
+  dimensions,
   items,
   subtotal,
   vat,
   total,
   showStamp = false,
-  stampText = "APPROVED",
-  stampColor = "#d32f2f",
-  showStampDate = true
+  stampText = "DISPATCHED",
+  stampColor = "#2196f3",
+  showStampDate = true,
+  serviceType = "FREIGHT"
 }) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     {/* Header Section */}
@@ -154,14 +159,8 @@ export const DefaultTemplate = ({
               <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
             )}
             <div>
-  <div className="text-xl font-bold">
-    {businessInfo?.businessName?.split(" ")[0] || ""}{" "}
-    {businessInfo?.businessName?.split(" ")[1] || ""}
-  </div>
-  <div className="text-sm font-semibold">
-    {businessInfo?.businessName?.split(" ").slice(2).join(" ") || ""}
-  </div>
-</div>
+              <div className="text-xl font-bold">{businessInfo?.businessName || ""}</div>
+            </div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{businessInfo.addressLine1}</div>
@@ -175,23 +174,23 @@ export const DefaultTemplate = ({
         </div>
 
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">INVOICE</div>
+          <div className="text-3xl font-bold mb-4">FREIGHT BILL</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">WAYBILL NO.</span>
               <span>{jobCardNumber}</span>
+            </div>
+            <div className="flex justify-between gap-8">
+              <span className="font-semibold">TRACKING NO.</span>
+              <span>{trackingNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
               <span className="font-semibold">DATE</span>
               <span>{new Date().toLocaleDateString("en-ZA")}</span>
             </div>
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">MERCHANT CODE</span>
-              <span>V8PA-12345</span>
-            </div>
-            <div className="flex justify-between gap-8">
               <span className="font-semibold">SERVICE TYPE</span>
-              <span>SERVICE</span>
+              <span>{serviceType}</span>
             </div>
           </div>
         </div>
@@ -201,61 +200,49 @@ export const DefaultTemplate = ({
     {/* Three Column Section */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">INVOICE TO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SENDER</div>
         <div className="text-xs space-y-1">
-          <div>{customerName}</div>
-          <div>ABC Limited</div>
-          <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
-          <div>{customerEmail}</div>
-          <div>{customerPhone}</div>
+          <div className="font-semibold">{senderName}</div>
+          <div className="h-12 overflow-hidden text-xs leading-tight">{senderAddress}</div>
+          <div>{senderEmail}</div>
+          <div>{senderPhone}</div>
+          <div className="mt-2"><span className="font-semibold">Origin:</span> {origin}</div>
         </div>
       </div>
 
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">BILL TO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">RECEIVER</div>
         <div className="text-xs space-y-1">
-          <div>{customerName}</div>
-          <div>ABC Limited</div>
-          <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
-          <div>{customerEmail}</div>
-          <div>{customerPhone}</div>
+          <div className="font-semibold">{receiverName}</div>
+          <div className="h-12 overflow-hidden text-xs leading-tight">{receiverAddress}</div>
+          <div>{receiverEmail}</div>
+          <div>{receiverPhone}</div>
+          <div className="mt-2"><span className="font-semibold">Destination:</span> {destination}</div>
         </div>
       </div>
 
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">VEHICLE DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SHIPMENT DETAILS</div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
-            <span className="font-semibold">Reg Number:</span>
-            <span>{vehicleReg}</span>
+            <span className="font-semibold">Cargo Type:</span>
+            <span>{cargoType}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold">Make:</span>
-            <span>{vehicleMake}</span>
+            <span className="font-semibold">Weight:</span>
+            <span>{weight} kg</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold">Model:</span>
-            <span>{vehicleModel}</span>
+            <span className="font-semibold">Dimensions:</span>
+            <span className="text-[9px]">{dimensions}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold">Engine No:</span>
-            <span>{vehicleYear}</span>
+            <span className="font-semibold">Pieces:</span>
+            <span>{items.length}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold">VIN Number:</span>
-            <span className="text-[9px]">{vehicleVin}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Odometer:</span>
-            <span>{vehicleMileage} km</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Pre Auth:</span>
-            <span>AUTH123</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Auth Code:</span>
-            <span>456789</span>
+            <span className="font-semibold">Insurance:</span>
+            <span>Standard</span>
           </div>
         </div>
       </div>
@@ -269,7 +256,7 @@ export const DefaultTemplate = ({
             <th className="text-left px-2 py-1 font-bold">ITEM DESCRIPTION</th>
             <th className="text-center px-2 py-1 font-bold">QUANTITY</th>
             <th className="text-right px-2 py-1 font-bold">UNIT PRICE</th>
-            <th className="text-right px-2 py-1 font-bold">NET PRICE</th>
+            <th className="text-right px-2 py-1 font-bold">AMOUNT</th>
           </tr>
         </thead>
         <tbody>
@@ -293,7 +280,7 @@ export const DefaultTemplate = ({
           <span>R {subtotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-1">
-          <span>VAT:</span>
+          <span>VAT (15%):</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
@@ -303,36 +290,21 @@ export const DefaultTemplate = ({
       </div>
     </div>
 
-    {/* Signatures */}
-    <div className="grid grid-cols-3 gap-4 mb-6 text-xs">
-      <div>
-        <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-      <div>
-        <div className="font-semibold mb-1">CLIENT SIGNATURE</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-      <div>
-        <div className="font-semibold mb-1">CONTACT NUMBER:</div>
-        <div className="border-b border-black h-8"></div>
+    {/* Payment Details */}
+    <div className="bg-blue-50 border border-blue-200 p-3 mb-4">
+      <div className="text-blue-600 font-bold text-xs mb-2">PAYMENT DETAILS</div>
+      <div className="text-xs space-y-1">
+        <div><span className="font-semibold">Bank Name:</span> {businessInfo.bankName || 'FNB'}</div>
+        <div><span className="font-semibold">Account Holder:</span> {businessInfo.businessName}</div>
+        <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber || '62146991441'}</div>
+        <div><span className="font-semibold">Branch Code:</span> {businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
 
-    {/* Banking Details */}
-    <div className="bg-red-50 border border-red-200 p-3 mb-4">
-      <div className="text-red-600 font-bold text-xs mb-2">BANKING DETAILS</div>
-      <div className="text-xs space-y-1">
-        <div><span className="font-semibold">Bank Name:</span> FNB</div>
-        <div><span className="font-semibold">Account Holder:</span> V8 POWERED AUTO</div>
-        <div><span className="font-semibold">Branch Name:</span> LIFESTYLE CENTURION</div>
-        <div><span className="font-semibold">Account Number:</span> 62146991441</div>
-      </div>
-    </div>
-     {/* Signatures and Stamp */}
+    {/* Signatures and Stamp */}
     <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
       <div>
-        <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
+        <div className="font-semibold mb-1">AUTHORIZED SIGNATURE</div>
         <div className="border-b border-black h-8"></div>
       </div>
       {showStamp && (
@@ -349,13 +321,13 @@ export const DefaultTemplate = ({
     </div>
 
     {/* Footer Note */}
-    <div className="text-center text-xs text-red-600 italic">
-      NB: All our parts and workmanship have 12 months or 15000KM Guarantee
+    <div className="text-center text-xs text-blue-600 italic">
+      NB: All shipments are insured. Terms and conditions apply.
     </div>
   </div>
 );
 
-// Classic Template
+// Classic Logistics Template
 export const ClassicTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     <div className="border-b-2 border-black pb-4 mb-4">
@@ -376,11 +348,15 @@ export const ClassicTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">INVOICE</div>
+          <div className="text-3xl font-bold mb-4">SHIPPING INVOICE</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">WAYBILL NO.</span>
               <span>{props.jobCardNumber}</span>
+            </div>
+            <div className="flex justify-between gap-8">
+              <span className="font-semibold">TRACKING</span>
+              <span>{props.trackingNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
               <span className="font-semibold">DATE</span>
@@ -393,28 +369,31 @@ export const ClassicTemplate = (props) => (
 
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CUSTOMER</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">FROM</div>
         <div className="text-xs space-y-1">
-          <div>{props.customerName}</div>
-          <div>{props.customerAddress}</div>
-          <div>{props.customerEmail}</div>
-          <div>{props.customerPhone}</div>
+          <div>{props.senderName}</div>
+          <div>{props.senderAddress}</div>
+          <div>{props.senderEmail}</div>
+          <div>{props.senderPhone}</div>
         </div>
       </div>
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">VEHICLE</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">TO</div>
         <div className="text-xs space-y-1">
-          <div>{props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
-          <div>Reg: {props.vehicleReg}</div>
-          <div>VIN: {props.vehicleVin}</div>
-          <div>Mileage: {props.vehicleMileage} km</div>
+          <div>{props.receiverName}</div>
+          <div>{props.receiverAddress}</div>
+          <div>{props.receiverEmail}</div>
+          <div>{props.receiverPhone}</div>
         </div>
       </div>
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SERVICE INFO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CARGO</div>
         <div className="text-xs space-y-1">
-          <div>Date: {new Date().toLocaleDateString()}</div>
-          <div>Status: In Progress</div>
+          <div>Type: {props.cargoType}</div>
+          <div>Weight: {props.weight} kg</div>
+          <div>Size: {props.dimensions}</div>
+          <div>Origin: {props.origin}</div>
+          <div>Dest: {props.destination}</div>
         </div>
       </div>
     </div>
@@ -424,7 +403,7 @@ export const ClassicTemplate = (props) => (
         <tr className="bg-gray-300">
           <th className="text-left px-2 py-1 font-bold">Description</th>
           <th className="text-center px-2 py-1 font-bold">Qty</th>
-          <th className="text-right px-2 py-1 font-bold">Unit Price</th>
+          <th className="text-right px-2 py-1 font-bold">Rate</th>
           <th className="text-right px-2 py-1 font-bold">Amount</th>
         </tr>
       </thead>
@@ -440,7 +419,7 @@ export const ClassicTemplate = (props) => (
       </tbody>
     </table>
 
-    <div className="flex justify-end">
+    <div className="flex justify-end mb-4">
       <div className="w-64 text-xs">
         <div className="flex justify-between py-1">
           <span>Subtotal:</span>
@@ -456,41 +435,26 @@ export const ClassicTemplate = (props) => (
         </div>
       </div>
     </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
-      </div>
-    </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp 
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
-        </div>
+
+    {props.showStamp && (
+      <div className="flex justify-center mb-4">
+        <SignatureStamp 
+          text={props.stampText}
+          color={props.stampColor}
+          showDate={props.showStampDate}
+          rotation={-5}
+          size="medium"
+        />
       </div>
     )}
-    {/* Footer Note */}
+
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
+      Thank you for choosing our logistics services.
     </div>
   </div>
 );
 
-// Modern Template
+// Modern Express Template
 export const ModernTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     <div className="border-b-4 border-blue-500 pb-6 mb-6">
@@ -503,13 +467,13 @@ export const ModernTemplate = (props) => (
           <div className="text-sm text-gray-600 space-y-1">
             <div>{props.businessInfo.addressLine1}</div>
             <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
-            <div>{props.businessInfo.primaryPhone}</div>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-5xl font-bold text-blue-500 mb-4">INVOICE</div>
+          <div className="text-5xl font-bold text-blue-500 mb-4">FREIGHT</div>
           <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-            <div className="text-sm"><span className="font-semibold">Invoice #:</span> {props.jobCardNumber}</div>
+            <div className="text-sm"><span className="font-semibold">Waybill:</span> {props.jobCardNumber}</div>
+            <div className="text-sm"><span className="font-semibold">Tracking:</span> {props.trackingNumber}</div>
             <div className="text-sm"><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</div>
           </div>
         </div>
@@ -518,32 +482,40 @@ export const ModernTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div className="bg-gray-300 p-4 rounded-lg">
-        <div className="text-sm font-bold text-gray-500 mb-3">BILL TO</div>
+        <div className="text-sm font-bold text-gray-500 mb-3">SHIPPER</div>
         <div className="space-y-1 text-sm">
-          <div className="font-semibold text-lg">{props.customerName}</div>
-          <div>{props.customerAddress}</div>
-          <div>{props.customerEmail}</div>
-          <div>{props.customerPhone}</div>
+          <div className="font-semibold text-lg">{props.senderName}</div>
+          <div>{props.senderAddress}</div>
+          <div>{props.senderPhone}</div>
+          <div className="mt-2 text-blue-600">Origin: {props.origin}</div>
         </div>
       </div>
       <div className="bg-blue-50 p-4 rounded-lg">
-        <div className="text-sm font-bold text-blue-700 mb-3">VEHICLE INFORMATION</div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div><span className="font-semibold">Make:</span> {props.vehicleMake}</div>
-          <div><span className="font-semibold">Model:</span> {props.vehicleModel}</div>
-          <div><span className="font-semibold">Year:</span> {props.vehicleYear}</div>
-          <div><span className="font-semibold">Reg:</span> {props.vehicleReg}</div>
-          <div className="col-span-2"><span className="font-semibold">Mileage:</span> {props.vehicleMileage} km</div>
+        <div className="text-sm font-bold text-blue-700 mb-3">CONSIGNEE</div>
+        <div className="space-y-1 text-sm">
+          <div className="font-semibold text-lg">{props.receiverName}</div>
+          <div>{props.receiverAddress}</div>
+          <div>{props.receiverPhone}</div>
+          <div className="mt-2 text-blue-600">Destination: {props.destination}</div>
         </div>
+      </div>
+    </div>
+
+    <div className="bg-gray-100 p-4 rounded-lg mb-6">
+      <div className="text-sm font-bold text-gray-700 mb-2">CARGO DETAILS</div>
+      <div className="grid grid-cols-3 gap-4 text-sm">
+        <div><span className="font-semibold">Type:</span> {props.cargoType}</div>
+        <div><span className="font-semibold">Weight:</span> {props.weight} kg</div>
+        <div><span className="font-semibold">Dimensions:</span> {props.dimensions}</div>
       </div>
     </div>
 
     <table className="w-full mb-6">
       <thead>
         <tr className="bg-blue-500 text-white">
-          <th className="text-left px-4 py-3 rounded-l-lg">Description</th>
+          <th className="text-left px-4 py-3 rounded-l-lg">Service</th>
           <th className="text-center px-4 py-3">Qty</th>
-          <th className="text-right px-4 py-3">Unit Price</th>
+          <th className="text-right px-4 py-3">Rate</th>
           <th className="text-right px-4 py-3 rounded-r-lg">Amount</th>
         </tr>
       </thead>
@@ -559,7 +531,7 @@ export const ModernTemplate = (props) => (
       </tbody>
     </table>
 
-    <div className="flex justify-end">
+    <div className="flex justify-end mb-4">
       <div className="w-80 space-y-2">
         <div className="flex justify-between py-2 text-gray-600">
           <span>Subtotal:</span>
@@ -575,41 +547,26 @@ export const ModernTemplate = (props) => (
         </div>
       </div>
     </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
-      </div>
-    </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp 
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
-        </div>
+
+    {props.showStamp && (
+      <div className="flex justify-center mb-4">
+        <SignatureStamp 
+          text={props.stampText}
+          color={props.stampColor}
+          showDate={props.showStampDate}
+          rotation={-5}
+          size="medium"
+        />
       </div>
     )}
-    {/* Footer Note */}
+
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
+      Fast, reliable delivery services worldwide.
     </div>
   </div>
 );
 
-// Elegant/Premium Template
+// Professional Courier Template
 export const ElegantTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     <div className="border-4 border-purple-900 p-8">
@@ -619,26 +576,35 @@ export const ElegantTemplate = (props) => (
         )}
         <div className="text-4xl font-serif font-bold text-purple-900 mb-2">{props.businessInfo.businessName}</div>
         <div className="text-sm text-gray-600">{props.businessInfo.addressLine1} • {props.businessInfo.city}</div>
-        <div className="text-2xl font-serif text-purple-700 mt-4">INVOICE</div>
-        <div className="text-sm text-gray-500 mt-1">#{props.jobCardNumber}</div>
+        <div className="text-2xl font-serif text-purple-700 mt-4">BILL OF LADING</div>
+        <div className="text-sm text-gray-500 mt-1">Waybill #{props.jobCardNumber}</div>
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
-          <div className="font-serif font-bold text-purple-900 mb-2">BILLED TO</div>
+          <div className="font-serif font-bold text-purple-900 mb-2">CONSIGNOR</div>
           <div className="text-sm space-y-1">
-            <div className="font-semibold">{props.customerName}</div>
-            <div>{props.customerAddress}</div>
-            <div>{props.customerEmail}</div>
+            <div className="font-semibold">{props.senderName}</div>
+            <div>{props.senderAddress}</div>
+            <div>{props.senderPhone}</div>
           </div>
         </div>
         <div>
-          <div className="font-serif font-bold text-purple-900 mb-2">VEHICLE</div>
+          <div className="font-serif font-bold text-purple-900 mb-2">CONSIGNEE</div>
           <div className="text-sm space-y-1">
-            <div>{props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
-            <div>Registration: {props.vehicleReg}</div>
-            <div>Mileage: {props.vehicleMileage} km</div>
+            <div className="font-semibold">{props.receiverName}</div>
+            <div>{props.receiverAddress}</div>
+            <div>{props.receiverPhone}</div>
           </div>
+        </div>
+      </div>
+
+      <div className="border-2 border-purple-900 p-4 rounded mb-6">
+        <div className="font-serif font-bold text-purple-900 mb-2">SHIPMENT INFORMATION</div>
+        <div className="grid grid-cols-3 gap-4 text-sm">
+          <div><span className="font-semibold">Route:</span> {props.origin} → {props.destination}</div>
+          <div><span className="font-semibold">Cargo:</span> {props.cargoType}</div>
+          <div><span className="font-semibold">Weight:</span> {props.weight} kg</div>
         </div>
       </div>
 
@@ -647,7 +613,7 @@ export const ElegantTemplate = (props) => (
           <tr className="border-b-2 border-purple-900">
             <th className="text-left py-2 font-serif">Service</th>
             <th className="text-center py-2 font-serif">Qty</th>
-            <th className="text-right py-2 font-serif">Price</th>
+            <th className="text-right py-2 font-serif">Rate</th>
             <th className="text-right py-2 font-serif">Total</th>
           </tr>
         </thead>
@@ -663,7 +629,7 @@ export const ElegantTemplate = (props) => (
         </tbody>
       </table>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end mb-4">
         <div className="w-64">
           <div className="flex justify-between py-2">
             <span>Subtotal:</span>
@@ -679,19 +645,9 @@ export const ElegantTemplate = (props) => (
           </div>
         </div>
       </div>
-      {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
-      </div>
-    </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
+
+      {props.showStamp && (
+        <div className="flex justify-center mb-4">
           <SignatureStamp 
             text={props.stampText}
             color={props.stampColor}
@@ -700,21 +656,127 @@ export const ElegantTemplate = (props) => (
             size="medium"
           />
         </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
-        </div>
+      )}
+
+      <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+        Professional logistics solutions with care.
       </div>
-    )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
-    </div>
     </div>
   </div>
 );
 
-// Speed Shop Template
+// Premium Freight Template
+export const PremiumTemplate = (props) => (
+  <div className="bg-gradient-to-br from-gray-50 to-gray-100" style={{ padding: "15mm 20mm" }}>
+    <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="border-b-4 border-amber-500 pb-6 mb-6">
+        <div className="flex justify-between items-start">
+          <div>
+            {props.businessInfo.logoUrl && (
+              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-24 h-24 object-contain mb-3" />
+            )}
+            <div className="text-3xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
+            <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-4xl font-bold text-amber-600 mb-3">PREMIUM</div>
+            <div className="text-2xl font-bold text-gray-700">FREIGHT SERVICE</div>
+            <div className="mt-4 bg-amber-50 p-3 rounded">
+              <div className="text-xs"><span className="font-bold">Waybill:</span> {props.jobCardNumber}</div>
+              <div className="text-xs"><span className="font-bold">Tracking:</span> {props.trackingNumber}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <div className="border-l-4 border-amber-500 pl-4">
+          <div className="text-sm font-bold text-amber-600 mb-2">ORIGIN</div>
+          <div className="text-sm space-y-1">
+            <div className="font-semibold text-lg">{props.senderName}</div>
+            <div className="text-gray-600">{props.senderAddress}</div>
+            <div className="text-gray-600">{props.senderPhone}</div>
+            <div className="mt-2 font-semibold text-amber-600">{props.origin}</div>
+          </div>
+        </div>
+        <div className="border-l-4 border-amber-500 pl-4">
+          <div className="text-sm font-bold text-amber-600 mb-2">DESTINATION</div>
+          <div className="text-sm space-y-1">
+            <div className="font-semibold text-lg">{props.receiverName}</div>
+            <div className="text-gray-600">{props.receiverAddress}</div>
+            <div className="text-gray-600">{props.receiverPhone}</div>
+            <div className="mt-2 font-semibold text-amber-600">{props.destination}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-amber-50 border border-amber-200 p-4 rounded mb-6">
+        <div className="font-bold text-amber-700 mb-3">CARGO SPECIFICATIONS</div>
+        <div className="grid grid-cols-3 gap-4 text-sm">
+          <div><span className="font-semibold">Type:</span> {props.cargoType}</div>
+          <div><span className="font-semibold">Weight:</span> {props.weight} kg</div>
+          <div><span className="font-semibold">Dimensions:</span> {props.dimensions}</div>
+        </div>
+      </div>
+
+      <table className="w-full mb-6">
+        <thead>
+          <tr className="bg-amber-500 text-white">
+            <th className="text-left px-4 py-3">Service Description</th>
+            <th className="text-center px-4 py-3">Qty</th>
+            <th className="text-right px-4 py-3">Rate</th>
+            <th className="text-right px-4 py-3">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {props.items.map((item, i) => (
+            <tr key={i} className="border-b hover:bg-gray-50">
+              <td className="px-4 py-3">{item.description}</td>
+              <td className="text-center px-4 py-3">{item.qty}</td>
+              <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="flex justify-end mb-6">
+        <div className="w-80 bg-gray-50 p-4 rounded">
+          <div className="flex justify-between py-2">
+            <span>Subtotal:</span>
+            <span>R {props.subtotal.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between py-2">
+            <span>VAT (15%):</span>
+            <span>R {props.vat.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between py-3 text-xl font-bold bg-amber-500 text-white px-4 rounded">
+            <span>TOTAL:</span>
+            <span>R {props.total.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+
+      {props.showStamp && (
+        <div className="flex justify-center mb-4">
+          <SignatureStamp 
+            text={props.stampText}
+            color={props.stampColor}
+            showDate={props.showStampDate}
+            rotation={-5}
+            size="medium"
+          />
+        </div>
+      )}
+
+      <div className="text-center text-xs text-gray-500 italic border-t pt-3">
+        Premium freight services - Delivered with excellence.
+      </div>
+    </div>
+  </div>
+);
+
+// Fast Track Delivery Template
 export const SpeedTemplate = (props) => (
   <div className="bg-black text-white" style={{ padding: "15mm 20mm" }}>
     <div className="border-b-4 border-red-600 pb-6 mb-6">
@@ -727,9 +789,10 @@ export const SpeedTemplate = (props) => (
           <div className="text-sm text-gray-400">{props.businessInfo.addressLine1}</div>
         </div>
         <div className="text-right">
-          <div className="text-5xl font-black text-red-600 mb-4 italic">INVOICE</div>
+          <div className="text-5xl font-black text-red-600 mb-4 italic">EXPRESS</div>
           <div className="bg-red-600 p-4 rounded space-y-1">
-            <div className="text-sm font-bold">#{props.jobCardNumber}</div>
+            <div className="text-sm font-bold">WAYBILL #{props.jobCardNumber}</div>
+            <div className="text-sm">TRACKING: {props.trackingNumber}</div>
             <div className="text-sm">{new Date().toLocaleDateString()}</div>
           </div>
         </div>
@@ -738,91 +801,91 @@ export const SpeedTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div className="bg-gray-900 p-4 rounded">
-        <div className="text-sm font-bold text-red-600 mb-3">CLIENT</div>
+        <div className="text-sm font-bold text-red-600 mb-3">PICKUP</div>
         <div className="text-sm space-y-1">
-          <div className="font-bold">{props.customerName}</div>
-          <div className="text-gray-400">{props.customerAddress}</div>
+          <div className="font-bold">{props.senderName}</div>
+          <div className="text-gray-400">{props.senderAddress}</div>
+          <div className="text-gray-400">{props.senderPhone}</div>
+          <div className="mt-2 text-red-500">FROM: {props.origin}</div>
         </div>
       </div>
       <div className="bg-gray-900 p-4 rounded">
-        <div className="text-sm font-bold text-red-600 mb-3">VEHICLE</div>
-        <div className="text-sm">
-          <div className="font-bold">{props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
-          <div className="text-gray-400">Reg: {props.vehicleReg}</div>
+        <div className="text-sm font-bold text-red-600 mb-3">DELIVERY</div>
+        <div className="text-sm space-y-1">
+          <div className="font-bold">{props.receiverName}</div>
+          <div className="text-gray-400">{props.receiverAddress}</div>
+          <div className="text-gray-400">{props.receiverPhone}</div>
+          <div className="mt-2 text-red-500">TO: {props.destination}</div>
         </div>
+      </div>
+    </div>
+
+    <div className="bg-red-900 p-4 rounded mb-6">
+      <div className="font-black text-red-200 mb-2">PACKAGE INFO</div>
+      <div className="grid grid-cols-3 gap-4 text-sm">
+        <div><span className="font-bold">Type:</span> {props.cargoType}</div>
+        <div><span className="font-bold">Weight:</span> {props.weight} kg</div>
+        <div><span className="font-bold">Size:</span> {props.dimensions}</div>
       </div>
     </div>
 
     <table className="w-full mb-6">
       <thead>
         <tr className="bg-red-600">
-          <th className="text-left px-4 py-3 font-black">DESCRIPTION</th>
+          <th className="text-left px-4 py-3 font-black">SERVICE</th>
           <th className="text-center px-4 py-3 font-black">QTY</th>
-<th className="text-right px-4 py-3 font-black">PRICE</th>
-<th className="text-right px-4 py-3 font-black">TOTAL</th>
-</tr>
-</thead>
-<tbody>
-{props.items.map((item, i) => (
-<tr key={i} className="border-b border-gray-800">
-<td className="px-4 py-3">{item.description}</td>
-<td className="text-center px-4 py-3">{item.qty}</td>
-<td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-<td className="text-right px-4 py-3 font-bold">R {item.amount.toFixed(2)}</td>
-</tr>
-))}
-</tbody>
-</table>
-<div className="flex justify-end">
-  <div className="w-80">
-    <div className="flex justify-between py-2 text-gray-400">
-      <span>Subtotal:</span>
-      <span>R {props.subtotal.toFixed(2)}</span>
-    </div>
-    <div className="flex justify-between py-2 text-gray-400">
-      <span>VAT:</span>
-      <span>R {props.vat.toFixed(2)}</span>
-    </div>
-    <div className="flex justify-between py-3 text-xl font-black bg-red-600 px-4 rounded">
-      <span>TOTAL:</span>
-      <span>R {props.total.toFixed(2)}</span>
-    </div>
-  </div>
-</div>
-{/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+          <th className="text-right px-4 py-3 font-black">RATE</th>
+          <th className="text-right px-4 py-3 font-black">TOTAL</th>
+        </tr>
+      </thead>
+      <tbody>
+        {props.items.map((item, i) => (
+          <tr key={i} className="border-b border-gray-800">
+            <td className="px-4 py-3">{item.description}</td>
+            <td className="text-center px-4 py-3">{item.qty}</td>
+            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+            <td className="text-right px-4 py-3 font-bold">R {item.amount.toFixed(2)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <div className="flex justify-end mb-6">
+      <div className="w-80">
+        <div className="flex justify-between py-2 text-gray-400">
+          <span>Subtotal:</span>
+          <span>R {props.subtotal.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between py-2 text-gray-400">
+          <span>VAT:</span>
+          <span>R {props.vat.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between py-3 text-xl font-black bg-red-600 px-4 rounded">
+          <span>TOTAL:</span>
+          <span>R {props.total.toFixed(2)}</span>
+        </div>
       </div>
     </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp 
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
-        </div>
+
+    {props.showStamp && (
+      <div className="flex justify-center mb-4">
+        <SignatureStamp 
+          text={props.stampText}
+          color={props.stampColor}
+          showDate={props.showStampDate}
+          rotation={-5}
+          size="medium"
+        />
       </div>
     )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
+
+    <div className="text-center text-xs text-red-500 italic border-t border-gray-800 pt-3">
+      FAST TRACK DELIVERY - When time matters most.
     </div>
-</div>
+  </div>
 );
-// Diagnostic Template
+
+// Detailed Shipping Template
 export const DiagnosticTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     <div className="border-b-4 border-green-600 pb-6 mb-6">
@@ -836,74 +899,96 @@ export const DiagnosticTemplate = (props) => (
           <div className="text-sm text-gray-600">{props.businessInfo.city}</div>
         </div>
         <div className="text-right">
-          <div className="text-4xl font-bold text-green-600 mb-4">SERVICE INVOICE</div>
+          <div className="text-4xl font-bold text-green-600 mb-4">SHIPPING MANIFEST</div>
           <div className="bg-green-50 border-2 border-green-600 p-3 rounded">
-            <div className="text-sm"><span className="font-bold">Invoice:</span> {props.jobCardNumber}</div>
+            <div className="text-sm"><span className="font-bold">Waybill:</span> {props.jobCardNumber}</div>
+            <div className="text-sm"><span className="font-bold">Tracking:</span> {props.trackingNumber}</div>
             <div className="text-sm"><span className="font-bold">Date:</span> {new Date().toLocaleDateString()}</div>
           </div>
         </div>
       </div>
     </div>
-<div className="grid grid-cols-2 gap-6 mb-6">
-  <div className="border-2 border-green-600 p-4 rounded">
-    <div className="text-sm font-bold text-green-600 mb-3">CUSTOMER DETAILS</div>
-    <div className="text-sm space-y-1">
-      <div><span className="font-semibold">Name:</span> {props.customerName}</div>
-      <div><span className="font-semibold">Email:</span> {props.customerEmail}</div>
-      <div><span className="font-semibold">Phone:</span> {props.customerPhone}</div>
-    </div>
-  </div>
-  <div className="border-2 border-green-600 p-4 rounded">
-    <div className="text-sm font-bold text-green-600 mb-3">VEHICLE DETAILS</div>
-    <div className="text-sm space-y-1">
-      <div><span className="font-semibold">Vehicle:</span> {props.vehicleYear} {props.vehicleMake} {props.vehicleModel}</div>
-      <div><span className="font-semibold">Registration:</span> {props.vehicleReg}</div>
-      <div><span className="font-semibold">Odometer:</span> {props.vehicleMileage} km</div>
-    </div>
-  </div>
-</div>
 
-<div className="mb-6">
-  <div className="bg-green-600 text-white px-4 py-2 font-bold">SERVICES PERFORMED</div>
-  <table className="w-full">
-    <thead>
-      <tr className="bg-green-50 border-b-2 border-green-600">
-        <th className="text-left px-4 py-2 text-sm">Description</th>
-        <th className="text-center px-4 py-2 text-sm">Qty</th>
-        <th className="text-right px-4 py-2 text-sm">Unit Price</th>
-        <th className="text-right px-4 py-2 text-sm">Amount</th>
-      </tr>
-    </thead>
-    <tbody>
-      {props.items.map((item, i) => (
-        <tr key={i} className="border-b">
-          <td className="px-4 py-3">{item.description}</td>
-          <td className="text-center px-4 py-3">{item.qty}</td>
-          <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-          <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
+    <div className="grid grid-cols-2 gap-6 mb-6">
+      <div className="border-2 border-green-600 p-4 rounded">
+        <div className="text-sm font-bold text-green-600 mb-3">SHIPPER DETAILS</div>
+        <div className="text-sm space-y-1">
+          <div><span className="font-semibold">Name:</span> {props.senderName}</div>
+          <div><span className="font-semibold">Address:</span> {props.senderAddress}</div>
+          <div><span className="font-semibold">Email:</span> {props.senderEmail}</div>
+          <div><span className="font-semibold">Phone:</span> {props.senderPhone}</div>
+          <div className="mt-2 pt-2 border-t border-green-300">
+            <span className="font-semibold">Origin Port:</span> {props.origin}
+          </div>
+        </div>
+      </div>
+      <div className="border-2 border-green-600 p-4 rounded">
+        <div className="text-sm font-bold text-green-600 mb-3">CONSIGNEE DETAILS</div>
+        <div className="text-sm space-y-1">
+          <div><span className="font-semibold">Name:</span> {props.receiverName}</div>
+          <div><span className="font-semibold">Address:</span> {props.receiverAddress}</div>
+          <div><span className="font-semibold">Email:</span> {props.receiverEmail}</div>
+          <div><span className="font-semibold">Phone:</span> {props.receiverPhone}</div>
+          <div className="mt-2 pt-2 border-t border-green-300">
+            <span className="font-semibold">Destination Port:</span> {props.destination}
+          </div>
+        </div>
+      </div>
+    </div>
 
-<div className="flex justify-end">
-  <div className="w-80 border-2 border-green-600 p-4 rounded">
-    <div className="flex justify-between py-2">
-      <span>Subtotal:</span>
-      <span>R {props.subtotal.toFixed(2)}</span>
+    <div className="bg-green-50 border-2 border-green-600 p-4 rounded mb-6">
+      <div className="text-sm font-bold text-green-600 mb-3">CARGO INFORMATION</div>
+      <div className="grid grid-cols-3 gap-4 text-sm">
+        <div><span className="font-semibold">Cargo Type:</span> {props.cargoType}</div>
+        <div><span className="font-semibold">Total Weight:</span> {props.weight} kg</div>
+        <div><span className="font-semibold">Dimensions:</span> {props.dimensions}</div>
+        <div><span className="font-semibold">Number of Pieces:</span> {props.items.length}</div>
+        <div><span className="font-semibold">Declared Value:</span> R {props.total.toFixed(2)}</div>
+        <div><span className="font-semibold">Insurance:</span> Comprehensive</div>
+      </div>
     </div>
-    <div className="flex justify-between py-2">
-      <span>VAT (15%):</span>
-      <span>R {props.vat.toFixed(2)}</span>
+
+    <div className="mb-6">
+      <div className="bg-green-600 text-white px-4 py-2 font-bold">ITEMIZED SERVICES</div>
+      <table className="w-full">
+        <thead>
+          <tr className="bg-green-50 border-b-2 border-green-600">
+            <th className="text-left px-4 py-2 text-sm">Service Description</th>
+            <th className="text-center px-4 py-2 text-sm">Quantity</th>
+            <th className="text-right px-4 py-2 text-sm">Unit Rate</th>
+            <th className="text-right px-4 py-2 text-sm">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {props.items.map((item, i) => (
+            <tr key={i} className="border-b">
+              <td className="px-4 py-3">{item.description}</td>
+              <td className="text-center px-4 py-3">{item.qty}</td>
+              <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
-    <div className="flex justify-between py-3 text-xl font-bold bg-green-600 text-white px-4 rounded">
-      <span>TOTAL DUE:</span>
-      <span>R {props.total.toFixed(2)}</span>
+
+    <div className="flex justify-end mb-6">
+      <div className="w-80 border-2 border-green-600 p-4 rounded">
+        <div className="flex justify-between py-2">
+          <span>Subtotal:</span>
+          <span>R {props.subtotal.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between py-2">
+          <span>VAT (15%):</span>
+          <span>R {props.vat.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between py-3 text-xl font-bold bg-green-600 text-white px-4 rounded">
+          <span>TOTAL DUE:</span>
+          <span>R {props.total.toFixed(2)}</span>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-{/* Payment Information */}
+
     <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
       <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
       <div className="text-xs space-y-1 text-gray-700">
@@ -913,62 +998,62 @@ export const DiagnosticTemplate = (props) => (
         <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
- {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp 
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
-        </div>
+
+    {props.showStamp && (
+      <div className="flex justify-center mb-4">
+        <SignatureStamp 
+          text={props.stampText}
+          color={props.stampColor}
+          showDate={props.showStampDate}
+          rotation={-5}
+          size="medium"
+        />
       </div>
     )}
-    {/* Footer Note */}
+
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice date.
+      Secure and detailed logistics documentation for your shipment.
     </div>
   </div>
 );
+
 // Template Renderer
-export const TemplateRenderer = ({  templateId, 
-  documentType = 'invoice',
-  stampText = "APPROVED",
-  stampColor = "#d32f2f",
+export const TemplateRenderer = ({
+  templateId,
+  documentType = 'freight',
+  stampText = "DISPATCHED",
+  stampColor = "#2196f3",
   showStampDate = true,
   showStamp = false,
-  ...props 
+  ...props
 }) => {
-   const templateProps = { 
-    ...props, 
+  const templateProps = {
+    ...props,
     documentType,
     stampText,
     stampColor,
     showStampDate,
     showStamp
-   };
-switch (templateId) {
-case 'default':
-return <DefaultTemplate {...templateProps} />;
-case 'classic':
-return <ClassicTemplate {...templateProps} />;
-case 'modern':
-return <ModernTemplate {...templateProps} />;
-case 'elegant':
-case 'premium':
-return <ElegantTemplate {...templateProps} />;
-case 'speed':
-return <SpeedTemplate {...templateProps} />;
-case 'diagnostic':
-return <DiagnosticTemplate {...templateProps} />;
-default:
-return <DefaultTemplate {...templateProps} />;
-}
+  };
+
+  switch (templateId) {
+    case 'default':
+      return <DefaultTemplate {...templateProps} />;
+    case 'classic':
+      return <ClassicTemplate {...templateProps} />;
+    case 'modern':
+      return <ModernTemplate {...templateProps} />;
+    case 'elegant':
+      return <ElegantTemplate {...templateProps} />;
+    case 'premium':
+      return <PremiumTemplate {...templateProps} />;
+    case 'speed':
+      return <SpeedTemplate {...templateProps} />;
+    case 'diagnostic':
+      return <DiagnosticTemplate {...templateProps} />;
+    default:
+      return <DefaultTemplate {...templateProps} />;
+  }
 };
-export default TemplateSelector
+
+export default TemplateSelector;

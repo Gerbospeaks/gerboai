@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from '../../assets/img/solidflo-logo.png';
 import { getAuth, signOut } from "firebase/auth";
+import FinancialOverview from "../FinancialOverview";
+import CheckInOutModal, { createCheckInFromInvoice, createCheckInFromGuest } from './CheckInOutModal';
 import {
   getFirestore,
   collection,
@@ -92,6 +94,8 @@ const HotelDashboard = () => {
   const [showGuestsListModal, setShowGuestsListModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [showGuestModal, setShowGuestModal] = useState(false);
+  const [showCheckInOutModal, setShowCheckInOutModal] = useState(false);
+  const [autoCreateCheckIn, setAutoCreateCheckIn] = useState(true);
   const [guests, setGuests] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
 const [stampSettings, setStampSettings] = useState({
@@ -506,18 +510,19 @@ const [stampSettings, setStampSettings] = useState({
   });
 
   const handleSaveInvoice = async () => {
-    if (!user?.uid) return;
+  if (!user?.uid) return;
 
-    const db = getFirestore();
-    let numberToUse = invoiceNumber;
+  const db = getFirestore();
+  let numberToUse = invoiceNumber;
 
-    if (!invoiceId) {
-      numberToUse = await generateInvoiceNumber(user.uid);
-      setInvoiceNumber(numberToUse);
-    }
+  if (!invoiceId) {
+    numberToUse = await generateInvoiceNumber(user.uid);
+    setInvoiceNumber(numberToUse);
+  }
 
-    const invoiceData = buildInvoicePayload(numberToUse);
+  const invoiceData = buildInvoicePayload(numberToUse);
 
+  try {
     if (invoiceId) {
       await updateDoc(doc(db, "users", user.uid, "invoices", invoiceId), {
         ...invoiceData,
@@ -531,9 +536,24 @@ const [stampSettings, setStampSettings] = useState({
       setInvoiceId(ref.id);
     }
 
-    alert("Invoice saved and locked");
+    // Automatically create check-in from invoice if enabled
+    if (autoCreateCheckIn && !invoiceId) { // Only on new invoices
+      const checkInCreated = await createCheckInFromInvoice(user.uid, invoiceData);
+      if (checkInCreated) {
+        alert("Invoice saved and check-in created successfully!");
+      } else {
+        alert("Invoice saved but failed to create check-in");
+      }
+    } else {
+      alert("Invoice saved and locked");
+    }
+
     loadSavedInvoices();
-  };
+  } catch (error) {
+    console.error("Error saving invoice:", error);
+    alert("Failed to save invoice");
+  }
+};
 
   const handleNewInvoice = () => {
     setInvoiceId(null);
@@ -684,11 +704,13 @@ const [stampSettings, setStampSettings] = useState({
                 <span>Room Management</span>
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <DoorOpen className="w-5 h-5" />
-                <span>Check-In/Out</span>
-              </div>
-
+             <div 
+  onClick={() => setShowCheckInOutModal(true)}
+  className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+>
+  <DoorOpen className="w-5 h-5" />
+  <span>Check-In/Out</span>
+</div>
               <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <CreditCard className="w-5 h-5" />
@@ -739,7 +761,7 @@ const [stampSettings, setStampSettings] = useState({
 
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+        <div className="bg-white border-red-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 lg:space-x-4">
               <button
@@ -752,11 +774,7 @@ const [stampSettings, setStampSettings] = useState({
               <h1 className="text-base lg:text-xl font-semibold">
                 Invoice #{invoiceNumber || "— not saved yet —"}
               </h1>
-              <TemplateSelector
-                              user={user}
-                              selectedTemplate={activeTemplate}
-                              onTemplateChange={setActiveTemplate}
-                            />
+              
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1275,6 +1293,26 @@ const [stampSettings, setStampSettings] = useState({
     )}
   </div>
 </div>
+ <div className="border-t pt-6 mt-6">
+  <h3 className="text-lg font-semibold mb-4">⚙️ Check-In Settings</h3>
+  
+  <div className="space-y-4">
+    <div>
+      <label className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          checked={autoCreateCheckIn}
+          onChange={(e) => setAutoCreateCheckIn(e.target.checked)}
+          className="w-4 h-4 rounded"
+        />
+        <span className="text-sm font-medium">Automatically create check-in when saving new invoices</span>
+      </label>
+      <p className="text-xs text-gray-500 mt-1 ml-6">
+        When enabled, a pending check-in will be automatically created whenever you save a new invoice with booking details.
+      </p>
+    </div>
+  </div>
+</div>
                     <button
                       onClick={handleSavePropertyInfo}
                       className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
@@ -1286,7 +1324,7 @@ const [stampSettings, setStampSettings] = useState({
               </div>
             </div>
           )}
-
+          
           <GuestsListModal
             showModal={showGuestsListModal}
             setShowModal={setShowGuestsListModal}
@@ -1302,6 +1340,11 @@ const [stampSettings, setStampSettings] = useState({
             existingGuest={selectedGuest}
             onGuestSaved={handleGuestSaved}
           />
+          <CheckInOutModal
+  showModal={showCheckInOutModal}
+  setShowModal={setShowCheckInOutModal}
+  user={user}
+/>
 
           {/* Saved Invoices List Modal */}
           {showInvoicesList && (
@@ -1377,6 +1420,9 @@ const [stampSettings, setStampSettings] = useState({
               </div>
             </div>
           )}
+            {activeView === "financial-overview" && (
+            <FinancialOverview user={user} />
+          )}
            {activeView === "templates" && <Templates user={user} />}
                      {activeView === "invoice" && (
                        <>
@@ -1394,11 +1440,7 @@ const [stampSettings, setStampSettings] = useState({
                 showInvoice ? "hidden" : "block"
               } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
             >
-              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-blue-700 font-medium">Draft</span>
-                <span className="text-blue-600">Created Today</span>
-              </div>
+             
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -1700,12 +1742,8 @@ const [stampSettings, setStampSettings] = useState({
             <div
               className={`${
                 !showInvoice ? "hidden" : "block"
-              } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-              style={{
-                width: "100%",
-                maxWidth: "210mm",
-                minHeight: "297mm",
-              }}
+              } lg:block mx-auto bg-white shadow-lg overflow-y-auto`}
+              style={{width: "100%",maxWidth: "210mm",maxHeight: "90vh",}}
             >
           {activeView === 'invoice' && (
   <>

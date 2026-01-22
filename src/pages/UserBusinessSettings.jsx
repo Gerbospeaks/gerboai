@@ -222,7 +222,7 @@ const [stampSettings, setStampSettings] = useState({
         <button
           onClick={handleSave}
           disabled={loading}
-          className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 disabled:opacity-50"
+          className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-orange-700 disabled:opacity-50"
         >
           {loading ? "Saving..." : "Save Business Information"}
         </button>

@@ -5,6 +5,7 @@ import logo from '../../assets/img/solidflo-logo.png';
 import Templates from "./Templates";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import { getAuth, signOut } from "firebase/auth";
+import FinancialOverview from "../FinancialOverview";
 import SignatureStamp from '../SignatureStamp';
 import {
   getFirestore,
@@ -579,10 +580,13 @@ const [stampSettings, setStampSettings] = useState({
             </div>
 
             <div className="pt-4">
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
-                <TrendingUp className="w-5 h-5" />
-                <span>Business Overview</span>
-              </div>
+             <div
+                             onClick={() => setActiveView("financial-overview")}
+                             className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                           >
+                             <TrendingUp className="w-5 h-5" />
+                             <span>Business Overview</span>
+                           </div>
 
               <div className="mt-2">
                 <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
@@ -595,7 +599,10 @@ const [stampSettings, setStampSettings] = useState({
 
                 <div className="ml-8 mt-1 space-y-1">
                   <div
-                    onClick={handleNewJobCard}
+                   onClick={() => {
+                      handleNewJobCard();
+                      setActiveView("invoice");
+                    }}
                     className="px-3 py-2 text-sm text-white bg-green-800 rounded-lg cursor-pointer"
                   >
                     Create Work Order
@@ -648,21 +655,8 @@ const [stampSettings, setStampSettings] = useState({
                 <span>Materials Inventory</span>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <Receipt className="w-5 h-5" />
-                  <span>Invoices</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
+             
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <CreditCard className="w-5 h-5" />
-                  <span>Payments</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
 
               <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
@@ -725,11 +719,7 @@ const [stampSettings, setStampSettings] = useState({
               <h1 className="text-base lg:text-xl font-semibold">
                 Work Order #{jobCardNumber || "— not saved yet —"}
               </h1>
-              <TemplateSelector
-                              user={user}
-                              selectedTemplate={activeTemplate}
-                              onTemplateChange={setActiveTemplate}
-                            />
+             
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1279,6 +1269,9 @@ const [stampSettings, setStampSettings] = useState({
               </div>
             </div>
           )}
+            {activeView === "financial-overview" && (
+            <FinancialOverview user={user} />
+          )}
            {activeView === "templates" && <Templates user={user} />}
                      {activeView === "invoice" && (
                        <>
@@ -1297,11 +1290,7 @@ const [stampSettings, setStampSettings] = useState({
                 showJobCard ? "hidden" : "block"
               } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
             >
-              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-blue-700 font-medium">In Progress</span>
-                <span className="text-blue-600">Started Today</span>
-              </div>
+             
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -1517,11 +1506,11 @@ const [stampSettings, setStampSettings] = useState({
             <div
               className={`${
                 !showJobCard ? "hidden" : "block"
-              } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
+              } lg:block mx-auto bg-white shadow-lg overflow-y-auto`}
               style={{
                 width: "100%",
                 maxWidth: "210mm",
-                minHeight: "297mm",
+                maxHeight: "90vh",
               }}
             >
              {activeView === 'invoice' && (

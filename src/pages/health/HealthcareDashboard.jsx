@@ -3,6 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
+import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import {
@@ -1380,6 +1381,9 @@ const HealthcareDashboard = () => {
           {activeView === "appointments" && (
             <AppointmentsCalendar user={user} />
           )}
+            {activeView === "financial-overview" && (
+            <FinancialOverview user={user} />
+          )}
           {activeView === "pending" && <PendingPayments user={user} />}
           {activeView === "templates" && <Templates user={user} />}
           {activeView === "invoice" && (
@@ -1715,12 +1719,8 @@ const HealthcareDashboard = () => {
                 <div
                   className={`${
                     !showInvoice ? "hidden" : "block"
-                  } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-                  style={{
-                    width: "100%",
-                    maxWidth: "210mm",
-                    minHeight: "297mm",
-                  }}
+                  } lg:block mx-auto bg-white shadow-lg overflow-y-auto`}
+              style={{width: "100%",maxWidth: "210mm",maxHeight: "90vh",}}
                 >
                   {activeView === "invoice" && (
                     <>

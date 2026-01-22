@@ -13,7 +13,6 @@ import DashboardRouter from './components/DashboardRouter';
 import PrivacyPolicy from './pages/PrivacyPolicy';  
 import TermsPage from './pages/TermsPage';
 import FinancialOverview from './pages/FinancialOverview';  
-import InvoiceDashboard from './pages/InvoiceDashboard';
 import MechanicsDashboard from './pages/mechanics/MechanicsDashboard';
 import SecurityDashboard from './pages/security/SecurityDashboard';
 import HealthcareDashboard from './pages/health/HealthcareDashboard';
@@ -86,15 +85,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <TemplateSelector />
-              </ProtectedRoute>
-            } 
-          />
-          {/* Protected Dashboard Routes */}
-          <Route 
-            path="/invoice" 
-            element={
-              <ProtectedRoute>
-                <InvoiceDashboard />
               </ProtectedRoute>
             } 
           />

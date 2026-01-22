@@ -3,6 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import logo from '../../assets/img/solidflo-logo.png';
+import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import {
@@ -787,10 +788,13 @@ const handleNewQuote = () => {
             </div>
 
             <div className="pt-4">
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <TrendingUp className="w-5 h-5" />
-                <span>Business Overview</span>
-              </div>
+             <div
+                             onClick={() => setActiveView("financial-overview")}
+                             className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                           >
+                             <TrendingUp className="w-5 h-5" />
+                             <span>Business Overview</span>
+                           </div>
 
               <div className="mt-2">
                 <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
@@ -947,7 +951,7 @@ const handleNewQuote = () => {
               </button>
               <button
   onClick={handleSaveQuote}
-  className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700"
 >
   Save {documentType === 'quote' ? 'Quote' : 'Invoice'}
 </button>
@@ -1419,7 +1423,7 @@ const handleNewQuote = () => {
       <div className="flex gap-3">
         <button
           onClick={handleConvertToInvoice}
-          className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
+          className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
         >
           Convert to Invoice
         </button>
@@ -1582,6 +1586,9 @@ const handleNewQuote = () => {
                 </div>
               </div>
             </div>
+          )}
+            {activeView === "financial-overview" && (
+            <FinancialOverview user={user} />
           )}
           {activeView === "templates" && <Templates user={user} />}
                     {activeView === "invoice" && (
@@ -1839,12 +1846,8 @@ const handleNewQuote = () => {
             <div
               className={`${
                 !showJobCard ? "hidden" : "block"
-              } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-              style={{
-                width: "100%",
-                maxWidth: "210mm",
-                minHeight: "297mm",
-              }}
+              } lg:block mx-auto bg-white shadow-lg overflow-y-auto`}
+              style={{width: "100%",maxWidth: "210mm",maxHeight: "90vh",}}
             >
              {activeView === 'invoice' && (
   <>

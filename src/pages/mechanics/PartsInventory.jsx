@@ -265,7 +265,7 @@ const PartsInventory = ({ user }) => {
             resetForm();
             setShowAddModal(true);
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+          className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700"
         >
           <Plus className="w-5 h-5" />
           Add Part
@@ -557,7 +557,7 @@ const PartsInventory = ({ user }) => {
               <div className="mt-6 flex gap-3">
                 <button
                   onClick={handleAddPart}
-                  className="flex-1 bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700"
+                  className="flex-1 bg-gray-600 text-white py-3 rounded-lg hover:bg-orange-700"
                 >
                   {editingPart ? 'Update Part' : 'Add Part'}
                 </button>
