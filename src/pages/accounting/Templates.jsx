@@ -138,81 +138,81 @@ const Templates = () => {
   };
 
   const handlePaymentSubmit = async () => {
-    const templateId = showPayment;
-    const template = TEMPLATES[templateId];
-
-    // Validate card details
-    if (!paymentForm.cardNumber || paymentForm.cardNumber.replace(/\s/g, '').length !== 16) {
-      alert('❌ Please enter a valid 16-digit card number');
-      return;
-    }
-
-    if (!paymentForm.cardName.trim()) {
-      alert('❌ Please enter the cardholder name');
-      return;
-    }
-
-    if (!paymentForm.expiryDate || !/^\d{2}\/\d{2}$/.test(paymentForm.expiryDate)) {
-      alert('❌ Please enter expiry date in MM/YY format');
-      return;
-    }
-
-    if (!paymentForm.cvv || paymentForm.cvv.length !== 3) {
-      alert('❌ Please enter a valid 3-digit CVV');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Add template to purchased list
-      setPurchasedTemplates(prev => [...prev, templateId]);
-      
-      // Reset form and close modal
-      setPaymentForm({ cardNumber: '', cardName: '', expiryDate: '', cvv: '' });
-      setShowPayment(null);
-      
-      alert(`✅ Payment successful!\n\n${template.name} has been added to your account.\n\nYou can now use it when creating invoices.`);
-    } catch (error) {
-      console.error('Error processing payment:', error);
-      alert('❌ Payment failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formatCardNumber = (value) => {
-    const cleaned = value.replace(/\s/g, '');
-    const chunks = cleaned.match(/.{1,4}/g);
-    return chunks ? chunks.join(' ') : cleaned;
-  };
-
-  const handleCardNumberChange = (e) => {
-    const value = e.target.value.replace(/\s/g, '');
-    if (/^\d*$/.test(value) && value.length <= 16) {
-      setPaymentForm({ ...paymentForm, cardNumber: formatCardNumber(value) });
-    }
-  };
-
-  const handleExpiryChange = (e) => {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length >= 2) {
-      value = value.slice(0, 2) + '/' + value.slice(2, 4);
-    }
-    if (value.length <= 5) {
-      setPaymentForm({ ...paymentForm, expiryDate: value });
-    }
-  };
-
-  const handleCvvChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '');
-    if (value.length <= 3) {
-      setPaymentForm({ ...paymentForm, cvv: value });
-    }
-  };
+      const templateId = showPayment;
+      const template = TEMPLATES[templateId];
+  
+      // Validate card details
+      if (!paymentForm.cardNumber || paymentForm.cardNumber.replace(/\s/g, '').length !== 16) {
+        alert('❌ Please enter a valid 16-digit card number');
+        return;
+      }
+  
+      if (!paymentForm.cardName.trim()) {
+        alert('❌ Please enter the cardholder name');
+        return;
+      }
+  
+      if (!paymentForm.expiryDate || !/^\d{2}\/\d{2}$/.test(paymentForm.expiryDate)) {
+        alert('❌ Please enter expiry date in MM/YY format');
+        return;
+      }
+  
+      if (!paymentForm.cvv || paymentForm.cvv.length !== 3) {
+        alert('❌ Please enter a valid 3-digit CVV');
+        return;
+      }
+  
+      try {
+        setLoading(true);
+        
+        // Simulate payment processing
+        await new Promise(resolve => setTimeout(resolve, 2000));
+  
+        // Add template to purchased list
+        setPurchasedTemplates(prev => [...prev, templateId]);
+        
+        // Reset form and close modal
+        setPaymentForm({ cardNumber: '', cardName: '', expiryDate: '', cvv: '' });
+        setShowPayment(null);
+        
+        alert(`✅ Payment successful!\n\n${template.name} has been added to your account.\n\nYou can now use it when creating invoices.`);
+      } catch (error) {
+        console.error('Error processing payment:', error);
+        alert('❌ Payment failed. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    const formatCardNumber = (value) => {
+      const cleaned = value.replace(/\s/g, '');
+      const chunks = cleaned.match(/.{1,4}/g);
+      return chunks ? chunks.join(' ') : cleaned;
+    };
+  
+    const handleCardNumberChange = (e) => {
+      const value = e.target.value.replace(/\s/g, '');
+      if (/^\d*$/.test(value) && value.length <= 16) {
+        setPaymentForm({ ...paymentForm, cardNumber: formatCardNumber(value) });
+      }
+    };
+  
+    const handleExpiryChange = (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length >= 2) {
+        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+      }
+      if (value.length <= 5) {
+        setPaymentForm({ ...paymentForm, expiryDate: value });
+      }
+    };
+  
+    const handleCvvChange = (e) => {
+      const value = e.target.value.replace(/\D/g, '');
+      if (value.length <= 3) {
+        setPaymentForm({ ...paymentForm, cvv: value });
+      }
+    };
 
   const categories = [
     { id: 'all', name: 'All Templates' },
@@ -478,207 +478,139 @@ const Templates = () => {
             </div>
           </div>
         </div>
-
-        {/* Preview Modal */}
-        {showPreview && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-            <div className="bg-white rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-              <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100">
-                <div className="flex items-center gap-3">
-                  {React.createElement(TEMPLATES[showPreview].icon, { className: "w-6 h-6 text-blue-600" })}
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {TEMPLATES[showPreview].name}
-                  </h2>
-                </div>
-                <button
-                  onClick={() => setShowPreview(null)}
-                  className="text-gray-500 hover:text-gray-700 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="overflow-auto p-8 bg-gray-300">
-                <div className="bg-white rounded-lg shadow-lg p-8 max-w-3xl mx-auto">
-                  <div className="text-center mb-6">
-                    {React.createElement(TEMPLATES[showPreview].icon, { className: "w-16 h-16 text-blue-600 mx-auto mb-4" })}
-                    <h3 className="text-2xl font-bold mb-2">{TEMPLATES[showPreview].name}</h3>
-                    <p className="text-gray-600 mb-4">{TEMPLATES[showPreview].description}</p>
-                    <img
-                      src={TEMPLATES[showPreview].image}
-                      alt={TEMPLATES[showPreview].name}
-                      className="w-full rounded-lg shadow-md"
-                    />
-                  </div>
-                  <div className="border-t pt-6">
-                    <h4 className="font-semibold mb-3">Template Features:</h4>
-                    <ul className="grid grid-cols-2 gap-3">
-                      {TEMPLATES[showPreview].features.map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2 text-sm">
-                          <Check className="w-4 h-4 text-green-500" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-900">
-                      <strong>Design Preview:</strong> {TEMPLATES[showPreview].preview}
-                    </p>
-                  </div>
-                  <div className="mt-4 flex justify-center">
-                    {purchasedTemplates.includes(showPreview) ? (
-                      <div className="px-6 py-3 bg-green-100 text-green-700 rounded-lg font-semibold flex items-center gap-2 border-2 border-green-200">
-                        <Check className="w-5 h-5" />
-                        <span>You Own This Template</span>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setShowPreview(null);
-                          handlePurchase(showPreview);
-                        }}
-                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
-                      >
-                        {TEMPLATES[showPreview].isPremium ? (
-                          <>
-                            <ShoppingCart className="w-5 h-5" />
-                            Purchase for R{TEMPLATES[showPreview].price}
-                          </>
-                        ) : (
-                          <>
-                            <Check className="w-5 h-5" />
-                            Get Free Template
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Payment Modal */}
         {showPayment && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-            <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
-              <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-indigo-600">
-                <div className="flex items-center justify-between text-white">
-                  <div className="flex items-center gap-3">
-                    <ShoppingCart className="w-6 h-6" />
-                    <h2 className="text-2xl font-bold">Complete Purchase</h2>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setShowPayment(null);
-                      setPaymentForm({ cardNumber: '', cardName: '', expiryDate: '', cvv: '' });
-                    }}
-                    className="text-white hover:text-gray-200 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-6">
-                {/* Template Info */}
-                <div className="mb-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    {React.createElement(TEMPLATES[showPayment].icon, { className: "w-8 h-8 text-blue-600" })}
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg text-gray-900">{TEMPLATES[showPayment].name}</h3>
-                      <p className="text-sm text-gray-600">{TEMPLATES[showPayment].description}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between pt-3 border-t border-blue-200">
-                    <span className="text-sm text-gray-600">One-time payment</span>
-                    <span className="text-2xl font-bold text-blue-600">R{TEMPLATES[showPayment].price}</span>
-                  </div>
-                </div>
-
-                {/* Payment Form */}
-                <div className="space-y-4">
-                  {/* Card Number */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                      <CreditCard className="w-4 h-4" />
-                      Card Number
-                    </label>
-                    <input
-                      type="text"
-                      value={paymentForm.cardNumber}
-                      onChange={handleCardNumberChange}
-                      placeholder="1234 5678 9012 3456"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all font-mono text-lg"
-                    />
-                  </div>
-
-                  {/* Cardholder Name */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Cardholder Name
-                    </label>
-                    <input
-                      type="text"
-                      value={paymentForm.cardName}
-                      onChange={(e) => setPaymentForm({ ...paymentForm, cardName: e.target.value.toUpperCase() })}
-                      placeholder="JOHN DOE"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all uppercase"
-                    />
-                  </div>
-
-                  {/* Expiry and CVV */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Expiry Date
-                      </label>
-                      <input
-                        type="text"
-                        value={paymentForm.expiryDate}
-                        onChange={handleExpiryChange}
-                        placeholder="MM/YY"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all font-mono text-lg"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Security Note */}
-                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-xs text-green-800 flex items-start gap-2">
-                    <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>Your payment information is encrypted and secure. This is a one-time purchase with lifetime access.</span>
-                  </p>
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  onClick={handlePaymentSubmit}
-                  disabled={loading}
-                  className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Processing Payment...
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-5 h-5" />
-                      Pay R{TEMPLATES[showPayment].price}
-                    </>
-                  )}
-                </button>
-
-                <p className="text-xs text-gray-500 text-center mt-4">
-                  By completing this purchase, you agree to our terms of service
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+                 <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                   <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
+                     <div className="p-6 border-b bg-gradient-to-r from-orange-500 to-red-500">
+                       <div className="flex items-center justify-between text-white">
+                         <div className="flex items-center gap-3">
+                           <ShoppingCart className="w-6 h-6" />
+                           <h2 className="text-2xl font-bold">Complete Purchase</h2>
+                         </div>
+                         <button
+                           onClick={() => {
+                             setShowPayment(null);
+                             setPaymentForm({ cardNumber: '', cardName: '', expiryDate: '', cvv: '' });
+                           }}
+                           className="text-white hover:text-gray-200 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors"
+                         >
+                           ✕
+                         </button>
+                       </div>
+                     </div>
+       
+                     <div className="p-6">
+                       {/* Template Info */}
+                       <div className="mb-6 p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg border-2 border-orange-200">
+                         <div className="flex items-center gap-3 mb-2">
+                           {React.createElement(TEMPLATES[showPayment].icon, { className: "w-8 h-8 text-orange-600" })}
+                           <div className="flex-1">
+                             <h3 className="font-bold text-lg text-gray-900">{TEMPLATES[showPayment].name}</h3>
+                             <p className="text-sm text-gray-600">{TEMPLATES[showPayment].description}</p>
+                           </div>
+                         </div>
+                         <div className="flex items-center justify-between pt-3 border-t border-orange-200">
+                           <span className="text-sm text-gray-600">One-time payment</span>
+                           <span className="text-2xl font-bold text-orange-600">R{TEMPLATES[showPayment].price}</span>
+                         </div>
+                       </div>
+       
+                       {/* Payment Form */}
+                       <div className="space-y-4">
+                         {/* Card Number */}
+                         <div>
+                           <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                             <CreditCard className="w-4 h-4" />
+                             Card Number
+                           </label>
+                           <input
+                             type="text"
+                             value={paymentForm.cardNumber}
+                             onChange={handleCardNumberChange}
+                             placeholder="1234 5678 9012 3456"
+                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all font-mono text-lg"
+                           />
+                         </div>
+       
+                         {/* Cardholder Name */}
+                         <div>
+                           <label className="block text-sm font-semibold text-gray-700 mb-2">
+                             Cardholder Name
+                           </label>
+                           <input
+                             type="text"
+                             value={paymentForm.cardName}
+                             onChange={(e) => setPaymentForm({ ...paymentForm, cardName: e.target.value.toUpperCase() })}
+                             placeholder="JOHN DOE"
+                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all uppercase"
+                           />
+                         </div>
+       
+                         {/* Expiry and CVV */}
+                         <div className="grid grid-cols-2 gap-4">
+                           <div>
+                             <label className="block text-sm font-semibold text-gray-700 mb-2">
+                               Expiry Date
+                             </label>
+                             <input
+                               type="text"
+                               value={paymentForm.expiryDate}
+                               onChange={handleExpiryChange}
+                               placeholder="MM/YY"
+                               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all font-mono text-lg"
+                             />
+                           </div>
+                           <div>
+                             <label className="block text-sm font-semibold text-gray-700 mb-2">
+                               CVV
+                             </label>
+                             <input
+                               type="password"
+                               value={paymentForm.cvv}
+                               onChange={handleCvvChange}
+                               placeholder="123"
+                               maxLength={3}
+                               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all font-mono text-lg"
+                             />
+                           </div>
+                         </div>
+                       </div>
+       
+                       {/* Security Note */}
+                       <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                         <p className="text-xs text-green-800 flex items-start gap-2">
+                           <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                           <span>Your payment information is encrypted and secure. This is a one-time purchase with lifetime access.</span>
+                         </p>
+                       </div>
+       
+                       {/* Submit Button */}
+                       <button
+                         onClick={handlePaymentSubmit}
+                         disabled={loading}
+                         className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                       >
+                         {loading ? (
+                           <>
+                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                             Processing Payment...
+                           </>
+                         ) : (
+                           <>
+                             <Lock className="w-5 h-5" />
+                             Pay R{TEMPLATES[showPayment].price}
+                           </>
+                         )}
+                       </button>
+       
+                       <p className="text-xs text-gray-500 text-center mt-4">
+                         By completing this purchase, you agree to our terms of service
+                       </p>
+                     </div>
+                   </div>
+                 </div>
+               )}
       </div>
     </div>
   );

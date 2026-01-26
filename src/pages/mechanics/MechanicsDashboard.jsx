@@ -8,7 +8,7 @@ import FinancialOverview from "../FinancialOverview";
 import Vehicles from "./Vehicles";
 import PartsInventory from "./PartsInventory";
 import Templates from "./Templates";
-import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
+import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import {
   getFirestore,
   collection,
@@ -23,14 +23,15 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, Sparkles } from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
-import HistoryView from './HistoryView';
-import NotesView from './NotesView';
-import { logHistory } from './historyLogger';
-import SignatureStamp from './SignatureStamp';
+import HistoryView from "./HistoryView";
+import NotesView from "./NotesView";
+import { logHistory } from "./historyLogger";
+import SignatureStamp from "./SignatureStamp";
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import {
   ChevronDown,
   ChevronLeft,
@@ -63,10 +64,10 @@ import {
 const generateJobCardNumber = async (userId, documentType) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
-  
+
   // Use different collection based on document type
-  const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
-  const prefix = documentType === 'quote' ? 'QT' : 'JC';
+  const collectionName = documentType === "quote" ? "quotations" : "invoices";
+  const prefix = documentType === "quote" ? "QT" : "JC";
 
   const jobCardsRef = collection(db, "users", userId, collectionName);
   const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(1));
@@ -105,19 +106,62 @@ const MechanicsDashboard = () => {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [activeTemplate, setActiveTemplate] = useState("classic");
-  const [selectedTemplate, setSelectedTemplate] = useState('professional');
+  const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  
-  const [stampSettings, setStampSettings] = useState({
-  text: "APPROVED",
-  color: "#d32f2f",
-  showDate: false,
-  enabled: false
-});
-  
-  // NEW: Document type state (quote or invoice)
-  const [documentType, setDocumentType] = useState('invoice');
+  const [inputMode, setInputMode] = useState("manual"); // 'manual' or 'ai'
+  const [useAI, setUseAI] = useState(false);
 
+  const [stampSettings, setStampSettings] = useState({
+    text: "APPROVED",
+    color: "#d32f2f",
+    showDate: false,
+    enabled: false,
+  });
+
+  // NEW: Document type state (quote or invoice)
+  const [documentType, setDocumentType] = useState("invoice");
+  const handleAIDataExtracted = (extractedData) => {
+    // Customer info
+    if (extractedData.customer.name)
+      setCustomerName(extractedData.customer.name);
+    if (extractedData.customer.email)
+      setCustomerEmail(extractedData.customer.email);
+    if (extractedData.customer.phone)
+      setCustomerPhone(extractedData.customer.phone);
+    if (extractedData.customer.address)
+      setCustomerAddress(extractedData.customer.address);
+    if (extractedData.customer.merchant_code)
+      setCustomerId(extractedData.customer.merchant_code);
+
+    // Bill To info
+    if (extractedData.billTo.name) setBillName(extractedData.billTo.name);
+    if (extractedData.billTo.email) setBillEmail(extractedData.billTo.email);
+    if (extractedData.billTo.phone) setBillPhone(extractedData.billTo.phone);
+    if (extractedData.billTo.address)
+      setBillAddress(extractedData.billTo.address);
+
+    // Vehicle info
+    if (extractedData.vehicle.make) setVehicleMake(extractedData.vehicle.make);
+    if (extractedData.vehicle.model)
+      setVehicleModel(extractedData.vehicle.model);
+    if (extractedData.vehicle.year) setVehicleYear(extractedData.vehicle.year);
+    if (extractedData.vehicle.registration)
+      setVehicleReg(extractedData.vehicle.registration);
+    if (extractedData.vehicle.vin) setVehicleVin(extractedData.vehicle.vin);
+    if (extractedData.vehicle.mileage)
+      setVehicleMileage(extractedData.vehicle.mileage);
+    if (extractedData.vehicle.preAuth)
+      setPreAuth(extractedData.vehicle.preAuth);
+    if (extractedData.vehicle.authCode)
+      setAuthCode(extractedData.vehicle.authCode);
+
+    // Items
+    if (extractedData.items && extractedData.items.length > 0) {
+      setItems(extractedData.items);
+    }
+
+    alert("✅ Data extracted and populated successfully!");
+  };
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -134,7 +178,7 @@ const MechanicsDashboard = () => {
     try {
       const q = query(
         collection(db, "users", user.uid, "clients"),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
       );
       const querySnapshot = await getDocs(q);
       const customersData = [];
@@ -156,7 +200,7 @@ const MechanicsDashboard = () => {
     if (!user?.uid) return;
 
     const db = getFirestore();
-    const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
+    const collectionName = documentType === "quote" ? "quotations" : "invoices";
     const jobCardsRef = collection(db, "users", user.uid, collectionName);
     const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(50));
     const snapshot = await getDocs(q);
@@ -269,9 +313,9 @@ const MechanicsDashboard = () => {
     if (!user?.uid || !jobCardId) return null;
 
     const db = getFirestore();
-    const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
+    const collectionName = documentType === "quote" ? "quotations" : "invoices";
     const snap = await getDoc(
-      doc(db, "users", user.uid, collectionName, jobCardId)
+      doc(db, "users", user.uid, collectionName, jobCardId),
     );
 
     return snap.exists() ? snap.data() : null;
@@ -338,13 +382,13 @@ const MechanicsDashboard = () => {
   const [customerEmail, setCustomerEmail] = useState("john.smith@example.com");
   const [customerPhone, setCustomerPhone] = useState("082 123 4567");
   const [customerAddress, setCustomerAddress] = useState(
-    "123 Main Street, Pretoria, 0001"
+    "123 Main Street, Pretoria, 0001",
   );
   const [billName, setBillName] = useState("John Smith");
   const [billEmail, setBillEmail] = useState("john.smith@example.com");
   const [billPhone, setBillPhone] = useState("082 123 4567");
   const [billAddress, setBillAddress] = useState(
-    "123 Main Street, Pretoria, 0001"
+    "123 Main Street, Pretoria, 0001",
   );
   const [vehicleMake, setVehicleMake] = useState("Toyota");
   const [vehicleModel, setVehicleModel] = useState("Hilux");
@@ -365,12 +409,12 @@ const MechanicsDashboard = () => {
     secondaryPhone: "084 583 9929",
     logoUrl: "",
   });
-  
+
   const tabViewMap = {
-    "JobCard": "invoice",
-    "Parts": "parts-inventory",
-    "History": "history-view",
-    "Notes": "notes-view",
+    JobCard: "invoice",
+    Parts: "parts-inventory",
+    History: "history-view",
+    Notes: "notes-view",
   };
 
   const [loading, setLoading] = useState(true);
@@ -417,8 +461,8 @@ const MechanicsDashboard = () => {
         const data = docSnap.data();
         setBusinessInfo(docSnap.data());
         if (data.stampSettings) {
-        setStampSettings(data.stampSettings);
-      }
+          setStampSettings(data.stampSettings);
+        }
       }
     } catch (error) {
       console.error("Error loading business info:", error);
@@ -486,7 +530,7 @@ const MechanicsDashboard = () => {
   });
 
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-  const vat = subtotal * 0.00;
+  const vat = subtotal * 0.0;
   const total = subtotal + vat;
 
   const buildJobCardPayload = (numberToUse) => ({
@@ -505,7 +549,7 @@ const MechanicsDashboard = () => {
       email: customerEmail,
       phone: customerPhone,
       address: customerAddress,
-      merchant_code:merchant_code,
+      merchant_code: merchant_code,
     },
 
     vehicle: {
@@ -543,9 +587,9 @@ const MechanicsDashboard = () => {
     }
 
     const jobCardData = buildJobCardPayload(numberToUse);
-    
+
     // NEW: Save to different collection based on document type
-    const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
+    const collectionName = documentType === "quote" ? "quotations" : "invoices";
 
     if (jobCardId) {
       await updateDoc(doc(db, "users", user.uid, collectionName, jobCardId), {
@@ -555,78 +599,84 @@ const MechanicsDashboard = () => {
     } else {
       const ref = await addDoc(
         collection(db, "users", user.uid, collectionName),
-        jobCardData
+        jobCardData,
       );
       setJobCardId(ref.id);
     }
 
-    alert(`${documentType === 'quote' ? 'Quote' : 'Job card'} saved and locked`);
+    alert(
+      `${documentType === "quote" ? "Quote" : "Job card"} saved and locked`,
+    );
     loadSavedJobCards();
   };
 
   // NEW: Convert Quote to Invoice
   const handleConvertToInvoice = async () => {
     if (!user?.uid) return;
-    
+
     if (!jobCardId) {
-      alert('Please save the quote first before converting to invoice');
+      alert("Please save the quote first before converting to invoice");
       return;
     }
 
-    if (!window.confirm('Convert this quote to an invoice? This will create a new invoice with the same details.')) {
+    if (
+      !window.confirm(
+        "Convert this quote to an invoice? This will create a new invoice with the same details.",
+      )
+    ) {
       return;
     }
 
     try {
       const db = getFirestore();
-      
+
       // Generate new invoice number
-      const newInvoiceNumber = await generateJobCardNumber(user.uid, 'invoice');
-      
+      const newInvoiceNumber = await generateJobCardNumber(user.uid, "invoice");
+
       // Create invoice data from current quote
       const invoiceData = buildJobCardPayload(newInvoiceNumber);
-      invoiceData.documentType = 'invoice';
+      invoiceData.documentType = "invoice";
       invoiceData.convertedFromQuote = jobCardId;
       invoiceData.convertedFromQuoteNumber = jobCardNumber;
       invoiceData.convertedAt = serverTimestamp();
-      
+
       // Save to invoices collection
       const invoiceRef = await addDoc(
         collection(db, "users", user.uid, "invoices"),
-        invoiceData
+        invoiceData,
       );
-      
+
       // Update quote to mark as converted
       await updateDoc(doc(db, "users", user.uid, "quotations", jobCardId), {
         convertedToInvoice: true,
         convertedToInvoiceId: invoiceRef.id,
         convertedToInvoiceNumber: newInvoiceNumber,
         convertedAt: serverTimestamp(),
-        status: 'converted'
+        status: "converted",
       });
-      
+
       // Switch to invoice mode
-      setDocumentType('invoice');
+      setDocumentType("invoice");
       setJobCardId(invoiceRef.id);
       setJobCardNumber(newInvoiceNumber);
-      
+
       alert(`Quote successfully converted to Invoice ${newInvoiceNumber}`);
       loadSavedJobCards();
     } catch (error) {
-      console.error('Error converting quote to invoice:', error);
-      alert('Failed to convert quote to invoice');
+      console.error("Error converting quote to invoice:", error);
+      alert("Failed to convert quote to invoice");
     }
   };
 
   // NEW: Handle creating new quote
   const handleNewQuote = () => {
-    setDocumentType('quote');
+    setDocumentType("quote");
     handleNewJobCard();
   };
 
   // NEW: Handle creating new invoice/job card
   const handleNewInvoice = () => {
-    setDocumentType('invoice');
+    setDocumentType("invoice");
     handleNewJobCard();
   };
 
@@ -666,7 +716,7 @@ const MechanicsDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-300">
+    <div className="flex h-screen bg-slate-600">
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -677,10 +727,10 @@ const MechanicsDashboard = () => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-600 border-r border-gray-800 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
-          <div className="flex items-center space-x-2 mb-8">
+          <div className="flex items-center space-x-2 mb-12">
             <img
               src={logo}
               alt="Business Logo"
@@ -689,13 +739,13 @@ const MechanicsDashboard = () => {
           </div>
 
           <nav className="space-y-1">
-            <div className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer">
+            <div className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer">
               <Home className="w-5 h-5" />
               <span>Home</span>
             </div>
             <div
               onClick={() => setShowSettings(true)}
-              className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer"
+              className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer"
             >
               <Settings className="w-5 h-5" />
               <span>Settings</span>
@@ -704,14 +754,14 @@ const MechanicsDashboard = () => {
             <div className="pt-4">
               <div
                 onClick={() => setActiveView("financial-overview")}
-                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer"
+                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer"
               >
                 <TrendingUp className="w-5 h-5" />
                 <span>Business Overview</span>
               </div>
 
               <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer">
+                <div className="flex items-center justify-between px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer">
                   <div className="flex items-center space-x-3">
                     <ClipboardList className="w-5 h-5" />
                     <span>Job Cards</span>
@@ -725,7 +775,7 @@ const MechanicsDashboard = () => {
                       handleNewQuote();
                       setActiveView("invoice");
                     }}
-                    className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+                    className="px-3 py-2 text-sm text-white bg-slate-600 rounded-lg cursor-pointer"
                   >
                     Create Quote
                   </div>
@@ -734,56 +784,56 @@ const MechanicsDashboard = () => {
                       handleNewInvoice();
                       setActiveView("invoice");
                     }}
-                    className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+                    className="px-3 py-2 text-sm text-white bg-slate-600 rounded-lg cursor-pointer"
                   >
                     Create Invoice
                   </div>
                   <div
                     onClick={() => setShowJobCardsList(!showJobCardsList)}
-                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-600 rounded-lg cursor-pointer"
                   >
-                    All {documentType === 'quote' ? 'Quotes' : 'Invoices'} ({savedJobCards.length})
+                    All {documentType === "quote" ? "Quotes" : "Invoices"} (
+                    {savedJobCards.length})
                   </div>
-                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
+                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-600 rounded-lg cursor-pointer">
                     In Progress
                   </div>
                 </div>
               </div>
-                <div className="mt-2">
-              <div className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
-                <div className="flex items-center space-x-3">
-                <Users className="w-5 h-5" />
-                <span>Customers</span>
+              <div className="mt-2">
+                <div className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer mt-2">
+                  <div className="flex items-center space-x-3">
+                    <Users className="w-5 h-5" />
+                    <span>Customers</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
                 </div>
-                 <ChevronDown className="w-4 h-4" />
 
-              </div>
-
-              <div className="ml-8 mt-1 space-y-1">
-                <div
-                  onClick={handleAddNewCustomer}
-                  className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
-                >
-                  <span>Add Customer</span>
+                <div className="ml-8 mt-1 space-y-1">
+                  <div
+                    onClick={handleAddNewCustomer}
+                    className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-600 rounded-lg cursor-pointer mt-2"
+                  >
+                    <span>Add Customer</span>
+                  </div>
+                  <div
+                    onClick={() => setShowCustomersListModal(true)}
+                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-600 rounded-lg cursor-pointer"
+                  >
+                    All Customers ({savedCustomers.length})
+                  </div>
                 </div>
-                <div
-                  onClick={() => setShowCustomersListModal(true)}
-                  className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
-                >
-                  All Customers ({savedCustomers.length})
-                </div>
               </div>
-               </div>
               <div
                 onClick={() => setActiveView("templates")}
-                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer"
+                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer"
               >
                 <FileText className="w-5 h-5" />
                 <span>Invoice Templates</span>
               </div>
               <div
                 onClick={() => setActiveView("vehicles")}
-                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer"
+                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer"
               >
                 <Car className="w-5 h-5" />
                 <span>Vehicles</span>
@@ -791,32 +841,28 @@ const MechanicsDashboard = () => {
 
               <div
                 onClick={() => setActiveView("parts-inventory")}
-                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer"
+                className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer"
               >
                 <Package className="w-5 h-5" />
                 <span>Parts Inventory</span>
               </div>
 
-             
-
-              <div className="flex items-center justify-between px-3 py-2 text-white hover:bg-slate-800 rounded-lg cursor-pointer">
+              <div className="flex items-center justify-between px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <CreditCard className="w-5 h-5" />
                   <span>Payments</span>
                 </div>
                 <ChevronDown className="w-4 h-4" />
               </div>
-
-             
-
-             
             </div>
           </nav>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-600">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center"><img src={v8logo} alt="" /></div>
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+              <img src={v8logo} alt="" />
+            </div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "User"}
@@ -836,7 +882,7 @@ const MechanicsDashboard = () => {
       </div>
 
       <div className="flex-1 overflow-auto">
-        <div className="bg-gray-200 border-b border-gray-200 px-4 lg:px-6 py-4">
+        <div className="sticky top-0 z-40 bg-slate-600 border-b border-gray-800 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 lg:space-x-4">
               <button
@@ -845,33 +891,34 @@ const MechanicsDashboard = () => {
               >
                 <Menu className="w-5 h-5" />
               </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
-              <h1 className="text-base lg:text-xl font-semibold">
-                {documentType === 'quote' ? 'Quote' : 'Invoice'} #{jobCardNumber || "— not saved yet —"}
+              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-50" />
+              <h1 className="text-base lg:text-xl font-semibold text-gray-500">
+                {documentType === "quote" ? "Quote" : "Invoice"} #
+                {jobCardNumber || "— not saved yet —"}
               </h1>
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 text-gray-50">
                 <CheckSquare className="w-4 h-4" />
                 <span>Mark Complete</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 text-gray-50">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
-              
+
               {/* NEW: Convert to Invoice Button (only shows for quotes) */}
-              {documentType === 'quote' && jobCardId && (
+              {documentType === "quote" && jobCardId && (
                 <button
                   onClick={handleConvertToInvoice}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <FileText className="w-4 h-4" />
                   Convert to Invoice
                 </button>
               )}
-              
+
               <button
                 onClick={handlePrint}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
@@ -881,7 +928,9 @@ const MechanicsDashboard = () => {
               </button>
 
               <button
-                onClick={documentType === 'quote' ? handleNewQuote : handleNewInvoice}
+                onClick={
+                  documentType === "quote" ? handleNewQuote : handleNewInvoice
+                }
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
                 <Plus className="w-4 h-4" />
@@ -904,7 +953,7 @@ const MechanicsDashboard = () => {
               >
                 Save
               </button>
-             
+
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -921,76 +970,78 @@ const MechanicsDashboard = () => {
             </button>
           </div>
         </div>
- <div className="sticky top-0 z-40 flex flex-col">
-        <div className="sticky top-0 z-40 lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <button  onClick={handleConvertToInvoice}
-            className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
-              <CheckSquare className="w-4 h-4" />
-              <span>Convert to Invoice</span>
-            </button>
-            
-            {/* NEW: Convert to Invoice Button for Mobile (only shows for quotes) */}
-            {documentType === 'quote' && jobCardId && (
+        <div className="sticky top-0 z-40 flex flex-col">
+          <div className="sticky top-0 z-40 lg:hidden bg-white border-b border-gray-800 px-4 py-3 print:hidden">
+            <div className="flex gap-2 overflow-x-auto pb-2">
               <button
                 onClick={handleConvertToInvoice}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
+                className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm"
               >
-                <FileText className="w-4 h-4" />
-                <span>To Invoice</span>
+                <CheckSquare className="w-4 h-4" />
+                <span>Convert to Invoice</span>
               </button>
-            )}
-            
-            <button
-              onClick={handleSaveJobCard}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700"
-            >
-              Save
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700 whitespace-nowrap text-sm">
-              <Send className="w-4 h-4" />
-              <span>Send</span>
-            </button>
-            <button
-              onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-2 bg-orange-300 text-white rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Download className="w-4 h-4" />
-              <span>Save PDF</span>
-            </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Print</span>
-            </button>
-          </div>
-        </div>
-          
-        <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-          <div className="flex space-x-4 lg:space-x-8 min-w-max">
-            {["JobCard", "Parts", "History", "Notes"].map((tab) => (
+
+              {/* NEW: Convert to Invoice Button for Mobile (only shows for quotes) */}
+              {documentType === "quote" && jobCardId && (
+                <button
+                  onClick={handleConvertToInvoice}
+                  className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>To Invoice</span>
+                </button>
+              )}
+
               <button
-                key={tab}
-                onClick={() => {
-                  setActiveTab(tab);
-                  if (tabViewMap[tab]) {
-                    setActiveView(tabViewMap[tab]);
-                  }
-                }}
-                className={`py-4 border-b-2 ${
-                  activeTab === tab
-                    ? "border-orange-400 text-white"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
-                }`}
+                onClick={handleSaveJobCard}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700"
               >
-                {tab}
+                Save
               </button>
-            ))}
+              <button className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700 whitespace-nowrap text-sm">
+                <Send className="w-4 h-4" />
+                <span>Send</span>
+              </button>
+              <button
+                onClick={handleSave}
+                className="flex items-center gap-2 px-3 py-2 bg-orange-300 text-white rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap text-sm"
+              >
+                <Download className="w-4 h-4" />
+                <span>Save PDF</span>
+              </button>
+              <button
+                onClick={handlePrint}
+                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
+              >
+                <Printer className="w-4 h-4" />
+                <span>Print</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-slate-600 border-b border-gray-800 px-4 lg:px-6 overflow-x-auto print:hidden">
+            <div className="flex space-x-4 lg:space-x-8 min-w-max">
+              {["JobCard", "Parts", "History", "Notes"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    setActiveTab(tab);
+                    if (tabViewMap[tab]) {
+                      setActiveView(tabViewMap[tab]);
+                    }
+                  }}
+                  className={`py-4 border-b-2 ${
+                    activeTab === tab
+                      ? "border-orange-400 text-white"
+                      : "border-transparent text-gray-400 hover:text-gray-200"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-</div>
         <div className="p-4 lg:p-6">
           {showSettings && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -1036,7 +1087,9 @@ const MechanicsDashboard = () => {
                             htmlFor="logo-upload"
                             className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer"
                           >
-                            {businessInfo.logoUrl ? "Change Logo" : "Upload Logo"}
+                            {businessInfo.logoUrl
+                              ? "Change Logo"
+                              : "Upload Logo"}
                           </label>
                           <p className="text-xs text-gray-500 mt-2">
                             Recommended: Square image, max 5MB
@@ -1046,12 +1099,17 @@ const MechanicsDashboard = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">Business Name</label>
+                      <label className="block text-sm font-medium mb-2">
+                        Business Name
+                      </label>
                       <input
                         type="text"
                         value={businessInfo.businessName}
                         onChange={(e) =>
-                          setBusinessInfo({ ...businessInfo, businessName: e.target.value })
+                          setBusinessInfo({
+                            ...businessInfo,
+                            businessName: e.target.value,
+                          })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
                         placeholder="V8 Powered Auto Service"
@@ -1059,12 +1117,17 @@ const MechanicsDashboard = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">Address Line 1</label>
+                      <label className="block text-sm font-medium mb-2">
+                        Address Line 1
+                      </label>
                       <input
                         type="text"
                         value={businessInfo.addressLine1}
                         onChange={(e) =>
-                          setBusinessInfo({ ...businessInfo, addressLine1: e.target.value })
+                          setBusinessInfo({
+                            ...businessInfo,
+                            addressLine1: e.target.value,
+                          })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
                         placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
@@ -1072,12 +1135,17 @@ const MechanicsDashboard = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">Address Line 2</label>
+                      <label className="block text-sm font-medium mb-2">
+                        Address Line 2
+                      </label>
                       <input
                         type="text"
                         value={businessInfo.addressLine2}
                         onChange={(e) =>
-                          setBusinessInfo({ ...businessInfo, addressLine2: e.target.value })
+                          setBusinessInfo({
+                            ...businessInfo,
+                            addressLine2: e.target.value,
+                          })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
                         placeholder="WYNBERG"
@@ -1086,12 +1154,17 @@ const MechanicsDashboard = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2">City</label>
+                        <label className="block text-sm font-medium mb-2">
+                          City
+                        </label>
                         <input
                           type="text"
                           value={businessInfo.city}
                           onChange={(e) =>
-                            setBusinessInfo({ ...businessInfo, city: e.target.value })
+                            setBusinessInfo({
+                              ...businessInfo,
+                              city: e.target.value,
+                            })
                           }
                           className="w-full px-4 py-2 border rounded-lg"
                           placeholder="SANDTON"
@@ -1099,12 +1172,17 @@ const MechanicsDashboard = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-2">Postal Code</label>
+                        <label className="block text-sm font-medium mb-2">
+                          Postal Code
+                        </label>
                         <input
                           type="text"
                           value={businessInfo.postalCode}
                           onChange={(e) =>
-                            setBusinessInfo({ ...businessInfo, postalCode: e.target.value })
+                            setBusinessInfo({
+                              ...businessInfo,
+                              postalCode: e.target.value,
+                            })
                           }
                           className="w-full px-4 py-2 border rounded-lg"
                           placeholder="2090"
@@ -1113,12 +1191,17 @@ const MechanicsDashboard = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">Primary Phone *</label>
+                      <label className="block text-sm font-medium mb-2">
+                        Primary Phone *
+                      </label>
                       <input
                         type="tel"
                         value={businessInfo.primaryPhone}
                         onChange={(e) =>
-                          setBusinessInfo({ ...businessInfo, primaryPhone: e.target.value })
+                          setBusinessInfo({
+                            ...businessInfo,
+                            primaryPhone: e.target.value,
+                          })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
                         placeholder="082 514 4509"
@@ -1127,18 +1210,23 @@ const MechanicsDashboard = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">Secondary Phone (Optional)</label>
+                      <label className="block text-sm font-medium mb-2">
+                        Secondary Phone (Optional)
+                      </label>
                       <input
                         type="tel"
                         value={businessInfo.secondaryPhone}
                         onChange={(e) =>
-                          setBusinessInfo({ ...businessInfo, secondaryPhone: e.target.value })
+                          setBusinessInfo({
+                            ...businessInfo,
+                            secondaryPhone: e.target.value,
+                          })
                         }
                         className="w-full px-4 py-2 border rounded-lg"
                         placeholder="084 583 9929"
                       />
                     </div>
-                     <div className="border-t pt-4 mt-6">
+                    <div className="border-t pt-4 mt-6">
                       <h3 className="text-lg font-semibold mb-4">
                         Bank Details
                       </h3>
@@ -1214,82 +1302,128 @@ const MechanicsDashboard = () => {
                       </div>
                     </div>
                     {/* Add this in your Business Settings modal, after phone fields */}
-<div className="border-t pt-6 mt-6">
-  <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>
-  
-  <div className="space-y-4">
-    <div>
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={stampSettings.enabled}
-          onChange={(e) => setStampSettings({...stampSettings, enabled: e.target.checked})}
-          className="w-4 h-4 rounded"
-        />
-        <span className="text-sm font-medium">Show approval stamp on invoices and quotes</span>
-      </label>
-    </div>
+                    <div className="border-t pt-6 mt-6">
+                      <h3 className="text-lg font-semibold mb-4">
+                        📋 Invoice Stamp Settings
+                      </h3>
 
-    {stampSettings.enabled && (
-      <>
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Text</label>
-          <input
-            type="text"
-            value={stampSettings.text}
-            onChange={(e) => setStampSettings({...stampSettings, text: e.target.value.toUpperCase()})}
-            className="w-full px-4 py-2 border rounded-lg uppercase"
-            placeholder="APPROVED"
-            maxLength={15}
-          />
-          <p className="text-xs text-gray-500 mt-1">Max 15 characters</p>
-        </div>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="flex items-center space-x-2 mb-4">
+                            <input
+                              type="checkbox"
+                              checked={stampSettings.enabled}
+                              onChange={(e) =>
+                                setStampSettings({
+                                  ...stampSettings,
+                                  enabled: e.target.checked,
+                                })
+                              }
+                              className="w-4 h-4 rounded"
+                            />
+                            <span className="text-sm font-medium">
+                              Show approval stamp on invoices and quotes
+                            </span>
+                          </label>
+                        </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Stamp Color</label>
-          <select
-            value={stampSettings.color}
-            onChange={(e) => setStampSettings({...stampSettings, color: e.target.value})}
-            className="w-full px-4 py-2 border rounded-lg"
-          >
-            <option value="#d32f2f">🔴 Red (Traditional)</option>
-            <option value="#1976d2">🔵 Blue (Professional)</option>
-            <option value="#388e3c">🟢 Green (Approved)</option>
-            <option value="#7b1fa2">🟣 Purple (Premium)</option>
-            <option value="#000000">⚫ Black (Formal)</option>
-            <option value="#f57c00">🟠 Orange (Attention)</option>
-          </select>
-        </div>
+                        {stampSettings.enabled && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                Stamp Text
+                              </label>
+                              <input
+                                type="text"
+                                value={stampSettings.text}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    text: e.target.value.toUpperCase(),
+                                  })
+                                }
+                                className="w-full px-4 py-2 border rounded-lg uppercase"
+                                placeholder="APPROVED"
+                                maxLength={15}
+                              />
+                              <p className="text-xs text-gray-500 mt-1">
+                                Max 15 characters
+                              </p>
+                            </div>
 
-        <div>
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={stampSettings.showDate}
-              onChange={(e) => setStampSettings({...stampSettings, showDate: e.target.checked})}
-              className="w-4 h-4 rounded"
-            />
-            <span className="text-sm font-medium">Include date on stamp</span>
-          </label>
-        </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                Stamp Color
+                              </label>
+                              <select
+                                value={stampSettings.color}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    color: e.target.value,
+                                  })
+                                }
+                                className="w-full px-4 py-2 border rounded-lg"
+                              >
+                                <option value="#d32f2f">
+                                  🔴 Red (Traditional)
+                                </option>
+                                <option value="#1976d2">
+                                  🔵 Blue (Professional)
+                                </option>
+                                <option value="#388e3c">
+                                  🟢 Green (Approved)
+                                </option>
+                                <option value="#7b1fa2">
+                                  🟣 Purple (Premium)
+                                </option>
+                                <option value="#000000">
+                                  ⚫ Black (Formal)
+                                </option>
+                                <option value="#f57c00">
+                                  🟠 Orange (Attention)
+                                </option>
+                              </select>
+                            </div>
 
-        {/* Preview */}
-        <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
-          <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
-          <div className="flex justify-center">
-            <SignatureStamp 
-              text={stampSettings.text}
-              color={stampSettings.color}
-              showDate={stampSettings.showDate}
-              rotation={-5}
-              size="medium"
-            />
-          </div>
-        </div>
-      </>
-    )}
-  </div>
-</div>
+                            <div>
+                              <label className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={stampSettings.showDate}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      showDate: e.target.checked,
+                                    })
+                                  }
+                                  className="w-4 h-4 rounded"
+                                />
+                                <span className="text-sm font-medium">
+                                  Include date on stamp
+                                </span>
+                              </label>
+                            </div>
+
+                            {/* Preview */}
+                            <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
+                              <p className="text-sm font-medium mb-4 text-center text-gray-600">
+                                Preview:
+                              </p>
+                              <div className="flex justify-center">
+                                <SignatureStamp
+                                  text={stampSettings.text}
+                                  color={stampSettings.color}
+                                  showDate={stampSettings.showDate}
+                                  rotation={-5}
+                                  size="medium"
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
 
                     <button
                       onClick={handleSaveBusinessInfo}
@@ -1324,7 +1458,7 @@ const MechanicsDashboard = () => {
               <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
                 <div className="p-4 border-b flex items-center justify-between">
                   <h2 className="text-xl font-semibold">
-                    Saved {documentType === 'quote' ? 'Quotes' : 'Job Cards'}
+                    Saved {documentType === "quote" ? "Quotes" : "Job Cards"}
                   </h2>
                   <button
                     onClick={() => setShowJobCardsList(false)}
@@ -1337,7 +1471,8 @@ const MechanicsDashboard = () => {
                 <div className="overflow-auto p-4">
                   {savedJobCards.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
-                      No saved {documentType === 'quote' ? 'quotes' : 'job cards'} yet
+                      No saved{" "}
+                      {documentType === "quote" ? "quotes" : "job cards"} yet
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -1356,11 +1491,13 @@ const MechanicsDashboard = () => {
                                 Customer: {card.customer?.name || "N/A"}
                               </div>
                               <div className="text-sm text-gray-600">
-                                Vehicle: {card.vehicle?.year || ""} {card.vehicle?.make || ""}{" "}
+                                Vehicle: {card.vehicle?.year || ""}{" "}
+                                {card.vehicle?.make || ""}{" "}
                                 {card.vehicle?.model || "N/A"}
                               </div>
                               <div className="text-sm text-gray-600">
-                                Registration: {card.vehicle?.registration || "N/A"}
+                                Registration:{" "}
+                                {card.vehicle?.registration || "N/A"}
                               </div>
                             </div>
                             <div className="text-right">
@@ -1369,7 +1506,9 @@ const MechanicsDashboard = () => {
                               </div>
                               <div className="text-sm text-gray-500">
                                 {card.dates?.serviceDate
-                                  ? new Date(card.dates.serviceDate).toLocaleDateString("en-ZA")
+                                  ? new Date(
+                                      card.dates.serviceDate,
+                                    ).toLocaleDateString("en-ZA")
                                   : "N/A"}
                               </div>
                               <div
@@ -1377,8 +1516,8 @@ const MechanicsDashboard = () => {
                                   card.status === "completed"
                                     ? "bg-green-100 text-green-700"
                                     : card.status === "pending"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : "bg-gray-100 text-gray-700"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-gray-100 text-gray-700"
                                 }`}
                               >
                                 {card.status || "unknown"}
@@ -1394,320 +1533,422 @@ const MechanicsDashboard = () => {
             </div>
           )}
 
-          {activeView === "financial-overview" && <FinancialOverview user={user} />}
+          {activeView === "financial-overview" && (
+            <FinancialOverview user={user} />
+          )}
           {activeView === "parts-inventory" && <PartsInventory user={user} />}
           {activeView === "history-view" && <HistoryView user={user} />}
           {activeView === "notes-view" && <NotesView user={user} />}
           {activeView === "vehicles" && <Vehicles user={user} />}
           {activeView === "templates" && <Templates user={user} />}
-          
+
           {activeView === "invoice" && (
             <>
               <button
                 onClick={() => setShowJobCard(!showJobCard)}
-                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-orange-100 transition-colors"
               >
                 <FileText className="w-5 h-5" />
-                {showJobCard ? `Hide ${documentType === 'quote' ? 'Quote' : 'Job Card'}` : `View ${documentType === 'quote' ? 'Quote' : 'Job Card'}`}
+                {showJobCard
+                  ? `Hide ${documentType === "quote" ? "Quote" : "Job Card"}`
+                  : `View ${documentType === "quote" ? "Quote" : "Job Card"}`}
               </button>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className={`${showJobCard ? "hidden" : "block"} space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-blue-700 font-medium">In Progress</span>
-                    <span className="text-blue-600">Started Today</span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="text-sm text-gray-500 mb-1">Total Amount</div>
-                      <div className="text-2xl font-semibold text-orange-600">
-                        R{total.toFixed(2)}
-                      </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="text-sm text-gray-500 mb-1">Paid</div>
-                      <div className="text-2xl font-semibold text-green-600">R0.00</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="text-sm text-gray-500 mb-1">Balance Due</div>
-                      <div className="text-2xl font-semibold text-red-600">
-                        R{total.toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-300 border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Users className="w-5 h-5" />
-                        <span>Customer Information</span>
-                      </h2>
-                    </div>
-                    <h4 className="mb-4 bg-gray-300 p-2 rounded">INVOICE TO</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Customer Name</div>
-                        <input
-                          type="text"
-                          value={customerName}
-                          onChange={(e) => setCustomerName(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Customer ID</div>
-                        <input
-                          type="text"
-                          value={merchant_code}
-                          onChange={(e) => setCustomerId(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Email</div>
-                        <input
-                          type="text"
-                          value={customerEmail}
-                          onChange={(e) => setCustomerEmail(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Phone</div>
-                        <input
-                          type="text"
-                          value={customerPhone}
-                          onChange={(e) => setCustomerPhone(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <div className="text-sm text-gray-500">Address</div>
-                        <input
-                          type="text"
-                          value={customerAddress}
-                          onChange={(e) => setCustomerAddress(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                    </div>
-                    <div className="mt-4"></div>
-                     <h4 className="mb-4 bg-blue-300 p-2 rounded">BILL TO</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Customer Name</div>
-                        <input
-                          type="text"
-                          value={billName}
-                          onChange={(e) => setBillName(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Customer ID</div>
-                        <input
-                          type="text"
-                          value={merchant_code}
-                          onChange={(e) => setCustomerId(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Email</div>
-                        <input
-                          type="text"
-                          value={billEmail}
-                          onChange={(e) => setBillEmail(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Phone</div>
-                        <input
-                          type="text"
-                          value={billPhone}
-                          onChange={(e) => setBillPhone(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <div className="text-sm text-gray-500">Address</div>
-                        <input
-                          type="text"
-                          value={billAddress}
-                          onChange={(e) => setBillAddress(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-300 border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Car className="w-5 h-5" />
-                        <span>Vehicle Information</span>
-                      </h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Make</div>
-                        <input
-                          type="text"
-                          value={vehicleMake}
-                          onChange={(e) => setVehicleMake(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Model</div>
-                        <input
-                          type="text"
-                          value={vehicleModel}
-                          onChange={(e) => setVehicleModel(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Year</div>
-                        <input
-                          type="text"
-                          value={vehicleYear}
-                          onChange={(e) => setVehicleYear(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Registration</div>
-                        <input
-                          type="text"
-                          value={vehicleReg}
-                          onChange={(e) => setVehicleReg(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">VIN</div>
-                        <input
-                          type="text"
-                          value={vehicleVin}
-                          onChange={(e) => setVehicleVin(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Mileage (km)</div>
-                        <input
-                          type="text"
-                          value={vehicleMileage}
-                          onChange={(e) => setVehicleMileage(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                       <div>
-                        <div className="text-sm text-gray-500">Pre Auth</div>
-                        <input
-                          type="text"
-                          value={preAuth}
-                          onChange={(e) => setPreAuth(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Auth Code</div>
-                        <input
-                          type="text"
-                          value={authCode}
-                          onChange={(e) => setAuthCode(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                    <h2 className="text-lg font-semibold mb-4">Add Service/Part</h2>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                      <select
-                        value={newItem.type}
-                        onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
-                        className="px-4 py-2 border rounded"
-                      >
-                        <option value="Labor">Labor</option>
-                        <option value="Parts">Parts</option>
-                      </select>
-
-                      <input
-                        type="text"
-                        placeholder="Description"
-                        value={newItem.description}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, description: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Rate"
-                        value={newItem.rate}
-                        onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })}
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Qty"
-                        value={newItem.qty}
-                        onChange={(e) => setNewItem({ ...newItem, qty: e.target.value })}
-                        className="px-4 py-2 border rounded"
-                      />
-
+                <div
+                  className={`${showJobCard ? "hidden" : "block"} space-y-6 lg:block print:hidden min-h-[calc(100vh)] overflow-y-auto`}
+                >
+                  {/* Tab Navigation */}
+                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="flex border-b">
                       <button
-                        onClick={handleAddItem}
-                        className="bg-gray-600 text-white rounded-lg px-4 py-2 hover:bg-orange-700 flex items-center justify-center gap-2"
+                        onClick={() => setInputMode("manual")}
+                        className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                          inputMode === "manual"
+                            ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                            : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                        }`}
                       >
-                        <Plus className="w-4 h-4" />
-                        Add
+                        📝 Manual Entry
+                      </button>
+                      <button
+                        onClick={() => setInputMode("ai")}
+                        className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                          inputMode === "ai"
+                            ? "bg-white text-purple-600 border-b-2 border-purple-600"
+                            : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        AI Assistant
                       </button>
                     </div>
-                  </div>
 
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold">Payment Terms</h2>
-                    </div>
-
-                    <div className="space-y-3 text-sm">
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Payment Method:</span>
-                        <span className="font-medium">Cash/Card/EFT</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Payment Terms:</span>
-                        <span className="font-medium">Due on Completion</span>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <span className="text-gray-600">Warranty:</span>
-                        <span className="font-medium">90 Days Parts & Labor</span>
-                      </div>
+                    {/* Tab Content */}
+                    <div className="p-6">
+                      {inputMode === "ai" ? (
+                        <AIInvoiceExtractor
+                          onDataExtracted={handleAIDataExtracted}
+                          documentType={documentType}
+                        />
+                      ) : (
+                        <div className="text-sm text-gray-600">
+                          Fill out the forms below to create your {documentType}
+                          .
+                        </div>
+                      )}
                     </div>
                   </div>
+                  {/* Manual forms always visible */}
+                  {inputMode === "manual" && (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <div className="text-sm text-gray-500 mb-1">
+                            Total Amount
+                          </div>
+                          <div className="text-2xl font-semibold text-orange-600">
+                            R{total.toFixed(2)}
+                          </div>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <div className="text-sm text-gray-500 mb-1">Paid</div>
+                          <div className="text-2xl font-semibold text-green-600">
+                            R0.00
+                          </div>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <div className="text-sm text-gray-500 mb-1">
+                            Balance Due
+                          </div>
+                          <div className="text-2xl font-semibold text-red-600">
+                            R{total.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-300 border border-gray-200 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-lg font-semibold flex items-center space-x-2">
+                            <Users className="w-5 h-5" />
+                            <span>Customer Information</span>
+                          </h2>
+                        </div>
+                        <h4 className="mb-4 bg-gray-300 p-2 rounded">
+                          INVOICE TO
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              Customer Name
+                            </div>
+                            <input
+                              type="text"
+                              value={customerName}
+                              onChange={(e) => setCustomerName(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              Customer ID
+                            </div>
+                            <input
+                              type="text"
+                              value={merchant_code}
+                              onChange={(e) => setCustomerId(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">Email</div>
+                            <input
+                              type="text"
+                              value={customerEmail}
+                              onChange={(e) => setCustomerEmail(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">Phone</div>
+                            <input
+                              type="text"
+                              value={customerPhone}
+                              onChange={(e) => setCustomerPhone(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div className="col-span-1 sm:col-span-2">
+                            <div className="text-sm text-gray-500">Address</div>
+                            <input
+                              type="text"
+                              value={customerAddress}
+                              onChange={(e) =>
+                                setCustomerAddress(e.target.value)
+                              }
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-4"></div>
+                        <h4 className="mb-4 bg-blue-300 p-2 rounded">
+                          BILL TO
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              Customer Name
+                            </div>
+                            <input
+                              type="text"
+                              value={billName}
+                              onChange={(e) => setBillName(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              Customer ID
+                            </div>
+                            <input
+                              type="text"
+                              value={merchant_code}
+                              onChange={(e) => setCustomerId(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">Email</div>
+                            <input
+                              type="text"
+                              value={billEmail}
+                              onChange={(e) => setBillEmail(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">Phone</div>
+                            <input
+                              type="text"
+                              value={billPhone}
+                              onChange={(e) => setBillPhone(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div className="col-span-1 sm:col-span-2">
+                            <div className="text-sm text-gray-500">Address</div>
+                            <input
+                              type="text"
+                              value={billAddress}
+                              onChange={(e) => setBillAddress(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-300 border border-gray-200 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-lg font-semibold flex items-center space-x-2">
+                            <Car className="w-5 h-5" />
+                            <span>Vehicle Information</span>
+                          </h2>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-sm text-gray-500">Make</div>
+                            <input
+                              type="text"
+                              value={vehicleMake}
+                              onChange={(e) => setVehicleMake(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">Model</div>
+                            <input
+                              type="text"
+                              value={vehicleModel}
+                              onChange={(e) => setVehicleModel(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">Year</div>
+                            <input
+                              type="text"
+                              value={vehicleYear}
+                              onChange={(e) => setVehicleYear(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              Registration
+                            </div>
+                            <input
+                              type="text"
+                              value={vehicleReg}
+                              onChange={(e) => setVehicleReg(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">VIN</div>
+                            <input
+                              type="text"
+                              value={vehicleVin}
+                              onChange={(e) => setVehicleVin(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              Mileage (km)
+                            </div>
+                            <input
+                              type="text"
+                              value={vehicleMileage}
+                              onChange={(e) =>
+                                setVehicleMileage(e.target.value)
+                              }
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              Pre Auth
+                            </div>
+                            <input
+                              type="text"
+                              value={preAuth}
+                              onChange={(e) => setPreAuth(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              Auth Code
+                            </div>
+                            <input
+                              type="text"
+                              value={authCode}
+                              onChange={(e) => setAuthCode(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                        <h2 className="text-lg font-semibold mb-4">
+                          Add Service/Part
+                        </h2>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                          <select
+                            value={newItem.type}
+                            onChange={(e) =>
+                              setNewItem({ ...newItem, type: e.target.value })
+                            }
+                            className="px-4 py-2 border rounded"
+                          >
+                            <option value="Labor">Labor</option>
+                            <option value="Parts">Parts</option>
+                          </select>
+
+                          <input
+                            type="text"
+                            placeholder="Description"
+                            value={newItem.description}
+                            onChange={(e) =>
+                              setNewItem({
+                                ...newItem,
+                                description: e.target.value,
+                              })
+                            }
+                            className="px-4 py-2 border rounded"
+                          />
+
+                          <input
+                            type="number"
+                            placeholder="Rate"
+                            value={newItem.rate}
+                            onChange={(e) =>
+                              setNewItem({ ...newItem, rate: e.target.value })
+                            }
+                            className="px-4 py-2 border rounded"
+                          />
+
+                          <input
+                            type="number"
+                            placeholder="Qty"
+                            value={newItem.qty}
+                            onChange={(e) =>
+                              setNewItem({ ...newItem, qty: e.target.value })
+                            }
+                            className="px-4 py-2 border rounded"
+                          />
+
+                          <button
+                            onClick={handleAddItem}
+                            className="bg-gray-600 text-white rounded-lg px-4 py-2 hover:bg-orange-700 flex items-center justify-center gap-2"
+                          >
+                            <Plus className="w-4 h-4" />
+                            Add
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-lg font-semibold">
+                            Payment Terms
+                          </h2>
+                        </div>
+
+                        <div className="space-y-3 text-sm">
+                          <div className="flex justify-between py-2 border-b">
+                            <span className="text-gray-600">
+                              Payment Method:
+                            </span>
+                            <span className="font-medium">Cash/Card/EFT</span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b">
+                            <span className="text-gray-600">
+                              Payment Terms:
+                            </span>
+                            <span className="font-medium">
+                              Due on Completion
+                            </span>
+                          </div>
+                          <div className="flex justify-between py-2">
+                            <span className="text-gray-600">Warranty:</span>
+                            <span className="font-medium">
+                              90 Days Parts & Labor
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  ,
                 </div>
 
                 <div
                   className={`${
                     !showJobCard ? "hidden" : "block"
                   } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-                  style={{ width: "100%", maxWidth: "210mm", minHeight: "297mm" }}
+                  style={{
+                    width: "100%",
+                    maxWidth: "210mm",
+                    minHeight: "297mm",
+                  }}
                 >
                   <div className="mb-4">
-                    <TemplateSelector 
-                      user={user} 
+                    <TemplateSelector
+                      user={user}
                       selectedTemplate={selectedTemplate}
                       onTemplateChange={setSelectedTemplate}
                     />
@@ -1748,7 +1989,6 @@ const MechanicsDashboard = () => {
                     showStampDate={stampSettings.showDate}
                     showStamp={stampSettings.enabled}
                   />
-                  
                 </div>
 
                 <style>{`
@@ -1781,7 +2021,7 @@ const MechanicsDashboard = () => {
                     
                     nav,
                     [class*="sidebar"],
-                    [class*="bg-gray-800"],
+                    [class*="bg-slate-600"],
                     button:not([style]) {
                       display: none !important;
                     }

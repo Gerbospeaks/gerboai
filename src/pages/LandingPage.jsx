@@ -51,8 +51,8 @@ const LandingPage = () => {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
-        footerContainer.style.maskImage = `radial-gradient(circle at ${x}px ${y}px, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 60%)`;
-        footerContainer.style.webkitMaskImage = `radial-gradient(circle at ${x}px ${y}px, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 60%)`;
+        footerContainer.style.maskImage = `radial-gradient(circle at ${x}px ${y}px, rgb(32, 24, 43) 0%, rgba(83, 74, 74, 0) 50%)`;
+        footerContainer.style.webkitMaskImage = `radial-gradient(circle at ${x}px ${y}px, rgb(0, 0, 0) 0%, rgba(48, 33, 33, 0) 50%)`;
       };
 
       const handleMouseLeave = () => {

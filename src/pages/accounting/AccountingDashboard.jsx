@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
-import logo from '../../assets/img/solidflo-logo.png';
+import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import {
   getFirestore,
@@ -19,11 +19,12 @@ import {
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download, RefreshCw } from "lucide-react";
 import { db } from "../../firebase";
-import CustomerModal from '../CustomerModal';
-import CustomersListModal from '../CustomersListModal';
+import CustomerModal from "../CustomerModal";
+import CustomersListModal from "../CustomersListModal";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
-import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
+import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import {
   ChevronDown,
   ChevronLeft,
@@ -40,6 +41,7 @@ import {
   Send,
   Edit,
   LogOut,
+  Sparkles,
   CheckSquare,
   TrendingUp,
   CreditCard,
@@ -49,7 +51,7 @@ import {
   Upload,
   BookOpen,
 } from "lucide-react";
-import SignatureStamp from '../SignatureStamp';
+import SignatureStamp from "../SignatureStamp";
 
 // Generate Quote Number
 const generateQuoteNumber = async (userId) => {
@@ -117,22 +119,23 @@ const AccountingDashboard = () => {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [activeTemplate, setActiveTemplate] = useState("classic");
-  const [activeView, setActiveView] = useState('invoice');
-  const [selectedTemplate, setSelectedTemplate] = useState('contemporary');
-  const [documentType, setDocumentType] = useState('invoice'); // 'invoice' or 'quote'
+  const [activeView, setActiveView] = useState("invoice");
+  const [selectedTemplate, setSelectedTemplate] = useState("contemporary");
+  const [documentType, setDocumentType] = useState("invoice"); // 'invoice' or 'quote'
   const [showConvertButton, setShowConvertButton] = useState(false);
+  const [inputMode, setInputMode] = useState("manual");
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
-  color: "#d32f2f",
-  showDate: false,
-  enabled: false
+    color: "#d32f2f",
+    showDate: false,
+    enabled: false,
   });
 
   useEffect(() => {
     if (!user?.uid) return;
 
     const loadDocumentNumber = async () => {
-      if (documentType === 'quote') {
+      if (documentType === "quote") {
         const nextQuote = await generateQuoteNumber(user.uid);
         setDocumentNumber(nextQuote);
       } else {
@@ -148,20 +151,23 @@ const AccountingDashboard = () => {
 
   const loadCustomers = async () => {
     try {
-      const q = query(collection(db, "users", user.uid, "clients"), orderBy('createdAt', 'desc'));
+      const q = query(
+        collection(db, "users", user.uid, "clients"),
+        orderBy("createdAt", "desc"),
+      );
       const querySnapshot = await getDocs(q);
       const customersData = [];
-      
+
       querySnapshot.forEach((doc) => {
         customersData.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         });
       });
-      
+
       setCustomers(customersData);
     } catch (error) {
-      console.error('Error loading customers:', error);
+      console.error("Error loading customers:", error);
     }
   };
 
@@ -224,7 +230,7 @@ const AccountingDashboard = () => {
   }, []);
 
   const loadInvoice = (invoice) => {
-    setDocumentType('invoice');
+    setDocumentType("invoice");
     setDocumentId(invoice.id);
     setDocumentNumber(invoice.invoiceNumber || "");
     setCustomerName(invoice.customer?.name || "");
@@ -232,17 +238,37 @@ const AccountingDashboard = () => {
     setCustomerPhone(invoice.customer?.phone || "");
     setCustomerAddress(invoice.customer?.address || "");
     setCustomerId(invoice.customer?.customerId || "");
-    setInvoiceDate(invoice.dates?.invoiceDate || new Date().toISOString().split('T')[0]);
+    setInvoiceDate(
+      invoice.dates?.invoiceDate || new Date().toISOString().split("T")[0],
+    );
     setDueDate(invoice.dates?.dueDate || "");
     setPaymentTerms(invoice.payment?.terms || "Net 30");
     setItems(invoice.items || []);
     setShowInvoicesList(false);
     setShowConvertButton(false);
-    setActiveView('invoice');
+    setActiveView("invoice");
   };
+  const handleAIDataExtracted = (extractedData) => {
+    // Customer info
+    if (extractedData.customer.name)
+      setCustomerName(extractedData.customer.name);
+    if (extractedData.customer.email)
+      setCustomerEmail(extractedData.customer.email);
+    if (extractedData.customer.phone)
+      setCustomerPhone(extractedData.customer.phone);
+    if (extractedData.customer.address)
+      setCustomerAddress(extractedData.customer.address);
+    if (extractedData.customer.merchant_code)
+      setCustomerId(extractedData.customer.merchant_code);
 
+    if (extractedData.items && extractedData.items.length > 0) {
+      setItems(extractedData.items);
+    }
+
+    alert("✅ Data extracted and populated successfully!");
+  };
   const loadQuote = (quote) => {
-    setDocumentType('quote');
+    setDocumentType("quote");
     setDocumentId(quote.id);
     setDocumentNumber(quote.quoteNumber || "");
     setCustomerName(quote.customer?.name || "");
@@ -250,13 +276,15 @@ const AccountingDashboard = () => {
     setCustomerPhone(quote.customer?.phone || "");
     setCustomerAddress(quote.customer?.address || "");
     setCustomerId(quote.customer?.customerId || "");
-    setInvoiceDate(quote.dates?.quoteDate || new Date().toISOString().split('T')[0]);
+    setInvoiceDate(
+      quote.dates?.quoteDate || new Date().toISOString().split("T")[0],
+    );
     setDueDate(quote.dates?.validUntil || "");
     setPaymentTerms(quote.payment?.terms || "Net 30");
     setItems(quote.items || []);
     setShowQuotesList(false);
     setShowConvertButton(true);
-    setActiveView('invoice');
+    setActiveView("invoice");
   };
 
   const loadSavedCustomers = async () => {
@@ -272,12 +300,12 @@ const AccountingDashboard = () => {
       ...doc.data(),
     }));
 
-    setSavedCustomers(customers.filter(c => !c._placeholder));
+    setSavedCustomers(customers.filter((c) => !c._placeholder));
   };
 
   const handleSaveCustomer = async () => {
     if (!user?.uid) return;
-    
+
     if (!customerName || !customerEmail) {
       alert("Please enter customer name and email");
       return;
@@ -292,7 +320,7 @@ const AccountingDashboard = () => {
         address: customerAddress,
         customerId: customerId || `CUST-${Date.now()}`,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       await addDoc(collection(db, "users", user.uid, "clients"), customerData);
@@ -308,9 +336,9 @@ const AccountingDashboard = () => {
     if (!user?.uid || !documentId) return null;
 
     const db = getFirestore();
-    const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
+    const collectionName = documentType === "quote" ? "quotations" : "invoices";
     const snap = await getDoc(
-      doc(db, "users", user.uid, collectionName, documentId)
+      doc(db, "users", user.uid, collectionName, documentId),
     );
 
     return snap.exists() ? snap.data() : null;
@@ -324,7 +352,7 @@ const AccountingDashboard = () => {
       return;
     }
 
-    if (documentType === 'quote') {
+    if (documentType === "quote") {
       setDocumentNumber(savedDocument.quoteNumber);
       setInvoiceDate(savedDocument.dates.quoteDate);
       setDueDate(savedDocument.dates.validUntil);
@@ -333,7 +361,7 @@ const AccountingDashboard = () => {
       setInvoiceDate(savedDocument.dates.invoiceDate);
       setDueDate(savedDocument.dates.dueDate);
     }
-    
+
     setItems(savedDocument.items);
     setCustomerName(savedDocument.customer.name);
     setCustomerEmail(savedDocument.customer.email);
@@ -383,9 +411,11 @@ const AccountingDashboard = () => {
   const [customerEmail, setCustomerEmail] = useState("accounts@acmecorp.com");
   const [customerPhone, setCustomerPhone] = useState("011 234 5678");
   const [customerAddress, setCustomerAddress] = useState(
-    "456 Business Park, Sandton, 2196"
+    "456 Business Park, Sandton, 2196",
   );
-  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
+  const [invoiceDate, setInvoiceDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
   const [dueDate, setDueDate] = useState("");
   const [paymentTerms, setPaymentTerms] = useState("Net 30");
 
@@ -540,7 +570,7 @@ const AccountingDashboard = () => {
       updatedAt: serverTimestamp(),
     };
 
-    if (documentType === 'quote') {
+    if (documentType === "quote") {
       return {
         ...basePayload,
         quoteNumber: numberToUse,
@@ -568,7 +598,7 @@ const AccountingDashboard = () => {
     let numberToUse = documentNumber;
 
     if (!documentId) {
-      if (documentType === 'quote') {
+      if (documentType === "quote") {
         numberToUse = await generateQuoteNumber(user.uid);
       } else {
         numberToUse = await generateInvoiceNumber(user.uid);
@@ -577,30 +607,35 @@ const AccountingDashboard = () => {
     }
 
     const documentData = buildDocumentPayload(numberToUse);
-    const collectionName = documentType === 'quote' ? 'quotations' : 'invoices';
+    const collectionName = documentType === "quote" ? "quotations" : "invoices";
 
     try {
       if (documentId) {
-        await updateDoc(doc(db, "users", user.uid, collectionName, documentId), {
-          ...documentData,
-          updatedAt: serverTimestamp(),
-        });
+        await updateDoc(
+          doc(db, "users", user.uid, collectionName, documentId),
+          {
+            ...documentData,
+            updatedAt: serverTimestamp(),
+          },
+        );
       } else {
         const ref = await addDoc(
           collection(db, "users", user.uid, collectionName),
-          documentData
+          documentData,
         );
         setDocumentId(ref.id);
-        
+
         // Show convert button after saving a quote
-        if (documentType === 'quote') {
+        if (documentType === "quote") {
           setShowConvertButton(true);
         }
       }
 
-      alert(`${documentType === 'quote' ? 'Quote' : 'Invoice'} saved successfully`);
-      
-      if (documentType === 'quote') {
+      alert(
+        `${documentType === "quote" ? "Quote" : "Invoice"} saved successfully`,
+      );
+
+      if (documentType === "quote") {
         loadSavedQuotes();
       } else {
         loadSavedInvoices();
@@ -612,21 +647,25 @@ const AccountingDashboard = () => {
   };
 
   const handleConvertToInvoice = async () => {
-    if (!documentId || documentType !== 'quote') {
+    if (!documentId || documentType !== "quote") {
       alert("Please save the quote first");
       return;
     }
 
-    if (!window.confirm("Convert this quote to an invoice? This will create a new invoice.")) {
+    if (
+      !window.confirm(
+        "Convert this quote to an invoice? This will create a new invoice.",
+      )
+    ) {
       return;
     }
 
     try {
       const db = getFirestore();
-      
+
       // Generate new invoice number
       const newInvoiceNumber = await generateInvoiceNumber(user.uid);
-      
+
       // Create invoice payload from current quote data
       const invoiceData = {
         invoiceNumber: newInvoiceNumber,
@@ -634,7 +673,7 @@ const AccountingDashboard = () => {
         status: "pending",
         convertedFromQuote: documentNumber,
         dates: {
-          invoiceDate: new Date().toISOString().split('T')[0],
+          invoiceDate: new Date().toISOString().split("T")[0],
           dueDate: dueDate,
         },
         customer: {
@@ -662,7 +701,7 @@ const AccountingDashboard = () => {
       // Save as new invoice
       const invoiceRef = await addDoc(
         collection(db, "users", user.uid, "invoices"),
-        invoiceData
+        invoiceData,
       );
 
       // Update quote status to converted
@@ -673,14 +712,14 @@ const AccountingDashboard = () => {
       });
 
       alert(`Quote converted to Invoice ${newInvoiceNumber} successfully!`);
-      
+
       // Switch to invoice mode and load the new invoice
-      setDocumentType('invoice');
+      setDocumentType("invoice");
       setDocumentId(invoiceRef.id);
       setDocumentNumber(newInvoiceNumber);
-      setInvoiceDate(new Date().toISOString().split('T')[0]);
+      setInvoiceDate(new Date().toISOString().split("T")[0]);
       setShowConvertButton(false);
-      
+
       loadSavedInvoices();
       loadSavedQuotes();
     } catch (error) {
@@ -689,9 +728,9 @@ const AccountingDashboard = () => {
     }
   };
 
-  const handleNewDocument = (type = 'invoice') => {
+  const handleNewDocument = (type = "invoice") => {
     setDocumentType(type);
-    setActiveView('invoice');
+    setActiveView("invoice");
     setDocumentId(null);
     setDocumentNumber("");
     setCustomerName("Acme Corporation");
@@ -699,7 +738,7 @@ const AccountingDashboard = () => {
     setCustomerEmail("accounts@acmecorp.com");
     setCustomerPhone("011 234 5678");
     setCustomerAddress("456 Business Park, Sandton, 2196");
-    setInvoiceDate(new Date().toISOString().split('T')[0]);
+    setInvoiceDate(new Date().toISOString().split("T")[0]);
     setDueDate("");
     setPaymentTerms("Net 30");
     setItems([]);
@@ -707,7 +746,7 @@ const AccountingDashboard = () => {
 
     const loadNewNumber = async () => {
       if (user?.uid) {
-        if (type === 'quote') {
+        if (type === "quote") {
           const nextQuote = await generateQuoteNumber(user.uid);
           setDocumentNumber(nextQuote);
         } else {
@@ -743,15 +782,15 @@ const AccountingDashboard = () => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
             <img
-                 src={logo}
-                 alt="Business Logo"
-                 className="w-16 h-12 object-contain rounded-lg"
-               />
+              src={logo}
+              alt="Business Logo"
+              className="w-16 h-12 object-contain rounded-lg"
+            />
           </div>
 
           <nav className="space-y-1">
@@ -768,14 +807,14 @@ const AccountingDashboard = () => {
             </div>
 
             <div className="pt-4">
-             <div 
-                onClick={() => setActiveView('financial-overview')}
+              <div
+                onClick={() => setActiveView("financial-overview")}
                 className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
               >
                 <TrendingUp className="w-5 h-5" />
                 <span>Financial Overview</span>
               </div>
-              
+
               {/* Quotes Section */}
               <div className="mt-2">
                 <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
@@ -788,7 +827,7 @@ const AccountingDashboard = () => {
 
                 <div className="ml-8 mt-1 space-y-1">
                   <div
-                    onClick={() => handleNewDocument('quote')}
+                    onClick={() => handleNewDocument("quote")}
                     className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
                   >
                     Create Quote
@@ -814,7 +853,7 @@ const AccountingDashboard = () => {
 
                 <div className="ml-8 mt-1 space-y-1">
                   <div
-                    onClick={() => handleNewDocument('invoice')}
+                    onClick={() => handleNewDocument("invoice")}
                     className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
                   >
                     Create Invoice
@@ -830,7 +869,7 @@ const AccountingDashboard = () => {
                   </div>
                 </div>
               </div>
- <div className="mt-2">
+              <div className="mt-2">
                 <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
                   <div className="flex items-center space-x-3">
                     <Receipt className="w-5 h-5" />
@@ -838,20 +877,20 @@ const AccountingDashboard = () => {
                   </div>
                   <ChevronDown className="w-4 h-4" />
                 </div>
-               <div className="ml-8 mt-1 space-y-1">
-                <div 
-                  onClick={handleAddNewCustomer}
-                  className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
-                >
-                  <span>Add Client</span>
+                <div className="ml-8 mt-1 space-y-1">
+                  <div
+                    onClick={handleAddNewCustomer}
+                    className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
+                  >
+                    <span>Add Client</span>
+                  </div>
+                  <div
+                    onClick={() => setShowCustomersListModal(true)}
+                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+                  >
+                    All Clients ({savedCustomers.length})
+                  </div>
                 </div>
-                <div
-                  onClick={() => setShowCustomersListModal(true)}
-                  className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
-                >
-                  All Clients ({savedCustomers.length})
-                </div>
-              </div>
               </div>
               <div
                 onClick={() => setActiveView("templates")}
@@ -900,7 +939,7 @@ const AccountingDashboard = () => {
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-800 rounded-full"></div>
+            <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "User"}
@@ -921,158 +960,163 @@ const AccountingDashboard = () => {
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-       <div className="sticky top-0 z-40 flex flex-col">
-        <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 lg:space-x-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
-              <h1 className="text-base lg:text-xl font-semibold">
-                {documentType === 'quote' ? 'Quote' : 'Invoice'} #{documentNumber || "— not saved yet —"}
-              </h1>
-             
-            </div>
+        <div className="sticky top-0 z-40 flex flex-col">
+          <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 lg:space-x-4">
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+                <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+                <h1 className="text-base lg:text-xl font-semibold">
+                  {documentType === "quote" ? "Quote" : "Invoice"} #
+                  {documentNumber || "— not saved yet —"}
+                </h1>
+              </div>
 
-            <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+              <div className="hidden lg:flex items-center space-x-3 print:hidden">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+                  <CheckSquare className="w-4 h-4" />
+                  <span>Mark Paid</span>
+                </button>
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+                  <Edit className="w-4 h-4" />
+                  <span>Edit</span>
+                </button>
+                <button
+                  onClick={handleSaveDocument}
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Save {documentType === "quote" ? "Quote" : "Invoice"}
+                </button>
+
+                {showConvertButton && documentType === "quote" && (
+                  <button
+                    onClick={handleConvertToInvoice}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Convert to Invoice
+                  </button>
+                )}
+
+                <button
+                  onClick={() => handleNewDocument(documentType)}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  <Plus className="w-4 h-4" />
+                  New
+                </button>
+
+                <button className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700">
+                  <Send className="w-4 h-4" />
+                  <span>Send</span>
+                </button>
+                <button
+                  onClick={handleSavePDF}
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Save as PDF
+                </button>
+
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Log Out
+                </button>
+              </div>
+
+              {/* Mobile Action Buttons */}
+              <button
+                onClick={handleLogout}
+                className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
+              >
+                <span className="text-sm font-medium">Logout</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Action Buttons Bar */}
+          <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
                 <CheckSquare className="w-4 h-4" />
                 <span>Mark Paid</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
               <button
                 onClick={handleSaveDocument}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
               >
-                Save {documentType === 'quote' ? 'Quote' : 'Invoice'}
+                Save {documentType === "quote" ? "Quote" : "Invoice"}
               </button>
-
-              {showConvertButton && documentType === 'quote' && (
+              {showConvertButton && documentType === "quote" && (
                 <button
                   onClick={handleConvertToInvoice}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap text-sm"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  Convert to Invoice
+                  Convert
                 </button>
               )}
-
-              <button
-                onClick={() => handleNewDocument(documentType)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                <Plus className="w-4 h-4" />
-                New
-              </button>
-
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700">
+              <button className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
-                onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                onClick={handleSave}
+                className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
               >
-                Save as PDF
+                <Download className="w-4 h-4" />
+                <span>Save PDF</span>
               </button>
-
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
               >
                 <Printer className="w-4 h-4" />
-                Print
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Log Out
+                <span>Print</span>
               </button>
             </div>
+          </div>
 
-            {/* Mobile Action Buttons */}
-            <button
-              onClick={handleLogout}
-              className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
-            >
-              <span className="text-sm font-medium">Logout</span>
-            </button>
+          <div className="bg-slate-600 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+            <div className="flex space-x-4 lg:space-x-8 min-w-max">
+              {[
+                documentType === "quote" ? "Quote" : "Invoice",
+                "Payments",
+                "History",
+                "Notes",
+              ].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`py-4 border-b-2 ${
+                    activeTab === tab
+                      ? "border-blue-400 text-white"
+                      : "border-transparent text-gray-400 hover:text-gray-200"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-
-        {/* Mobile Action Buttons Bar */}
-        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
-              <CheckSquare className="w-4 h-4" />
-              <span>Mark Paid</span>
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
-              <Edit className="w-4 h-4" />
-              <span>Edit</span>
-            </button>
-            <button
-              onClick={handleSaveDocument}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
-            >
-              Save {documentType === 'quote' ? 'Quote' : 'Invoice'}
-            </button>
-            {showConvertButton && documentType === 'quote' && (
-              <button
-                onClick={handleConvertToInvoice}
-                className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap text-sm"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Convert
-              </button>
-            )}
-            <button className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
-              <Send className="w-4 h-4" />
-              <span>Send</span>
-            </button>
-            <button
-              onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Download className="w-4 h-4" />
-              <span>Save PDF</span>
-            </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Print</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-          <div className="flex space-x-4 lg:space-x-8 min-w-max">
-            {[documentType === 'quote' ? "Quote" : "Invoice", "Payments", "History", "Notes"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 border-b-2 ${
-                  activeTab === tab
-                    ? "border-blue-400 text-white"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-         </div>
         <div className="p-4 lg:p-6">
           {/* Business Settings Modal */}
           {showSettings && (
@@ -1370,49 +1414,86 @@ const AccountingDashboard = () => {
                       </div>
                     </div>
                     <div className="border-t pt-6 mt-6">
-                      <h3 className="text-lg font-semibold mb-4">📋 Invoice Stamp Settings</h3>
-                      
+                      <h3 className="text-lg font-semibold mb-4">
+                        📋 Invoice Stamp Settings
+                      </h3>
+
                       <div className="space-y-4">
                         <div>
                           <label className="flex items-center space-x-2 mb-4">
                             <input
                               type="checkbox"
                               checked={stampSettings.enabled}
-                              onChange={(e) => setStampSettings({...stampSettings, enabled: e.target.checked})}
+                              onChange={(e) =>
+                                setStampSettings({
+                                  ...stampSettings,
+                                  enabled: e.target.checked,
+                                })
+                              }
                               className="w-4 h-4 rounded"
                             />
-                            <span className="text-sm font-medium">Show approval stamp on invoices and quotes</span>
+                            <span className="text-sm font-medium">
+                              Show approval stamp on invoices and quotes
+                            </span>
                           </label>
                         </div>
 
                         {stampSettings.enabled && (
                           <>
                             <div>
-                              <label className="block text-sm font-medium mb-2">Stamp Text</label>
+                              <label className="block text-sm font-medium mb-2">
+                                Stamp Text
+                              </label>
                               <input
                                 type="text"
                                 value={stampSettings.text}
-                                onChange={(e) => setStampSettings({...stampSettings, text: e.target.value.toUpperCase()})}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    text: e.target.value.toUpperCase(),
+                                  })
+                                }
                                 className="w-full px-4 py-2 border rounded-lg uppercase"
                                 placeholder="APPROVED"
                                 maxLength={15}
                               />
-                              <p className="text-xs text-gray-500 mt-1">Max 15 characters</p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Max 15 characters
+                              </p>
                             </div>
 
                             <div>
-                              <label className="block text-sm font-medium mb-2">Stamp Color</label>
+                              <label className="block text-sm font-medium mb-2">
+                                Stamp Color
+                              </label>
                               <select
                                 value={stampSettings.color}
-                                onChange={(e) => setStampSettings({...stampSettings, color: e.target.value})}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    color: e.target.value,
+                                  })
+                                }
                                 className="w-full px-4 py-2 border rounded-lg"
                               >
-                                <option value="#d32f2f">🔴 Red (Traditional)</option>
-                                <option value="#1976d2">🔵 Blue (Professional)</option>
-                                <option value="#388e3c">🟢 Green (Approved)</option>
-                                <option value="#7b1fa2">🟣 Purple (Premium)</option>
-                                <option value="#000000">⚫ Black (Formal)</option>
-                                <option value="#f57c00">🟠 Orange (Attention)</option>
+                                <option value="#d32f2f">
+                                  🔴 Red (Traditional)
+                                </option>
+                                <option value="#1976d2">
+                                  🔵 Blue (Professional)
+                                </option>
+                                <option value="#388e3c">
+                                  🟢 Green (Approved)
+                                </option>
+                                <option value="#7b1fa2">
+                                  🟣 Purple (Premium)
+                                </option>
+                                <option value="#000000">
+                                  ⚫ Black (Formal)
+                                </option>
+                                <option value="#f57c00">
+                                  🟠 Orange (Attention)
+                                </option>
                               </select>
                             </div>
 
@@ -1421,18 +1502,27 @@ const AccountingDashboard = () => {
                                 <input
                                   type="checkbox"
                                   checked={stampSettings.showDate}
-                                  onChange={(e) => setStampSettings({...stampSettings, showDate: e.target.checked})}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      showDate: e.target.checked,
+                                    })
+                                  }
                                   className="w-4 h-4 rounded"
                                 />
-                                <span className="text-sm font-medium">Include date on stamp</span>
+                                <span className="text-sm font-medium">
+                                  Include date on stamp
+                                </span>
                               </label>
                             </div>
 
                             {/* Preview */}
                             <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
-                              <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
+                              <p className="text-sm font-medium mb-4 text-center text-gray-600">
+                                Preview:
+                              </p>
                               <div className="flex justify-center">
-                                <SignatureStamp 
+                                <SignatureStamp
                                   text={stampSettings.text}
                                   color={stampSettings.color}
                                   showDate={stampSettings.showDate}
@@ -1447,7 +1537,7 @@ const AccountingDashboard = () => {
                     </div>
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Business Information
                     </button>
@@ -1517,7 +1607,7 @@ const AccountingDashboard = () => {
                                 </div>
                               )}
                             </div>
-                            
+
                             <div className="text-right">
                               <div className="text-lg font-semibold text-blue-600">
                                 R{invoice.totals?.total?.toFixed(2) || "0.00"}
@@ -1525,7 +1615,7 @@ const AccountingDashboard = () => {
                               <div className="text-sm text-gray-500">
                                 {invoice.dates?.invoiceDate
                                   ? new Date(
-                                      invoice.dates.invoiceDate
+                                      invoice.dates.invoiceDate,
                                     ).toLocaleDateString("en-ZA")
                                   : "N/A"}
                               </div>
@@ -1534,8 +1624,8 @@ const AccountingDashboard = () => {
                                   invoice.status === "paid"
                                     ? "bg-green-100 text-green-700"
                                     : invoice.status === "pending"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : "bg-gray-100 text-gray-700"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-gray-100 text-gray-700"
                                 }`}
                               >
                                 {invoice.status || "unknown"}
@@ -1595,7 +1685,7 @@ const AccountingDashboard = () => {
                                 </div>
                               )}
                             </div>
-                            
+
                             <div className="text-right">
                               <div className="text-lg font-semibold text-purple-600">
                                 R{quote.totals?.total?.toFixed(2) || "0.00"}
@@ -1603,7 +1693,7 @@ const AccountingDashboard = () => {
                               <div className="text-sm text-gray-500">
                                 {quote.dates?.quoteDate
                                   ? new Date(
-                                      quote.dates.quoteDate
+                                      quote.dates.quoteDate,
                                     ).toLocaleDateString("en-ZA")
                                   : "N/A"}
                               </div>
@@ -1612,10 +1702,10 @@ const AccountingDashboard = () => {
                                   quote.status === "converted"
                                     ? "bg-green-100 text-green-700"
                                     : quote.status === "pending"
-                                    ? "bg-purple-100 text-purple-700"
-                                    : quote.status === "accepted"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : "bg-gray-100 text-gray-700"
+                                      ? "bg-purple-100 text-purple-700"
+                                      : quote.status === "accepted"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "bg-gray-100 text-gray-700"
                                 }`}
                               >
                                 {quote.status || "pending"}
@@ -1632,258 +1722,361 @@ const AccountingDashboard = () => {
           )}
 
           {activeView === "templates" && <Templates user={user} />}
-          {activeView === 'financial-overview' && <FinancialOverview user={user} />}
-          
+          {activeView === "financial-overview" && (
+            <FinancialOverview user={user} />
+          )}
+
           {/* Invoice/Quote Content - Only show when activeView is 'invoice' */}
-          {activeView === 'invoice' && (
+          {activeView === "invoice" && (
             <>
               {/* Mobile View Invoice Button */}
               <button
                 onClick={() => setShowInvoice(!showInvoice)}
-                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <FileText className="w-5 h-5" />
-                {showInvoice ? `Hide ${documentType === 'quote' ? 'Quote' : 'Invoice'}` : `View ${documentType === 'quote' ? 'Quote' : 'Invoice'}`}
+                {showInvoice
+                  ? `Hide ${documentType === "quote" ? "Quote" : "Invoice"}`
+                  : `View ${documentType === "quote" ? "Quote" : "Invoice"}`}
               </button>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div
-                  className={`${
-                    showInvoice ? "hidden" : "block"
-                  } space-y-6 lg:block print:hidden
-                  max-h-[calc(100vh-120px)] overflow-y-auto`}
+                  className={`${showInvoice ? "hidden" : "block"} space-y-6 lg:block print:hidden min-h-[calc(100vh)] overflow-y-auto`}
                 >
-                  <div className={`${
-                    documentType === 'quote' ? 'bg-purple-50 border-purple-200' : 'bg-blue-50 border-blue-200'
-                  } border rounded-lg px-4 py-3 flex items-center space-x-3`}>
-                    <div className={`w-2 h-2 ${documentType === 'quote' ? 'bg-purple-500' : 'bg-blue-500'} rounded-full`}></div>
-                    <span className={`${documentType === 'quote' ? 'text-purple-700' : 'text-blue-700'} font-medium`}>
-                      {documentType === 'quote' ? 'Quote Pending' : 'Pending Payment'}
-                    </span>
-                    <span className={`${documentType === 'quote' ? 'text-purple-600' : 'text-blue-600'}`}>
-                      {documentType === 'quote' ? `Valid Until: ${dueDate || 'Not set'}` : `Due: ${dueDate || 'Not set'}`}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="text-sm text-gray-500 mb-1">Total Amount</div>
-                      <div className={`text-2xl font-semibold ${documentType === 'quote' ? 'text-purple-600' : 'text-blue-600'}`}>
-                        R{total.toFixed(2)}
-                      </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="text-sm text-gray-500 mb-1">Paid</div>
-                      <div className="text-2xl font-semibold text-green-600">
-                        R0.00
-                      </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="text-sm text-gray-500 mb-1">Balance Due</div>
-                      <div className="text-2xl font-semibold text-red-600">
-                        R{total.toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Users className="w-5 h-5" />
-                        <span>Client Information</span>
-                      </h2>
-                      <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-                        <Edit className="w-4 h-4" />
-                        <span>Edit</span>
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Client Name</div>
-                        <input
-                          type="text"
-                          value={customerName}
-                          onChange={(e) => setCustomerName(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Client ID</div>
-                        <input
-                          type="text"
-                          value={customerId}
-                          onChange={(e) => setCustomerId(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Email</div>
-                        <input
-                          type="text"
-                          value={customerEmail}
-                          onChange={(e) => setCustomerEmail(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Phone</div>
-                        <input
-                          type="text"
-                          value={customerPhone}
-                          onChange={(e) => setCustomerPhone(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <div className="text-sm text-gray-500">Address</div>
-                        <input
-                          type="text"
-                          value={customerAddress}
-                          onChange={(e) => setCustomerAddress(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Calendar className="w-5 h-5" />
-                        <span>{documentType === 'quote' ? 'Quote' : 'Invoice'} Details</span>
-                      </h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          {documentType === 'quote' ? 'Quote Date' : 'Invoice Date'}
-                        </div>
-                        <input
-                          type="date"
-                          value={invoiceDate}
-                          onChange={(e) => setInvoiceDate(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          {documentType === 'quote' ? 'Valid Until' : 'Due Date'}
-                        </div>
-                        <input
-                          type="date"
-                          value={dueDate}
-                          onChange={(e) => setDueDate(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <div className="text-sm text-gray-500">Payment Terms</div>
-                        <select
-                          value={paymentTerms}
-                          onChange={(e) => setPaymentTerms(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
-                        >
-                          <option value="Due on Receipt">Due on Receipt</option>
-                          <option value="Net 15">Net 15</option>
-                          <option value="Net 30">Net 30</option>
-                          <option value="Net 60">Net 60</option>
-                          <option value="Net 90">Net 90</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                    <h2 className="text-lg font-semibold mb-4">Add Line Item</h2>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                      <select
-                        value={newItem.type}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, type: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      >
-                        <option value="Service">Service</option>
-                        <option value="Consultation">Consultation</option>
-                        <option value="Bookkeeping">Bookkeeping</option>
-                        <option value="Tax Preparation">Tax Preparation</option>
-                        <option value="Audit">Audit</option>
-                      </select>
-
-                      <input
-                        type="text"
-                        placeholder="Description"
-                        value={newItem.description}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, description: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Rate"
-                        value={newItem.rate}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, rate: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Qty"
-                        value={newItem.qty}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, qty: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
+                  {/* Tab Navigation */}
+                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="flex border-b">
                       <button
-                        onClick={handleAddItem}
-                        className="bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                        onClick={() => setInputMode("manual")}
+                        className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                          inputMode === "manual"
+                            ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                            : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                        }`}
                       >
-                        <Plus className="w-4 h-4" />
-                        Add
+                        📝 Manual Entry
+                      </button>
+                      <button
+                        onClick={() => setInputMode("ai")}
+                        className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                          inputMode === "ai"
+                            ? "bg-white text-purple-600 border-b-2 border-purple-600"
+                            : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        AI Assistant
                       </button>
                     </div>
-                  </div>
 
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold">Payment Information</h2>
-                    </div>
-
-                    <div className="space-y-3 text-sm">
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Payment Method:</span>
-                        <span className="font-medium">EFT/Card/Cash</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Payment Terms:</span>
-                        <span className="font-medium">{paymentTerms}</span>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <span className="text-gray-600">Late Fee:</span>
-                        <span className="font-medium">2% per month</span>
-                      </div>
+                    {/* Tab Content */}
+                    <div className="p-6">
+                      {inputMode === "ai" ? (
+                        <AIInvoiceExtractor
+                          onDataExtracted={handleAIDataExtracted}
+                          documentType={documentType}
+                        />
+                      ) : (
+                        <div className="text-sm text-gray-600">
+                          Fill out the forms below to create your {documentType}
+                          .
+                        </div>
+                      )}
                     </div>
                   </div>
+                  {/* Manual forms always visible */}
+                  {inputMode === "manual" && (
+                    <>
+                      <div
+                        className={`${
+                          documentType === "quote"
+                            ? "bg-purple-50 border-purple-200"
+                            : "bg-blue-50 border-blue-200"
+                        } border rounded-lg px-4 py-3 flex items-center space-x-3`}
+                      >
+                        <div
+                          className={`w-2 h-2 ${documentType === "quote" ? "bg-purple-500" : "bg-blue-500"} rounded-full`}
+                        ></div>
+                        <span
+                          className={`${documentType === "quote" ? "text-purple-700" : "text-blue-700"} font-medium`}
+                        >
+                          {documentType === "quote"
+                            ? "Quote Pending"
+                            : "Pending Payment"}
+                        </span>
+                        <span
+                          className={`${documentType === "quote" ? "text-purple-600" : "text-blue-600"}`}
+                        >
+                          {documentType === "quote"
+                            ? `Valid Until: ${dueDate || "Not set"}`
+                            : `Due: ${dueDate || "Not set"}`}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <div className="text-sm text-gray-500 mb-1">
+                            Total Amount
+                          </div>
+                          <div
+                            className={`text-2xl font-semibold ${documentType === "quote" ? "text-purple-600" : "text-blue-600"}`}
+                          >
+                            R{total.toFixed(2)}
+                          </div>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <div className="text-sm text-gray-500 mb-1">Paid</div>
+                          <div className="text-2xl font-semibold text-green-600">
+                            R0.00
+                          </div>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <div className="text-sm text-gray-500 mb-1">
+                            Balance Due
+                          </div>
+                          <div className="text-2xl font-semibold text-red-600">
+                            R{total.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-lg font-semibold flex items-center space-x-2">
+                            <Users className="w-5 h-5" />
+                            <span>Client Information</span>
+                          </h2>
+                          <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+                            <Edit className="w-4 h-4" />
+                            <span>Edit</span>
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              Client Name
+                            </div>
+                            <input
+                              type="text"
+                              value={customerName}
+                              onChange={(e) => setCustomerName(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              Client ID
+                            </div>
+                            <input
+                              type="text"
+                              value={customerId}
+                              onChange={(e) => setCustomerId(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">Email</div>
+                            <input
+                              type="text"
+                              value={customerEmail}
+                              onChange={(e) => setCustomerEmail(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">Phone</div>
+                            <input
+                              type="text"
+                              value={customerPhone}
+                              onChange={(e) => setCustomerPhone(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div className="col-span-1 sm:col-span-2">
+                            <div className="text-sm text-gray-500">Address</div>
+                            <input
+                              type="text"
+                              value={customerAddress}
+                              onChange={(e) =>
+                                setCustomerAddress(e.target.value)
+                              }
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-lg font-semibold flex items-center space-x-2">
+                            <Calendar className="w-5 h-5" />
+                            <span>
+                              {documentType === "quote" ? "Quote" : "Invoice"}{" "}
+                              Details
+                            </span>
+                          </h2>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              {documentType === "quote"
+                                ? "Quote Date"
+                                : "Invoice Date"}
+                            </div>
+                            <input
+                              type="date"
+                              value={invoiceDate}
+                              onChange={(e) => setInvoiceDate(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">
+                              {documentType === "quote"
+                                ? "Valid Until"
+                                : "Due Date"}
+                            </div>
+                            <input
+                              type="date"
+                              value={dueDate}
+                              onChange={(e) => setDueDate(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            />
+                          </div>
+                          <div className="col-span-1 sm:col-span-2">
+                            <div className="text-sm text-gray-500">
+                              Payment Terms
+                            </div>
+                            <select
+                              value={paymentTerms}
+                              onChange={(e) => setPaymentTerms(e.target.value)}
+                              className="w-full px-4 py-2 border rounded"
+                            >
+                              <option value="Due on Receipt">
+                                Due on Receipt
+                              </option>
+                              <option value="Net 15">Net 15</option>
+                              <option value="Net 30">Net 30</option>
+                              <option value="Net 60">Net 60</option>
+                              <option value="Net 90">Net 90</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                        <h2 className="text-lg font-semibold mb-4">
+                          Add Line Item
+                        </h2>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                          <select
+                            value={newItem.type}
+                            onChange={(e) =>
+                              setNewItem({ ...newItem, type: e.target.value })
+                            }
+                            className="px-4 py-2 border rounded"
+                          >
+                            <option value="Service">Service</option>
+                            <option value="Consultation">Consultation</option>
+                            <option value="Bookkeeping">Bookkeeping</option>
+                            <option value="Tax Preparation">
+                              Tax Preparation
+                            </option>
+                            <option value="Audit">Audit</option>
+                          </select>
+
+                          <input
+                            type="text"
+                            placeholder="Description"
+                            value={newItem.description}
+                            onChange={(e) =>
+                              setNewItem({
+                                ...newItem,
+                                description: e.target.value,
+                              })
+                            }
+                            className="px-4 py-2 border rounded"
+                          />
+
+                          <input
+                            type="number"
+                            placeholder="Rate"
+                            value={newItem.rate}
+                            onChange={(e) =>
+                              setNewItem({ ...newItem, rate: e.target.value })
+                            }
+                            className="px-4 py-2 border rounded"
+                          />
+
+                          <input
+                            type="number"
+                            placeholder="Qty"
+                            value={newItem.qty}
+                            onChange={(e) =>
+                              setNewItem({ ...newItem, qty: e.target.value })
+                            }
+                            className="px-4 py-2 border rounded"
+                          />
+
+                          <button
+                            onClick={handleAddItem}
+                            className="bg-slate-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                          >
+                            <Plus className="w-4 h-4" />
+                            Add
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-lg font-semibold">
+                            Payment Information
+                          </h2>
+                        </div>
+
+                        <div className="space-y-3 text-sm">
+                          <div className="flex justify-between py-2 border-b">
+                            <span className="text-gray-600">
+                              Payment Method:
+                            </span>
+                            <span className="font-medium">EFT/Card/Cash</span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b">
+                            <span className="text-gray-600">
+                              Payment Terms:
+                            </span>
+                            <span className="font-medium">{paymentTerms}</span>
+                          </div>
+                          <div className="flex justify-between py-2">
+                            <span className="text-gray-600">Late Fee:</span>
+                            <span className="font-medium">2% per month</span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  ,
                 </div>
+               
 
                 <div
                   className={`${
                     !showInvoice ? "hidden" : "block"
                   } lg:block mx-auto bg-white shadow-lg overflow-y-auto`}
-              style={{width: "100%",maxWidth: "210mm",maxHeight: "90vh",}}
+                  style={{
+                    width: "100%",
+                    maxWidth: "210mm",
+                    maxHeight: "297mm",
+                  }}
                 >
                   <div className="mb-4">
-                    <TemplateSelector 
-                      user={user} 
+                    <TemplateSelector
+                      user={user}
                       selectedTemplate={selectedTemplate}
                       onTemplateChange={setSelectedTemplate}
                     />
@@ -1898,9 +2091,9 @@ const AccountingDashboard = () => {
                     customerEmail={customerEmail}
                     customerPhone={customerPhone}
                     customerAddress={customerAddress}
-                    invoiceDate={invoiceDate || ''}
-                    dueDate={dueDate || ''}
-                    paymentTerms={paymentTerms || ''}
+                    invoiceDate={invoiceDate || ""}
+                    dueDate={dueDate || ""}
+                    paymentTerms={paymentTerms || ""}
                     items={items}
                     subtotal={subtotal}
                     vat={vat}
