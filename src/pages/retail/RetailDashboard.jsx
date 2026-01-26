@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { serverTimestamp } from 'firebase/firestore';
 import { getAuth, signOut } from 'firebase/auth';
-import Templates from "./Templates";
+import Templates from "./Templates"; 
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 
 import logo from '../../assets/img/solidflo-logo.png';
@@ -55,6 +56,9 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 
 const RetailDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+const [inputMode, setInputMode] = useState("manual");
+const [documentType, setDocumentType] = useState("invoice"); 
+const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState('Overview');
   const { user } = useAuth();
   const [activeView, setActiveView] = useState("invoice");
@@ -656,7 +660,7 @@ const RetailDashboard = () => {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleEditProduct(product)}
-                              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 text-sm"
+                              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                             >
                               <Edit className="w-4 h-4" />
                               Edit

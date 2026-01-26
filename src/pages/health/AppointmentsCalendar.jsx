@@ -396,7 +396,7 @@ const AppointmentsCalendar = ({ user }) => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+              className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
             >
               <Plus className="w-4 h-4" />
               <span>New Appointment</span>
@@ -425,7 +425,7 @@ const AppointmentsCalendar = ({ user }) => {
                 onClick={() => setViewMode(mode)}
                 className={`px-4 py-2 rounded-lg capitalize ${
                   viewMode === mode
-                    ? "bg-gray-800 text-white"
+                    ? "bg-slate-600 text-white"
                     : "border border-gray-300 hover:bg-gray-300"
                 }`}
               >
@@ -591,7 +591,7 @@ const AppointmentsCalendar = ({ user }) => {
                   {dayAppointments.slice(0, 2).map((apt) => (
                     <div
                       key={apt.id}
-                      className="text-xs bg-gray-800 text-white rounded px-1 py-0.5 mb-1 truncate"
+                      className="text-xs bg-slate-600 text-white rounded px-1 py-0.5 mb-1 truncate"
                     >
                       {apt.time} {apt.patientName}
                     </div>
@@ -884,7 +884,7 @@ const AppointmentsCalendar = ({ user }) => {
 
                 <button
                   onClick={handleAddAppointment}
-                  className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
+                  className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-blue-700"
                 >
                   Create Appointment
                 </button>
@@ -1004,7 +1004,7 @@ const AppointmentsCalendar = ({ user }) => {
                       status: "completed",
                     })
                   }
-                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   <CheckCircle className="w-4 h-4" />
                   <span>Complete</span>

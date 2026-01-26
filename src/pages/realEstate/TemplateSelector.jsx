@@ -296,7 +296,7 @@ export const DefaultTemplate = ({
           <span>VAT:</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
+        <div className="flex justify-between py-2 font-bold bg-slate-600 text-white px-2">
           <span>TOTAL:</span>
           <span>R {total.toFixed(2)}</span>
         </div>
@@ -450,7 +450,7 @@ export const ClassicTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
+        <div className="flex justify-between py-2 font-bold bg-slate-600 text-white px-2">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>

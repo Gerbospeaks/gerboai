@@ -171,7 +171,7 @@ const GuestsListModal = ({
           <div className="flex gap-2">
             <button
               onClick={onAddNewGuest}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
             >
               <UserPlus className="w-4 h-4" />
               Add New Guest
@@ -211,7 +211,7 @@ const GuestsListModal = ({
               {!searchTerm && (
                 <button
                   onClick={onAddNewGuest}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <UserPlus className="w-4 h-4" />
                   Add First Guest

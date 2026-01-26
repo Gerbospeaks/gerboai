@@ -287,7 +287,7 @@ const FinancialOverview = ({ user }) => {
             <button
               onClick={() => setTimeRange('week')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                timeRange === 'week' ? 'bg-gray-800 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
+                timeRange === 'week' ? 'bg-slate-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
               }`}
             >
               Week
@@ -295,7 +295,7 @@ const FinancialOverview = ({ user }) => {
             <button
               onClick={() => setTimeRange('month')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                timeRange === 'month' ? 'bg-gray-800 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
+                timeRange === 'month' ? 'bg-slate-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
               }`}
             >
               Month
@@ -303,7 +303,7 @@ const FinancialOverview = ({ user }) => {
             <button
               onClick={() => setTimeRange('year')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                timeRange === 'year' ? 'bg-gray-800 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
+                timeRange === 'year' ? 'bg-slate-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
               }`}
             >
               Year

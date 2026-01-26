@@ -413,7 +413,7 @@ export const ProfessionalTemplate = (props) => {
         </h3>
         <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="bg-gray-800 text-white">
+            <tr className="bg-slate-600 text-white">
               <th className="border border-gray-600 px-3 py-2 text-left">SUBJECT</th>
               <th className="border border-gray-600 px-3 py-2 text-center w-24">MARK (%)</th>
               <th className="border border-gray-600 px-3 py-2 text-center w-20">GRADE</th>

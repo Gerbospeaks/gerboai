@@ -4,7 +4,8 @@ import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
-import Templates from "./Templates";
+import Templates from "./Templates"; 
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import {
   getFirestore,
@@ -33,6 +34,7 @@ import {
   ChevronDown,
   ChevronLeft,
   Home,
+   Sparkles,
   Settings,
   Users,
   Calendar,
@@ -85,6 +87,9 @@ const generateInvoiceNumber = async (userId) => {
 
 const HealthcareDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+const [inputMode, setInputMode] = useState("manual");
+const [documentType, setDocumentType] = useState("invoice"); 
+const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("Invoice");
   const [showInvoice, setShowInvoice] = useState(false);
   const { user } = useAuth();
@@ -217,7 +222,32 @@ const HealthcareDashboard = () => {
     setItems(invoice.items || []);
     setShowInvoicesList(false);
   };
+const handleAIDataExtracted = (extractedData) => {
+  // Patient info
+  if (extractedData.patient.name) setPatientName(extractedData.patient.name);
+  if (extractedData.patient.email) setPatientEmail(extractedData.patient.email);
+  if (extractedData.patient.phone) setPatientPhone(extractedData.patient.phone);
+  if (extractedData.patient.address) setPatientAddress(extractedData.patient.address);
+  if (extractedData.patient.patientId) setPatientId(extractedData.patient.patientId);
+  if (extractedData.patient.dateOfBirth) setPatientDOB(extractedData.patient.dateOfBirth);
+  if (extractedData.patient.gender) setPatientGender(extractedData.patient.gender);
 
+  // Insurance info
+  if (extractedData.insurance.provider) setInsuranceProvider(extractedData.insurance.provider);
+  if (extractedData.insurance.number) setInsuranceNumber(extractedData.insurance.number);
+
+  // Medical info
+  if (extractedData.medical.diagnosis) setDiagnosis(extractedData.medical.diagnosis);
+  if (extractedData.medical.treatmentPlan) setTreatmentPlan(extractedData.medical.treatmentPlan);
+  if (extractedData.medical.prescription) setPrescription(extractedData.medical.prescription);
+
+  // Items
+  if (extractedData.items && extractedData.items.length > 0) {
+    setItems(extractedData.items);
+  }
+
+  alert("✅ Medical data extracted and populated successfully!");
+};
   const loadSavedPatients = async () => {
     if (!user?.uid) return;
 
@@ -601,7 +631,7 @@ const HealthcareDashboard = () => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -739,7 +769,7 @@ const HealthcareDashboard = () => {
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-800 rounded-full"></div>
+            <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "Dr. User"}
@@ -788,7 +818,7 @@ const HealthcareDashboard = () => {
                 </button>
                 <button
                   onClick={handleSaveInvoice}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Save Invoice
                 </button>
@@ -801,13 +831,13 @@ const HealthcareDashboard = () => {
                   New
                 </button>
 
-                <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700">
+                <button className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700">
                   <Send className="w-4 h-4" />
                   <span>Send</span>
                 </button>
                 <button
                   onClick={handleSavePDF}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Save as PDF
                 </button>
@@ -836,7 +866,7 @@ const HealthcareDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+          <div className="bg-slate-600 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
             <div className="flex space-x-4 lg:space-x-8 min-w-max">
               {["Invoice", "Medical", "History", "Notes"].map((tab) => (
                 <button
@@ -1266,7 +1296,7 @@ const HealthcareDashboard = () => {
                     </div>
                     <button
                       onClick={handleSaveFacilityInfo}
-                      className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Facility Information
                     </button>
@@ -1390,7 +1420,7 @@ const HealthcareDashboard = () => {
             <>
               <button
                 onClick={() => setShowInvoice(!showInvoice)}
-                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <FileText className="w-5 h-5" />
                 {showInvoice ? "Hide Invoice" : "View Invoice"}
@@ -1402,6 +1432,48 @@ const HealthcareDashboard = () => {
                     showInvoice ? "hidden" : "block"
                   } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
                 >
+                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                      <div className="flex border-b">
+                                        <button
+                                          onClick={() => setInputMode("manual")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                            inputMode === "manual"
+                                              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          📝 Manual Entry
+                                        </button>
+                                        <button
+                                          onClick={() => setInputMode("ai")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                            inputMode === "ai"
+                                              ? "bg-white text-purple-600 border-b-2 border-purple-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          <Sparkles className="w-4 h-4" />
+                                          AI Assistant
+                                        </button>
+                                      </div>
+                  
+                                      {/* Tab Content */}
+                                      <div className="p-6">
+                                        {inputMode === "ai" ? (
+                                          <AIInvoiceExtractor
+                                            onDataExtracted={handleAIDataExtracted}
+                                            documentType={documentType}
+                                          />
+                                        ) : (
+                                          <div className="text-sm text-gray-600">
+                                            Fill out the forms below to create your {documentType}
+                                            .
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                     {inputMode === "manual" && (
+                    <>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     <span className="text-blue-700 font-medium">
@@ -1575,7 +1647,7 @@ const HealthcareDashboard = () => {
                       </h2>
                       <button
                         onClick={() => setShowSickNoteModal(true)}
-                        className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2"
+                        className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2"
                       >
                         <svg
                           className="w-4 h-4"
@@ -1684,7 +1756,7 @@ const HealthcareDashboard = () => {
 
                       <button
                         onClick={handleAddItem}
-                        className="bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                        className="bg-slate-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                       >
                         <Plus className="w-4 h-4" />
                         Add
@@ -1714,6 +1786,7 @@ const HealthcareDashboard = () => {
                       </div>
                     </div>
                   </div>
+                  </>)}
                 </div>
 
                 <div
@@ -1791,7 +1864,7 @@ const HealthcareDashboard = () => {
                 
                 nav,
                 [class*="sidebar"],
-                [class*="bg-gray-800"],
+                [class*="bg-slate-600"],
                 button:not([style]) {
                   display: none !important;
                 }

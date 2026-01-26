@@ -3,7 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import FinancialOverview from "../FinancialOverview";
-import Templates from "./Templates";
+import Templates from "./Templates"; 
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import {
@@ -32,6 +33,7 @@ import {
   ChevronLeft,
   Home,
   Settings,
+   Sparkles,
   Users,
   Calendar,
   FileText,
@@ -81,6 +83,9 @@ const generateWaybillNumber = async (userId) => {
 
 const LogisticsDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+const [inputMode, setInputMode] = useState("manual");
+const [documentType, setDocumentType] = useState("invoice"); 
+const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("Waybill");
   const [showWaybill, setShowWaybill] = useState(false);
   const { user } = useAuth();
@@ -188,7 +193,35 @@ const LogisticsDashboard = () => {
     setSenderAddress(customer.address || "");
     setCustomerId(customer.customerId || "");
   };
+const handleAIDataExtracted = (extractedData) => {
+  // Sender info
+  if (extractedData.sender.name) setSenderName(extractedData.sender.name);
+  if (extractedData.sender.email) setSenderEmail(extractedData.sender.email);
+  if (extractedData.sender.phone) setSenderPhone(extractedData.sender.phone);
+  if (extractedData.sender.address) setSenderAddress(extractedData.sender.address);
+  if (extractedData.sender.customerId) setCustomerId(extractedData.sender.customerId);
 
+  // Receiver info
+  if (extractedData.receiver.name) setReceiverName(extractedData.receiver.name);
+  if (extractedData.receiver.email) setReceiverEmail(extractedData.receiver.email);
+  if (extractedData.receiver.phone) setReceiverPhone(extractedData.receiver.phone);
+  if (extractedData.receiver.address) setReceiverAddress(extractedData.receiver.address);
+
+  // Shipment info
+  if (extractedData.shipment.origin) setOrigin(extractedData.shipment.origin);
+  if (extractedData.shipment.destination) setDestination(extractedData.shipment.destination);
+  if (extractedData.shipment.cargoType) setCargoType(extractedData.shipment.cargoType);
+  if (extractedData.shipment.weight) setWeight(extractedData.shipment.weight);
+  if (extractedData.shipment.dimensions) setDimensions(extractedData.shipment.dimensions);
+  if (extractedData.shipment.trackingNumber) setTrackingNumber(extractedData.shipment.trackingNumber);
+
+  // Items
+  if (extractedData.items && extractedData.items.length > 0) {
+    setItems(extractedData.items);
+  }
+
+  alert("✅ Waybill data extracted and populated successfully!");
+};
   const handleCustomerSaved = () => {
     loadCustomers();
   };
@@ -615,7 +648,7 @@ const LogisticsDashboard = () => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -882,7 +915,7 @@ const LogisticsDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+          <div className="bg-slate-600 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
             <div className="flex space-x-4 lg:space-x-8 min-w-max">
               {["Waybill", "Cargo", "History", "Notes"].map((tab) => (
                 <button
@@ -1429,6 +1462,48 @@ const LogisticsDashboard = () => {
                     showWaybill ? "hidden" : "block"
                   } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
                 >
+                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                      <div className="flex border-b">
+                                        <button
+                                          onClick={() => setInputMode("manual")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                            inputMode === "manual"
+                                              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          📝 Manual Entry
+                                        </button>
+                                        <button
+                                          onClick={() => setInputMode("ai")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                            inputMode === "ai"
+                                              ? "bg-white text-purple-600 border-b-2 border-purple-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          <Sparkles className="w-4 h-4" />
+                                          AI Assistant
+                                        </button>
+                                      </div>
+                  
+                                      {/* Tab Content */}
+                                      <div className="p-6">
+                                        {inputMode === "ai" ? (
+                                          <AIInvoiceExtractor
+                                            onDataExtracted={handleAIDataExtracted}
+                                            documentType={documentType}
+                                          />
+                                        ) : (
+                                          <div className="text-sm text-gray-600">
+                                            Fill out the forms below to create your {documentType}
+                                            .
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                     {inputMode === "manual" && (
+                    <>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     <span className="text-blue-700 font-medium">
@@ -1725,6 +1800,7 @@ const LogisticsDashboard = () => {
                       </div>
                     </div>
                   </div>
+                  </>)}
                 </div>
 
                 <div
@@ -1810,7 +1886,7 @@ const LogisticsDashboard = () => {
                 
                 nav,
                 [class*="sidebar"],
-                [class*="bg-gray-800"],
+                [class*="bg-slate-600"],
                 button:not([style]) {
                   display: none !important;
                 }

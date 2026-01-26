@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from '../../assets/img/solidflo-logo.png';
-import Templates from "./Templates";
+import Templates from "./Templates"; 
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import { getAuth, signOut } from "firebase/auth";
 import {
@@ -77,6 +78,9 @@ const generateInvoiceNumber = async (userId) => {
 
 const RealEstateDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+const [inputMode, setInputMode] = useState("manual");
+const [documentType, setDocumentType] = useState("invoice"); 
+const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("Invoice");
   const [showInvoice, setShowInvoice] = useState(false);
   const { user } = useAuth();
@@ -693,7 +697,7 @@ const [stampSettings, setStampSettings] = useState({
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-700 bg-blue-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-800 rounded-full"></div>
+            <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "User"}
@@ -746,26 +750,26 @@ const [stampSettings, setStampSettings] = useState({
                 </button>
                 <button
                   onClick={handleSaveInvoice}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Save Invoice
                 </button>
 
                 <button
                   onClick={handleNewInvoice}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   <Plus className="w-4 h-4" />
                   New
                 </button>
 
-                <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700">
+                <button className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700">
                   <Send className="w-4 h-4" />
                   <span>Send</span>
                 </button>
                 <button
                   onClick={handleSavePDF}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Save as PDF
                 </button>
@@ -806,13 +810,13 @@ const [stampSettings, setStampSettings] = useState({
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
-              <button className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSave}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Save PDF</span>
@@ -1185,7 +1189,7 @@ const [stampSettings, setStampSettings] = useState({
 </div>
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Business Information
                     </button>
@@ -1289,7 +1293,7 @@ const [stampSettings, setStampSettings] = useState({
           {/* Mobile View Invoice Button */}
           <button
             onClick={() => setShowInvoice(!showInvoice)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showInvoice ? "Hide Invoice" : "View Invoice"}
@@ -1501,7 +1505,7 @@ const [stampSettings, setStampSettings] = useState({
 
                   <button
                     onClick={handleAddItem}
-                    className="bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                    className="bg-slate-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Add

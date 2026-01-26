@@ -3,7 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import logo from '../../assets/img/solidflo-logo.png';
-import Templates from "./Templates";
+import Templates from "./Templates"; 
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import {
   getFirestore,
@@ -39,6 +40,7 @@ import {
   Plus,
   Send,
   Edit,
+   Sparkles,
   LogOut,
   CheckSquare,
   TrendingUp,
@@ -77,6 +79,9 @@ const generateReportCardNumber = async (userId) => {
 
 const EducationDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+const [inputMode, setInputMode] = useState("manual");
+const [documentType, setDocumentType] = useState("invoice"); 
+const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("ReportCard");
   const [showReportCard, setShowReportCard] = useState(false);
   const { user } = useAuth();
@@ -195,7 +200,45 @@ const [stampSettings, setStampSettings] = useState({
     setAttendancePresent(report.attendance?.present || "");
     setShowReportsList(false);
   };
+const handleAIDataExtracted = (extractedData) => {
+  // Student info
+  if (extractedData.student.name) setStudentName(extractedData.student.name);
+  if (extractedData.student.studentId) setStudentId(extractedData.student.studentId);
+  if (extractedData.student.gradeLevel) setGradeLevel(extractedData.student.gradeLevel);
+  if (extractedData.student.dateOfBirth) setDateOfBirth(extractedData.student.dateOfBirth);
 
+  // Parent/Guardian info
+  if (extractedData.parent) {
+    if (extractedData.parent.name) setParentName(extractedData.parent.name);
+    if (extractedData.parent.email) setParentEmail(extractedData.parent.email);
+    if (extractedData.parent.phone) setParentPhone(extractedData.parent.phone);
+    if (extractedData.parent.address) setParentAddress(extractedData.parent.address);
+  }
+
+  // Academic period info
+  if (extractedData.academicInfo) {
+    if (extractedData.academicInfo.term) setTerm(extractedData.academicInfo.term);
+    if (extractedData.academicInfo.year) setAcademicYear(extractedData.academicInfo.year);
+  }
+
+  // Attendance info
+  if (extractedData.attendance) {
+    if (extractedData.attendance.days) setAttendanceDays(extractedData.attendance.days);
+    if (extractedData.attendance.present) setAttendancePresent(extractedData.attendance.present);
+  }
+
+  // Subjects/grades
+  if (extractedData.subjects && extractedData.subjects.length > 0) {
+    setSubjects(extractedData.subjects);
+  }
+
+  // Teacher comments
+  if (extractedData.teacherComments) {
+    setTeacherComments(extractedData.teacherComments);
+  }
+
+  alert("✅ Data extracted and populated successfully!");
+};
   const loadSavedStudents = async () => {
     if (!user?.uid) return;
 
@@ -1284,6 +1327,48 @@ const [stampSettings, setStampSettings] = useState({
                 showReportCard ? "hidden" : "block"
               } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
             >
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                      <div className="flex border-b">
+                                        <button
+                                          onClick={() => setInputMode("manual")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                            inputMode === "manual"
+                                              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          📝 Manual Entry
+                                        </button>
+                                        <button
+                                          onClick={() => setInputMode("ai")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                            inputMode === "ai"
+                                              ? "bg-white text-purple-600 border-b-2 border-purple-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          <Sparkles className="w-4 h-4" />
+                                          AI Assistant
+                                        </button>
+                                      </div>
+                  
+                                      {/* Tab Content */}
+                                      <div className="p-6">
+                                        {inputMode === "ai" ? (
+                                          <AIInvoiceExtractor
+                                            onDataExtracted={handleAIDataExtracted}
+                                            documentType={documentType}
+                                          />
+                                        ) : (
+                                          <div className="text-sm text-gray-600">
+                                            Fill out the forms below to create your {documentType}
+                                            .
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                     {inputMode === "manual" && (
+                    <>
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                 <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
                 <span className="text-indigo-700 font-medium">{term} - {academicYear}</span>
@@ -1531,6 +1616,7 @@ const [stampSettings, setStampSettings] = useState({
                   placeholder="Enter teacher comments about the student's performance..."
                 />
               </div>
+              </>)}
             </div>
 
             <div

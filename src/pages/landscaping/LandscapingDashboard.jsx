@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from '../../assets/img/solidflo-logo.png';
-import Templates from "./Templates";
+import Templates from "./Templates"; 
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
@@ -33,6 +34,7 @@ import {
   Users,
   Calendar,
   FileText,
+   Sparkles,
   Wrench,
   FileBarChart,
   BarChart3,
@@ -81,6 +83,9 @@ const generateJobCardNumber = async (userId) => {
 
 const LandscapingDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+const [inputMode, setInputMode] = useState("manual");
+const [documentType, setDocumentType] = useState("invoice"); 
+const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("WorkOrder");
   const [showJobCard, setShowJobCard] = useState(false);
   const { user } = useAuth();
@@ -168,7 +173,27 @@ const [stampSettings, setStampSettings] = useState({
     setCustomerAddress(customer.address || "");
     setCustomerId(customer.customerId || "");
   };
+const handleAIDataExtracted = (extractedData) => {
+  // Customer info
+  if (extractedData.customer.name) setCustomerName(extractedData.customer.name);
+  if (extractedData.customer.email) setCustomerEmail(extractedData.customer.email);
+  if (extractedData.customer.phone) setCustomerPhone(extractedData.customer.phone);
+  if (extractedData.customer.address) setCustomerAddress(extractedData.customer.address);
+  if (extractedData.customer.customerId) setCustomerId(extractedData.customer.customerId);
 
+  // Property info
+  if (extractedData.property.type) setPropertyType(extractedData.property.type);
+  if (extractedData.property.size) setPropertySize(extractedData.property.size);
+  if (extractedData.property.address) setPropertyAddress(extractedData.property.address);
+  if (extractedData.property.accessDetails) setAccessDetails(extractedData.property.accessDetails);
+
+  // Items
+  if (extractedData.items && extractedData.items.length > 0) {
+    setItems(extractedData.items);
+  }
+
+  alert("✅ Landscaping work order data extracted and populated successfully!");
+};
   const handleCustomerSaved = () => {
     loadCustomers();
   };
@@ -1290,7 +1315,48 @@ const [stampSettings, setStampSettings] = useState({
                 showJobCard ? "hidden" : "block"
               } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
             >
-             
+             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                      <div className="flex border-b">
+                                        <button
+                                          onClick={() => setInputMode("manual")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                            inputMode === "manual"
+                                              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          📝 Manual Entry
+                                        </button>
+                                        <button
+                                          onClick={() => setInputMode("ai")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                            inputMode === "ai"
+                                              ? "bg-white text-purple-600 border-b-2 border-purple-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          <Sparkles className="w-4 h-4" />
+                                          AI Assistant
+                                        </button>
+                                      </div>
+                  
+                                      {/* Tab Content */}
+                                      <div className="p-6">
+                                        {inputMode === "ai" ? (
+                                          <AIInvoiceExtractor
+                                            onDataExtracted={handleAIDataExtracted}
+                                            documentType={documentType}
+                                          />
+                                        ) : (
+                                          <div className="text-sm text-gray-600">
+                                            Fill out the forms below to create your {documentType}
+                                            .
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                     {inputMode === "manual" && (
+                    <>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -1501,6 +1567,7 @@ const [stampSettings, setStampSettings] = useState({
                   </div>
                 </div>
               </div>
+              </>)}
             </div>
 
             <div

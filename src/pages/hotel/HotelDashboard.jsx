@@ -22,7 +22,8 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
 import GuestModal from './GuestModal';
-import Templates from "./Templates";
+import Templates from "./Templates"; 
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import GuestsListModal from './GuestsListModal';
 import SignatureStamp from '../SignatureStamp';
@@ -30,6 +31,7 @@ import {
   ChevronDown,
   ChevronLeft,
   Home,
+   Sparkles,
   Settings,
   Users,
   Calendar,
@@ -79,6 +81,9 @@ const generateInvoiceNumber = async (userId) => {
 
 const HotelDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+const [inputMode, setInputMode] = useState("manual");
+const [documentType, setDocumentType] = useState("invoice"); 
+const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("Invoice");
   const [showInvoice, setShowInvoice] = useState(false);
   const { user } = useAuth();
@@ -172,7 +177,34 @@ const [stampSettings, setStampSettings] = useState({
     setIdType(guest.idType || "ID Document");
     setIdNumber(guest.idNumber || "");
   };
+const handleAIDataExtracted = (extractedData) => {
+  // Guest info
+  if (extractedData.guest.name) setGuestName(extractedData.guest.name);
+  if (extractedData.guest.email) setGuestEmail(extractedData.guest.email);
+  if (extractedData.guest.phone) setGuestPhone(extractedData.guest.phone);
+  if (extractedData.guest.address) setGuestAddress(extractedData.guest.address);
+  if (extractedData.guest.guestId) setGuestId(extractedData.guest.guestId);
+  if (extractedData.guest.dateOfBirth) setGuestDOB(extractedData.guest.dateOfBirth);
+  if (extractedData.guest.nationality) setGuestNationality(extractedData.guest.nationality);
+  if (extractedData.guest.idType) setIdType(extractedData.guest.idType);
+  if (extractedData.guest.idNumber) setIdNumber(extractedData.guest.idNumber);
 
+  // Booking info
+  if (extractedData.booking.roomNumber) setRoomNumber(extractedData.booking.roomNumber);
+  if (extractedData.booking.roomType) setRoomType(extractedData.booking.roomType);
+  if (extractedData.booking.checkInDate) setCheckInDate(extractedData.booking.checkInDate);
+  if (extractedData.booking.checkOutDate) setCheckOutDate(extractedData.booking.checkOutDate);
+  if (extractedData.booking.numberOfGuests) setNumberOfGuests(extractedData.booking.numberOfGuests);
+  if (extractedData.booking.numberOfNights) setNumberOfNights(extractedData.booking.numberOfNights);
+  if (extractedData.booking.specialRequests) setSpecialRequests(extractedData.booking.specialRequests);
+
+  // Items
+  if (extractedData.items && extractedData.items.length > 0) {
+    setItems(extractedData.items);
+  }
+
+  alert("✅ Hotel booking data extracted and populated successfully!");
+};
   const handleGuestSaved = () => {
     loadGuests();
   };
@@ -607,7 +639,7 @@ const [stampSettings, setStampSettings] = useState({
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -740,7 +772,7 @@ const [stampSettings, setStampSettings] = useState({
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-800 rounded-full"></div>
+            <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "Manager"}
@@ -788,7 +820,7 @@ const [stampSettings, setStampSettings] = useState({
               </button>
               <button
                 onClick={handleSaveInvoice}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
               >
                 Save Invoice
               </button>
@@ -801,13 +833,13 @@ const [stampSettings, setStampSettings] = useState({
                 New
               </button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
               >
                 Save as PDF
               </button>
@@ -847,13 +879,13 @@ const [stampSettings, setStampSettings] = useState({
               <Edit className="w-4 h-4" />
               <span>Edit</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
             >
               <Download className="w-4 h-4" />
               <span>Save PDF</span>
@@ -869,7 +901,7 @@ const [stampSettings, setStampSettings] = useState({
         </div>
 
         {/* Tabs */}
-        <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+        <div className="bg-slate-600 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
             {["Invoice", "Guest Details", "Booking", "Notes"].map((tab) => (
               <button
@@ -1315,7 +1347,7 @@ const [stampSettings, setStampSettings] = useState({
 </div>
                     <button
                       onClick={handleSavePropertyInfo}
-                      className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Property Information
                     </button>
@@ -1428,7 +1460,7 @@ const [stampSettings, setStampSettings] = useState({
                        <>
           <button
             onClick={() => setShowInvoice(!showInvoice)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showInvoice ? "Hide Invoice" : "View Invoice"}
@@ -1440,7 +1472,48 @@ const [stampSettings, setStampSettings] = useState({
                 showInvoice ? "hidden" : "block"
               } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
             >
-             
+             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                      <div className="flex border-b">
+                                        <button
+                                          onClick={() => setInputMode("manual")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                            inputMode === "manual"
+                                              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          📝 Manual Entry
+                                        </button>
+                                        <button
+                                          onClick={() => setInputMode("ai")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                            inputMode === "ai"
+                                              ? "bg-white text-purple-600 border-b-2 border-purple-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          <Sparkles className="w-4 h-4" />
+                                          AI Assistant
+                                        </button>
+                                      </div>
+                  
+                                      {/* Tab Content */}
+                                      <div className="p-6">
+                                        {inputMode === "ai" ? (
+                                          <AIInvoiceExtractor
+                                            onDataExtracted={handleAIDataExtracted}
+                                            documentType={documentType}
+                                          />
+                                        ) : (
+                                          <div className="text-sm text-gray-600">
+                                            Fill out the forms below to create your {documentType}
+                                            .
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                     {inputMode === "manual" && (
+                    <>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -1708,7 +1781,7 @@ const [stampSettings, setStampSettings] = useState({
 
                   <button
                     onClick={handleAddItem}
-                    className="bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                    className="bg-slate-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Add
@@ -1736,6 +1809,7 @@ const [stampSettings, setStampSettings] = useState({
                   </div>
                 </div>
               </div>
+              </>)}
             </div>
 
             {/* Invoice Preview/Print Section */}
@@ -1817,7 +1891,7 @@ const [stampSettings, setStampSettings] = useState({
                 
                 nav,
                 [class*="sidebar"],
-                [class*="bg-gray-800"],
+                [class*="bg-slate-600"],
                 button:not([style]) {
                   display: none !important;
                 }

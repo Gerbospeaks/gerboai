@@ -3,7 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
-import Templates from "./Templates";
+import Templates from "./Templates"; 
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import logo from "../../assets/img/solidflo-logo.png";
 import {
@@ -37,6 +38,7 @@ import {
   FileBarChart,
   BarChart3,
   Menu,
+  Sparkles,
   Plus,
   Send,
   Edit,
@@ -103,6 +105,8 @@ const generateInvoiceNumber = async (userId) => {
 
 const ConstructionDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+const [inputMode, setInputMode] = useState("manual");
+const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("quote");
   const [showQuote, setShowQuote] = useState(false);
   const { user } = useAuth();
@@ -284,7 +288,33 @@ const loadInvoice = (invoice) => {
 
     setSavedClients(clients.filter((c) => !c._placeholder));
   };
+const handleAIDataExtracted = (extractedData) => {
+  // Client info
+  if (extractedData.client.name) setClientName(extractedData.client.name);
+  if (extractedData.client.email) setClientEmail(extractedData.client.email);
+  if (extractedData.client.phone) setClientPhone(extractedData.client.phone);
+  if (extractedData.client.address) setClientAddress(extractedData.client.address);
+  if (extractedData.client.clientId) setClientId(extractedData.client.clientId);
+  if (extractedData.client.company) setClientCompany(extractedData.client.company);
+  if (extractedData.client.clientType) setClientType(extractedData.client.clientType);
 
+  // Project info (specific to ConstructionDashboard)
+  if (extractedData.project) {
+    if (extractedData.project.name) setProjectName(extractedData.project.name);
+    if (extractedData.project.address) setProjectAddress(extractedData.project.address);
+    if (extractedData.project.type) setProjectType(extractedData.project.type);
+    if (extractedData.project.size) setProjectSize(extractedData.project.size);
+    if (extractedData.project.duration) setProjectDuration(extractedData.project.duration);
+    if (extractedData.project.startDate) setProjectStartDate(extractedData.project.startDate);
+  }
+
+  // Items
+  if (extractedData.items && extractedData.items.length > 0) {
+    setItems(extractedData.items);
+  }
+
+  alert("✅ Data extracted and populated successfully!");
+};
   const handleSaveClient = async () => {
     if (!user?.uid) return;
 
@@ -759,7 +789,7 @@ const loadInvoice = (invoice) => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -1050,7 +1080,7 @@ const loadInvoice = (invoice) => {
             </div>
           </div>
 
-          <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+          <div className="bg-slate-600 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
             <div className="flex space-x-4 lg:space-x-8 min-w-max">
               {[
                 documentType === "quote" ? "Quote" : "Invoice",
@@ -1713,11 +1743,48 @@ const loadInvoice = (invoice) => {
                     showQuote ? "hidden" : "block"
                   } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
                 >
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                    <span className="text-orange-700 font-medium">Draft</span>
-                    <span className="text-orange-600">Created Today</span>
-                  </div>
+                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                      <div className="flex border-b">
+                                        <button
+                                          onClick={() => setInputMode("manual")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                            inputMode === "manual"
+                                              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          📝 Manual Entry
+                                        </button>
+                                        <button
+                                          onClick={() => setInputMode("ai")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                            inputMode === "ai"
+                                              ? "bg-white text-purple-600 border-b-2 border-purple-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          <Sparkles className="w-4 h-4" />
+                                          AI Assistant
+                                        </button>
+                                      </div>
+                  
+                                      {/* Tab Content */}
+                                      <div className="p-6">
+                                        {inputMode === "ai" ? (
+                                          <AIInvoiceExtractor
+                                            onDataExtracted={handleAIDataExtracted}
+                                            documentType={documentType}
+                                          />
+                                        ) : (
+                                          <div className="text-sm text-gray-600">
+                                            Fill out the forms below to create your {documentType}
+                                            .
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                  {inputMode === "manual" && (
+                    <>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -2001,6 +2068,7 @@ const loadInvoice = (invoice) => {
                       </div>
                     </div>
                   </div>
+                  </>)}
                 </div>
 
                 {/* Quote Preview/Print Section */}
@@ -2077,7 +2145,7 @@ const loadInvoice = (invoice) => {
                     
                     nav,
                     [class*="sidebar"],
-                    [class*="bg-gray-800"],
+                    [class*="bg-slate-600"],
                     button:not([style]) {
                       display: none !important;
                     }

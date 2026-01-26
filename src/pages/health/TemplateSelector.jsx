@@ -161,7 +161,7 @@ export const DefaultTemplate = ({
     {/* Three Column Section */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-blue-50 border border-blue-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">PATIENT INFORMATION</div>
+        <div className="font-bold text-xs mb-2 bg-slate-600 text-white px-2 py-1">PATIENT INFORMATION</div>
         <div className="text-xs space-y-1">
           <div className="font-semibold">{customerName}</div>
           <div className="text-gray-600">Patient ID: {patientId}</div>
@@ -172,7 +172,7 @@ export const DefaultTemplate = ({
       </div>
 
       <div className="bg-blue-50 border border-blue-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">PATIENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-slate-600 text-white px-2 py-1">PATIENT DETAILS</div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Date of Birth:</span>
@@ -190,7 +190,7 @@ export const DefaultTemplate = ({
       </div>
 
       <div className="bg-blue-50 border border-blue-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">INSURANCE INFORMATION</div>
+        <div className="font-bold text-xs mb-2 bg-slate-600 text-white px-2 py-1">INSURANCE INFORMATION</div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Provider:</span>
@@ -229,7 +229,7 @@ export const DefaultTemplate = ({
     <div className="mb-4">
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-gray-800 text-white">
+          <tr className="bg-slate-600 text-white">
             <th className="text-left px-2 py-1 font-bold">SERVICE DESCRIPTION</th>
             <th className="text-center px-2 py-1 font-bold">QUANTITY</th>
             <th className="text-right px-2 py-1 font-bold">UNIT PRICE</th>

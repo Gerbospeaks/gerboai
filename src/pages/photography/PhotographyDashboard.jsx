@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from '../../assets/img/solidflo-logo.png';
-import Templates from "./Templates";
+import Templates from "./Templates"; 
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from '../SignatureStamp';
@@ -29,6 +30,7 @@ import {
   ChevronLeft,
   Home,
   Settings,
+   Sparkles,
   Users,
   Calendar,
   FileText,
@@ -78,6 +80,9 @@ const generateInvoiceNumber = async (userId) => {
 
 const PhotographyDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+const [inputMode, setInputMode] = useState("manual");
+const [documentType, setDocumentType] = useState("invoice"); 
+const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("Invoice");
   const [showInvoice, setShowInvoice] = useState(false);
   const { user } = useAuth();
@@ -188,7 +193,26 @@ const [stampSettings, setStampSettings] = useState({
     setItems(invoice.items || []);
     setShowInvoicesList(false);
   };
+const handleAIDataExtracted = (extractedData) => {
+  // Customer/Client info
+  if (extractedData.customer.name) setCustomerName(extractedData.customer.name);
+  if (extractedData.customer.email) setCustomerEmail(extractedData.customer.email);
+  if (extractedData.customer.phone) setCustomerPhone(extractedData.customer.phone);
+  if (extractedData.customer.address) setCustomerAddress(extractedData.customer.address);
+  if (extractedData.customer.customerId) setCustomerId(extractedData.customer.customerId);
 
+  // Event info
+  if (extractedData.event.date) setEventDate(extractedData.event.date);
+  if (extractedData.event.type) setEventType(extractedData.event.type);
+  if (extractedData.event.location) setEventLocation(extractedData.event.location);
+
+  // Items
+  if (extractedData.items && extractedData.items.length > 0) {
+    setItems(extractedData.items);
+  }
+
+  alert("✅ Photography invoice data extracted and populated successfully!");
+};
   const loadSavedCustomers = async () => {
     if (!user?.uid) return;
 
@@ -548,7 +572,7 @@ const [stampSettings, setStampSettings] = useState({
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -676,7 +700,7 @@ const [stampSettings, setStampSettings] = useState({
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-purple-600 rounded-full"></div>
+            <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "User"}
@@ -729,7 +753,7 @@ const [stampSettings, setStampSettings] = useState({
               </button>
               <button
                 onClick={handleSaveInvoice}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-purple-700"
               >
                 Save Invoice
               </button>
@@ -742,13 +766,13 @@ const [stampSettings, setStampSettings] = useState({
                 New
               </button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-purple-700">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-purple-700"
               >
                 Save as PDF
               </button>
@@ -789,13 +813,13 @@ const [stampSettings, setStampSettings] = useState({
               <Edit className="w-4 h-4" />
               <span>Edit</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-purple-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-purple-700 transition-colors whitespace-nowrap text-sm"
             >
               <Download className="w-4 h-4" />
               <span>Save PDF</span>
@@ -810,7 +834,7 @@ const [stampSettings, setStampSettings] = useState({
           </div>
         </div>
 
-        <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+        <div className="bg-slate-600 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
             {["Invoice", "Packages", "Gallery", "Notes"].map((tab) => (
               <button
@@ -1166,7 +1190,7 @@ const [stampSettings, setStampSettings] = useState({
 </div>
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700"
+                      className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-purple-700"
                     >
                       Save Business Information
                     </button>
@@ -1273,7 +1297,7 @@ const [stampSettings, setStampSettings] = useState({
           {/* Mobile View Invoice Button */}
           <button
             onClick={() => setShowInvoice(!showInvoice)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showInvoice ? "Hide Invoice" : "View Invoice"}
@@ -1285,6 +1309,48 @@ const [stampSettings, setStampSettings] = useState({
                 showInvoice ? "hidden" : "block"
               } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
             >
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                      <div className="flex border-b">
+                                        <button
+                                          onClick={() => setInputMode("manual")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                            inputMode === "manual"
+                                              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          📝 Manual Entry
+                                        </button>
+                                        <button
+                                          onClick={() => setInputMode("ai")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                            inputMode === "ai"
+                                              ? "bg-white text-purple-600 border-b-2 border-purple-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          <Sparkles className="w-4 h-4" />
+                                          AI Assistant
+                                        </button>
+                                      </div>
+                  
+                                      {/* Tab Content */}
+                                      <div className="p-6">
+                                        {inputMode === "ai" ? (
+                                          <AIInvoiceExtractor
+                                            onDataExtracted={handleAIDataExtracted}
+                                            documentType={documentType}
+                                          />
+                                        ) : (
+                                          <div className="text-sm text-gray-600">
+                                            Fill out the forms below to create your {documentType}
+                                            .
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                     {inputMode === "manual" && (
+                    <>
               <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <span className="text-blue-700 font-medium">Pending Payment</span>
@@ -1466,7 +1532,7 @@ const [stampSettings, setStampSettings] = useState({
 
                   <button
                     onClick={handleAddItem}
-                    className="bg-purple-600 text-white rounded-lg px-4 py-2 hover:bg-purple-700 flex items-center justify-center gap-2"
+                    className="bg-slate-600 text-white rounded-lg px-4 py-2 hover:bg-purple-700 flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Add
@@ -1494,6 +1560,7 @@ const [stampSettings, setStampSettings] = useState({
                   </div>
                 </div>
               </div>
+              </>)}
             </div>
 
             <div

@@ -394,7 +394,7 @@ export const ProfessionalTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 font-bold bg-gray-800 text-white px-4 rounded">
+        <div className="flex justify-between py-3 font-bold bg-slate-600 text-white px-4 rounded">
           <span>TOTAL DUE:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>

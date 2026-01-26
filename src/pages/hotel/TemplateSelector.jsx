@@ -720,7 +720,7 @@ export const BusinessHotelTemplate = (props) => (
 
     <table className="w-full text-sm mb-6 border border-gray-300">
       <thead>
-        <tr className="bg-gray-800 text-white">
+        <tr className="bg-slate-600 text-white">
           <th className="text-left px-4 py-2">Description</th>
           <th className="text-center px-4 py-2">Quantity</th>
           <th className="text-right px-4 py-2">Unit Price</th>
@@ -749,7 +749,7 @@ export const BusinessHotelTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 px-4 font-bold text-lg bg-gray-800 text-white">
+        <div className="flex justify-between py-3 px-4 font-bold text-lg bg-slate-600 text-white">
           <span>TOTAL DUE:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>

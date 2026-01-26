@@ -1,6 +1,7 @@
 import React from 'react';
 import { Calendar, Users, DollarSign, PawPrint } from 'lucide-react';
-import Templates from "./Templates";
+import Templates from "./Templates"; 
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 export default function VeterinaryDashboard() {
   return (

@@ -27,6 +27,9 @@ export default function Home() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+const [inputMode, setInputMode] = useState("manual");
+const [documentType, setDocumentType] = useState("invoice"); 
+const [useAI, setUseAI] = useState(false);
   const [stats, setStats] = useState({
     totalInvoices: 0,
     totalQuotes: 0,

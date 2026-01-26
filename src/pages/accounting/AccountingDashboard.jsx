@@ -22,9 +22,9 @@ import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import FinancialOverview from "../FinancialOverview";
-import Templates from "./Templates";
-import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
+import Templates from "./Templates"; 
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import {
   ChevronDown,
   ChevronLeft,

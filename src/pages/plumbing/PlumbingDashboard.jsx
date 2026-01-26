@@ -22,13 +22,15 @@ import { db } from "../../firebase";
 import CustomerModal from '../CustomerModal';
 import CustomersListModal from '../CustomersListModal';
 import SignatureStamp from '../SignatureStamp';
-import Templates from "./Templates";
+import Templates from "./Templates"; 
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import {
   ChevronDown,
   ChevronLeft,
   Home,
   Settings,
+   Sparkles,
   Users,
   Calendar,
   FileText,
@@ -77,6 +79,9 @@ const generateJobCardNumber = async (userId) => {
 
 const PlumbingDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+const [inputMode, setInputMode] = useState("manual");
+const [documentType, setDocumentType] = useState("invoice"); 
+const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("WorkOrder");
   const [showJobCard, setShowJobCard] = useState(false);
   const { user } = useAuth();
@@ -284,7 +289,29 @@ const [stampSettings, setStampSettings] = useState({
     setItems((prev) => [...prev, item]);
     setNewItem({ description: "", rate: "", qty: "", type: "Labor" });
   };
+const handleAIDataExtracted = (extractedData) => {
+  // Customer info
+  if (extractedData.customer.name) setCustomerName(extractedData.customer.name);
+  if (extractedData.customer.email) setCustomerEmail(extractedData.customer.email);
+  if (extractedData.customer.phone) setCustomerPhone(extractedData.customer.phone);
+  if (extractedData.customer.address) setCustomerAddress(extractedData.customer.address);
+  if (extractedData.customer.customerId) setCustomerId(extractedData.customer.customerId);
 
+  // Property info
+  if (extractedData.property.type) setPropertyType(extractedData.property.type);
+  if (extractedData.property.address) setPropertyAddress(extractedData.property.address);
+  if (extractedData.property.accessDetails) setAccessDetails(extractedData.property.accessDetails);
+  if (typeof extractedData.property.emergencyService === 'boolean') {
+    setEmergencyService(extractedData.property.emergencyService);
+  }
+
+  // Items
+  if (extractedData.items && extractedData.items.length > 0) {
+    setItems(extractedData.items);
+  }
+
+  alert("✅ Plumbing work order data extracted and populated successfully!");
+};
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
@@ -689,7 +716,7 @@ const [stampSettings, setStampSettings] = useState({
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-700 bg-blue-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-800 rounded-full"></div>
+            <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">
                 {user?.name || "User"}
@@ -747,26 +774,26 @@ const [stampSettings, setStampSettings] = useState({
               </button>
               <button
                 onClick={handleSaveJobCard}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
               >
                 Save Work Order
               </button>
 
               <button
                 onClick={handleNewJobCard}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
               >
                 <Plus className="w-4 h-4" />
                 New
               </button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
               >
                 Save as PDF
               </button>
@@ -807,13 +834,13 @@ const [stampSettings, setStampSettings] = useState({
               <Edit className="w-4 h-4" />
               <span>Edit</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
             >
               <Download className="w-4 h-4" />
               <span>Save PDF</span>
@@ -1185,7 +1212,7 @@ const [stampSettings, setStampSettings] = useState({
 </div>
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Business Information
                     </button>
@@ -1294,7 +1321,7 @@ const [stampSettings, setStampSettings] = useState({
           {/* Mobile View Work Order Button */}
           <button
             onClick={() => setShowJobCard(!showJobCard)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showJobCard ? "Hide Work Order" : "View Work Order"}
@@ -1306,6 +1333,48 @@ const [stampSettings, setStampSettings] = useState({
                 showJobCard ? "hidden" : "block"
               } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
             >
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                      <div className="flex border-b">
+                                        <button
+                                          onClick={() => setInputMode("manual")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                            inputMode === "manual"
+                                              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          📝 Manual Entry
+                                        </button>
+                                        <button
+                                          onClick={() => setInputMode("ai")}
+                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                            inputMode === "ai"
+                                              ? "bg-white text-purple-600 border-b-2 border-purple-600"
+                                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                          }`}
+                                        >
+                                          <Sparkles className="w-4 h-4" />
+                                          AI Assistant
+                                        </button>
+                                      </div>
+                  
+                                      {/* Tab Content */}
+                                      <div className="p-6">
+                                        {inputMode === "ai" ? (
+                                          <AIInvoiceExtractor
+                                            onDataExtracted={handleAIDataExtracted}
+                                            documentType={documentType}
+                                          />
+                                        ) : (
+                                          <div className="text-sm text-gray-600">
+                                            Fill out the forms below to create your {documentType}
+                                            .
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                     {inputMode === "manual" && (
+                    <>
               <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <span className="text-blue-700 font-medium">In Progress</span>
@@ -1452,7 +1521,7 @@ const [stampSettings, setStampSettings] = useState({
 
                   <button
                     onClick={handleAddItem}
-                    className="bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                    className="bg-slate-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Add
@@ -1480,6 +1549,7 @@ const [stampSettings, setStampSettings] = useState({
                   </div>
                 </div>
               </div>
+              </>)}
             </div>
 
             <div

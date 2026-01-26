@@ -77,7 +77,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
 };
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat" style={{backgroundImage: `url(${logon})`, backgroundAttachment: 'fixed', backgroundBlendMode: 'overlay'}}>
-      <div className="max-w-md w-full bg-gray-800 rounded-xl shadow-2xl p-8">
+      <div className="max-w-md w-full bg-slate-600 rounded-xl shadow-2xl p-8">
          <div className="flex items-center space-x-2 mb-8">
                               <img
                                   src={logo}
@@ -196,7 +196,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-gray-800 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+            className="w-full bg-slate-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Creating Account...' : 'Create Account'}
           </button>
