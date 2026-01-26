@@ -5,6 +5,7 @@ import logo from '../../assets/img/solidflo-logo.png';
 import Templates from "./Templates"; 
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
+import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import SignatureStamp from '../SignatureStamp';
@@ -29,6 +30,7 @@ import CustomersListModal from '../CustomersListModal';
 import {
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   Home,
   Settings,
   Users,
@@ -43,6 +45,7 @@ import {
   Send,
   Edit,
   LogOut,
+  X,
   CheckSquare,
   TrendingUp,
   CreditCard,
@@ -401,33 +404,48 @@ const handleAIDataExtracted = (extractedData) => {
   };
 
   const handleLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !user?.uid) return;
+  const file = e.target.files[0];
+  if (!file || !user?.uid) return;
 
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
-      return;
-    }
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file');
+    return;
+  }
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
-      return;
-    }
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Image size should be less than 5MB');
+    return;
+  }
 
-    try {
-      const storage = getStorage();
-      const storageRef = ref(storage, `users/${user.uid}/logo/${file.name}`);
+  try {
+    // Show loading state
+    setBusinessInfo({ ...businessInfo, uploading: true });
 
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
+    // Upload to Cloudflare R2
+    const logoUrl = await uploadLogoToR2(file, user.uid);
 
-      setBusinessInfo({ ...businessInfo, logoUrl: downloadURL });
-      alert("Logo uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading logo:", error);
-      alert("Failed to upload logo");
-    }
-  };
+    // Update business info state
+    setBusinessInfo({ 
+      ...businessInfo, 
+      logoUrl: logoUrl,
+      uploading: false 
+    });
+
+    // Save to Firebase Firestore
+    const db = getFirestore();
+    const docRef = doc(db, 'users', user.uid, 'settings', 'businessInfo');
+    await updateDoc(docRef, { 
+      logoUrl: logoUrl,
+      updatedAt: new Date().toISOString()
+    });
+
+    alert('Logo uploaded successfully!');
+  } catch (error) {
+    console.error('Error uploading logo:', error);
+    alert('Failed to upload logo: ' + error.message);
+    setBusinessInfo({ ...businessInfo, uploading: false });
+  }
+};
 
   const handleSaveBusinessInfo = async () => {
     if (!user?.uid) return;
@@ -568,167 +586,299 @@ const handleAIDataExtracted = (extractedData) => {
 
   return (
     <div className="flex h-screen bg-gray-300">
-      {/* Mobile Sidebar Backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        ></div>
-      )}
+     
+    {/* Mobile Sidebar Backdrop */}
+{sidebarOpen && (
+  <div
+    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+    onClick={() => setSidebarOpen(false)}
+  ></div>
+)}
 
-      {/* Sidebar */}
-      <div
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-green-900 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+{/* Collapsed Sidebar (Icon Only) */}
+<div
+  className={`${
+    sidebarOpen ? "hidden" : "block"
+  } fixed z-40 w-16 bg-green-900 border-r border-gray-200 h-full print:hidden transition-all duration-300`}
+>
+  <div className="flex flex-col items-center py-4 space-y-4">
+    {/* Toggle Button */}
+    <button
+      onClick={() => setSidebarOpen(true)}
+      className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors"
+      title="Expand Sidebar"
+    >
+      <ChevronRight className="w-6 h-6" />
+    </button>
+
+    {/* Logo */}
+    <div className="w-10 h-10">
+      <img
+        src={logo}
+        alt="Logo"
+        className="w-full h-full object-contain rounded-lg"
+      />
+    </div>
+
+    <div className="w-full border-t border-green-700"></div>
+
+    {/* Icon Navigation */}
+    <div className="flex flex-col items-center space-y-3 w-full">
+      <button
+        className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Home"
       >
-        <div className="p-4">
-          <div className="flex items-center space-x-2 mb-8">
-             <img
-                 src={logo}
-                 alt="Business Logo"
-                 className="w-16 h-12 object-contain rounded-lg"
-               />
-          </div>
+        <Home className="w-5 h-5" />
+      </button>
+      
+      <button
+        onClick={() => setShowSettings(true)}
+        className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Settings"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
 
-          <nav className="space-y-1">
-            <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
-              <Home className="w-5 h-5" />
-              <span>Home</span>
-            </div>
-            <div
-              onClick={() => setShowSettings(true)}
-              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer"
-            >
-              <Settings className="w-5 h-5" />
-              <span>Settings</span>
-            </div>
+      <button
+        onClick={() => setActiveView("financial-overview")}
+        className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Business Overview"
+      >
+        <TrendingUp className="w-5 h-5" />
+      </button>
 
-            <div className="pt-4">
-             <div
-                             onClick={() => setActiveView("financial-overview")}
-                             className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-                           >
-                             <TrendingUp className="w-5 h-5" />
-                             <span>Business Overview</span>
-                           </div>
+      <button
+        onClick={() => {
+          handleNewJobCard();
+          setActiveView("invoice");
+        }}
+        className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Work Orders"
+      >
+        <ClipboardList className="w-5 h-5" />
+      </button>
 
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <ClipboardList className="w-5 h-5" />
-                    <span>Work Orders</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
+      <button
+        onClick={() => setShowCustomersListModal(true)}
+        className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Customers"
+      >
+        <Users className="w-5 h-5" />
+      </button>
 
-                <div className="ml-8 mt-1 space-y-1">
-                  <div
-                   onClick={() => {
-                      handleNewJobCard();
-                      setActiveView("invoice");
-                    }}
-                    className="px-3 py-2 text-sm text-white bg-green-800 rounded-lg cursor-pointer"
-                  >
-                    Create Work Order
-                  </div>
-                  <div
-                    onClick={() => setShowJobCardsList(!showJobCardsList)}
-                    className="px-3 py-2 text-sm text-gray-400 hover:bg-green-800 rounded-lg cursor-pointer"
-                  >
-                    All Work Orders ({savedJobCards.length})
-                  </div>
-                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-green-800 rounded-lg cursor-pointer">
-                    In Progress
-                  </div>
-                </div>
-              </div>
+      <button
+        onClick={() => setActiveView("templates")}
+        className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Invoice Templates"
+      >
+        <FileText className="w-5 h-5" />
+      </button>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer mt-2">
-                <Users className="w-5 h-5" />
-                <span>Customers</span>
-              </div>
-               <div className="ml-8 mt-1 space-y-1">
-                <div 
-                  onClick={handleAddNewCustomer}
-                  className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-green-800 rounded-lg cursor-pointer mt-2"
-                >
-                  <span>Add Customer</span>
-                </div>
-                <div
-                  onClick={() => setShowCustomersListModal(true)}
-                  className="px-3 py-2 text-sm text-gray-400 hover:bg-green-800 rounded-lg cursor-pointer"
-                >
-                  All Customers ({savedCustomers.length})
-                </div>
-              </div>
-               <div
-                              onClick={() => setActiveView("templates")}
-                              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-                            >
-                              <FileText className="w-5 h-5" />
-                              <span>Invoice Templates</span>
-                            </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Properties"
+      >
+        <MapPin className="w-5 h-5" />
+      </button>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
-                <MapPin className="w-5 h-5" />
-                <span>Properties</span>
-              </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Materials Inventory"
+      >
+        <Package className="w-5 h-5" />
+      </button>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
-                <Package className="w-5 h-5" />
-                <span>Materials Inventory</span>
-              </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Reports"
+      >
+        <FileBarChart className="w-5 h-5" />
+      </button>
 
-             
+      <button
+        className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Appointments"
+      >
+        <Calendar className="w-5 h-5" />
+      </button>
 
+      <button
+        className="p-2 text-gray-300 hover:bg-green-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Analytics"
+      >
+        <BarChart3 className="w-5 h-5" />
+      </button>
+    </div>
+  </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <FileBarChart className="w-5 h-5" />
-                  <span>Reports</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
+  {/* User Icon at Bottom */}
+  <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+    <div className="w-10 h-10 bg-green-600 rounded-full"></div>
+  </div>
+</div>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
-                <Calendar className="w-5 h-5" />
-                <span>Appointments</span>
-              </div>
+{/* Expanded Sidebar (Full Width) */}
+<div
+  className={`${
+    sidebarOpen ? "translate-x-0" : "-translate-x-full"
+  } fixed z-50 w-64 bg-green-900 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+>
+  <div className="p-4">
+    <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center space-x-2">
+        <img
+          src={logo}
+          alt="Business Logo"
+          className="w-16 h-12 object-contain rounded-lg"
+        />
+      </div>
+      {/* Close Button */}
+      <button
+        onClick={() => setSidebarOpen(false)}
+        className="p-1.5 text-gray-300 hover:bg-green-800 rounded-lg transition-colors"
+        title="Collapse Sidebar"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+    </div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <BarChart3 className="w-5 h-5" />
-                  <span>Analytics</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-            </div>
-          </nav>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-green-700 bg-green-800">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-green-600 rounded-full"></div>
-            <div className="flex-1">
-              <div className="text-sm font-medium text-white">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-gray-400">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="text-gray-400 hover:text-white"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+    <nav className="space-y-1">
+      <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
+        <Home className="w-5 h-5" />
+        <span>Home</span>
+      </div>
+      <div
+        onClick={() => setShowSettings(true)}
+        className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer"
+      >
+        <Settings className="w-5 h-5" />
+        <span>Settings</span>
       </div>
 
+      <div className="pt-4">
+        <div
+          onClick={() => setActiveView("financial-overview")}
+          className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer"
+        >
+          <TrendingUp className="w-5 h-5" />
+          <span>Business Overview</span>
+        </div>
+
+        <div className="mt-2">
+          <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
+            <div className="flex items-center space-x-3">
+              <ClipboardList className="w-5 h-5" />
+              <span>Work Orders</span>
+            </div>
+            <ChevronDown className="w-4 h-4" />
+          </div>
+
+          <div className="ml-8 mt-1 space-y-1">
+            <div
+              onClick={() => {
+                handleNewJobCard();
+                setActiveView("invoice");
+              }}
+              className="px-3 py-2 text-sm text-white bg-green-800 rounded-lg cursor-pointer"
+            >
+              Create Work Order
+            </div>
+            <div
+              onClick={() => setShowJobCardsList(!showJobCardsList)}
+              className="px-3 py-2 text-sm text-gray-400 hover:bg-green-800 rounded-lg cursor-pointer"
+            >
+              All Work Orders ({savedJobCards.length})
+            </div>
+            <div className="px-3 py-2 text-sm text-gray-400 hover:bg-green-800 rounded-lg cursor-pointer">
+              In Progress
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer mt-2">
+          <Users className="w-5 h-5" />
+          <span>Customers</span>
+        </div>
+        <div className="ml-8 mt-1 space-y-1">
+          <div
+            onClick={handleAddNewCustomer}
+            className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-green-800 rounded-lg cursor-pointer mt-2"
+          >
+            <span>Add Customer</span>
+          </div>
+          <div
+            onClick={() => setShowCustomersListModal(true)}
+            className="px-3 py-2 text-sm text-gray-400 hover:bg-green-800 rounded-lg cursor-pointer"
+          >
+            All Customers ({savedCustomers.length})
+          </div>
+        </div>
+
+        <div
+          onClick={() => setActiveView("templates")}
+          className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer"
+        >
+          <FileText className="w-5 h-5" />
+          <span>Invoice Templates</span>
+        </div>
+
+        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
+          <MapPin className="w-5 h-5" />
+          <span>Properties</span>
+        </div>
+
+        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
+          <Package className="w-5 h-5" />
+          <span>Materials Inventory</span>
+        </div>
+
+        <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
+          <div className="flex items-center space-x-3">
+            <FileBarChart className="w-5 h-5" />
+            <span>Reports</span>
+          </div>
+          <ChevronDown className="w-4 h-4" />
+        </div>
+
+        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
+          <Calendar className="w-5 h-5" />
+          <span>Appointments</span>
+        </div>
+
+        <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-green-800 rounded-lg cursor-pointer">
+          <div className="flex items-center space-x-3">
+            <BarChart3 className="w-5 h-5" />
+            <span>Analytics</span>
+          </div>
+          <ChevronDown className="w-4 h-4" />
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-green-700 bg-green-800">
+    <div className="flex items-center space-x-3">
+      <div className="w-10 h-10 bg-green-600 rounded-full"></div>
+      <div className="flex-1">
+        <div className="text-sm font-medium text-white">
+          {user?.name || "User"}
+        </div>
+        <div className="text-xs text-gray-400">
+          {user?.email || "email@example.com"}
+        </div>
+      </div>
+      <button
+        onClick={handleLogout}
+        className="text-gray-400 hover:text-white"
+      >
+        <LogOut className="w-4 h-4" />
+      </button>
+    </div>
+  </div>
+</div>
+
       {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 flex flex-col">
         <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
@@ -1703,6 +1853,7 @@ const handleAIDataExtracted = (extractedData) => {
           </div>
                 </>)}
         </div>
+      </div>
       </div>
     </div>
   );

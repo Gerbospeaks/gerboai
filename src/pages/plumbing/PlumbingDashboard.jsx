@@ -24,10 +24,12 @@ import CustomersListModal from '../CustomersListModal';
 import SignatureStamp from '../SignatureStamp';
 import Templates from "./Templates"; 
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import {
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   Home,
   Settings,
    Sparkles,
@@ -50,6 +52,7 @@ import {
   Droplets,
   ClipboardList,
   Package,
+  X,
   MapPin,
   Upload,
 } from "lucide-react";
@@ -398,33 +401,48 @@ const handleAIDataExtracted = (extractedData) => {
   };
 
   const handleLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !user?.uid) return;
+  const file = e.target.files[0];
+  if (!file || !user?.uid) return;
 
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
-      return;
-    }
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file');
+    return;
+  }
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
-      return;
-    }
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Image size should be less than 5MB');
+    return;
+  }
 
-    try {
-      const storage = getStorage();
-      const storageRef = ref(storage, `users/${user.uid}/logo/${file.name}`);
+  try {
+    // Show loading state
+    setBusinessInfo({ ...businessInfo, uploading: true });
 
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
+    // Upload to Cloudflare R2
+    const logoUrl = await uploadLogoToR2(file, user.uid);
 
-      setBusinessInfo({ ...businessInfo, logoUrl: downloadURL });
-      alert("Logo uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading logo:", error);
-      alert("Failed to upload logo");
-    }
-  };
+    // Update business info state
+    setBusinessInfo({ 
+      ...businessInfo, 
+      logoUrl: logoUrl,
+      uploading: false 
+    });
+
+    // Save to Firebase Firestore
+    const db = getFirestore();
+    const docRef = doc(db, 'users', user.uid, 'settings', 'businessInfo');
+    await updateDoc(docRef, { 
+      logoUrl: logoUrl,
+      updatedAt: new Date().toISOString()
+    });
+
+    alert('Logo uploaded successfully!');
+  } catch (error) {
+    console.error('Error uploading logo:', error);
+    alert('Failed to upload logo: ' + error.message);
+    setBusinessInfo({ ...businessInfo, uploading: false });
+  }
+};
 
   const handleSaveBusinessInfo = async () => {
     if (!user?.uid) return;
@@ -565,7 +583,7 @@ const handleAIDataExtracted = (extractedData) => {
 
   return (
     <div className="flex h-screen bg-gray-300">
-      {/* Mobile Sidebar Backdrop */}
+    {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -573,19 +591,161 @@ const handleAIDataExtracted = (extractedData) => {
         ></div>
       )}
 
-      {/* Sidebar */}
+      {/* Collapsed Sidebar (Icon Only) */}
+      <div
+        className={`${
+          sidebarOpen ? "hidden" : "block"
+        } fixed z-40 w-16 bg-slate-600 border-r border-gray-200 h-full print:hidden transition-all duration-300`}
+      >
+        <div className="flex flex-col items-center py-4 space-y-4">
+          {/* Toggle Button */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
+            title="Expand Sidebar"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          {/* Logo */}
+          <div className="w-10 h-10">
+            <img
+              src={logo}
+              alt="Logo"
+              className="w-full h-full object-contain rounded-lg"
+            />
+          </div>
+
+          <div className="w-full border-t border-slate-500"></div>
+
+          {/* Icon Navigation */}
+          <div className="flex flex-col items-center space-y-3 w-full">
+            <button
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Home"
+            >
+              <Home className="w-5 h-5" />
+            </button>
+            
+            <button
+              onClick={() => setShowSettings(true)}
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Settings"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+
+            <button
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Business Overview"
+            >
+              <TrendingUp className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={handleNewJobCard}
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Work Orders"
+            >
+              <ClipboardList className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setShowCustomersListModal(true)}
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Customers"
+            >
+              <Users className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setActiveView("templates")}
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Invoice Templates"
+            >
+              <FileText className="w-5 h-5" />
+            </button>
+
+            <button
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Properties"
+            >
+              <MapPin className="w-5 h-5" />
+            </button>
+
+            <button
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Parts Inventory"
+            >
+              <Package className="w-5 h-5" />
+            </button>
+
+            <button
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Invoices"
+            >
+              <Receipt className="w-5 h-5" />
+            </button>
+
+            <button
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Payments"
+            >
+              <CreditCard className="w-5 h-5" />
+            </button>
+
+            <button
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Reports"
+            >
+              <FileBarChart className="w-5 h-5" />
+            </button>
+
+            <button
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Appointments"
+            >
+              <Calendar className="w-5 h-5" />
+            </button>
+
+            <button
+              className="p-2 text-gray-300 hover:bg-blue-800 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Analytics"
+            >
+              <BarChart3 className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* User Icon at Bottom */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+          <div className="w-10 h-10 bg-blue-800 rounded-full"></div>
+        </div>
+      </div>
+
+      {/* Expanded Sidebar (Full Width) */}
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-blue-900 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
-          <div className="flex items-center space-x-2 mb-8">
-            <img
-              src={logo}
-              alt="Business Logo"
-              className="w-16 h-12 object-contain rounded-lg"
-            />
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-2">
+              <img
+                src={logo}
+                alt="Business Logo"
+                className="w-16 h-12 object-contain rounded-lg"
+              />
+            </div>
+            {/* Close Button */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-1.5 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
+              title="Collapse Sidebar"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
           </div>
 
           <nav className="space-y-1">
@@ -643,7 +803,7 @@ const handleAIDataExtracted = (extractedData) => {
                 <span>Customers</span>
               </div>
               <div className="ml-8 mt-1 space-y-1">
-                <div 
+                <div
                   onClick={handleAddNewCustomer}
                   className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-blue-800 rounded-lg cursor-pointer mt-2"
                 >
@@ -656,13 +816,14 @@ const handleAIDataExtracted = (extractedData) => {
                   All Customers ({savedCustomers.length})
                 </div>
               </div>
-               <div
-                              onClick={() => setActiveView("templates")}
-                              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-                            >
-                              <FileText className="w-5 h-5" />
-                              <span>Invoice Templates</span>
-                            </div>
+
+              <div
+                onClick={() => setActiveView("templates")}
+                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+              >
+                <FileText className="w-5 h-5" />
+                <span>Invoice Templates</span>
+              </div>
 
               <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer">
                 <MapPin className="w-5 h-5" />
@@ -736,6 +897,7 @@ const handleAIDataExtracted = (extractedData) => {
       </div>
 
       {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 flex flex-col">
         <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
@@ -745,17 +907,13 @@ const handleAIDataExtracted = (extractedData) => {
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="p-2 hover:bg-gray-100 rounded-lg"
               >
-                <Menu className="w-5 h-5" />
+               
               </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+            
               <h1 className="text-base lg:text-xl font-semibold">
                 Work Order #{jobCardNumber || "— not saved yet —"}
               </h1>
-              <TemplateSelector
-                              user={user}
-                              selectedTemplate={activeTemplate}
-                              onTemplateChange={setActiveTemplate}
-                            />
+             
               {emergencyService && (
                 <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded">
                   EMERGENCY
@@ -1684,6 +1842,7 @@ const handleAIDataExtracted = (extractedData) => {
           </div>
          </>)}  
         </div>
+      </div>
       </div>
     </div>
   );

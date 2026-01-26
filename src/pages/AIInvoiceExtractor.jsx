@@ -1,177 +1,229 @@
 import React, { useState } from 'react';
-import { Sparkles, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Sparkles, Loader2, AlertCircle, CheckCircle, Image, X } from 'lucide-react';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 const AIInvoiceExtractor = ({ onDataExtracted, businessInfo, documentType = 'invoice' }) => {
   const [input, setInput] = useState('');
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-const extractInvoiceData = async () => {
-  if (!input.trim()) {
-    setError('Please enter some information to extract');
-    return;
-  }
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
 
-  setLoading(true);
-  setError('');
-  setSuccess(false);
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!validTypes.includes(selectedFile.type)) {
+      setError('Please upload an image (JPG, PNG, WebP) or PDF file');
+      return;
+    }
 
-  try {
-    const prompt = `You are an AI assistant that extracts invoice/quote data from natural language input.
+    // Validate file size (max 10MB)
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      setError('File size must be less than 10MB');
+      return;
+    }
 
-Business Context:
-- Business Name: ${businessInfo?.businessName || 'Not provided'}
-- Document Type: ${documentType}
+    setFile(selectedFile);
+    setError('');
 
-User Input:
-"${input}"
+    // Create preview for images
+    if (selectedFile.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    } else {
+      setPreview('');
+    }
+  };
 
-Extract the following information and return ONLY a JSON object with no markdown formatting, no backticks, no explanation - just pure JSON:
+  const clearFile = () => {
+    setFile(null);
+    setPreview('');
+  };
+
+  const extractFromImage = async () => {
+    if (!file) {
+      setError('Please select a file first');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess(false);
+
+    try {
+      // Convert file to base64
+      const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const mediaType = file.type;
+
+      // Prepare the message content
+      const content = [
+        {
+          type: file.type === 'application/pdf' ? 'document' : 'image',
+          source: {
+            type: 'base64',
+            media_type: mediaType,
+            data: base64Data
+          }
+        },
+        {
+          type: 'text',
+          text: `Extract ${documentType} information from this document. Return ONLY a JSON object with this exact structure (no markdown, no explanation):
 
 {
   "customer": {
-    "name": "customer name or empty string",
-    "email": "customer email or empty string",
-    "phone": "customer phone or empty string",
-    "address": "customer address or empty string",
-    "merchant_code": "customer ID/code or empty string"
-  },
-  "billTo": {
-    "name": "billing name (default to customer name) or empty string",
-    "email": "billing email (default to customer email) or empty string",
-    "phone": "billing phone (default to customer phone) or empty string",
-    "address": "billing address (default to customer address) or empty string"
+    "name": "",
+    "email": "",
+    "phone": "",
+    "address": "",
+    "customerId": ""
   },
   "vehicle": {
-    "make": "vehicle make or empty string",
-    "model": "vehicle model or empty string",
-    "year": "vehicle year or empty string",
-    "registration": "registration/license plate or empty string",
-    "vin": "VIN number or empty string",
-    "mileage": "mileage or empty string",
-    "preAuth": "pre-authorization code or empty string",
-    "authCode": "authorization code or empty string"
+    "make": "",
+    "model": "",
+    "year": "",
+    "registration": "",
+    "vin": "",
+    "mileage": ""
   },
   "items": [
     {
-      "description": "service/part description",
-      "type": "Labor or Parts",
-      "rate": number,
-      "qty": number,
-      "amount": number (rate * qty)
+      "description": "",
+      "type": "Service",
+      "rate": 0,
+      "qty": 1,
+      "amount": 0
     }
   ]
 }
 
-Rules:
-- Extract all information you can find
-- Use empty strings for missing data
-- For items, calculate amount = rate × qty
-- Infer reasonable defaults (e.g., if "oil change" mentioned, type is "Labor")
-- If billing info not specified, copy from customer info
-- Be smart about detecting vehicle info, customer details, and line items
-- Return ONLY valid JSON, absolutely no other text, no markdown code blocks`;
+Extract all available information. Use empty strings for missing text fields, empty arrays for missing lists, and 0 for missing numbers.`
+        }
+      ];
 
-    console.log('Calling Netlify function...');
-    
-    const response = await fetch('/.netlify/functions/extractInvoiceData', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt })
-    });
+      // Call Claude API
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4000,
+          messages: [
+            {
+              role: 'user',
+              content: content
+            }
+          ]
+        })
+      });
 
-    console.log('Response status:', response.status);
-
-    if (!response.ok) {
-      const contentType = response.headers.get('content-type');
-      
-      if (contentType && contentType.includes('text/html')) {
-        throw new Error('Function not found. Make sure you are running "netlify dev"');
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
       }
+
+      const data = await response.json();
       
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        throw new Error(`Request failed with status ${response.status}`);
+      // Extract text from response
+      const textContent = data.content
+        .filter(block => block.type === 'text')
+        .map(block => block.text)
+        .join('\n');
+
+      // Clean and parse JSON
+      let cleanedText = textContent.trim();
+      cleanedText = cleanedText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      
+      const extractedData = JSON.parse(cleanedText);
+
+      // Validate the structure
+      if (!extractedData.customer || !extractedData.vehicle || !extractedData.items) {
+        throw new Error('Extracted data is missing required fields');
       }
+
+      // Pass data to parent component
+      onDataExtracted(extractedData);
+      setSuccess(true);
+      setFile(null);
+      setPreview('');
       
-      throw new Error(errorData.error || `Request failed with status ${response.status}`);
+      setTimeout(() => setSuccess(false), 3000);
+      
+    } catch (err) {
+      console.error('Extraction error:', err);
+      setError(err.message || 'Failed to extract data from image. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const extractInvoiceData = async () => {
+    if (!input.trim()) {
+      setError('Please enter some information to extract');
+      return;
     }
 
-    const data = await response.json();
-    console.log('Full API Response:', data);
-    
-    // Check if there's an error in the response
-    if (!data) {
-      throw new Error('Empty response from API');
-    }
+    setLoading(true);
+    setError('');
+    setSuccess(false);
 
-    if (data.error) {
-      throw new Error(data.error.message || data.error || 'API returned an error');
-    }
-
-    // Check for content array
-    if (!data.content || !Array.isArray(data.content) || data.content.length === 0) {
-      console.error('Invalid response structure:', data);
-      throw new Error('Invalid response structure from API');
-    }
-
-    // Get the first content block
-    const firstContent = data.content[0];
-    console.log('First content block:', firstContent);
-
-    if (!firstContent || firstContent.type !== 'text') {
-      throw new Error('Expected text content but got: ' + (firstContent?.type || 'unknown'));
-    }
-
-    // ✅ FIXED: Declare text variable here with let
-    let text = firstContent.text;
-    console.log('Raw text response:', text);
-    
-    // Clean the response
-    text = text.trim()
-      .replace(/```json\s*/g, '')
-      .replace(/```\s*/g, '')
-      .trim();
-    
-    console.log('Cleaned text:', text);
-    
-    // ✅ FIXED: Declare extractedData with let
-    let extractedData;
     try {
-      extractedData = JSON.parse(text);
-    } catch (parseError) {
-      console.error('JSON Parse Error:', parseError);
-      console.error('Failed to parse text:', text);
-      throw new Error('AI returned invalid JSON. Please try again with clearer information.');
+      // ✅ CALL FIREBASE FUNCTION INSTEAD OF NETLIFY
+      const functions = getFunctions();
+      const extractData = httpsCallable(functions, 'extractInvoiceDataGemini');
+      
+      console.log('Calling Firebase function...');
+      
+      const result = await extractData({
+        input: input,
+        businessInfo: businessInfo,
+        documentType: documentType
+      });
+
+      console.log('Function Response:', result.data);
+      
+      const extractedData = result.data;
+      
+      // Validate the structure
+      if (!extractedData.customer || !extractedData.vehicle || !extractedData.items) {
+        console.error('Missing required fields in:', extractedData);
+        throw new Error('Extracted data is missing required fields');
+      }
+      
+      // Pass data to parent component
+      onDataExtracted(extractedData);
+      setSuccess(true);
+      setInput('');
+      
+      setTimeout(() => setSuccess(false), 3000);
+      
+    } catch (err) {
+      console.error('Extraction error:', err);
+      
+      if (err.code === 'unauthenticated') {
+        setError('You must be logged in to use AI extraction.');
+      } else if (err.code === 'functions/internal') {
+        setError('AI service error. Please try again.');
+      } else {
+        setError(err.message || 'Failed to extract data. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
-    
-    console.log('Parsed extracted data:', extractedData);
-    
-    // Validate the structure
-    if (!extractedData.customer || !extractedData.vehicle || !extractedData.items) {
-      console.error('Missing required fields in:', extractedData);
-      throw new Error('Extracted data is missing required fields (customer, vehicle, or items)');
-    }
-    
-    // ✅ Pass data to parent component
-    onDataExtracted(extractedData);
-    setSuccess(true);
-    setInput('');
-    
-    setTimeout(() => setSuccess(false), 3000);
-    
-  } catch (err) {
-    console.error('Extraction error:', err);
-    setError(err.message || 'Failed to extract data. Please check your input and try again.');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-white rounded-lg p-6 mb-6">
@@ -187,18 +239,90 @@ Rules:
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Describe your {documentType} in plain English
           </label>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={`Example: "Create an invoice for John Smith, email john@email.com, phone 082 123 4567, address 123 Main St Pretoria. Vehicle is a 2020 Toyota Hilux, reg ABC123GP, 45000km. Services: oil change R500, brake pads R1200 (2 sets), labor 3 hours at R450/hour"`}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent resize-none"
-            rows={4}
-            disabled={loading}
-          />
+          <div className="relative">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={`Example: "Create an invoice for John Smith, email john@email.com, phone 082 123 4567, address 123 Main St Pretoria. Vehicle is a 2020 Toyota Hilux, reg ABC123GP, 45000km. Services: oil change R500, brake pads R1200 (2 sets), labor 3 hours at R450/hour"`}
+              className="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent resize-none"
+              rows={4}
+              disabled={loading}
+            />
+            <div className="absolute bottom-3 right-3">
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={handleFileChange}
+                className="hidden"
+                id="invoice-file-upload"
+                disabled={loading}
+              />
+              <label
+                htmlFor="invoice-file-upload"
+                className={`flex items-center justify-center w-8 h-8 rounded-lg cursor-pointer transition-colors ${
+                  loading 
+                    ? 'bg-gray-200 cursor-not-allowed' 
+                    : 'bg-gray-600 hover:bg-gray-700'
+                }`}
+                title="Upload invoice image or PDF"
+              >
+                <Image className="w-4 h-4 text-white" />
+              </label>
+            </div>
+          </div>
           <p className="text-xs text-gray-500 mt-2">
-            💡 Tip: Include customer details, vehicle info, and services/parts. The AI will organize everything for you!
+            💡 Tip: Type your invoice details OR click the image icon to upload a document
           </p>
         </div>
+
+        {file && (
+          <div className="bg-white rounded-lg p-4 border border-gray-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Image className="w-5 h-5 text-gray-600" />
+                <div>
+                  <p className="text-sm font-medium text-gray-800">{file.name}</p>
+                  <p className="text-xs text-gray-500">
+                    {(file.size / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={clearFile}
+                disabled={loading}
+                className="text-gray-400 hover:text-red-600 disabled:opacity-50"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {preview && (
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-full h-32 object-contain bg-gray-50 rounded-lg mb-2"
+              />
+            )}
+
+            <button
+              onClick={extractFromImage}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Extracting from image...</span>
+                </>
+              ) : (
+                <>
+                  <Image className="w-4 h-4" />
+                  <span>Extract from Image</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
         {error && (
           <div className="flex items-start gap-2 text-red-600 bg-red-50 px-4 py-3 rounded-lg">
@@ -211,7 +335,7 @@ Rules:
         )}
 
         {success && (
-          <div className="flex items-center gap-2 text-green-600 bg-gray-50 px-4 py-3 rounded-lg">
+          <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-3 rounded-lg">
             <CheckCircle className="w-4 h-4" />
             <span className="text-sm font-medium">✅ Data extracted and populated successfully!</span>
           </div>
@@ -236,11 +360,11 @@ Rules:
         </button>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-purple-200">
+      <div className="mt-4 pt-4 border-t border-gray-200">
         <p className="text-xs text-gray-600">
           <strong>What the AI can extract:</strong> Customer name, email, phone, address, customer ID, 
           vehicle make/model/year/registration/VIN/mileage, service items, parts, quantities, prices, 
-          labor hours, and more. Just describe it naturally!
+          labor hours, and more. Just describe it naturally or upload an image!
         </p>
       </div>
     </div>

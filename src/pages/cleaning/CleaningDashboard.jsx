@@ -26,9 +26,11 @@ import {
   Sparkles,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   Home,
   Settings,
   Users,
+  X,
   Calendar,
   FileText,
   FileBarChart,
@@ -52,6 +54,7 @@ import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import FinancialOverview from "../FinancialOverview";
+import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
 import SignatureStamp from '../SignatureStamp';
 
 // Generate Invoice Number
@@ -710,170 +713,297 @@ const handleAIDataExtracted = (extractedData) => {
 
   return (
     <div className="flex h-screen bg-gray-300">
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        ></div>
-      )}
+      {/* Mobile Sidebar Backdrop */}
+{sidebarOpen && (
+  <div
+    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+    onClick={() => setSidebarOpen(false)}
+  ></div>
+)}
 
-      <div
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+{/* Collapsed Sidebar (Icon Only) */}
+<div
+  className={`${
+    sidebarOpen ? "hidden" : "block"
+  } fixed z-40 w-16 bg-slate-600 border-r border-gray-200 h-full print:hidden transition-all duration-300`}
+>
+  <div className="flex flex-col items-center py-4 space-y-4">
+    {/* Toggle Button */}
+    <button
+      onClick={() => setSidebarOpen(true)}
+      className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
+      title="Expand Sidebar"
+    >
+      <ChevronRight className="w-6 h-6" />
+    </button>
+
+    {/* Logo */}
+    <div className="w-10 h-10">
+      <img
+        src={logo}
+        alt="Logo"
+        className="w-full h-full object-contain rounded-lg"
+      />
+    </div>
+
+    <div className="w-full border-t border-slate-500"></div>
+
+    {/* Icon Navigation */}
+    <div className="flex flex-col items-center space-y-3 w-full">
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Home"
       >
-        <div className="p-4">
-          <div className="flex items-center space-x-2 mb-8">
-            <img
-              src={logo}
-              alt="Business Logo"
-              className="w-16 h-12 object-contain rounded-lg"
-            />
-          </div>
+        <Home className="w-5 h-5" />
+      </button>
+      
+      <button
+        onClick={() => setShowSettings(true)}
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Settings"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
 
-          <nav className="space-y-1">
-            <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-              <Home className="w-5 h-5" />
-              <span>Home</span>
-            </div>
-            <div
-              onClick={() => setShowSettings(true)}
-              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-            >
-              <Settings className="w-5 h-5" />
-              <span>Settings</span>
-            </div>
+      <button
+        onClick={() => setActiveView("financial-overview")}
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Business Overview"
+      >
+        <TrendingUp className="w-5 h-5" />
+      </button>
 
-            <div className="pt-4">
-              <div
-                onClick={() => setActiveView("financial-overview")}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-              >
-                <TrendingUp className="w-5 h-5" />
-                <span>Business Overview</span>
-              </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Invoices"
+      >
+        <ClipboardList className="w-5 h-5" />
+      </button>
 
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <ClipboardList className="w-5 h-5" />
-                    <span>Invoices</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Quotes"
+      >
+        <Receipt className="w-5 h-5" />
+      </button>
 
-                <div className="ml-8 mt-1 space-y-1">
-                  <div
-                    onClick={handleNewInvoice}
-                    className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
-                  >
-                    Create Invoice
-                  </div>
-                  <div
-                    onClick={() => setShowInvoicesList(!showInvoicesList)}
-                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
-                  >
-                    All Invoices ({savedInvoices.length})
-                  </div>
-                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
-                    Scheduled
-                  </div>
-                </div>
-              </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Customers"
+      >
+        <Users className="w-5 h-5" />
+      </button>
 
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <Receipt className="w-5 h-5" />
-                    <span>Quotes</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Properties"
+      >
+        <Building className="w-5 h-5" />
+      </button>
 
-                <div className="ml-8 mt-1 space-y-1">
-                  <div
-                    onClick={handleNewQuote}
-                    className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
-                  >
-                    Create Quote
-                  </div>
-                  <div
-                    onClick={() => setShowQuotesList(!showQuotesList)}
-                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
-                  >
-                    All Quotes ({savedQuotes.length})
-                  </div>
-                </div>
-              </div>
+      <button
+        onClick={() => setActiveView("templates")}
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Invoice Templates"
+      >
+        <FileText className="w-5 h-5" />
+      </button>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
-                <Users className="w-5 h-5" />
-                <span>Customers</span>
-              </div>
-              <div className="ml-8 mt-1 space-y-1">
-                <div
-                  onClick={handleAddNewCustomer}
-                  className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
-                >
-                  <span>Add Customer</span>
-                </div>
-                <div
-                  onClick={() => setShowCustomersListModal(true)}
-                  className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
-                >
-                  All Customers ({savedCustomers.length})
-                </div>
-              </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Supplies"
+      >
+        <Package className="w-5 h-5" />
+      </button>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <Building className="w-5 h-5" />
-                <span>Properties</span>
-              </div>
-              <div
-                onClick={() => setActiveView("templates")}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-              >
-                <FileText className="w-5 h-5" />
-                <span>Invoice Templates</span>
-              </div>
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <Package className="w-5 h-5" />
-                <span>Supplies</span>
-              </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Analytics"
+      >
+        <BarChart3 className="w-5 h-5" />
+      </button>
+    </div>
+  </div>
 
+  {/* User Icon at Bottom */}
+  <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+    <div className="w-10 h-10 bg-slate-500 rounded-full"></div>
+  </div>
+</div>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <BarChart3 className="w-5 h-5" />
-                  <span>Analytics</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-            </div>
-          </nav>
-        </div>
+{/* Expanded Sidebar (Full Width) */}
+<div
+  className={`${
+    sidebarOpen ? "translate-x-0" : "-translate-x-full"
+  } fixed z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+>
+  <div className="p-4">
+    <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center space-x-2">
+        <img
+          src={logo}
+          alt="Business Logo"
+          className="w-16 h-12 object-contain rounded-lg"
+        />
+      </div>
+      {/* Close Button */}
+      <button
+        onClick={() => setSidebarOpen(false)}
+        className="p-1.5 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
+        title="Collapse Sidebar"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+    </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
-            <div className="flex-1">
-              <div className="text-sm font-medium text-white">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-gray-400">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="text-gray-400 hover:text-white"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+    <nav className="space-y-1">
+      <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+        <Home className="w-5 h-5" />
+        <span>Home</span>
+      </div>
+      <div
+        onClick={() => setShowSettings(true)}
+        className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+      >
+        <Settings className="w-5 h-5" />
+        <span>Settings</span>
       </div>
 
+      <div className="pt-4">
+        <div
+          onClick={() => setActiveView("financial-overview")}
+          className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+        >
+          <TrendingUp className="w-5 h-5" />
+          <span>Business Overview</span>
+        </div>
+
+        {/* Invoices Section */}
+        <div className="mt-2">
+          <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+            <div className="flex items-center space-x-3">
+              <ClipboardList className="w-5 h-5" />
+              <span>Invoices</span>
+            </div>
+            <ChevronDown className="w-4 h-4" />
+          </div>
+
+          <div className="ml-8 mt-1 space-y-1">
+            <div
+              onClick={handleNewInvoice}
+              className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+            >
+              Create Invoice
+            </div>
+            <div
+              onClick={() => setShowInvoicesList(!showInvoicesList)}
+              className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+            >
+              All Invoices ({savedInvoices.length})
+            </div>
+            <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
+              Scheduled
+            </div>
+          </div>
+        </div>
+
+        {/* Quotes Section */}
+        <div className="mt-2">
+          <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+            <div className="flex items-center space-x-3">
+              <Receipt className="w-5 h-5" />
+              <span>Quotes</span>
+            </div>
+            <ChevronDown className="w-4 h-4" />
+          </div>
+
+          <div className="ml-8 mt-1 space-y-1">
+            <div
+              onClick={handleNewQuote}
+              className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+            >
+              Create Quote
+            </div>
+            <div
+              onClick={() => setShowQuotesList(!showQuotesList)}
+              className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+            >
+              All Quotes ({savedQuotes.length})
+            </div>
+          </div>
+        </div>
+
+        {/* Customers Section */}
+        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
+          <Users className="w-5 h-5" />
+          <span>Customers</span>
+        </div>
+        <div className="ml-8 mt-1 space-y-1">
+          <div
+            onClick={handleAddNewCustomer}
+            className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
+          >
+            <span>Add Customer</span>
+          </div>
+          <div
+            onClick={() => setShowCustomersListModal(true)}
+            className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+          >
+            All Customers ({savedCustomers.length})
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+          <Building className="w-5 h-5" />
+          <span>Properties</span>
+        </div>
+
+        <div
+          onClick={() => setActiveView("templates")}
+          className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+        >
+          <FileText className="w-5 h-5" />
+          <span>Invoice Templates</span>
+        </div>
+
+        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+          <Package className="w-5 h-5" />
+          <span>Supplies</span>
+        </div>
+
+        <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+          <div className="flex items-center space-x-3">
+            <BarChart3 className="w-5 h-5" />
+            <span>Analytics</span>
+          </div>
+          <ChevronDown className="w-4 h-4" />
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
+    <div className="flex items-center space-x-3">
+      <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
+      <div className="flex-1">
+        <div className="text-sm font-medium text-white">
+          {user?.name || "User"}
+        </div>
+        <div className="text-xs text-gray-400">
+          {user?.email || "email@example.com"}
+        </div>
+      </div>
+      <button
+        onClick={handleLogout}
+        className="text-gray-400 hover:text-white"
+      >
+        <LogOut className="w-4 h-4" />
+      </button>
+    </div>
+  </div>
+</div>
+
+<div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 flex flex-col">
           <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 py-4">
@@ -1419,7 +1549,7 @@ const handleAIDataExtracted = (extractedData) => {
             {activeView === "invoice" && (
               <>
                 {/* Left Panel - Form */}
-                <div className={`${showInvoice ? "hidden" : "block"} space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}>
+                <div className={`${showInvoice ? "hidden" : "block"} space-y-6 lg:block print:hidden min-h-[calc(297mm)] overflow-y-auto`}>
                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                       <div className="flex border-b">
                                         <button
@@ -1699,7 +1829,7 @@ const handleAIDataExtracted = (extractedData) => {
                 {/* Right Panel - Invoice/Quote Preview */}
                 <div
                   className={`${!showInvoice ? "hidden" : "block"} lg:block mx-auto bg-white shadow-lg overflow-y-auto`}
-              style={{width: "100%",maxWidth: "210mm",maxHeight: "90vh",}}
+              style={{width: "100%",maxWidth: "210mm",minHeight: "297mm",}}
                 >
                   <div className="mb-4">
                     <TemplateSelector 
@@ -1803,6 +1933,7 @@ const handleAIDataExtracted = (extractedData) => {
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import logo from '../../assets/img/solidflo-logo.png';
 import Templates from "./Templates"; 
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
+import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
 import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from '../SignatureStamp';
 import {
@@ -35,6 +36,7 @@ import {
   FileBarChart,
   BarChart3,
   Menu,
+  X,
   Plus,
   Send,
   Edit,
@@ -216,33 +218,48 @@ const [stampSettings, setStampSettings] = useState({
   };
 
   const handleLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !user?.uid) return;
+  const file = e.target.files[0];
+  if (!file || !user?.uid) return;
 
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
-      return;
-    }
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file');
+    return;
+  }
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
-      return;
-    }
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Image size should be less than 5MB');
+    return;
+  }
 
-    try {
-      const storage = getStorage();
-      const storageRef = ref(storage, `users/${user.uid}/logo/${file.name}`);
+  try {
+    // Show loading state
+    setBusinessInfo({ ...businessInfo, uploading: true });
 
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
+    // Upload to Cloudflare R2
+    const logoUrl = await uploadLogoToR2(file, user.uid);
 
-      setBusinessInfo({ ...businessInfo, logoUrl: downloadURL });
-      alert("Logo uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading logo:", error);
-      alert("Failed to upload logo");
-    }
-  };
+    // Update business info state
+    setBusinessInfo({ 
+      ...businessInfo, 
+      logoUrl: logoUrl,
+      uploading: false 
+    });
+
+    // Save to Firebase Firestore
+    const db = getFirestore();
+    const docRef = doc(db, 'users', user.uid, 'settings', 'businessInfo');
+    await updateDoc(docRef, { 
+      logoUrl: logoUrl,
+      updatedAt: new Date().toISOString()
+    });
+
+    alert('Logo uploaded successfully!');
+  } catch (error) {
+    console.error('Error uploading logo:', error);
+    alert('Failed to upload logo: ' + error.message);
+    setBusinessInfo({ ...businessInfo, uploading: false });
+  }
+};
 
   const handleSaveBusinessInfo = async () => {
     if (!user?.uid) return;
@@ -362,17 +379,19 @@ const [stampSettings, setStampSettings] = useState({
 
   return (
     <div className="flex h-screen bg-gray-300">
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        ></div>
-      )}
-
+    {/* Sidebar Toggle Button - Works on both mobile and desktop */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="fixed top-4 left-4 z-50 p-2 bg-slate-600 text-white rounded-lg shadow-lg hover:bg-slate-700 transition-colors print:hidden"
+      >
+        {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+      </button>
+    
+      {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed z-40 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -519,7 +538,7 @@ const [stampSettings, setStampSettings] = useState({
           </div>
         </div>
       </div>
-
+       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
       <div className="flex-1 overflow-auto">
         <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
@@ -1354,6 +1373,7 @@ const [stampSettings, setStampSettings] = useState({
           </div>
 </>)}
         </div>
+      </div>
       </div>
     </div>
   );

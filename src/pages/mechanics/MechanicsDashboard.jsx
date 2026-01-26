@@ -7,6 +7,7 @@ import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Vehicles from "./Vehicles";
 import PartsInventory from "./PartsInventory";
+import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
 import Templates from "./Templates";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import {
@@ -35,10 +36,12 @@ import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import {
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   Home,
   Settings,
   Users,
   Calendar,
+  X,
   FileText,
   Wrench,
   FileBarChart,
@@ -470,33 +473,48 @@ const MechanicsDashboard = () => {
   };
 
   const handleLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !user?.uid) return;
+  const file = e.target.files[0];
+  if (!file || !user?.uid) return;
 
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
-      return;
-    }
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file');
+    return;
+  }
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
-      return;
-    }
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Image size should be less than 5MB');
+    return;
+  }
 
-    try {
-      const storage = getStorage();
-      const storageRef = ref(storage, `users/${user.uid}/logo/${file.name}`);
+  try {
+    // Show loading state
+    setBusinessInfo({ ...businessInfo, uploading: true });
 
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
+    // Upload to Cloudflare R2
+    const logoUrl = await uploadLogoToR2(file, user.uid);
 
-      setBusinessInfo({ ...businessInfo, logoUrl: downloadURL });
-      alert("Logo uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading logo:", error);
-      alert("Failed to upload logo");
-    }
-  };
+    // Update business info state
+    setBusinessInfo({ 
+      ...businessInfo, 
+      logoUrl: logoUrl,
+      uploading: false 
+    });
+
+    // Save to Firebase Firestore
+    const db = getFirestore();
+    const docRef = doc(db, 'users', user.uid, 'settings', 'businessInfo');
+    await updateDoc(docRef, { 
+      logoUrl: logoUrl,
+      updatedAt: new Date().toISOString()
+    });
+
+    alert('Logo uploaded successfully!');
+  } catch (error) {
+    console.error('Error uploading logo:', error);
+    alert('Failed to upload logo: ' + error.message);
+    setBusinessInfo({ ...businessInfo, uploading: false });
+  }
+};
 
   const handleSaveBusinessInfo = async () => {
     if (!user?.uid) return;
@@ -716,7 +734,8 @@ const MechanicsDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-600">
+    <div className="flex h-screen bg-white">
+     {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -724,18 +743,140 @@ const MechanicsDashboard = () => {
         ></div>
       )}
 
+      {/* Collapsed Sidebar (Icon Only) */}
+      <div
+        className={`${
+          sidebarOpen ? "hidden" : "block"
+        } fixed z-40 w-16 bg-slate-600  h-full print:hidden transition-all duration-300`}
+      >
+        <div className="flex flex-col items-center py-4 space-y-4">
+          {/* Toggle Button */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
+            title="Expand Sidebar"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          {/* Logo */}
+          <div className="w-10 h-10">
+            <img
+              src={logo}
+              alt="Logo"
+              className="w-full h-full object-contain rounded-lg"
+            />
+          </div>
+
+          
+          {/* Icon Navigation */}
+          <div className="flex flex-col items-center space-y-3 w-full">
+            <button
+              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Home"
+            >
+              <Home className="w-5 h-5" />
+            </button>
+            
+            <button
+              onClick={() => setShowSettings(true)}
+              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Settings"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setActiveView("financial-overview")}
+              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Business Overview"
+            >
+              <TrendingUp className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => {
+                handleNewInvoice();
+                setActiveView("invoice");
+              }}
+              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Job Cards"
+            >
+              <ClipboardList className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setShowCustomersListModal(true)}
+              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Customers"
+            >
+              <Users className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setActiveView("templates")}
+              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Invoice Templates"
+            >
+              <FileText className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setActiveView("vehicles")}
+              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Vehicles"
+            >
+              <Car className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setActiveView("parts-inventory")}
+              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Parts Inventory"
+            >
+              <Package className="w-5 h-5" />
+            </button>
+
+            <button
+              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+              title="Payments"
+            >
+              <CreditCard className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* User Icon at Bottom */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+            <img src={v8logo} alt="" className="w-full h-full rounded-full" />
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Sidebar (Full Width) */}
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-600 border-r border-gray-800 transition-transform duration-300 h-full print:hidden`}
+        } fixed z-50 w-64 bg-slate-600 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
-          <div className="flex items-center space-x-2 mb-12">
-            <img
-              src={logo}
-              alt="Business Logo"
-              className="w-16 h-12 object-contain rounded-lg"
-            />
+          <div className="flex items-center justify-between mb-12">
+            <div className="flex items-center space-x-2">
+              <img
+                src={logo}
+                alt="Business Logo"
+                className="w-16 h-12 object-contain rounded-lg"
+              />
+            </div>
+            {/* Close Button */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-1.5 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
+              title="Collapse Sidebar"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
           </div>
 
           <nav className="space-y-1">
@@ -800,8 +941,9 @@ const MechanicsDashboard = () => {
                   </div>
                 </div>
               </div>
+
               <div className="mt-2">
-                <div className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer mt-2">
+                <div className="flex items-center justify-between px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer mt-2">
                   <div className="flex items-center space-x-3">
                     <Users className="w-5 h-5" />
                     <span>Customers</span>
@@ -824,6 +966,7 @@ const MechanicsDashboard = () => {
                   </div>
                 </div>
               </div>
+
               <div
                 onClick={() => setActiveView("templates")}
                 className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer"
@@ -831,6 +974,7 @@ const MechanicsDashboard = () => {
                 <FileText className="w-5 h-5" />
                 <span>Invoice Templates</span>
               </div>
+
               <div
                 onClick={() => setActiveView("vehicles")}
                 className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-slate-600 rounded-lg cursor-pointer"
@@ -881,17 +1025,18 @@ const MechanicsDashboard = () => {
         </div>
       </div>
 
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
       <div className="flex-1 overflow-auto">
-        <div className="sticky top-0 z-40 bg-slate-600 border-b border-gray-800 px-4 lg:px-6 py-4">
+        <div className="sticky top-0 z-40 bg-gray-100 border-b border-gray-800 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 lg:space-x-4">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="p-2 hover:bg-gray-100 rounded-lg"
               >
-                <Menu className="w-5 h-5" />
+               
               </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-50" />
+              
               <h1 className="text-base lg:text-xl font-semibold text-gray-500">
                 {documentType === "quote" ? "Quote" : "Invoice"} #
                 {jobCardNumber || "— not saved yet —"}
@@ -899,11 +1044,11 @@ const MechanicsDashboard = () => {
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 text-gray-50">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 text-gray-500">
                 <CheckSquare className="w-4 h-4" />
                 <span>Mark Complete</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 text-gray-50">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 text-gray-500">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
@@ -2074,6 +2219,7 @@ const MechanicsDashboard = () => {
             </>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

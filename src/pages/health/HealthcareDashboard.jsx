@@ -5,7 +5,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates"; 
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import MedicalAIExtractor from "./MedicalAIExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import {
   getFirestore,
@@ -29,10 +29,12 @@ import PatientsListModal from "./PatientsListModal";
 import PendingPayments from "./PendingPayments";
 import AppointmentsCalendar from "./AppointmentsCalendar";
 import SignatureStamp from "../SignatureStamp";
+import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
 import SickNoteModal from "./SickNoteModal";
 import {
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   Home,
    Sparkles,
   Settings,
@@ -40,6 +42,7 @@ import {
   Calendar,
   FileText,
   Activity,
+  X,
   FileBarChart,
   BarChart3,
   Menu,
@@ -619,176 +622,318 @@ const handleAIDataExtracted = (extractedData) => {
 
   return (
     <div className="flex h-screen bg-gray-300">
-      {/* Mobile Sidebar Backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        ></div>
-      )}
+  {/* Mobile Sidebar Backdrop */}
+{sidebarOpen && (
+  <div
+    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+    onClick={() => setSidebarOpen(false)}
+  ></div>
+)}
 
-      {/* Sidebar */}
-      <div
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+{/* Collapsed Sidebar (Icon Only) */}
+<div
+  className={`${
+    sidebarOpen ? "hidden" : "block"
+  } fixed z-40 w-16 bg-slate-600 border-r border-gray-200 h-full print:hidden transition-all duration-300`}
+>
+  <div className="flex flex-col items-center py-4 space-y-4">
+    {/* Toggle Button */}
+    <button
+      onClick={() => setSidebarOpen(true)}
+      className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
+      title="Expand Sidebar"
+    >
+      <ChevronRight className="w-6 h-6" />
+    </button>
+
+    {/* Logo */}
+    <div className="w-10 h-10">
+      <img
+        src={logo}
+        alt="Logo"
+        className="w-full h-full object-contain rounded-lg"
+      />
+    </div>
+
+    <div className="w-full border-t border-slate-500"></div>
+
+    {/* Icon Navigation */}
+    <div className="flex flex-col items-center space-y-3 w-full">
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Dashboard"
       >
-        <div className="p-4">
-          <div className="flex items-center space-x-2 mb-8">
-            <img
-              src={logo}
-              alt="Business Logo"
-              className="w-16 h-12 object-contain rounded-lg"
-            />
-          </div>
+        <Home className="w-5 h-5" />
+      </button>
+      
+      <button
+        onClick={() => setShowSettings(true)}
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Settings"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
 
-          <nav className="space-y-1">
-            <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-              <Home className="w-5 h-5" />
-              <span>Dashboard</span>
-            </div>
-            <div
-              onClick={() => setShowSettings(true)}
-              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-            >
-              <Settings className="w-5 h-5" />
-              <span>Settings</span>
-            </div>
+      <button
+        onClick={() => setActiveView("practice-overview")}
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Practice Overview"
+      >
+        <TrendingUp className="w-5 h-5" />
+      </button>
 
-            <div className="pt-4">
-              <div
-                onClick={() => setActiveView("practice-overview")}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-              >
-                <TrendingUp className="w-5 h-5" />
-                <span>Practice Overview</span>
-              </div>
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <Receipt className="w-5 h-5" />
-                    <span>Invoices</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Invoices"
+      >
+        <Receipt className="w-5 h-5" />
+      </button>
 
-                <div className="ml-8 mt-1 space-y-1">
-                  <div
-                    onClick={() => {
-                      handleNewInvoice();
-                      setActiveView("invoice");
-                    }}
-                    className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
-                  >
-                    Create Invoice
-                  </div>
-                  <div
-                    onClick={() => setShowInvoicesList(!showInvoicesList)}
-                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
-                  >
-                    All Invoices ({savedInvoices.length})
-                  </div>
-                  <div
-                    onClick={() => setActiveView("pending")}
-                    className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
-                  >
-                    Pending Payment
-                  </div>
-                </div>
-              </div>
-              <div
-                onClick={() => setActiveView("templates")}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-              >
-                <FileText className="w-5 h-5" />
-                <span>Invoice Templates</span>
-              </div>
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
-                <Users className="w-5 h-5" />
-                <span>Patients</span>
-              </div>
-              <div className="ml-8 mt-1 space-y-1">
-                <div
-                  onClick={handleAddNewPatient}
-                  className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
-                >
-                  <span>Add Patient</span>
-                </div>
-                <div
-                  onClick={() => setShowPatientsListModal(true)}
-                  className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
-                >
-                  All Patients ({savedPatients.length})
-                </div>
-              </div>
+      <button
+        onClick={() => setActiveView("templates")}
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Invoice Templates"
+      >
+        <FileText className="w-5 h-5" />
+      </button>
 
-              <div
-                onClick={() => setActiveView("appointments")}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-              >
-                <Calendar className="w-5 h-5" />
-                <span>Appointments</span>
-              </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Patients"
+      >
+        <Users className="w-5 h-5" />
+      </button>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <Stethoscope className="w-5 h-5" />
-                <span>Medical Records</span>
-              </div>
+      <button
+        onClick={() => setActiveView("appointments")}
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Appointments"
+      >
+        <Calendar className="w-5 h-5" />
+      </button>
 
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <Pill className="w-5 h-5" />
-                <span>Prescriptions</span>
-              </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Medical Records"
+      >
+        <Stethoscope className="w-5 h-5" />
+      </button>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <CreditCard className="w-5 h-5" />
-                  <span>Payments</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Prescriptions"
+      >
+        <Pill className="w-5 h-5" />
+      </button>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <FileBarChart className="w-5 h-5" />
-                  <span>Reports</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Payments"
+      >
+        <CreditCard className="w-5 h-5" />
+      </button>
 
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <BarChart3 className="w-5 h-5" />
-                  <span>Analytics</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-            </div>
-          </nav>
-        </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Reports"
+      >
+        <FileBarChart className="w-5 h-5" />
+      </button>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
-            <div className="flex-1">
-              <div className="text-sm font-medium text-white">
-                {user?.name || "Dr. User"}
-              </div>
-              <div className="text-xs text-gray-400">
-                {user?.email || "doctor@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="text-gray-400 hover:text-white"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+      <button
+        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        title="Analytics"
+      >
+        <BarChart3 className="w-5 h-5" />
+      </button>
+    </div>
+  </div>
+
+  {/* User Icon at Bottom */}
+  <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+    <div className="w-10 h-10 bg-slate-500 rounded-full"></div>
+  </div>
+</div>
+
+{/* Expanded Sidebar (Full Width) */}
+<div
+  className={`${
+    sidebarOpen ? "translate-x-0" : "-translate-x-full"
+  } fixed z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+>
+  <div className="p-4">
+    <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center space-x-2">
+        <img
+          src={logo}
+          alt="Business Logo"
+          className="w-16 h-12 object-contain rounded-lg"
+        />
+      </div>
+      {/* Close Button */}
+      <button
+        onClick={() => setSidebarOpen(false)}
+        className="p-1.5 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
+        title="Collapse Sidebar"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+    </div>
+
+    <nav className="space-y-1">
+      <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+        <Home className="w-5 h-5" />
+        <span>Dashboard</span>
+      </div>
+      <div
+        onClick={() => setShowSettings(true)}
+        className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+      >
+        <Settings className="w-5 h-5" />
+        <span>Settings</span>
       </div>
 
+      <div className="pt-4">
+        <div
+          onClick={() => setActiveView("practice-overview")}
+          className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+        >
+          <TrendingUp className="w-5 h-5" />
+          <span>Practice Overview</span>
+        </div>
+
+        {/* Invoices Section */}
+        <div className="mt-2">
+          <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+            <div className="flex items-center space-x-3">
+              <Receipt className="w-5 h-5" />
+              <span>Invoices</span>
+            </div>
+            <ChevronDown className="w-4 h-4" />
+          </div>
+
+          <div className="ml-8 mt-1 space-y-1">
+            <div
+              onClick={() => {
+                handleNewInvoice();
+                setActiveView("invoice");
+              }}
+              className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+            >
+              Create Invoice
+            </div>
+            <div
+              onClick={() => setShowInvoicesList(!showInvoicesList)}
+              className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+            >
+              All Invoices ({savedInvoices.length})
+            </div>
+            <div
+              onClick={() => setActiveView("pending")}
+              className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+            >
+              Pending Payment
+            </div>
+          </div>
+        </div>
+
+        <div
+          onClick={() => setActiveView("templates")}
+          className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+        >
+          <FileText className="w-5 h-5" />
+          <span>Invoice Templates</span>
+        </div>
+
+        {/* Patients Section */}
+        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
+          <Users className="w-5 h-5" />
+          <span>Patients</span>
+        </div>
+        <div className="ml-8 mt-1 space-y-1">
+          <div
+            onClick={handleAddNewPatient}
+            className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
+          >
+            <span>Add Patient</span>
+          </div>
+          <div
+            onClick={() => setShowPatientsListModal(true)}
+            className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+          >
+            All Patients ({savedPatients.length})
+          </div>
+        </div>
+
+        <div
+          onClick={() => setActiveView("appointments")}
+          className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+        >
+          <Calendar className="w-5 h-5" />
+          <span>Appointments</span>
+        </div>
+
+        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+          <Stethoscope className="w-5 h-5" />
+          <span>Medical Records</span>
+        </div>
+
+        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+          <Pill className="w-5 h-5" />
+          <span>Prescriptions</span>
+        </div>
+
+        <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+          <div className="flex items-center space-x-3">
+            <CreditCard className="w-5 h-5" />
+            <span>Payments</span>
+          </div>
+          <ChevronDown className="w-4 h-4" />
+        </div>
+
+        <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+          <div className="flex items-center space-x-3">
+            <FileBarChart className="w-5 h-5" />
+            <span>Reports</span>
+          </div>
+          <ChevronDown className="w-4 h-4" />
+        </div>
+
+        <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+          <div className="flex items-center space-x-3">
+            <BarChart3 className="w-5 h-5" />
+            <span>Analytics</span>
+          </div>
+          <ChevronDown className="w-4 h-4" />
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
+    <div className="flex items-center space-x-3">
+      <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
+      <div className="flex-1">
+        <div className="text-sm font-medium text-white">
+          {user?.name || "Dr. User"}
+        </div>
+        <div className="text-xs text-gray-400">
+          {user?.email || "doctor@example.com"}
+        </div>
+      </div>
+      <button
+        onClick={handleLogout}
+        className="text-gray-400 hover:text-white"
+      >
+        <LogOut className="w-4 h-4" />
+      </button>
+    </div>
+  </div>
+</div>
+
+
       {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 flex flex-col">
           <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
@@ -798,7 +943,7 @@ const handleAIDataExtracted = (extractedData) => {
                   onClick={() => setSidebarOpen(!sidebarOpen)}
                   className="p-2 hover:bg-gray-100 rounded-lg"
                 >
-                  <Menu className="w-5 h-5" />
+                 
                 
                 </button>
                 
@@ -1460,7 +1605,7 @@ const handleAIDataExtracted = (extractedData) => {
                                       {/* Tab Content */}
                                       <div className="p-6">
                                         {inputMode === "ai" ? (
-                                          <AIInvoiceExtractor
+                                          <MedicalAIExtractor
                                             onDataExtracted={handleAIDataExtracted}
                                             documentType={documentType}
                                           />
@@ -1917,6 +2062,7 @@ const handleAIDataExtracted = (extractedData) => {
             </>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

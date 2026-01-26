@@ -351,19 +351,19 @@ const [useAI, setUseAI] = useState(false);
 
   return (
     <div className="flex h-screen bg-gray-300">
-      {/* Sidebar Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
+    {/* Sidebar Toggle Button - Works on both mobile and desktop */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="fixed top-4 left-4 z-50 p-2 bg-slate-600 text-white rounded-lg shadow-lg hover:bg-slate-700 transition-colors print:hidden"
+      >
+        {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+      </button>
+    
       {/* Sidebar */}
       <div
         className={`${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-indigo-950 border-r border-gray-200 transition-transform duration-300 h-full`}
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } fixed z-40 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -468,6 +468,7 @@ const [useAI, setUseAI] = useState(false);
       </div>
 
       {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
       <div className="flex-1 overflow-auto">
         {/* Header */}
         <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
@@ -725,6 +726,7 @@ const [useAI, setUseAI] = useState(false);
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* Product Modal */}

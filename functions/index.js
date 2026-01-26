@@ -1,24 +1,62 @@
+/* eslint-disable max-len */
 const functions = require("firebase-functions");
+const {GoogleGenerativeAI} = require("@google/generative-ai");
 
-exports.extractInvoiceData = functions
-    .runWith({secrets: ["ANTHROPIC_API_KEY"]})
-    .https.onCall(async (data, context) => {
-      const apiKey = process.env.ANTHROPIC_API_KEY;
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(functions.config().google.gemini_key);
 
-      // Now use the key with Anthropic's SDK
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1024,
-          messages: [{role: "user", content: "Extract invoice data..."}],
-        }),
-      });
+// Gemini-based extraction function
+exports.extractInvoiceDataGemini = functions.https.onCall(async (data, context) => {
+  // Verify user is authenticated
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+        "unauthenticated",
+        "User must be authenticated to use AI extraction",
+    );
+  }
 
-      return await response.json();
-    }
-  );
+  const {input, businessInfo, documentType} = data;
+
+  if (!input || !input.trim()) {
+    throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Input text is required",
+    );
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const prompt = `Extract invoice data from this description and return ONLY valid JSON:
+
+"${input}"
+
+Business: ${businessInfo?.businessName}
+Document Type: ${documentType}
+
+JSON structure:
+{
+  "customer": {"name": "", "email": "", "phone": "", "address": "", "merchant_code": ""},
+  "billTo": {"name": "", "email": "", "phone": "", "address": ""},
+  "vehicle": {"make": "", "model": "", "year": "", "registration": "", "vin": "", "mileage": "", "preAuth": "", "authCode": ""},
+  "items": [{"description": "", "type": "Labor or Parts", "rate": 0, "qty": 0, "amount": 0}]
+}`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const jsonData = JSON.parse(response.text());
+
+    return jsonData;
+  } catch (error) {
+    console.error("Error in extractInvoiceDataGemini:", error);
+    throw new functions.https.HttpsError(
+        "internal",
+        error.message || "An error occurred during extraction",
+    );
+  }
+});
