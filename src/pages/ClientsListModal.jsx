@@ -51,20 +51,20 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-4 border-b flex items-center justify-between bg-slate-600 text-white">
+        <div className="p-4 border-b flex items-center justify-between bg-gray-50 text-gray-800">
           <div className="flex items-center gap-3">
             <User className="w-6 h-6" />
             <h2 className="text-xl font-semibold">Clients ({clients.length})</h2>
           </div>
           <button
             onClick={handleClose}
-            className="text-white hover:text-gray-300 transition-colors"
+            className="text-gray-800 hover:text-gray-300 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="p-4 border-b bg-gray-300 space-y-3">
+        <div className="p-4 border-b bg-gray-800 space-y-3">
           <div className="flex gap-3 flex-wrap">
             <div className="flex-1 min-w-[200px] relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -78,7 +78,7 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
             </div>
             <button
               onClick={onAddNewClient}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 font-medium"
+              className="px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 font-medium"
             >
               <Plus className="w-4 h-4" />
               Add New Client
@@ -92,8 +92,8 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
                 onClick={() => setFilterType(type)}
                 className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
                   filterType === type
-                    ? 'bg-gray-600 text-white'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-300'
+                    ? 'bg-gray-600 text-gray-800'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-800'
                 }`}
               >
                 {type}
@@ -174,13 +174,13 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
                         onLoadClient(client);
                         handleClose();
                       }}
-                      className="flex-1 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium"
+                      className="flex-1 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium"
                     >
                       Use Client
                     </button>
                     <button
                       onClick={() => onEditClient(client)}
-                      className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                      className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-800 transition-colors"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
@@ -203,13 +203,13 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
           )}
         </div>
 
-        <div className="p-4 border-t bg-gray-300 flex justify-between items-center">
+        <div className="p-4 border-t bg-gray-800 flex justify-between items-center">
           <div className="text-sm text-gray-600">
             Showing {filteredClients.length} of {clients.length} clients
           </div>
           <button
             onClick={handleClose}
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+            className="px-6 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors font-medium"
           >
             Close
           </button>

@@ -10,7 +10,7 @@ function DashboardHome() {
   if (!user || !userDashboard) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-gray-800 text-xl">Loading...</div>
       </div>
     );
   }
@@ -24,11 +24,11 @@ function DashboardHome() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <div className="bg-slate-600 shadow-lg">
+      <div className="bg-gray-50 shadow-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center flex-wrap gap-4">
           <div className="flex items-center space-x-3">
             <span className="text-4xl">{dashboard.icon}</span>
-            <h1 className="text-2xl font-bold text-white">{dashboard.name}</h1>
+            <h1 className="text-2xl font-bold text-gray-800">{dashboard.name}</h1>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-gray-300">
@@ -37,7 +37,7 @@ function DashboardHome() {
             </div>
             <button
               onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="bg-red-600 hover:bg-red-700 text-gray-800 px-4 py-2 rounded-lg transition-colors"
             >
               Logout
             </button>
@@ -46,8 +46,8 @@ function DashboardHome() {
       </div>
       
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-slate-600 rounded-xl p-8 shadow-xl">
-          <h2 className="text-3xl font-bold text-white mb-4">
+        <div className="bg-gray-50 rounded-xl p-8 shadow-xl">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">
             Welcome to your {dashboard.name}
           </h2>
           <p className="text-gray-300 text-lg mb-6">

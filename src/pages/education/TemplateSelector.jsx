@@ -413,7 +413,7 @@ export const ProfessionalTemplate = (props) => {
         </h3>
         <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="bg-slate-600 text-white">
+            <tr className="bg-gray-50 text-gray-800">
               <th className="border border-gray-600 px-3 py-2 text-left">SUBJECT</th>
               <th className="border border-gray-600 px-3 py-2 text-center w-24">MARK (%)</th>
               <th className="border border-gray-600 px-3 py-2 text-center w-20">GRADE</th>
@@ -517,7 +517,7 @@ export const ColorfulTemplate = (props) => {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
             {props.businessInfo.schoolName || 'SCHOOL NAME'}
           </h1>
-          <div className="inline-block bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-6 py-2 rounded-full font-bold text-lg">
+          <div className="inline-block bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-800 px-6 py-2 rounded-full font-bold text-lg">
             ⭐ REPORT CARD ⭐
           </div>
           <p className="text-sm text-gray-600 mt-3">{props.jobCardNumber}</p>
@@ -526,17 +526,17 @@ export const ColorfulTemplate = (props) => {
 
       {/* Student Info Cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-blue-400 to-blue-600 text-white rounded-xl shadow-lg p-4">
+        <div className="bg-gradient-to-br from-blue-400 to-blue-600 text-gray-800 rounded-xl shadow-lg p-4">
           <p className="text-xs opacity-90 mb-1">Student</p>
           <p className="font-bold text-lg">{props.studentName}</p>
           <p className="text-xs opacity-75">{props.gradeLevel}</p>
         </div>
-        <div className="bg-gradient-to-br from-green-400 to-green-600 text-white rounded-xl shadow-lg p-4">
+        <div className="bg-gradient-to-br from-green-400 to-green-600 text-gray-800 rounded-xl shadow-lg p-4">
           <p className="text-xs opacity-90 mb-1">Academic Period</p>
           <p className="font-bold text-lg">{props.term}</p>
           <p className="text-xs opacity-75">{props.academicYear}</p>
         </div>
-        <div className="bg-gradient-to-br from-orange-400 to-red-500 text-white rounded-xl shadow-lg p-4">
+        <div className="bg-gradient-to-br from-orange-400 to-red-500 text-gray-800 rounded-xl shadow-lg p-4">
           <p className="text-xs opacity-90 mb-1">Average</p>
           <p className="font-bold text-3xl">{props.calculateAverage ? props.calculateAverage() : '0'}%</p>
         </div>
@@ -560,14 +560,14 @@ export const ColorfulTemplate = (props) => {
                 <div className="flex items-center gap-3">
                   <div className="text-center">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
-                      <span className="text-white font-bold text-xl">{subject.mark}</span>
+                      <span className="text-gray-800 font-bold text-xl">{subject.mark}</span>
                     </div>
                   </div>
                   <div className={`w-12 h-12 rounded-lg flex items-center justify-center font-bold text-2xl shadow-lg ${
-                    subject.grade === 'A' ? 'bg-gradient-to-br from-green-400 to-green-600 text-white' :
-                    subject.grade === 'B' ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-white' :
-                    subject.grade === 'C' ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white' :
-                    'bg-gradient-to-br from-red-400 to-red-600 text-white'
+                    subject.grade === 'A' ? 'bg-gradient-to-br from-green-400 to-green-600 text-gray-800' :
+                    subject.grade === 'B' ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-gray-800' :
+                    subject.grade === 'C' ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-gray-800' :
+                    'bg-gradient-to-br from-red-400 to-red-600 text-gray-800'
                   }`}>
                     {subject.grade}
                   </div>
@@ -582,7 +582,7 @@ export const ColorfulTemplate = (props) => {
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
           <h3 className="text-lg font-bold text-purple-700 mb-4">📅 Attendance</h3>
-          <div className="inline-block bg-gradient-to-br from-green-400 to-emerald-500 text-white rounded-full w-24 h-24 flex items-center justify-center shadow-lg mb-3">
+          <div className="inline-block bg-gradient-to-br from-green-400 to-emerald-500 text-gray-800 rounded-full w-24 h-24 flex items-center justify-center shadow-lg mb-3">
             <div>
               <p className="text-3xl font-bold">
                 {props.attendanceDays && props.attendancePresent

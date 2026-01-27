@@ -67,14 +67,14 @@ const WaybillStickerModal = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-gray-800 rounded-lg hover:bg-blue-700"
             >
               <Printer className="w-4 h-4" />
               Print Label
             </button>
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
             >
               <Download className="w-4 h-4" />
               Download
@@ -122,7 +122,7 @@ const WaybillStickerModal = ({
 
               {/* FROM Section */}
               <div className="mb-4 border-2 border-black p-3">
-                <div className="bg-black text-white px-2 py-1 font-bold text-sm mb-2">
+                <div className="bg-black text-gray-800 px-2 py-1 font-bold text-sm mb-2">
                   FROM (SHIPPER)
                 </div>
                 <div className="space-y-1">
@@ -139,7 +139,7 @@ const WaybillStickerModal = ({
 
               {/* TO Section - More Prominent */}
               <div className="mb-4 border-4 border-black p-3 bg-yellow-50">
-                <div className="bg-black text-white px-2 py-1 font-bold text-sm mb-2">
+                <div className="bg-black text-gray-800 px-2 py-1 font-bold text-sm mb-2">
                   TO (CONSIGNEE) - DELIVER TO:
                 </div>
                 <div className="space-y-1">
@@ -148,7 +148,7 @@ const WaybillStickerModal = ({
                   <div className="text-sm flex justify-between mt-2">
                     <span className="font-bold">📱 {waybillData.receiver?.phone || 'N/A'}</span>
                   </div>
-                  <div className="text-sm bg-black text-white px-3 py-2 mt-2 font-bold text-center">
+                  <div className="text-sm bg-black text-gray-800 px-3 py-2 mt-2 font-bold text-center">
                     DESTINATION: {waybillData.shipment?.destination || 'N/A'}
                   </div>
                 </div>
@@ -156,7 +156,7 @@ const WaybillStickerModal = ({
 
               {/* Shipment Details */}
               <div className="mb-4 border-2 border-gray-400 p-3">
-                <div className="bg-gray-700 text-white px-2 py-1 font-bold text-xs mb-2">
+                <div className="bg-gray-700 text-gray-800 px-2 py-1 font-bold text-xs mb-2">
                   SHIPMENT DETAILS
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -187,10 +187,10 @@ const WaybillStickerModal = ({
 
               {/* Service Type Badge */}
               <div className="mt-3 flex justify-between items-center">
-                <div className="bg-red-600 text-white px-3 py-1 font-bold text-xs">
+                <div className="bg-red-600 text-gray-800 px-3 py-1 font-bold text-xs">
                   URGENT
                 </div>
-                <div className="bg-blue-600 text-white px-3 py-1 font-bold text-xs">
+                <div className="bg-blue-600 text-gray-800 px-3 py-1 font-bold text-xs">
                   INSURED
                 </div>
                 <div className="text-xs">

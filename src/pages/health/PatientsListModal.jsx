@@ -62,7 +62,7 @@ const PatientsListModal = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b flex items-center justify-between bg-slate-600 text-white">
+        <div className="p-4 border-b flex items-center justify-between bg-gray-50 text-gray-800">
           <div className="flex items-center gap-3">
             <UserCheck className="w-6 h-6" />
             <div>
@@ -74,14 +74,14 @@ const PatientsListModal = ({
           </div>
           <button
             onClick={() => setShowModal(false)}
-            className="text-white hover:text-gray-200 transition-colors"
+            className="text-gray-800 hover:text-gray-200 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Search and Filter Bar */}
-        <div className="p-4 border-b bg-gray-300">
+        <div className="p-4 border-b bg-gray-800">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -107,7 +107,7 @@ const PatientsListModal = ({
 
             <button
               onClick={onAddNewPatient}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap"
             >
               <Plus className="w-5 h-5" />
               Add New Patient
@@ -238,13 +238,13 @@ const PatientsListModal = ({
                         onLoadPatient(patient);
                         setShowModal(false);
                       }}
-                      className="flex-1 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      className="flex-1 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                     >
                       Load to Invoice
                     </button>
                     <button
                       onClick={() => onEditPatient(patient)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
                     >
                       Edit Details
                     </button>
@@ -263,13 +263,13 @@ const PatientsListModal = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t bg-gray-300 flex justify-between items-center">
+        <div className="p-4 border-t bg-gray-800 flex justify-between items-center">
           <div className="text-sm text-gray-600">
             Showing {filteredPatients.length} of {patients.length} total patients
           </div>
           <button
             onClick={() => setShowModal(false)}
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            className="px-6 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
           >
             Close
           </button>

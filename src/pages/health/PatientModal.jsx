@@ -130,14 +130,14 @@ const PatientModal = ({ showModal, setShowModal, existingPatient, onPatientSaved
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b flex items-center justify-between bg-slate-600 text-white">
+        <div className="p-4 border-b flex items-center justify-between bg-gray-50 text-gray-800">
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <User className="w-6 h-6" />
             {existingPatient ? 'Edit Patient' : 'Add New Patient'}
           </h2>
           <button
             onClick={() => setShowModal(false)}
-            className="text-white hover:text-gray-200 transition-colors"
+            className="text-gray-800 hover:text-gray-200 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
@@ -410,14 +410,14 @@ const PatientModal = ({ showModal, setShowModal, existingPatient, onPatientSaved
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 transition-colors"
+              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 transition-colors"
               disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
             >
               <Save className="w-4 h-4" />

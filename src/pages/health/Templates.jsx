@@ -329,7 +329,7 @@ const Templates = ({ user }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-lg p-8 text-white">
+      <div className="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-lg p-8 text-gray-800">
         <div className="flex items-center gap-3 mb-3">
           <Heart className="w-8 h-8" />
           <h1 className="text-3xl font-bold">Invoice Templates</h1>
@@ -385,7 +385,7 @@ const Templates = ({ user }) => {
             onClick={() => setSelectedCategory(category.id)}
             className={`px-4 py-2 rounded-lg font-medium transition-all ${
               selectedCategory === category.id
-                ? 'bg-teal-600 text-white shadow-lg scale-105'
+                ? 'bg-teal-600 text-gray-800 shadow-lg scale-105'
                 : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
             }`}
           >
@@ -416,18 +416,18 @@ const Templates = ({ user }) => {
                 
                 {/* Icon Overlay */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <Icon className="w-24 h-24 text-white opacity-20" />
+                  <Icon className="w-24 h-24 text-gray-800 opacity-20" />
                 </div>
 
                 {/* Badges */}
                 {template.isPremium && !isPurchased && (
-                  <div className="absolute top-4 right-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-gray-800 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
                     <Sparkles className="w-4 h-4" />
                     Premium
                   </div>
                 )}
                 {isPurchased && (
-                  <div className="absolute top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
+                  <div className="absolute top-4 left-4 bg-green-600 text-gray-800 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
                     <Check className="w-5 h-5" />
                     Owned
                   </div>
@@ -435,7 +435,7 @@ const Templates = ({ user }) => {
 
                 {/* Template Name Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                  <div className="flex items-center gap-2 text-white">
+                  <div className="flex items-center gap-2 text-gray-800">
                     <Icon className="w-6 h-6" />
                     <h3 className="text-xl font-bold">{template.name}</h3>
                   </div>
@@ -460,7 +460,7 @@ const Templates = ({ user }) => {
                 </div>
 
                 {/* Preview Description */}
-                <div className="mb-4 p-3 bg-gray-300 rounded-lg">
+                <div className="mb-4 p-3 bg-gray-800 rounded-lg">
                   <div className="text-xs font-semibold text-gray-500 mb-1">PREVIEW</div>
                   <p className="text-xs text-gray-600 leading-relaxed">{template.preview}</p>
                 </div>
@@ -488,7 +488,7 @@ const Templates = ({ user }) => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setShowPreview(template.id)}
-                      className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-300 hover:border-gray-400 flex items-center gap-2 transition-all"
+                      className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-800 hover:border-gray-400 flex items-center gap-2 transition-all"
                     >
                       <Eye className="w-4 h-4" />
                       <span className="hidden sm:inline">Preview</span>
@@ -502,7 +502,7 @@ const Templates = ({ user }) => {
                     ) : (
                       <button
                         onClick={() => handlePurchase(template.id)}
-                        className="px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white rounded-lg hover:from-teal-700 hover:to-cyan-600 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
+                        className="px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-gray-800 rounded-lg hover:from-teal-700 hover:to-cyan-600 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
                       >
                         {template.isPremium ? (
                           <>
@@ -558,7 +558,7 @@ const Templates = ({ user }) => {
                 ✕
               </button>
             </div>
-            <div className="overflow-auto p-8 bg-gray-300">
+            <div className="overflow-auto p-8 bg-gray-800">
               <div className="bg-white rounded-lg shadow-lg p-8 max-w-3xl mx-auto">
                 <div className="text-center mb-6">
                   {React.createElement(TEMPLATES[showPreview].icon, { className: "w-16 h-16 text-teal-600 mx-auto mb-4" })}
@@ -598,7 +598,7 @@ const Templates = ({ user }) => {
                         setShowPreview(null);
                         handlePurchase(showPreview);
                       }}
-                      className="px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-500 text-white rounded-lg hover:from-teal-700 hover:to-cyan-600 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
+                      className="px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-500 text-gray-800 rounded-lg hover:from-teal-700 hover:to-cyan-600 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
                     >
                       {TEMPLATES[showPreview].isPremium ? (
                         <>
@@ -624,7 +624,7 @@ const Templates = ({ user }) => {
       {showPayment && (
         <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
-            <div className="p-6 border-b bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-t-xl">
+            <div className="p-6 border-b bg-gradient-to-r from-teal-500 to-cyan-500 text-gray-800 rounded-t-xl">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-2xl font-bold">Complete Purchase</h2>
                 <button
@@ -632,7 +632,7 @@ const Templates = ({ user }) => {
                     setShowPayment(null);
                     setCardDetails({ cardNumber: '', expiryDate: '', cvv: '', cardName: '' });
                   }}
-                  className="text-white hover:text-gray-200 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors"
+                  className="text-gray-800 hover:text-gray-200 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors"
                   disabled={paymentProcessing}
                 >
                   ✕
@@ -743,7 +743,7 @@ const Templates = ({ user }) => {
               <button
                 onClick={handlePaymentSubmit}
                 disabled={paymentProcessing}
-                className="w-full px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-500 text-white rounded-lg hover:from-teal-700 hover:to-cyan-600 flex items-center justify-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-500 text-gray-800 rounded-lg hover:from-teal-700 hover:to-cyan-600 flex items-center justify-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {paymentProcessing ? (
                   <>

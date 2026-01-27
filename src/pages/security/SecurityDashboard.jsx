@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
-import logo from '../../assets/img/solidflo-logo.png';
+import logo from '../../assets/img/solidflo.png';
 import Templates from "./Templates"; 
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
@@ -378,11 +378,11 @@ const [stampSettings, setStampSettings] = useState({
   };
 
   return (
-    <div className="flex h-screen bg-gray-300">
+    <div className="flex h-screen bg-gray-800">
     {/* Sidebar Toggle Button - Works on both mobile and desktop */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed top-4 left-4 z-50 p-2 bg-slate-600 text-white rounded-lg shadow-lg hover:bg-slate-700 transition-colors print:hidden"
+        className="fixed top-4 left-4 z-50 p-2 bg-gray-50 text-gray-800 rounded-lg shadow-lg hover:bg-slate-700 transition-colors print:hidden"
       >
         {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
@@ -391,7 +391,7 @@ const [stampSettings, setStampSettings] = useState({
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed z-40 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed z-40 w-64 bg-gray-50 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -433,7 +433,7 @@ const [stampSettings, setStampSettings] = useState({
                 <div className="ml-8 mt-1 space-y-1">
                   <div
                     onClick={handleNewIncident}
-                    className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+                    className="px-3 py-2 text-sm text-gray-800 bg-slate-800 rounded-lg cursor-pointer"
                   >
                     New Incident Report
                   </div>
@@ -518,11 +518,11 @@ const [stampSettings, setStampSettings] = useState({
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-slate-600 rounded-full flex items-center justify-center">
-              <Shield className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center">
+              <Shield className="w-6 h-6 text-gray-800" />
             </div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-white">
+              <div className="text-sm font-medium text-gray-800">
                 {user?.name || "User"}
               </div>
               <div className="text-xs text-gray-400">
@@ -531,7 +531,7 @@ const [stampSettings, setStampSettings] = useState({
             </div>
             <button
               onClick={handleLogout}
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-gray-800"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -563,14 +563,14 @@ const [stampSettings, setStampSettings] = useState({
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
               <button
                 onClick={handleSaveIncident}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
               >
                 Save Report
               </button>
 
               <button
                 onClick={handleNewIncident}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
               >
                 <Plus className="w-4 h-4" />
                 New
@@ -578,14 +578,14 @@ const [stampSettings, setStampSettings] = useState({
 
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <Printer className="w-4 h-4" />
                 Print
               </button>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors"
               >
                 Log Out
               </button>
@@ -593,14 +593,14 @@ const [stampSettings, setStampSettings] = useState({
 
             <button
               onClick={handleLogout}
-              className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
+              className="lg:hidden p-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors print:hidden"
             >
               <span className="text-sm font-medium">Logout</span>
             </button>
           </div>
         </div>
         <div className="sticky top-0 z-40 flex flex-col">
-        <div className="bg-slate-600 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+        <div className="bg-gray-50 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
             {["IncidentReport", "Follow-up", "Photos", "Notes"].map((tab) => (
               <button
@@ -608,7 +608,7 @@ const [stampSettings, setStampSettings] = useState({
                 onClick={() => setActiveTab(tab)}
                 className={`py-4 border-b-2 ${
                   activeTab === tab
-                    ? "border-blue-400 text-white"
+                    ? "border-blue-400 text-gray-800"
                     : "border-transparent text-gray-400 hover:text-gray-200"
                 }`}
               >
@@ -646,7 +646,7 @@ const [stampSettings, setStampSettings] = useState({
                             className="w-24 h-24 object-contain border rounded-lg"
                           />
                         ) : (
-                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
+                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
                             <Upload className="w-8 h-8 text-gray-400" />
                           </div>
                         )}
@@ -661,7 +661,7 @@ const [stampSettings, setStampSettings] = useState({
                           />
                           <label
                             htmlFor="logo-upload"
-                            className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer"
+                            className="inline-block px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer"
                           >
                             {businessInfo.logoUrl ? "Change Logo" : "Upload Logo"}
                           </label>
@@ -942,7 +942,7 @@ const [stampSettings, setStampSettings] = useState({
         </div>
 
         {/* Preview */}
-        <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
+        <div className="mt-4 p-6 bg-gray-800 rounded-lg border-2 border-dashed border-gray-300">
           <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
           <div className="flex justify-center">
             <SignatureStamp 
@@ -960,7 +960,7 @@ const [stampSettings, setStampSettings] = useState({
 </div>
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-gray-50 text-gray-800 py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Business Information
                     </button>
@@ -994,7 +994,7 @@ const [stampSettings, setStampSettings] = useState({
                         <div
                           key={incident.id}
                           onClick={() => loadIncident(incident)}
-                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1044,7 +1044,7 @@ const [stampSettings, setStampSettings] = useState({
                        <>
           <button
             onClick={() => setShowIncidentReport(!showIncidentReport)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showIncidentReport ? "Hide Report" : "View Report"}
@@ -1077,7 +1077,7 @@ const [stampSettings, setStampSettings] = useState({
                       type="text"
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1086,7 +1086,7 @@ const [stampSettings, setStampSettings] = useState({
                       type="text"
                       value={clientContact}
                       onChange={(e) => setClientContact(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1095,7 +1095,7 @@ const [stampSettings, setStampSettings] = useState({
                       type="text"
                       value={clientEmail}
                       onChange={(e) => setClientEmail(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -1116,7 +1116,7 @@ const [stampSettings, setStampSettings] = useState({
                       type="text"
                       value={siteName}
                       onChange={(e) => setSiteName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1125,7 +1125,7 @@ const [stampSettings, setStampSettings] = useState({
                       type="text"
                       value={siteAddress}
                       onChange={(e) => setSiteAddress(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -1146,7 +1146,7 @@ const [stampSettings, setStampSettings] = useState({
                       type="text"
                       value={guardName}
                       onChange={(e) => setGuardName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1155,7 +1155,7 @@ const [stampSettings, setStampSettings] = useState({
                       type="text"
                       value={guardId}
                       onChange={(e) => setGuardId(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -1175,7 +1175,7 @@ const [stampSettings, setStampSettings] = useState({
                     <select
                       value={incidentType}
                       onChange={(e) => setIncidentType(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="Theft">Theft</option>
                       <option value="Trespassing">Trespassing</option>
@@ -1193,7 +1193,7 @@ const [stampSettings, setStampSettings] = useState({
                       type="date"
                       value={incidentDate}
                       onChange={(e) => setIncidentDate(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1202,7 +1202,7 @@ const [stampSettings, setStampSettings] = useState({
                       type="time"
                       value={incidentTime}
                       onChange={(e) => setIncidentTime(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div className="col-span-3">
@@ -1238,7 +1238,7 @@ const [stampSettings, setStampSettings] = useState({
                       type="text"
                       value={witnessName}
                       onChange={(e) => setWitnessName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Optional"
                     />
                   </div>
@@ -1248,7 +1248,7 @@ const [stampSettings, setStampSettings] = useState({
                       type="text"
                       value={witnessContact}
                       onChange={(e) => setWitnessContact(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Optional"
                     />
                   </div>
@@ -1330,7 +1330,7 @@ const [stampSettings, setStampSettings] = useState({
                 
                 nav,
                 [class*="sidebar"],
-                [class*="bg-slate-600"],
+                [class*="bg-gray-50"],
                 button:not([style]) {
                   display: none !important;
                 }

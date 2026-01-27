@@ -156,7 +156,7 @@ export const dashboards = [
     name: 'Education', 
     path: '/education',
     icon: '📚', 
-    color: 'bg-slate-600',
+    color: 'bg-gray-50',
     description: 'Student & course management'
   },
   { 

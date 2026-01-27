@@ -176,7 +176,7 @@ const ProtectedApp = () => {
                 </ul>
               </div>
 
-              <div className="p-4 bg-gray-300 rounded-lg">
+              <div className="p-4 bg-gray-800 rounded-lg">
                 <h3 className="font-semibold text-gray-900 mb-2">
                   Try These (They're Blocked):
                 </h3>

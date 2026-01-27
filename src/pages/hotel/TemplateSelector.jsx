@@ -202,7 +202,7 @@ export const DefaultHotelTemplate = ({
     {/* Guest and Room Information */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-gray-100 p-3 rounded">
-        <div className="font-bold text-xs mb-2 bg-gray-300 px-2 py-1 rounded">GUEST DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1 rounded">GUEST DETAILS</div>
         <div className="text-xs space-y-1">
           <div className="font-semibold">{customerName}</div>
           <div className="text-gray-600">{customerAddress}</div>
@@ -213,7 +213,7 @@ export const DefaultHotelTemplate = ({
       </div>
 
       <div className="bg-gray-100 p-3 rounded">
-        <div className="font-bold text-xs mb-2 bg-gray-300 px-2 py-1 rounded">IDENTIFICATION</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1 rounded">IDENTIFICATION</div>
         <div className="text-xs space-y-1">
           {guestId && <div>Guest ID: {guestId}</div>}
           {idType && <div>ID Type: {idType}</div>}
@@ -249,7 +249,7 @@ export const DefaultHotelTemplate = ({
     <div className="mb-4">
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-gray-300">
+          <tr className="bg-gray-800">
             <th className="text-left px-2 py-2 font-bold">DESCRIPTION</th>
             <th className="text-center px-2 py-2 font-bold">QUANTITY</th>
             <th className="text-right px-2 py-2 font-bold">UNIT PRICE</th>
@@ -280,7 +280,7 @@ export const DefaultHotelTemplate = ({
           <span>VAT (15%):</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-blue-600 text-white px-2 rounded">
+        <div className="flex justify-between py-2 font-bold bg-blue-600 text-gray-800 px-2 rounded">
           <span>TOTAL:</span>
           <span>R {total.toFixed(2)}</span>
         </div>
@@ -369,7 +369,7 @@ export const ClassicHotelTemplate = (props) => (
 
     <table className="w-full text-sm mb-6">
       <thead>
-        <tr className="bg-amber-700 text-white">
+        <tr className="bg-amber-700 text-gray-800">
           <th className="text-left px-4 py-2 font-serif">Service</th>
           <th className="text-center px-4 py-2 font-serif">Qty</th>
           <th className="text-right px-4 py-2 font-serif">Rate</th>
@@ -398,7 +398,7 @@ export const ClassicHotelTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 font-bold text-lg bg-amber-700 text-white px-4 rounded">
+        <div className="flex justify-between py-3 font-bold text-lg bg-amber-700 text-gray-800 px-4 rounded">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
@@ -489,7 +489,7 @@ export const ModernHotelTemplate = (props) => (
 
     <table className="w-full mb-6">
       <thead>
-        <tr className="bg-purple-500 text-white">
+        <tr className="bg-purple-500 text-gray-800">
           <th className="text-left px-4 py-3 rounded-l-lg">Item</th>
           <th className="text-center px-4 py-3">Qty</th>
           <th className="text-right px-4 py-3">Price</th>
@@ -518,7 +518,7 @@ export const ModernHotelTemplate = (props) => (
           <span>VAT:</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-4 text-xl font-bold bg-purple-500 text-white px-4 rounded-lg">
+        <div className="flex justify-between py-4 text-xl font-bold bg-purple-500 text-gray-800 px-4 rounded-lg">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
@@ -620,7 +620,7 @@ export const LuxuryHotelTemplate = (props) => (
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-4 text-2xl font-serif font-bold bg-amber-600 text-white px-4 rounded">
+          <div className="flex justify-between py-4 text-2xl font-serif font-bold bg-amber-600 text-gray-800 px-4 rounded">
             <span>TOTAL DUE:</span>
             <span>R {props.total.toFixed(2)}</span>
           </div>
@@ -720,7 +720,7 @@ export const BusinessHotelTemplate = (props) => (
 
     <table className="w-full text-sm mb-6 border border-gray-300">
       <thead>
-        <tr className="bg-slate-600 text-white">
+        <tr className="bg-gray-50 text-gray-800">
           <th className="text-left px-4 py-2">Description</th>
           <th className="text-center px-4 py-2">Quantity</th>
           <th className="text-right px-4 py-2">Unit Price</th>
@@ -749,7 +749,7 @@ export const BusinessHotelTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 px-4 font-bold text-lg bg-slate-600 text-white">
+        <div className="flex justify-between py-3 px-4 font-bold text-lg bg-gray-50 text-gray-800">
           <span>TOTAL DUE:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
@@ -861,7 +861,7 @@ export const ElegantHotelTemplate = (props) => (
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-3 font-bold text-lg bg-teal-700 text-white px-4">
+          <div className="flex justify-between py-3 font-bold text-lg bg-teal-700 text-gray-800 px-4">
             <span>TOTAL:</span>
             <span>R {props.total.toFixed(2)}</span>
           </div>
@@ -915,7 +915,7 @@ export const PremiumHotelTemplate = (props) => (
           </div>
           <div className="text-right">
             <div className="text-5xl font-black text-slate-800 mb-4">INVOICE</div>
-            <div className="bg-slate-800 text-white p-4 rounded">
+            <div className="bg-slate-800 text-gray-800 p-4 rounded">
               <div className="text-sm space-y-1">
                 <div className="font-bold">#{props.jobCardNumber}</div>
                 <div>{new Date().toLocaleDateString()}</div>
@@ -935,7 +935,7 @@ export const PremiumHotelTemplate = (props) => (
             <div className="text-sm text-slate-700">{props.customerPhone}</div>
           </div>
         </div>
-        <div className="bg-slate-800 text-white p-5 rounded-lg shadow-sm">
+        <div className="bg-slate-800 text-gray-800 p-5 rounded-lg shadow-sm">
           <div className="text-sm font-bold mb-3 uppercase tracking-wide">Accommodation Details</div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
@@ -964,7 +964,7 @@ export const PremiumHotelTemplate = (props) => (
 
       <table className="w-full mb-6 shadow-sm">
         <thead>
-          <tr className="bg-slate-800 text-white">
+          <tr className="bg-slate-800 text-gray-800">
             <th className="text-left px-4 py-3 font-bold">Description</th>
             <th className="text-center px-4 py-3 font-bold">Qty</th>
             <th className="text-right px-4 py-3 font-bold">Unit Price</th>
@@ -993,7 +993,7 @@ export const PremiumHotelTemplate = (props) => (
             <span className="text-slate-700">VAT (15%):</span>
             <span className="text-slate-900">R {props.vat.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-4 px-4 font-bold text-xl bg-slate-800 text-white rounded">
+          <div className="flex justify-between py-4 px-4 font-bold text-xl bg-slate-800 text-gray-800 rounded">
             <span>TOTAL DUE:</span>
             <span>R {props.total.toFixed(2)}</span>
           </div>

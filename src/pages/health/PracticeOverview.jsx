@@ -99,7 +99,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-gray-800">
         <h1 className="text-3xl font-bold mb-2">Practice Overview</h1>
         <p className="text-blue-100">Real-time insights into your healthcare practice</p>
       </div>
@@ -229,19 +229,19 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             <span>Revenue Overview</span>
           </h3>
           <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-gray-300 rounded">
+            <div className="flex justify-between items-center p-3 bg-gray-800 rounded">
               <span className="text-sm text-gray-600">This Month</span>
               <span className="text-lg font-semibold text-green-600">
                 {formatCurrency(stats.monthlyRevenue)}
               </span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-gray-300 rounded">
+            <div className="flex justify-between items-center p-3 bg-gray-800 rounded">
               <span className="text-sm text-gray-600">Total Revenue</span>
               <span className="text-lg font-semibold text-blue-600">
                 {formatCurrency(stats.totalRevenue)}
               </span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-gray-300 rounded">
+            <div className="flex justify-between items-center p-3 bg-gray-800 rounded">
               <span className="text-sm text-gray-600">Average Invoice</span>
               <span className="text-lg font-semibold text-purple-600">
                 {formatCurrency(stats.averageInvoiceValue)}
@@ -305,7 +305,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             {recentActivity.map((activity) => (
               <div 
                 key={activity.id}
-                className="flex items-center justify-between p-4 bg-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                className="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div className="flex items-center space-x-4">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
@@ -338,15 +338,15 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors">
             <FileText className="w-5 h-5" />
             <span>Create Invoice</span>
           </button>
-          <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+          <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 transition-colors">
             <Users className="w-5 h-5" />
             <span>Add Patient</span>
           </button>
-          <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+          <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-purple-600 text-gray-800 rounded-lg hover:bg-purple-700 transition-colors">
             <Calendar className="w-5 h-5" />
             <span>View Schedule</span>
           </button>

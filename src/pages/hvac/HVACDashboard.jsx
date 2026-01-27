@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
-import logo from '../../assets/img/solidflo-logo.png';
+import logo from '../../assets/img/solidflo.png';
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates"; 
 import HvacAIExtractor from "./HvacAIExtractor";
@@ -805,7 +805,7 @@ const handleAIDataExtracted = (extractedData) => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-300">
+    <div className="flex h-screen bg-gray-800">
      {/* Mobile Sidebar Backdrop */}
 {sidebarOpen && (
   <div
@@ -818,7 +818,7 @@ const handleAIDataExtracted = (extractedData) => {
 <div
   className={`${
     sidebarOpen ? "hidden" : "block"
-  } fixed z-40 w-16 bg-slate-600 border-r border-gray-200 h-full print:hidden transition-all duration-300`}
+  } fixed z-40 w-16 bg-gray-50 border-r border-gray-200 h-full print:hidden transition-all duration-300`}
 >
   <div className="flex flex-col items-center py-4 space-y-4">
     {/* Toggle Button */}
@@ -928,7 +928,7 @@ const handleAIDataExtracted = (extractedData) => {
 <div
   className={`${
     sidebarOpen ? "translate-x-0" : "-translate-x-full"
-  } fixed z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+  } fixed z-50 w-64 bg-gray-50 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
 >
   <div className="p-4">
     <div className="flex items-center justify-between mb-8">
@@ -987,7 +987,7 @@ const handleAIDataExtracted = (extractedData) => {
                 handleNewQuote();
                 setActiveView("invoice");
               }}
-              className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+              className="px-3 py-2 text-sm text-gray-800 bg-slate-800 rounded-lg cursor-pointer"
             >
               Create Quote
             </div>
@@ -1016,7 +1016,7 @@ const handleAIDataExtracted = (extractedData) => {
                 handleNewService();
                 setActiveView("invoice");
               }}
-              className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+              className="px-3 py-2 text-sm text-gray-800 bg-slate-800 rounded-lg cursor-pointer"
             >
               Create Invoice
             </div>
@@ -1077,9 +1077,9 @@ const handleAIDataExtracted = (extractedData) => {
 
   <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
     <div className="flex items-center space-x-3">
-      <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
+      <div className="w-10 h-10 bg-gray-50 rounded-full"></div>
       <div className="flex-1">
-        <div className="text-sm font-medium text-white">
+        <div className="text-sm font-medium text-gray-800">
           {user?.name || "User"}
         </div>
         <div className="text-xs text-gray-400">
@@ -1088,7 +1088,7 @@ const handleAIDataExtracted = (extractedData) => {
       </div>
       <button
         onClick={handleLogout}
-        className="text-gray-400 hover:text-white"
+        className="text-gray-400 hover:text-gray-800"
       >
         <LogOut className="w-4 h-4" />
       </button>
@@ -1116,50 +1116,50 @@ const handleAIDataExtracted = (extractedData) => {
               </div>
 
               <div className="hidden lg:flex items-center space-x-3 print:hidden">
-                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800">
                   <CheckSquare className="w-4 h-4" />
                   <span>Mark Complete</span>
                 </button>
-                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800">
                   <Edit className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
                 <button
                   onClick={handleSaveQuote}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-orange-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-700"
                 >
                   Save {documentType === 'quote' ? 'Quote' : 'Invoice'}
                 </button>
 
                 <button
                   onClick={documentType === 'quote' ? handleNewQuote : handleNewService}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
                 >
                   <Plus className="w-4 h-4" />
                   New {documentType === 'quote' ? 'Quote' : 'Invoice'}
                 </button>
 
-                <button className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700">
+                <button className="flex items-center space-x-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700">
                   <Send className="w-4 h-4" />
                   <span>Send</span>
                 </button>
                 <button
                   onClick={handleSavePDF}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
                 >
                   Save as PDF
                 </button>
 
                 <button
                   onClick={handlePrint}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   <Printer className="w-4 h-4" />
                   Print
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors"
                 >
                   Log Out
                 </button>
@@ -1167,7 +1167,7 @@ const handleAIDataExtracted = (extractedData) => {
 
               <button
                 onClick={handleLogout}
-                className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
+                className="lg:hidden p-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors print:hidden"
               >
                 <span className="text-sm font-medium">Logout</span>
               </button>
@@ -1176,28 +1176,28 @@ const handleAIDataExtracted = (extractedData) => {
 
           <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
             <div className="flex gap-2 overflow-x-auto pb-2">
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
                 <CheckSquare className="w-4 h-4" />
                 <span>Complete</span>
               </button>
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
-              <button className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSave}
-                className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Save PDF</span>
               </button>
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
               >
                 <Printer className="w-4 h-4" />
                 <span>Print</span>
@@ -1205,7 +1205,7 @@ const handleAIDataExtracted = (extractedData) => {
             </div>
           </div>
 
-          <div className="bg-slate-600 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+          <div className="bg-gray-50 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
             <div className="flex space-x-4 lg:space-x-8 min-w-max">
               {["Service", "Parts", "History", "Notes"].map((tab) => (
                 <button
@@ -1213,7 +1213,7 @@ const handleAIDataExtracted = (extractedData) => {
                   onClick={() => setActiveTab(tab)}
                   className={`py-4 border-b-2 ${
                     activeTab === tab
-                      ? "border-blue-400 text-white"
+                      ? "border-blue-400 text-gray-800"
                       : "border-transparent text-gray-400 hover:text-gray-200"
                   }`}
                 >
@@ -1252,7 +1252,7 @@ const handleAIDataExtracted = (extractedData) => {
                             className="w-24 h-24 object-contain border rounded-lg"
                           />
                         ) : (
-                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
+                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
                             <Upload className="w-8 h-8 text-gray-400" />
                           </div>
                         )}
@@ -1266,7 +1266,7 @@ const handleAIDataExtracted = (extractedData) => {
                           />
                           <label
                             htmlFor="logo-upload"
-                            className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer"
+                            className="inline-block px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer"
                           >
                             {businessInfo.logoUrl ? "Change Logo" : "Upload Logo"}
                           </label>
@@ -1541,7 +1541,7 @@ const handleAIDataExtracted = (extractedData) => {
                               </label>
                             </div>
 
-                            <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
+                            <div className="mt-4 p-6 bg-gray-800 rounded-lg border-2 border-dashed border-gray-300">
                               <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
                               <div className="flex justify-center">
                                 <SignatureStamp 
@@ -1560,7 +1560,7 @@ const handleAIDataExtracted = (extractedData) => {
 
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-gray-50 text-gray-800 py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Business Information
                     </button>
@@ -1596,13 +1596,13 @@ const handleAIDataExtracted = (extractedData) => {
                 <div className="flex gap-3">
                   <button
                     onClick={handleConvertToInvoice}
-                    className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
+                    className="flex-1 bg-gray-600 text-gray-800 px-4 py-2 rounded-lg hover:bg-orange-700"
                   >
                     Convert to Invoice
                   </button>
                   <button
                     onClick={() => setShowConvertModal(false)}
-                    className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                    className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-800"
                   >
                     Later
                   </button>
@@ -1634,7 +1634,7 @@ const handleAIDataExtracted = (extractedData) => {
                         <div
                           key={service.id}
                           onClick={() => loadService(service)}
-                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1708,7 +1708,7 @@ const handleAIDataExtracted = (extractedData) => {
                         <div
                           key={quote.id}
                           onClick={() => loadQuote(quote)}
-                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1766,7 +1766,7 @@ const handleAIDataExtracted = (extractedData) => {
             <>
               <button
                 onClick={() => setShowServiceCard(!showServiceCard)}
-                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <FileText className="w-5 h-5" />
                 {showServiceCard ? "Hide Service Record" : "View Service Record"}
@@ -1868,7 +1868,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={customerName}
                           onChange={(e) => setCustomerName(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1877,7 +1877,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={customerId}
                           onChange={(e) => setCustomerId(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1886,7 +1886,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={customerEmail}
                           onChange={(e) => setCustomerEmail(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1895,7 +1895,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={customerPhone}
                           onChange={(e) => setCustomerPhone(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div className="col-span-1 sm:col-span-2">
@@ -1904,7 +1904,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={customerAddress}
                           onChange={(e) => setCustomerAddress(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                     </div>
@@ -1925,7 +1925,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={systemType}
                           onChange={(e) => setSystemType(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1934,7 +1934,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={systemBrand}
                           onChange={(e) => setSystemBrand(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1943,7 +1943,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={systemModel}
                           onChange={(e) => setSystemModel(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1952,7 +1952,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={systemSerial}
                           onChange={(e) => setSystemSerial(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1961,7 +1961,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={systemCapacity}
                           onChange={(e) => setSystemCapacity(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1970,7 +1970,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={systemLocation}
                           onChange={(e) => setSystemLocation(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                     </div>
@@ -2025,7 +2025,7 @@ const handleAIDataExtracted = (extractedData) => {
 
                       <button
                         onClick={handleAddItem}
-                        className="bg-slate-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                        className="bg-gray-50 text-gray-800 rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                       >
                         <Plus className="w-4 h-4" />
                         Add
@@ -2129,7 +2129,7 @@ const handleAIDataExtracted = (extractedData) => {
                     
                     nav,
                     [class*="sidebar"],
-                    [class*="bg-slate-600"],
+                    [class*="bg-gray-50"],
                     button:not([style]) {
                       display: none !important;
                     }

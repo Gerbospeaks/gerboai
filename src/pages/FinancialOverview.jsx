@@ -265,7 +265,7 @@ const FinancialOverview = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-300 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-800 p-4 md:p-6">
       {loading ? (
         <div className="flex items-center justify-center h-screen">
           <div className="text-center">
@@ -287,7 +287,7 @@ const FinancialOverview = ({ user }) => {
             <button
               onClick={() => setTimeRange('week')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                timeRange === 'week' ? 'bg-slate-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
+                timeRange === 'week' ? 'bg-gray-50 text-gray-800' : 'bg-white text-gray-700 hover:bg-gray-800'
               }`}
             >
               Week
@@ -295,7 +295,7 @@ const FinancialOverview = ({ user }) => {
             <button
               onClick={() => setTimeRange('month')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                timeRange === 'month' ? 'bg-slate-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
+                timeRange === 'month' ? 'bg-gray-50 text-gray-800' : 'bg-white text-gray-700 hover:bg-gray-800'
               }`}
             >
               Month
@@ -303,7 +303,7 @@ const FinancialOverview = ({ user }) => {
             <button
               onClick={() => setTimeRange('year')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                timeRange === 'year' ? 'bg-slate-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-300'
+                timeRange === 'year' ? 'bg-gray-50 text-gray-800' : 'bg-white text-gray-700 hover:bg-gray-800'
               }`}
             >
               Year
@@ -314,7 +314,7 @@ const FinancialOverview = ({ user }) => {
 
       {/* Financial Health Score */}
       <div className="mb-6">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-gray-800">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 mb-2">Financial Health Score</p>
@@ -630,7 +630,7 @@ const FinancialOverview = ({ user }) => {
                   <div key={index}>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-gray-800 font-semibold text-sm">
                           {index + 1}
                         </div>
                         <div>

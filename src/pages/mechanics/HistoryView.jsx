@@ -78,7 +78,7 @@ const HistoryView = ({ jobCardId }) => {
       </div>
 
       <div className="relative">
-        <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+        <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-800"></div>
 
         <div className="space-y-6">
           {history.map((item) => (
@@ -98,7 +98,7 @@ const HistoryView = ({ jobCardId }) => {
                 
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <span className="inline-flex items-center gap-1">
-                    <span className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-xs font-medium">
+                    <span className="w-6 h-6 bg-gray-800 rounded-full flex items-center justify-center text-xs font-medium">
                       {item.user.split(' ').map(n => n[0]).join('')}
                     </span>
                     {item.user}
@@ -257,7 +257,7 @@ const NotesView = ({ jobCardId }) => {
           <button
             onClick={handleAddNote}
             disabled={!newNote.trim()}
-            className="px-6 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-2 bg-orange-400 text-gray-800 rounded-lg hover:bg-orange-500 disabled:bg-gray-800 disabled:cursor-not-allowed transition-colors"
           >
             Add Note
           </button>
@@ -279,7 +279,7 @@ const NotesView = ({ jobCardId }) => {
                 )}
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs font-medium">
+                    <span className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-xs font-medium">
                       {note.user.split(' ').map(n => n[0]).join('')}
                     </span>
                     <span className="font-semibold text-gray-800">{note.user}</span>
@@ -299,13 +299,13 @@ const NotesView = ({ jobCardId }) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleSaveEdit(note.id)}
-                    className="px-4 py-1 bg-orange-400 text-white rounded hover:bg-orange-500 text-sm"
+                    className="px-4 py-1 bg-orange-400 text-gray-800 rounded hover:bg-orange-500 text-sm"
                   >
                     Save
                   </button>
                   <button
                     onClick={() => setEditingId(null)}
-                    className="px-4 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm"
+                    className="px-4 py-1 bg-gray-800 text-gray-700 rounded hover:bg-gray-400 text-sm"
                   >
                     Cancel
                   </button>

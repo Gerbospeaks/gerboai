@@ -69,7 +69,7 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-300"
+        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-800"
       >
         <FileText className="w-4 h-4" />
         <span className="hidden sm:inline">{templateNames[selectedTemplate] || 'Select Template'}</span>
@@ -94,7 +94,7 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
                 <button
                   key={templateId}
                   onClick={() => handleSelectTemplate(templateId)}
-                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-300 flex items-center justify-between ${
+                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-between ${
                     selectedTemplate === templateId ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
                   }`}
                 >
@@ -260,7 +260,7 @@ export const DefaultTemplate = ({
           <span>VAT (15%):</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 font-bold bg-slate-700 text-white px-4 rounded">
+        <div className="flex justify-between py-3 font-bold bg-slate-700 text-gray-800 px-4 rounded">
           <span>TOTAL DUE:</span>
           <span>R {total.toFixed(2)}</span>
         </div>
@@ -353,7 +353,7 @@ export const ProfessionalTemplate = (props) => (
           <div>{props.customerPhone}</div>
         </div>
       </div>
-      <div className="bg-gray-300 p-4 rounded">
+      <div className="bg-gray-800 p-4 rounded">
         <div className="font-bold text-sm mb-2 text-gray-700">PAYMENT TERMS</div>
         <div className="text-xs space-y-1">
           <div>Terms: Net 30 Days</div>
@@ -394,7 +394,7 @@ export const ProfessionalTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 font-bold bg-slate-600 text-white px-4 rounded">
+        <div className="flex justify-between py-3 font-bold bg-gray-50 text-gray-800 px-4 rounded">
           <span>TOTAL DUE:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
@@ -463,7 +463,7 @@ export const ModernTemplate = (props) => (
     </div>
 
     <div className="grid grid-cols-2 gap-6 mb-6">
-      <div className="bg-gray-300 p-4 rounded-lg">
+      <div className="bg-gray-800 p-4 rounded-lg">
         <div className="text-sm font-bold text-gray-500 mb-3">BILL TO</div>
         <div className="space-y-1 text-sm">
           <div className="font-semibold text-lg">{props.customerName}</div>
@@ -484,7 +484,7 @@ export const ModernTemplate = (props) => (
 
     <table className="w-full mb-6">
       <thead>
-        <tr className="bg-indigo-500 text-white">
+        <tr className="bg-indigo-500 text-gray-800">
           <th className="text-left px-4 py-3 rounded-l-lg">Description</th>
           <th className="text-center px-4 py-3">Qty</th>
           <th className="text-right px-4 py-3">Unit Price</th>
@@ -493,7 +493,7 @@ export const ModernTemplate = (props) => (
       </thead>
       <tbody>
         {props.items.map((item, i) => (
-          <tr key={i} className="border-b hover:bg-gray-300">
+          <tr key={i} className="border-b hover:bg-gray-800">
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
             <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
@@ -513,7 +513,7 @@ export const ModernTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 text-xl font-bold bg-indigo-500 text-white px-4 rounded-lg">
+        <div className="flex justify-between py-3 text-xl font-bold bg-indigo-500 text-gray-800 px-4 rounded-lg">
           <span>TOTAL DUE:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
@@ -620,7 +620,7 @@ export const CorporateTemplate = (props) => (
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-3 font-bold text-lg bg-slate-800 text-white px-4">
+          <div className="flex justify-between py-3 font-bold text-lg bg-slate-800 text-gray-800 px-4">
             <span>TOTAL DUE:</span>
             <span>R {props.total.toFixed(2)}</span>
           </div>
@@ -677,7 +677,7 @@ export const ContemporaryTemplate = (props) => (
           </div>
           <div className="text-right">
             <div className="text-5xl font-black text-emerald-600 mb-4 italic">INVOICE</div>
-            <div className="bg-emerald-600 text-white p-4 rounded space-y-1">
+            <div className="bg-emerald-600 text-gray-800 p-4 rounded space-y-1">
               <div className="text-sm font-bold">#{props.jobCardNumber}</div>
               <div className="text-sm">{new Date().toLocaleDateString()}</div>
             </div>
@@ -706,7 +706,7 @@ export const ContemporaryTemplate = (props) => (
 
       <table className="w-full mb-6">
         <thead>
-          <tr className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white">
+          <tr className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-gray-800">
             <th className="text-left px-4 py-3 font-black">DESCRIPTION</th>
             <th className="text-center px-4 py-3 font-black">QTY</th>
             <th className="text-right px-4 py-3 font-black">RATE</th>
@@ -715,7 +715,7 @@ export const ContemporaryTemplate = (props) => (
         </thead>
         <tbody>
           {props.items.map((item, i) => (
-            <tr key={i} className="border-b border-gray-200 hover:bg-gray-300">
+            <tr key={i} className="border-b border-gray-200 hover:bg-gray-800">
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
               <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
@@ -735,7 +735,7 @@ export const ContemporaryTemplate = (props) => (
             <span>VAT:</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-3 text-xl font-black bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-4 rounded-lg">
+          <div className="flex justify-between py-3 text-xl font-black bg-gradient-to-r from-emerald-600 to-emerald-500 text-gray-800 px-4 rounded-lg">
             <span>AMOUNT DUE:</span>
             <span>R {props.total.toFixed(2)}</span>
           </div>
@@ -824,7 +824,7 @@ export const DetailedTemplate = (props) => (
     </div>
 
     <div className="mb-6">
-      <div className="bg-teal-600 text-white px-4 py-2 font-bold">ITEMIZED STATEMENT</div>
+      <div className="bg-teal-600 text-gray-800 px-4 py-2 font-bold">ITEMIZED STATEMENT</div>
       <table className="w-full">
         <thead>
           <tr className="bg-teal-50 border-b-2 border-teal-600">
@@ -857,7 +857,7 @@ export const DetailedTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 text-xl font-bold bg-teal-600 text-white px-4 rounded mt-2">
+        <div className="flex justify-between py-3 text-xl font-bold bg-teal-600 text-gray-800 px-4 rounded mt-2">
           <span>AMOUNT DUE:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>

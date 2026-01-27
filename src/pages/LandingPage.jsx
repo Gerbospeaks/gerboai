@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/img/solidflo-logo.png';
+import logo from '../assets/img/solidflo.png';
 import globe from '../assets/images/globe.webp'
 import instagram from '../assets/images/instagram.png';
 import facebook from '../assets/images/facebook.png';

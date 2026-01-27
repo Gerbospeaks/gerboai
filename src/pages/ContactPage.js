@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from 'lucide-react';
-import logo from '../assets/img/solidflo-logo.png';
+import logo from '../assets/img/solidflo.png';
 import { useNavigate } from 'react-router-dom';
 import about from './AboutPage';  
 import contact from './ContactPage';

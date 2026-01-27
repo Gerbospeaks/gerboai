@@ -134,10 +134,10 @@ const GuestsListModal = ({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-white" />
+                <User className="w-6 h-6 text-gray-800" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-white">
+                <h2 className="text-xl font-semibold text-gray-800">
                   All Guests ({filteredGuests.length})
                 </h2>
                 <p className="text-blue-100 text-sm">
@@ -147,7 +147,7 @@ const GuestsListModal = ({
             </div>
             <button
               onClick={handleClose}
-              className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
+              className="text-gray-800 hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -167,11 +167,11 @@ const GuestsListModal = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="px-6 py-3 border-b bg-gray-300 flex justify-between items-center">
+        <div className="px-6 py-3 border-b bg-gray-800 flex justify-between items-center">
           <div className="flex gap-2">
             <button
               onClick={onAddNewGuest}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
             >
               <UserPlus className="w-4 h-4" />
               Add New Guest
@@ -211,7 +211,7 @@ const GuestsListModal = ({
               {!searchTerm && (
                 <button
                   onClick={onAddNewGuest}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <UserPlus className="w-4 h-4" />
                   Add First Guest
@@ -227,7 +227,7 @@ const GuestsListModal = ({
                 >
                   <div 
                     onClick={() => handleLoadGuest(guest)}
-                    className="p-5 cursor-pointer hover:bg-gray-300 transition-colors"
+                    className="p-5 cursor-pointer hover:bg-gray-800 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-start gap-3">
@@ -285,7 +285,7 @@ const GuestsListModal = ({
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="px-5 py-3 bg-gray-300 border-t flex justify-end gap-2">
+                  <div className="px-5 py-3 bg-gray-800 border-t flex justify-end gap-2">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -314,7 +314,7 @@ const GuestsListModal = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t bg-gray-300 text-center text-sm text-gray-600">
+        <div className="p-4 border-t bg-gray-800 text-center text-sm text-gray-600">
           Tip: Click on any guest card to load their details into the invoice form
         </div>
       </div>

@@ -266,7 +266,7 @@ Extract all available information. Use empty strings for missing text fields, em
                 }`}
                 title="Upload invoice image or PDF"
               >
-                <Image className="w-4 h-4 text-white" />
+                <Image className="w-4 h-4 text-gray-800" />
               </label>
             </div>
           </div>
@@ -307,7 +307,7 @@ Extract all available information. Use empty strings for missing text fields, em
             <button
               onClick={extractFromImage}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm"
             >
               {loading ? (
                 <>
@@ -344,7 +344,7 @@ Extract all available information. Use empty strings for missing text fields, em
         <button
           onClick={extractInvoiceData}
           disabled={loading || !input.trim()}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-900 text-white rounded-lg hover:from-gray-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-900 text-gray-800 rounded-lg hover:from-gray-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {loading ? (
             <>

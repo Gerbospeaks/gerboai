@@ -124,13 +124,13 @@ const GuestModal = ({ showModal, setShowModal, existingGuest, onGuestSaved , use
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-6 border-b flex items-center justify-between bg-blue-600 text-white">
+        <div className="p-6 border-b flex items-center justify-between bg-blue-600 text-gray-800">
           <h2 className="text-xl font-semibold">
             {existingGuest ? 'Edit Guest' : 'Add New Guest'}
           </h2>
           <button
             onClick={() => setShowModal(false)}
-            className="text-white hover:bg-blue-700 p-2 rounded-lg transition-colors"
+            className="text-gray-800 hover:bg-blue-700 p-2 rounded-lg transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
@@ -371,7 +371,7 @@ const GuestModal = ({ showModal, setShowModal, existingGuest, onGuestSaved , use
             <div className="flex gap-4 pt-4">
               <button
                 type="submit"
-                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-medium"
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-gray-800 py-3 rounded-lg hover:bg-blue-700 font-medium"
               >
                 <Save className="w-5 h-5" />
                 {existingGuest ? 'Update Guest' : createCheckIn ? 'Save Guest & Create Check-In' : 'Save Guest'}

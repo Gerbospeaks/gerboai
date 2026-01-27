@@ -32,7 +32,7 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-300"
+        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-800"
       >
         <FileText className="w-4 h-4" />
         <span className="hidden sm:inline">{templateNames[selectedTemplate] || 'Select Template'}</span>
@@ -57,7 +57,7 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
                 <button
                   key={templateId}
                   onClick={() => handleSelectTemplate(templateId)}
-                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-300 flex items-center justify-between ${
+                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-between ${
                     selectedTemplate === templateId ? 'bg-green-50 text-green-600' : 'text-gray-700'
                   }`}
                 >
@@ -160,7 +160,7 @@ export const DefaultTemplate = ({
     {/* Three Column Section */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-green-50 p-3 border border-green-200">
-        <div className="font-bold text-xs mb-2 bg-green-600 text-white px-2 py-1">INVOICE TO</div>
+        <div className="font-bold text-xs mb-2 bg-green-600 text-gray-800 px-2 py-1">INVOICE TO</div>
         <div className="text-xs space-y-1">
           <div>{customerName}</div>
           <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
@@ -170,7 +170,7 @@ export const DefaultTemplate = ({
       </div>
 
       <div className="bg-green-50 p-3 border border-green-200">
-        <div className="font-bold text-xs mb-2 bg-green-600 text-white px-2 py-1">BILL TO</div>
+        <div className="font-bold text-xs mb-2 bg-green-600 text-gray-800 px-2 py-1">BILL TO</div>
         <div className="text-xs space-y-1">
           <div>{customerName}</div>
           <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
@@ -180,7 +180,7 @@ export const DefaultTemplate = ({
       </div>
 
       <div className="bg-green-50 p-3 border border-green-200">
-        <div className="font-bold text-xs mb-2 bg-green-600 text-white px-2 py-1">PROPERTY DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-green-600 text-gray-800 px-2 py-1">PROPERTY DETAILS</div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Type:</span>
@@ -206,7 +206,7 @@ export const DefaultTemplate = ({
     <div className="mb-4">
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-green-600 text-white">
+          <tr className="bg-green-600 text-gray-800">
             <th className="text-left px-2 py-1 font-bold">ITEM DESCRIPTION</th>
             <th className="text-center px-2 py-1 font-bold">QUANTITY</th>
             <th className="text-right px-2 py-1 font-bold">UNIT PRICE</th>
@@ -237,7 +237,7 @@ export const DefaultTemplate = ({
           <span>VAT:</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-green-700 text-white px-2">
+        <div className="flex justify-between py-2 font-bold bg-green-700 text-gray-800 px-2">
           <span>TOTAL:</span>
           <span>R {total.toFixed(2)}</span>
         </div>
@@ -318,7 +318,7 @@ export const ClassicTemplate = (props) => (
 
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-green-50 p-3 border border-green-200">
-        <div className="font-bold text-xs mb-2 bg-green-700 text-white px-2 py-1">CUSTOMER</div>
+        <div className="font-bold text-xs mb-2 bg-green-700 text-gray-800 px-2 py-1">CUSTOMER</div>
         <div className="text-xs space-y-1">
           <div>{props.customerName}</div>
           <div>{props.customerAddress}</div>
@@ -327,7 +327,7 @@ export const ClassicTemplate = (props) => (
         </div>
       </div>
       <div className="bg-green-50 p-3 border border-green-200">
-        <div className="font-bold text-xs mb-2 bg-green-700 text-white px-2 py-1">PROPERTY</div>
+        <div className="font-bold text-xs mb-2 bg-green-700 text-gray-800 px-2 py-1">PROPERTY</div>
         <div className="text-xs space-y-1">
           <div>Type: {props.propertyType}</div>
           <div>Size: {props.propertySize}</div>
@@ -335,7 +335,7 @@ export const ClassicTemplate = (props) => (
         </div>
       </div>
       <div className="bg-green-50 p-3 border border-green-200">
-        <div className="font-bold text-xs mb-2 bg-green-700 text-white px-2 py-1">SERVICE INFO</div>
+        <div className="font-bold text-xs mb-2 bg-green-700 text-gray-800 px-2 py-1">SERVICE INFO</div>
         <div className="text-xs space-y-1">
           <div>Date: {new Date().toLocaleDateString()}</div>
           <div>Type: {props.serviceType}</div>
@@ -345,7 +345,7 @@ export const ClassicTemplate = (props) => (
 
     <table className="w-full text-xs mb-4">
       <thead>
-        <tr className="bg-green-700 text-white">
+        <tr className="bg-green-700 text-gray-800">
           <th className="text-left px-2 py-1 font-bold">Description</th>
           <th className="text-center px-2 py-1 font-bold">Qty</th>
           <th className="text-right px-2 py-1 font-bold">Unit Price</th>
@@ -374,7 +374,7 @@ export const ClassicTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-green-700 text-white px-2">
+        <div className="flex justify-between py-2 font-bold bg-green-700 text-gray-800 px-2">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
@@ -457,7 +457,7 @@ export const ModernTemplate = (props) => (
 
     <table className="w-full mb-6">
       <thead>
-        <tr className="bg-green-500 text-white">
+        <tr className="bg-green-500 text-gray-800">
           <th className="text-left px-4 py-3 rounded-l-lg">Description</th>
           <th className="text-center px-4 py-3">Qty</th>
           <th className="text-right px-4 py-3">Unit Price</th>
@@ -486,7 +486,7 @@ export const ModernTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 text-xl font-bold bg-green-500 text-white px-4 rounded-lg">
+        <div className="flex justify-between py-3 text-xl font-bold bg-green-500 text-gray-800 px-4 rounded-lg">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>

@@ -259,7 +259,7 @@ export const DefaultTemplate = ({
           <span>VAT (15%):</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-slate-600 text-white px-2">
+        <div className="flex justify-between py-2 font-bold bg-gray-50 text-gray-800 px-2">
           <span>TOTAL:</span>
           <span>R {total.toFixed(2)}</span>
         </div>
@@ -342,7 +342,7 @@ export const ClassicTemplate = (props) => (
 
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-gray-100 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-300 px-2 py-1">CUSTOMER</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1">CUSTOMER</div>
         <div className="text-xs space-y-1">
           <div>{props.customerName}</div>
           <div>{props.customerAddress}</div>
@@ -351,7 +351,7 @@ export const ClassicTemplate = (props) => (
         </div>
       </div>
       <div className="bg-gray-100 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-300 px-2 py-1">SERVICE LOCATION</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1">SERVICE LOCATION</div>
         <div className="text-xs space-y-1">
           <div>{props.serviceLocation || props.customerAddress}</div>
           <div>Type: {props.propertyType || 'Residential'}</div>
@@ -359,7 +359,7 @@ export const ClassicTemplate = (props) => (
         </div>
       </div>
       <div className="bg-gray-100 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-300 px-2 py-1">SERVICE INFO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1">SERVICE INFO</div>
         <div className="text-xs space-y-1">
           <div>Date: {props.serviceDate || new Date().toLocaleDateString()}</div>
           <div>Time: {props.serviceTime || '09:00 AM'}</div>
@@ -370,7 +370,7 @@ export const ClassicTemplate = (props) => (
 
     <table className="w-full text-xs mb-4">
       <thead>
-        <tr className="bg-gray-300">
+        <tr className="bg-gray-800">
           <th className="text-left px-2 py-1 font-bold">Service Description</th>
           <th className="text-center px-2 py-1 font-bold">Qty</th>
           <th className="text-right px-2 py-1 font-bold">Unit Price</th>
@@ -399,7 +399,7 @@ export const ClassicTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-slate-600 text-white px-2">
+        <div className="flex justify-between py-2 font-bold bg-gray-50 text-gray-800 px-2">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
@@ -484,7 +484,7 @@ export const ModernTemplate = (props) => (
 
     <table className="w-full mb-6">
       <thead>
-        <tr className="bg-blue-500 text-white">
+        <tr className="bg-blue-500 text-gray-800">
           <th className="text-left px-4 py-3 rounded-l-lg">Service Description</th>
           <th className="text-center px-4 py-3">Qty</th>
           <th className="text-right px-4 py-3">Unit Price</th>
@@ -513,7 +513,7 @@ export const ModernTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 text-xl font-bold bg-blue-500 text-white px-4 rounded-lg">
+        <div className="flex justify-between py-3 text-xl font-bold bg-blue-500 text-gray-800 px-4 rounded-lg">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
@@ -615,7 +615,7 @@ export const ElegantTemplate = (props) => (
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-3 font-bold text-lg bg-purple-900 text-white px-4">
+          <div className="flex justify-between py-3 font-bold text-lg bg-purple-900 text-gray-800 px-4">
             <span>TOTAL:</span>
             <span>R {props.total.toFixed(2)}</span>
           </div>
@@ -670,7 +670,7 @@ export const ResidentialTemplate = (props) => (
           </div>
           <div className="text-right">
             <div className="text-5xl font-black text-green-500 mb-4 italic">INVOICE</div>
-            <div className="bg-green-500 text-white p-4 rounded space-y-1">
+            <div className="bg-green-500 text-gray-800 p-4 rounded space-y-1">
               <div className="text-sm font-bold">#{props.jobCardNumber}</div>
               <div className="text-sm">{new Date().toLocaleDateString()}</div>
             </div>
@@ -701,7 +701,7 @@ export const ResidentialTemplate = (props) => (
 
       <table className="w-full mb-6 shadow-sm">
         <thead>
-          <tr className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
+          <tr className="bg-gradient-to-r from-green-500 to-blue-500 text-gray-800">
             <th className="text-left px-4 py-3 font-black">CLEANING SERVICE</th>
             <th className="text-center px-4 py-3 font-black">QTY</th>
             <th className="text-right px-4 py-3 font-black">RATE</th>
@@ -730,7 +730,7 @@ export const ResidentialTemplate = (props) => (
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-3 text-xl font-black bg-gradient-to-r from-green-500 to-blue-500 text-white px-4 rounded-lg">
+          <div className="flex justify-between py-3 text-xl font-black bg-gradient-to-r from-green-500 to-blue-500 text-gray-800 px-4 rounded-lg">
             <span>TOTAL:</span>
             <span>R {props.total.toFixed(2)}</span>
           </div>
@@ -818,7 +818,7 @@ export const CommercialTemplate = (props) => (
     </div>
 
     <div className="mb-6">
-      <div className="bg-indigo-600 text-white px-4 py-2 font-bold">SERVICES PROVIDED</div>
+      <div className="bg-indigo-600 text-gray-800 px-4 py-2 font-bold">SERVICES PROVIDED</div>
       <table className="w-full">
         <thead>
           <tr className="bg-indigo-50 border-b-2 border-indigo-600">
@@ -851,7 +851,7 @@ export const CommercialTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 text-xl font-bold bg-indigo-600 text-white px-4 rounded">
+        <div className="flex justify-between py-3 text-xl font-bold bg-indigo-600 text-gray-800 px-4 rounded">
           <span>TOTAL DUE:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>

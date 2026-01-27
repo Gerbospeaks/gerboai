@@ -602,7 +602,8 @@ const handleAIDataExtracted = (extractedData) => {
 
   return (
     <div className="flex h-screen bg-gray-300">
-    {sidebarOpen && (
+   {/* Mobile Sidebar Backdrop */}
+{sidebarOpen && (
   <div
     className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
     onClick={() => setSidebarOpen(false)}
@@ -613,20 +614,20 @@ const handleAIDataExtracted = (extractedData) => {
 <div
   className={`${
     sidebarOpen ? "hidden" : "block"
-  } fixed z-40 w-16 bg-slate-600 border-r border-gray-200 h-full print:hidden transition-all duration-300`}
+  } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
 >
   <div className="flex flex-col items-center py-4 space-y-4">
     {/* Toggle Button */}
     <button
       onClick={() => setSidebarOpen(true)}
-      className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors"
+      className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
       title="Expand Sidebar"
     >
       <ChevronRight className="w-6 h-6" />
     </button>
 
     {/* Logo */}
-    <div className="w-10 h-10">
+    <div className="w-10 h-10 mb-2">
       <img
         src={logo}
         alt="Logo"
@@ -634,12 +635,12 @@ const handleAIDataExtracted = (extractedData) => {
       />
     </div>
 
-    <div className="w-full border-t border-slate-500"></div>
+    <div className="w-10 border-t border-slate-600"></div>
 
     {/* Icon Navigation */}
-    <div className="flex flex-col items-center space-y-3 w-full">
+    <div className="flex flex-col items-center space-y-3 w-full px-2">
       <button
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
         title="Home"
       >
         <Home className="w-5 h-5" />
@@ -647,21 +648,21 @@ const handleAIDataExtracted = (extractedData) => {
       
       <button
         onClick={() => setShowSettings(true)}
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
         title="Settings"
       >
         <Settings className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
         title="School Overview"
       >
         <TrendingUp className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
         title="Report Cards"
       >
         <ClipboardList className="w-5 h-5" />
@@ -669,49 +670,49 @@ const handleAIDataExtracted = (extractedData) => {
 
       <button
         onClick={() => setActiveView("templates")}
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
         title="Templates"
       >
         <FileText className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
         title="Students"
       >
         <Users className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
         title="Attendance"
       >
         <Calendar className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
         title="Curriculum"
       >
         <BookOpen className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
         title="Assessments"
       >
         <Award className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
         title="Analytics"
       >
         <BarChart3 className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
         title="Staff"
       >
         <UserCheck className="w-5 h-5" />
@@ -721,7 +722,7 @@ const handleAIDataExtracted = (extractedData) => {
 
   {/* User Icon at Bottom */}
   <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-    <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+    <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
       <School className="w-6 h-6 text-white" />
     </div>
   </div>
@@ -731,21 +732,21 @@ const handleAIDataExtracted = (extractedData) => {
 <div
   className={`${
     sidebarOpen ? "translate-x-0" : "-translate-x-full"
-  } fixed z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+  } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl`}
 >
   <div className="p-4">
     <div className="flex items-center justify-between mb-8">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-3">
         <img
           src={logo}
-          alt="Business Logo"
+          alt="School Logo"
           className="w-16 h-12 object-contain rounded-lg"
         />
       </div>
       {/* Close Button */}
       <button
         onClick={() => setSidebarOpen(false)}
-        className="p-1.5 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors"
+        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
         title="Collapse Sidebar"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -753,125 +754,142 @@ const handleAIDataExtracted = (extractedData) => {
     </div>
 
     <nav className="space-y-1">
-      <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
+      <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
         <Home className="w-5 h-5" />
-        <span>Home</span>
+        <span className="font-medium">Home</span>
       </div>
       <div
         onClick={() => setShowSettings(true)}
-        className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer"
+        className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
         <Settings className="w-5 h-5" />
-        <span>Settings</span>
+        <span className="font-medium">Settings</span>
       </div>
 
-      <div className="pt-4">
-        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
+      <div className="pt-4 mt-4 border-t border-slate-700/50">
+        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200">
           <TrendingUp className="w-5 h-5" />
-          <span>School Overview</span>
+          <span className="font-medium">School Overview</span>
         </div>
 
         {/* Report Cards Section */}
         <div className="mt-2">
-          <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
+          <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <ClipboardList className="w-5 h-5" />
-              <span>Report Cards</span>
+              <span className="font-medium">Report Cards</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
 
-          <div className="ml-8 mt-1 space-y-1">
+          <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
             <div
               onClick={() => setActiveView("reportCard")}
-              className="px-3 py-2 text-sm text-white bg-gray-500 rounded-lg cursor-pointer"
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
               Create Report Card
             </div>
             <div
               onClick={() => setShowReportsList(!showReportsList)}
-              className="px-3 py-2 text-sm text-gray-400 hover:bg-gray-500 rounded-lg cursor-pointer"
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
-              All Reports ({savedReports.length})
+              <div className="flex items-center justify-between">
+                <span>All Reports</span>
+                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                  {savedReports.length}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
         <div
           onClick={() => setActiveView("templates")}
-          className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+          className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
         >
           <FileText className="w-5 h-5" />
-          <span>Invoice Templates</span>
+          <span className="font-medium">Templates</span>
         </div>
 
         {/* Students Section */}
-        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer mt-2">
-          <Users className="w-5 h-5" />
-          <span>Students</span>
-        </div>
-        <div className="ml-8 mt-1 space-y-1">
-          <div
-            onClick={handleAddNewStudent}
-            className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-500 rounded-lg cursor-pointer mt-2"
-          >
-            <span>Add Student</span>
+        <div className="mt-2">
+          <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+            <div className="flex items-center space-x-3">
+              <Users className="w-5 h-5" />
+              <span className="font-medium">Students</span>
+            </div>
+            <ChevronDown className="w-4 h-4" />
           </div>
-          <div
-            onClick={() => setShowStudentsListModal(true)}
-            className="px-3 py-2 text-sm text-gray-400 hover:bg-gray-500 rounded-lg cursor-pointer"
-          >
-            All Students ({savedStudents.length})
+
+          <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+            <div
+              onClick={handleAddNewStudent}
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+            >
+              Add Student
+            </div>
+            <div
+              onClick={() => setShowStudentsListModal(true)}
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+            >
+              <div className="flex items-center justify-between">
+                <span>All Students</span>
+                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                  {savedStudents.length}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
+        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Calendar className="w-5 h-5" />
-          <span>Attendance</span>
+          <span className="font-medium">Attendance</span>
         </div>
 
-        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
+        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <BookOpen className="w-5 h-5" />
-          <span>Curriculum</span>
+          <span className="font-medium">Curriculum</span>
         </div>
 
-        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
+        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Award className="w-5 h-5" />
-          <span>Assessments</span>
+          <span className="font-medium">Assessments</span>
         </div>
 
-        <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
+        <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <BarChart3 className="w-5 h-5" />
-            <span>Analytics</span>
+            <span className="font-medium">Analytics</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
 
-        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer">
+        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <UserCheck className="w-5 h-5" />
-          <span>Staff</span>
+          <span className="font-medium">Staff</span>
         </div>
       </div>
     </nav>
   </div>
 
-  <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-indigo-700 bg-gray-500">
+  <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm">
     <div className="flex items-center space-x-3">
-      <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+      <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
         <School className="w-6 h-6 text-white" />
       </div>
       <div className="flex-1">
-        <div className="text-sm font-medium text-white">
+        <div className="text-sm font-semibold text-white">
           {user?.name || "Teacher"}
         </div>
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-slate-400">
           {user?.email || "teacher@school.com"}
         </div>
       </div>
       <button
         onClick={handleLogout}
-        className="text-gray-400 hover:text-white"
+        className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 rounded-lg transition-all duration-200"
+        title="Logout"
       >
         <LogOut className="w-4 h-4" />
       </button>
@@ -880,7 +898,7 @@ const handleAIDataExtracted = (extractedData) => {
 </div>
 
       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
          <div className="sticky top-0 z-40 flex flex-col">
         <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
@@ -905,40 +923,40 @@ const handleAIDataExtracted = (extractedData) => {
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
               <button
                 onClick={handleSaveReport}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700"
               >
                 Save Report
               </button>
 
               <button
                 onClick={handleNewReport}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
               >
                 <Plus className="w-4 h-4" />
                 New
               </button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700"
               >
                 Save as PDF
               </button>
 
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <Printer className="w-4 h-4" />
                 Print
               </button>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors"
               >
                 Log Out
               </button>
@@ -946,7 +964,7 @@ const handleAIDataExtracted = (extractedData) => {
 
             <button
               onClick={handleLogout}
-              className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
+              className="lg:hidden p-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors print:hidden"
             >
               <span className="text-sm font-medium">Logout</span>
             </button>
@@ -955,20 +973,20 @@ const handleAIDataExtracted = (extractedData) => {
 
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
           <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
             </button>
             <button
               onClick={handleSavePDF}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap text-sm"
             >
               <Download className="w-4 h-4" />
               <span>Save PDF</span>
             </button>
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
             >
               <Printer className="w-4 h-4" />
               <span>Print</span>
@@ -976,7 +994,7 @@ const handleAIDataExtracted = (extractedData) => {
           </div>
         </div>
 
-        <div className="bg-indigo-950 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+        <div className="bg-gray-800 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
             {["ReportCard", "Attendance", "Behavior", "Notes"].map((tab) => (
               <button
@@ -984,7 +1002,7 @@ const handleAIDataExtracted = (extractedData) => {
                 onClick={() => setActiveTab(tab)}
                 className={`py-4 border-b-2 ${
                   activeTab === tab
-                    ? "border-yellow-400 text-white"
+                    ? "border-yellow-400 text-gray-800"
                     : "border-transparent text-gray-400 hover:text-gray-200"
                 }`}
               >
@@ -1022,7 +1040,7 @@ const handleAIDataExtracted = (extractedData) => {
                             className="w-24 h-24 object-contain border rounded-lg"
                           />
                         ) : (
-                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
+                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
                             <Upload className="w-8 h-8 text-gray-400" />
                           </div>
                         )}
@@ -1037,7 +1055,7 @@ const handleAIDataExtracted = (extractedData) => {
                           />
                           <label
                             htmlFor="logo-upload"
-                            className="inline-block px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
+                            className="inline-block px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 cursor-pointer"
                           >
                             {schoolInfo.logoUrl
                               ? "Change Logo"
@@ -1331,7 +1349,7 @@ const handleAIDataExtracted = (extractedData) => {
         </div>
 
         {/* Preview */}
-        <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
+        <div className="mt-4 p-6 bg-gray-800 rounded-lg border-2 border-dashed border-gray-300">
           <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
           <div className="flex justify-center">
             <SignatureStamp 
@@ -1349,7 +1367,7 @@ const handleAIDataExtracted = (extractedData) => {
 </div>
                     <button
                       onClick={handleSaveSchoolInfo}
-                      className="w-full bg-gray-500 text-white py-3 rounded-lg hover:bg-indigo-700"
+                      className="w-full bg-gray-500 text-gray-800 py-3 rounded-lg hover:bg-indigo-700"
                     >
                       Save School Information
                     </button>
@@ -1399,7 +1417,7 @@ const handleAIDataExtracted = (extractedData) => {
                         <div
                           key={report.id}
                           onClick={() => loadReport(report)}
-                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1452,7 +1470,7 @@ const handleAIDataExtracted = (extractedData) => {
           <>
           <button
             onClick={() => setShowReportCard(!showReportCard)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showReportCard ? "Hide Report Card" : "View Report Card"}
@@ -1552,7 +1570,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={studentName}
                       onChange={(e) => setStudentName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1561,7 +1579,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={studentId}
                       onChange={(e) => setStudentId(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1570,7 +1588,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={gradeLevel}
                       onChange={(e) => setGradeLevel(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1579,7 +1597,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="date"
                       value={dateOfBirth}
                       onChange={(e) => setDateOfBirth(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -1600,7 +1618,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={parentName}
                       onChange={(e) => setParentName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1609,7 +1627,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="email"
                       value={parentEmail}
                       onChange={(e) => setParentEmail(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1618,7 +1636,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="tel"
                       value={parentPhone}
                       onChange={(e) => setParentPhone(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div className="col-span-1 sm:col-span-2">
@@ -1627,7 +1645,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={parentAddress}
                       onChange={(e) => setParentAddress(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -1647,7 +1665,7 @@ const handleAIDataExtracted = (extractedData) => {
                     <select
                       value={term}
                       onChange={(e) => setTerm(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="Term 1">Term 1</option>
                       <option value="Term 2">Term 2</option>
@@ -1661,7 +1679,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={academicYear}
                       onChange={(e) => setAcademicYear(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -1705,7 +1723,7 @@ const handleAIDataExtracted = (extractedData) => {
 
                   <button
                     onClick={handleAddSubject}
-                    className="bg-gray-500 text-white rounded-lg px-4 py-2 hover:bg-indigo-700 flex items-center justify-center gap-2"
+                    className="bg-gray-500 text-gray-800 rounded-lg px-4 py-2 hover:bg-indigo-700 flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Add
@@ -1725,7 +1743,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="number"
                       value={attendanceDays}
                       onChange={(e) => setAttendanceDays(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1734,7 +1752,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="number"
                       value={attendancePresent}
                       onChange={(e) => setAttendancePresent(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -1749,7 +1767,7 @@ const handleAIDataExtracted = (extractedData) => {
                   value={teacherComments}
                   onChange={(e) => setTeacherComments(e.target.value)}
                   rows="4"
-                  className="w-full px-4 py-2 border rounded"
+                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter teacher comments about the student's performance..."
                 />
               </div>
@@ -1829,7 +1847,7 @@ const handleAIDataExtracted = (extractedData) => {
                 
                 nav,
                 [class*="sidebar"],
-                [class*="bg-indigo-950"],
+                [class*="bg-gray-800"],
                 button:not([style]) {
                   display: none !important;
                 }

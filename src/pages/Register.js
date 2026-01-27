@@ -77,7 +77,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
 };
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat" style={{backgroundImage: `url(${logon})`, backgroundAttachment: 'fixed', backgroundBlendMode: 'overlay'}}>
-      <div className="max-w-md w-full bg-slate-600 rounded-xl shadow-2xl p-8">
+      <div className="max-w-md w-full bg-gray-600 rounded-xl shadow-2xl p-8">
          <div className="flex items-center space-x-2 mb-8">
                               <img
                                   src={logo}
@@ -85,7 +85,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
                                   className="w-16 h-12 object-contain rounded-lg"
                                 />
                           </div>
-        <h2 className="text-3xl font-bold text-white mb-6 text-center">Create Account</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Create Account</h2>
         
         {error && (
           <div className="bg-red-500 bg-opacity-20 border border-red-500 text-red-200 px-4 py-3 rounded mb-4">
@@ -106,7 +106,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 bg-gray-700 text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your full name"
               disabled={isSubmitting}
             />
@@ -118,7 +118,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 bg-gray-700 text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your email"
               disabled={isSubmitting}
             />
@@ -130,7 +130,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 bg-gray-700 text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter password"
               disabled={isSubmitting}
             />
@@ -142,7 +142,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 bg-gray-700 text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Confirm password"
               disabled={isSubmitting}
             />
@@ -153,7 +153,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
             <select
               value={selectedDashboard}
               onChange={(e) => setSelectedDashboard(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 bg-gray-700 text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isSubmitting}
             >
               <option value="">-- Choose an Industry --</option>
@@ -170,7 +170,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
     type="text"
     value={companyName}
     onChange={(e) => setCompanyName(e.target.value)}
-    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg"
+    className="w-full px-4 py-2 bg-gray-700 text-gray-800 rounded-lg"
   />
 </div>
 
@@ -179,7 +179,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
   <textarea
     value={companyAddress}
     onChange={(e) => setCompanyAddress(e.target.value)}
-    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg"
+    className="w-full px-4 py-2 bg-gray-700 text-gray-800 rounded-lg"
   />
 </div>
 
@@ -196,7 +196,7 @@ const [companyLogo, setCompanyLogo] = useState(null);
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-slate-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+            className="w-full bg-gray-50 hover:bg-blue-700 text-gray-800 font-semibold py-3 rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Creating Account...' : 'Create Account'}
           </button>

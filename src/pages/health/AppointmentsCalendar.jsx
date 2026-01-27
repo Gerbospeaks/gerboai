@@ -372,7 +372,7 @@ const AppointmentsCalendar = ({ user }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-6 text-white">
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-6 text-gray-800">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2 flex items-center space-x-3">
@@ -396,7 +396,7 @@ const AppointmentsCalendar = ({ user }) => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
             >
               <Plus className="w-4 h-4" />
               <span>New Appointment</span>
@@ -404,7 +404,7 @@ const AppointmentsCalendar = ({ user }) => {
 
             <button
               onClick={() => setShowAiPanel(!showAiPanel)}
-              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-gray-800 rounded-lg hover:bg-purple-700"
             >
               <Bot className="w-4 h-4" />
               <span>AI Receptionist ({aiReceptionistData.length})</span>
@@ -412,7 +412,7 @@ const AppointmentsCalendar = ({ user }) => {
 
             <button
               onClick={loadAppointments}
-              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300"
+              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -425,8 +425,8 @@ const AppointmentsCalendar = ({ user }) => {
                 onClick={() => setViewMode(mode)}
                 className={`px-4 py-2 rounded-lg capitalize ${
                   viewMode === mode
-                    ? "bg-slate-600 text-white"
-                    : "border border-gray-300 hover:bg-gray-300"
+                    ? "bg-gray-50 text-gray-800"
+                    : "border border-gray-300 hover:bg-gray-800"
                 }`}
               >
                 {mode}
@@ -504,7 +504,7 @@ const AppointmentsCalendar = ({ user }) => {
                   </div>
                   <button
                     onClick={() => handleImportFromAi(booking)}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    className="px-4 py-2 bg-purple-600 text-gray-800 rounded-lg hover:bg-purple-700"
                   >
                     Import
                   </button>
@@ -534,7 +534,7 @@ const AppointmentsCalendar = ({ user }) => {
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300"
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800"
               >
                 Today
               </button>
@@ -578,7 +578,7 @@ const AppointmentsCalendar = ({ user }) => {
                       ? "bg-blue-50 border-blue-500"
                       : isSelected
                       ? "bg-blue-100 border-blue-400"
-                      : "hover:bg-gray-300 border-gray-200"
+                      : "hover:bg-gray-800 border-gray-200"
                   }`}
                 >
                   <div
@@ -591,7 +591,7 @@ const AppointmentsCalendar = ({ user }) => {
                   {dayAppointments.slice(0, 2).map((apt) => (
                     <div
                       key={apt.id}
-                      className="text-xs bg-slate-600 text-white rounded px-1 py-0.5 mb-1 truncate"
+                      className="text-xs bg-gray-50 text-gray-800 rounded px-1 py-0.5 mb-1 truncate"
                     >
                       {apt.time} {apt.patientName}
                     </div>
@@ -624,7 +624,7 @@ const AppointmentsCalendar = ({ user }) => {
             </h2>
             <button
               onClick={() => setViewMode("month")}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300"
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800"
             >
               Back to Month
             </button>
@@ -644,7 +644,7 @@ const AppointmentsCalendar = ({ user }) => {
                     setSelectedAppointment(apt);
                     setShowDetailsModal(true);
                   }}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-300 cursor-pointer"
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-800 cursor-pointer"
                 >
                   <div className="flex items-center space-x-4">
                     <div className="w-16 text-center">
@@ -884,7 +884,7 @@ const AppointmentsCalendar = ({ user }) => {
 
                 <button
                   onClick={handleAddAppointment}
-                  className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                  className="w-full bg-gray-50 text-gray-800 py-3 rounded-lg hover:bg-blue-700"
                 >
                   Create Appointment
                 </button>
@@ -898,18 +898,18 @@ const AppointmentsCalendar = ({ user }) => {
       {showDetailsModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+            <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-purple-600 to-blue-600 text-gray-800">
               <h2 className="text-xl font-semibold">Appointment Details</h2>
               <button
                 onClick={() => setShowDetailsModal(false)}
-                className="text-white hover:text-gray-200 text-2xl"
+                className="text-gray-800 hover:text-gray-200 text-2xl"
               >
                 ✕
               </button>
             </div>
 
             <div className="overflow-auto p-6 space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-300 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
                 <div>
                   <div className="text-2xl font-bold">
                     {selectedAppointment.patientName}
@@ -992,7 +992,7 @@ const AppointmentsCalendar = ({ user }) => {
                       status: "confirmed",
                     })
                   }
-                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
                 >
                   <CheckCircle className="w-4 h-4" />
                   <span>Confirm</span>
@@ -1004,7 +1004,7 @@ const AppointmentsCalendar = ({ user }) => {
                       status: "completed",
                     })
                   }
-                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
                 >
                   <CheckCircle className="w-4 h-4" />
                   <span>Complete</span>
@@ -1016,7 +1016,7 @@ const AppointmentsCalendar = ({ user }) => {
                       status: "cancelled",
                     })
                   }
-                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700"
                 >
                   <XCircle className="w-4 h-4" />
                   <span>Cancel</span>
@@ -1026,7 +1026,7 @@ const AppointmentsCalendar = ({ user }) => {
                   onClick={() =>
                     handleDeleteAppointment(selectedAppointment.id)
                   }
-                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700"
                 >
                   <Trash2 className="w-4 h-4" />
                   <span>Delete</span>

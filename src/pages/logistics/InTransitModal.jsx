@@ -150,7 +150,7 @@ const InTransitModal = ({ isOpen, onClose, user, onViewDetails, onPrintLabel }) 
       <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         
         {/* Header */}
-        <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-purple-600 text-gray-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Truck className="w-8 h-8" />
@@ -161,7 +161,7 @@ const InTransitModal = ({ isOpen, onClose, user, onViewDetails, onPrintLabel }) 
             </div>
             <button
               onClick={onClose}
-              className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors"
+              className="text-gray-800 hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
@@ -330,20 +330,20 @@ const InTransitModal = ({ isOpen, onClose, user, onViewDetails, onPrintLabel }) 
                       <div className="flex gap-2">
                         <button
                           onClick={() => onViewDetails(waybill)}
-                          className="flex items-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                          className="flex items-center gap-1 px-3 py-2 bg-blue-600 text-gray-800 rounded-lg hover:bg-blue-700 text-sm"
                         >
                           <Eye className="w-4 h-4" />
                           View
                         </button>
                         <button
                           onClick={() => onPrintLabel(waybill)}
-                          className="flex items-center gap-1 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                          className="flex items-center gap-1 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 text-sm"
                         >
                           <Printer className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleMarkDelivered(waybill.id)}
-                          className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                          className="flex items-center gap-1 px-3 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 text-sm"
                         >
                           <CheckCircle className="w-4 h-4" />
                           Deliver
@@ -364,7 +364,7 @@ const InTransitModal = ({ isOpen, onClose, user, onViewDetails, onPrintLabel }) 
           </div>
           <button
             onClick={() => loadInTransitWaybills()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+            className="px-4 py-2 bg-blue-600 text-gray-800 rounded-lg hover:bg-blue-700 text-sm"
           >
             Refresh
           </button>

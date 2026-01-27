@@ -258,14 +258,14 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-7xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+        <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 text-gray-800">
           <div>
             <h2 className="text-2xl font-bold">Check-In / Check-Out Management</h2>
             <p className="text-sm text-blue-100 mt-1">Manage guest arrivals and departures</p>
           </div>
           <button
             onClick={() => setShowModal(false)}
-            className="text-white hover:bg-blue-800 p-2 rounded-lg transition-colors"
+            className="text-gray-800 hover:bg-blue-800 p-2 rounded-lg transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
@@ -338,7 +338,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
               </div>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Plus className="w-5 h-5" />
                 Add Check-In
@@ -447,7 +447,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                       {checkIn.status === 'pending' && (
                         <button
                           onClick={() => handleCheckIn(checkIn)}
-                          className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 text-sm transition-colors"
                         >
                           <CheckCircle className="w-4 h-4" />
                           Check In
@@ -456,7 +456,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                       {checkIn.status === 'checkedin' && (
                         <button
                           onClick={() => handleCheckOut(checkIn)}
-                          className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-gray-800 rounded-lg hover:bg-blue-700 text-sm transition-colors"
                         >
                           <UserX className="w-4 h-4" />
                           Check Out
@@ -698,7 +698,7 @@ const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSav
             <div className="flex gap-4 pt-4">
               <button
                 type="submit"
-                className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-medium"
+                className="flex-1 bg-blue-600 text-gray-800 py-3 rounded-lg hover:bg-blue-700 font-medium"
               >
                 {existingCheckIn ? 'Update Check-In' : 'Add Check-In'}
               </button>

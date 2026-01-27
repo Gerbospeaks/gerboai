@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
-import logo from '../../assets/img/solidflo-logo.png';
+import logo from '../../assets/img/solidflo.png';
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates"; 
@@ -579,7 +579,7 @@ const handleAIDataExtracted = (extractedData) => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-300">
+    <div className="flex h-screen bg-gray-800">
     {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
@@ -592,7 +592,7 @@ const handleAIDataExtracted = (extractedData) => {
       <div
         className={`${
           sidebarOpen ? "hidden" : "block"
-        } fixed z-40 w-16 bg-slate-600 border-r border-gray-200 h-full print:hidden transition-all duration-300`}
+        } fixed z-40 w-16 bg-gray-50 border-r border-gray-200 h-full print:hidden transition-all duration-300`}
       >
         <div className="flex flex-col items-center py-4 space-y-4">
           {/* Toggle Button */}
@@ -721,7 +721,7 @@ const handleAIDataExtracted = (extractedData) => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed z-50 w-64 bg-gray-50 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center justify-between mb-8">
@@ -779,7 +779,7 @@ const handleAIDataExtracted = (extractedData) => {
                       handleNewInvoice();
                       setActiveView("invoice");
                     }}
-                    className="px-3 py-2 text-sm text-white bg-blue-800 rounded-lg cursor-pointer"
+                    className="px-3 py-2 text-sm text-gray-800 bg-blue-800 rounded-lg cursor-pointer"
                   >
                     Create Invoice
                   </div>
@@ -866,9 +866,9 @@ const handleAIDataExtracted = (extractedData) => {
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-700 bg-blue-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
+            <div className="w-10 h-10 bg-gray-50 rounded-full"></div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-white">
+              <div className="text-sm font-medium text-gray-800">
                 {user?.name || "User"}
               </div>
               <div className="text-xs text-gray-400">
@@ -877,7 +877,7 @@ const handleAIDataExtracted = (extractedData) => {
             </div>
             <button
               onClick={handleLogout}
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-gray-800"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -911,50 +911,50 @@ const handleAIDataExtracted = (extractedData) => {
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800">
                 <CheckSquare className="w-4 h-4" />
                 <span>Mark Paid</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
               <button
                 onClick={handleSaveInvoice}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
               >
                 Save Invoice
               </button>
 
               <button
                 onClick={handleNewInvoice}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
               >
                 <Plus className="w-4 h-4" />
                 New
               </button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
               >
                 Save as PDF
               </button>
 
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <Printer className="w-4 h-4" />
                 Print
               </button>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors"
               >
                 Log Out
               </button>
@@ -963,7 +963,7 @@ const handleAIDataExtracted = (extractedData) => {
             {/* Mobile Action Buttons */}
             <button
               onClick={handleLogout}
-              className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
+              className="lg:hidden p-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors print:hidden"
             >
               <span className="text-sm font-medium">Logout</span>
             </button>
@@ -973,28 +973,28 @@ const handleAIDataExtracted = (extractedData) => {
         {/* Mobile Action Buttons Bar */}
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
           <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
               <CheckSquare className="w-4 h-4" />
               <span>Mark Paid</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
               <Edit className="w-4 h-4" />
               <span>Edit</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
+            <button className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
               <span>Send</span>
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
             >
               <Download className="w-4 h-4" />
               <span>Save PDF</span>
             </button>
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
             >
               <Printer className="w-4 h-4" />
               <span>Print</span>
@@ -1010,7 +1010,7 @@ const handleAIDataExtracted = (extractedData) => {
                 onClick={() => setActiveTab(tab)}
                 className={`py-4 border-b-2 ${
                   activeTab === tab
-                    ? "border-blue-400 text-white"
+                    ? "border-blue-400 text-gray-800"
                     : "border-transparent text-gray-400 hover:text-gray-200"
                 }`}
               >
@@ -1050,7 +1050,7 @@ const handleAIDataExtracted = (extractedData) => {
                             className="w-24 h-24 object-contain border rounded-lg"
                           />
                         ) : (
-                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
+                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
                             <Upload className="w-8 h-8 text-gray-400" />
                           </div>
                         )}
@@ -1065,7 +1065,7 @@ const handleAIDataExtracted = (extractedData) => {
                           />
                           <label
                             htmlFor="logo-upload"
-                            className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer"
+                            className="inline-block px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer"
                           >
                             {businessInfo.logoUrl
                               ? "Change Logo"
@@ -1341,7 +1341,7 @@ const handleAIDataExtracted = (extractedData) => {
         </div>
 
         {/* Preview */}
-        <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
+        <div className="mt-4 p-6 bg-gray-800 rounded-lg border-2 border-dashed border-gray-300">
           <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
           <div className="flex justify-center">
             <SignatureStamp 
@@ -1359,7 +1359,7 @@ const handleAIDataExtracted = (extractedData) => {
 </div>
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-gray-50 text-gray-800 py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Firm Information
                     </button>
@@ -1408,7 +1408,7 @@ const handleAIDataExtracted = (extractedData) => {
                         <div
                           key={invoice.id}
                           onClick={() => loadInvoice(invoice)}
-                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1466,7 +1466,7 @@ const handleAIDataExtracted = (extractedData) => {
           {/* Mobile View Invoice Button */}
           <button
             onClick={() => setShowInvoice(!showInvoice)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showInvoice ? "Hide Invoice" : "View Invoice"}
@@ -1561,7 +1561,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1570,7 +1570,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={clientId}
                       onChange={(e) => setClientId(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1579,7 +1579,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={clientEmail}
                       onChange={(e) => setClientEmail(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -1588,7 +1588,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div className="col-span-1 sm:col-span-2">
@@ -1597,7 +1597,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={clientAddress}
                       onChange={(e) => setClientAddress(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -1618,7 +1618,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={caseType}
                       onChange={(e) => setCaseType(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="e.g., Commercial Litigation"
                     />
                   </div>
@@ -1628,7 +1628,7 @@ const handleAIDataExtracted = (extractedData) => {
                       type="text"
                       value={caseNumber}
                       onChange={(e) => setCaseNumber(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="e.g., CASE-2026-001"
                     />
                   </div>
@@ -1637,7 +1637,7 @@ const handleAIDataExtracted = (extractedData) => {
                     <textarea
                       value={matterDescription}
                       onChange={(e) => setMatterDescription(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       rows="3"
                       placeholder="Brief description of the legal matter"
                     />
@@ -1693,7 +1693,7 @@ const handleAIDataExtracted = (extractedData) => {
 
                   <button
                     onClick={handleAddItem}
-                    className="bg-slate-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                    className="bg-gray-50 text-gray-800 rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Add

@@ -6,7 +6,7 @@ import Templates from "./Templates";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 
-import logo from '../../assets/img/solidflo-logo.png';
+import logo from '../../assets/img/solidflo.png';
 import {
   getFirestore,
   collection,
@@ -350,11 +350,11 @@ const [useAI, setUseAI] = useState(false);
   };
 
   return (
-    <div className="flex h-screen bg-gray-300">
+    <div className="flex h-screen bg-gray-800">
     {/* Sidebar Toggle Button - Works on both mobile and desktop */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed top-4 left-4 z-50 p-2 bg-slate-600 text-white rounded-lg shadow-lg hover:bg-slate-700 transition-colors print:hidden"
+        className="fixed top-4 left-4 z-50 p-2 bg-gray-50 text-gray-800 rounded-lg shadow-lg hover:bg-slate-700 transition-colors print:hidden"
       >
         {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
@@ -363,7 +363,7 @@ const [useAI, setUseAI] = useState(false);
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed z-40 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+        } fixed z-40 w-64 bg-gray-50 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -378,7 +378,7 @@ const [useAI, setUseAI] = useState(false);
             <div
               onClick={() => setActiveTab('Overview')}
               className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
-                activeTab === 'Overview' ? 'bg-gray-500 text-white' : 'text-gray-300 hover:bg-gray-500'
+                activeTab === 'Overview' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
               }`}
             >
               <Home className="w-5 h-5" />
@@ -397,7 +397,7 @@ const [useAI, setUseAI] = useState(false);
               <div
                 onClick={() => setActiveTab('Products')}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
-                  activeTab === 'Products' ? 'bg-gray-500 text-white' : 'text-gray-300 hover:bg-gray-500'
+                  activeTab === 'Products' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
                 }`}
               >
                 <Package className="w-5 h-5" />
@@ -407,7 +407,7 @@ const [useAI, setUseAI] = useState(false);
               <div
                 onClick={() => setActiveTab('Orders')}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
-                  activeTab === 'Orders' ? 'bg-gray-500 text-white' : 'text-gray-300 hover:bg-gray-500'
+                  activeTab === 'Orders' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
                 }`}
               >
                 <ShoppingCart className="w-5 h-5" />
@@ -417,7 +417,7 @@ const [useAI, setUseAI] = useState(false);
               <div
                 onClick={() => setActiveTab('Customers')}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
-                  activeTab === 'Customers' ? 'bg-gray-500 text-white' : 'text-gray-300 hover:bg-gray-500'
+                  activeTab === 'Customers' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
                 }`}
               >
                 <Users className="w-5 h-5" />
@@ -434,7 +434,7 @@ const [useAI, setUseAI] = useState(false);
               <div
                 onClick={() => setActiveTab('Analytics')}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
-                  activeTab === 'Analytics' ? 'bg-gray-500 text-white' : 'text-gray-300 hover:bg-gray-500'
+                  activeTab === 'Analytics' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
                 }`}
               >
                 <BarChart3 className="w-5 h-5" />
@@ -447,10 +447,10 @@ const [useAI, setUseAI] = useState(false);
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-indigo-700 bg-gray-500">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
-              <ShoppingBag className="w-6 h-6 text-white" />
+              <ShoppingBag className="w-6 h-6 text-gray-800" />
             </div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-white">
+              <div className="text-sm font-medium text-gray-800">
                 {user?.displayName || 'Store Owner'}
               </div>
               <div className="text-xs text-gray-400">
@@ -459,7 +459,7 @@ const [useAI, setUseAI] = useState(false);
             </div>
             <button
               onClick={handleLogout}
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-gray-800"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -487,7 +487,7 @@ const [useAI, setUseAI] = useState(false);
               {activeTab === 'Products' && (
                 <button
                   onClick={handleAddProduct}
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-gray-800 rounded-lg hover:bg-indigo-700"
                 >
                   <Plus className="w-4 h-4" />
                   Add Product
@@ -495,7 +495,7 @@ const [useAI, setUseAI] = useState(false);
               )}
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700"
               >
                 <LogOut className="w-4 h-4" />
                 Logout
@@ -604,7 +604,7 @@ const [useAI, setUseAI] = useState(false);
                     </thead>
                     <tbody>
                       {orders.slice(0, 5).map((order) => (
-                        <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-300">
+                        <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-800">
                           <td className="py-3 px-2 text-sm font-medium text-gray-900">{order.id}</td>
                           <td className="py-3 px-2 text-sm text-gray-600">{order.customerName || 'N/A'}</td>
                           <td className="py-3 px-2 text-sm font-medium text-gray-900">${order.total || 0}</td>
@@ -661,14 +661,14 @@ const [useAI, setUseAI] = useState(false);
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleEditProduct(product)}
-                              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 text-sm"
                             >
                               <Edit className="w-4 h-4" />
                               Edit
                             </button>
                             <button
                               onClick={() => handleDeleteProduct(product.id)}
-                              className="flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                              className="flex items-center justify-center px-3 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -706,7 +706,7 @@ const [useAI, setUseAI] = useState(false);
                   </thead>
                   <tbody>
                     {orders.map((order) => (
-                      <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-300">
+                      <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-800">
                         <td className="py-3 px-2 text-sm font-medium text-gray-900">{order.id}</td>
                         <td className="py-3 px-2 text-sm text-gray-600">
                           {order.createdAt?.toDate?.().toLocaleDateString() || 'N/A'}
@@ -757,7 +757,7 @@ const [useAI, setUseAI] = useState(false);
                         className="w-24 h-24 object-cover rounded-lg border"
                       />
                     ) : (
-                      <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
+                      <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
                         <Upload className="w-8 h-8 text-gray-400" />
                       </div>
                     )}
@@ -771,7 +771,7 @@ const [useAI, setUseAI] = useState(false);
                       />
                       <label
                         htmlFor="product-image"
-                        className="inline-block px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
+                        className="inline-block px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 cursor-pointer"
                       >
                         Upload Image
                       </label>
@@ -877,7 +877,7 @@ const [useAI, setUseAI] = useState(false);
 
                 <button
                   onClick={handleSaveProduct}
-                  className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700"
+                  className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-gray-800 py-3 rounded-lg hover:bg-indigo-700"
                 >
                   <Save className="w-5 h-5" />
                   {editingProduct ? 'Update Product' : 'Add Product'}
@@ -914,7 +914,7 @@ const [useAI, setUseAI] = useState(false);
                         className="w-24 h-24 object-contain border rounded-lg"
                       />
                     ) : (
-                      <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
+                      <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
                         <Upload className="w-8 h-8 text-gray-400" />
                       </div>
                     )}
@@ -928,7 +928,7 @@ const [useAI, setUseAI] = useState(false);
                       />
                       <label
                         htmlFor="logo-upload"
-                        className="inline-block px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
+                        className="inline-block px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 cursor-pointer"
                       >
                         Upload Logo
                       </label>
@@ -1000,7 +1000,7 @@ const [useAI, setUseAI] = useState(false);
 
                 <button
                   onClick={handleSaveStoreInfo}
-                  className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700"
+                  className="w-full bg-indigo-600 text-gray-800 py-3 rounded-lg hover:bg-indigo-700"
                 >
                   Save Store Information
                 </button>

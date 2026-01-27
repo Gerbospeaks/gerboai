@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import logo from '../assets/img/solidflo-logo.png';
+import logo from '../assets/img/solidflo.png';
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import about from './AboutPage';  

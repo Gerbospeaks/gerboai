@@ -150,7 +150,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-600 to-red-600 rounded-lg p-6 text-white">
+      <div className="bg-gradient-to-r from-orange-600 to-red-600 rounded-lg p-6 text-gray-800">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2 flex items-center space-x-3">
@@ -263,7 +263,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-300 border-b border-gray-200">
+              <thead className="bg-gray-800 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Invoice
@@ -293,7 +293,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
                   return (
                     <tr
                       key={invoice.id}
-                      className="hover:bg-gray-300 transition-colors"
+                      className="hover:bg-gray-800 transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -392,11 +392,11 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
       {showDetails && selectedInvoice && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-orange-600 to-red-600 text-white">
+            <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-orange-600 to-red-600 text-gray-800">
               <h2 className="text-xl font-semibold">Invoice Details</h2>
               <button
                 onClick={() => setShowDetails(false)}
-                className="text-white hover:text-gray-200 text-2xl"
+                className="text-gray-800 hover:text-gray-200 text-2xl"
               >
                 ✕
               </button>
@@ -404,7 +404,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
 
             <div className="overflow-auto p-6 space-y-6">
               {/* Invoice Info */}
-              <div className="bg-gray-300 rounded-lg p-4">
+              <div className="bg-gray-800 rounded-lg p-4">
                 <h3 className="font-semibold text-lg mb-3 flex items-center space-x-2">
                   <DollarSign className="w-5 h-5 text-orange-600" />
                   <span>Invoice Information</span>
@@ -468,7 +468,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
               </div>
 
               {/* Services */}
-              <div className="bg-gray-300 rounded-lg p-4">
+              <div className="bg-gray-800 rounded-lg p-4">
                 <h3 className="font-semibold text-lg mb-3">Services</h3>
                 <div className="space-y-2">
                   {selectedInvoice.items?.map((item, index) => (
@@ -489,14 +489,14 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
               <div className="flex space-x-3">
                 <button
                   onClick={() => handleMarkAsPaid(selectedInvoice)}
-                  className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
                 >
                   <CheckCircle className="w-5 h-5" />
                   <span>Mark as Paid</span>
                 </button>
                 <button
                   onClick={() => handleSendReminder(selectedInvoice)}
-                  className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-purple-600 text-gray-800 rounded-lg hover:bg-purple-700"
                 >
                   <Send className="w-5 h-5" />
                   <span>Send Reminder</span>

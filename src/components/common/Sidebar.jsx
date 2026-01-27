@@ -13,7 +13,7 @@ function Sidebar({ title, navItems, color = 'blue' }) {
     <div className="w-64 bg-white border-r border-gray-200">
       <div className="p-4">
         <div className="flex items-center space-x-2 mb-8">
-          <div className={`w-10 h-10 ${colorClasses[color]} rounded-lg flex items-center justify-center text-white text-xl font-bold`}>
+          <div className={`w-10 h-10 ${colorClasses[color]} rounded-lg flex items-center justify-center text-gray-800 text-xl font-bold`}>
             {title[0]}
           </div>
           <span className="font-semibold text-lg">{title}</span>

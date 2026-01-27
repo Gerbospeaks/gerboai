@@ -713,7 +713,7 @@ const handleAIDataExtracted = (extractedData) => {
 
   return (
     <div className="flex h-screen bg-gray-300">
-      {/* Mobile Sidebar Backdrop */}
+{/* Mobile Sidebar Backdrop */}
 {sidebarOpen && (
   <div
     className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -725,20 +725,20 @@ const handleAIDataExtracted = (extractedData) => {
 <div
   className={`${
     sidebarOpen ? "hidden" : "block"
-  } fixed z-40 w-16 bg-slate-600 border-r border-gray-200 h-full print:hidden transition-all duration-300`}
+  } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
 >
   <div className="flex flex-col items-center py-4 space-y-4">
     {/* Toggle Button */}
     <button
       onClick={() => setSidebarOpen(true)}
-      className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
+      className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
       title="Expand Sidebar"
     >
       <ChevronRight className="w-6 h-6" />
     </button>
 
     {/* Logo */}
-    <div className="w-10 h-10">
+    <div className="w-10 h-10 mb-2">
       <img
         src={logo}
         alt="Logo"
@@ -746,12 +746,12 @@ const handleAIDataExtracted = (extractedData) => {
       />
     </div>
 
-    <div className="w-full border-t border-slate-500"></div>
+    <div className="w-10 border-t border-slate-600"></div>
 
     {/* Icon Navigation */}
-    <div className="flex flex-col items-center space-y-3 w-full">
+    <div className="flex flex-col items-center space-y-3 w-full px-2">
       <button
-        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
         title="Home"
       >
         <Home className="w-5 h-5" />
@@ -759,7 +759,7 @@ const handleAIDataExtracted = (extractedData) => {
       
       <button
         onClick={() => setShowSettings(true)}
-        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
         title="Settings"
       >
         <Settings className="w-5 h-5" />
@@ -767,35 +767,35 @@ const handleAIDataExtracted = (extractedData) => {
 
       <button
         onClick={() => setActiveView("financial-overview")}
-        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
         title="Business Overview"
       >
         <TrendingUp className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
         title="Invoices"
       >
         <ClipboardList className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
         title="Quotes"
       >
         <Receipt className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
         title="Customers"
       >
         <Users className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
         title="Properties"
       >
         <Building className="w-5 h-5" />
@@ -803,21 +803,21 @@ const handleAIDataExtracted = (extractedData) => {
 
       <button
         onClick={() => setActiveView("templates")}
-        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
         title="Invoice Templates"
       >
         <FileText className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
         title="Supplies"
       >
         <Package className="w-5 h-5" />
       </button>
 
       <button
-        className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
         title="Analytics"
       >
         <BarChart3 className="w-5 h-5" />
@@ -827,7 +827,11 @@ const handleAIDataExtracted = (extractedData) => {
 
   {/* User Icon at Bottom */}
   <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-    <div className="w-10 h-10 bg-slate-500 rounded-full"></div>
+    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
+      <span className="text-white font-bold text-sm">
+        {user?.name?.charAt(0) || "U"}
+      </span>
+    </div>
   </div>
 </div>
 
@@ -835,11 +839,11 @@ const handleAIDataExtracted = (extractedData) => {
 <div
   className={`${
     sidebarOpen ? "translate-x-0" : "-translate-x-full"
-  } fixed z-50 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+  } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl`}
 >
   <div className="p-4">
     <div className="flex items-center justify-between mb-8">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-3">
         <img
           src={logo}
           alt="Business Logo"
@@ -849,7 +853,7 @@ const handleAIDataExtracted = (extractedData) => {
       {/* Close Button */}
       <button
         onClick={() => setSidebarOpen(false)}
-        className="p-1.5 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
+        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
         title="Collapse Sidebar"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -857,51 +861,56 @@ const handleAIDataExtracted = (extractedData) => {
     </div>
 
     <nav className="space-y-1">
-      <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+      <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
         <Home className="w-5 h-5" />
-        <span>Home</span>
+        <span className="font-medium">Home</span>
       </div>
       <div
         onClick={() => setShowSettings(true)}
-        className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+        className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
         <Settings className="w-5 h-5" />
-        <span>Settings</span>
+        <span className="font-medium">Settings</span>
       </div>
 
-      <div className="pt-4">
+      <div className="pt-4 mt-4 border-t border-slate-700/50">
         <div
           onClick={() => setActiveView("financial-overview")}
-          className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+          className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200"
         >
           <TrendingUp className="w-5 h-5" />
-          <span>Business Overview</span>
+          <span className="font-medium">Business Overview</span>
         </div>
 
         {/* Invoices Section */}
         <div className="mt-2">
-          <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+          <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <ClipboardList className="w-5 h-5" />
-              <span>Invoices</span>
+              <span className="font-medium">Invoices</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
 
-          <div className="ml-8 mt-1 space-y-1">
+          <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
             <div
               onClick={handleNewInvoice}
-              className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
               Create Invoice
             </div>
             <div
               onClick={() => setShowInvoicesList(!showInvoicesList)}
-              className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
-              All Invoices ({savedInvoices.length})
+              <div className="flex items-center justify-between">
+                <span>All Invoices</span>
+                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                  {savedInvoices.length}
+                </span>
+              </div>
             </div>
-            <div className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer">
+            <div className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200">
               Scheduled
             </div>
           </div>
@@ -909,72 +918,88 @@ const handleAIDataExtracted = (extractedData) => {
 
         {/* Quotes Section */}
         <div className="mt-2">
-          <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+          <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <Receipt className="w-5 h-5" />
-              <span>Quotes</span>
+              <span className="font-medium">Quotes</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
 
-          <div className="ml-8 mt-1 space-y-1">
+          <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
             <div
               onClick={handleNewQuote}
-              className="px-3 py-2 text-sm text-white bg-slate-800 rounded-lg cursor-pointer"
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
               Create Quote
             </div>
             <div
               onClick={() => setShowQuotesList(!showQuotesList)}
-              className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
-              All Quotes ({savedQuotes.length})
+              <div className="flex items-center justify-between">
+                <span>All Quotes</span>
+                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                  {savedQuotes.length}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Customers Section */}
-        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer mt-2">
-          <Users className="w-5 h-5" />
-          <span>Customers</span>
-        </div>
-        <div className="ml-8 mt-1 space-y-1">
-          <div
-            onClick={handleAddNewCustomer}
-            className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer mt-2"
-          >
-            <span>Add Customer</span>
+        <div className="mt-2">
+          <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+            <div className="flex items-center space-x-3">
+              <Users className="w-5 h-5" />
+              <span className="font-medium">Customers</span>
+            </div>
+            <ChevronDown className="w-4 h-4" />
           </div>
-          <div
-            onClick={() => setShowCustomersListModal(true)}
-            className="px-3 py-2 text-sm text-gray-400 hover:bg-slate-800 rounded-lg cursor-pointer"
-          >
-            All Customers ({savedCustomers.length})
+
+          <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+            <div
+              onClick={handleAddNewCustomer}
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+            >
+              Add Customer
+            </div>
+            <div
+              onClick={() => setShowCustomersListModal(true)}
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+            >
+              <div className="flex items-center justify-between">
+                <span>All Customers</span>
+                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                  {savedCustomers.length}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2">
           <Building className="w-5 h-5" />
-          <span>Properties</span>
+          <span className="font-medium">Properties</span>
         </div>
 
         <div
           onClick={() => setActiveView("templates")}
-          className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+          className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
         >
           <FileText className="w-5 h-5" />
-          <span>Invoice Templates</span>
+          <span className="font-medium">Invoice Templates</span>
         </div>
 
-        <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Package className="w-5 h-5" />
-          <span>Supplies</span>
+          <span className="font-medium">Supplies</span>
         </div>
 
-        <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer">
+        <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <BarChart3 className="w-5 h-5" />
-            <span>Analytics</span>
+            <span className="font-medium">Analytics</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -982,20 +1007,25 @@ const handleAIDataExtracted = (extractedData) => {
     </nav>
   </div>
 
-  <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-800">
+  <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm">
     <div className="flex items-center space-x-3">
-      <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
+      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
+        <span className="text-white font-bold text-sm">
+          {user?.name?.charAt(0) || "U"}
+        </span>
+      </div>
       <div className="flex-1">
-        <div className="text-sm font-medium text-white">
+        <div className="text-sm font-semibold text-white">
           {user?.name || "User"}
         </div>
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-slate-400">
           {user?.email || "email@example.com"}
         </div>
       </div>
       <button
         onClick={handleLogout}
-        className="text-gray-400 hover:text-white"
+        className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 rounded-lg transition-all duration-200"
+        title="Logout"
       >
         <LogOut className="w-4 h-4" />
       </button>
@@ -1013,9 +1043,9 @@ const handleAIDataExtracted = (extractedData) => {
                   onClick={() => setSidebarOpen(!sidebarOpen)}
                   className="p-2 hover:bg-gray-100 rounded-lg"
                 >
-                  <Menu className="w-5 h-5" />
+                 
                 </button>
-                <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+                
                 <h1 className="text-base lg:text-xl font-semibold">
                   {isQuoteMode ? 'Quote' : 'Invoice'} #{invoiceNumber || "— not saved yet —"}
                 </h1>
@@ -1026,53 +1056,53 @@ const handleAIDataExtracted = (extractedData) => {
                 {showConvertButton && (
                   <button
                     onClick={handleConvertToInvoice}
-                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-gray-800 rounded-lg hover:bg-purple-700"
                   >
                     <RefreshCw className="w-4 h-4" />
                     Convert to Invoice
                   </button>
                 )}
-                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800">
                   <CheckSquare className="w-4 h-4" />
                   <span>Mark Complete</span>
                 </button>
-                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300">
+                <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800">
                   <Edit className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
                 <button
                   onClick={handleSaveInvoice}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
                 >
                   Save {isQuoteMode ? 'Quote' : 'Invoice'}
                 </button>
                 <button
                   onClick={isQuoteMode ? handleNewQuote : handleNewInvoice}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
                 >
                   <Plus className="w-4 h-4" />
                   New
                 </button>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700">
+                <button className="flex items-center space-x-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700">
                   <Send className="w-4 h-4" />
                   <span>Send</span>
                 </button>
                 <button
                   onClick={handleSavePDF}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
                 >
                   Save as PDF
                 </button>
                 <button
                   onClick={handlePrint}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   <Printer className="w-4 h-4" />
                   Print
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors"
                 >
                   Log Out
                 </button>
@@ -1080,7 +1110,7 @@ const handleAIDataExtracted = (extractedData) => {
 
               <button
                 onClick={handleLogout}
-                className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden"
+                className="lg:hidden p-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors print:hidden"
               >
                 <span className="text-sm font-medium">Logout</span>
               </button>
@@ -1092,34 +1122,34 @@ const handleAIDataExtracted = (extractedData) => {
               {showConvertButton && (
                 <button
                   onClick={handleConvertToInvoice}
-                  className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 whitespace-nowrap text-sm"
+                  className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-gray-800 rounded-lg hover:bg-purple-700 whitespace-nowrap text-sm"
                 >
                   <RefreshCw className="w-4 h-4" />
                   <span>To Invoice</span>
                 </button>
               )}
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
                 <CheckSquare className="w-4 h-4" />
                 <span>Complete</span>
               </button>
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-300 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
                 <Edit className="w-4 h-4" />
                 <span>Edit</span>
               </button>
-              <button className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
+              <button className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
                 <Send className="w-4 h-4" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Save PDF</span>
               </button>
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
               >
                 <Printer className="w-4 h-4" />
                 <span>Print</span>
@@ -1127,7 +1157,7 @@ const handleAIDataExtracted = (extractedData) => {
             </div>
           </div>
 
-          <div className="bg-slate-600 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+          <div className="bg-gray-50 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
             <div className="flex space-x-4 lg:space-x-8 min-w-max">
               {[isQuoteMode ? "Quote" : "Invoice", "Services", "History", "Notes"].map((tab) => (
                 <button
@@ -1135,7 +1165,7 @@ const handleAIDataExtracted = (extractedData) => {
                   onClick={() => setActiveTab(tab)}
                   className={`py-4 border-b-2 ${
                     activeTab === tab || (tab === "Quote" && isQuoteMode) || (tab === "Invoice" && !isQuoteMode)
-                      ? "border-blue-400 text-white"
+                      ? "border-blue-400 text-gray-800"
                       : "border-transparent text-gray-400 hover:text-gray-200"
                   }`}
                 >
@@ -1175,7 +1205,7 @@ const handleAIDataExtracted = (extractedData) => {
                             className="w-24 h-24 object-contain border rounded-lg"
                           />
                         ) : (
-                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
+                          <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
                             <Upload className="w-8 h-8 text-gray-400" />
                           </div>
                         )}
@@ -1190,7 +1220,7 @@ const handleAIDataExtracted = (extractedData) => {
                           />
                           <label
                             htmlFor="logo-upload"
-                            className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer"
+                            className="inline-block px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer"
                           >
                             {businessInfo.logoUrl ? "Change Logo" : "Upload Logo"}
                           </label>
@@ -1376,7 +1406,7 @@ const handleAIDataExtracted = (extractedData) => {
                               </label>
                             </div>
 
-                            <div className="mt-4 p-6 bg-gray-300 rounded-lg border-2 border-dashed border-gray-300">
+                            <div className="mt-4 p-6 bg-gray-800 rounded-lg border-2 border-dashed border-gray-300">
                               <p className="text-sm font-medium mb-4 text-center text-gray-600">Preview:</p>
                               <div className="flex justify-center">
                                 <SignatureStamp 
@@ -1395,7 +1425,7 @@ const handleAIDataExtracted = (extractedData) => {
 
                     <button
                       onClick={handleSaveBusinessInfo}
-                      className="w-full bg-slate-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                      className="w-full bg-gray-50 text-gray-800 py-3 rounded-lg hover:bg-blue-700"
                     >
                       Save Business Information
                     </button>
@@ -1443,7 +1473,7 @@ const handleAIDataExtracted = (extractedData) => {
                         <div
                           key={inv.id}
                           onClick={() => loadInvoice(inv)}
-                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1497,7 +1527,7 @@ const handleAIDataExtracted = (extractedData) => {
                         <div
                           key={quote.id}
                           onClick={() => loadQuote(quote)}
-                          className="border rounded-lg p-4 hover:bg-gray-300 cursor-pointer transition-colors"
+                          className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
                         >
                           <div className="flex justify-between items-start">
                             <div>
@@ -1532,7 +1562,7 @@ const handleAIDataExtracted = (extractedData) => {
           {/* Mobile Invoice Toggle Button */}
           <button
             onClick={() => setShowInvoice(!showInvoice)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FileText className="w-5 h-5" />
             {showInvoice ? `Hide ${isQuoteMode ? 'Quote' : 'Invoice'}` : `View ${isQuoteMode ? 'Quote' : 'Invoice'}`}
@@ -1627,7 +1657,7 @@ const handleAIDataExtracted = (extractedData) => {
                   </div>
 
                   {/* Customer Information */}
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <div className="bg-gray-100 border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold flex items-center space-x-2">
                         <Users className="w-5 h-5" />
@@ -1645,7 +1675,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={customerName}
                           onChange={(e) => setCustomerName(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-200"
                         />
                       </div>
                       <div>
@@ -1654,7 +1684,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={customerId}
                           onChange={(e) => setCustomerId(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1663,7 +1693,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={customerEmail}
                           onChange={(e) => setCustomerEmail(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1672,7 +1702,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={customerPhone}
                           onChange={(e) => setCustomerPhone(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div className="col-span-1 sm:col-span-2">
@@ -1681,7 +1711,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={customerAddress}
                           onChange={(e) => setCustomerAddress(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                     </div>
@@ -1701,7 +1731,7 @@ const handleAIDataExtracted = (extractedData) => {
                         <select
                           value={propertyType}
                           onChange={(e) => setPropertyType(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         >
                           <option>Residential</option>
                           <option>Commercial</option>
@@ -1714,7 +1744,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={propertySize}
                           onChange={(e) => setPropertySize(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1723,7 +1753,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={propertyRooms}
                           onChange={(e) => setPropertyRooms(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1732,7 +1762,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={propertyBathrooms}
                           onChange={(e) => setPropertyBathrooms(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1741,7 +1771,7 @@ const handleAIDataExtracted = (extractedData) => {
                           type="text"
                           value={propertyFloors}
                           onChange={(e) => setPropertyFloors(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
@@ -1749,7 +1779,7 @@ const handleAIDataExtracted = (extractedData) => {
                         <select
                           value={serviceFrequency}
                           onChange={(e) => setServiceFrequency(e.target.value)}
-                          className="w-full px-4 py-2 border rounded"
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         >
                           <option>One-Time</option>
                           <option>Weekly</option>
@@ -1795,7 +1825,7 @@ const handleAIDataExtracted = (extractedData) => {
                       />
                       <button
                         onClick={handleAddItem}
-                        className="bg-slate-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
+                        className="bg-gray-50 text-gray-800 rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
                       >
                         <Plus className="w-4 h-4" />
                         Add
@@ -1889,7 +1919,7 @@ const handleAIDataExtracted = (extractedData) => {
                     div[class*="border-b"][class*="border-gray"] {
                       display: none !important;
                     }
-                    nav, [class*="sidebar"], [class*="bg-slate-600"], button:not([style]) {
+                    nav, [class*="sidebar"], [class*="bg-gray-50"], button:not([style]) {
                       display: none !important;
                     }
                     .space-y-6 {

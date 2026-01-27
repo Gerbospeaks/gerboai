@@ -139,7 +139,7 @@ const NotesView = ({ jobCardId }) => {
           <button
             onClick={handleAddNote}
             disabled={!newNote.trim()}
-            className="px-6 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-2 bg-orange-400 text-gray-800 rounded-lg hover:bg-orange-500 disabled:bg-gray-800 disabled:cursor-not-allowed transition-colors"
           >
             Add Note
           </button>
@@ -161,7 +161,7 @@ const NotesView = ({ jobCardId }) => {
                 )}
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs font-medium">
+                    <span className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-xs font-medium">
                       {note.user.split(' ').map(n => n[0]).join('')}
                     </span>
                     <span className="font-semibold text-gray-800">{note.user}</span>
@@ -181,13 +181,13 @@ const NotesView = ({ jobCardId }) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleSaveEdit(note.id)}
-                    className="px-4 py-1 bg-orange-400 text-white rounded hover:bg-orange-500 text-sm"
+                    className="px-4 py-1 bg-orange-400 text-gray-800 rounded hover:bg-orange-500 text-sm"
                   >
                     Save
                   </button>
                   <button
                     onClick={() => setEditingId(null)}
-                    className="px-4 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm"
+                    className="px-4 py-1 bg-gray-800 text-gray-700 rounded hover:bg-gray-400 text-sm"
                   >
                     Cancel
                   </button>

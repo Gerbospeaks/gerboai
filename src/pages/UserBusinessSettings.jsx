@@ -112,7 +112,7 @@ const [stampSettings, setStampSettings] = useState({
                 className="w-24 h-24 object-contain border rounded-lg"
               />
             ) : (
-              <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-300">
+              <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
                 <Upload className="w-8 h-8 text-gray-400" />
               </div>
             )}
@@ -128,7 +128,7 @@ const [stampSettings, setStampSettings] = useState({
               />
               <label
                 htmlFor="logo-upload"
-                className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer disabled:opacity-50"
+                className="inline-block px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer disabled:opacity-50"
               >
                 {uploading ? 'Uploading...' : businessInfo.logoUrl ? 'Change Logo' : 'Upload Logo'}
               </label>
@@ -222,7 +222,7 @@ const [stampSettings, setStampSettings] = useState({
         <button
           onClick={handleSave}
           disabled={loading}
-          className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-orange-700 disabled:opacity-50"
+          className="w-full bg-gray-600 text-gray-800 py-3 rounded-lg hover:bg-orange-700 disabled:opacity-50"
         >
           {loading ? "Saving..." : "Save Business Information"}
         </button>

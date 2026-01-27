@@ -161,7 +161,7 @@ export const DefaultTemplate = ({
     {/* Three Column Section */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-blue-50 border border-blue-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-slate-600 text-white px-2 py-1">PATIENT INFORMATION</div>
+        <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">PATIENT INFORMATION</div>
         <div className="text-xs space-y-1">
           <div className="font-semibold">{customerName}</div>
           <div className="text-gray-600">Patient ID: {patientId}</div>
@@ -172,7 +172,7 @@ export const DefaultTemplate = ({
       </div>
 
       <div className="bg-blue-50 border border-blue-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-slate-600 text-white px-2 py-1">PATIENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">PATIENT DETAILS</div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Date of Birth:</span>
@@ -190,7 +190,7 @@ export const DefaultTemplate = ({
       </div>
 
       <div className="bg-blue-50 border border-blue-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-slate-600 text-white px-2 py-1">INSURANCE INFORMATION</div>
+        <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">INSURANCE INFORMATION</div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Provider:</span>
@@ -229,7 +229,7 @@ export const DefaultTemplate = ({
     <div className="mb-4">
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-slate-600 text-white">
+          <tr className="bg-gray-50 text-gray-800">
             <th className="text-left px-2 py-1 font-bold">SERVICE DESCRIPTION</th>
             <th className="text-center px-2 py-1 font-bold">QUANTITY</th>
             <th className="text-right px-2 py-1 font-bold">UNIT PRICE</th>
@@ -260,7 +260,7 @@ export const DefaultTemplate = ({
           <span>VAT (15%):</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-blue-900 text-white px-2">
+        <div className="flex justify-between py-2 font-bold bg-blue-900 text-gray-800 px-2">
           <span>TOTAL DUE:</span>
           <span>R {total.toFixed(2)}</span>
         </div>
@@ -337,7 +337,7 @@ export const ClinicalTemplate = (props) => (
 
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-teal-50 border border-teal-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-teal-600 text-white px-2 py-1">PATIENT</div>
+        <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">PATIENT</div>
         <div className="text-xs space-y-1">
           <div className="font-semibold">{props.customerName}</div>
           <div>DOB: {props.patientDOB}</div>
@@ -346,14 +346,14 @@ export const ClinicalTemplate = (props) => (
         </div>
       </div>
       <div className="bg-teal-50 border border-teal-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-teal-600 text-white px-2 py-1">INSURANCE</div>
+        <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">INSURANCE</div>
         <div className="text-xs space-y-1">
           <div>{props.insuranceProvider || 'Self Pay'}</div>
           <div>Policy: {props.insuranceNumber || 'N/A'}</div>
         </div>
       </div>
       <div className="bg-teal-50 border border-teal-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-teal-600 text-white px-2 py-1">VISIT INFO</div>
+        <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">VISIT INFO</div>
         <div className="text-xs space-y-1">
           <div>Date: {new Date().toLocaleDateString()}</div>
           <div>Type: {props.serviceType}</div>
@@ -363,7 +363,7 @@ export const ClinicalTemplate = (props) => (
 
     <table className="w-full text-xs mb-4">
       <thead>
-        <tr className="bg-teal-600 text-white">
+        <tr className="bg-teal-600 text-gray-800">
           <th className="text-left px-2 py-1 font-bold">Service</th>
           <th className="text-center px-2 py-1 font-bold">Qty</th>
           <th className="text-right px-2 py-1 font-bold">Rate</th>
@@ -392,7 +392,7 @@ export const ClinicalTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-teal-900 text-white px-2">
+        <div className="flex justify-between py-2 font-bold bg-teal-900 text-gray-800 px-2">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
@@ -472,7 +472,7 @@ export const ModernTemplate = (props) => (
 
     <table className="w-full mb-6">
       <thead>
-        <tr className="bg-indigo-500 text-white">
+        <tr className="bg-indigo-500 text-gray-800">
           <th className="text-left px-4 py-3 rounded-l-lg">Service</th>
           <th className="text-center px-4 py-3">Qty</th>
           <th className="text-right px-4 py-3">Rate</th>
@@ -501,7 +501,7 @@ export const ModernTemplate = (props) => (
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 text-xl font-bold bg-indigo-500 text-white px-4 rounded-lg">
+        <div className="flex justify-between py-3 text-xl font-bold bg-indigo-500 text-gray-800 px-4 rounded-lg">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>

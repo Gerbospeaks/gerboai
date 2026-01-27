@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logo from "../assets/img/solidflo-logo.png";
 import { useAuth } from '../contexts/AuthContext';
 
 import { db } from '../firebase';
@@ -167,23 +168,25 @@ const [useAI, setUseAI] = useState(false);
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-indigo-950 border-r border-gray-800 transition-transform duration-300 h-full`}
+        } fixed lg:relative lg:translate-x-0 z-50 w-64 bg-gray-900 border-r border-gray-800 transition-transform duration-300 h-full`}
       >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-gray-500 rounded-lg flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">
-              SolidFlo
-            </span>
-            <ChevronDown className="w-4 h-4 ml-auto text-gray-400" />
+           <div className="w-10 h-10">
+                       <img
+                         src={logo}
+                         alt="Logo"
+                         className="w-full h-full object-contain rounded-lg"
+                       />
+                     </div>
+            
+          
           </div>
 
           <nav className="space-y-1">
             <div 
               onClick={() => navigate('/home')}
-              className="flex items-center space-x-3 px-3 py-2 text-white bg-gray-500 rounded-lg cursor-pointer"
+              className="flex items-center space-x-3 px-3 py-2 text-gray-800 bg-gray-500 rounded-lg cursor-pointer"
             >
               <HomeIcon className="w-5 h-5" />
               <span>Home</span>
@@ -285,18 +288,18 @@ const [useAI, setUseAI] = useState(false);
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-indigo-700 bg-gray-500">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white font-semibold">
+            <div className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-gray-800 font-semibold">
               {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
             </div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-white">
+              <div className="text-sm font-medium text-gray-800">
                 {user?.name || "User"}
               </div>
               <div className="text-xs text-gray-400">
                 {user?.email || "email@example.com"}
               </div>
             </div>
-            <button onClick={handleLogout} className="text-gray-400 hover:text-white">
+            <button onClick={handleLogout} className="text-gray-400 hover:text-gray-800">
               <LogOut className="w-4 h-4" />
             </button>
           </div>
@@ -317,7 +320,7 @@ const [useAI, setUseAI] = useState(false);
         <div className="lg:hidden fixed top-4 left-4 z-30">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 bg-gray-500 text-white rounded-lg shadow-lg"
+            className="p-2 bg-gray-500 text-gray-800 rounded-lg shadow-lg"
           >
             {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>

@@ -117,13 +117,13 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-4 border-b flex items-center justify-between bg-gray-600 text-white">
+        <div className="p-4 border-b flex items-center justify-between bg-gray-600 text-gray-800">
           <h2 className="text-xl font-semibold">
             {existingClient ? 'Edit Client' : 'Add New Client'}
           </h2>
           <button
             onClick={handleClose}
-            className="text-white hover:text-gray-200 transition-colors"
+            className="text-gray-800 hover:text-gray-200 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
@@ -192,7 +192,7 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
                   name="clientId"
                   value={formData.clientId}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="CLI-2026-0001"
                   readOnly
                 />
@@ -253,14 +253,14 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
             <div className="flex gap-3 pt-4">
               <button
                 onClick={handleClose}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-800 transition-colors font-medium"
                 disabled={saving}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmit}
-                className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-700 transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={saving}
               >
                 <Save className="w-4 h-4" />

@@ -239,10 +239,10 @@ const Templates = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-300 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-800 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-8 text-white">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-8 text-gray-800">
           <div className="flex items-center gap-3 mb-3">
             <FileText className="w-8 h-8" />
             <h1 className="text-3xl font-bold">Professional Invoice Templates</h1>
@@ -298,7 +298,7 @@ const Templates = () => {
               onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
                 selectedCategory === category.id
-                  ? 'bg-slate-600 text-white shadow-lg scale-105'
+                  ? 'bg-gray-50 text-gray-800 shadow-lg scale-105'
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
               }`}
             >
@@ -329,18 +329,18 @@ const Templates = () => {
                   
                   {/* Icon Overlay */}
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <Icon className="w-24 h-24 text-white opacity-20" />
+                    <Icon className="w-24 h-24 text-gray-800 opacity-20" />
                   </div>
 
                   {/* Badges */}
                   {template.isPremium && !isPurchased && (
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-gray-800 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
                       <Sparkles className="w-4 h-4" />
                       Premium
                     </div>
                   )}
                   {isPurchased && (
-                    <div className="absolute top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
+                    <div className="absolute top-4 left-4 bg-green-600 text-gray-800 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
                       <Check className="w-5 h-5" />
                       Owned
                     </div>
@@ -348,7 +348,7 @@ const Templates = () => {
 
                   {/* Template Name Overlay */}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                    <div className="flex items-center gap-2 text-white">
+                    <div className="flex items-center gap-2 text-gray-800">
                       <Icon className="w-6 h-6" />
                       <h3 className="text-xl font-bold">{template.name}</h3>
                     </div>
@@ -373,7 +373,7 @@ const Templates = () => {
                   </div>
 
                   {/* Preview Description */}
-                  <div className="mb-4 p-3 bg-gray-300 rounded-lg">
+                  <div className="mb-4 p-3 bg-gray-800 rounded-lg">
                     <div className="text-xs font-semibold text-gray-500 mb-1">PREVIEW</div>
                     <p className="text-xs text-gray-600 leading-relaxed">{template.preview}</p>
                   </div>
@@ -401,7 +401,7 @@ const Templates = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setShowPreview(template.id)}
-                        className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-300 hover:border-gray-400 flex items-center gap-2 transition-all"
+                        className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-800 hover:border-gray-400 flex items-center gap-2 transition-all"
                       >
                         <Eye className="w-4 h-4" />
                         <span className="hidden sm:inline">Preview</span>
@@ -415,7 +415,7 @@ const Templates = () => {
                       ) : (
                         <button
                           onClick={() => handlePurchase(template.id)}
-                          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
+                          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-gray-800 rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
                         >
                           {template.isPremium ? (
                             <>
@@ -483,7 +483,7 @@ const Templates = () => {
                  <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
                    <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
                      <div className="p-6 border-b bg-gradient-to-r from-orange-500 to-red-500">
-                       <div className="flex items-center justify-between text-white">
+                       <div className="flex items-center justify-between text-gray-800">
                          <div className="flex items-center gap-3">
                            <ShoppingCart className="w-6 h-6" />
                            <h2 className="text-2xl font-bold">Complete Purchase</h2>
@@ -493,7 +493,7 @@ const Templates = () => {
                              setShowPayment(null);
                              setPaymentForm({ cardNumber: '', cardName: '', expiryDate: '', cvv: '' });
                            }}
-                           className="text-white hover:text-gray-200 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors"
+                           className="text-gray-800 hover:text-gray-200 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors"
                          >
                            ✕
                          </button>
@@ -589,7 +589,7 @@ const Templates = () => {
                        <button
                          onClick={handlePaymentSubmit}
                          disabled={loading}
-                         className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                         className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-orange-600 to-red-600 text-gray-800 rounded-lg hover:from-orange-700 hover:to-red-700 font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                        >
                          {loading ? (
                            <>

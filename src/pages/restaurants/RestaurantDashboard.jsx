@@ -289,11 +289,11 @@ const [useAI, setUseAI] = useState(false);
   };
 
   return (
-    <div className="flex h-screen bg-gray-300">
+    <div className="flex h-screen bg-gray-800">
      {/* Sidebar Toggle Button - Works on both mobile and desktop */}
        <button
          onClick={() => setSidebarOpen(!sidebarOpen)}
-         className="fixed top-4 left-4 z-50 p-2 bg-slate-600 text-white rounded-lg shadow-lg hover:bg-slate-700 transition-colors print:hidden"
+         className="fixed top-4 left-4 z-50 p-2 bg-gray-50 text-gray-800 rounded-lg shadow-lg hover:bg-slate-700 transition-colors print:hidden"
        >
          {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
        </button>
@@ -302,12 +302,12 @@ const [useAI, setUseAI] = useState(false);
        <div
          className={`${
            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-         } fixed z-40 w-64 bg-slate-600 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+         } fixed z-40 w-64 bg-gray-50 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
        >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
             <div className="w-16 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
-              <UtensilsCrossed className="w-8 h-8 text-white" />
+              <UtensilsCrossed className="w-8 h-8 text-gray-800" />
             </div>
           </div>
 
@@ -315,7 +315,7 @@ const [useAI, setUseAI] = useState(false);
             <div
               onClick={() => setActiveTab('Overview')}
               className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
-                activeTab === 'Overview' ? 'bg-gray-500 text-white' : 'text-gray-300 hover:bg-gray-500'
+                activeTab === 'Overview' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
               }`}
             >
               <Home className="w-5 h-5" />
@@ -334,7 +334,7 @@ const [useAI, setUseAI] = useState(false);
               <div
                 onClick={() => setActiveTab('Menu')}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
-                  activeTab === 'Menu' ? 'bg-gray-500 text-white' : 'text-gray-300 hover:bg-gray-500'
+                  activeTab === 'Menu' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
                 }`}
               >
                 <UtensilsCrossed className="w-5 h-5" />
@@ -344,7 +344,7 @@ const [useAI, setUseAI] = useState(false);
               <div
                 onClick={() => setActiveTab('Orders')}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
-                  activeTab === 'Orders' ? 'bg-gray-500 text-white' : 'text-gray-300 hover:bg-gray-500'
+                  activeTab === 'Orders' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
                 }`}
               >
                 <ShoppingCart className="w-5 h-5" />
@@ -354,7 +354,7 @@ const [useAI, setUseAI] = useState(false);
               <div
                 onClick={() => setActiveTab('Customers')}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
-                  activeTab === 'Customers' ? 'bg-gray-500 text-white' : 'text-gray-300 hover:bg-gray-500'
+                  activeTab === 'Customers' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
                 }`}
               >
                 <Users className="w-5 h-5" />
@@ -371,7 +371,7 @@ const [useAI, setUseAI] = useState(false);
               <div
                 onClick={() => setActiveTab('Analytics')}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
-                  activeTab === 'Analytics' ? 'bg-gray-500 text-white' : 'text-gray-300 hover:bg-gray-500'
+                  activeTab === 'Analytics' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
                 }`}
               >
                 <BarChart3 className="w-5 h-5" />
@@ -384,10 +384,10 @@ const [useAI, setUseAI] = useState(false);
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-indigo-700 bg-gray-500">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-              <ChefHat className="w-6 h-6 text-white" />
+              <ChefHat className="w-6 h-6 text-gray-800" />
             </div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-white">
+              <div className="text-sm font-medium text-gray-800">
                 {user?.displayName || 'Restaurant Owner'}
               </div>
               <div className="text-xs text-gray-400">
@@ -396,7 +396,7 @@ const [useAI, setUseAI] = useState(false);
             </div>
             <button
               onClick={handleLogout}
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-gray-800"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -421,7 +421,7 @@ const [useAI, setUseAI] = useState(false);
               {activeTab === 'Menu' && (
                 <button
                   onClick={handleAddMenuItem}
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-gray-800 rounded-lg hover:bg-indigo-700"
                 >
                   <Plus className="w-4 h-4" />
                   Add Menu Item
@@ -429,7 +429,7 @@ const [useAI, setUseAI] = useState(false);
               )}
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700"
               >
                 <LogOut className="w-4 h-4" />
                 Logout
@@ -549,7 +549,7 @@ const [useAI, setUseAI] = useState(false);
                     </thead>
                     <tbody>
                       {orders.slice(0, 5).map((order) => (
-                        <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-300">
+                        <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-800">
                           <td className="py-3 px-2 text-sm font-medium text-gray-900">#{order.id.slice(0, 8)}</td>
                           <td className="py-3 px-2 text-sm text-gray-600">{order.customerName || 'Guest'}</td>
                           <td className="py-3 px-2 text-sm text-gray-600">{order.itemCount || 0} items</td>
@@ -611,14 +611,14 @@ const [useAI, setUseAI] = useState(false);
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleEditMenuItem(item)}
-                            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 text-sm"
                           >
                             <Edit className="w-4 h-4" />
                             Edit
                           </button>
                           <button
                             onClick={() => handleDeleteMenuItem(item.id)}
-                            className="flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                            className="flex items-center justify-center px-3 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -655,7 +655,7 @@ const [useAI, setUseAI] = useState(false);
                   </thead>
                   <tbody>
                     {orders.map((order) => (
-                      <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-300">
+                      <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-800">
                         <td className="py-3 px-2 text-sm font-medium text-gray-900">#{order.id}</td>
                         <td className="py-3 px-2 text-sm text-gray-600">
                           {order.createdAt.toLocaleDateString()}
@@ -901,16 +901,16 @@ const [useAI, setUseAI] = useState(false);
               </div>
             </div>
 
-            <div className="sticky bottom-0 bg-gray-300 border-t border-gray-200 p-6 flex gap-3">
+            <div className="sticky bottom-0 bg-gray-800 border-t border-gray-200 p-6 flex gap-3">
               <button
                 onClick={() => setShowMenuModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveMenuItem}
-                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                className="flex-1 px-4 py-2 bg-indigo-600 text-gray-800 rounded-lg hover:bg-indigo-700"
               >
                 {editingItem ? 'Update Item' : 'Add Item'}
               </button>
@@ -1065,16 +1065,16 @@ const [useAI, setUseAI] = useState(false);
               </div>
             </div>
 
-            <div className="sticky bottom-0 bg-gray-300 border-t border-gray-200 p-6 flex gap-3">
+            <div className="sticky bottom-0 bg-gray-800 border-t border-gray-200 p-6 flex gap-3">
               <button
                 onClick={() => setShowSettings(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-300"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveRestaurantInfo}
-                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                className="flex-1 px-4 py-2 bg-indigo-600 text-gray-800 rounded-lg hover:bg-indigo-700"
               >
                 Save Settings
               </button>
