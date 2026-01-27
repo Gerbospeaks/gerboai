@@ -289,11 +289,11 @@ const [useAI, setUseAI] = useState(false);
   };
 
   return (
-    <div className="flex h-screen bg-gray-800">
+    <div className="flex h-screen bg-gray-300">
      {/* Sidebar Toggle Button - Works on both mobile and desktop */}
        <button
          onClick={() => setSidebarOpen(!sidebarOpen)}
-         className="fixed top-4 left-4 z-50 p-2 bg-gray-50 text-gray-800 rounded-lg shadow-lg hover:bg-slate-700 transition-colors print:hidden"
+         className="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-gray-800 rounded-lg shadow-lg hover:bg-slate-700 transition-colors print:hidden"
        >
          {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
        </button>
@@ -302,7 +302,7 @@ const [useAI, setUseAI] = useState(false);
        <div
          className={`${
            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-         } fixed z-40 w-64 bg-gray-50 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
+         } fixed z-40 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
        >
         <div className="p-4">
           <div className="flex items-center space-x-2 mb-8">
@@ -403,7 +403,7 @@ const [useAI, setUseAI] = useState(false);
           </div>
         </div>
       </div>
-       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
+       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">

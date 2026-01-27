@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
-import logo from '../../assets/img/solidflo.png';
+import logo from '../../assets/img/solidflo-logo.png';
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates"; 
@@ -579,335 +579,362 @@ const handleAIDataExtracted = (extractedData) => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-800">
-    {/* Mobile Sidebar Backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        ></div>
-      )}
+    <div className="flex h-screen bg-gray-300">
+   {/* Mobile Sidebar Backdrop */}
+{sidebarOpen && (
+  <div
+    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+    onClick={() => setSidebarOpen(false)}
+  ></div>
+)}
 
-      {/* Collapsed Sidebar (Icon Only) */}
-      <div
-        className={`${
-          sidebarOpen ? "hidden" : "block"
-        } fixed z-40 w-16 bg-gray-50 border-r border-gray-200 h-full print:hidden transition-all duration-300`}
+{/* Collapsed Sidebar (Icon Only) */}
+<div
+  className={`${
+    sidebarOpen ? "hidden" : "block"
+  } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
+>
+  <div className="flex flex-col items-center py-4 space-y-4">
+    {/* Toggle Button */}
+    <button
+      onClick={() => setSidebarOpen(true)}
+      className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
+      title="Expand Sidebar"
+    >
+      <ChevronRight className="w-6 h-6" />
+    </button>
+
+    {/* Logo */}
+    <div className="w-10 h-10 mb-2">
+      <img
+        src={logo}
+        alt="Logo"
+        className="w-full h-full object-contain rounded-lg"
+      />
+    </div>
+
+    <div className="w-10 border-t border-slate-600"></div>
+
+    {/* Icon Navigation */}
+    <div className="flex flex-col items-center space-y-3 w-full px-2">
+      <button
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Home"
       >
-        <div className="flex flex-col items-center py-4 space-y-4">
-          {/* Toggle Button */}
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
-            title="Expand Sidebar"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
+        <Home className="w-5 h-5" />
+      </button>
+      
+      <button
+        onClick={() => setShowSettings(true)}
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Settings"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
 
-          {/* Logo */}
-          <div className="w-10 h-10">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-full h-full object-contain rounded-lg"
-            />
+      <button
+        onClick={() => setActiveView("financial-overview")}
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Practice Overview"
+      >
+        <TrendingUp className="w-5 h-5" />
+      </button>
+
+      <button
+        onClick={() => {
+          handleNewInvoice();
+          setActiveView("invoice");
+        }}
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Cases"
+      >
+        <FolderOpen className="w-5 h-5" />
+      </button>
+
+      <button
+        onClick={() => setShowCustomersListModal(true)}
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Clients"
+      >
+        <Users className="w-5 h-5" />
+      </button>
+
+      <button
+        onClick={() => setActiveView("templates")}
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Invoice Templates"
+      >
+        <FileText className="w-5 h-5" />
+      </button>
+
+      <button
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Court Dates"
+      >
+        <Scale className="w-5 h-5" />
+      </button>
+
+      <button
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Legal Research"
+      >
+        <BookOpen className="w-5 h-5" />
+      </button>
+
+      <button
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Billing"
+      >
+        <Receipt className="w-5 h-5" />
+      </button>
+
+      <button
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Payments"
+      >
+        <CreditCard className="w-5 h-5" />
+      </button>
+
+      <button
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Reports"
+      >
+        <FileBarChart className="w-5 h-5" />
+      </button>
+
+      <button
+        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+        title="Calendar"
+      >
+        <Calendar className="w-5 h-5" />
+      </button>
+    </div>
+  </div>
+
+  {/* User Icon at Bottom */}
+  <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
+      <span className="text-white font-bold text-sm">
+        {user?.name?.charAt(0) || "U"}
+      </span>
+    </div>
+  </div>
+</div>
+
+{/* Expanded Sidebar (Full Width) */}
+<div
+  className={`${
+    sidebarOpen ? "translate-x-0" : "-translate-x-full"
+  } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl`}
+>
+  <div className="p-4">
+    <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center space-x-3">
+        <img
+          src={logo}
+          alt="Business Logo"
+          className="w-16 h-12 object-contain rounded-lg"
+        />
+      </div>
+      {/* Close Button */}
+      <button
+        onClick={() => setSidebarOpen(false)}
+        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
+        title="Collapse Sidebar"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+    </div>
+
+    <nav className="space-y-1">
+      <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+        <Home className="w-5 h-5" />
+        <span className="font-medium">Home</span>
+      </div>
+      <div
+        onClick={() => setShowSettings(true)}
+        className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
+      >
+        <Settings className="w-5 h-5" />
+        <span className="font-medium">Settings</span>
+      </div>
+
+      <div className="pt-4 mt-4 border-t border-slate-700/50">
+        <div
+          onClick={() => setActiveView("financial-overview")}
+          className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200"
+        >
+          <TrendingUp className="w-5 h-5" />
+          <span className="font-medium">Practice Overview</span>
+        </div>
+
+        {/* Cases Section */}
+        <div className="mt-2">
+          <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+            <div className="flex items-center space-x-3">
+              <FolderOpen className="w-5 h-5" />
+              <span className="font-medium">Cases</span>
+            </div>
+            <ChevronDown className="w-4 h-4" />
           </div>
 
-          <div className="w-full border-t border-slate-500"></div>
-
-          {/* Icon Navigation */}
-          <div className="flex flex-col items-center space-y-3 w-full">
-            <button
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Home"
-            >
-              <Home className="w-5 h-5" />
-            </button>
-            
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={() => setActiveView("financial-overview")}
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Practice Overview"
-            >
-              <TrendingUp className="w-5 h-5" />
-            </button>
-
-            <button
+          <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+            <div
               onClick={() => {
                 handleNewInvoice();
                 setActiveView("invoice");
               }}
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Cases"
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
-              <FolderOpen className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={() => setShowCustomersListModal(true)}
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Clients"
-            >
-              <Users className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={() => setActiveView("templates")}
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Invoice Templates"
-            >
-              <FileText className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Court Dates"
-            >
-              <Scale className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Legal Research"
-            >
-              <BookOpen className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Billing"
-            >
-              <Receipt className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Payments"
-            >
-              <CreditCard className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Reports"
-            >
-              <FileBarChart className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-              title="Calendar"
-            >
-              <Calendar className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* User Icon at Bottom */}
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-          <div className="w-10 h-10 bg-blue-800 rounded-full"></div>
-        </div>
-      </div>
-
-      {/* Expanded Sidebar (Full Width) */}
-      <div
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed z-50 w-64 bg-gray-50 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
-      >
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-2">
-              <img
-                src={logo}
-                alt="Business Logo"
-                className="w-16 h-12 object-contain rounded-lg"
-              />
-            </div>
-            {/* Close Button */}
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1.5 text-gray-300 hover:bg-slate-700 rounded-lg transition-colors"
-              title="Collapse Sidebar"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          </div>
-
-          <nav className="space-y-1">
-            <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer">
-              <Home className="w-5 h-5" />
-              <span>Home</span>
+              Create Invoice
             </div>
             <div
-              onClick={() => setShowSettings(true)}
-              className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer"
+              onClick={() => setShowInvoicesList(!showInvoicesList)}
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
-              <Settings className="w-5 h-5" />
-              <span>Settings</span>
-            </div>
-
-            <div className="pt-4">
-              <div
-                onClick={() => setActiveView("financial-overview")}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-              >
-                <TrendingUp className="w-5 h-5" />
-                <span>Practice Overview</span>
-              </div>
-
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <FolderOpen className="w-5 h-5" />
-                    <span>Cases</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-
-                <div className="ml-8 mt-1 space-y-1">
-                  <div
-                    onClick={() => {
-                      handleNewInvoice();
-                      setActiveView("invoice");
-                    }}
-                    className="px-3 py-2 text-sm text-gray-800 bg-blue-800 rounded-lg cursor-pointer"
-                  >
-                    Create Invoice
-                  </div>
-                  <div
-                    onClick={() => setShowInvoicesList(!showInvoicesList)}
-                    className="px-3 py-2 text-sm text-gray-400 hover:bg-blue-800 rounded-lg cursor-pointer"
-                  >
-                    All Invoices ({savedInvoices.length})
-                  </div>
-                  <div className="px-3 py-2 text-sm text-gray-400 hover:bg-blue-800 rounded-lg cursor-pointer">
-                    Active Cases
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer mt-2">
-                <Users className="w-5 h-5" />
-                <span>Clients</span>
-              </div>
-              <div className="ml-8 mt-1 space-y-1">
-                <div
-                  onClick={handleAddNewCustomer}
-                  className="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-blue-800 rounded-lg cursor-pointer mt-2"
-                >
-                  <span>Add Client</span>
-                </div>
-                <div
-                  onClick={() => setShowCustomersListModal(true)}
-                  className="px-3 py-2 text-sm text-gray-400 hover:bg-blue-800 rounded-lg cursor-pointer"
-                >
-                  All Clients ({savedCustomers.length})
-                </div>
-              </div>
-
-              <div
-                onClick={() => setActiveView("templates")}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-              >
-                <FileText className="w-5 h-5" />
-                <span>Invoice Templates</span>
-              </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer">
-                <Scale className="w-5 h-5" />
-                <span>Court Dates</span>
-              </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer">
-                <BookOpen className="w-5 h-5" />
-                <span>Legal Research</span>
-              </div>
-
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <Receipt className="w-5 h-5" />
-                  <span>Billing</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <CreditCard className="w-5 h-5" />
-                  <span>Payments</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-
-              <div className="flex items-center justify-between px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <FileBarChart className="w-5 h-5" />
-                  <span>Reports</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-blue-800 rounded-lg cursor-pointer">
-                <Calendar className="w-5 h-5" />
-                <span>Calendar</span>
+              <div className="flex items-center justify-between">
+                <span>All Invoices</span>
+                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                  {savedInvoices.length}
+                </span>
               </div>
             </div>
-          </nav>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-700 bg-blue-800">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-50 rounded-full"></div>
-            <div className="flex-1">
-              <div className="text-sm font-medium text-gray-800">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-gray-400">
-                {user?.email || "email@example.com"}
+            <div className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <span>Active Cases</span>
+                <span className="bg-green-600/30 text-green-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                  0
+                </span>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="text-gray-400 hover:text-gray-800"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
         </div>
-      </div>
 
+        {/* Clients Section */}
+        <div className="mt-2">
+          <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+            <div className="flex items-center space-x-3">
+              <Users className="w-5 h-5" />
+              <span className="font-medium">Clients</span>
+            </div>
+            <ChevronDown className="w-4 h-4" />
+          </div>
+
+          <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+            <div
+              onClick={handleAddNewCustomer}
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+            >
+              Add Client
+            </div>
+            <div
+              onClick={() => setShowCustomersListModal(true)}
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+            >
+              <div className="flex items-center justify-between">
+                <span>All Clients</span>
+                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                  {savedCustomers.length}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          onClick={() => setActiveView("templates")}
+          className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
+        >
+          <FileText className="w-5 h-5" />
+          <span className="font-medium">Invoice Templates</span>
+        </div>
+
+        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+          <Scale className="w-5 h-5" />
+          <span className="font-medium">Court Dates</span>
+        </div>
+
+        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+          <BookOpen className="w-5 h-5" />
+          <span className="font-medium">Legal Research</span>
+        </div>
+
+        <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+          <div className="flex items-center space-x-3">
+            <Receipt className="w-5 h-5" />
+            <span className="font-medium">Billing</span>
+          </div>
+          <ChevronDown className="w-4 h-4" />
+        </div>
+
+        <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+          <div className="flex items-center space-x-3">
+            <CreditCard className="w-5 h-5" />
+            <span className="font-medium">Payments</span>
+          </div>
+          <ChevronDown className="w-4 h-4" />
+        </div>
+
+        <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+          <div className="flex items-center space-x-3">
+            <FileBarChart className="w-5 h-5" />
+            <span className="font-medium">Reports</span>
+          </div>
+          <ChevronDown className="w-4 h-4" />
+        </div>
+
+        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+          <Calendar className="w-5 h-5" />
+          <span className="font-medium">Calendar</span>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm">
+    <div className="flex items-center space-x-3">
+      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
+        <span className="text-white font-bold text-sm">
+          {user?.name?.charAt(0) || "U"}
+        </span>
+      </div>
+      <div className="flex-1">
+        <div className="text-sm font-semibold text-white">
+          {user?.name || "User"}
+        </div>
+        <div className="text-xs text-slate-400">
+          {user?.email || "email@example.com"}
+        </div>
+      </div>
+      <button
+        onClick={handleLogout}
+        className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 rounded-lg transition-all duration-200"
+        title="Logout"
+      >
+        <LogOut className="w-4 h-4" />
+      </button>
+    </div>
+  </div>
+</div>
 
       {/* Main Content */}
       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
         <div className="sticky top-0 z-40 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+        <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 lg:space-x-4">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="p-2 hover:bg-gray-100 rounded-lg"
               >
-                <Menu className="w-5 h-5" />
+             
               </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+              
               <h1 className="text-base lg:text-xl font-semibold">
                 Invoice #{invoiceNumber || "— not saved yet —"}
               </h1>
-              <TemplateSelector
-                              user={user}
-                              selectedTemplate={activeTemplate}
-                              onTemplateChange={setActiveTemplate}
-                            />
+             
             </div>
 
             <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1002,7 +1029,7 @@ const handleAIDataExtracted = (extractedData) => {
           </div>
         </div>
 
-        <div className="bg-blue-900 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
             {["Invoice", "TimeEntries", "Documents", "Notes"].map((tab) => (
               <button

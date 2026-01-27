@@ -754,7 +754,7 @@ const MechanicsDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-gray-300">
      {/* Mobile Sidebar Backdrop */}
 {sidebarOpen && (
   <div
@@ -1056,8 +1056,8 @@ const MechanicsDashboard = () => {
       <div
         className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-16"}`}
       >
-        <div className="flex-1 overflow-auto">
-          <div className="sticky top-0 z-40 bg-white border-b border-white px-4 lg:px-6 py-4">
+        <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
+          <div className="sticky top-0 z-40 bg-gray-300 border-b border-white px-4 lg:px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 lg:space-x-4">
                 <button
@@ -1192,7 +1192,7 @@ const MechanicsDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-gray-300  px-4 lg:px-6 overflow-x-auto print:hidden">
+            <div className="bg-white  px-4 lg:px-6 overflow-x-auto print:hidden">
               <div className="flex space-x-4 lg:space-x-8 min-w-max">
                 {["JobCard", "Parts", "History", "Notes"].map((tab) => (
                   <button
