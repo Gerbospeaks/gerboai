@@ -56,6 +56,7 @@ import CustomersListModal from "../CustomersListModal";
 import FinancialOverview from "../FinancialOverview";
 import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
 import SignatureStamp from '../SignatureStamp';
+import MultiStepForm from './MultiStepForm';
 
 // Generate Invoice Number
 const generateInvoiceNumber = async (userId) => {
@@ -863,14 +864,14 @@ const handleAIDataExtracted = (extractedData) => {
     <nav className="space-y-1">
       <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
         <Home className="w-5 h-5" />
-        <span className="font-medium">Home</span>
+        <span className="text-sm font-medium">Home</span>
       </div>
       <div
         onClick={() => setShowSettings(true)}
         className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
         <Settings className="w-5 h-5" />
-        <span className="font-medium">Settings</span>
+        <span className="text-sm font-medium">Settings</span>
       </div>
 
       <div className="pt-4 mt-4 border-t border-slate-700/50">
@@ -879,7 +880,7 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200"
         >
           <TrendingUp className="w-5 h-5" />
-          <span className="font-medium">Business Overview</span>
+          <span className="text-sm font-medium">Business Overview</span>
         </div>
 
         {/* Invoices Section */}
@@ -887,7 +888,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <ClipboardList className="w-5 h-5" />
-              <span className="font-medium">Invoices</span>
+              <span className="text-sm font-medium">Invoices</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -905,7 +906,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Invoices</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className="text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedInvoices.length}
                 </span>
               </div>
@@ -921,7 +922,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <Receipt className="w-5 h-5" />
-              <span className="font-medium">Quotes</span>
+              <span className="text-sm font-medium">Quotes</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -939,7 +940,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Quotes</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedQuotes.length}
                 </span>
               </div>
@@ -952,7 +953,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <Users className="w-5 h-5" />
-              <span className="font-medium">Customers</span>
+              <span className="text-sm font-medium">Customers</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -970,7 +971,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Customers</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedCustomers.length}
                 </span>
               </div>
@@ -980,7 +981,7 @@ const handleAIDataExtracted = (extractedData) => {
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2">
           <Building className="w-5 h-5" />
-          <span className="font-medium">Properties</span>
+          <span className="text-sm font-medium">Properties</span>
         </div>
 
         <div
@@ -988,18 +989,18 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
         >
           <FileText className="w-5 h-5" />
-          <span className="font-medium">Invoice Templates</span>
+          <span className="text-sm font-medium">Invoice Templates</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Package className="w-5 h-5" />
-          <span className="font-medium">Supplies</span>
+          <span className="text-sm font-medium">Supplies</span>
         </div>
 
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <BarChart3 className="w-5 h-5" />
-            <span className="font-medium">Analytics</span>
+            <span className="text-sm font-medium">Analytics</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -1452,112 +1453,269 @@ const handleAIDataExtracted = (extractedData) => {
           />
 
           {/* Invoices List Modal */}
-          {showInvoicesList && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-                <div className="p-4 border-b flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Saved Invoices</h2>
-                  <button
-                    onClick={() => setShowInvoicesList(false)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="overflow-auto p-4">
-                  {savedInvoices.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">No saved invoices yet</div>
-                  ) : (
-                    <div className="space-y-2">
-                      {savedInvoices.map((inv) => (
-                        <div
-                          key={inv.id}
-                          onClick={() => loadInvoice(inv)}
-                          className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <div className="font-semibold text-lg">{inv.invoiceNumber || "N/A"}</div>
-                              <div className="text-sm text-gray-600 mt-1">Customer: {inv.customer?.name || "N/A"}</div>
-                              <div className="text-sm text-gray-600">Property: {inv.property?.type || "N/A"} - {inv.property?.size || ""}m²</div>
-                              <div className="text-sm text-gray-600">Frequency: {inv.property?.serviceFrequency || "N/A"}</div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-lg font-semibold text-blue-600">R{inv.totals?.total?.toFixed(2) || "0.00"}</div>
-                              <div className="text-sm text-gray-500">
-                                {inv.dates?.serviceDate ? new Date(inv.dates.serviceDate).toLocaleDateString("en-ZA") : "N/A"}
-                              </div>
-                              <div className={`text-xs mt-1 px-2 py-1 rounded ${
-                                inv.status === "completed" ? "bg-green-100 text-green-700" :
-                                inv.status === "pending" ? "bg-blue-100 text-blue-700" :
-                                "bg-gray-100 text-gray-700"
-                              }`}>
-                                {inv.status || "unknown"}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+         {showInvoicesList && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="p-4 border-b flex items-center justify-between bg-gray-50">
+        <h2 className="text-xl font-semibold text-gray-800">Saved Invoices</h2>
+        <button
+          onClick={() => setShowInvoicesList(false)}
+          className="text-gray-500 hover:text-gray-700 text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
+        >
+          ✕
+        </button>
+      </div>
+      <div className="overflow-auto flex-1 p-4">
+        {savedInvoices.length === 0 ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <p className="text-gray-500 text-lg">No saved invoices yet</p>
+              <p className="text-gray-400 text-sm mt-2">Create your first invoice to get started</p>
             </div>
-          )}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse bg-white min-w-[800px]">
+              <thead>
+                <tr className="bg-gray-800 text-white">
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Invoice #</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Customer</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Property</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Service Date</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Frequency</th>
+                  <th className="text-right py-3 px-4 font-semibold text-sm">Amount</th>
+                  <th className="text-center py-3 px-4 font-semibold text-sm">Status</th>
+                  <th className="text-center py-3 px-4 font-semibold text-sm">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {savedInvoices.map((inv, index) => (
+                  <tr 
+                    key={inv.id}
+                    className={`border-b border-gray-200 hover:bg-gray-50 transition-colors ${
+                      index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                    }`}
+                  >
+                    <td className="py-3 px-4">
+                      <span className="font-semibold text-gray-900">
+                        {inv.invoiceNumber || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          {inv.customer?.name || 'N/A'}
+                        </span>
+                        {inv.customer?.email && (
+                          <span className="text-xs text-gray-500 mt-0.5">
+                            {inv.customer.email}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm text-gray-900">
+                          {inv.property?.type || 'N/A'}
+                        </span>
+                        {inv.property?.size && (
+                          <span className="text-xs text-gray-500 mt-0.5">
+                            {inv.property.size}m²
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-sm text-gray-700">
+                      {inv.dates?.serviceDate 
+                        ? new Date(inv.dates.serviceDate).toLocaleDateString('en-ZA') 
+                        : 'N/A'}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-gray-700">
+                      {inv.property?.serviceFrequency || 'N/A'}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <span className="font-bold text-blue-600 text-base">
+                        R{inv.totals?.total?.toFixed(2) || '0.00'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex justify-center">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
+                          inv.status === 'completed' ? 'bg-green-500' :
+                          inv.status === 'paid' ? 'bg-green-500' :
+                          inv.status === 'sent' ? 'bg-blue-500' :
+                          inv.status === 'pending' ? 'bg-blue-500' :
+                          inv.status === 'overdue' ? 'bg-red-500' :
+                          inv.status === 'draft' ? 'bg-gray-500' :
+                          'bg-gray-500'
+                        }`}>
+                          {inv.status || 'unknown'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => loadInvoice(inv)}
+                          className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors text-sm font-medium"
+                        >
+                          Load
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Add view/preview functionality here
+                            console.log('View invoice:', inv);
+                          }}
+                          className="px-3 py-1.5 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors text-sm font-medium"
+                        >
+                          View
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
           {/* Quotes List Modal */}
-          {showQuotesList && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-                <div className="p-4 border-b flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Saved Quotes</h2>
-                  <button
-                    onClick={() => setShowQuotesList(false)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="overflow-auto p-4">
-                  {savedQuotes.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">No saved quotes yet</div>
-                  ) : (
-                    <div className="space-y-2">
-                      {savedQuotes.map((quote) => (
-                        <div
-                          key={quote.id}
-                          onClick={() => loadQuote(quote)}
-                          className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <div className="font-semibold text-lg">{quote.quoteNumber || "N/A"}</div>
-                              <div className="text-sm text-gray-600 mt-1">Customer: {quote.customer?.name || "N/A"}</div>
-                              <div className="text-sm text-gray-600">Property: {quote.property?.type || "N/A"} - {quote.property?.size || ""}m²</div>
-                              <div className="text-sm text-gray-600">Frequency: {quote.property?.serviceFrequency || "N/A"}</div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-lg font-semibold text-purple-600">R{quote.totals?.total?.toFixed(2) || "0.00"}</div>
-                              <div className="text-sm text-gray-500">
-                                {quote.dates?.quoteDate ? new Date(quote.dates.quoteDate).toLocaleDateString("en-ZA") : "N/A"}
-                              </div>
-                              <div className={`text-xs mt-1 px-2 py-1 rounded ${
-                                quote.status === "converted" ? "bg-green-100 text-green-700" :
-                                quote.status === "pending" ? "bg-purple-100 text-purple-700" :
-                                "bg-gray-100 text-gray-700"
-                              }`}>
-                                {quote.status || "unknown"}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+         {showQuotesList && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="p-4 border-b flex items-center justify-between bg-gray-50">
+        <h2 className="text-xl font-semibold text-gray-800">Saved Quotes</h2>
+        <button
+          onClick={() => setShowQuotesList(false)}
+          className="text-gray-500 hover:text-gray-700 text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
+        >
+          ✕
+        </button>
+      </div>
+      <div className="overflow-auto flex-1 p-4">
+        {savedQuotes.length === 0 ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <p className="text-gray-500 text-lg">No saved quotes yet</p>
+              <p className="text-gray-400 text-sm mt-2">Create your first quote to get started</p>
             </div>
-          )}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse bg-white min-w-[800px]">
+              <thead>
+                <tr className="bg-gray-800 text-white">
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Quote #</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Customer</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Property</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Quote Date</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Frequency</th>
+                  <th className="text-right py-3 px-4 font-semibold text-sm">Amount</th>
+                  <th className="text-center py-3 px-4 font-semibold text-sm">Status</th>
+                  <th className="text-center py-3 px-4 font-semibold text-sm">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {savedQuotes.map((quote, index) => (
+                  <tr 
+                    key={quote.id}
+                    className={`border-b border-gray-200 hover:bg-gray-50 transition-colors ${
+                      index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                    }`}
+                  >
+                    <td className="py-3 px-4">
+                      <span className="font-semibold text-gray-900">
+                        {quote.quoteNumber || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          {quote.customer?.name || 'N/A'}
+                        </span>
+                        {quote.customer?.email && (
+                          <span className="text-xs text-gray-500 mt-0.5">
+                            {quote.customer.email}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm text-gray-900">
+                          {quote.property?.type || 'N/A'}
+                        </span>
+                        {quote.property?.size && (
+                          <span className="text-xs text-gray-500 mt-0.5">
+                            {quote.property.size}m²
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-sm text-gray-700">
+                      {quote.dates?.quoteDate 
+                        ? new Date(quote.dates.quoteDate).toLocaleDateString('en-ZA') 
+                        : 'N/A'}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-gray-700">
+                      {quote.property?.serviceFrequency || 'N/A'}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <span className="font-bold text-purple-600 text-base">
+                        R{quote.totals?.total?.toFixed(2) || '0.00'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex justify-center">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
+                          quote.status === 'converted' ? 'bg-green-500' :
+                          quote.status === 'accepted' ? 'bg-green-500' :
+                          quote.status === 'sent' ? 'bg-blue-500' :
+                          quote.status === 'pending' ? 'bg-purple-500' :
+                          quote.status === 'rejected' ? 'bg-red-500' :
+                          quote.status === 'expired' ? 'bg-orange-500' :
+                          quote.status === 'draft' ? 'bg-gray-500' :
+                          'bg-gray-500'
+                        }`}>
+                          {quote.status || 'unknown'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => loadQuote(quote)}
+                          className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors text-sm font-medium"
+                        >
+                          Load
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Add view/preview functionality here
+                            console.log('View quote:', quote);
+                          }}
+                          className="px-3 py-1.5 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors text-sm font-medium"
+                        >
+                          View
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
           {/* Mobile Invoice Toggle Button */}
           <button
@@ -1584,7 +1742,7 @@ const handleAIDataExtracted = (extractedData) => {
                                       <div className="flex border-b">
                                         <button
                                           onClick={() => setInputMode("manual")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
                                             inputMode === "manual"
                                               ? "bg-white text-blue-600 border-b-2 border-blue-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1594,7 +1752,7 @@ const handleAIDataExtracted = (extractedData) => {
                                         </button>
                                         <button
                                           onClick={() => setInputMode("ai")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                                             inputMode === "ai"
                                               ? "bg-white text-purple-600 border-b-2 border-purple-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1624,7 +1782,7 @@ const handleAIDataExtracted = (extractedData) => {
                     <>               
                   <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-blue-700 font-medium">{isQuoteMode ? 'Quote' : 'Scheduled'}</span>
+                    <span className="text-blue-700 text-sm font-medium">{isQuoteMode ? 'Quote' : 'Scheduled'}</span>
                     <span className="text-blue-600">
                       {isQuoteMode ? 'Valid Until: ' : 'Service Date: '}
                       {new Date(isQuoteMode ? Date.now() + 30 * 24 * 60 * 60 * 1000 : Date.now()).toLocaleDateString("en-ZA")}
@@ -1656,183 +1814,39 @@ const handleAIDataExtracted = (extractedData) => {
                     )}
                   </div>
 
-                  {/* Customer Information */}
-                  <div className="bg-gray-100 border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Users className="w-5 h-5" />
-                        <span>Customer Information</span>
-                      </h2>
-                      <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-                        <Edit className="w-4 h-4" />
-                        <span>Edit</span>
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Customer Name</div>
-                        <input
-                          type="text"
-                          value={customerName}
-                          onChange={(e) => setCustomerName(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-200"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Customer ID</div>
-                        <input
-                          type="text"
-                          value={customerId}
-                          onChange={(e) => setCustomerId(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Email</div>
-                        <input
-                          type="text"
-                          value={customerEmail}
-                          onChange={(e) => setCustomerEmail(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Phone</div>
-                        <input
-                          type="text"
-                          value={customerPhone}
-                          onChange={(e) => setCustomerPhone(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <div className="text-sm text-gray-500">Address</div>
-                        <input
-                          type="text"
-                          value={customerAddress}
-                          onChange={(e) => setCustomerAddress(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Property Information */}
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Building className="w-5 h-5" />
-                        <span>Property Information</span>
-                      </h2>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Property Type</div>
-                        <select
-                          value={propertyType}
-                          onChange={(e) => setPropertyType(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option>Residential</option>
-                          <option>Commercial</option>
-                          <option>Office</option>
-                        </select>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Size (m²)</div>
-                        <input
-                          type="text"
-                          value={propertySize}
-                          onChange={(e) => setPropertySize(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Rooms</div>
-                        <input
-                          type="text"
-                          value={propertyRooms}
-                          onChange={(e) => setPropertyRooms(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Bathrooms</div>
-                        <input
-                          type="text"
-                          value={propertyBathrooms}
-                          onChange={(e) => setPropertyBathrooms(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Floors</div>
-                        <input
-                          type="text"
-                          value={propertyFloors}
-                          onChange={(e) => setPropertyFloors(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Service Frequency</div>
-                        <select
-                          value={serviceFrequency}
-                          onChange={(e) => setServiceFrequency(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option>One-Time</option>
-                          <option>Weekly</option>
-                          <option>Bi-Weekly</option>
-                          <option>Monthly</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Add Service/Item */}
-                  <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                    <h2 className="text-lg font-semibold mb-4">Add Service/Item</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                      <select
-                        value={newItem.type}
-                        onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
-                        className="px-4 py-2 border rounded"
-                      >
-                        <option value="Service">Service</option>
-                        <option value="Supplies">Supplies</option>
-                      </select>
-                      <input
-                        type="text"
-                        placeholder="Description"
-                        value={newItem.description}
-                        onChange={(e) => setNewItem({...newItem, description: e.target.value})}
-                        className="px-4 py-2 border rounded"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Rate"
-                        value={newItem.rate}
-                        onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })}
-                        className="px-4 py-2 border rounded"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Qty"
-                        value={newItem.qty}
-                        onChange={(e) => setNewItem({ ...newItem, qty: e.target.value })}
-                        className="px-4 py-2 border rounded"
-                      />
-                      <button
-                        onClick={handleAddItem}
-                        className="bg-gray-50 text-gray-800 rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Add
-                      </button>
-                    </div>
-                  </div>
-
+                 {inputMode === "manual" && (
+  <MultiStepForm
+    // Customer Info Props
+    customerName={customerName}
+    setCustomerName={setCustomerName}
+    customerId={customerId}
+    setCustomerId={setCustomerId}
+    customerEmail={customerEmail}
+    setCustomerEmail={setCustomerEmail}
+    customerPhone={customerPhone}
+    setCustomerPhone={setCustomerPhone}
+    customerAddress={customerAddress}
+    setCustomerAddress={setCustomerAddress}
+    // Property Info Props
+    propertyType={propertyType}
+    setPropertyType={setPropertyType}
+    propertySize={propertySize}
+    setPropertySize={setPropertySize}
+    propertyRooms={propertyRooms}
+    setPropertyRooms={setPropertyRooms}
+    propertyBathrooms={propertyBathrooms}
+    setPropertyBathrooms={setPropertyBathrooms}
+    propertyFloors={propertyFloors}
+    setPropertyFloors={setPropertyFloors}
+    serviceFrequency={serviceFrequency}
+    setServiceFrequency={setServiceFrequency}
+    // Items Props
+    items={items}
+    newItem={newItem}
+    setNewItem={setNewItem}
+    handleAddItem={handleAddItem}
+  />
+)}
                   {/* Payment Terms */}
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1841,15 +1855,15 @@ const handleAIDataExtracted = (extractedData) => {
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-gray-600">Payment Method:</span>
-                        <span className="font-medium">Cash/Card/EFT</span>
+                        <span className="text-sm font-medium">Cash/Card/EFT</span>
                       </div>
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-gray-600">Payment Terms:</span>
-                        <span className="font-medium">{isQuoteMode ? 'Quote Valid 30 Days' : 'Due on Completion'}</span>
+                        <span className="text-sm font-medium">{isQuoteMode ? 'Quote Valid 30 Days' : 'Due on Completion'}</span>
                       </div>
                       <div className="flex justify-between py-2">
                         <span className="text-gray-600">Service Guarantee:</span>
-                        <span className="font-medium">7 Day Satisfaction Guarantee</span>
+                        <span className="text-sm font-medium">7 Day Satisfaction Guarantee</span>
                       </div>
                     </div>
                   </div>

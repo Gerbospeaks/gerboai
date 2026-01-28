@@ -371,7 +371,7 @@ const GuestModal = ({ showModal, setShowModal, existingGuest, onGuestSaved , use
             <div className="flex gap-4 pt-4">
               <button
                 type="submit"
-                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-gray-800 py-3 rounded-lg hover:bg-blue-700 font-medium"
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-gray-800 py-3 rounded-lg hover:bg-blue-700 text-sm font-medium"
               >
                 <Save className="w-5 h-5" />
                 {existingGuest ? 'Update Guest' : createCheckIn ? 'Save Guest & Create Check-In' : 'Save Guest'}
@@ -379,7 +379,7 @@ const GuestModal = ({ showModal, setShowModal, existingGuest, onGuestSaved , use
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="flex-1 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 font-medium"
+                className="flex-1 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 text-sm font-medium"
               >
                 Cancel
               </button>

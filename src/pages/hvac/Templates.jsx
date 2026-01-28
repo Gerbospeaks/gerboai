@@ -277,7 +277,7 @@ const Templates = ({ user }) => {
           <button
             key={category.id}
             onClick={() => setSelectedCategory(category.id)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               selectedCategory === category.id
                 ? 'bg-cyan-600 text-gray-800 shadow-lg scale-105'
                 : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'

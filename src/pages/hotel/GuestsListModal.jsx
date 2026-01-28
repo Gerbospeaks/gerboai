@@ -277,7 +277,7 @@ const GuestsListModal = ({
                       )}
                       {guest.idType && guest.idNumber && (
                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <span className="font-medium">{guest.idType}:</span>
+                          <span className="text-sm font-medium">{guest.idType}:</span>
                           <span>{guest.idNumber}</span>
                         </div>
                       )}

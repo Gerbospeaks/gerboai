@@ -253,14 +253,14 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
             <div className="flex gap-3 pt-4">
               <button
                 onClick={handleClose}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
                 disabled={saving}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmit}
-                className="flex-1 px-4 py-3 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-700 transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={saving}
               >
                 <Save className="w-4 h-4" />

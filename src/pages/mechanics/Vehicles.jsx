@@ -341,7 +341,7 @@ const Vehicles = ({ user }) => {
                       </p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  <span className={`px-2 py-1 rounded-full text-xs text-sm font-medium ${
                     vehicle.status === 'Active' ? 'bg-green-100 text-green-700' :
                     vehicle.status === 'In Service' ? 'bg-blue-100 text-blue-700' :
                     'bg-gray-100 text-gray-700'

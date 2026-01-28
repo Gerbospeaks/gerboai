@@ -8,6 +8,7 @@ import Templates from "./Templates";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import SignatureStamp from '../SignatureStamp';
+import LegalMultiStepForm from './LegalMultiStepForm';
 import {
   getFirestore,
   collection,
@@ -749,14 +750,14 @@ const handleAIDataExtracted = (extractedData) => {
     <nav className="space-y-1">
       <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
         <Home className="w-5 h-5" />
-        <span className="font-medium">Home</span>
+        <span className="text-sm font-medium">Home</span>
       </div>
       <div
         onClick={() => setShowSettings(true)}
         className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
         <Settings className="w-5 h-5" />
-        <span className="font-medium">Settings</span>
+        <span className="text-sm font-medium">Settings</span>
       </div>
 
       <div className="pt-4 mt-4 border-t border-slate-700/50">
@@ -765,7 +766,7 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200"
         >
           <TrendingUp className="w-5 h-5" />
-          <span className="font-medium">Practice Overview</span>
+          <span className="text-sm font-medium">Practice Overview</span>
         </div>
 
         {/* Cases Section */}
@@ -773,7 +774,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <FolderOpen className="w-5 h-5" />
-              <span className="font-medium">Cases</span>
+              <span className="text-sm font-medium">Cases</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -794,7 +795,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Invoices</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedInvoices.length}
                 </span>
               </div>
@@ -815,7 +816,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <Users className="w-5 h-5" />
-              <span className="font-medium">Clients</span>
+              <span className="text-sm font-medium">Clients</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -833,7 +834,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Clients</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedCustomers.length}
                 </span>
               </div>
@@ -846,23 +847,23 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
         >
           <FileText className="w-5 h-5" />
-          <span className="font-medium">Invoice Templates</span>
+          <span className="text-sm font-medium">Invoice Templates</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Scale className="w-5 h-5" />
-          <span className="font-medium">Court Dates</span>
+          <span className="text-sm font-medium">Court Dates</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <BookOpen className="w-5 h-5" />
-          <span className="font-medium">Legal Research</span>
+          <span className="text-sm font-medium">Legal Research</span>
         </div>
 
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <Receipt className="w-5 h-5" />
-            <span className="font-medium">Billing</span>
+            <span className="text-sm font-medium">Billing</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -870,7 +871,7 @@ const handleAIDataExtracted = (extractedData) => {
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <CreditCard className="w-5 h-5" />
-            <span className="font-medium">Payments</span>
+            <span className="text-sm font-medium">Payments</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -878,14 +879,14 @@ const handleAIDataExtracted = (extractedData) => {
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <FileBarChart className="w-5 h-5" />
-            <span className="font-medium">Reports</span>
+            <span className="text-sm font-medium">Reports</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Calendar className="w-5 h-5" />
-          <span className="font-medium">Calendar</span>
+          <span className="text-sm font-medium">Calendar</span>
         </div>
       </div>
     </nav>
@@ -1510,7 +1511,7 @@ const handleAIDataExtracted = (extractedData) => {
                                       <div className="flex border-b">
                                         <button
                                           onClick={() => setInputMode("manual")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
                                             inputMode === "manual"
                                               ? "bg-white text-blue-600 border-b-2 border-blue-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1520,7 +1521,7 @@ const handleAIDataExtracted = (extractedData) => {
                                         </button>
                                         <button
                                           onClick={() => setInputMode("ai")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                                             inputMode === "ai"
                                               ? "bg-white text-purple-600 border-b-2 border-purple-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1569,164 +1570,33 @@ const handleAIDataExtracted = (extractedData) => {
                 </div>
               </div>
 
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Users className="w-5 h-5" />
-                    <span>Client Information</span>
-                  </h2>
-                  <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Client Name</div>
-                    <input
-                      type="text"
-                      value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Client ID</div>
-                    <input
-                      type="text"
-                      value={clientId}
-                      onChange={(e) => setClientId(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Email</div>
-                    <input
-                      type="text"
-                      value={clientEmail}
-                      onChange={(e) => setClientEmail(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Phone</div>
-                    <input
-                      type="text"
-                      value={clientPhone}
-                      onChange={(e) => setClientPhone(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Address</div>
-                    <input
-                      type="text"
-                      value={clientAddress}
-                      onChange={(e) => setClientAddress(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Briefcase className="w-5 h-5" />
-                    <span>Case Information</span>
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Case Type</div>
-                    <input
-                      type="text"
-                      value={caseType}
-                      onChange={(e) => setCaseType(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="e.g., Commercial Litigation"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Case Number</div>
-                    <input
-                      type="text"
-                      value={caseNumber}
-                      onChange={(e) => setCaseNumber(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="e.g., CASE-2026-001"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Matter Description</div>
-                    <textarea
-                      value={matterDescription}
-                      onChange={(e) => setMatterDescription(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      rows="3"
-                      placeholder="Brief description of the legal matter"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h2 className="text-lg font-semibold mb-4">Add Time Entry/Expense</h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                  <select
-                    value={newItem.type}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, type: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  >
-                    <option value="Legal Services">Legal Services</option>
-                    <option value="Court Fees">Court Fees</option>
-                    <option value="Disbursements">Disbursements</option>
-                  </select>
-
-                  <input
-                    type="text"
-                    placeholder="Description"
-                    value={newItem.description}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, description: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Rate/Hour"
-                    value={newItem.rate}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, rate: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Hours"
-                    value={newItem.hours}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, hours: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <button
-                    onClick={handleAddItem}
-                    className="bg-gray-50 text-gray-800 rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add
-                  </button>
-                </div>
-              </div>
+             {inputMode === "manual" && (
+  <LegalMultiStepForm
+    // Client Info Props
+    clientName={clientName}
+    setClientName={setClientName}
+    clientId={clientId}
+    setClientId={setClientId}
+    clientEmail={clientEmail}
+    setClientEmail={setClientEmail}
+    clientPhone={clientPhone}
+    setClientPhone={setClientPhone}
+    clientAddress={clientAddress}
+    setClientAddress={setClientAddress}
+    // Case Info Props
+    caseType={caseType}
+    setCaseType={setCaseType}
+    caseNumber={caseNumber}
+    setCaseNumber={setCaseNumber}
+    matterDescription={matterDescription}
+    setMatterDescription={setMatterDescription}
+    // Items Props
+    items={items}
+    newItem={newItem}
+    setNewItem={setNewItem}
+    handleAddItem={handleAddItem}
+  />
+)}
 
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -1736,15 +1606,15 @@ const handleAIDataExtracted = (extractedData) => {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between py-2 border-b">
                     <span className="text-gray-600">Payment Method:</span>
-                    <span className="font-medium">EFT/Bank Transfer</span>
+                    <span className="text-sm font-medium">EFT/Bank Transfer</span>
                   </div>
                   <div className="flex justify-between py-2 border-b">
                     <span className="text-gray-600">Payment Terms:</span>
-                    <span className="font-medium">Due Within 30 Days</span>
+                    <span className="text-sm font-medium">Due Within 30 Days</span>
                   </div>
                   <div className="flex justify-between py-2">
                     <span className="text-gray-600">Late Payment:</span>
-                    <span className="font-medium">Interest at Prime + 2%</span>
+                    <span className="text-sm font-medium">Interest at Prime + 2%</span>
                   </div>
                 </div>
               </div>

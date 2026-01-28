@@ -265,22 +265,22 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
             <table className="w-full">
               <thead className="bg-gray-800 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Invoice
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Patient
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -337,7 +337,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
 
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs text-sm font-medium ${
                             isOverdue
                               ? "bg-red-100 text-red-800"
                               : "bg-orange-100 text-orange-800"
@@ -412,13 +412,13 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-500">Invoice Number:</span>
-                    <div className="font-medium">
+                    <div className="text-sm font-medium">
                       {selectedInvoice.invoiceNumber}
                     </div>
                   </div>
                   <div>
                     <span className="text-gray-500">Date:</span>
-                    <div className="font-medium">
+                    <div className="text-sm font-medium">
                       {formatDate(selectedInvoice.createdAt)}
                     </div>
                   </div>
@@ -430,7 +430,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
                   </div>
                   <div>
                     <span className="text-gray-500">Days Outstanding:</span>
-                    <div className="font-medium">
+                    <div className="text-sm font-medium">
                       {getDaysOverdue(selectedInvoice.createdAt)} days
                     </div>
                   </div>
@@ -446,7 +446,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center space-x-2">
                     <User className="w-4 h-4 text-gray-400" />
-                    <span className="font-medium">
+                    <span className="text-sm font-medium">
                       {selectedInvoice.patient?.name}
                     </span>
                   </div>
@@ -477,7 +477,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
                       className="flex justify-between text-sm py-2 border-b"
                     >
                       <span>{item.description}</span>
-                      <span className="font-medium">
+                      <span className="text-sm font-medium">
                         {formatCurrency(item.amount)}
                       </span>
                     </div>

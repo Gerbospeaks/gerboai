@@ -7,6 +7,7 @@ import Templates from "./Templates";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
+import FreightMultiStepForm from "./FreightMultiStepForm";
 import {
   getFirestore,
   collection,
@@ -823,14 +824,14 @@ const handleAIDataExtracted = (extractedData) => {
     <nav className="space-y-1">
       <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
         <Home className="w-5 h-5" />
-        <span className="font-medium">Home</span>
+        <span className="text-sm font-medium">Home</span>
       </div>
       <div
         onClick={() => setShowSettings(true)}
         className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
         <Settings className="w-5 h-5" />
-        <span className="font-medium">Settings</span>
+        <span className="text-sm font-medium">Settings</span>
       </div>
 
       <div className="pt-4 mt-4 border-t border-slate-700/50">
@@ -839,7 +840,7 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200"
         >
           <TrendingUp className="w-5 h-5" />
-          <span className="font-medium">Business Overview</span>
+          <span className="text-sm font-medium">Business Overview</span>
         </div>
 
         {/* Waybills Section */}
@@ -847,7 +848,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <ClipboardList className="w-5 h-5" />
-              <span className="font-medium">Waybills</span>
+              <span className="text-sm font-medium">Waybills</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -868,7 +869,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Waybills</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedWaybills.length}
                 </span>
               </div>
@@ -892,7 +893,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <Users className="w-5 h-5" />
-              <span className="font-medium">Customers</span>
+              <span className="text-sm font-medium">Customers</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -910,7 +911,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Customers</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedCustomers.length}
                 </span>
               </div>
@@ -923,23 +924,23 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
         >
           <FileText className="w-5 h-5" />
-          <span className="font-medium">Invoice Templates</span>
+          <span className="text-sm font-medium">Invoice Templates</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Truck className="w-5 h-5" />
-          <span className="font-medium">Fleet</span>
+          <span className="text-sm font-medium">Fleet</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <MapPin className="w-5 h-5" />
-          <span className="font-medium">Tracking</span>
+          <span className="text-sm font-medium">Tracking</span>
         </div>
 
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <Receipt className="w-5 h-5" />
-            <span className="font-medium">Invoices</span>
+            <span className="text-sm font-medium">Invoices</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -947,7 +948,7 @@ const handleAIDataExtracted = (extractedData) => {
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <CreditCard className="w-5 h-5" />
-            <span className="font-medium">Payments</span>
+            <span className="text-sm font-medium">Payments</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -955,14 +956,14 @@ const handleAIDataExtracted = (extractedData) => {
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <FileBarChart className="w-5 h-5" />
-            <span className="font-medium">Reports</span>
+            <span className="text-sm font-medium">Reports</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Calendar className="w-5 h-5" />
-          <span className="font-medium">Schedule</span>
+          <span className="text-sm font-medium">Schedule</span>
         </div>
       </div>
     </nav>
@@ -1656,7 +1657,7 @@ const handleAIDataExtracted = (extractedData) => {
                                       <div className="flex border-b">
                                         <button
                                           onClick={() => setInputMode("manual")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
                                             inputMode === "manual"
                                               ? "bg-white text-blue-600 border-b-2 border-blue-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1666,7 +1667,7 @@ const handleAIDataExtracted = (extractedData) => {
                                         </button>
                                         <button
                                           onClick={() => setInputMode("ai")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                                             inputMode === "ai"
                                               ? "bg-white text-purple-600 border-b-2 border-purple-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1696,7 +1697,7 @@ const handleAIDataExtracted = (extractedData) => {
                     <>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-blue-700 font-medium">
+                    <span className="text-blue-700 text-sm font-medium">
                       In Transit
                     </span>
                     <span className="text-blue-600">Shipped Today</span>
@@ -1727,247 +1728,48 @@ const handleAIDataExtracted = (extractedData) => {
                     </div>
                   </div>
 
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Users className="w-5 h-5" />
-                        <span>Sender Information</span>
-                      </h2>
-                      <button className="flex items-center space-x-2 text-orange-600 hover:text-orange-700">
-                        <Edit className="w-4 h-4" />
-                        <span>Edit</span>
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Sender Name</div>
-                        <input
-                          type="text"
-                          value={senderName}
-                          onChange={(e) => setSenderName(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Customer ID</div>
-                        <input
-                          type="text"
-                          value={customerId}
-                          onChange={(e) => setCustomerId(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Email</div>
-                        <input
-                          type="text"
-                          value={senderEmail}
-                          onChange={(e) => setSenderEmail(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Phone</div>
-                        <input
-                          type="text"
-                          value={senderPhone}
-                          onChange={(e) => setSenderPhone(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <div className="text-sm text-gray-500">Address</div>
-                        <input
-                          type="text"
-                          value={senderAddress}
-                          onChange={(e) => setSenderAddress(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Users className="w-5 h-5" />
-                        <span>Receiver Information</span>
-                      </h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Receiver Name
-                        </div>
-                        <input
-                          type="text"
-                          value={receiverName}
-                          onChange={(e) => setReceiverName(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Email</div>
-                        <input
-                          type="text"
-                          value={receiverEmail}
-                          onChange={(e) => setReceiverEmail(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Phone</div>
-                        <input
-                          type="text"
-                          value={receiverPhone}
-                          onChange={(e) => setReceiverPhone(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <div className="text-sm text-gray-500">Address</div>
-                        <input
-                          type="text"
-                          value={receiverAddress}
-                          onChange={(e) => setReceiverAddress(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Package className="w-5 h-5" />
-                        <span>Shipment Information</span>
-                      </h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Origin</div>
-                        <input
-                          type="text"
-                          value={origin}
-                          onChange={(e) => setOrigin(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Destination</div>
-                        <input
-                          type="text"
-                          value={destination}
-                          onChange={(e) => setDestination(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Cargo Type</div>
-                        <input
-                          type="text"
-                          value={cargoType}
-                          onChange={(e) => setCargoType(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Weight (kg)</div>
-                        <input
-                          type="text"
-                          value={weight}
-                          onChange={(e) => setWeight(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Dimensions</div>
-                        <input
-                          type="text"
-                          value={dimensions}
-                          onChange={(e) => setDimensions(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Tracking Number
-                        </div>
-                        <input
-                          type="text"
-                          value={trackingNumber}
-                          onChange={(e) => setTrackingNumber(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                    <h2 className="text-lg font-semibold mb-4">
-                      Add Service/Charge
-                    </h2>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                      <select
-                        value={newItem.type}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, type: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      >
-                        <option value="Freight">Freight</option>
-                        <option value="Insurance">Insurance</option>
-                        <option value="Handling">Handling</option>
-                        <option value="Storage">Storage</option>
-                      </select>
-
-                      <input
-                        type="text"
-                        placeholder="Description"
-                        value={newItem.description}
-                        onChange={(e) =>
-                          setNewItem({
-                            ...newItem,
-                            description: e.target.value,
-                          })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Rate"
-                        value={newItem.rate}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, rate: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Qty"
-                        value={newItem.qty}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, qty: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <button
-                        onClick={handleAddItem}
-                        className="bg-gray-600 text-gray-800 rounded-lg px-4 py-2 hover:bg-orange-700 flex items-center justify-center gap-2"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Add
-                      </button>
-                    </div>
-                  </div>
-
+                 {inputMode === "manual" && (
+  <FreightMultiStepForm
+    // Sender Info Props
+    senderName={senderName}
+    setSenderName={setSenderName}
+    customerId={customerId}
+    setCustomerId={setCustomerId}
+    senderEmail={senderEmail}
+    setSenderEmail={setSenderEmail}
+    senderPhone={senderPhone}
+    setSenderPhone={setSenderPhone}
+    senderAddress={senderAddress}
+    setSenderAddress={setSenderAddress}
+    // Receiver Info Props
+    receiverName={receiverName}
+    setReceiverName={setReceiverName}
+    receiverEmail={receiverEmail}
+    setReceiverEmail={setReceiverEmail}
+    receiverPhone={receiverPhone}
+    setReceiverPhone={setReceiverPhone}
+    receiverAddress={receiverAddress}
+    setReceiverAddress={setReceiverAddress}
+    // Shipment Info Props
+    origin={origin}
+    setOrigin={setOrigin}
+    destination={destination}
+    setDestination={setDestination}
+    cargoType={cargoType}
+    setCargoType={setCargoType}
+    weight={weight}
+    setWeight={setWeight}
+    dimensions={dimensions}
+    setDimensions={setDimensions}
+    trackingNumber={trackingNumber}
+    setTrackingNumber={setTrackingNumber}
+    // Items Props
+    items={items}
+    newItem={newItem}
+    setNewItem={setNewItem}
+    handleAddItem={handleAddItem}
+  />
+)}
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold">Payment Terms</h2>
@@ -1976,15 +1778,15 @@ const handleAIDataExtracted = (extractedData) => {
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-gray-600">Payment Method:</span>
-                        <span className="font-medium">Cash/Card/EFT</span>
+                        <span className="text-sm font-medium">Cash/Card/EFT</span>
                       </div>
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-gray-600">Payment Terms:</span>
-                        <span className="font-medium">Due on Delivery</span>
+                        <span className="text-sm font-medium">Due on Delivery</span>
                       </div>
                       <div className="flex justify-between py-2">
                         <span className="text-gray-600">Insurance:</span>
-                        <span className="font-medium">
+                        <span className="text-sm font-medium">
                           Optional Coverage Available
                         </span>
                       </div>

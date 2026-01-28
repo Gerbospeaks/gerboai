@@ -756,20 +756,20 @@ const handleAIDataExtracted = (extractedData) => {
     <nav className="space-y-1">
       <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
         <Home className="w-5 h-5" />
-        <span className="font-medium">Home</span>
+        <span className="text-sm font-medium">Home</span>
       </div>
       <div
         onClick={() => setShowSettings(true)}
         className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
         <Settings className="w-5 h-5" />
-        <span className="font-medium">Settings</span>
+        <span className="text-sm font-medium">Settings</span>
       </div>
 
       <div className="pt-4 mt-4 border-t border-slate-700/50">
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200">
           <TrendingUp className="w-5 h-5" />
-          <span className="font-medium">School Overview</span>
+          <span className="text-sm font-medium">School Overview</span>
         </div>
 
         {/* Report Cards Section */}
@@ -777,7 +777,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <ClipboardList className="w-5 h-5" />
-              <span className="font-medium">Report Cards</span>
+              <span className="text-sm font-medium">Report Cards</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -795,7 +795,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Reports</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedReports.length}
                 </span>
               </div>
@@ -808,7 +808,7 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
         >
           <FileText className="w-5 h-5" />
-          <span className="font-medium">Templates</span>
+          <span className="text-sm font-medium">Templates</span>
         </div>
 
         {/* Students Section */}
@@ -816,7 +816,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <Users className="w-5 h-5" />
-              <span className="font-medium">Students</span>
+              <span className="text-sm font-medium">Students</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -834,7 +834,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Students</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedStudents.length}
                 </span>
               </div>
@@ -844,30 +844,30 @@ const handleAIDataExtracted = (extractedData) => {
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Calendar className="w-5 h-5" />
-          <span className="font-medium">Attendance</span>
+          <span className="text-sm font-medium">Attendance</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <BookOpen className="w-5 h-5" />
-          <span className="font-medium">Curriculum</span>
+          <span className="text-sm font-medium">Curriculum</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Award className="w-5 h-5" />
-          <span className="font-medium">Assessments</span>
+          <span className="text-sm font-medium">Assessments</span>
         </div>
 
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <BarChart3 className="w-5 h-5" />
-            <span className="font-medium">Analytics</span>
+            <span className="text-sm font-medium">Analytics</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <UserCheck className="w-5 h-5" />
-          <span className="font-medium">Staff</span>
+          <span className="text-sm font-medium">Staff</span>
         </div>
       </div>
     </nav>
@@ -1486,7 +1486,7 @@ const handleAIDataExtracted = (extractedData) => {
                                       <div className="flex border-b">
                                         <button
                                           onClick={() => setInputMode("manual")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
                                             inputMode === "manual"
                                               ? "bg-white text-blue-600 border-b-2 border-blue-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1496,7 +1496,7 @@ const handleAIDataExtracted = (extractedData) => {
                                         </button>
                                         <button
                                           onClick={() => setInputMode("ai")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                                             inputMode === "ai"
                                               ? "bg-white text-purple-600 border-b-2 border-purple-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1526,7 +1526,7 @@ const handleAIDataExtracted = (extractedData) => {
                     <>
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                 <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                <span className="text-indigo-700 font-medium">{term} - {academicYear}</span>
+                <span className="text-indigo-700 text-sm font-medium">{term} - {academicYear}</span>
                 <span className="text-indigo-600">Academic Year</span>
               </div>
 

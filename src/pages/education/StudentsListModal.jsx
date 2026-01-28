@@ -223,7 +223,7 @@ const StudentsListModal = ({
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2 text-gray-700">
                         <GraduationCap className="w-4 h-4 text-indigo-500" />
-                        <span className="font-medium">{student.gradeLevel || 'No Grade'}</span>
+                        <span className="text-sm font-medium">{student.gradeLevel || 'No Grade'}</span>
                       </div>
                       
                       {student.dateOfBirth && (
@@ -237,7 +237,7 @@ const StudentsListModal = ({
                         <p className="text-xs text-gray-500 mb-1">Parent/Guardian:</p>
                         <div className="flex items-center gap-2 text-gray-700">
                           <User className="w-4 h-4 text-gray-400" />
-                          <span className="font-medium">{student.parentName || 'N/A'}</span>
+                          <span className="text-sm font-medium">{student.parentName || 'N/A'}</span>
                         </div>
                         
                         {student.parentPhone && (
@@ -260,7 +260,7 @@ const StudentsListModal = ({
                         <div className="border-t pt-2 mt-2">
                           <div className="flex items-center gap-2 text-orange-600 bg-orange-50 px-2 py-1 rounded">
                             <AlertCircle className="w-4 h-4" />
-                            <span className="text-xs font-medium">Medical Alert</span>
+                            <span className="text-xs text-sm font-medium">Medical Alert</span>
                           </div>
                         </div>
                       )}
@@ -268,7 +268,7 @@ const StudentsListModal = ({
 
                     {/* Click to Load Indicator */}
                     <div className="mt-3 pt-3 border-t text-center">
-                      <span className="text-xs text-indigo-600 font-medium">
+                      <span className="text-xs text-indigo-600 text-sm font-medium">
                         Click to load student details
                       </span>
                     </div>

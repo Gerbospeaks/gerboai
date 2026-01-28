@@ -357,7 +357,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -399,7 +399,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                         <h3 className="text-lg font-semibold text-gray-900">
                           {checkIn.guestName}
                         </h3>
-                        <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(checkIn.status)}`}>
+                        <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs text-sm font-medium ${getStatusBadge(checkIn.status)}`}>
                           {getStatusIcon(checkIn.status)}
                           {checkIn.status?.toUpperCase()}
                         </span>
@@ -409,28 +409,28 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                         <div>
                           <div className="flex items-center gap-1">
                             <User className="w-4 h-4" />
-                            <span className="font-medium">Guest ID:</span>
+                            <span className="text-sm font-medium">Guest ID:</span>
                           </div>
                           <div className="ml-5">{checkIn.guestId || 'N/A'}</div>
                         </div>
                         <div>
                           <div className="flex items-center gap-1">
                             <Bed className="w-4 h-4" />
-                            <span className="font-medium">Room:</span>
+                            <span className="text-sm font-medium">Room:</span>
                           </div>
                           <div className="ml-5">{checkIn.roomNumber} - {checkIn.roomType}</div>
                         </div>
                         <div>
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            <span className="font-medium">Check-In:</span>
+                            <span className="text-sm font-medium">Check-In:</span>
                           </div>
                           <div className="ml-5">{checkIn.checkInDate}</div>
                         </div>
                         <div>
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            <span className="font-medium">Check-Out:</span>
+                            <span className="text-sm font-medium">Check-Out:</span>
                           </div>
                           <div className="ml-5">{checkIn.checkOutDate}</div>
                         </div>
@@ -438,7 +438,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
 
                       {checkIn.notes && (
                         <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                          <span className="font-medium">Notes:</span> {checkIn.notes}
+                          <span className="text-sm font-medium">Notes:</span> {checkIn.notes}
                         </div>
                       )}
                     </div>
@@ -698,14 +698,14 @@ const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSav
             <div className="flex gap-4 pt-4">
               <button
                 type="submit"
-                className="flex-1 bg-blue-600 text-gray-800 py-3 rounded-lg hover:bg-blue-700 font-medium"
+                className="flex-1 bg-blue-600 text-gray-800 py-3 rounded-lg hover:bg-blue-700 text-sm font-medium"
               >
                 {existingCheckIn ? 'Update Check-In' : 'Add Check-In'}
               </button>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="flex-1 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 font-medium"
+                className="flex-1 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 text-sm font-medium"
               >
                 Cancel
               </button>

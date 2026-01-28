@@ -6,6 +6,7 @@ import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates"; 
 import MedicalAIExtractor from "./MedicalAIExtractor";
+import MedicalMultiStepForm from "./MedicalMultiStepForm";  
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import {
   getFirestore,
@@ -787,14 +788,14 @@ const handleAIDataExtracted = (extractedData) => {
     <nav className="space-y-1">
       <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
         <Home className="w-5 h-5" />
-        <span className="font-medium">Dashboard</span>
+        <span className="text-sm font-medium">Dashboard</span>
       </div>
       <div
         onClick={() => setShowSettings(true)}
         className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
         <Settings className="w-5 h-5" />
-        <span className="font-medium">Settings</span>
+        <span className="text-sm font-medium">Settings</span>
       </div>
 
       <div className="pt-4 mt-4 border-t border-slate-700/50">
@@ -803,7 +804,7 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200"
         >
           <TrendingUp className="w-5 h-5" />
-          <span className="font-medium">Practice Overview</span>
+          <span className="text-sm font-medium">Practice Overview</span>
         </div>
 
         {/* Invoices Section */}
@@ -811,7 +812,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <Receipt className="w-5 h-5" />
-              <span className="font-medium">Invoices</span>
+              <span className="text-sm font-medium">Invoices</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -832,7 +833,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Invoices</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedInvoices.length}
                 </span>
               </div>
@@ -851,7 +852,7 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
         >
           <FileText className="w-5 h-5" />
-          <span className="font-medium">Invoice Templates</span>
+          <span className="text-sm font-medium">Invoice Templates</span>
         </div>
 
         {/* Patients Section */}
@@ -859,7 +860,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <Users className="w-5 h-5" />
-              <span className="font-medium">Patients</span>
+              <span className="text-sm font-medium">Patients</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -877,7 +878,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Patients</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedPatients.length}
                 </span>
               </div>
@@ -890,23 +891,23 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
         >
           <Calendar className="w-5 h-5" />
-          <span className="font-medium">Appointments</span>
+          <span className="text-sm font-medium">Appointments</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Stethoscope className="w-5 h-5" />
-          <span className="font-medium">Medical Records</span>
+          <span className="text-sm font-medium">Medical Records</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Pill className="w-5 h-5" />
-          <span className="font-medium">Prescriptions</span>
+          <span className="text-sm font-medium">Prescriptions</span>
         </div>
 
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <CreditCard className="w-5 h-5" />
-            <span className="font-medium">Payments</span>
+            <span className="text-sm font-medium">Payments</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -914,7 +915,7 @@ const handleAIDataExtracted = (extractedData) => {
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <FileBarChart className="w-5 h-5" />
-            <span className="font-medium">Reports</span>
+            <span className="text-sm font-medium">Reports</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -922,7 +923,7 @@ const handleAIDataExtracted = (extractedData) => {
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <BarChart3 className="w-5 h-5" />
-            <span className="font-medium">Analytics</span>
+            <span className="text-sm font-medium">Analytics</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -1606,7 +1607,7 @@ const handleAIDataExtracted = (extractedData) => {
                                       <div className="flex border-b">
                                         <button
                                           onClick={() => setInputMode("manual")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
                                             inputMode === "manual"
                                               ? "bg-white text-blue-600 border-b-2 border-blue-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1616,7 +1617,7 @@ const handleAIDataExtracted = (extractedData) => {
                                         </button>
                                         <button
                                           onClick={() => setInputMode("ai")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                                             inputMode === "ai"
                                               ? "bg-white text-purple-600 border-b-2 border-purple-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1646,7 +1647,7 @@ const handleAIDataExtracted = (extractedData) => {
                     <>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-blue-700 font-medium">
+                    <span className="text-blue-700 text-sm font-medium">
                       Pending Payment
                     </span>
                     <span className="text-blue-600">Created Today</span>
@@ -1677,262 +1678,45 @@ const handleAIDataExtracted = (extractedData) => {
                     </div>
                   </div>
 
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Users className="w-5 h-5" />
-                        <span>Patient Information</span>
-                      </h2>
-                      <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-                        <Edit className="w-4 h-4" />
-                        <span>Edit</span>
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Patient Name
-                        </div>
-                        <input
-                          type="text"
-                          value={patientName}
-                          onChange={(e) => setPatientName(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Patient ID</div>
-                        <input
-                          type="text"
-                          value={patientId}
-                          onChange={(e) => setPatientId(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Email</div>
-                        <input
-                          type="text"
-                          value={patientEmail}
-                          onChange={(e) => setPatientEmail(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Phone</div>
-                        <input
-                          type="text"
-                          value={patientPhone}
-                          onChange={(e) => setPatientPhone(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Date of Birth
-                        </div>
-                        <input
-                          type="date"
-                          value={patientDOB}
-                          onChange={(e) => setPatientDOB(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Gender</div>
-                        <select
-                          value={patientGender}
-                          onChange={(e) => setPatientGender(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <div className="text-sm text-gray-500">Address</div>
-                        <input
-                          type="text"
-                          value={patientAddress}
-                          onChange={(e) => setPatientAddress(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <CreditCard className="w-5 h-5" />
-                        <span>Insurance Information</span>
-                      </h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Insurance Provider
-                        </div>
-                        <input
-                          type="text"
-                          value={insuranceProvider}
-                          onChange={(e) => setInsuranceProvider(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Insurance Number
-                        </div>
-                        <input
-                          type="text"
-                          value={insuranceNumber}
-                          onChange={(e) => setInsuranceNumber(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                        <span>Medical Information</span>
-                      </h2>
-                      <button
-                        onClick={() => setShowSickNoteModal(true)}
-                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm flex items-center gap-2"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                        Generate Sick Note
-                      </button>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Diagnosis</div>
-                        <textarea
-                          value={diagnosis}
-                          onChange={(e) => setDiagnosis(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          rows="2"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Treatment Plan
-                        </div>
-                        <textarea
-                          value={treatmentPlan}
-                          onChange={(e) => setTreatmentPlan(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          rows="3"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Prescription
-                        </div>
-                        <textarea
-                          value={prescription}
-                          onChange={(e) => setPrescription(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          rows="3"
-                          placeholder="Medication details..."
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                    <h2 className="text-lg font-semibold mb-4">
-                      Add Service/Procedure
-                    </h2>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                      <select
-                        value={newItem.type}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, type: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      >
-                        <option value="Service">Service</option>
-                        <option value="Procedure">Procedure</option>
-                        <option value="Medication">Medication</option>
-                        <option value="Test">Test</option>
-                      </select>
-
-                      <input
-                        type="text"
-                        placeholder="Description"
-                        value={newItem.description}
-                        onChange={(e) =>
-                          setNewItem({
-                            ...newItem,
-                            description: e.target.value,
-                          })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Rate"
-                        value={newItem.rate}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, rate: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Qty"
-                        value={newItem.qty}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, qty: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <button
-                        onClick={handleAddItem}
-                        className="bg-gray-50 text-gray-800 rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Add
-                      </button>
-                    </div>
-                  </div>
+                  {inputMode === "manual" && (
+  <MedicalMultiStepForm
+    // Patient Info Props
+    patientName={patientName}
+    setPatientName={setPatientName}
+    patientId={patientId}
+    setPatientId={setPatientId}
+    patientEmail={patientEmail}
+    setPatientEmail={setPatientEmail}
+    patientPhone={patientPhone}
+    setPatientPhone={setPatientPhone}
+    patientDOB={patientDOB}
+    setPatientDOB={setPatientDOB}
+    patientGender={patientGender}
+    setPatientGender={setPatientGender}
+    patientAddress={patientAddress}
+    setPatientAddress={setPatientAddress}
+    // Insurance Info Props
+    insuranceProvider={insuranceProvider}
+    setInsuranceProvider={setInsuranceProvider}
+    insuranceNumber={insuranceNumber}
+    setInsuranceNumber={setInsuranceNumber}
+    // Medical Info Props
+    diagnosis={diagnosis}
+    setDiagnosis={setDiagnosis}
+    treatmentPlan={treatmentPlan}
+    setTreatmentPlan={setTreatmentPlan}
+    prescription={prescription}
+    setPrescription={setPrescription}
+    // Sick Note Props
+    showSickNoteModal={showSickNoteModal}
+    setShowSickNoteModal={setShowSickNoteModal}
+    // Items Props
+    items={items}
+    newItem={newItem}
+    setNewItem={setNewItem}
+    handleAddItem={handleAddItem}
+  />
+)}
 
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1942,17 +1726,17 @@ const handleAIDataExtracted = (extractedData) => {
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-gray-600">Payment Method:</span>
-                        <span className="font-medium">
+                        <span className="text-sm font-medium">
                           Cash/Card/Medical Aid
                         </span>
                       </div>
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-gray-600">Payment Terms:</span>
-                        <span className="font-medium">Due on Service</span>
+                        <span className="text-sm font-medium">Due on Service</span>
                       </div>
                       <div className="flex justify-between py-2">
                         <span className="text-gray-600">Refund Policy:</span>
-                        <span className="font-medium">30 Days</span>
+                        <span className="text-sm font-medium">30 Days</span>
                       </div>
                     </div>
                   </div>

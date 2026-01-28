@@ -7,6 +7,7 @@ import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from '../SignatureStamp';
+import PhotographyMultiStepForm from './PhotographyMultiStepForm';
 import {
   getFirestore,
   collection,
@@ -743,27 +744,27 @@ const handleAIDataExtracted = (extractedData) => {
     <nav className="space-y-1">
       <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
         <Home className="w-5 h-5" />
-        <span className="font-medium">Home</span>
+        <span className="text-sm font-medium">Home</span>
       </div>
       <div
         onClick={() => setShowSettings(true)}
         className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
         <Settings className="w-5 h-5" />
-        <span className="font-medium">Settings</span>
+        <span className="text-sm font-medium">Settings</span>
       </div>
 
       <div className="pt-4 mt-4 border-t border-slate-700/50">
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200">
           <TrendingUp className="w-5 h-5" />
-          <span className="font-medium">Business Overview</span>
+          <span className="text-sm font-medium">Business Overview</span>
         </div>
 
         <div className="mt-2">
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <ClipboardList className="w-5 h-5" />
-              <span className="font-medium">Invoices</span>
+              <span className="text-sm font-medium">Invoices</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -781,7 +782,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Invoices</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedInvoices.length}
                 </span>
               </div>
@@ -796,7 +797,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <Users className="w-5 h-5" />
-              <span className="font-medium">Clients</span>
+              <span className="text-sm font-medium">Clients</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -814,7 +815,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Clients</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedCustomers.length}
                 </span>
               </div>
@@ -827,28 +828,28 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
         >
           <FileText className="w-5 h-5" />
-          <span className="font-medium">Invoice Templates</span>
+          <span className="text-sm font-medium">Invoice Templates</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Calendar className="w-5 h-5" />
-          <span className="font-medium">Bookings</span>
+          <span className="text-sm font-medium">Bookings</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Image className="w-5 h-5" />
-          <span className="font-medium">Portfolio</span>
+          <span className="text-sm font-medium">Portfolio</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Package className="w-5 h-5" />
-          <span className="font-medium">Packages</span>
+          <span className="text-sm font-medium">Packages</span>
         </div>
 
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <CreditCard className="w-5 h-5" />
-            <span className="font-medium">Payments</span>
+            <span className="text-sm font-medium">Payments</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -856,7 +857,7 @@ const handleAIDataExtracted = (extractedData) => {
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <FileBarChart className="w-5 h-5" />
-            <span className="font-medium">Reports</span>
+            <span className="text-sm font-medium">Reports</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -864,7 +865,7 @@ const handleAIDataExtracted = (extractedData) => {
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <BarChart3 className="w-5 h-5" />
-            <span className="font-medium">Analytics</span>
+            <span className="text-sm font-medium">Analytics</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -1489,7 +1490,7 @@ const handleAIDataExtracted = (extractedData) => {
                                       <div className="flex border-b">
                                         <button
                                           onClick={() => setInputMode("manual")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
                                             inputMode === "manual"
                                               ? "bg-white text-blue-600 border-b-2 border-blue-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1499,7 +1500,7 @@ const handleAIDataExtracted = (extractedData) => {
                                         </button>
                                         <button
                                           onClick={() => setInputMode("ai")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                                             inputMode === "ai"
                                               ? "bg-white text-purple-600 border-b-2 border-purple-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1529,7 +1530,7 @@ const handleAIDataExtracted = (extractedData) => {
                     <>
               <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-blue-700 font-medium">Pending Payment</span>
+                <span className="text-blue-700 text-sm font-medium">Pending Payment</span>
                 <span className="text-blue-600">Due in 7 days</span>
               </div>
 
@@ -1554,167 +1555,33 @@ const handleAIDataExtracted = (extractedData) => {
                 </div>
               </div>
 
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Users className="w-5 h-5" />
-                    <span>Client Information</span>
-                  </h2>
-                  <button className="flex items-center space-x-2 text-purple-600 hover:text-purple-700">
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Client Name</div>
-                    <input
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Client ID</div>
-                    <input
-                      type="text"
-                      value={customerId}
-                      onChange={(e) => setCustomerId(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Email</div>
-                    <input
-                      type="text"
-                      value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Phone</div>
-                    <input
-                      type="text"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Address</div>
-                    <input
-                      type="text"
-                      value={customerAddress}
-                      onChange={(e) => setCustomerAddress(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Calendar className="w-5 h-5" />
-                    <span>Event Information</span>
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Event Date</div>
-                    <input
-                      type="date"
-                      value={eventDate}
-                      onChange={(e) => setEventDate(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Event Type</div>
-                    <select
-                      value={eventType}
-                      onChange={(e) => setEventType(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="Wedding">Wedding</option>
-                      <option value="Portrait">Portrait Session</option>
-                      <option value="Corporate">Corporate Event</option>
-                      <option value="Birthday">Birthday Party</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Event Location</div>
-                    <input
-                      type="text"
-                      value={eventLocation}
-                      onChange={(e) => setEventLocation(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h2 className="text-lg font-semibold mb-4">Add Service/Package</h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                  <select
-                    value={newItem.type}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, type: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  >
-                    <option value="Photography">Photography</option>
-                    <option value="Videography">Videography</option>
-                    <option value="Editing">Editing</option>
-                    <option value="Prints">Prints</option>
-                  </select>
-
-                  <input
-                    type="text"
-                    placeholder="Description"
-                    value={newItem.description}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, description: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Rate"
-                    value={newItem.rate}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, rate: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Qty"
-                    value={newItem.qty}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, qty: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <button
-                    onClick={handleAddItem}
-                    className="bg-gray-50 text-gray-800 rounded-lg px-4 py-2 hover:bg-purple-700 flex items-center justify-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add
-                  </button>
-                </div>
-              </div>
+            {inputMode === "manual" && (
+  <PhotographyMultiStepForm
+    // Client Info Props
+    customerName={customerName}
+    setCustomerName={setCustomerName}
+    customerId={customerId}
+    setCustomerId={setCustomerId}
+    customerEmail={customerEmail}
+    setCustomerEmail={setCustomerEmail}
+    customerPhone={customerPhone}
+    setCustomerPhone={setCustomerPhone}
+    customerAddress={customerAddress}
+    setCustomerAddress={setCustomerAddress}
+    // Event Info Props
+    eventDate={eventDate}
+    setEventDate={setEventDate}
+    eventType={eventType}
+    setEventType={setEventType}
+    eventLocation={eventLocation}
+    setEventLocation={setEventLocation}
+    // Items Props
+    items={items}
+    newItem={newItem}
+    setNewItem={setNewItem}
+    handleAddItem={handleAddItem}
+  />
+)}
 
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -1724,15 +1591,15 @@ const handleAIDataExtracted = (extractedData) => {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between py-2 border-b">
                     <span className="text-gray-600">Payment Method:</span>
-                    <span className="font-medium">EFT/Card/Cash</span>
+                    <span className="text-sm font-medium">EFT/Card/Cash</span>
                   </div>
                   <div className="flex justify-between py-2 border-b">
                     <span className="text-gray-600">Deposit Required:</span>
-                    <span className="font-medium">50% Upfront</span>
+                    <span className="text-sm font-medium">50% Upfront</span>
                   </div>
                   <div className="flex justify-between py-2">
                     <span className="text-gray-600">Balance Due:</span>
-                    <span className="font-medium">Day of Event</span>
+                    <span className="text-sm font-medium">Day of Event</span>
                   </div>
                 </div>
               </div>

@@ -304,28 +304,28 @@ const PartsInventory = ({ user }) => {
             <table className="w-full">
               <thead className="bg-gray-800 border-b border-gray-200">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Part Number
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Name
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Category
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Quantity
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Unit Price
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Supplier
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Location
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-right text-xs text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>

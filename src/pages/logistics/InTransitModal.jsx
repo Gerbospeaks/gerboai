@@ -239,7 +239,7 @@ const InTransitModal = ({ isOpen, onClose, user, onViewDetails, onPrintLabel }) 
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg font-medium">No shipments found</p>
+                <p className="text-gray-500 text-lg text-sm font-medium">No shipments found</p>
                 <p className="text-gray-400 text-sm mt-2">
                   {searchTerm ? 'Try adjusting your search or filter' : 'All shipments have been delivered'}
                 </p>

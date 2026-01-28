@@ -384,7 +384,7 @@ const Templates = ({ user }) => {
           <button
             key={category.id}
             onClick={() => setSelectedCategory(category.id)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               selectedCategory === category.id
                 ? 'bg-gray-50 text-gray-800 shadow-lg scale-105'
                 : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -675,7 +675,7 @@ const Templates = ({ user }) => {
               </div>
               <div className="flex items-center gap-2 text-blue-50">
                 {React.createElement(TEMPLATES[showPayment].icon, { className: "w-5 h-5" })}
-                <span className="font-medium">{TEMPLATES[showPayment].name}</span>
+                <span className="text-sm font-medium">{TEMPLATES[showPayment].name}</span>
               </div>
             </div>
 

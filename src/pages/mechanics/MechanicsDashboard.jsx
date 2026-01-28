@@ -901,14 +901,14 @@ const MechanicsDashboard = () => {
     <nav className="space-y-1">
       <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
         <Home className="w-5 h-5" />
-        <span className="font-medium">Home</span>
+        <span className="text-sm font-medium">Home</span>
       </div>
       <div
         onClick={() => setShowSettings(true)}
         className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
         <Settings className="w-5 h-5" />
-        <span className="font-medium">Settings</span>
+        <span className="text-sm font-medium">Settings</span>
       </div>
 
       <div className="pt-4 mt-4 border-t border-slate-700/50">
@@ -917,14 +917,14 @@ const MechanicsDashboard = () => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200"
         >
           <TrendingUp className="w-5 h-5" />
-          <span className="font-medium">Business Overview</span>
+          <span className="text-sm font-medium">Business Overview</span>
         </div>
 
         <div className="mt-2">
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <ClipboardList className="w-5 h-5" />
-              <span className="font-medium">Job Cards</span>
+              <span className="text-sm font-medium">Job Cards</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -954,7 +954,7 @@ const MechanicsDashboard = () => {
             >
               <div className="flex items-center justify-between">
                 <span>All {documentType === "quote" ? "Quotes" : "Invoices"}</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedJobCards.length}
                 </span>
               </div>
@@ -969,7 +969,7 @@ const MechanicsDashboard = () => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2">
             <div className="flex items-center space-x-3">
               <Users className="w-5 h-5" />
-              <span className="font-medium">Customers</span>
+              <span className="text-sm font-medium">Customers</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -987,7 +987,7 @@ const MechanicsDashboard = () => {
             >
               <div className="flex items-center justify-between">
                 <span>All Customers</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedCustomers.length}
                 </span>
               </div>
@@ -1000,7 +1000,7 @@ const MechanicsDashboard = () => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
         >
           <FileText className="w-5 h-5" />
-          <span className="font-medium">Invoice Templates</span>
+          <span className="text-sm font-medium">Invoice Templates</span>
         </div>
 
         <div
@@ -1008,7 +1008,7 @@ const MechanicsDashboard = () => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
         >
           <Car className="w-5 h-5" />
-          <span className="font-medium">Vehicles</span>
+          <span className="text-sm font-medium">Vehicles</span>
         </div>
 
         <div
@@ -1016,13 +1016,13 @@ const MechanicsDashboard = () => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
         >
           <Package className="w-5 h-5" />
-          <span className="font-medium">Parts Inventory</span>
+          <span className="text-sm font-medium">Parts Inventory</span>
         </div>
 
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <CreditCard className="w-5 h-5" />
-            <span className="font-medium">Payments</span>
+            <span className="text-sm font-medium">Payments</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -2162,7 +2162,7 @@ const MechanicsDashboard = () => {
                         type: e.target.value,
                       })
                     }
-                    className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white font-medium hover:border-slate-400"
+                    className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
                   >
                     <option value="Labor">Labor</option>
                     <option value="Parts">Parts</option>
@@ -2264,7 +2264,7 @@ const MechanicsDashboard = () => {
                                 {item.type}
                               </span>
                             </td>
-                            <td className="px-4 py-4 text-sm text-slate-700 font-medium">
+                            <td className="px-4 py-4 text-sm text-slate-700 text-sm font-medium">
                               {item.description}
                             </td>
                             <td className="px-4 py-4 text-sm text-right text-slate-700">
@@ -2309,7 +2309,7 @@ const MechanicsDashboard = () => {
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
                   <div className="space-y-3">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-700 font-medium">
+                      <span className="text-slate-700 text-sm font-medium">
                         Subtotal:
                       </span>
                       <span className="font-bold text-slate-900 text-lg">
@@ -2317,7 +2317,7 @@ const MechanicsDashboard = () => {
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-700 font-medium">
+                      <span className="text-slate-700 text-sm font-medium">
                         VAT (0%):
                       </span>
                       <span className="font-bold text-slate-900 text-lg">
@@ -2386,13 +2386,13 @@ const MechanicsDashboard = () => {
 
           <div className="space-y-3 text-sm">
             <div className="flex justify-between items-center py-3 border-b border-slate-100">
-              <span className="text-slate-600 font-medium">
+              <span className="text-slate-600 text-sm font-medium">
                 Payment Method:
               </span>
               <span className="font-bold text-slate-900">Cash/Card/EFT</span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-slate-100">
-              <span className="text-slate-600 font-medium">
+              <span className="text-slate-600 text-sm font-medium">
                 Payment Terms:
               </span>
               <span className="font-bold text-slate-900">
@@ -2400,7 +2400,7 @@ const MechanicsDashboard = () => {
               </span>
             </div>
             <div className="flex justify-between items-center py-3">
-              <span className="text-slate-600 font-medium">Warranty:</span>
+              <span className="text-slate-600 text-sm font-medium">Warranty:</span>
               <span className="font-bold text-slate-900">
                 90 Days Parts & Labor
               </span>

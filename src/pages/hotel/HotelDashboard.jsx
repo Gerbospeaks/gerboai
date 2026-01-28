@@ -4,6 +4,7 @@ import { serverTimestamp } from "firebase/firestore";
 import logo from '../../assets/img/solidflo-logo.png';
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
+import HospitalityMultiStepForm from "./HospitalityMultiStepForm";  
 import CheckInOutModal, { createCheckInFromInvoice, createCheckInFromGuest } from './CheckInOutModal';
 import {
   getFirestore,
@@ -796,20 +797,20 @@ const handleAIDataExtracted = (extractedData) => {
     <nav className="space-y-1">
       <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
         <Home className="w-5 h-5" />
-        <span className="font-medium">Dashboard</span>
+        <span className="text-sm font-medium">Dashboard</span>
       </div>
       <div
         onClick={() => setShowSettings(true)}
         className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
         <Settings className="w-5 h-5" />
-        <span className="font-medium">Settings</span>
+        <span className="text-sm font-medium">Settings</span>
       </div>
 
       <div className="pt-4 mt-4 border-t border-slate-700/50">
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200">
           <TrendingUp className="w-5 h-5" />
-          <span className="font-medium">Property Overview</span>
+          <span className="text-sm font-medium">Property Overview</span>
         </div>
 
         {/* Invoices Section */}
@@ -817,7 +818,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <Receipt className="w-5 h-5" />
-              <span className="font-medium">Invoices</span>
+              <span className="text-sm font-medium">Invoices</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -838,7 +839,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Invoices</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedInvoices.length}
                 </span>
               </div>
@@ -859,7 +860,7 @@ const handleAIDataExtracted = (extractedData) => {
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
             <div className="flex items-center space-x-3">
               <Users className="w-5 h-5" />
-              <span className="font-medium">Guests</span>
+              <span className="text-sm font-medium">Guests</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
@@ -877,7 +878,7 @@ const handleAIDataExtracted = (extractedData) => {
             >
               <div className="flex items-center justify-between">
                 <span>All Guests</span>
-                <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                   {savedGuests.length}
                 </span>
               </div>
@@ -890,17 +891,17 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
         >
           <FileText className="w-5 h-5" />
-          <span className="font-medium">Invoice Templates</span>
+          <span className="text-sm font-medium">Invoice Templates</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Calendar className="w-5 h-5" />
-          <span className="font-medium">Reservations</span>
+          <span className="text-sm font-medium">Reservations</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <Bed className="w-5 h-5" />
-          <span className="font-medium">Room Management</span>
+          <span className="text-sm font-medium">Room Management</span>
         </div>
 
         <div
@@ -908,13 +909,13 @@ const handleAIDataExtracted = (extractedData) => {
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
         >
           <DoorOpen className="w-5 h-5" />
-          <span className="font-medium">Check-In/Out</span>
+          <span className="text-sm font-medium">Check-In/Out</span>
         </div>
 
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <CreditCard className="w-5 h-5" />
-            <span className="font-medium">Payments</span>
+            <span className="text-sm font-medium">Payments</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -922,7 +923,7 @@ const handleAIDataExtracted = (extractedData) => {
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <FileBarChart className="w-5 h-5" />
-            <span className="font-medium">Reports</span>
+            <span className="text-sm font-medium">Reports</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -930,7 +931,7 @@ const handleAIDataExtracted = (extractedData) => {
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
           <div className="flex items-center space-x-3">
             <BarChart3 className="w-5 h-5" />
-            <span className="font-medium">Analytics</span>
+            <span className="text-sm font-medium">Analytics</span>
           </div>
           <ChevronDown className="w-4 h-4" />
         </div>
@@ -1649,7 +1650,7 @@ const handleAIDataExtracted = (extractedData) => {
                                       <div className="flex border-b">
                                         <button
                                           onClick={() => setInputMode("manual")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
                                             inputMode === "manual"
                                               ? "bg-white text-blue-600 border-b-2 border-blue-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1659,7 +1660,7 @@ const handleAIDataExtracted = (extractedData) => {
                                         </button>
                                         <button
                                           onClick={() => setInputMode("ai")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                                             inputMode === "ai"
                                               ? "bg-white text-purple-600 border-b-2 border-purple-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1709,258 +1710,52 @@ const handleAIDataExtracted = (extractedData) => {
                 </div>
               </div>
 
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Users className="w-5 h-5" />
-                    <span>Guest Information</span>
-                  </h2>
-                  <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Guest Name</div>
-                    <input
-                      type="text"
-                      value={guestName}
-                      onChange={(e) => setGuestName(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Guest ID</div>
-                    <input
-                      type="text"
-                      value={guestId}
-                      onChange={(e) => setGuestId(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Email</div>
-                    <input
-                      type="text"
-                      value={guestEmail}
-                      onChange={(e) => setGuestEmail(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Phone</div>
-                    <input
-                      type="text"
-                      value={guestPhone}
-                      onChange={(e) => setGuestPhone(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Address</div>
-                    <input
-                      type="text"
-                      value={guestAddress}
-                      onChange={(e) => setGuestAddress(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Date of Birth</div>
-                    <input
-                      type="date"
-                      value={guestDOB}
-                      onChange={(e) => setGuestDOB(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Nationality</div>
-                    <input
-                      type="text"
-                      value={guestNationality}
-                      onChange={(e) => setGuestNationality(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">ID Type</div>
-                    <select
-                      value={idType}
-                      onChange={(e) => setIdType(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option>ID Document</option>
-                      <option>Passport</option>
-                      <option>Driver's License</option>
-                    </select>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">ID Number</div>
-                    <input
-                      type="text"
-                      value={idNumber}
-                      onChange={(e) => setIdNumber(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setShowGuestsListModal(true)}
-                  className="mt-4 text-sm text-blue-600 hover:underline"
-                >
-                  Load from saved guests
-                </button>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Bed className="w-5 h-5" />
-                    <span>Booking Information</span>
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Room Number</div>
-                    <input
-                      type="text"
-                      value={roomNumber}
-                      onChange={(e) => setRoomNumber(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Room Type</div>
-                    <select
-                      value={roomType}
-                      onChange={(e) => setRoomType(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Select Room Type</option>
-                      <option value="Standard Single Room">Standard Single Room</option>
-                      <option value="Standard Double Room">Standard Double Room</option>
-                      <option value="Deluxe Single Room">Deluxe Single Room</option>
-                      <option value="Deluxe Double Room">Deluxe Double Room</option>
-                      <option value="Executive Suite">Executive Suite</option>
-                      <option value="Presidential Suite">Presidential Suite</option>
-                      <option value="Family Room">Family Room</option>
-                    </select>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Check-In Date</div>
-                    <input
-                      type="date"
-                      value={checkInDate}
-                      onChange={(e) => setCheckInDate(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Check-Out Date</div>
-                    <input
-                      type="date"
-                      value={checkOutDate}
-                      onChange={(e) => setCheckOutDate(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Number of Guests</div>
-                    <input
-                      type="number"
-                      value={numberOfGuests}
-                      onChange={(e) => setNumberOfGuests(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="2"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Number of Nights</div>
-                    <input
-                      type="number"
-                      value={numberOfNights}
-                      onChange={(e) => setNumberOfNights(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="5"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Special Requests</div>
-                    <textarea
-                      value={specialRequests}
-                      onChange={(e) => setSpecialRequests(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      rows="2"
-                      placeholder="e.g., Late check-in, High floor, Sea view"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h2 className="text-lg font-semibold mb-4">Add Line Item</h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                  <select
-                    value={newItem.type}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, type: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  >
-                    <option value="Room Charge">Room Charge</option>
-                    <option value="Food & Beverage">Food & Beverage</option>
-                    <option value="Laundry">Laundry</option>
-                    <option value="Minibar">Minibar</option>
-                    <option value="Spa & Wellness">Spa & Wellness</option>
-                    <option value="Room Service">Room Service</option>
-                    <option value="Other">Other</option>
-                  </select>
-
-                  <input
-                    type="text"
-                    placeholder="Description"
-                    value={newItem.description}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, description: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Rate"
-                    value={newItem.rate}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, rate: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Qty"
-                    value={newItem.qty}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, qty: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <button
-                    onClick={handleAddItem}
-                    className="bg-gray-50 text-gray-800 rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center justify-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add
-                  </button>
-                </div>
-              </div>
+              {inputMode === "manual" && (
+  <HospitalityMultiStepForm
+    // Guest Info Props
+    guestName={guestName}
+    setGuestName={setGuestName}
+    guestId={guestId}
+    setGuestId={setGuestId}
+    guestEmail={guestEmail}
+    setGuestEmail={setGuestEmail}
+    guestPhone={guestPhone}
+    setGuestPhone={setGuestPhone}
+    guestAddress={guestAddress}
+    setGuestAddress={setGuestAddress}
+    guestDOB={guestDOB}
+    setGuestDOB={setGuestDOB}
+    guestNationality={guestNationality}
+    setGuestNationality={setGuestNationality}
+    idType={idType}
+    setIdType={setIdType}
+    idNumber={idNumber}
+    setIdNumber={setIdNumber}
+    // Booking Info Props
+    roomNumber={roomNumber}
+    setRoomNumber={setRoomNumber}
+    roomType={roomType}
+    setRoomType={setRoomType}
+    checkInDate={checkInDate}
+    setCheckInDate={setCheckInDate}
+    checkOutDate={checkOutDate}
+    setCheckOutDate={setCheckOutDate}
+    numberOfGuests={numberOfGuests}
+    setNumberOfGuests={setNumberOfGuests}
+    numberOfNights={numberOfNights}
+    setNumberOfNights={setNumberOfNights}
+    specialRequests={specialRequests}
+    setSpecialRequests={setSpecialRequests}
+    // Modal Props
+    showGuestsListModal={showGuestsListModal}
+    setShowGuestsListModal={setShowGuestsListModal}
+    // Items Props
+    items={items}
+    newItem={newItem}
+    setNewItem={setNewItem}
+    handleAddItem={handleAddItem}
+  />
+)}
 
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -1970,15 +1765,15 @@ const handleAIDataExtracted = (extractedData) => {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between py-2 border-b">
                     <span className="text-gray-600">Payment Terms:</span>
-                    <span className="font-medium">Due upon check-out</span>
+                    <span className="text-sm font-medium">Due upon check-out</span>
                   </div>
                   <div className="flex justify-between py-2 border-b">
                     <span className="text-gray-600">Cancellation Policy:</span>
-                    <span className="font-medium">48 hours notice</span>
+                    <span className="text-sm font-medium">48 hours notice</span>
                   </div>
                   <div className="flex justify-between py-2">
                     <span className="text-gray-600">Check-in / Check-out:</span>
-                    <span className="font-medium">2:00 PM / 11:00 AM</span>
+                    <span className="text-sm font-medium">2:00 PM / 11:00 AM</span>
                   </div>
                 </div>
               </div>

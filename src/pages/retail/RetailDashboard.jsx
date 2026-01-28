@@ -609,7 +609,7 @@ const [useAI, setUseAI] = useState(false);
                           <td className="py-3 px-2 text-sm text-gray-600">{order.customerName || 'N/A'}</td>
                           <td className="py-3 px-2 text-sm font-medium text-gray-900">${order.total || 0}</td>
                           <td className="py-3 px-2">
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <span className="px-2 py-1 rounded-full text-xs text-sm font-medium bg-green-100 text-green-800">
                               {order.status || 'Pending'}
                             </span>
                           </td>
@@ -644,7 +644,7 @@ const [useAI, setUseAI] = useState(false);
                             </div>
                           )}
                           <div className="absolute top-2 right-2">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${stockStatus.color}`}>
+                            <span className={`px-2 py-1 rounded-full text-xs text-sm font-medium ${stockStatus.color}`}>
                               {stockStatus.text}
                             </span>
                           </div>
@@ -714,7 +714,7 @@ const [useAI, setUseAI] = useState(false);
                         <td className="py-3 px-2 text-sm text-gray-600">{order.customerName || 'N/A'}</td>
                         <td className="py-3 px-2 text-sm font-medium text-gray-900">${order.total || 0}</td>
                         <td className="py-3 px-2">
-                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <span className="px-2 py-1 rounded-full text-xs text-sm font-medium bg-green-100 text-green-800">
                             {order.status || 'Pending'}
                           </span>
                         </td>

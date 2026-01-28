@@ -286,7 +286,7 @@ const FinancialOverview = ({ user }) => {
           <div className="flex gap-2">
             <button
               onClick={() => setTimeRange('week')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 timeRange === 'week' ? 'bg-gray-50 text-gray-800' : 'bg-white text-gray-700 hover:bg-gray-800'
               }`}
             >
@@ -294,7 +294,7 @@ const FinancialOverview = ({ user }) => {
             </button>
             <button
               onClick={() => setTimeRange('month')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 timeRange === 'month' ? 'bg-gray-50 text-gray-800' : 'bg-white text-gray-700 hover:bg-gray-800'
               }`}
             >
@@ -302,7 +302,7 @@ const FinancialOverview = ({ user }) => {
             </button>
             <button
               onClick={() => setTimeRange('year')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 timeRange === 'year' ? 'bg-gray-50 text-gray-800' : 'bg-white text-gray-700 hover:bg-gray-800'
               }`}
             >
@@ -448,9 +448,9 @@ const FinancialOverview = ({ user }) => {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">{data.month}</span>
                     <div className="text-xs text-gray-500">
-                      <span className="text-green-600 font-medium">R{(data.revenue / 1000).toFixed(0)}k</span>
+                      <span className="text-green-600 text-sm font-medium">R{(data.revenue / 1000).toFixed(0)}k</span>
                       {' / '}
-                      <span className="text-red-600 font-medium">R{(data.expenses / 1000).toFixed(0)}k</span>
+                      <span className="text-red-600 text-sm font-medium">R{(data.expenses / 1000).toFixed(0)}k</span>
                     </div>
                   </div>
                   <div className="space-y-1">
@@ -593,7 +593,7 @@ const FinancialOverview = ({ user }) => {
                   
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-gray-900">{activity.client}</span>
+                      <span className="text-sm font-medium text-gray-900">{activity.client}</span>
                       <span className="font-semibold text-gray-900">{formatCurrency(activity.amount)}</span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -634,7 +634,7 @@ const FinancialOverview = ({ user }) => {
                           {index + 1}
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">{client.name}</div>
+                          <div className="text-sm font-medium text-gray-900">{client.name}</div>
                           <div className="text-xs text-gray-500">{client.invoices} invoices</div>
                         </div>
                       </div>

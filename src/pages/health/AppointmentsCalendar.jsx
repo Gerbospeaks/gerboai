@@ -494,7 +494,7 @@ const AppointmentsCalendar = ({ user }) => {
                   className="flex items-center justify-between p-4 bg-purple-50 rounded-lg"
                 >
                   <div>
-                    <div className="font-medium">{booking.patientName}</div>
+                    <div className="text-sm font-medium">{booking.patientName}</div>
                     <div className="text-sm text-gray-600">
                       {booking.date} at {booking.time}
                     </div>
@@ -680,7 +680,7 @@ const AppointmentsCalendar = ({ user }) => {
                   </div>
                   <div>
                     <span
-                      className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                      className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs text-sm font-medium ${getStatusColor(
                         apt.status
                       )}`}
                     >
@@ -919,7 +919,7 @@ const AppointmentsCalendar = ({ user }) => {
                   </div>
                 </div>
                 <span
-                  className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                  className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs text-sm font-medium ${getStatusColor(
                     selectedAppointment.status
                   )}`}
                 >

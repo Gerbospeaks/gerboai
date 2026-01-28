@@ -78,7 +78,7 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
             </div>
             <button
               onClick={onAddNewClient}
-              className="px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 font-medium"
+              className="px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 text-sm font-medium"
             >
               <Plus className="w-4 h-4" />
               Add New Client
@@ -90,7 +90,7 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
                   filterType === type
                     ? 'bg-gray-600 text-gray-800'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-800'
@@ -209,7 +209,7 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
           </div>
           <button
             onClick={handleClose}
-            className="px-6 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors font-medium"
+            className="px-6 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
           >
             Close
           </button>

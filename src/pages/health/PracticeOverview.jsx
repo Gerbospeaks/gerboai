@@ -118,7 +118,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             {formatCurrency(stats.totalRevenue)}
           </div>
           <div className="text-sm text-gray-500">Total Revenue</div>
-          <div className="mt-2 text-xs text-green-600 font-medium">
+          <div className="mt-2 text-xs text-green-600 text-sm font-medium">
             {formatCurrency(stats.monthlyRevenue)} this month
           </div>
         </div>
@@ -135,7 +135,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             {stats.totalPatients}
           </div>
           <div className="text-sm text-gray-500">Total Patients</div>
-          <div className="mt-2 text-xs text-blue-600 font-medium">
+          <div className="mt-2 text-xs text-blue-600 text-sm font-medium">
             {stats.activePatients} active
           </div>
         </div>
@@ -152,7 +152,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             {stats.totalInvoices}
           </div>
           <div className="text-sm text-gray-500">Total Invoices</div>
-          <div className="mt-2 text-xs text-purple-600 font-medium">
+          <div className="mt-2 text-xs text-purple-600 text-sm font-medium">
             {stats.completedInvoices} completed
           </div>
         </div>
@@ -169,7 +169,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             {stats.pendingPayments}
           </div>
           <div className="text-sm text-gray-500">Pending Payments</div>
-          <div className="mt-2 text-xs text-orange-600 font-medium">
+          <div className="mt-2 text-xs text-orange-600 text-sm font-medium">
             Requires attention
           </div>
         </div>
@@ -260,7 +260,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-600">Completed</span>
-                <span className="font-medium">{stats.completedInvoices}</span>
+                <span className="text-sm font-medium">{stats.completedInvoices}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div 
@@ -274,7 +274,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-600">Pending</span>
-                <span className="font-medium">{stats.pendingPayments}</span>
+                <span className="text-sm font-medium">{stats.pendingPayments}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div 
@@ -316,7 +316,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
                     }`} />
                   </div>
                   <div>
-                    <div className="font-medium text-gray-900">{activity.title}</div>
+                    <div className="text-sm font-medium text-gray-900">{activity.title}</div>
                     <div className="text-sm text-gray-500">{activity.patient}</div>
                   </div>
                 </div>

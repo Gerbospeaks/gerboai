@@ -423,7 +423,7 @@ export const ProfessionalTemplate = (props) => {
           <tbody>
             {safeSubjects.map((subject, index) => (
               <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                <td className="border border-gray-300 px-3 py-2 font-medium">{subject.name}</td>
+                <td className="border border-gray-300 px-3 py-2 text-sm font-medium">{subject.name}</td>
                 <td className="border border-gray-300 px-3 py-2 text-center font-semibold">{subject.mark}</td>
                 <td className="border border-gray-300 px-3 py-2 text-center font-bold">{subject.grade}</td>
                 <td className="border border-gray-300 px-3 py-2 text-xs">{subject.comments}</td>

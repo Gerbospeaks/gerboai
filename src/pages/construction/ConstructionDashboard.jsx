@@ -26,6 +26,7 @@ import { db } from "../../firebase";
 import ClientModal from "./ClientModal";
 import ClientsListModal from "../ClientsListModal";
 import SignatureStamp from "../SignatureStamp";
+import ConstructionMultiStepForm from './ConstructionMultiStepForm';
 import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
 import {
   ChevronDown,
@@ -783,271 +784,302 @@ const handleAIDataExtracted = (extractedData) => {
   return (
     <div className="flex h-screen bg-gray-300">
      {/* Mobile Sidebar Backdrop */}
-{sidebarOpen && (
-  <div
-    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-    onClick={() => setSidebarOpen(false)}
-  ></div>
-)}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
 
-{/* Collapsed Sidebar (Icon Only) */}
-<div
-  className={`${
-    sidebarOpen ? "hidden" : "block"
-  } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-gray-200 h-full print:hidden transition-all duration-300 shadow-sm`}
->
-  <div className="flex flex-col items-center py-4 space-y-4">
-    {/* Toggle Button */}
-    <button
-      onClick={() => setSidebarOpen(true)}
-      className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-      title="Expand Sidebar"
-    >
-      <ChevronRight className="w-6 h-6" />
-    </button>
-
-    {/* Logo */}
-    <div className="w-10 h-10">
-      <img
-        src={logo}
-        alt="Logo"
-        className="w-full h-full object-contain rounded-lg"
-      />
-    </div>
-
-    <div className="w-full border-t border-gray-200"></div>
-
-    {/* Icon Navigation */}
-    <div className="flex flex-col items-center space-y-3 w-full">
-      <button
-        className="p-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-        title="Dashboard"
-      >
-        <Home className="w-5 h-5" />
-      </button>
-      
-      <button
-        onClick={() => setShowSettings(true)}
-        className="p-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-        title="Settings"
-      >
-        <Settings className="w-5 h-5" />
-      </button>
-
-      <button
-        onClick={() => setActiveView("financial-overview")}
-        className="p-2 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-        title="Business Overview"
-      >
-        <TrendingUp className="w-5 h-5" />
-      </button>
-
-      <button
-        className="p-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-        title="Quotes"
-      >
-        <FileText className="w-5 h-5" />
-      </button>
-
-      <button
-        className="p-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-        title="Invoices"
-      >
-        <Receipt className="w-5 h-5" />
-      </button>
-
-      <button
-        className="p-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-        title="Clients"
-      >
-        <Users className="w-5 h-5" />
-      </button>
-
-      <button
-        className="p-2 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-        title="Projects"
-      >
-        <Building2 className="w-5 h-5" />
-      </button>
-
-      <button
-        onClick={() => setActiveView("templates")}
-        className="p-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors w-10 h-10 flex items-center justify-center"
-        title="Invoice Templates"
-      >
-        <FileText className="w-5 h-5" />
-      </button>
-    </div>
-  </div>
-
-  {/* User Icon at Bottom */}
-  <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-      {user?.name?.charAt(0) || "U"}
-    </div>
-  </div>
-</div>
-
-{/* Expanded Sidebar (Full Width) */}
-<div
-  className={`${
-    sidebarOpen ? "translate-x-0" : "-translate-x-full"
-  } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden shadow-lg`}
->
-  <div className="p-4">
-    <div className="flex items-center justify-between mb-8">
-      <div className="flex items-center space-x-2">
-        <img
-          src={logo}
-          alt="Business Logo"
-          className="w-16 h-12 object-contain rounded-lg"
-        />
-      </div>
-      {/* Close Button */}
-      <button
-        onClick={() => setSidebarOpen(false)}
-        className="p-1.5 text-white hover:bg-gray-100 rounded-lg transition-colors"
-        title="Collapse Sidebar"
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </button>
-    </div>
-
-    <nav className="space-y-1">
-      <div className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg cursor-pointer transition-colors">
-        <Home className="w-5 h-5" />
-        <span className="font-medium">Dashboard</span>
-      </div>
+      {/* Collapsed Sidebar (Icon Only) */}
       <div
-        onClick={() => setShowSettings(true)}
-        className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg cursor-pointer transition-colors"
+        className={`${
+          sidebarOpen ? "hidden" : "block"
+        } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
       >
-        <Settings className="w-5 h-5" />
-        <span className="font-medium">Settings</span>
-      </div>
+        <div className="flex flex-col items-center py-4 space-y-4">
+          {/* Toggle Button */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
+            title="Expand Sidebar"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
 
-      <div className="pt-4">
-        <div
-          onClick={() => setActiveView("financial-overview")}
-          className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg cursor-pointer transition-colors"
-        >
-          <TrendingUp className="w-5 h-5" />
-          <span className="font-medium">Business Overview</span>
-        </div>
+          {/* Logo */}
+          <div className="w-10 h-10 mb-2">
+            <img
+              src={logo}
+              alt="Logo"
+              className="w-full h-full object-contain rounded-lg"
+            />
+          </div>
 
-        {/* Quotes Section */}
-        <div className="mt-2">
-          <div className="flex items-center justify-between px-3 py-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg cursor-pointer transition-colors">
-            <div className="flex items-center space-x-3">
+          <div className="w-10 border-t border-slate-600"></div>
+
+          {/* Icon Navigation */}
+          <div className="flex flex-col items-center space-y-3 w-full px-2">
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-orange-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+              title="Dashboard"
+            >
+              <Home className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setShowSettings(true)}
+              className="p-2 text-slate-400 hover:text-white hover:bg-orange-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+              title="Settings"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setActiveView("financial-overview")}
+              className="p-2 text-slate-400 hover:text-white hover:bg-orange-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+              title="Business Overview"
+            >
+              <TrendingUp className="w-5 h-5" />
+            </button>
+
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-orange-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+              title="Quotes"
+            >
               <FileText className="w-5 h-5" />
-              <span className="font-medium">Quotes</span>
-            </div>
-            <ChevronDown className="w-4 h-4" />
-          </div>
+            </button>
 
-          <div className="ml-8 mt-1 space-y-1">
-            <div
-              onClick={handleNewQuote}
-              className="px-3 py-2 text-sm text-blue-600 bg-blue-50 font-medium rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-orange-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+              title="Invoices"
             >
-              Create Quote
-            </div>
-            <div
-              onClick={() => setShowQuotesList(!showQuotesList)}
-              className="px-3 py-2 text-sm text-white hover:bg-gray-50 hover:text-gray-900 rounded-lg cursor-pointer transition-colors"
-            >
-              All Quotes ({savedQuotes.length})
-            </div>
-          </div>
-        </div>
-
-        {/* Invoices Section */}
-        <div className="mt-2">
-          <div className="flex items-center justify-between px-3 py-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg cursor-pointer transition-colors">
-            <div className="flex items-center space-x-3">
               <Receipt className="w-5 h-5" />
-              <span className="font-medium">Invoices</span>
-            </div>
-            <ChevronDown className="w-4 h-4" />
-          </div>
+            </button>
 
-          <div className="ml-8 mt-1 space-y-1">
-            <div
-              onClick={handleNewInvoice}
-              className="px-3 py-2 text-sm text-blue-600 bg-blue-50 font-medium rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-orange-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+              title="Clients"
             >
-              Create Invoice
-            </div>
-            <div
-              onClick={() => setShowInvoicesList(!showInvoicesList)}
-              className="px-3 py-2 text-sm text-white hover:bg-gray-50 hover:text-gray-900 rounded-lg cursor-pointer transition-colors"
+              <Users className="w-5 h-5" />
+            </button>
+
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-orange-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+              title="Projects"
             >
-              All Invoices ({savedInvoices.length})
-            </div>
-            <div className="px-3 py-2 text-sm text-white hover:bg-gray-50 hover:text-gray-900 rounded-lg cursor-pointer transition-colors">
-              Pending Payment
-            </div>
+              <Building2 className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setActiveView("templates")}
+              className="p-2 text-slate-400 hover:text-white hover:bg-orange-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+              title="Invoice Templates"
+            >
+              <FileText className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        {/* Clients Section */}
-        <div className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg cursor-pointer mt-2 transition-colors">
-          <Users className="w-5 h-5" />
-          <span className="font-medium">Clients</span>
-        </div>
-        <div className="ml-8 mt-1 space-y-1">
-          <div
-            onClick={handleAddNewClient}
-            className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-gray-50 hover:text-gray-900 rounded-lg cursor-pointer mt-2 transition-colors"
-          >
-            <span>Add Client</span>
-          </div>
-          <div
-            onClick={() => setShowClientsListModal(true)}
-            className="px-3 py-2 text-sm text-white hover:bg-gray-50 hover:text-gray-900 rounded-lg cursor-pointer transition-colors"
-          >
-            All Clients ({savedClients.length})
+        {/* User Icon at Bottom */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">
+              {user?.name?.charAt(0) || "U"}
+            </span>
           </div>
         </div>
-
-        <div className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg cursor-pointer transition-colors">
-          <Building2 className="w-5 h-5" />
-          <span className="font-medium">Projects</span>
-        </div>
-
-        <div
-          onClick={() => setActiveView("templates")}
-          className="flex items-center space-x-3 px-3 py-2 text-white hover:bg-blue-50 hover:text-blue-600 rounded-lg cursor-pointer transition-colors"
-        >
-          <FileText className="w-5 h-5" />
-          <span className="font-medium">Invoice Templates</span>
-        </div>
       </div>
-    </nav>
-  </div>
 
-  <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gray-50">
-    <div className="flex items-center space-x-3">
-      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-        {user?.name?.charAt(0) || "U"}
-      </div>
-      <div className="flex-1">
-        <div className="text-sm font-medium text-gray-900">
-          {user?.name || "User"}
-        </div>
-        <div className="text-xs text-gray-500">
-          {user?.email || "email@example.com"}
-        </div>
-      </div>
-      <button
-        onClick={handleLogout}
-        className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 p-1.5 rounded-lg transition-colors"
+      {/* Expanded Sidebar (Full Width) */}
+      <div
+        className={`${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl`}
       >
-        <LogOut className="w-4 h-4" />
-      </button>
-    </div>
-  </div>
-</div>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-3">
+              <img
+                src={logo}
+                alt="Business Logo"
+                className="w-16 h-12 object-contain rounded-lg"
+              />
+            </div>
+            {/* Close Button */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
+              title="Collapse Sidebar"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          </div>
+
+          <nav className="space-y-1">
+            <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+              <Home className="w-5 h-5" />
+              <span className="text-sm font-medium">Dashboard</span>
+            </div>
+            <div
+              onClick={() => setShowSettings(true)}
+              className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
+            >
+              <Settings className="w-5 h-5" />
+              <span className="text-sm font-medium">Settings</span>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-slate-700/50">
+              <div
+                onClick={() => setActiveView("financial-overview")}
+                className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-orange-600/20 hover:border-l-4 hover:border-orange-500 rounded-lg cursor-pointer transition-all duration-200"
+              >
+                <TrendingUp className="w-5 h-5" />
+                <span className="text-sm font-medium">Business Overview</span>
+              </div>
+
+              {/* Quotes Section */}
+              <div className="mt-2">
+                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="w-5 h-5" />
+                    <span className="text-sm font-medium">Quotes</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+
+                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+                  <div
+                    onClick={handleNewQuote}
+                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                  >
+                    Create Quote
+                  </div>
+                  <div
+                    onClick={() => setShowQuotesList(!showQuotesList)}
+                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>All Quotes</span>
+                      <span className="text-orange-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        {savedQuotes.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Invoices Section */}
+              <div className="mt-2">
+                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+                  <div className="flex items-center space-x-3">
+                    <Receipt className="w-5 h-5" />
+                    <span className="text-sm font-medium">Invoices</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+
+                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+                  <div
+                    onClick={handleNewInvoice}
+                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                  >
+                    Create Invoice
+                  </div>
+                  <div
+                    onClick={() => setShowInvoicesList(!showInvoicesList)}
+                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>All Invoices</span>
+                      <span className="text-orange-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        {savedInvoices.length}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200">
+                    <div className="flex items-center justify-between">
+                      <span>Overdue</span>
+                      <span className="bg-rose-600/30 text-rose-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        0
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Clients Section */}
+              <div className="mt-2">
+                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+                  <div className="flex items-center space-x-3">
+                    <Users className="w-5 h-5" />
+                    <span className="text-sm font-medium">Clients</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+
+                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+                  <div
+                    onClick={handleAddNewClient}
+                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                  >
+                    Add Client
+                  </div>
+                  <div
+                    onClick={() => setShowClientsListModal(true)}
+                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>All Clients</span>
+                      <span className="text-orange-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        {savedClients.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2">
+                <Building2 className="w-5 h-5" />
+                <span className="text-sm font-medium">Projects</span>
+              </div>
+
+              <div
+                onClick={() => setActiveView("templates")}
+                className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
+              >
+                <FileText className="w-5 h-5" />
+                <span className="text-sm font-medium">Invoice Templates</span>
+              </div>
+            </div>
+          </nav>
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">
+                {user?.name?.charAt(0) || "U"}
+              </span>
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-white">
+                {user?.name || "User"}
+              </div>
+              <div className="text-xs text-slate-400">
+                {user?.email || "email@example.com"}
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 rounded-lg transition-all duration-200"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 flex flex-col">
@@ -1827,7 +1859,7 @@ const handleAIDataExtracted = (extractedData) => {
                                       <div className="flex border-b">
                                         <button
                                           onClick={() => setInputMode("manual")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
                                             inputMode === "manual"
                                               ? "bg-white text-blue-600 border-b-2 border-blue-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1837,7 +1869,7 @@ const handleAIDataExtracted = (extractedData) => {
                                         </button>
                                         <button
                                           onClick={() => setInputMode("ai")}
-                                          className={`flex-1 px-6 py-3 font-medium transition-colors flex items-center justify-center gap-2 ${
+                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                                             inputMode === "ai"
                                               ? "bg-white text-purple-600 border-b-2 border-purple-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1893,234 +1925,44 @@ const handleAIDataExtracted = (extractedData) => {
                     </div>
                   </div>
 
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Users className="w-5 h-5" />
-                        <span>Client Information</span>
-                      </h2>
-                      <button className="flex items-center space-x-2 text-orange-600 hover:text-orange-700">
-                        <Edit className="w-4 h-4" />
-                        <span>Edit</span>
-                      </button>
-                    </div>
+                 {inputMode === "manual" && (
+  <ConstructionMultiStepForm
+    // Client Info Props
+    clientName={clientName}
+    setClientName={setClientName}
+    clientType={clientType}
+    setClientType={setClientType}
+    clientCompany={clientCompany}
+    setClientCompany={setClientCompany}
+    clientId={clientId}
+    setClientId={setClientId}
+    clientEmail={clientEmail}
+    setClientEmail={setClientEmail}
+    clientPhone={clientPhone}
+    setClientPhone={setClientPhone}
+    clientAddress={clientAddress}
+    setClientAddress={setClientAddress}
+    // Project Info Props
+    projectName={projectName}
+    setProjectName={setProjectName}
+    projectAddress={projectAddress}
+    setProjectAddress={setProjectAddress}
+    projectType={projectType}
+    setProjectType={setProjectType}
+    projectSize={projectSize}
+    setProjectSize={setProjectSize}
+    projectDuration={projectDuration}
+    setProjectDuration={setProjectDuration}
+    projectStartDate={projectStartDate}
+    setProjectStartDate={setProjectStartDate}
+    // Items Props
+    items={items}
+    newItem={newItem}
+    setNewItem={setNewItem}
+    handleAddItem={handleAddItem}
+  />
+)}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Client Name</div>
-                       <input
-  type="text"
-  value={clientName}
-  onChange={(e) => setClientName(e.target.value)}
-  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-/>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Client Type</div>
-                        <select
-                          value={clientType}
-                          onChange={(e) => setClientType(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="Residential">Residential</option>
-                          <option value="Commercial">Commercial</option>
-                          <option value="Industrial">Industrial</option>
-                          <option value="Government">Government</option>
-                        </select>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Company Name
-                        </div>
-                        <input
-                          type="text"
-                          value={clientCompany}
-                          onChange={(e) => setClientCompany(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Client ID</div>
-                        <input
-                          type="text"
-                          value={clientId}
-                          onChange={(e) => setClientId(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Email</div>
-                        <input
-                          type="text"
-                          value={clientEmail}
-                          onChange={(e) => setClientEmail(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Phone</div>
-                        <input
-                          type="text"
-                          value={clientPhone}
-                          onChange={(e) => setClientPhone(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <div className="text-sm text-gray-500">Address</div>
-                        <input
-                          type="text"
-                          value={clientAddress}
-                          onChange={(e) => setClientAddress(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold flex items-center space-x-2">
-                        <Building2 className="w-5 h-5" />
-                        <span>Project Information</span>
-                      </h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="col-span-1 sm:col-span-2">
-                        <div className="text-sm text-gray-500">
-                          Project Name
-                        </div>
-                        <input
-                          type="text"
-                          value={projectName}
-                          onChange={(e) => setProjectName(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <div className="text-sm text-gray-500">
-                          Project Address
-                        </div>
-                        <input
-                          type="text"
-                          value={projectAddress}
-                          onChange={(e) => setProjectAddress(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Project Type
-                        </div>
-                        <select
-                          value={projectType}
-                          onChange={(e) => setProjectType(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="">Select Type</option>
-                          <option value="New Build">New Build</option>
-                          <option value="Renovation">Renovation</option>
-                          <option value="Extension">Extension</option>
-                          <option value="Repairs">Repairs</option>
-                          <option value="Maintenance">Maintenance</option>
-                        </select>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Project Size
-                        </div>
-                        <input
-                          type="text"
-                          value={projectSize}
-                          onChange={(e) => setProjectSize(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="e.g., 500 sqm"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Duration</div>
-                        <input
-                          type="text"
-                          value={projectDuration}
-                          onChange={(e) => setProjectDuration(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="e.g., 3 months"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Start Date</div>
-                        <input
-                          type="date"
-                          value={projectStartDate}
-                          onChange={(e) => setProjectStartDate(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                    <h2 className="text-lg font-semibold mb-4">
-                      Add Line Item
-                    </h2>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                      <select
-                        value={newItem.type}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, type: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      >
-                        <option value="Labor">Labor</option>
-                        <option value="Materials">Materials</option>
-                        <option value="Equipment">Equipment</option>
-                        <option value="Subcontractor">Subcontractor</option>
-                      </select>
-
-                      <input
-                        type="text"
-                        placeholder="Description"
-                        value={newItem.description}
-                        onChange={(e) =>
-                          setNewItem({
-                            ...newItem,
-                            description: e.target.value,
-                          })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Rate"
-                        value={newItem.rate}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, rate: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Qty"
-                        value={newItem.qty}
-                        onChange={(e) =>
-                          setNewItem({ ...newItem, qty: e.target.value })
-                        }
-                        className="px-4 py-2 border rounded"
-                      />
-
-                      <button
-                        onClick={handleAddItem}
-                        className="bg-gray-600 text-gray-800 rounded-lg px-4 py-2 hover:bg-orange-700 flex items-center justify-center gap-2"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Add
-                      </button>
-                    </div>
-                  </div>
 
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -2132,17 +1974,17 @@ const handleAIDataExtracted = (extractedData) => {
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-gray-600">Payment Terms:</span>
-                        <span className="font-medium">
+                        <span className="text-sm font-medium">
                           50% Deposit, Balance on Completion
                         </span>
                       </div>
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-gray-600">Quote Valid:</span>
-                        <span className="font-medium">30 Days</span>
+                        <span className="text-sm font-medium">30 Days</span>
                       </div>
                       <div className="flex justify-between py-2">
                         <span className="text-gray-600">Warranty:</span>
-                        <span className="font-medium">
+                        <span className="text-sm font-medium">
                           12 Months Workmanship
                         </span>
                       </div>

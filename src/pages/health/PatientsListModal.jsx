@@ -175,7 +175,7 @@ const PatientsListModal = ({
                       <Calendar className="w-4 h-4 text-gray-400" />
                       <div>
                         <div className="text-xs text-gray-500">Age</div>
-                        <div className="font-medium">
+                        <div className="text-sm font-medium">
                           {calculateAge(patient.dateOfBirth)} years
                         </div>
                       </div>
@@ -185,7 +185,7 @@ const PatientsListModal = ({
                       <Phone className="w-4 h-4 text-gray-400" />
                       <div>
                         <div className="text-xs text-gray-500">Phone</div>
-                        <div className="font-medium">{patient.phone || 'N/A'}</div>
+                        <div className="text-sm font-medium">{patient.phone || 'N/A'}</div>
                       </div>
                     </div>
 
@@ -194,7 +194,7 @@ const PatientsListModal = ({
                         <Mail className="w-4 h-4 text-gray-400" />
                         <div>
                           <div className="text-xs text-gray-500">Email</div>
-                          <div className="font-medium text-xs">{patient.email}</div>
+                          <div className="text-sm font-medium text-xs">{patient.email}</div>
                         </div>
                       </div>
                     )}
@@ -204,7 +204,7 @@ const PatientsListModal = ({
                         <CreditCard className="w-4 h-4 text-gray-400" />
                         <div>
                           <div className="text-xs text-gray-500">Insurance</div>
-                          <div className="font-medium">
+                          <div className="text-sm font-medium">
                             {patient.insuranceProvider}
                             {patient.insuranceNumber && ` - ${patient.insuranceNumber}`}
                           </div>

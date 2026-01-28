@@ -161,7 +161,7 @@ const NotesView = ({ jobCardId }) => {
                 )}
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-xs font-medium">
+                    <span className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-xs text-sm font-medium">
                       {note.user.split(' ').map(n => n[0]).join('')}
                     </span>
                     <span className="font-semibold text-gray-800">{note.user}</span>

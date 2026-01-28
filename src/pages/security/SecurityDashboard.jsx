@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
+import SecurityIncidentMultiStepForm from "./SecurityIncidentMultiStepForm";
 import Templates from "./Templates";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
@@ -555,20 +556,20 @@ const SecurityDashboard = () => {
           <nav className="space-y-1">
             <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
               <Home className="w-5 h-5" />
-              <span className="font-medium">Home</span>
+              <span className="text-sm font-medium">Home</span>
             </div>
             <div
               onClick={() => setShowSettings(true)}
               className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
             >
               <Settings className="w-5 h-5" />
-              <span className="font-medium">Settings</span>
+              <span className="text-sm font-medium">Settings</span>
             </div>
 
             <div className="pt-4 mt-4 border-t border-slate-700/50">
               <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200">
                 <TrendingUp className="w-5 h-5" />
-                <span className="font-medium">Business Overview</span>
+                <span className="text-sm font-medium">Business Overview</span>
               </div>
 
               {/* Incident Reports Section */}
@@ -576,7 +577,7 @@ const SecurityDashboard = () => {
                 <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
                   <div className="flex items-center space-x-3">
                     <AlertTriangle className="w-5 h-5" />
-                    <span className="font-medium">Incident Reports</span>
+                    <span className="text-sm font-medium">Incident Reports</span>
                   </div>
                   <ChevronDown className="w-4 h-4" />
                 </div>
@@ -594,7 +595,7 @@ const SecurityDashboard = () => {
                   >
                     <div className="flex items-center justify-between">
                       <span>All Incidents</span>
-                      <span className="bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                      <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                         {savedIncidents.length}
                       </span>
                     </div>
@@ -612,22 +613,22 @@ const SecurityDashboard = () => {
 
               <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2">
                 <UserCheck className="w-5 h-5" />
-                <span className="font-medium">Security Guards</span>
+                <span className="text-sm font-medium">Security Guards</span>
               </div>
 
               <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
                 <Users className="w-5 h-5" />
-                <span className="font-medium">Clients</span>
+                <span className="text-sm font-medium">Clients</span>
               </div>
 
               <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
                 <Building className="w-5 h-5" />
-                <span className="font-medium">Sites</span>
+                <span className="text-sm font-medium">Sites</span>
               </div>
 
               <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
                 <MapPin className="w-5 h-5" />
-                <span className="font-medium">Patrol Routes</span>
+                <span className="text-sm font-medium">Patrol Routes</span>
               </div>
 
               {/* Schedules Section */}
@@ -635,7 +636,7 @@ const SecurityDashboard = () => {
                 <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
                   <div className="flex items-center space-x-3">
                     <Clock className="w-5 h-5" />
-                    <span className="font-medium">Schedules</span>
+                    <span className="text-sm font-medium">Schedules</span>
                   </div>
                   <ChevronDown className="w-4 h-4" />
                 </div>
@@ -646,7 +647,7 @@ const SecurityDashboard = () => {
                 <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
                   <div className="flex items-center space-x-3">
                     <Receipt className="w-5 h-5" />
-                    <span className="font-medium">Invoices</span>
+                    <span className="text-sm font-medium">Invoices</span>
                   </div>
                   <ChevronDown className="w-4 h-4" />
                 </div>
@@ -657,7 +658,7 @@ const SecurityDashboard = () => {
                 className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
               >
                 <FileText className="w-5 h-5" />
-                <span className="font-medium">Invoice Templates</span>
+                <span className="text-sm font-medium">Invoice Templates</span>
               </div>
 
               {/* Reports Section */}
@@ -665,7 +666,7 @@ const SecurityDashboard = () => {
                 <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
                   <div className="flex items-center space-x-3">
                     <FileBarChart className="w-5 h-5" />
-                    <span className="font-medium">Reports</span>
+                    <span className="text-sm font-medium">Reports</span>
                   </div>
                   <ChevronDown className="w-4 h-4" />
                 </div>
@@ -673,7 +674,7 @@ const SecurityDashboard = () => {
 
               <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
                 <Calendar className="w-5 h-5" />
-                <span className="font-medium">Shift Calendar</span>
+                <span className="text-sm font-medium">Shift Calendar</span>
               </div>
 
               
@@ -1279,230 +1280,48 @@ const SecurityDashboard = () => {
                   >
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                       <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-yellow-700 font-medium">
+                      <span className="text-yellow-700 text-sm font-medium">
                         Under Investigation
                       </span>
                       <span className="text-yellow-600">Reported Today</span>
                     </div>
 
-                    <div className="bg-white border border-gray-200 rounded-lg p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold flex items-center space-x-2">
-                          <Users className="w-5 h-5" />
-                          <span>Client Information</span>
-                        </h2>
-                      </div>
+                    <SecurityIncidentMultiStepForm
+  // Client Info Props
+  clientName={clientName}
+  setClientName={setClientName}
+  clientContact={clientContact}
+  setClientContact={setClientContact}
+  clientEmail={clientEmail}
+  setClientEmail={setClientEmail}
+  // Site Info Props
+  siteName={siteName}
+  setSiteName={setSiteName}
+  siteAddress={siteAddress}
+  setSiteAddress={setSiteAddress}
+  // Guard Info Props
+  guardName={guardName}
+  setGuardName={setGuardName}
+  guardId={guardId}
+  setGuardId={setGuardId}
+  // Incident Details Props
+  incidentType={incidentType}
+  setIncidentType={setIncidentType}
+  incidentDate={incidentDate}
+  setIncidentDate={setIncidentDate}
+  incidentTime={incidentTime}
+  setIncidentTime={setIncidentTime}
+  incidentDescription={incidentDescription}
+  setIncidentDescription={setIncidentDescription}
+  actionsTaken={actionsTaken}
+  setActionsTaken={setActionsTaken}
+  // Witness Info Props
+  witnessName={witnessName}
+  setWitnessName={setWitnessName}
+  witnessContact={witnessContact}
+  setWitnessContact={setWitnessContact}
+/>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="col-span-2">
-                          <div className="text-sm text-gray-500">
-                            Client Name
-                          </div>
-                          <input
-                            type="text"
-                            value={clientName}
-                            onChange={(e) => setClientName(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">
-                            Contact Number
-                          </div>
-                          <input
-                            type="text"
-                            value={clientContact}
-                            onChange={(e) => setClientContact(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">Email</div>
-                          <input
-                            type="text"
-                            value={clientEmail}
-                            onChange={(e) => setClientEmail(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-gray-200 rounded-lg p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold flex items-center space-x-2">
-                          <Building className="w-5 h-5" />
-                          <span>Site Information</span>
-                        </h2>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-4">
-                        <div>
-                          <div className="text-sm text-gray-500">Site Name</div>
-                          <input
-                            type="text"
-                            value={siteName}
-                            onChange={(e) => setSiteName(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">
-                            Site Address
-                          </div>
-                          <input
-                            type="text"
-                            value={siteAddress}
-                            onChange={(e) => setSiteAddress(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-gray-200 rounded-lg p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold flex items-center space-x-2">
-                          <UserCheck className="w-5 h-5" />
-                          <span>Guard on Duty</span>
-                        </h2>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-sm text-gray-500">
-                            Guard Name
-                          </div>
-                          <input
-                            type="text"
-                            value={guardName}
-                            onChange={(e) => setGuardName(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">Guard ID</div>
-                          <input
-                            type="text"
-                            value={guardId}
-                            onChange={(e) => setGuardId(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-gray-200 rounded-lg p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold flex items-center space-x-2">
-                          <AlertTriangle className="w-5 h-5" />
-                          <span>Incident Details</span>
-                        </h2>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <div className="text-sm text-gray-500">
-                            Incident Type
-                          </div>
-                          <select
-                            value={incidentType}
-                            onChange={(e) => setIncidentType(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          >
-                            <option value="Theft">Theft</option>
-                            <option value="Trespassing">Trespassing</option>
-                            <option value="Vandalism">Vandalism</option>
-                            <option value="Assault">Assault</option>
-                            <option value="Fire">Fire</option>
-                            <option value="Medical Emergency">
-                              Medical Emergency
-                            </option>
-                            <option value="Suspicious Activity">
-                              Suspicious Activity
-                            </option>
-                            <option value="Other">Other</option>
-                          </select>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">Date</div>
-                          <input
-                            type="date"
-                            value={incidentDate}
-                            onChange={(e) => setIncidentDate(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">Time</div>
-                          <input
-                            type="time"
-                            value={incidentTime}
-                            onChange={(e) => setIncidentTime(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                        <div className="col-span-3">
-                          <div className="text-sm text-gray-500">
-                            Incident Description
-                          </div>
-                          <textarea
-                            value={incidentDescription}
-                            onChange={(e) =>
-                              setIncidentDescription(e.target.value)
-                            }
-                            className="w-full px-4 py-2 border rounded h-32"
-                            placeholder="Provide detailed description of the incident..."
-                          />
-                        </div>
-                        <div className="col-span-3">
-                          <div className="text-sm text-gray-500">
-                            Actions Taken
-                          </div>
-                          <textarea
-                            value={actionsTaken}
-                            onChange={(e) => setActionsTaken(e.target.value)}
-                            className="w-full px-4 py-2 border rounded h-24"
-                            placeholder="Describe immediate actions taken..."
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-gray-200 rounded-lg p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold">
-                          Witness Information
-                        </h2>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-sm text-gray-500">
-                            Witness Name
-                          </div>
-                          <input
-                            type="text"
-                            value={witnessName}
-                            onChange={(e) => setWitnessName(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Optional"
-                          />
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">
-                            Witness Contact
-                          </div>
-                          <input
-                            type="text"
-                            value={witnessContact}
-                            onChange={(e) => setWitnessContact(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Optional"
-                          />
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
                   <div

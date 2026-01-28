@@ -555,7 +555,7 @@ const [useAI, setUseAI] = useState(false);
                           <td className="py-3 px-2 text-sm text-gray-600">{order.itemCount || 0} items</td>
                           <td className="py-3 px-2 text-sm font-medium text-gray-900">${order.total || 0}</td>
                           <td className="py-3 px-2">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getOrderStatusColor(order.status || 'Pending')}`}>
+                            <span className={`px-2 py-1 rounded-full text-xs text-sm font-medium ${getOrderStatusColor(order.status || 'Pending')}`}>
                               {order.status || 'Pending'}
                             </span>
                           </td>
@@ -587,7 +587,7 @@ const [useAI, setUseAI] = useState(false);
                           </div>
                         )}
                         <div className="absolute top-2 right-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          <span className={`px-2 py-1 rounded-full text-xs text-sm font-medium ${
                             item.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                           }`}>
                             {item.available ? 'Available' : 'Unavailable'}
@@ -664,7 +664,7 @@ const [useAI, setUseAI] = useState(false);
                         <td className="py-3 px-2 text-sm text-gray-600">{order.itemCount || 0} items</td>
                         <td className="py-3 px-2 text-sm font-medium text-gray-900">${order.total || 0}</td>
                         <td className="py-3 px-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getOrderStatusColor(order.status || 'Pending')}`}>
+                          <span className={`px-2 py-1 rounded-full text-xs text-sm font-medium ${getOrderStatusColor(order.status || 'Pending')}`}>
                             {order.status || 'Pending'}
                           </span>
                         </td>
