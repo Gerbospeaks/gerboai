@@ -1,3 +1,4 @@
+// src/contexts/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   createUserWithEmailAndPassword,
@@ -22,6 +23,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userDashboard, setUserDashboard] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,10 +40,12 @@ export const AuthProvider = ({ children }) => {
             emailVerified: firebaseUser.emailVerified
           });
           setUserDashboard(userData.dashboardId);
+          setIsAdmin(userData.isAdmin === true); // Check if user is admin
         }
       } else {
         setUser(null);
         setUserDashboard(null);
+        setIsAdmin(false);
       }
       setLoading(false);
     });
@@ -69,7 +73,8 @@ export const AuthProvider = ({ children }) => {
         dashboardId: dashboardId,
         createdAt: serverTimestamp(),
         emailVerified: false,
-        role: 'user'
+        role: 'user',
+        isAdmin: false // Default to false for new users
       });
       console.log('User document created');
 
@@ -152,7 +157,16 @@ export const AuthProvider = ({ children }) => {
         };
       }
 
-      return { success: true };
+      // Get user data to check admin status
+      const userDocRef = doc(db, 'users', userCredential.user.uid);
+      const userDoc = await getDoc(userDocRef);
+      const userData = userDoc.data();
+
+      return { 
+        success: true,
+        isAdmin: userData?.isAdmin === true,
+        dashboardId: userData?.dashboardId
+      };
     } catch (error) {
       return { success: false, message: error.message };
     }
@@ -168,7 +182,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, userDashboard, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      userDashboard, 
+      isAdmin, 
+      login, 
+      register, 
+      logout, 
+      loading 
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import logon from '../assets/img/reg2.png';
 import logo from '../assets/img/solidflo-logo.png';
+
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,7 +26,12 @@ function Login() {
     setIsSubmitting(false);
 
     if (result.success) {
-      navigate('/home');
+      // Check if user is admin and redirect accordingly
+      if (result.isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/home');
+      }
     } else {
       setError(result.message);
     }
