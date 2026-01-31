@@ -101,7 +101,7 @@ export const DefaultTemplate = ({
   showStampDate = true,
   serviceType = "MEDICAL"
 }) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     {/* Header Section */}
     <div className="border-b-2 border-blue-600 pb-4 mb-4">
       <div className="flex justify-between items-start">
@@ -300,7 +300,7 @@ export const DefaultTemplate = ({
 
 // Clinical Template
 export const ClinicalTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     <div className="border-b-2 border-teal-600 pb-4 mb-4">
       <div className="flex justify-between items-start">
         <div>
@@ -427,7 +427,7 @@ export const ClinicalTemplate = (props) => (
 
 // Modern Medical Template
 export const ModernTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     <div className="border-b-4 border-indigo-500 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
@@ -568,7 +568,7 @@ const SickNoteDocument = ({
   practiceNumber,
   additionalNotes 
 }) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     <div className="border-4 border-blue-600 p-6">
       {/* Header */}
       <div className="text-center border-b-2 border-blue-600 pb-4 mb-6">

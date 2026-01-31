@@ -464,8 +464,91 @@ const handleAIDataExtracted = (extractedData) => {
   };
 
   const handlePrint = () => {
-    window.print();
-  };
+  // Add print styles to document
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = printStyles;
+  document.head.appendChild(styleSheet);
+  
+  // Trigger print
+  window.print();
+  
+  // Clean up (remove after print dialog closes)
+  setTimeout(() => {
+    document.head.removeChild(styleSheet);
+  }, 1000);
+};
+const printStyles = `
+  @media print {
+    /* Hide everything except the print area */
+    body * {
+      visibility: hidden !important;
+    }
+    
+    #print-area,
+    #print-area * {
+      visibility: visible !important;
+    }
+    
+    /* Force print area to display even if hidden */
+    #print-area {
+      display: block !important;
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 210mm !important;
+      min-height: 297mm !important;
+      margin: 0 !important;
+      padding: 10mm !important;
+      box-sizing: border-box !important;
+      background: white !important;
+      box-shadow: none !important;
+    }
+    
+    /* Reset page margins and size */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 210mm !important;
+      height: 297mm !important;
+      background: white !important;
+    }
+    
+    /* Ensure colors print correctly */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+    
+    /* Logo sizing */
+    .logo img {
+      height: 60px;
+      width: auto;
+    }
+    
+    /* Remove any borders or shadows */
+    .shadow-lg, .rounded-lg, .shadow-xl, .shadow-2xl {
+      border: none !important;
+      box-shadow: none !important;
+    }
+    
+    /* Prevent page breaks inside elements */
+    table, tr, td, th, div {
+      page-break-inside: avoid !important;
+    }
+    
+    /* Ensure tables print correctly */
+    table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+    }
+  }
+`;
 
   const handleSave = () => {
     window.print();
@@ -1022,23 +1105,7 @@ const handleAIDataExtracted = (extractedData) => {
           </div>
         </div>
 
-        <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-          <div className="flex space-x-4 lg:space-x-8 min-w-max">
-            {["WorkOrder", "Materials", "History", "Notes"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 border-b-2 ${
-                  activeTab === tab
-                    ? "border-green-400 text-gray-800"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
+       
         </div>
         <div className="p-4 lg:p-6">
           {/* Business Settings Modal */}
@@ -1616,19 +1683,14 @@ const handleAIDataExtracted = (extractedData) => {
             </div>
 
             <div
-              className={`${
-                !showJobCard ? "hidden" : "block"
-              } lg:block mx-auto bg-white shadow-lg overflow-y-auto`}
-              style={{
-                width: "100%",
-                maxWidth: "210mm",
-                maxHeight: "90vh",
-              }}
-            >
+  id="print-area"
+  className={`${!showJobCard ? "hidden lg:block" : "block"} mx-auto bg-white print:block`}
+  style={{ width: "210mm", minHeight: "297mm" }}
+>
              {activeView === 'invoice' && (
   <>
     {/* Add Template Selector */}
-    <div className="mb-4">
+    <div className="mb-4 print:hidden">
       <TemplateSelector 
         user={user} 
         selectedTemplate={selectedTemplate}
@@ -1662,89 +1724,7 @@ const handleAIDataExtracted = (extractedData) => {
 )}
             </div>
 
-            <style>{`
-              @media print {
-                * {
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                }
-                
-                html, body {
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  background: white !important;
-                  width: 100% !important;
-                  height: 100% !important;
-                }
-                
-                @page {
-                  size: A4;
-                  margin: 0;
-                }
-                
-                .print\\:hidden {
-                  display: none !important;
-                }
-                
-                /* Hide all navigation and headers */
-                div[class*="border-b"][class*="border-gray"] {
-                  display: none !important;
-                }
-                
-                nav,
-                [class*="sidebar"],
-                [class*="bg-green-900"],
-                button:not([style]) {
-                  display: none !important;
-                }
-                
-                .space-y-6 {
-                  display: none !important;
-                }
-                
-                /* Show only the invoice section */
-                .flex.h-screen {
-                  display: block !important;
-                  height: auto !important;
-                }
-                
-                .flex-1 {
-                  display: block !important;
-                  overflow: visible !important;
-                }
-                
-                .grid.grid-cols-1 {
-                  display: block !important;
-                  grid-template-columns: none !important;
-                }
-                
-                /* Invoice container styling */
-                div[style*="210mm"] {
-                  display: block !important;
-                  width: 210mm !important;
-                  height: auto !important;
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  box-shadow: none !important;
-                  page-break-after: avoid !important;
-                }
-                
-                .bg-white {
-                  background: white !important;
-                  box-shadow: none !important;
-                }
-                
-                /* Ensure table displays */
-                table {
-                  width: 100% !important;
-                  border-collapse: collapse !important;
-                }
-                
-                tr, td, th {
-                  page-break-inside: avoid !important;
-                }
-              }
-            `}</style>
+            
           </div>
                 </>)}
         </div>

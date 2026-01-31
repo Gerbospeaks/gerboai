@@ -149,8 +149,92 @@ const SecurityDashboard = () => {
   };
 
   const handlePrint = () => {
-    window.print();
-  };
+  // Add print styles to document
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = printStyles;
+  document.head.appendChild(styleSheet);
+  
+  // Trigger print
+  window.print();
+  
+  // Clean up (remove after print dialog closes)
+  setTimeout(() => {
+    document.head.removeChild(styleSheet);
+  }, 1000);
+};
+const printStyles = `
+  @media print {
+    /* Hide everything except the print area */
+    body * {
+      visibility: hidden !important;
+    }
+    
+    #print-area,
+    #print-area * {
+      visibility: visible !important;
+    }
+    
+    /* Force print area to display even if hidden */
+    #print-area {
+      display: block !important;
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 210mm !important;
+      min-height: 297mm !important;
+      margin: 0 !important;
+      padding: 10mm !important;
+      box-sizing: border-box !important;
+      background: white !important;
+      box-shadow: none !important;
+    }
+    
+    /* Reset page margins and size */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 210mm !important;
+      height: 297mm !important;
+      background: white !important;
+    }
+    
+    /* Ensure colors print correctly */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+    
+    /* Logo sizing */
+    .logo img {
+      height: 60px;
+      width: auto;
+    }
+    
+    /* Remove any borders or shadows */
+    .shadow-lg, .rounded-lg, .shadow-xl, .shadow-2xl {
+      border: none !important;
+      box-shadow: none !important;
+    }
+    
+    /* Prevent page breaks inside elements */
+    table, tr, td, th, div {
+      page-break-inside: avoid !important;
+    }
+    
+    /* Ensure tables print correctly */
+    table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+    }
+  }
+`;
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -577,7 +661,9 @@ const SecurityDashboard = () => {
                 <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
                   <div className="flex items-center space-x-3">
                     <AlertTriangle className="w-5 h-5" />
-                    <span className="text-sm font-medium">Incident Reports</span>
+                    <span className="text-sm font-medium">
+                      Incident Reports
+                    </span>
                   </div>
                   <ChevronDown className="w-4 h-4" />
                 </div>
@@ -676,8 +762,6 @@ const SecurityDashboard = () => {
                 <Calendar className="w-5 h-5" />
                 <span className="text-sm font-medium">Shift Calendar</span>
               </div>
-
-              
             </div>
           </nav>
         </div>
@@ -706,7 +790,7 @@ const SecurityDashboard = () => {
         </div>
       </div>
       <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-16"}`}
+        className={`flex-1 transition-all duration-300 ml-16 lg:ml-64`}
       >
         <div className="flex-1 overflow-auto">
           <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 py-4">
@@ -715,14 +799,11 @@ const SecurityDashboard = () => {
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
                   className="p-2 hover:bg-gray-100 rounded-lg"
-                >
-                 
-                </button>
-                
+                ></button>
+
                 <h1 className="text-base lg:text-xl font-semibold">
                   Incident Report #{incidentNumber || "— not saved yet —"}
                 </h1>
-                
               </div>
 
               <div className="hidden lg:flex items-center space-x-3 print:hidden">
@@ -1287,56 +1368,50 @@ const SecurityDashboard = () => {
                     </div>
 
                     <SecurityIncidentMultiStepForm
-  // Client Info Props
-  clientName={clientName}
-  setClientName={setClientName}
-  clientContact={clientContact}
-  setClientContact={setClientContact}
-  clientEmail={clientEmail}
-  setClientEmail={setClientEmail}
-  // Site Info Props
-  siteName={siteName}
-  setSiteName={setSiteName}
-  siteAddress={siteAddress}
-  setSiteAddress={setSiteAddress}
-  // Guard Info Props
-  guardName={guardName}
-  setGuardName={setGuardName}
-  guardId={guardId}
-  setGuardId={setGuardId}
-  // Incident Details Props
-  incidentType={incidentType}
-  setIncidentType={setIncidentType}
-  incidentDate={incidentDate}
-  setIncidentDate={setIncidentDate}
-  incidentTime={incidentTime}
-  setIncidentTime={setIncidentTime}
-  incidentDescription={incidentDescription}
-  setIncidentDescription={setIncidentDescription}
-  actionsTaken={actionsTaken}
-  setActionsTaken={setActionsTaken}
-  // Witness Info Props
-  witnessName={witnessName}
-  setWitnessName={setWitnessName}
-  witnessContact={witnessContact}
-  setWitnessContact={setWitnessContact}
-/>
-
+                      // Client Info Props
+                      clientName={clientName}
+                      setClientName={setClientName}
+                      clientContact={clientContact}
+                      setClientContact={setClientContact}
+                      clientEmail={clientEmail}
+                      setClientEmail={setClientEmail}
+                      // Site Info Props
+                      siteName={siteName}
+                      setSiteName={setSiteName}
+                      siteAddress={siteAddress}
+                      setSiteAddress={setSiteAddress}
+                      // Guard Info Props
+                      guardName={guardName}
+                      setGuardName={setGuardName}
+                      guardId={guardId}
+                      setGuardId={setGuardId}
+                      // Incident Details Props
+                      incidentType={incidentType}
+                      setIncidentType={setIncidentType}
+                      incidentDate={incidentDate}
+                      setIncidentDate={setIncidentDate}
+                      incidentTime={incidentTime}
+                      setIncidentTime={setIncidentTime}
+                      incidentDescription={incidentDescription}
+                      setIncidentDescription={setIncidentDescription}
+                      actionsTaken={actionsTaken}
+                      setActionsTaken={setActionsTaken}
+                      // Witness Info Props
+                      witnessName={witnessName}
+                      setWitnessName={setWitnessName}
+                      witnessContact={witnessContact}
+                      setWitnessContact={setWitnessContact}
+                    />
                   </div>
 
                   <div
-                    className={`${
-                      !showIncidentReport ? "hidden" : "block"
-                    } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-                    style={{
-                      width: "100%",
-                      maxWidth: "210mm",
-                      minHeight: "297mm",
-                    }}
-                  >
+  id="print-area"
+  className={`${!showIncidentReport ? "hidden lg:block" : "block"} mx-auto bg-white print:block`}
+  style={{ width: "210mm", minHeight: "297mm" }}
+>
                     <>
                       {/* Add Template Selector */}
-                      <div className="mb-4">
+                      <div className="mb-4 print:hidden">
                         <TemplateSelector
                           user={user}
                           selectedTemplate={selectedTemplate}
@@ -1396,72 +1471,7 @@ const SecurityDashboard = () => {
                     </>
                   </div>
 
-                  <style>{`
-              @media print {
-                * {
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                }
                 
-                html, body {
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  background: white !important;
-                  width: 100% !important;
-                  height: 100% !important;
-                }
-                
-                @page {
-                  size: A4;
-                  margin: 0;
-                }
-                
-                .print\\:hidden {
-                  display: none !important;
-                }
-                
-                nav,
-                [class*="sidebar"],
-                [class*="bg-gray-50"],
-                button:not([style]) {
-                  display: none !important;
-                }
-                
-                .space-y-6 {
-                  display: none !important;
-                }
-                
-                .flex.h-screen {
-                  display: block !important;
-                  height: auto !important;
-                }
-                
-                .flex-1 {
-                  display: block !important;
-                  overflow: visible !important;
-                }
-                
-                .grid.grid-cols-1 {
-                  display: block !important;
-                  grid-template-columns: none !important;
-                }
-                
-                div[style*="210mm"] {
-                  display: block !important;
-                  width: 210mm !important;
-                  height: auto !important;
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  box-shadow: none !important;
-                  page-break-after: avoid !important;
-                }
-                
-                .bg-white {
-                  background: white !important;
-                  box-shadow: none !important;
-                }
-              }
-            `}</style>
                 </div>
               </>
             )}

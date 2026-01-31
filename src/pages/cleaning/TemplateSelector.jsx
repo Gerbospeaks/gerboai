@@ -102,6 +102,7 @@ export const DefaultTemplate = ({
   numberOfRooms,
   items,
   subtotal,
+  documentType = 'invoice',
   vat,
   total,
   showStamp = false,
@@ -109,7 +110,7 @@ export const DefaultTemplate = ({
   stampColor = "#2563eb",
   showStampDate = true
 }) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white print:p-0" style={{ padding: "15mm 20mm" }}>
     {/* Header Section */}
     <div className="border-b-2 border-blue-600 pb-4 mb-4">
       <div className="flex justify-between items-start">
@@ -147,10 +148,10 @@ export const DefaultTemplate = ({
         </div>
 
         <div className="text-right">
-          <div className="text-3xl font-bold text-blue-600 mb-4">INVOICE</div>
+          <div className="text-5xl font-black text-green-500 mb-4 italic">{documentType === 'invoice' ? 'INVOICE' : 'QUOTE'}</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">{documentType === 'quote' ? 'QUOTE NO.' : 'INVOICE NO.'}</span>
               <span>{jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -305,7 +306,7 @@ export const DefaultTemplate = ({
 
 // Classic Template
 export const ClassicTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white print:p-0" style={{ padding: "15mm 20mm" }}>
     <div className="border-b-2 border-gray-800 pb-4 mb-4">
       <div className="flex justify-between items-start">
         <div>
@@ -325,10 +326,10 @@ export const ClassicTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">INVOICE</div>
+         <div className="text-5xl font-black text-green-500 mb-4 italic">{props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">{props.documentType === 'quote' ? 'QUOTE NO.' : 'INVOICE NO.'}</span>
               <span>{props.jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -436,7 +437,7 @@ export const ClassicTemplate = (props) => (
 
 // Modern Template
 export const ModernTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white print:p-0" style={{ padding: "15mm 20mm" }}>
     <div className="border-b-4 border-blue-500 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
@@ -451,9 +452,9 @@ export const ModernTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-5xl font-bold text-blue-500 mb-4">INVOICE</div>
+          <div className="text-5xl font-black text-green-500 mb-4 italic">{props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}</div>
           <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-            <div className="text-sm"><span className="font-semibold">Invoice #:</span> {props.jobCardNumber}</div>
+            <div className="text-sm"><span className="font-semibold">{props.documentType === 'quote' ? 'QUOTE NO.' : 'INVOICE NO.'}</span> {props.jobCardNumber}</div>
             <div className="text-sm"><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</div>
           </div>
         </div>
@@ -550,7 +551,7 @@ export const ModernTemplate = (props) => (
 
 // Elegant/Premium Template
 export const ElegantTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white print:p-0" style={{ padding: "15mm 20mm" }}>
     <div className="border-4 border-purple-900 p-8">
       <div className="text-center border-b-2 border-purple-900 pb-6 mb-6">
         {props.businessInfo.logoUrl && (
@@ -669,7 +670,7 @@ export const ResidentialTemplate = (props) => (
             <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
           </div>
           <div className="text-right">
-            <div className="text-5xl font-black text-green-500 mb-4 italic">INVOICE</div>
+            <div className="text-5xl font-black text-green-500 mb-4 italic">{props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}</div>
             <div className="bg-green-500 text-gray-800 p-4 rounded space-y-1">
               <div className="text-sm font-bold">#{props.jobCardNumber}</div>
               <div className="text-sm">{new Date().toLocaleDateString()}</div>
@@ -774,7 +775,7 @@ export const ResidentialTemplate = (props) => (
 
 // Commercial Pro Template
 export const CommercialTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white print:p-0" style={{ padding: "15mm 20mm" }}>
     <div className="border-b-4 border-indigo-600 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
@@ -918,11 +919,10 @@ return <ClassicTemplate {...templateProps} />;
 case 'modern':
 return <ModernTemplate {...templateProps} />;
 case 'elegant':
-case 'premium':
 return <ElegantTemplate {...templateProps} />;
-case 'speed':
+case 'residential':
 return <ResidentialTemplate {...templateProps} />;
-case 'diagnostic':
+case 'commercial':
 return <CommercialTemplate {...templateProps} />;
 default:
 return <DefaultTemplate {...templateProps} />;

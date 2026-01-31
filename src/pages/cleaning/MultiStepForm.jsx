@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Users, Building, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, Building, Plus, ChevronLeft, ChevronRight, CreditCard } from "lucide-react";
 
 const MultiStepForm = ({
   // Customer Info Props
@@ -31,9 +31,18 @@ const MultiStepForm = ({
   newItem,
   setNewItem,
   handleAddItem,
+  // Payment Terms Props
+  paymentMethod,
+  setPaymentMethod,
+  paymentTerms,
+  setPaymentTerms,
+  serviceGuarantee,
+  setServiceGuarantee,
+  // Document Type (for conditional rendering)
+  isQuoteMode = false,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 3;
+  const totalSteps = 4;
 
   const nextStep = () => {
     if (currentStep < totalSteps) {
@@ -50,7 +59,7 @@ const MultiStepForm = ({
   const renderStepIndicator = () => (
     <div className="mb-6">
       <div className="flex items-center justify-between">
-        {[1, 2, 3].map((step) => (
+        {[1, 2, 3, 4].map((step) => (
           <React.Fragment key={step}>
             <div className="flex flex-col items-center">
               <div
@@ -66,9 +75,10 @@ const MultiStepForm = ({
                 {step === 1 && "Customer"}
                 {step === 2 && "Property"}
                 {step === 3 && "Services"}
+                {step === 4 && "Payment"}
               </div>
             </div>
-            {step < 3 && (
+            {step < 4 && (
               <div
                 className={`flex-1 h-1 mx-2 ${
                   currentStep > step ? "bg-blue-600" : "bg-gray-200"
@@ -299,6 +309,96 @@ const MultiStepForm = ({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Step 4: Payment Terms */}
+      {currentStep === 4 && (
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold flex items-center space-x-2">
+              <CreditCard className="w-5 h-5" />
+              <span>Payment Terms</span>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <div className="text-sm text-gray-500 mb-2">Payment Method *</div>
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="EFT">EFT</option>
+                <option value="Cash/Card/EFT">Cash/Card/EFT</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Cheque">Cheque</option>
+              </select>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-500 mb-2">Payment Terms *</div>
+              <select
+                value={paymentTerms}
+                onChange={(e) => setPaymentTerms(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {isQuoteMode ? (
+                  <>
+                    <option value="Quote Valid 30 Days">Quote Valid 30 Days</option>
+                    <option value="Quote Valid 60 Days">Quote Valid 60 Days</option>
+                    <option value="Quote Valid 90 Days">Quote Valid 90 Days</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="Due on Completion">Due on Completion</option>
+                    <option value="Net 7 Days">Net 7 Days</option>
+                    <option value="Net 15 Days">Net 15 Days</option>
+                    <option value="Net 30 Days">Net 30 Days</option>
+                    <option value="Net 60 Days">Net 60 Days</option>
+                    <option value="50% Deposit, Balance on Completion">50% Deposit, Balance on Completion</option>
+                  </>
+                )}
+              </select>
+            </div>
+
+            <div className="col-span-1 sm:col-span-2">
+              <div className="text-sm text-gray-500 mb-2">Service Guarantee</div>
+              <select
+                value={serviceGuarantee}
+                onChange={(e) => setServiceGuarantee(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="7 Day Satisfaction Guarantee">7 Day Satisfaction Guarantee</option>
+                <option value="14 Day Satisfaction Guarantee">14 Day Satisfaction Guarantee</option>
+                <option value="30 Day Satisfaction Guarantee">30 Day Satisfaction Guarantee</option>
+                <option value="100% Satisfaction Guaranteed">100% Satisfaction Guaranteed</option>
+                <option value="Money Back Guarantee">Money Back Guarantee</option>
+                <option value="No Guarantee">No Guarantee</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Payment Terms Preview */}
+          <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h3 className="text-sm font-semibold mb-3 text-gray-700">Preview</h3>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between py-2 border-b border-gray-200">
+                <span className="text-gray-600">Payment Method:</span>
+                <span className="font-medium text-gray-800">{paymentMethod}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-gray-200">
+                <span className="text-gray-600">Payment Terms:</span>
+                <span className="font-medium text-gray-800">{paymentTerms}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-gray-600">Service Guarantee:</span>
+                <span className="font-medium text-gray-800">{serviceGuarantee}</span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

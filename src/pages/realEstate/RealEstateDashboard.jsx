@@ -440,9 +440,91 @@ const [stampSettings, setStampSettings] = useState({
   };
 
   const handlePrint = () => {
-    window.print();
-  };
-
+  // Add print styles to document
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = printStyles;
+  document.head.appendChild(styleSheet);
+  
+  // Trigger print
+  window.print();
+  
+  // Clean up (remove after print dialog closes)
+  setTimeout(() => {
+    document.head.removeChild(styleSheet);
+  }, 1000);
+};
+const printStyles = `
+  @media print {
+    /* Hide everything except the print area */
+    body * {
+      visibility: hidden !important;
+    }
+    
+    #print-area,
+    #print-area * {
+      visibility: visible !important;
+    }
+    
+    /* Force print area to display even if hidden */
+    #print-area {
+      display: block !important;
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 210mm !important;
+      min-height: 297mm !important;
+      margin: 0 !important;
+      padding: 10mm !important;
+      box-sizing: border-box !important;
+      background: white !important;
+      box-shadow: none !important;
+    }
+    
+    /* Reset page margins and size */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 210mm !important;
+      height: 297mm !important;
+      background: white !important;
+    }
+    
+    /* Ensure colors print correctly */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+    
+    /* Logo sizing */
+    .logo img {
+      height: 60px;
+      width: auto;
+    }
+    
+    /* Remove any borders or shadows */
+    .shadow-lg, .rounded-lg, .shadow-xl, .shadow-2xl {
+      border: none !important;
+      box-shadow: none !important;
+    }
+    
+    /* Prevent page breaks inside elements */
+    table, tr, td, th, div {
+      page-break-inside: avoid !important;
+    }
+    
+    /* Ensure tables print correctly */
+    table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+    }
+  }
+`;
   const handleSave = () => {
     window.print();
   };
@@ -1548,15 +1630,10 @@ const [stampSettings, setStampSettings] = useState({
             </div>
 
             <div
-              className={`${
-                !showInvoice ? "hidden" : "block"
-              } lg:block mx-auto bg-white shadow-lg overflow-hidden`}
-              style={{
-                width: "100%",
-                maxWidth: "210mm",
-                minHeight: "297mm",
-              }}
-            >
+  id="print-area"
+  className={`${!showInvoice ? "hidden lg:block" : "block"} mx-auto bg-white print:block`}
+  style={{ width: "210mm", minHeight: "297mm" }}
+>
              {activeView === 'invoice' && (
   <>
     {/* Add Template Selector */}
@@ -1591,6 +1668,10 @@ const [stampSettings, setStampSettings] = useState({
       serviceType="REAL ESTATE"
       currency="£"
       locale="en-GB"
+      showStamp={stampSettings.enabled} // Add this
+      stampText={stampSettings.text} // Add this
+      stampColor={stampSettings.color} // Add this
+      showStampDate={stampSettings.showDate}
     />
   </>
 )}

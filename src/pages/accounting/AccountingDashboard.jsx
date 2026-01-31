@@ -127,6 +127,8 @@ const AccountingDashboard = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("contemporary");
   const [documentType, setDocumentType] = useState("invoice"); // 'invoice' or 'quote'
   const [showConvertButton, setShowConvertButton] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("Cash/Card/EFT");
+  const [serviceGuarantee, setServiceGuarantee] = useState("7 Day Satisfaction Guarantee");
   const [inputMode, setInputMode] = useState("manual");
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
@@ -544,8 +546,91 @@ const AccountingDashboard = () => {
   };
 
   const handlePrint = () => {
-    window.print();
-  };
+  // Add print styles to document
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = printStyles;
+  document.head.appendChild(styleSheet);
+  
+  // Trigger print
+  window.print();
+  
+  // Clean up (remove after print dialog closes)
+  setTimeout(() => {
+    document.head.removeChild(styleSheet);
+  }, 1000);
+};
+const printStyles = `
+  @media print {
+    /* Hide everything except the print area */
+    body * {
+      visibility: hidden !important;
+    }
+    
+    #print-area,
+    #print-area * {
+      visibility: visible !important;
+    }
+    
+    /* Force print area to display even if hidden */
+    #print-area {
+      display: block !important;
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 210mm !important;
+      min-height: 297mm !important;
+      margin: 0 !important;
+      padding: 10mm !important;
+      box-sizing: border-box !important;
+      background: white !important;
+      box-shadow: none !important;
+    }
+    
+    /* Reset page margins and size */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 210mm !important;
+      height: 297mm !important;
+      background: white !important;
+    }
+    
+    /* Ensure colors print correctly */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+    
+    /* Logo sizing */
+    .logo img {
+      height: 60px;
+      width: auto;
+    }
+    
+    /* Remove any borders or shadows */
+    .shadow-lg, .rounded-lg, .shadow-xl, .shadow-2xl {
+      border: none !important;
+      box-shadow: none !important;
+    }
+    
+    /* Prevent page breaks inside elements */
+    table, tr, td, th, div {
+      page-break-inside: avoid !important;
+    }
+    
+    /* Ensure tables print correctly */
+    table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+    }
+  }
+`;
 
   const handleSave = () => {
     window.print();
@@ -1115,7 +1200,7 @@ const AccountingDashboard = () => {
 
       {/* Main Content */}
       <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-16"}`}
+        className={`flex-1 transition-all duration-300 ml-16 lg:ml-64`}
       >
         <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
           <div className="sticky top-0 z-40 flex flex-col">
@@ -1250,28 +1335,7 @@ const AccountingDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-gray-100 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-              <div className="flex space-x-4 lg:space-x-8 min-w-max">
-                {[
-                  documentType === "quote" ? "Quote" : "Invoice",
-                  "Payments",
-                  "History",
-                  "Notes",
-                ].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`py-4 border-b-2 ${
-                      activeTab === tab
-                        ? "border-blue-400 text-gray-800"
-                        : "border-transparent text-gray-400 hover:text-gray-200"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-            </div>
+          
           </div>
           <div className="p-4 lg:p-6">
             {/* Business Settings Modal */}
@@ -1884,6 +1948,7 @@ const AccountingDashboard = () => {
             )}
 
             {/* Invoice/Quote Content - Only show when activeView is 'invoice' */}
+           
             {activeView === "invoice" && (
               <>
                 {/* Mobile View Invoice Button */}
@@ -1945,31 +2010,7 @@ const AccountingDashboard = () => {
                     {/* Manual forms always visible */}
                     {inputMode === "manual" && (
                       <>
-                        <div
-                          className={`${
-                            documentType === "quote"
-                              ? "bg-purple-50 border-purple-200"
-                              : "bg-blue-50 border-blue-200"
-                          } border rounded-lg px-4 py-3 flex items-center space-x-3`}
-                        >
-                          <div
-                            className={`w-2 h-2 ${documentType === "quote" ? "bg-purple-500" : "bg-blue-500"} rounded-full`}
-                          ></div>
-                          <span
-                            className={`${documentType === "quote" ? "text-purple-700" : "text-blue-700"} text-sm font-medium`}
-                          >
-                            {documentType === "quote"
-                              ? "Quote Pending"
-                              : "Pending Payment"}
-                          </span>
-                          <span
-                            className={`${documentType === "quote" ? "text-purple-600" : "text-blue-600"}`}
-                          >
-                            {documentType === "quote"
-                              ? `Valid Until: ${dueDate || "Not set"}`
-                              : `Due: ${dueDate || "Not set"}`}
-                          </span>
-                        </div>
+                       
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -2026,55 +2067,27 @@ const AccountingDashboard = () => {
                             newItem={newItem}
                             setNewItem={setNewItem}
                             handleAddItem={handleAddItem}
+
+                            paymentMethod={paymentMethod}
+                            setPaymentMethod={setPaymentMethod}
+                            
+                            serviceGuarantee={serviceGuarantee}
+                            setServiceGuarantee={setServiceGuarantee}
+                           
+                            
                           />
                         )}
 
-                        <div className="bg-white border border-gray-200 rounded-lg p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold">
-                              Payment Information
-                            </h2>
-                          </div>
-
-                          <div className="space-y-3 text-sm">
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">
-                                Payment Method:
-                              </span>
-                              <span className="text-sm font-medium">
-                                EFT/Card/Cash
-                              </span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">
-                                Payment Terms:
-                              </span>
-                              <span className="text-sm font-medium">
-                                {paymentTerms}
-                              </span>
-                            </div>
-                            <div className="flex justify-between py-2">
-                              <span className="text-gray-600">Late Fee:</span>
-                              <span className="text-sm font-medium">
-                                2% per month
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                       
                       </>
                     )}
-                    ,
+                    
                   </div>
 
-                  <div
-                    className={`${
-                      !showInvoice ? "hidden" : "block"
-                    } lg:block mx-auto bg-white shadow-lg overflow-y-auto`}
-                    style={{
-                      width: "100%",
-                      maxWidth: "210mm",
-                      minHeight: "297mm",
-                    }}
+                   <div
+                    id="print-area"
+                    className={`${!showInvoice ? "hidden" : "block"} lg:block mx-auto bg-white`}
+                    style={{ width: "210mm", minHeight: "297mm" }}
                   >
                     <div className="mb-4">
                       <TemplateSelector
@@ -2100,74 +2113,21 @@ const AccountingDashboard = () => {
                       subtotal={subtotal}
                       vat={vat}
                       total={total}
+                      paymentMethod={paymentMethod}
+                      serviceGuarantee={serviceGuarantee}
                       documentType={documentType}
+                      showStamp={stampSettings.enabled} // Add this
+                      stampText={stampSettings.text} // Add this
+                      stampColor={stampSettings.color} // Add this
+                      showStampDate={stampSettings.showDate} // Add this
                     />
-                  </div>
-                </div>
 
-                <style>{`
-                @media print {
-                  * {
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                  }
-                  
-                  html, body {
-                    margin: 0;
-                    padding: 0;
-                    background: white !important;
-                    overflow: hidden !important;
-                    width: 210mm;
-                    height: 297mm;
-                  }
-                  
-                  @page {
-                    size: A4;
-                    margin: 0;
-                  }
-                  
-                  .print\\:hidden,
-                  nav,
-                  button,
-                  [class*="sidebar"],
-                  [class*="bg-gray-800"],
-                  [class*="border-b"] {
-                    display: none !important;
-                  }
-                  
-                  .space-y-6.lg\\:block {
-                    display: none !important;
-                  }
-                  
-                  .flex.h-screen.bg-gray-800,
-                  .flex-1.overflow-auto {
-                    overflow: hidden !important;
-                  }
-                  
-                  .grid.grid-cols-1.lg\\:grid-cols-2 {
-                    display: block !important;
-                    grid-template-columns: 1fr !important;
-                    overflow: hidden !important;
-                  }
-                  
-                  .lg\\:block.mx-auto.bg-white.shadow-lg {
-                    display: block !important;
-                    box-shadow: none !important;
-                    max-width: 210mm !important;
-                    width: 210mm !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    overflow: hidden !important;
-                  }
-                  
-                  .bg-white.rounded-lg {
-                    page-break-inside: avoid;
-                    break-inside: avoid;
-                  }
-                }
-              `}</style>
+                  </div>
+               
+                </div>
               </>
             )}
+             
           </div>
         </div>
       </div>
