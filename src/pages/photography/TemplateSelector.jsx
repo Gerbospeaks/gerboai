@@ -268,7 +268,7 @@ export const ClassicTemplate = (props) => (
               <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
             )}
             <div>
-              <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
+              
             </div>
           </div>
           <div className="text-xs leading-relaxed">
@@ -394,7 +394,7 @@ export const ModernTemplate = (props) => (
               <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
             )}
             <div>
-              <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
+              
             </div>
           </div>
           <div className="text-xs leading-relaxed">
@@ -520,7 +520,7 @@ export const ElegantTemplate = (props) => (
               <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
             )}
             <div>
-              <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
+              
             </div>
           </div>
           <div className="text-xs leading-relaxed">
@@ -646,7 +646,7 @@ export const SpeedTemplate = (props) => (
               <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
             )}
             <div>
-              <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
+              
             </div>
           </div>
           <div className="text-xs leading-relaxed">
@@ -771,7 +771,7 @@ export const DiagnosticTemplate = (props) => (
               <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
             )}
             <div>
-              <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
+              
             </div>
           </div>
           <div className="text-xs leading-relaxed">

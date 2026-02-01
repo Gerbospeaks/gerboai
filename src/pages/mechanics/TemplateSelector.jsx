@@ -518,7 +518,7 @@ export const ModernTemplate = (props) => (
           {props.v8logo && (
             <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain mb-3" />
           )}
-          <div className="text-3xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
+          
           <div className="text-sm text-gray-600 space-y-1">
             <div>{props.businessInfo.addressLine1}</div>
             <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
@@ -648,7 +648,7 @@ export const ElegantTemplate = (props) => (
         {props.v8logo && (
           <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain mx-auto mb-4" />
         )}
-        <div className="text-4xl font-serif font-bold text-purple-900 mb-2">{props.businessInfo.businessName}</div>
+        
         <div className="text-sm text-gray-600">{props.businessInfo.addressLine1} • {props.businessInfo.city}</div>
         <div className="text-2xl font-serif text-purple-700 mt-4">
           {props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}
@@ -893,7 +893,7 @@ export const DiagnosticTemplate = (props) => (
           {props.v8logo && (
             <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain mb-3" />
           )}
-          <div className="text-2xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
+          
           <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
           <div className="text-sm text-gray-600">{props.businessInfo.city}</div>
         </div>

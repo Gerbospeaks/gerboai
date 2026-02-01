@@ -403,7 +403,7 @@ const CleaningDashboard = () => {
        logoUrl,
        uploading: false,
      }));
- 
+ console.log("API URL:", process.env.REACT_APP_API_URL);
      // Save URL to Firestore
      const db = getFirestore();
      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");

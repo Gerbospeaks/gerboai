@@ -337,7 +337,7 @@ export const ClassicTemplate = (props) => (
               <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
             )}
             <div>
-              <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
+              
               <div className="text-xs text-blue-600">Professional HVAC Services</div>
             </div>
           </div>
@@ -462,7 +462,7 @@ export const ModernTemplate = (props) => (
           {props.businessInfo.logoUrl && (
             <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
           )}
-          <div className="text-3xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
+          
           <div className="text-sm text-gray-600 space-y-1">
             <div>{props.businessInfo.addressLine1}</div>
             <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
@@ -793,7 +793,7 @@ export const DiagnosticTemplate = (props) => (
           {props.businessInfo.logoUrl && (
             <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
           )}
-          <div className="text-2xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
+          
           <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
           <div className="text-sm text-gray-600">{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
           <div className="text-sm text-green-600 font-semibold mt-1">Professional HVAC Diagnostics</div>

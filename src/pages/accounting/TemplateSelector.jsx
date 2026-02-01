@@ -180,9 +180,7 @@ export const ProfessionalTemplate = ({
               </div>
             )}
             <div>
-              <div className="text-xl font-bold text-blue-600">
-                {businessInfo.businessName || businessInfo.companyName}
-              </div>
+             
               <div className="text-sm font-semibold text-gray-600">
                 Professional Accounting Services
               </div>
@@ -372,7 +370,7 @@ export const ClassicTemplate = (props) => (
               <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
             )}
             <div>
-              <div className="text-xl font-bold">{props.businessInfo.businessName || props.businessInfo.companyName}</div>
+              
               <div className="text-sm text-gray-600">Accounting & Financial Services</div>
             </div>
           </div>
@@ -619,7 +617,7 @@ export const CorporateTemplate = (props) => (
           {props.businessInfo.logoUrl && (
             <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
           )}
-          <div className="text-2xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName || props.businessInfo.companyName}</div>
+          
           <div className="text-sm font-semibold text-slate-700 mb-2">Financial & Accounting Services</div>
           <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
           <div className="text-sm text-gray-600">{props.businessInfo.city}</div>
@@ -750,7 +748,7 @@ export const PremiumTemplate = (props) => (
             {props.businessInfo.logoUrl && (
               <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
             )}
-            <div className="text-3xl font-black text-blue-600 mb-2">{props.businessInfo.businessName || props.businessInfo.companyName}</div>
+            
             <div className="text-sm text-gray-600">Professional Financial Services</div>
             <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
           </div>
@@ -873,7 +871,7 @@ export const ContemporaryTemplate = (props) => (
             {props.businessInfo.logoUrl && (
               <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
             )}
-            <div className="text-3xl font-black text-emerald-600 mb-2">{props.businessInfo.businessName || props.businessInfo.companyName}</div>
+            
             <div className="text-sm text-gray-600">Professional Financial Services</div>
             <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
           </div>
@@ -995,7 +993,7 @@ export const DetailedTemplate = (props) => (
           {props.businessInfo.logoUrl && (
             <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
           )}
-          <div className="text-2xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName || props.businessInfo.companyName}</div>
+          
           <div className="text-sm font-semibold text-teal-700 mb-2">Detailed Financial Statements</div>
           <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
           <div className="text-sm text-gray-600">{props.businessInfo.city}</div>

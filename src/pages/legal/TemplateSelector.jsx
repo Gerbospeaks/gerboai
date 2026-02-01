@@ -565,7 +565,7 @@ export const ModernTemplate = (props) => {
             {props.businessInfo.logoUrl && (
               <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
             )}
-            <div className="text-3xl font-bold text-gray-900 mb-2">{props.businessInfo.businessName}</div>
+            
             <div className="text-sm text-gray-600 space-y-1">
               <div>{props.businessInfo.addressLine1}</div>
               <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
