@@ -12,7 +12,7 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
     address: existingCustomer?.address || '',
     customerId: existingCustomer?.customerId || ''
   });
-   const { user } = useAuth();
+   const {user, authUser} = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

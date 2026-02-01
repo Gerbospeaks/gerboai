@@ -32,7 +32,7 @@ const GuestsListModal = ({
   onEditGuest, 
   onAddNewGuest 
 }) => {
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredGuests, setFilteredGuests] = useState([]);
   const [loading, setLoading] = useState(false);

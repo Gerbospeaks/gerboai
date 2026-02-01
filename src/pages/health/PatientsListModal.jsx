@@ -11,7 +11,7 @@ const PatientsListModal = ({
   onEditPatient, 
   onAddNewPatient 
 }) => {
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterGender, setFilterGender] = useState('All');
 

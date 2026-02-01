@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import './InvoicesList.css';
 
 const InvoicesList = ({ invoices, type = 'invoice', onRefresh, onView }) => {
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
 
   const getStatusColor = (status) => {
     const colors = {

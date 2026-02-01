@@ -109,8 +109,7 @@ const AccountingDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Invoice");
   const [showInvoice, setShowInvoice] = useState(false);
-  const { user } = useAuth();
-  const {authUser} = useAuth(); 
+  const {user, authUser} = useAuth(); 
   const [documentNumber, setDocumentNumber] = useState("");
   const [documentId, setDocumentId] = useState(null);
   const [savedInvoices, setSavedInvoices] = useState([]);

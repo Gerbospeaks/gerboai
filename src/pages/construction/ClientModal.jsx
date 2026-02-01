@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 
 const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved }) => {
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',

@@ -4,7 +4,7 @@ import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp } fro
 import { X, Save, User, Mail, Phone, MapPin, Calendar, CreditCard, Stethoscope } from 'lucide-react';
 
 const PatientModal = ({ showModal, setShowModal, existingPatient, onPatientSaved }) => {
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({

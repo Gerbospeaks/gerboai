@@ -16,7 +16,7 @@ const AdminDashboard = () => {
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
 
   useEffect(() => {
     if (user) {

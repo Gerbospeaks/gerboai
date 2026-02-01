@@ -11,7 +11,7 @@ import {
 import { X, User, Phone, Mail, MapPin, Calendar, GraduationCap } from 'lucide-react';
 
 const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved }) => {
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({

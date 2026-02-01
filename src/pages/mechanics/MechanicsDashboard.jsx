@@ -98,7 +98,7 @@ const MechanicsDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("JobCard");
   const [showJobCard, setShowJobCard] = useState(false);
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [jobCardNumber, setJobCardNumber] = useState("");
   const [jobCardId, setJobCardId] = useState(null);
   const [savedJobCards, setSavedJobCards] = useState([]);
@@ -495,45 +495,44 @@ const MechanicsDashboard = () => {
 
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
-    if (!file || !user?.uid) return;
-
+    if (!file || !user?.uid || !authUser) return;
+  
     if (!file.type.startsWith("image/")) {
       alert("Please upload an image file");
       return;
     }
-
+  
     if (file.size > 5 * 1024 * 1024) {
       alert("Image size should be less than 5MB");
       return;
     }
-
+  
     try {
-      // Show loading state
       setBusinessInfo(prev => ({ ...prev, uploading: true }));
-
-      // Upload to Cloudflare R2
-      const logoUrl = await uploadLogoToR2(file, user.uid);
-
-      // Update business info state
-      setBusinessInfo({
-        ...businessInfo,
-        logoUrl: logoUrl,
+  
+      // ✅ Upload to Cloudflare R2 (Worker handles userId)
+      const logoUrl = await uploadLogoToR2(file, authUser);
+  
+      setBusinessInfo(prev => ({
+        ...prev,
+        logoUrl,
         uploading: false,
-      });
-
-      // Save to Firebase Firestore
+      }));
+  
+      // Save URL to Firestore
       const db = getFirestore();
       const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-      await updateDoc(docRef, {
-        logoUrl: logoUrl,
-        updatedAt: new Date().toISOString(),
-      });
-
+  
+      await setDoc(docRef, {
+    logoUrl,
+    updatedAt: new Date().toISOString(),
+  }, { merge: true });
+  
       alert("Logo uploaded successfully!");
     } catch (error) {
       console.error("Error uploading logo:", error);
       alert("Failed to upload logo: " + error.message);
-      setBusinessInfo({ ...businessInfo, uploading: false });
+      setBusinessInfo(prev => ({ ...prev, uploading: false }));
     }
   };
 

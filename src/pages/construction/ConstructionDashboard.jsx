@@ -6,6 +6,7 @@ import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates"; 
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
+import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import logo from "../../assets/img/solidflo-logo.png";
 import {
   getFirestore,
@@ -27,7 +28,6 @@ import ClientModal from "./ClientModal";
 import ClientsListModal from "../ClientsListModal";
 import SignatureStamp from "../SignatureStamp";
 import ConstructionMultiStepForm from './ConstructionMultiStepForm';
-import  uploadLogoToR2 from '../../utils/uploadLogoToR2';
 import {
   ChevronDown,
   ChevronLeft,
@@ -109,11 +109,11 @@ const generateInvoiceNumber = async (userId) => {
 
 const ConstructionDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-const [inputMode, setInputMode] = useState("manual");
-const [useAI, setUseAI] = useState(false);
+  const [inputMode, setInputMode] = useState("manual");
+  const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("quote");
   const [showQuote, setShowQuote] = useState(false);
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [quoteNumber, setQuoteNumber] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [quoteId, setQuoteId] = useState(null);
@@ -507,30 +507,44 @@ const handleAIDataExtracted = (extractedData) => {
 
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
-    if (!file || !user?.uid) return;
-
+    if (!file || !user?.uid || !authUser) return;
+  
     if (!file.type.startsWith("image/")) {
       alert("Please upload an image file");
       return;
     }
-
+  
     if (file.size > 5 * 1024 * 1024) {
       alert("Image size should be less than 5MB");
       return;
     }
-
+  
     try {
-      const storage = getStorage();
-      const storageRef = ref(storage, `users/${user.uid}/logo/${file.name}`);
-
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-
-      setCompanyInfo({ ...companyInfo, logoUrl: downloadURL });
+      setCompanyInfo(prev => ({ ...prev, uploading: true }));
+  
+      // ✅ Upload to Cloudflare R2 (Worker handles userId)
+      const logoUrl = await uploadLogoToR2(file, authUser);
+  
+      setCompanyInfo(prev => ({
+        ...prev,
+        logoUrl,
+        uploading: false,
+      }));
+  
+      // Save URL to Firestore
+      const db = getFirestore();
+      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+  
+      await setDoc(docRef, {
+    logoUrl,
+    updatedAt: new Date().toISOString(),
+  }, { merge: true });
+  
       alert("Logo uploaded successfully!");
     } catch (error) {
       console.error("Error uploading logo:", error);
-      alert("Failed to upload logo");
+      alert("Failed to upload logo: " + error.message);
+      setCompanyInfo(prev => ({ ...prev, uploading: false }));
     }
   };
 

@@ -6,7 +6,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Upload } from "lucide-react";
 import SignatureStamp from './mechanics/SignatureStamp';
 const UserBusinessSettings = () => {
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "",
     addressLine1: "",

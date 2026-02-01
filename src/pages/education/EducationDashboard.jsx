@@ -6,6 +6,7 @@ import logo from '../../assets/img/solidflo-logo.png';
 import Templates from "./Templates"; 
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
+import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import {
   getFirestore,
   collection,
@@ -25,7 +26,6 @@ import { db } from "../../firebase";
 import StudentModal from './StudentModal';
 import StudentsListModal from './StudentsListModal';
 import SignatureStamp from '../SignatureStamp';
-import  uploadLogoToR2 from '../../utils/uploadLogoToR2';
 import {
   ChevronDown,
   ChevronLeft,
@@ -87,7 +87,7 @@ const [documentType, setDocumentType] = useState("invoice");
 const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("ReportCard");
   const [showReportCard, setShowReportCard] = useState(false);
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [reportNumber, setReportNumber] = useState("");
   const [reportId, setReportId] = useState(null);
   const [savedReports, setSavedReports] = useState([]);
@@ -434,34 +434,48 @@ const handleAIDataExtracted = (extractedData) => {
     }
   };
 
-  const handleLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !user?.uid) return;
-
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
-      return;
-    }
-
-    try {
-      const storage = getStorage();
-      const storageRef = ref(storage, `users/${user.uid}/logo/${file.name}`);
-
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-
-      setSchoolInfo({ ...schoolInfo, logoUrl: downloadURL });
-      alert("Logo uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading logo:", error);
-      alert("Failed to upload logo");
-    }
-  };
+ const handleLogoUpload = async (e) => {
+   const file = e.target.files[0];
+   if (!file || !user?.uid || !authUser) return;
+ 
+   if (!file.type.startsWith("image/")) {
+     alert("Please upload an image file");
+     return;
+   }
+ 
+   if (file.size > 5 * 1024 * 1024) {
+     alert("Image size should be less than 5MB");
+     return;
+   }
+ 
+   try {
+     setSchoolInfo(prev => ({ ...prev, uploading: true }));
+ 
+     // ✅ Upload to Cloudflare R2 (Worker handles userId)
+     const logoUrl = await uploadLogoToR2(file, authUser);
+ 
+     setSchoolInfo(prev => ({
+       ...prev,
+       logoUrl,
+       uploading: false,
+     }));
+ 
+     // Save URL to Firestore
+     const db = getFirestore();
+     const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+ 
+     await setDoc(docRef, {
+   logoUrl,
+   updatedAt: new Date().toISOString(),
+ }, { merge: true });
+ 
+     alert("Logo uploaded successfully!");
+   } catch (error) {
+     console.error("Error uploading logo:", error);
+     alert("Failed to upload logo: " + error.message);
+     setSchoolInfo(prev => ({ ...prev, uploading: false }));
+   }
+ };
 
   const handleSaveSchoolInfo = async () => {
     if (!user?.uid) return;

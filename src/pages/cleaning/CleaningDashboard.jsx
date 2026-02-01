@@ -6,6 +6,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import Templates from "./Templates";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
+import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import {
   getFirestore,
   collection,
@@ -58,7 +59,6 @@ import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import FinancialOverview from "../FinancialOverview";
-import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import SignatureStamp from "../SignatureStamp";
 import MultiStepForm from "./MultiStepForm";
 
@@ -101,7 +101,7 @@ const CleaningDashboard = () => {
   const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("Invoice");
   const [showInvoice, setShowInvoice] = useState(false);
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceId, setInvoiceId] = useState(null);
   const [savedInvoices, setSavedInvoices] = useState([]);
@@ -378,29 +378,48 @@ const CleaningDashboard = () => {
     setActiveView("invoice");
   };
 
-  const handleLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !user?.uid) return;
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
-      return;
-    }
-    try {
-      const storage = getStorage();
-      const storageRef = ref(storage, `users/${user.uid}/logo/${file.name}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      setBusinessInfo({ ...businessInfo, logoUrl: downloadURL });
-      alert("Logo uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading logo:", error);
-      alert("Failed to upload logo");
-    }
-  };
+ const handleLogoUpload = async (e) => {
+   const file = e.target.files[0];
+   if (!file || !user?.uid || !authUser) return;
+ 
+   if (!file.type.startsWith("image/")) {
+     alert("Please upload an image file");
+     return;
+   }
+ 
+   if (file.size > 5 * 1024 * 1024) {
+     alert("Image size should be less than 5MB");
+     return;
+   }
+ 
+   try {
+     setBusinessInfo(prev => ({ ...prev, uploading: true }));
+ 
+     // ✅ Upload to Cloudflare R2 (Worker handles userId)
+     const logoUrl = await uploadLogoToR2(file, authUser);
+ 
+     setBusinessInfo(prev => ({
+       ...prev,
+       logoUrl,
+       uploading: false,
+     }));
+ 
+     // Save URL to Firestore
+     const db = getFirestore();
+     const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+ 
+     await setDoc(docRef, {
+   logoUrl,
+   updatedAt: new Date().toISOString(),
+ }, { merge: true });
+ 
+     alert("Logo uploaded successfully!");
+   } catch (error) {
+     console.error("Error uploading logo:", error);
+     alert("Failed to upload logo: " + error.message);
+     setBusinessInfo(prev => ({ ...prev, uploading: false }));
+   }
+ };
 
   const handleSaveBusinessInfo = async () => {
     if (!user?.uid) return;

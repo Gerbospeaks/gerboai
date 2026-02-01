@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Templates from "./Templates"; 
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
+import { useAuth } from "../../contexts/AuthContext";
+import { serverTimestamp } from "firebase/firestore";
+import logo from "../../assets/img/solidflo-logo.png";
+import { getAuth, signOut } from "firebase/auth";
+import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import {
   DollarSign,
   ShoppingCart,
@@ -33,22 +38,30 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react';
+import {
+  getFirestore,
+  collection,
+  query,
+  addDoc,
+  updateDoc,
+  doc,
+  getDoc,
+  setDoc,
+  orderBy,
+  limit,
+  getDocs,
+} from "firebase/firestore";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const RestaurantDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 const [inputMode, setInputMode] = useState("manual");
 const [documentType, setDocumentType] = useState("invoice"); 
+const {user, authUser} = useAuth();
 const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState('Overview');
   const [activeView, setActiveView] = useState("invoice");
-  const [selectedTemplate, setSelectedTemplate] = useState('professional');
-  const user = {
-    uid: 'demo-user',
-    displayName: 'Restaurant Owner',
-    email: 'owner@restaurant.com'
-  };
-  
+  const [selectedTemplate, setSelectedTemplate] = useState('professional');  
   const [menuItems, setMenuItems] = useState([
     {
       id: '1',
@@ -257,16 +270,47 @@ const [useAI, setUseAI] = useState(false);
     setShowSettings(false);
   };
 
-  const handleLogoUpload = (e) => {
+  const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setRestaurantInfo({ ...restaurantInfo, logoUrl: reader.result });
-      alert('Logo uploaded successfully!');
-    };
-    reader.readAsDataURL(file);
+    if (!file || !user?.uid || !authUser) return;
+  
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
+  
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
+    }
+  
+    try {
+      setRestaurantInfo(prev => ({ ...prev, uploading: true }));
+  
+      // ✅ Upload to Cloudflare R2 (Worker handles userId)
+      const logoUrl = await uploadLogoToR2(file, authUser);
+  
+      setRestaurantInfo(prev => ({
+        ...prev,
+        logoUrl,
+        uploading: false,
+      }));
+  
+      // Save URL to Firestore
+      const db = getFirestore();
+      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+  
+      await setDoc(docRef, {
+    logoUrl,
+    updatedAt: new Date().toISOString(),
+  }, { merge: true });
+  
+      alert("Logo uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      alert("Failed to upload logo: " + error.message);
+      setRestaurantInfo(prev => ({ ...prev, uploading: false }));
+    }
   };
 
   const handleLogout = () => {

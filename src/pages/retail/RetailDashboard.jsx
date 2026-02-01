@@ -5,7 +5,7 @@ import { getAuth, signOut } from 'firebase/auth';
 import Templates from "./Templates"; 
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
-
+import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import logo from '../../assets/img/solidflo.png';
 import {
   getFirestore,
@@ -57,10 +57,10 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 const RetailDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 const [inputMode, setInputMode] = useState("manual");
+const {user, authUser} = useAuth();
 const [documentType, setDocumentType] = useState("invoice"); 
 const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState('Overview');
-  const { user } = useAuth();
   const [activeView, setActiveView] = useState("invoice");
   // Products state
   const [products, setProducts] = useState([]);
@@ -319,18 +319,44 @@ const [useAI, setUseAI] = useState(false);
 
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
-    if (!file || !user?.uid) return;
-
+    if (!file || !user?.uid || !authUser) return;
+  
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
+  
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
+    }
+  
     try {
-      const storage = getStorage();
-      const storageRef = ref(storage, `users/${user.uid}/logo/${file.name}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      setStoreInfo({ ...storeInfo, logoUrl: downloadURL });
-      alert('Logo uploaded successfully!');
+      setStoreInfo(prev => ({ ...prev, uploading: true }));
+  
+      // ✅ Upload to Cloudflare R2 (Worker handles userId)
+      const logoUrl = await uploadLogoToR2(file, authUser);
+  
+      setStoreInfo(prev => ({
+        ...prev,
+        logoUrl,
+        uploading: false,
+      }));
+  
+      // Save URL to Firestore
+      const db = getFirestore();
+      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+  
+      await setDoc(docRef, {
+    logoUrl,
+    updatedAt: new Date().toISOString(),
+  }, { merge: true });
+  
+      alert("Logo uploaded successfully!");
     } catch (error) {
-      console.error('Error uploading logo:', error);
-      alert('Failed to upload logo');
+      console.error("Error uploading logo:", error);
+      alert("Failed to upload logo: " + error.message);
+      setStoreInfo(prev => ({ ...prev, uploading: false }));
     }
   };
 

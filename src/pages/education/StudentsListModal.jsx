@@ -23,7 +23,7 @@ const StudentsListModal = ({
   onEditStudent, 
   onAddNewStudent 
 }) => {
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);

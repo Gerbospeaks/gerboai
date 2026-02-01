@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getFirestore, doc, deleteDoc } from 'firebase/firestore';
 
 const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEditClient, onAddNewClient }) => {
-  const { user } = useAuth();
+  const {user, authUser} = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
 
