@@ -154,12 +154,8 @@ export const DefaultTemplate = ({
           <div className="flex items-center gap-3 mb-2">
             {loading ? (
               <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-            ) : v8logo ? (
-              <img
-                src={v8logo}
-                alt="Business Logo"
-                className="w-32 h-18 object-contain"
-              />
+            ) : businessInfo.logoUrl ? (
+             <img src={businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
             ) : (
               <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
             )}
@@ -373,8 +369,8 @@ export const ClassicTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            {props.v8logo && (
-              <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain" />
+            {props.businessInfo.logoUrl && (
+              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
             )}
             <div>
              
@@ -515,8 +511,8 @@ export const ModernTemplate = (props) => (
     <div className="border-b-4 border-blue-500 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
-          {props.v8logo && (
-            <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain mb-3" />
+          {props.businessInfo.logoUrl && (
+            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
           )}
           
           <div className="text-sm text-gray-600 space-y-1">
@@ -645,8 +641,8 @@ export const ElegantTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     <div className="border-4 border-purple-900 p-8">
       <div className="text-center border-b-2 border-purple-900 pb-6 mb-6">
-        {props.v8logo && (
-          <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain mx-auto mb-4" />
+        {props.businessInfo.logoUrl && (
+         <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
         )}
         
         <div className="text-sm text-gray-600">{props.businessInfo.addressLine1} • {props.businessInfo.city}</div>
@@ -768,8 +764,8 @@ export const SpeedTemplate = (props) => (
     <div className="border-b-4 border-red-600 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
-          {props.v8logo && (
-            <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain mb-3 brightness-0 invert" />
+          {props.businessInfo.logoUrl && (
+           <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
           )}
           <div className="text-3xl font-black text-red-600 mb-2">{props.businessInfo.businessName}</div>
           <div className="text-sm text-gray-400">{props.businessInfo.addressLine1}</div>
@@ -890,8 +886,8 @@ export const DiagnosticTemplate = (props) => (
     <div className="border-b-4 border-green-600 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
-          {props.v8logo && (
-            <img src={props.v8logo} alt="Logo" className="w-32 h-18 object-contain mb-3" />
+          {props.businessInfo.logoUrl && (
+            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
           )}
           
           <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
