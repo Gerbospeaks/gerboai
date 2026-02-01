@@ -7,7 +7,7 @@ const worker = {
   async fetch(request: Request, env: Env): Promise<Response> {
     // CORS headers
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://solidflo.co.za",
+      "Access-Control-Allow-Origin": "solidflo.co.za",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
