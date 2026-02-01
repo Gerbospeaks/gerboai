@@ -516,10 +516,10 @@ const handleLogoUpload = async (e) => {
     const db = getFirestore();
     const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
 
-    await updateDoc(docRef, {
-      logoUrl,
-      updatedAt: new Date().toISOString(),
-    });
+    await setDoc(docRef, {
+  logoUrl,
+  updatedAt: new Date().toISOString(),
+}, { merge: true });
 
     alert("Logo uploaded successfully!");
   } catch (error) {
