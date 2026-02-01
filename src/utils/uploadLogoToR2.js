@@ -5,6 +5,10 @@ export const uploadLogoToR2 = async (file, authUser) => {
 
   const token = await authUser.getIdToken();
 
+  console.log("Uploading to:", process.env.REACT_APP_API_URL);
+  console.log("File type:", file.type);
+  console.log("File size:", file.size);
+
   const res = await fetch(process.env.REACT_APP_API_URL, {
     method: "POST",
     headers: {
@@ -14,8 +18,12 @@ export const uploadLogoToR2 = async (file, authUser) => {
     body: file,
   });
 
+  console.log("Response status:", res.status);
+  console.log("Response ok:", res.ok);
+
   if (!res.ok) {
     const text = await res.text();
+    console.error("Error response:", text);
     throw new Error(text || "Upload failed");
   }
 
