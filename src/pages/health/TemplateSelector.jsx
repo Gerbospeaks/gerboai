@@ -122,7 +122,7 @@ export const DefaultTemplate = ({
             )}
             <div>
               <div className="text-xl font-bold text-blue-900">
-                {businessInfo?.businessName || "Medical Facility"}
+                {businessInfo.businessName}
               </div>
             </div>
           </div>
