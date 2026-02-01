@@ -18,9 +18,9 @@
       "bucket_name": "company-logos"  // your R2 bucket name
     }
   ],
-"vars": {
-  "R2_PUBLIC_DOMAIN": "r2-upload-worker.v8-auto.workers.dev"
-}
+	"vars": {
+	"R2_PUBLIC_DOMAIN": "pub-69fb6c18938046458efbd268503903d8.r2.dev"
+	}
 
   /**
    * The rest of your previous comments and optional settings can stay
