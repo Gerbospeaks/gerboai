@@ -1,7 +1,7 @@
 
 export interface Env {
   LOGOS_BUCKET: R2Bucket;
-  R2_PUBLIC_DOMAIN: string;
+  REACT_APP_CLOUDFLARE_R2_PUBLIC_DOMAIN: string;
 }
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -27,7 +27,7 @@ export default {
         httpMetadata: { contentType },
       });
 
-      const publicUrl = `https://${env.R2_PUBLIC_DOMAIN}/${fileName}`;
+      const publicUrl = `https://${env.REACT_APP_CLOUDFLARE_R2_PUBLIC_DOMAIN}/${fileName}`;
       return new Response(JSON.stringify({ publicUrl }), { headers: { "Content-Type": "application/json" } });
     } catch (err: any) {
       console.error("Worker error:", err);
