@@ -1970,7 +1970,7 @@ const printStyles = `
 
                     {/* Invoice Content */}
                     <div className="p-4">
-                      <div className="mb-4">
+                      <div className="mb-4 print:hidden">
                         <TemplateSelector
                           user={user}
                           selectedTemplate={selectedTemplate}

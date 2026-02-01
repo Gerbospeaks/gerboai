@@ -2061,7 +2061,7 @@ const printStyles = `
                     className={`${!showQuote ? "hidden" : "block"} lg:block mx-auto bg-white`}
                     style={{ width: "210mm", minHeight: "297mm" }}
                   >
-                  <div className="mb-4">
+                  <div className="mb-4 print:hidden">
                                      <TemplateSelector 
                                        user={user} 
                                        selectedTemplate={selectedTemplate}
