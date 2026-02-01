@@ -94,7 +94,7 @@ const generateJobCardNumber = async (userId, documentType) => {
 
 const MechanicsDashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 3;
+  const totalSteps = 4;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("JobCard");
   const [showJobCard, setShowJobCard] = useState(false);
@@ -2019,7 +2019,7 @@ const printStyles = `
               </div>
             </div>
           )}
-           {/* Step 1: Customer Information */}
+           {/* Step 2: Customer Information */}
           {currentStep === 2 && (
             <div className="p-8">
               
@@ -2082,7 +2082,7 @@ const printStyles = `
               </div>
             </div>
           )}
-          {/* Step 2: Vehicle Information */}
+          {/* Step 3: Vehicle Information */}
           {currentStep === 3 && (
             <div className="p-8">
               <div className="mb-8">
@@ -2198,7 +2198,7 @@ const printStyles = `
             </div>
           )}
 
-          {/* Step 3: Services/Parts */}
+          {/* Step 4: Services/Parts */}
           {currentStep === 4 && (
             <div className="p-8">
               <div className="mb-8">
