@@ -30,7 +30,7 @@ import PatientsListModal from "./PatientsListModal";
 import PendingPayments from "./PendingPayments";
 import AppointmentsCalendar from "./AppointmentsCalendar";
 import SignatureStamp from "../SignatureStamp";
-import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
+import  uploadLogoToR2 from '../../utils/uploadLogoToR2';
 import SickNoteModal from "./SickNoteModal";
 import {
   ChevronDown,

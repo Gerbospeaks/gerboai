@@ -7,7 +7,7 @@ import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Vehicles from "./Vehicles";
 import PartsInventory from "./PartsInventory";
-import { uploadLogoToR2 } from "../../utils/cloudflareUpload";
+import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import {
@@ -509,7 +509,7 @@ const MechanicsDashboard = () => {
 
     try {
       // Show loading state
-      setBusinessInfo({ ...businessInfo, uploading: true });
+      setBusinessInfo(prev => ({ ...prev, uploading: true }));
 
       // Upload to Cloudflare R2
       const logoUrl = await uploadLogoToR2(file, user.uid);

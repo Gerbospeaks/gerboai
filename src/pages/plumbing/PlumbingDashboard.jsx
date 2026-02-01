@@ -25,7 +25,7 @@ import SignatureStamp from '../SignatureStamp';
 import Templates from "./Templates"; 
 import PlumbingMultiStepForm from "./PlumbingMultiStepForm";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
-import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
+import  uploadLogoToR2 from '../../utils/uploadLogoToR2';
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import {
   ChevronDown,
@@ -417,7 +417,7 @@ const handleAIDataExtracted = (extractedData) => {
 
   try {
     // Show loading state
-    setBusinessInfo({ ...businessInfo, uploading: true });
+    setBusinessInfo(prev => ({ ...prev, uploading: true }));
 
     // Upload to Cloudflare R2
     const logoUrl = await uploadLogoToR2(file, user.uid);

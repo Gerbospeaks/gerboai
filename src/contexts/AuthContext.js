@@ -22,30 +22,37 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
   const [userDashboard, setUserDashboard] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            name: userData.name,
-            emailVerified: firebaseUser.emailVerified
-          });
-          setUserDashboard(userData.dashboardId);
-          setIsAdmin(userData.isAdmin === true); // Check if user is admin
-        }
-      } else {
+     if (firebaseUser) {
+  setAuthUser(firebaseUser); // ✅ KEEP the real Firebase user
+
+  const userDocRef = doc(db, 'users', firebaseUser.uid);
+  const userDoc = await getDoc(userDocRef);
+
+  if (userDoc.exists()) {
+    const userData = userDoc.data();
+
+    setUser({
+      uid: firebaseUser.uid,
+      email: firebaseUser.email,
+      name: userData.name,
+      emailVerified: firebaseUser.emailVerified
+    });
+
+    setUserDashboard(userData.dashboardId);
+    setIsAdmin(userData.isAdmin === true);
+  }
+}
+ else {
+        setAuthUser(null);
         setUser(null);
         setUserDashboard(null);
-        setIsAdmin(false);
       }
       setLoading(false);
     });
@@ -182,15 +189,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      userDashboard, 
-      isAdmin, 
-      login, 
-      register, 
-      logout, 
-      loading 
-    }}>
+    <AuthContext.Provider value={{
+  user,          // Firestore profile
+  authUser,      // ✅ Firebase Auth user
+  userDashboard,
+  isAdmin,
+  login,
+  register,
+  logout,
+  loading
+}}>
+
       {children}
     </AuthContext.Provider>
   );

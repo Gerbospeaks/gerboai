@@ -23,7 +23,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
 import GuestModal from './GuestModal';
-import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
+import  uploadLogoToR2 from '../../utils/uploadLogoToR2';
 import Templates from "./Templates"; 
 import HotelAIExtractor from "./HotelAIExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';

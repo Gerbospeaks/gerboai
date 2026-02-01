@@ -6,7 +6,7 @@ import SecurityIncidentMultiStepForm from "./SecurityIncidentMultiStepForm";
 import Templates from "./Templates";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
-import { uploadLogoToR2 } from "../../utils/cloudflareUpload";
+import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from "../SignatureStamp";
 import {
@@ -325,7 +325,7 @@ const printStyles = `
 
     try {
       // Show loading state
-      setBusinessInfo({ ...businessInfo, uploading: true });
+      setBusinessInfo(prev => ({ ...prev, uploading: true }));
 
       // Upload to Cloudflare R2
       const logoUrl = await uploadLogoToR2(file, user.uid);

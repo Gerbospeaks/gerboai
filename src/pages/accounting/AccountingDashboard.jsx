@@ -26,7 +26,7 @@ import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
-import { uploadLogoToR2 } from "../../utils/cloudflareUpload";
+import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import {
   ChevronDown,
   ChevronRight,
@@ -110,6 +110,7 @@ const AccountingDashboard = () => {
   const [activeTab, setActiveTab] = useState("Invoice");
   const [showInvoice, setShowInvoice] = useState(false);
   const { user } = useAuth();
+  const {authUser} = useAuth(); 
   const [documentNumber, setDocumentNumber] = useState("");
   const [documentId, setDocumentId] = useState(null);
   const [savedInvoices, setSavedInvoices] = useState([]);
@@ -485,50 +486,49 @@ const AccountingDashboard = () => {
       console.error("Error loading business info:", error);
     }
   };
+const handleLogoUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file || !user?.uid || !authUser) return;
 
-  const handleLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !user?.uid) return;
+  if (!file.type.startsWith("image/")) {
+    alert("Please upload an image file");
+    return;
+  }
 
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
-      return;
-    }
+  if (file.size > 5 * 1024 * 1024) {
+    alert("Image size should be less than 5MB");
+    return;
+  }
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
-      return;
-    }
+  try {
+    setBusinessInfo(prev => ({ ...prev, uploading: true }));
 
-    try {
-      // Show loading state
-      setBusinessInfo({ ...businessInfo, uploading: true });
+    // ✅ Upload to Cloudflare R2 (Worker handles userId)
+    const logoUrl = await uploadLogoToR2(file, authUser);
 
-      // Upload to Cloudflare R2
-      const logoUrl = await uploadLogoToR2(file, user.uid);
+    setBusinessInfo(prev => ({
+      ...prev,
+      logoUrl,
+      uploading: false,
+    }));
 
-      // Update business info state
-      setBusinessInfo({
-        ...businessInfo,
-        logoUrl: logoUrl,
-        uploading: false,
-      });
+    // Save URL to Firestore
+    const db = getFirestore();
+    const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
 
-      // Save to Firebase Firestore
-      const db = getFirestore();
-      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-      await updateDoc(docRef, {
-        logoUrl: logoUrl,
-        updatedAt: new Date().toISOString(),
-      });
+    await updateDoc(docRef, {
+      logoUrl,
+      updatedAt: new Date().toISOString(),
+    });
 
-      alert("Logo uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading logo:", error);
-      alert("Failed to upload logo: " + error.message);
-      setBusinessInfo({ ...businessInfo, uploading: false });
-    }
-  };
+    alert("Logo uploaded successfully!");
+  } catch (error) {
+    console.error("Error uploading logo:", error);
+    alert("Failed to upload logo: " + error.message);
+    setBusinessInfo(prev => ({ ...prev, uploading: false }));
+  }
+};
+
 
   const handleSaveBusinessInfo = async () => {
     if (!user?.uid) return;
@@ -1200,7 +1200,7 @@ const printStyles = `
 
       {/* Main Content */}
       <div
-        className={`flex-1 transition-all duration-300 ml-16 lg:ml-64`}
+        className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-0 lg:ml-64' : 'ml-16'}`}
       >
         <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
           <div className="sticky top-0 z-40 flex flex-col">
@@ -1209,8 +1209,10 @@ const printStyles = `
                 <div className="flex items-center space-x-2 lg:space-x-4">
                   <button
                     onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
-                  ></button>
+                    className="p-2 hover:bg-gray-100 rounded-lg lg:hidden"
+                  >
+                    <Menu className="w-5 h-5" />
+                  </button>
 
                   <h1 className="text-base lg:text-xl font-semibold">
                     {documentType === "quote" ? "Quote" : "Invoice"} #
@@ -1951,16 +1953,76 @@ const printStyles = `
            
             {activeView === "invoice" && (
               <>
-                {/* Mobile View Invoice Button */}
-                <button
-                  onClick={() => setShowInvoice(!showInvoice)}
-                  className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <FileText className="w-5 h-5" />
-                  {showInvoice
-                    ? `Hide ${documentType === "quote" ? "Quote" : "Invoice"}`
-                    : `View ${documentType === "quote" ? "Quote" : "Invoice"}`}
-                </button>
+                {/* Mobile Full-Screen Invoice View */}
+                {showInvoice && (
+                  <div className="fixed inset-0 bg-white z-50 lg:hidden overflow-auto">
+                    {/* Mobile Invoice Header */}
+                    <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between shadow-sm">
+                      <h2 className="text-lg font-semibold">
+                        {documentType === "quote" ? "Quote" : "Invoice"} Preview
+                      </h2>
+                      <button
+                        onClick={() => setShowInvoice(false)}
+                        className="p-2 hover:bg-gray-100 rounded-lg"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                    </div>
+
+                    {/* Invoice Content */}
+                    <div className="p-4">
+                      <div className="mb-4">
+                        <TemplateSelector
+                          user={user}
+                          selectedTemplate={selectedTemplate}
+                          onTemplateChange={setSelectedTemplate}
+                        />
+                      </div>
+
+                      <div
+                        id="print-area-mobile"
+                        className="bg-white"
+                        style={{ width: "100%", minHeight: "100vh" }}
+                      >
+                        <TemplateRenderer
+                          templateId={selectedTemplate}
+                          businessInfo={businessInfo}
+                          loading={loading}
+                          jobCardNumber={documentNumber}
+                          customerName={customerName}
+                          customerEmail={customerEmail}
+                          customerPhone={customerPhone}
+                          customerAddress={customerAddress}
+                          invoiceDate={invoiceDate || ""}
+                          dueDate={dueDate || ""}
+                          paymentTerms={paymentTerms || ""}
+                          items={items}
+                          subtotal={subtotal}
+                          vat={vat}
+                          total={total}
+                          paymentMethod={paymentMethod}
+                          serviceGuarantee={serviceGuarantee}
+                          documentType={documentType}
+                          showStamp={stampSettings.enabled}
+                          stampText={stampSettings.text}
+                          stampColor={stampSettings.color}
+                          showStampDate={stampSettings.showDate}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Mobile View Invoice Button - Only show when invoice is hidden */}
+                {!showInvoice && (
+                  <button
+                    onClick={() => setShowInvoice(true)}
+                    className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+                  >
+                    <FileText className="w-5 h-5" />
+                    View {documentType === "quote" ? "Quote" : "Invoice"}
+                  </button>
+                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div
@@ -2084,9 +2146,10 @@ const printStyles = `
                     
                   </div>
 
-                   <div
+                  {/* Desktop Invoice Preview */}
+                  <div
                     id="print-area"
-                    className={`${!showInvoice ? "hidden" : "block"} lg:block mx-auto bg-white`}
+                    className="hidden lg:block mx-auto bg-white"
                     style={{ width: "210mm", minHeight: "297mm" }}
                   >
                     <div className="mb-4">
@@ -2116,12 +2179,11 @@ const printStyles = `
                       paymentMethod={paymentMethod}
                       serviceGuarantee={serviceGuarantee}
                       documentType={documentType}
-                      showStamp={stampSettings.enabled} // Add this
-                      stampText={stampSettings.text} // Add this
-                      stampColor={stampSettings.color} // Add this
-                      showStampDate={stampSettings.showDate} // Add this
+                      showStamp={stampSettings.enabled}
+                      stampText={stampSettings.text}
+                      stampColor={stampSettings.color}
+                      showStampDate={stampSettings.showDate}
                     />
-
                   </div>
                
                 </div>

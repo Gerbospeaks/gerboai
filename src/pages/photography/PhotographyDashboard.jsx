@@ -25,7 +25,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
-import { uploadLogoToR2 } from "../../utils/cloudflareUpload";
+import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import CustomersListModal from "../CustomersListModal";
 import {
   ChevronDown,
@@ -427,7 +427,7 @@ const PhotographyDashboard = () => {
 
     try {
       // Show loading state
-      setBusinessInfo({ ...businessInfo, uploading: true });
+      setBusinessInfo(prev => ({ ...prev, uploading: true }));
 
       // Upload to Cloudflare R2
       const logoUrl = await uploadLogoToR2(file, user.uid);

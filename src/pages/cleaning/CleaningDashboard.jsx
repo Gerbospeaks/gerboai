@@ -58,7 +58,7 @@ import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import FinancialOverview from "../FinancialOverview";
-import { uploadLogoToR2 } from "../../utils/cloudflareUpload";
+import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import SignatureStamp from "../SignatureStamp";
 import MultiStepForm from "./MultiStepForm";
 
@@ -2040,15 +2040,12 @@ const printStyles = `
             )}
 
             {/* Mobile Invoice Toggle Button */}
-            <button
-              onClick={() => setShowInvoice(!showInvoice)}
-              className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
-            >
+           {!showInvoice && (
+            <button onClick={() => setShowInvoice(true)} className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors">
               <FileText className="w-5 h-5" />
-              {showInvoice
-                ? `Hide ${isQuoteMode ? "Quote" : "Invoice"}`
-                : `View ${isQuoteMode ? "Quote" : "Invoice"}`}
+              View {isQuoteMode ? "Quote" : "Invoice"}
             </button>
+          )}
 
             {/* Templates View */}
             {activeView === "templates" && <Templates user={user} />}

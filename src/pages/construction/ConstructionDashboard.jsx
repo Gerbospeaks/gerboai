@@ -27,7 +27,7 @@ import ClientModal from "./ClientModal";
 import ClientsListModal from "../ClientsListModal";
 import SignatureStamp from "../SignatureStamp";
 import ConstructionMultiStepForm from './ConstructionMultiStepForm';
-import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
+import  uploadLogoToR2 from '../../utils/uploadLogoToR2';
 import {
   ChevronDown,
   ChevronLeft,

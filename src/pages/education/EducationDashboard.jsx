@@ -25,7 +25,7 @@ import { db } from "../../firebase";
 import StudentModal from './StudentModal';
 import StudentsListModal from './StudentsListModal';
 import SignatureStamp from '../SignatureStamp';
-import { uploadLogoToR2 } from '../../utils/cloudflareUpload';
+import  uploadLogoToR2 from '../../utils/uploadLogoToR2';
 import {
   ChevronDown,
   ChevronLeft,
