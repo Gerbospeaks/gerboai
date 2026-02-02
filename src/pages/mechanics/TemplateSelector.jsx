@@ -146,7 +146,7 @@ export const DefaultTemplate = ({
   stampColor = "#d32f2f",
   showStampDate = true
 }) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     {/* Header Section */}
     <div className="border-b-2 border-black pb-4 mb-4">
       <div className="flex justify-between items-start">
@@ -364,7 +364,7 @@ export const DefaultTemplate = ({
 
 // Classic Template
 export const ClassicTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     <div className="border-b-2 border-black pb-4 mb-4">
       <div className="flex justify-between items-start">
         <div>
@@ -507,7 +507,7 @@ export const ClassicTemplate = (props) => (
 
 // Modern Template
 export const ModernTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     <div className="border-b-4 border-blue-500 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
@@ -638,7 +638,7 @@ export const ModernTemplate = (props) => (
 );
 // Elegant/Premium Template
 export const ElegantTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     <div className="border-4 border-purple-900 p-8">
       <div className="text-center border-b-2 border-purple-900 pb-6 mb-6">
         {props.businessInfo.logoUrl && (
@@ -760,7 +760,7 @@ export const ElegantTemplate = (props) => (
 
 // Speed Shop Template
 export const SpeedTemplate = (props) => (
-  <div className="bg-black text-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-black text-white" style={{ padding: "5mm 10mm" }}>
     <div className="border-b-4 border-red-600 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>
@@ -882,7 +882,7 @@ export const SpeedTemplate = (props) => (
 
 // Diagnostic Template
 export const DiagnosticTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     <div className="border-b-4 border-green-600 pb-6 mb-6">
       <div className="flex justify-between items-start">
         <div>

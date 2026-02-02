@@ -26,7 +26,9 @@ import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
-import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
+import uploadLogoToR2 from "../../utils/uploadLogoToR2";
+import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
+import PaymentReceipt from "../../components/dashboard/PaymentReceipt";
 import {
   ChevronDown,
   ChevronRight,
@@ -43,6 +45,7 @@ import {
   Menu,
   Plus,
   Send,
+  Save,
   Edit,
   LogOut,
   Sparkles,
@@ -109,7 +112,7 @@ const AccountingDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Invoice");
   const [showInvoice, setShowInvoice] = useState(false);
-  const {user, authUser} = useAuth(); 
+  const { user, authUser } = useAuth();
   const [documentNumber, setDocumentNumber] = useState("");
   const [documentId, setDocumentId] = useState(null);
   const [savedInvoices, setSavedInvoices] = useState([]);
@@ -128,15 +131,33 @@ const AccountingDashboard = () => {
   const [documentType, setDocumentType] = useState("invoice"); // 'invoice' or 'quote'
   const [showConvertButton, setShowConvertButton] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("Cash/Card/EFT");
-  const [serviceGuarantee, setServiceGuarantee] = useState("7 Day Satisfaction Guarantee");
+  const [invoiceId, setInvoiceId] = useState(null);
+  const [serviceGuarantee, setServiceGuarantee] = useState(
+    "7 Day Satisfaction Guarantee",
+  );
   const [inputMode, setInputMode] = useState("manual");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
+    useState(null);
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
     showDate: false,
     enabled: false,
   });
-
+  const handleNewQuote = () => {
+    setDocumentType("quote");
+    handleNewInvoice();
+  };
+  const [paymentStatus, setPaymentStatus] = useState({
+    totalPaid: 0,
+    balanceDue: 0,
+    status: "pending",
+  });
+  const handleNewInvoice = () => {
+    setDocumentType("invoice");
+    handleNewInvoice();
+  };
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -230,7 +251,81 @@ const AccountingDashboard = () => {
   const handleCustomerSaved = () => {
     loadCustomers();
   };
+  const handleProcessPayment = async () => {
+    if (!invoiceId || !user?.uid) {
+      alert("Please save the invoice before processing payment");
+      return;
+    }
 
+    try {
+      const collectionName =
+        documentType === "quote" ? "quotations" : "invoices";
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, invoiceId),
+      );
+
+      if (invoiceDoc.exists()) {
+        const invoiceData = invoiceDoc.data();
+        setSelectedInvoiceForPayment({
+          id: invoiceId,
+          ...invoiceData,
+        });
+        setShowPaymentModal(true);
+      } else {
+        alert("Invoice not found. Please save the invoice first.");
+      }
+    } catch (error) {
+      console.error("Error loading invoice:", error);
+      alert("Failed to load invoice for payment");
+    }
+  };
+
+  const loadPaymentStatus = async () => {
+    if (!user?.uid || !invoiceId) {
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+      return;
+    }
+
+    try {
+      const collectionName =
+        documentType === "quote" ? "quotations" : "invoices";
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, invoiceId),
+      );
+
+      if (invoiceDoc.exists()) {
+        const data = invoiceDoc.data();
+        setPaymentStatus({
+          totalPaid: data.totals?.paid || 0,
+          balanceDue: data.totals?.due || data.totals?.total || 0,
+          status: data.status || "pending",
+        });
+      } else {
+        setPaymentStatus({
+          totalPaid: 0,
+          balanceDue: total,
+          status: "pending",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading payment status:", error);
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+    }
+  };
+
+  const handlePaymentComplete = () => {
+    loadSavedInvoices();
+    loadPaymentStatus();
+    setShowPaymentModal(false);
+  };
   useEffect(() => {
     loadCustomers();
   }, []);
@@ -485,49 +580,52 @@ const AccountingDashboard = () => {
       console.error("Error loading business info:", error);
     }
   };
-const handleLogoUpload = async (e) => {
-  const file = e.target.files[0];
-  if (!file || !user?.uid || !authUser) return;
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !user?.uid || !authUser) return;
 
-  if (!file.type.startsWith("image/")) {
-    alert("Please upload an image file");
-    return;
-  }
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
 
-  if (file.size > 5 * 1024 * 1024) {
-    alert("Image size should be less than 5MB");
-    return;
-  }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
+    }
 
-  try {
-    setBusinessInfo(prev => ({ ...prev, uploading: true }));
+    try {
+      setBusinessInfo((prev) => ({ ...prev, uploading: true }));
 
-    // ✅ Upload to Cloudflare R2 (Worker handles userId)
-    const logoUrl = await uploadLogoToR2(file, authUser);
+      // ✅ Upload to Cloudflare R2 (Worker handles userId)
+      const logoUrl = await uploadLogoToR2(file, authUser);
 
-    setBusinessInfo(prev => ({
-      ...prev,
-      logoUrl,
-      uploading: false,
-    }));
+      setBusinessInfo((prev) => ({
+        ...prev,
+        logoUrl,
+        uploading: false,
+      }));
 
-    // Save URL to Firestore
-    const db = getFirestore();
-    const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+      // Save URL to Firestore
+      const db = getFirestore();
+      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
 
-    await setDoc(docRef, {
-  logoUrl,
-  updatedAt: new Date().toISOString(),
-}, { merge: true });
+      await setDoc(
+        docRef,
+        {
+          logoUrl,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true },
+      );
 
-    alert("Logo uploaded successfully!");
-  } catch (error) {
-    console.error("Error uploading logo:", error);
-    alert("Failed to upload logo: " + error.message);
-    setBusinessInfo(prev => ({ ...prev, uploading: false }));
-  }
-};
-
+      alert("Logo uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      alert("Failed to upload logo: " + error.message);
+      setBusinessInfo((prev) => ({ ...prev, uploading: false }));
+    }
+  };
 
   const handleSaveBusinessInfo = async () => {
     if (!user?.uid) return;
@@ -545,20 +643,20 @@ const handleLogoUpload = async (e) => {
   };
 
   const handlePrint = () => {
-  // Add print styles to document
-  const styleSheet = document.createElement("style");
-  styleSheet.textContent = printStyles;
-  document.head.appendChild(styleSheet);
-  
-  // Trigger print
-  window.print();
-  
-  // Clean up (remove after print dialog closes)
-  setTimeout(() => {
-    document.head.removeChild(styleSheet);
-  }, 1000);
-};
-const printStyles = `
+    // Add print styles to document
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = printStyles;
+    document.head.appendChild(styleSheet);
+
+    // Trigger print
+    window.print();
+
+    // Clean up (remove after print dialog closes)
+    setTimeout(() => {
+      document.head.removeChild(styleSheet);
+    }, 1000);
+  };
+  const printStyles = `
   @media print {
     /* Hide everything except the print area */
     body * {
@@ -860,7 +958,69 @@ const printStyles = `
     };
     loadNewNumber();
   };
+  const handleSaveInvoice = async () => {
+    if (!user?.uid) return;
 
+    const db = getFirestore();
+    let numberToUse = documentNumber;
+
+    if (!invoiceId) {
+      numberToUse = await generateInvoiceNumber(user.uid);
+      setDocumentNumber(numberToUse);
+    }
+
+    const jobCardData = buildInvoicePayload(numberToUse);
+
+    const collectionName = documentType === "quote" ? "quotations" : "invoices";
+
+    if (invoiceId) {
+      await updateDoc(doc(db, "users", user.uid, collectionName, invoiceId), {
+        ...jobCardData,
+        updatedAt: serverTimestamp(),
+      });
+    } else {
+      const ref = await addDoc(
+        collection(db, "users", user.uid, collectionName),
+        jobCardData,
+      );
+      setInvoiceId(ref.id);
+    }
+
+    alert(`${documentType === "quote" ? "Quote" : "Invoice"} saved and locked`);
+    loadSavedInvoices();
+  };
+  const buildInvoicePayload = (numberToUse) => ({
+    invoiceNumber: numberToUse,
+    locked: true,
+    status: "pending",
+    documentType: documentType,
+
+    dates: {
+      serviceDate: new Date().toISOString(),
+      completedDate: null,
+    },
+
+    customer: {
+      name: customerName,
+      email: customerEmail,
+      phone: customerPhone,
+      address: customerAddress,
+      customerId,
+    },
+
+    items,
+
+    totals: {
+      subtotal,
+      vat,
+      total,
+      paid: 0,
+      due: total,
+    },
+
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
   const handleLogout = async () => {
     const auth = getAuth();
     try {
@@ -1199,7 +1359,7 @@ const printStyles = `
 
       {/* Main Content */}
       <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-0 lg:ml-64' : 'ml-16'}`}
+        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-64" : "ml-16"}`}
       >
         <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
           <div className="sticky top-0 z-40 flex flex-col">
@@ -1219,63 +1379,64 @@ const printStyles = `
                   </h1>
                 </div>
 
-                <div className="hidden lg:flex items-center space-x-3 print:hidden">
-                  <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800">
-                    <CheckSquare className="w-4 h-4" />
-                    <span>Mark Paid</span>
-                  </button>
-                  <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800">
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
-                  <button
-                    onClick={handleSaveDocument}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
-                  >
-                    Save {documentType === "quote" ? "Quote" : "Invoice"}
-                  </button>
-
-                  {showConvertButton && documentType === "quote" && (
+                <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
+                  {documentType === "quote" && invoiceId && (
                     <button
                       onClick={handleConvertToInvoice}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
+                      className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap"
                     >
-                      <RefreshCw className="w-4 h-4" />
+                      <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
                       Convert to Invoice
                     </button>
                   )}
 
                   <button
-                    onClick={() => handleNewDocument(documentType)}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
+                    onClick={handlePrint}
+                    className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                    Print
+                  </button>
+
+                  <button
+                    onClick={
+                      documentType === "quote"
+                        ? handleNewQuote
+                        : handleNewInvoice
+                    }
+                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
+                  >
+                    <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
                     New
                   </button>
 
-                  <button className="flex items-center space-x-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700">
-                    <Send className="w-4 h-4" />
+                  <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-blue-500/50 hover:scale-105 whitespace-nowrap">
+                    <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                     <span>Send</span>
-                  </button>
-                  <button
-                    onClick={handleSavePDF}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
-                  >
-                    Save as PDF
                   </button>
 
                   <button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
+                    onClick={handleSavePDF}
+                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap"
                   >
-                    <Printer className="w-4 h-4" />
-                    Print
+                    <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                    Save PDF
                   </button>
+
+                  <button
+                    onClick={handleSaveInvoice}
+                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap"
+                  >
+                    <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                    Save
+                  </button>
+
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors"
+                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
                   >
-                    Log Out
+                    <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                    Logout
                   </button>
                 </div>
 
@@ -1335,10 +1496,8 @@ const printStyles = `
                 </button>
               </div>
             </div>
-
-          
           </div>
-          <div className="p-4 lg:p-6">
+          <div className="flex-1 overflow-y-auto">
             {/* Business Settings Modal */}
             {showSettings && (
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -1783,7 +1942,16 @@ const printStyles = `
               existingCustomer={selectedCustomer}
               onCustomerSaved={handleCustomerSaved}
             />
-
+            {showPaymentModal && selectedInvoiceForPayment && (
+              <PaymentProcessor
+                showModal={showPaymentModal}
+                setShowModal={setShowPaymentModal}
+                invoice={selectedInvoiceForPayment}
+                onPaymentComplete={handlePaymentComplete}
+                user={user}
+                businessInfo={businessInfo}
+              />
+            )}
             {/* Saved Invoices List Modal */}
             {showInvoicesList && (
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -1949,7 +2117,7 @@ const printStyles = `
             )}
 
             {/* Invoice/Quote Content - Only show when activeView is 'invoice' */}
-           
+
             {activeView === "invoice" && (
               <>
                 {/* Mobile Full-Screen Invoice View */}
@@ -2023,7 +2191,7 @@ const printStyles = `
                   </button>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                   <div
                     className={`${showInvoice ? "hidden" : "block"} space-y-6 lg:block print:hidden min-h-[calc(297mm)] overflow-y-auto`}
                   >
@@ -2060,49 +2228,306 @@ const printStyles = `
                             onDataExtracted={handleAIDataExtracted}
                             documentType={documentType}
                           />
-                        ) : (
-                          <div className="text-sm text-gray-600">
-                            Fill out the forms below to create your{" "}
-                            {documentType}.
-                          </div>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                     {/* Manual forms always visible */}
                     {inputMode === "manual" && (
-                      <>
-                       
-
+                      <div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div className="bg-white p-4 rounded-lg border border-gray-200">
-                            <div className="text-sm text-gray-500 mb-1">
-                              Total Amount
+                          <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="text-sm font-medium text-orange-700">
+                                Total Amount
+                              </div>
+                              <div className="w-8 h-8 bg-orange-200 rounded-lg flex items-center justify-center">
+                                <svg
+                                  className="w-5 h-5 text-orange-600"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                            <div className="text-2xl font-bold text-orange-900">
+                              R{total.toFixed(2)}
+                            </div>
+                          </div>
+                          <div
+                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                              paymentStatus.totalPaid > 0
+                                ? "from-emerald-50 to-emerald-100 border-emerald-200"
+                                : "from-slate-50 to-slate-100 border-slate-200"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div
+                                className={`text-sm font-medium ${
+                                  paymentStatus.totalPaid > 0
+                                    ? "text-emerald-700"
+                                    : "text-slate-600"
+                                }`}
+                              >
+                                Paid
+                              </div>
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                  paymentStatus.totalPaid > 0
+                                    ? "bg-emerald-200"
+                                    : "bg-slate-200"
+                                }`}
+                              >
+                                <svg
+                                  className={`w-5 h-5 ${
+                                    paymentStatus.totalPaid > 0
+                                      ? "text-emerald-600"
+                                      : "text-slate-400"
+                                  }`}
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                  />
+                                </svg>
+                              </div>
                             </div>
                             <div
-                              className={`text-2xl font-semibold ${documentType === "quote" ? "text-purple-600" : "text-blue-600"}`}
+                              className={`text-2xl font-bold ${
+                                paymentStatus.totalPaid > 0
+                                  ? "text-emerald-900"
+                                  : "text-slate-900"
+                              }`}
                             >
-                              R{total.toFixed(2)}
+                              R{paymentStatus.totalPaid.toFixed(2)}
                             </div>
+                            {paymentStatus.totalPaid > 0 &&
+                              paymentStatus.status === "partially_paid" && (
+                                <div className="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full inline-block">
+                                  Partial Payment
+                                </div>
+                              )}
+                            {paymentStatus.status === "paid" && (
+                              <div className="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full inline-block">
+                                ✓ Fully Paid
+                              </div>
+                            )}
                           </div>
-                          <div className="bg-white p-4 rounded-lg border border-gray-200">
-                            <div className="text-sm text-gray-500 mb-1">
-                              Paid
+
+                          {/* Balance Due Card - Dynamic */}
+                          <div
+                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                              paymentStatus.balanceDue <= 0
+                                ? "from-emerald-50 to-emerald-100 border-emerald-200"
+                                : paymentStatus.totalPaid > 0
+                                  ? "from-amber-50 to-amber-100 border-amber-200"
+                                  : "from-rose-50 to-rose-100 border-rose-200"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div
+                                className={`text-sm font-medium ${
+                                  paymentStatus.balanceDue <= 0
+                                    ? "text-emerald-700"
+                                    : paymentStatus.totalPaid > 0
+                                      ? "text-amber-700"
+                                      : "text-rose-700"
+                                }`}
+                              >
+                                Balance Due
+                              </div>
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                  paymentStatus.balanceDue <= 0
+                                    ? "bg-emerald-200"
+                                    : paymentStatus.totalPaid > 0
+                                      ? "bg-amber-200"
+                                      : "bg-rose-200"
+                                }`}
+                              >
+                                {paymentStatus.balanceDue <= 0 ? (
+                                  <svg
+                                    className="w-5 h-5 text-emerald-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                ) : paymentStatus.totalPaid > 0 ? (
+                                  <svg
+                                    className="w-5 h-5 text-amber-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                ) : (
+                                  <svg
+                                    className="w-5 h-5 text-rose-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                )}
+                              </div>
                             </div>
-                            <div className="text-2xl font-semibold text-green-600">
-                              R0.00
+                            <div
+                              className={`text-2xl font-bold ${
+                                paymentStatus.balanceDue <= 0
+                                  ? "text-emerald-900"
+                                  : paymentStatus.totalPaid > 0
+                                    ? "text-amber-900"
+                                    : "text-rose-900"
+                              }`}
+                            >
+                              R{paymentStatus.balanceDue.toFixed(2)}
                             </div>
-                          </div>
-                          <div className="bg-white p-4 rounded-lg border border-gray-200">
-                            <div className="text-sm text-gray-500 mb-1">
-                              Balance Due
-                            </div>
-                            <div className="text-2xl font-semibold text-red-600">
-                              R{total.toFixed(2)}
-                            </div>
+                            {paymentStatus.balanceDue <= 0 && (
+                              <div className="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full inline-block">
+                                No Balance Due
+                              </div>
+                            )}
                           </div>
                         </div>
+                        {/* Payment Status Banner */}
+                        {invoiceId && (
+                          <div
+                            className={`p-4 rounded-xl border-2 flex items-center justify-between ${
+                              paymentStatus.status === "paid"
+                                ? "bg-emerald-50 border-emerald-300"
+                                : paymentStatus.status === "partially_paid"
+                                  ? "bg-amber-50 border-amber-300"
+                                  : "bg-rose-50 border-rose-300"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              {paymentStatus.status === "paid" ? (
+                                <>
+                                  <div className="w-10 h-10 bg-emerald-200 rounded-full flex items-center justify-center">
+                                    <svg
+                                      className="w-6 h-6 text-emerald-600"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M5 13l4 4L19 7"
+                                      />
+                                    </svg>
+                                  </div>
+                                  <div>
+                                    <div className="font-bold text-emerald-900">
+                                      Invoice Fully Paid
+                                    </div>
+                                    <div className="text-sm text-emerald-700">
+                                      Payment complete - Thank you!
+                                    </div>
+                                  </div>
+                                </>
+                              ) : paymentStatus.status === "partially_paid" ? (
+                                <>
+                                  <div className="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center">
+                                    <svg
+                                      className="w-6 h-6 text-amber-600"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                  </div>
+                                  <div>
+                                    <div className="font-bold text-amber-900">
+                                      Partial Payment Received
+                                    </div>
+                                    <div className="text-sm text-amber-700">
+                                      R{paymentStatus.totalPaid.toFixed(2)} paid
+                                      • R{paymentStatus.balanceDue.toFixed(2)}{" "}
+                                      remaining
+                                    </div>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center">
+                                    <svg
+                                      className="w-6 h-6 text-rose-600"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                  </div>
+                                  <div>
+                                    <div className="font-bold text-rose-900">
+                                      Payment Pending
+                                    </div>
+                                    <div className="text-sm text-rose-700">
+                                      Full amount due: R
+                                      {paymentStatus.balanceDue.toFixed(2)}
+                                    </div>
+                                  </div>
+                                </>
+                              )}
+                            </div>
 
-                        {inputMode === "manual" && (
+                            {paymentStatus.status !== "paid" && (
+                              <button
+                                onClick={handleProcessPayment}
+                                className="px-4 py-2 bg-white border-2 border-current rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2"
+                              >
+                                <CreditCard className="w-4 h-4" />
+                                Record Payment
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="w-full">
                           <MultiStepForm
                             // Client Info Props
                             customerName={customerName}
@@ -2128,21 +2553,14 @@ const printStyles = `
                             newItem={newItem}
                             setNewItem={setNewItem}
                             handleAddItem={handleAddItem}
-
                             paymentMethod={paymentMethod}
                             setPaymentMethod={setPaymentMethod}
-                            
                             serviceGuarantee={serviceGuarantee}
                             setServiceGuarantee={setServiceGuarantee}
-                           
-                            
                           />
-                        )}
-
-                       
-                      </>
+                        </div>
+                      </div>
                     )}
-                    
                   </div>
 
                   {/* Desktop Invoice Preview */}
@@ -2184,11 +2602,9 @@ const printStyles = `
                       showStampDate={stampSettings.showDate}
                     />
                   </div>
-               
                 </div>
               </>
             )}
-             
           </div>
         </div>
       </div>
