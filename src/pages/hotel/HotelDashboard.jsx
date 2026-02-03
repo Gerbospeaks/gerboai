@@ -29,6 +29,7 @@ import HotelAIExtractor from "./HotelAIExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import GuestsListModal from './GuestsListModal';
 import SignatureStamp from '../SignatureStamp';
+import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import {
   ChevronDown,
   ChevronLeft,
@@ -58,6 +59,7 @@ import {
   Upload,
   MapPin,
   Package,
+  Wallet,
 } from "lucide-react";
 
 const generateInvoiceNumber = async (userId) => {
@@ -107,12 +109,22 @@ const [useAI, setUseAI] = useState(false);
   const [autoCreateCheckIn, setAutoCreateCheckIn] = useState(true);
   const [guests, setGuests] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
 const [stampSettings, setStampSettings] = useState({
    text: "APPROVED",
   color: "#d32f2f",
   showDate: false,
   enabled: false
   });
+
+  // Payment Status State
+  const [paymentStatus, setPaymentStatus] = useState({
+    totalPaid: 0,
+    balanceDue: 0,
+    status: "pending",
+  });
+
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -238,6 +250,12 @@ const handleAIDataExtracted = (extractedData) => {
     setSpecialRequests(invoice.booking?.specialRequests || "");
     setItems(invoice.items || []);
     setShowInvoicesList(false);
+    // Load payment status
+    setPaymentStatus({
+      totalPaid: invoice.totals?.paid || 0,
+      balanceDue: invoice.totals?.due || invoice.totals?.total || 0,
+      status: invoice.status || "pending",
+    });
   };
 
   const loadSavedGuests = async () => {
@@ -594,6 +612,97 @@ const printStyles = `
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
   const vat = subtotal * 0.15;
   const total = subtotal + vat;
+
+  // Load payment status when invoice changes
+  const loadPaymentStatus = async () => {
+    if (!user?.uid || !invoiceId) {
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+      return;
+    }
+
+    try {
+      const db = getFirestore();
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, "invoices", invoiceId)
+      );
+
+      if (invoiceDoc.exists()) {
+        const data = invoiceDoc.data();
+        setPaymentStatus({
+          totalPaid: data.totals?.paid || 0,
+          balanceDue: data.totals?.due || data.totals?.total || 0,
+          status: data.status || "pending",
+        });
+      } else {
+        setPaymentStatus({
+          totalPaid: 0,
+          balanceDue: total,
+          status: "pending",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading payment status:", error);
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+    }
+  };
+
+  useEffect(() => {
+    loadPaymentStatus();
+  }, [invoiceId, user?.uid]);
+
+  useEffect(() => {
+    if (!invoiceId) {
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+    }
+  }, [total, invoiceId]);
+
+  // Handle Process Payment
+  const handleProcessPayment = async () => {
+    if (!invoiceId || !user?.uid) {
+      alert("Please save the invoice before processing payment");
+      return;
+    }
+
+    try {
+      const db = getFirestore();
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, "invoices", invoiceId)
+      );
+
+      if (invoiceDoc.exists()) {
+        const invoiceData = invoiceDoc.data();
+        setSelectedInvoiceForPayment({
+          id: invoiceId,
+          ...invoiceData,
+        });
+        setShowPaymentModal(true);
+      } else {
+        alert("Invoice not found. Please save the invoice first.");
+      }
+    } catch (error) {
+      console.error("Error loading invoice:", error);
+      alert("Failed to load invoice for payment");
+    }
+  };
+
+  // Handle Payment Complete
+  const handlePaymentComplete = () => {
+    loadSavedInvoices();
+    loadPaymentStatus();
+    setShowPaymentModal(false);
+  };
 
   const buildInvoicePayload = (numberToUse) => ({
     invoiceNumber: numberToUse,
@@ -1083,6 +1192,18 @@ const printStyles = `
 
             {/* Desktop Action Buttons */}
             <div className="hidden lg:flex items-center space-x-2 xl:space-x-3 print:hidden flex-shrink-0">
+              <button 
+                onClick={handleProcessPayment}
+                disabled={!invoiceId}
+                className={`flex items-center space-x-2 px-3 xl:px-4 py-2 border rounded-lg whitespace-nowrap ${
+                  !invoiceId
+                    ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                    : "border-emerald-300 hover:bg-emerald-50 text-emerald-700"
+                }`}
+              >
+                <CreditCard className="w-4 h-4" />
+                <span className="hidden xl:inline">Process Payment</span>
+              </button>
               <button className="flex items-center space-x-2 px-3 xl:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap">
                 <CheckSquare className="w-4 h-4" />
                 <span className="hidden xl:inline">Mark Paid</span>
@@ -1148,6 +1269,18 @@ const printStyles = `
         {/* Mobile action buttons */}
         <div className="lg:hidden bg-white border-b border-gray-200 px-3 py-2 print:hidden overflow-x-auto">
           <div className="flex gap-2 min-w-max pb-1">
+            <button 
+              onClick={handleProcessPayment}
+              disabled={!invoiceId}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg whitespace-nowrap text-sm ${
+                !invoiceId
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-emerald-600 text-white hover:bg-emerald-700"
+              }`}
+            >
+              <CreditCard className="w-4 h-4" />
+              <span>Payment</span>
+            </button>
             <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
               <CheckSquare className="w-4 h-4" />
               <span>Paid</span>
@@ -1672,6 +1805,18 @@ const printStyles = `
   user={user}
 />
 
+          {/* Payment Processor Modal */}
+          {showPaymentModal && selectedInvoiceForPayment && (
+            <PaymentProcessor
+              showModal={showPaymentModal}
+              setShowModal={setShowPaymentModal}
+              invoice={selectedInvoiceForPayment}
+              onPaymentComplete={handlePaymentComplete}
+              user={user}
+              businessInfo={propertyInfo}
+            />
+          )}
+
           {/* Saved Invoices List Modal */}
           {showInvoicesList && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-3 md:p-4">
@@ -1718,6 +1863,16 @@ const printStyles = `
                               <div className="text-lg font-semibold text-blue-600">
                                 R{invoice.totals?.total?.toFixed(2) || "0.00"}
                               </div>
+                              {invoice.totals?.paid > 0 && (
+                                <div className="text-sm text-emerald-600 font-semibold">
+                                  Paid: R{invoice.totals.paid.toFixed(2)}
+                                </div>
+                              )}
+                              {invoice.totals?.due > 0 && (
+                                <div className="text-sm text-rose-600 font-semibold">
+                                  Due: R{invoice.totals.due.toFixed(2)}
+                                </div>
+                              )}
                               <div className="text-sm text-gray-500">
                                 {invoice.dates?.invoiceDate
                                   ? new Date(
@@ -1729,12 +1884,18 @@ const printStyles = `
                                 className={`text-xs mt-1 px-2 py-1 rounded inline-block ${
                                   invoice.status === "paid"
                                     ? "bg-green-100 text-green-700"
+                                    : invoice.status === "partially_paid"
+                                    ? "bg-amber-100 text-amber-700"
                                     : invoice.status === "pending"
                                     ? "bg-blue-100 text-blue-700"
                                     : "bg-gray-100 text-gray-700"
                                 }`}
                               >
-                                {invoice.status || "unknown"}
+                                {invoice.status === "paid"
+                                  ? "Paid"
+                                  : invoice.status === "partially_paid"
+                                  ? "Partial"
+                                  : "Pending"}
                               </div>
                             </div>
                           </div>
@@ -1808,7 +1969,7 @@ const printStyles = `
                                     </div>
                                      {inputMode === "manual" && (
                     <>
-
+              {/* Payment Status Summary Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
                 <div className="bg-white p-3 md:p-4 rounded-lg border border-gray-200">
                   <div className="text-xs md:text-sm text-gray-500 mb-1">Invoice Amount</div>
@@ -1816,19 +1977,106 @@ const printStyles = `
                     R{total.toFixed(2)}
                   </div>
                 </div>
-                <div className="bg-white p-3 md:p-4 rounded-lg border border-gray-200">
-                  <div className="text-xs md:text-sm text-gray-500 mb-1">Nights</div>
-                  <div className="text-xl md:text-2xl font-semibold text-green-600">
-                    {numberOfNights}
+                <div className={`p-3 md:p-4 rounded-lg border transition-all ${
+                  paymentStatus.totalPaid > 0
+                    ? "bg-emerald-50 border-emerald-200"
+                    : "bg-white border-gray-200"
+                }`}>
+                  <div className={`text-xs md:text-sm mb-1 ${
+                    paymentStatus.totalPaid > 0 ? "text-emerald-700" : "text-gray-500"
+                  }`}>Paid</div>
+                  <div className={`text-xl md:text-2xl font-semibold ${
+                    paymentStatus.totalPaid > 0 ? "text-emerald-600" : "text-gray-600"
+                  }`}>
+                    R{paymentStatus.totalPaid.toFixed(2)}
                   </div>
                 </div>
-                <div className="bg-white p-3 md:p-4 rounded-lg border border-gray-200">
-                  <div className="text-xs md:text-sm text-gray-500 mb-1">Room</div>
-                  <div className="text-base md:text-lg font-semibold text-gray-700">
-                    {roomNumber}
+                <div className={`p-3 md:p-4 rounded-lg border transition-all ${
+                  paymentStatus.balanceDue <= 0
+                    ? "bg-emerald-50 border-emerald-200"
+                    : paymentStatus.totalPaid > 0
+                    ? "bg-amber-50 border-amber-200"
+                    : "bg-rose-50 border-rose-200"
+                }`}>
+                  <div className={`text-xs md:text-sm mb-1 ${
+                    paymentStatus.balanceDue <= 0
+                      ? "text-emerald-700"
+                      : paymentStatus.totalPaid > 0
+                      ? "text-amber-700"
+                      : "text-rose-700"
+                  }`}>Balance Due</div>
+                  <div className={`text-xl md:text-2xl font-semibold ${
+                    paymentStatus.balanceDue <= 0
+                      ? "text-emerald-600"
+                      : paymentStatus.totalPaid > 0
+                      ? "text-amber-600"
+                      : "text-rose-600"
+                  }`}>
+                    R{paymentStatus.balanceDue.toFixed(2)}
                   </div>
                 </div>
               </div>
+
+              {/* Payment Status Banner */}
+              {invoiceId && (
+                <div
+                  className={`p-4 rounded-xl border-2 flex items-center justify-between ${
+                    paymentStatus.status === "paid"
+                      ? "bg-emerald-50 border-emerald-300"
+                      : paymentStatus.status === "partially_paid"
+                      ? "bg-amber-50 border-amber-300"
+                      : "bg-rose-50 border-rose-300"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {paymentStatus.status === "paid" ? (
+                      <>
+                        <div className="w-10 h-10 bg-emerald-200 rounded-full flex items-center justify-center">
+                          <CheckSquare className="w-6 h-6 text-emerald-600" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-emerald-900">Invoice Fully Paid</div>
+                          <div className="text-sm text-emerald-700">Payment complete - Thank you!</div>
+                        </div>
+                      </>
+                    ) : paymentStatus.status === "partially_paid" ? (
+                      <>
+                        <div className="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center">
+                          <Wallet className="w-6 h-6 text-amber-600" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-amber-900">Partial Payment Received</div>
+                          <div className="text-sm text-amber-700">
+                            R{paymentStatus.totalPaid.toFixed(2)} paid • R{paymentStatus.balanceDue.toFixed(2)} remaining
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center">
+                          <CreditCard className="w-6 h-6 text-rose-600" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-rose-900">Payment Pending</div>
+                          <div className="text-sm text-rose-700">
+                            Full amount due: R{paymentStatus.balanceDue.toFixed(2)}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {paymentStatus.status !== "paid" && (
+                    <button
+                      onClick={handleProcessPayment}
+                      className="px-4 py-2 bg-white border-2 border-current rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2"
+                    >
+                      <CreditCard className="w-4 h-4" />
+                      Record Payment
+                    </button>
+                  )}
+                </div>
+              )}
 
               {inputMode === "manual" && (
   <HospitalityMultiStepForm

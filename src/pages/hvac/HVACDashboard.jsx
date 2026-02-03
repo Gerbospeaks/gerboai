@@ -1869,7 +1869,7 @@ const printStyles = `
                 {showServiceCard ? "Hide Service Record" : "View Service Record"}
               </button>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                 <div
                   className={`${
                     showServiceCard ? "hidden" : "block"
@@ -1907,21 +1907,12 @@ const printStyles = `
                                             onDataExtracted={handleAIDataExtracted}
                                             documentType={documentType}
                                           />
-                                        ) : (
-                                          <div className="text-sm text-gray-600">
-                                            Fill out the forms below to create your {documentType}
-                                            .
-                                          </div>
-                                        )}
+                                        ) : null}
                                       </div>
                                     </div>
                                      {inputMode === "manual" && (
                     <>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-blue-700 text-sm font-medium">In Progress</span>
-                    <span className="text-blue-600">Started Today</span>
-                  </div>
+                
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
