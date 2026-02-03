@@ -36,6 +36,7 @@ import {
   Settings,
   Users,
   Calendar,
+  DollarSign,
   FileText,
    Sparkles,
   Wrench,
@@ -159,6 +160,11 @@ const [stampSettings, setStampSettings] = useState({
 
     setSavedJobCards(cards);
   };
+  const [paymentStatus, setPaymentStatus] = useState({
+    totalPaid: 0,
+    balanceDue: 0,
+    status: "pending",
+  });
 
   const handleAddNewCustomer = () => {
     setSelectedCustomer(null);
@@ -993,7 +999,7 @@ const printStyles = `
 </div>
 
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-16 md:ml-20"}`}>
       <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
         <div className="sticky top-0 z-40 flex flex-col">
         <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 py-4">
@@ -1558,7 +1564,7 @@ const printStyles = `
             {showJobCard ? "Hide Work Order" : "View Work Order"}
           </button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
             <div
               className={`${
                 showJobCard ? "hidden" : "block"
@@ -1608,25 +1614,110 @@ const printStyles = `
                     <>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Total Amount</div>
-                  <div className="text-2xl font-semibold text-green-600">
-                    R{total.toFixed(2)}
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Paid</div>
-                  <div className="text-2xl font-semibold text-green-600">
-                    R0.00
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Balance Due</div>
-                  <div className="text-2xl font-semibold text-red-600">
-                    R{total.toFixed(2)}
-                  </div>
-                </div>
-              </div>
+                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-sm font-medium text-orange-700">Total Amount</div>
+                            <div className="w-8 h-8 bg-orange-200 rounded-lg flex items-center justify-center">
+                              <DollarSign className="w-5 h-5 text-orange-600" />
+                            </div>
+                          </div>
+                          <div className="text-2xl font-bold text-orange-900">
+                            R{total.toFixed(2)}
+                          </div>
+                        </div>
+
+                        <div
+                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                            paymentStatus.totalPaid > 0
+                              ? "from-emerald-50 to-emerald-100 border-emerald-200"
+                              : "from-slate-50 to-slate-100 border-slate-200"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div
+                              className={`text-sm font-medium ${
+                                paymentStatus.totalPaid > 0 ? "text-emerald-700" : "text-slate-600"
+                              }`}
+                            >
+                              Paid
+                            </div>
+                            <div
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                paymentStatus.totalPaid > 0 ? "bg-emerald-200" : "bg-slate-200"
+                              }`}
+                            >
+                              <CheckSquare
+                                className={`w-5 h-5 ${
+                                  paymentStatus.totalPaid > 0
+                                    ? "text-emerald-600"
+                                    : "text-slate-400"
+                                }`}
+                              />
+                            </div>
+                          </div>
+                          <div
+                            className={`text-2xl font-bold ${
+                              paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"
+                            }`}
+                          >
+                            R{paymentStatus.totalPaid.toFixed(2)}
+                          </div>
+                        </div>
+
+                        <div
+                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                            paymentStatus.balanceDue <= 0
+                              ? "from-emerald-50 to-emerald-100 border-emerald-200"
+                              : paymentStatus.totalPaid > 0
+                                ? "from-amber-50 to-amber-100 border-amber-200"
+                                : "from-rose-50 to-rose-100 border-rose-200"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div
+                              className={`text-sm font-medium ${
+                                paymentStatus.balanceDue <= 0
+                                  ? "text-emerald-700"
+                                  : paymentStatus.totalPaid > 0
+                                    ? "text-amber-700"
+                                    : "text-rose-700"
+                              }`}
+                            >
+                              Balance Due
+                            </div>
+                            <div
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                paymentStatus.balanceDue <= 0
+                                  ? "bg-emerald-200"
+                                  : paymentStatus.totalPaid > 0
+                                    ? "bg-amber-200"
+                                    : "bg-rose-200"
+                              }`}
+                            >
+                              <Wallet
+                                className={`w-5 h-5 ${
+                                  paymentStatus.balanceDue <= 0
+                                    ? "text-emerald-600"
+                                    : paymentStatus.totalPaid > 0
+                                      ? "text-amber-600"
+                                      : "text-rose-600"
+                                }`}
+                              />
+                            </div>
+                          </div>
+                          <div
+                            className={`text-2xl font-bold ${
+                              paymentStatus.balanceDue <= 0
+                                ? "text-emerald-900"
+                                : paymentStatus.totalPaid > 0
+                                  ? "text-amber-900"
+                                  : "text-rose-900"
+                            }`}
+                          >
+                            R{paymentStatus.balanceDue.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
 
             {inputMode === "manual" && (
   <LandscapingMultiStepForm
@@ -1718,6 +1809,7 @@ const printStyles = `
       merchantCode="GPL-12345"
       serviceType="LANDSCAPING"
       documentType="landscaping"
+      paymentStatus={paymentStatus}
     />
   </>
 )}

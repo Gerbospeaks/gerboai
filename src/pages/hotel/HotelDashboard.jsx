@@ -1323,24 +1323,7 @@ const printStyles = `
           </div>
         </div>
 
-        {/* Tabs - Now scrollable on mobile */}
-        <div className="bg-gray-50 border-b border-gray-200 px-3 md:px-4 lg:px-6 overflow-x-auto print:hidden">
-          <div className="flex space-x-4 lg:space-x-8 min-w-max">
-            {["Invoice", "Guest Details", "Booking", "Notes"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-3 md:py-4 border-b-2 whitespace-nowrap text-sm md:text-base ${
-                  activeTab === tab
-                    ? "border-blue-400 text-gray-800"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
+       
         </div>
 
         {/* Main Content Area - Now properly scrollable */}
@@ -1959,12 +1942,7 @@ const printStyles = `
                                             onDataExtracted={handleAIDataExtracted}
                                             documentType={documentType}
                                           />
-                                        ) : (
-                                          <div className="text-sm text-gray-600">
-                                            Fill out the forms below to create your {documentType}
-                                            .
-                                          </div>
-                                        )}
+                                        ) : null}
                                       </div>
                                     </div>
                                      {inputMode === "manual" && (
