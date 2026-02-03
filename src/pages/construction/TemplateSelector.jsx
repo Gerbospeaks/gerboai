@@ -301,15 +301,15 @@ export const ProfessionalTemplate = ({
       <div className="w-72 text-sm">
         <div className="flex justify-between py-2 text-gray-600">
           <span>Subtotal:</span>
-          <span>R {subtotal.toFixed(2)}</span>
+          <span>R {(subtotal || 0).toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-2 text-gray-600">
           <span>VAT (15%):</span>
-          <span>R {vat.toFixed(2)}</span>
+          <span>R {(vat || 0).toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-3 font-bold bg-orange-600 text-white px-4 rounded">
           <span>TOTAL:</span>
-          <span>R {total.toFixed(2)}</span>
+          <span>R {(total || 0).toFixed(2)}</span>
         </div>
       </div>
     </div>

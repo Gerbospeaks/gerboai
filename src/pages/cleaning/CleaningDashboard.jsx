@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
-import { getAuth, signOut } from "firebase/auth";
 import logo from "../../assets/img/solidflo-logo.png";
+import { getAuth, signOut } from "firebase/auth";
+import FinancialOverview from "../FinancialOverview";
+import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
-import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
+import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import {
   getFirestore,
   collection,
@@ -20,241 +21,134 @@ import {
   limit,
   getDocs,
 } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Printer, Download, Sparkles, Trash2, Home as HomeIcon } from "lucide-react";
+import { db } from "../../firebase";
+import CustomerModal from "../CustomerModal";
+import CustomersListModal from "../CustomersListModal";
+import HistoryView from "./HistoryView";
+import NotesView from "./NotesView";
+import SignatureStamp from "../SignatureStamp";
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import {
-  Printer,
-  Download,
-  Sparkles,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Home,
-  DollarSign,
-  CheckCircle,
-  AlertCircle,
-  Clock,
   Settings,
   Users,
-  X,
   Calendar,
+  X,
   FileText,
-  FileBarChart,
   BarChart3,
   Menu,
   Plus,
   Send,
+  Save,
   Edit,
   LogOut,
   CheckSquare,
   TrendingUp,
   CreditCard,
   Receipt,
-  Building,
+  Wallet,
+  PieChart,
   ClipboardList,
-  Package,
   Upload,
-  RefreshCw,
+  DollarSign,
+  Building,
+  FileBarChart,
+  Calculator,
+  Briefcase,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+  MapPin,
+  Clock,
 } from "lucide-react";
-import { db } from "../../firebase";
-import CustomerModal from "../CustomerModal";
-import CustomersListModal from "../CustomersListModal";
-import FinancialOverview from "../FinancialOverview";
-import SignatureStamp from "../SignatureStamp";
-import MultiStepForm from "./MultiStepForm";
 
-// Generate Invoice Number
-const generateInvoiceNumber = async (userId) => {
+const generateQuoteNumber = async (userId, documentType) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
-  const invoicesRef = collection(db, "users", userId, "invoices");
-  const q = query(invoicesRef, orderBy("createdAt", "desc"), limit(1));
-  const snapshot = await getDocs(q);
-  let lastNumber = 100;
-  if (!snapshot.empty) {
-    const lastInvoice = snapshot.docs[0].data();
-    const match = lastInvoice.invoiceNumber?.match(/(\d+)$/);
-    if (match) lastNumber = Number(match[1]);
-  }
-  return `INV-${year}-${String(lastNumber + 1).padStart(4, "0")}`;
-};
 
-// Generate Quote Number
-const generateQuoteNumber = async (userId) => {
-  const db = getFirestore();
-  const year = new Date().getFullYear();
-  const quotesRef = collection(db, "users", userId, "quotations");
+  const collectionName = documentType === "quote" ? "quotes" : "invoices";
+  const prefix = documentType === "quote" ? "QTE" : "INV";
+
+  const quotesRef = collection(db, "users", userId, collectionName);
   const q = query(quotesRef, orderBy("createdAt", "desc"), limit(1));
   const snapshot = await getDocs(q);
-  let lastNumber = 100;
+
+  let lastNumber = 1000;
+
   if (!snapshot.empty) {
     const lastQuote = snapshot.docs[0].data();
     const match = lastQuote.quoteNumber?.match(/(\d+)$/);
-    if (match) lastNumber = Number(match[1]);
+
+    if (match) {
+      lastNumber = Number(match[1]);
+    }
   }
-  return `QUO-${year}-${String(lastNumber + 1).padStart(4, "0")}`;
+
+  const nextNumber = lastNumber + 1;
+  return `${prefix}-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
 
 const CleaningDashboard = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 4;
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [inputMode, setInputMode] = useState("manual");
-  const [documentType, setDocumentType] = useState("invoice");
-  const [useAI, setUseAI] = useState(false);
-  const [activeTab, setActiveTab] = useState("Invoice");
-  const [showInvoice, setShowInvoice] = useState(false);
-  const {user, authUser} = useAuth();
-  const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [invoiceId, setInvoiceId] = useState(null);
-  const [savedInvoices, setSavedInvoices] = useState([]);
-  const [showInvoicesList, setShowInvoicesList] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showCustomersListModal, setShowCustomersListModal] = useState(false);
-  const [showCustomerModal, setShowCustomerModal] = useState(false);
-  const [customers, setCustomers] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [savedCustomers, setSavedCustomers] = useState([]);
-  const [activeView, setActiveView] = useState("invoice");
-  const [activeTemplate, setActiveTemplate] = useState("classic");
-  const [paymentMethod, setPaymentMethod] = useState("Cash/Card/EFT");
-  const [paymentTerms, setPaymentTerms] = useState("Due on Completion");
-  const [serviceGuarantee, setServiceGuarantee] = useState("7 Day Satisfaction Guarantee");
-  // Quote-specific states
-  const [isQuoteMode, setIsQuoteMode] = useState(false);
+  const [activeTab, setActiveTab] = useState("Quote");
+  const { user, authUser } = useAuth();
+  const [quoteNumber, setQuoteNumber] = useState("");
   const [quoteId, setQuoteId] = useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [showQuotesList, setShowQuotesList] = useState(false);
-  const [showConvertButton, setShowConvertButton] = useState(false);
-
-  const [customerName, setCustomerName] = useState("Zoey Mor");
-  const [customerId, setCustomerId] = useState("CUST-2026-5678");
-  const [customerEmail, setCustomerEmail] = useState("jane.doe@example.com");
-  const [customerPhone, setCustomerPhone] = useState("082 765 4321");
+  const [showSettings, setShowSettings] = useState(false);
+  const [activeView, setActiveView] = useState("quote");
+  const [currentQuoteId, setCurrentQuoteId] = useState(null);
+  const [savedCustomers, setSavedCustomers] = useState([]);
+  const [showCustomersListModal, setShowCustomersListModal] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [customers, setCustomers] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
-  const [customerAddress, setCustomerAddress] = useState(
-    "456 Oak Avenue, Pretoria, 0002",
-  );
-  const [propertyType, setPropertyType] = useState("Residential");
-  const [propertySize, setPropertySize] = useState("120");
-  const [propertyRooms, setPropertyRooms] = useState("3");
-  const [propertyBathrooms, setPropertyBathrooms] = useState("2");
-  const [propertyFloors, setPropertyFloors] = useState("1");
-  const [serviceFrequency, setServiceFrequency] = useState("Weekly");
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [inputMode, setInputMode] = useState("manual");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+
   const [stampSettings, setStampSettings] = useState({
-    text: "APPROVED",
-    color: "#d32f2f",
-    showDate: false,
-    enabled: false,
-  });
-  const [businessInfo, setBusinessInfo] = useState({
-    businessName: "SPARKLE CLEAN SERVICES",
-    addressLine1: "78 CLEANING STREET",
-    addressLine2: "HATFIELD",
-    city: "PRETORIA",
-    postalCode: "0028",
-    primaryPhone: "012 345 6789",
-    secondaryPhone: "082 987 6543",
-    logoUrl: "",
-  });
-  const [loading, setLoading] = useState(true);
-
-  const [items, setItems] = useState([]);
-  const [newItem, setNewItem] = useState({
-    description: "",
-    rate: "",
-    qty: "",
-    type: "Service",
+    text: "PAID",
+    color: "#22c55e",
+    showDate: true,
+    enabled: true,
   });
 
-  const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-  const vat = subtotal * 0.15;
-  const total = subtotal + vat;
+  const handleRemoveItem = (index) => {
+    setItems((prev) => prev.filter((_, i) => i !== index));
+  };
 
-  useEffect(() => {
-    if (!user?.uid) return;
-    const loadNumber = async () => {
-      if (isQuoteMode) {
-        const next = await generateQuoteNumber(user.uid);
-        setInvoiceNumber(next);
-      } else {
-        const next = await generateInvoiceNumber(user.uid);
-        setInvoiceNumber(next);
-      }
-    };
-    loadNumber();
-    loadSavedInvoices();
-    loadSavedQuotes();
-    loadCustomers();
-    loadSavedCustomers();
-  }, [user, isQuoteMode]);
-
-  useEffect(() => {
-    if (user?.uid) loadBusinessInfo();
-  }, [user]);
-
-  useEffect(() => {
-    const fetchBusinessInfo = async () => {
-      if (!user?.uid) return;
-      try {
-        const db = getFirestore();
-        const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) setBusinessInfo(docSnap.data());
-      } catch (error) {
-        console.error("Error fetching business info:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBusinessInfo();
-  }, [user]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setSidebarOpen(window.innerWidth >= 1024);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const loadCustomers = async () => {
-    if (!user?.uid) return;
-    try {
-      const q = query(
-        collection(db, "users", user.uid, "clients"),
-        orderBy("createdAt", "desc"),
-      );
-      const querySnapshot = await getDocs(q);
-      const customersData = [];
-      querySnapshot.forEach((doc) => {
-        customersData.push({ id: doc.id, ...doc.data() });
-      });
-      setCustomers(customersData);
-    } catch (error) {
-      console.error("Error loading customers:", error);
+  const handleNext = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
-  const loadSavedInvoices = async () => {
-    if (!user?.uid) return;
-    const db = getFirestore();
-    const invoicesRef = collection(db, "users", user.uid, "invoices");
-    const q = query(invoicesRef, orderBy("createdAt", "desc"), limit(50));
-    const snapshot = await getDocs(q);
-    const invs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    setSavedInvoices(invs);
+  const [paymentStatus, setPaymentStatus] = useState({
+    totalPaid: 0,
+    balanceDue: 0,
+    status: "pending",
+  });
+
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
-  const loadSavedQuotes = async () => {
-    if (!user?.uid) return;
-    const db = getFirestore();
-    const quotesRef = collection(db, "users", user.uid, "quotations");
-    const q = query(quotesRef, orderBy("createdAt", "desc"), limit(50));
-    const snapshot = await getDocs(q);
-    const quotes = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    setSavedQuotes(quotes);
-  };
+  const [documentType, setDocumentType] = useState("quote");
+
   const handleAIDataExtracted = (extractedData) => {
-    // Customer info
     if (extractedData.customer.name)
       setCustomerName(extractedData.customer.name);
     if (extractedData.customer.email)
@@ -262,53 +156,164 @@ const CleaningDashboard = () => {
     if (extractedData.customer.phone)
       setCustomerPhone(extractedData.customer.phone);
     if (extractedData.customer.address)
-      setCustomerAddress(extractedData.customer.address);
-    if (extractedData.customer.customerId)
-      setCustomerId(extractedData.customer.customerId);
+      setPropertyAddress(extractedData.customer.address);
 
-    // Property info (specific to CleaningDashboard)
-    if (extractedData.property) {
-      if (extractedData.property.type)
-        setPropertyType(extractedData.property.type);
-      if (extractedData.property.size)
-        setPropertySize(extractedData.property.size);
-      if (extractedData.property.rooms)
-        setPropertyRooms(extractedData.property.rooms);
-      if (extractedData.property.bathrooms)
-        setPropertyBathrooms(extractedData.property.bathrooms);
-      if (extractedData.property.floors)
-        setPropertyFloors(extractedData.property.floors);
-      if (extractedData.property.serviceFrequency)
-        setServiceFrequency(extractedData.property.serviceFrequency);
-    }
-
-    // Items
     if (extractedData.items && extractedData.items.length > 0) {
       setItems(extractedData.items);
     }
 
-    alert("✅ Data extracted and populated successfully!");
-  };
-  const loadSavedCustomers = async () => {
-    if (!user?.uid) return;
-    const db = getFirestore();
-    const customersRef = collection(db, "users", user.uid, "clients");
-    const q = query(customersRef, orderBy("createdAt", "desc"), limit(50));
-    const snapshot = await getDocs(q);
-    const custs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    setSavedCustomers(custs.filter((c) => !c._placeholder));
+    alert("✨ Data extracted and populated successfully!");
   };
 
-  const loadBusinessInfo = async () => {
+  useEffect(() => {
     if (!user?.uid) return;
+
+    const loadQuoteNumber = async () => {
+      const nextQuote = await generateQuoteNumber(user.uid, documentType);
+      setQuoteNumber(nextQuote);
+    };
+
+    loadQuoteNumber();
+    loadSavedQuotes();
+  }, [user, documentType]);
+
+  // Responsive detection
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+
+      if (width >= 1024) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const steps = [
+    { number: 1, title: "Client Info", icon: Users },
+    { number: 2, title: "Property Details", icon: HomeIcon },
+    { number: 3, title: "Services", icon: ClipboardList },
+    { number: 4, title: "Schedule & Payment", icon: Calendar },
+  ];
+
+  const loadCustomers = async () => {
     try {
-      const db = getFirestore();
-      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) setBusinessInfo(docSnap.data());
+      const q = query(
+        collection(db, "users", user.uid, "clients"),
+        orderBy("createdAt", "desc"),
+      );
+      const querySnapshot = await getDocs(q);
+      const customersData = [];
+
+      querySnapshot.forEach((doc) => {
+        customersData.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      setCustomers(customersData);
     } catch (error) {
-      console.error("Error loading business info:", error);
+      console.error("Error loading customers:", error);
     }
+  };
+
+  const handleProcessPayment = async () => {
+    if (!quoteId || !user?.uid) {
+      alert("Please save the quote before processing payment");
+      return;
+    }
+
+    try {
+      const collectionName = documentType === "quote" ? "quotes" : "invoices";
+      const quoteDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, quoteId),
+      );
+
+      if (quoteDoc.exists()) {
+        const quoteData = quoteDoc.data();
+        setSelectedQuoteForPayment({
+          id: quoteId,
+          ...quoteData,
+        });
+        setShowPaymentModal(true);
+      } else {
+        alert("Quote not found. Please save the quote first.");
+      }
+    } catch (error) {
+      console.error("Error loading quote:", error);
+      alert("Failed to load quote for payment");
+    }
+  };
+
+  const loadPaymentStatus = async () => {
+    if (!user?.uid || !quoteId) {
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+      return;
+    }
+
+    try {
+      const collectionName = documentType === "quote" ? "quotes" : "invoices";
+      const quoteDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, quoteId),
+      );
+
+      if (quoteDoc.exists()) {
+        const data = quoteDoc.data();
+        setPaymentStatus({
+          totalPaid: data.totals?.paid || 0,
+          balanceDue: data.totals?.due || data.totals?.total || 0,
+          status: data.status || "pending",
+        });
+      } else {
+        setPaymentStatus({
+          totalPaid: 0,
+          balanceDue: total,
+          status: "pending",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading payment status:", error);
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+    }
+  };
+
+  const handlePaymentComplete = () => {
+    loadSavedQuotes();
+    loadPaymentStatus();
+    setShowPaymentModal(false);
+  };
+
+  const loadSavedQuotes = async () => {
+    if (!user?.uid) return;
+
+    const db = getFirestore();
+    const collectionName = documentType === "quote" ? "quotes" : "invoices";
+    const quotesRef = collection(db, "users", user.uid, collectionName);
+    const q = query(quotesRef, orderBy("createdAt", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+
+    const quotes = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setSavedQuotes(quotes);
   };
 
   const handleAddNewCustomer = () => {
@@ -325,108 +330,253 @@ const CleaningDashboard = () => {
     setCustomerName(customer.name || "");
     setCustomerEmail(customer.email || "");
     setCustomerPhone(customer.phone || "");
-    setCustomerAddress(customer.address || "");
-    setCustomerId(customer.customerId || "");
+    setPropertyAddress(customer.address || "");
   };
 
   const handleCustomerSaved = () => {
     loadCustomers();
-    loadSavedCustomers();
   };
 
-  const loadInvoice = (invoice) => {
-    setIsQuoteMode(false);
-    setInvoiceId(invoice.id);
-    setQuoteId(null);
-    setShowConvertButton(false);
-    setInvoiceNumber(invoice.invoiceNumber || "");
-    setCustomerName(invoice.customer?.name || "");
-    setCustomerEmail(invoice.customer?.email || "");
-    setCustomerPhone(invoice.customer?.phone || "");
-    setCustomerAddress(invoice.customer?.address || "");
-    setCustomerId(invoice.customer?.customerId || "");
-    setPropertyType(invoice.property?.type || "");
-    setPropertySize(invoice.property?.size || "");
-    setPropertyRooms(invoice.property?.rooms || "");
-    setPropertyBathrooms(invoice.property?.bathrooms || "");
-    setPropertyFloors(invoice.property?.floors || "");
-    setServiceFrequency(invoice.property?.serviceFrequency || "");
-    setItems(invoice.items || []);
-    setShowInvoicesList(false);
-    setActiveView("invoice");
-  };
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
+  useEffect(() => {
+    loadPaymentStatus();
+  }, [quoteId, user?.uid, documentType]);
 
   const loadQuote = (quote) => {
-    setIsQuoteMode(true);
     setQuoteId(quote.id);
-    setInvoiceId(null);
-    setShowConvertButton(true);
-    setInvoiceNumber(quote.quoteNumber || "");
+    setQuoteNumber(quote.quoteNumber || "");
     setCustomerName(quote.customer?.name || "");
     setCustomerEmail(quote.customer?.email || "");
     setCustomerPhone(quote.customer?.phone || "");
-    setCustomerAddress(quote.customer?.address || "");
-    setCustomerId(quote.customer?.customerId || "");
-    setPropertyType(quote.property?.type || "");
-    setPropertySize(quote.property?.size || "");
-    setPropertyRooms(quote.property?.rooms || "");
-    setPropertyBathrooms(quote.property?.bathrooms || "");
-    setPropertyFloors(quote.property?.floors || "");
-    setServiceFrequency(quote.property?.serviceFrequency || "");
+    setPropertyAddress(quote.customer?.address || "");
+    setPropertyType(quote.propertyDetails?.type || "");
+    setPropertySize(quote.propertyDetails?.size || "");
+    setRooms(quote.propertyDetails?.rooms || "");
+    setBathrooms(quote.propertyDetails?.bathrooms || "");
     setItems(quote.items || []);
     setShowQuotesList(false);
-    setActiveView("invoice");
+    setPaymentStatus({
+      totalPaid: quote.totals?.paid || 0,
+      balanceDue: quote.totals?.due || quote.totals?.total || 0,
+      status: quote.status || "pending",
+    });
   };
 
- const handleLogoUpload = async (e) => {
-   const file = e.target.files[0];
-   if (!file || !user?.uid || !authUser) return;
- 
-   if (!file.type.startsWith("image/")) {
-     alert("Please upload an image file");
-     return;
-   }
- 
-   if (file.size > 5 * 1024 * 1024) {
-     alert("Image size should be less than 5MB");
-     return;
-   }
- 
-   try {
-     setBusinessInfo(prev => ({ ...prev, uploading: true }));
- 
-     // ✅ Upload to Cloudflare R2 (Worker handles userId)
-     const logoUrl = await uploadLogoToR2(file, authUser);
- 
-     setBusinessInfo(prev => ({
-       ...prev,
-       logoUrl,
-       uploading: false,
-     }));
- console.log("API URL:", process.env.REACT_APP_API_URL);
-     // Save URL to Firestore
-     const db = getFirestore();
-     const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
- 
-     await setDoc(docRef, {
-   logoUrl,
-   updatedAt: new Date().toISOString(),
- }, { merge: true });
- 
-     alert("Logo uploaded successfully!");
-   } catch (error) {
-     console.error("Error uploading logo:", error);
-     alert("Failed to upload logo: " + error.message);
-     setBusinessInfo(prev => ({ ...prev, uploading: false }));
-   }
- };
-
-  const handleSaveBusinessInfo = async () => {
+  const loadSavedCustomers = async () => {
     if (!user?.uid) return;
+
+    const db = getFirestore();
+    const customersRef = collection(db, "users", user.uid, "clients");
+    const q = query(customersRef, orderBy("createdAt", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+
+    const customers = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setSavedCustomers(customers.filter((c) => !c._placeholder));
+  };
+
+  const loadQuoteForExport = async () => {
+    if (!user?.uid || !quoteId) return null;
+
+    const db = getFirestore();
+    const collectionName = documentType === "quote" ? "quotes" : "invoices";
+    const snap = await getDoc(
+      doc(db, "users", user.uid, collectionName, quoteId),
+    );
+
+    return snap.exists() ? snap.data() : null;
+  };
+
+  const handleSavePDF = async () => {
+    const savedQuote = await loadQuoteForExport();
+
+    if (!savedQuote) {
+      alert(`Please save the ${documentType} before exporting PDF`);
+      return;
+    }
+
+    setQuoteNumber(savedQuote.quoteNumber);
+    setItems(savedQuote.items);
+    setCustomerName(savedQuote.customer.name);
+    setCustomerEmail(savedQuote.customer.email);
+    setCustomerPhone(savedQuote.customer.phone);
+    setPropertyAddress(savedQuote.customer.address);
+
+    setTimeout(() => {
+      window.print();
+    }, 300);
+  };
+
+  const handleAddItem = () => {
+    if (!newItem.description || !newItem.qty) return;
+
+    const rate = Number(newItem.rate) || 0;
+    const qty = Number(newItem.qty);
+    const taxRate = Number(newItem.taxRate) || 0;
+
+    const amount = rate * qty;
+    const taxAmount = amount * (taxRate / 100);
+    const totalAmount = amount + taxAmount;
+
+    const item = {
+      description: newItem.description,
+      serviceType: newItem.serviceType || "Standard Cleaning",
+      rate,
+      qty,
+      amount,
+      taxRate,
+      taxAmount,
+      totalAmount,
+      frequency: newItem.frequency || "One-time",
+    };
+
+    setItems((prev) => [...prev, item]);
+    setNewItem({
+      description: "",
+      rate: "",
+      qty: "",
+      serviceType: "Standard Cleaning",
+      taxRate: "15",
+      frequency: "One-time",
+    });
+  };
+
+  const [customerName, setCustomerName] = useState("Johnson Residence");
+  const [customerEmail, setCustomerEmail] = useState("johnson@email.com");
+  const [customerPhone, setCustomerPhone] = useState("+27 82 123 4567");
+  const [propertyAddress, setPropertyAddress] = useState(
+    "123 Sunset Avenue, Sandton, Johannesburg, 2196",
+  );
+  const [propertyType, setPropertyType] = useState("Residential");
+  const [propertySize, setPropertySize] = useState("200");
+  const [rooms, setRooms] = useState("4");
+  const [bathrooms, setBathrooms] = useState("2");
+
+  const [businessInfo, setBusinessInfo] = useState({
+    businessName: "SPARKLE CLEAN SERVICES",
+    addressLine1: "456 Commercial Plaza",
+    addressLine2: "Rosebank",
+    city: "Johannesburg",
+    postalCode: "2196",
+    primaryPhone: "+27 11 555 0001",
+    secondaryPhone: "+27 11 555 0002",
+    email: "info@sparkleclean.co.za",
+    website: "www.sparkleclean.co.za",
+    registrationNumber: "2024/123456/07",
+    vatNumber: "4123456789",
+    logoUrl: "",
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.uid) {
+      loadBusinessInfo();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const fetchBusinessInfo = async () => {
+      if (!user?.uid) return;
+
+      try {
+        const db = getFirestore();
+        const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setBusinessInfo(docSnap.data());
+        } else {
+          console.log("No business info found");
+        }
+      } catch (error) {
+        console.error("Error fetching business info:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBusinessInfo();
+  }, [user]);
+
+  const loadBusinessInfo = async () => {
+    if (!user?.uid) return;
+
     try {
       const db = getFirestore();
       const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-      await setDoc(docRef, businessInfo);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setBusinessInfo(docSnap.data());
+        if (data.stampSettings) {
+          setStampSettings(data.stampSettings);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading business info:", error);
+    }
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !user?.uid || !authUser) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
+    }
+
+    try {
+      setBusinessInfo((prev) => ({ ...prev, uploading: true }));
+
+      const logoUrl = await uploadLogoToR2(file, authUser);
+
+      setBusinessInfo((prev) => ({
+        ...prev,
+        logoUrl,
+        uploading: false,
+      }));
+
+      const db = getFirestore();
+      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+
+      await setDoc(
+        docRef,
+        {
+          logoUrl,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true },
+      );
+
+      alert("Logo uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      alert("Failed to upload logo: " + error.message);
+      setBusinessInfo((prev) => ({ ...prev, uploading: false }));
+    }
+  };
+
+  const handleSaveBusinessInfo = async () => {
+    if (!user?.uid) return;
+
+    try {
+      const db = getFirestore();
+      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+      await setDoc(docRef, { ...businessInfo, stampSettings });
       alert("Business information saved successfully!");
       setShowSettings(false);
     } catch (error) {
@@ -435,149 +585,192 @@ const CleaningDashboard = () => {
     }
   };
 
-  const handleAddItem = () => {
-    if (!newItem.description || !newItem.qty) return;
-    const rate = Number(newItem.rate) || 0;
-    const qty = Number(newItem.qty);
-    const item = {
-      description: newItem.description,
-      type: newItem.type || "Service",
-      rate,
-      qty,
-      amount: rate * qty,
-    };
-    setItems((prev) => [...prev, item]);
-    setNewItem({ description: "", rate: "", qty: "", type: "Service" });
+  const handlePrint = () => {
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = printStyles;
+    document.head.appendChild(styleSheet);
+
+    window.print();
+
+    setTimeout(() => {
+      document.head.removeChild(styleSheet);
+    }, 1000);
   };
 
-  const handleSaveInvoice = async () => {
-    if (!user?.uid) return;
-    const db = getFirestore();
-    let numberToUse = invoiceNumber;
-
-    if (isQuoteMode) {
-      // Saving as Quote
-      if (!quoteId) {
-        numberToUse = await generateQuoteNumber(user.uid);
-        setInvoiceNumber(numberToUse);
+  const printStyles = `
+    @media print {
+      body * {
+        visibility: hidden !important;
       }
-      const quoteData = {
-        quoteNumber: numberToUse,
-        locked: true,
-        status: "pending",
-        dates: {
-          quoteDate: new Date().toISOString(),
-          validUntil: new Date(
-            Date.now() + 30 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-        },
-        customer: {
-          name: customerName,
-          email: customerEmail,
-          phone: customerPhone,
-          address: customerAddress,
-          customerId,
-        },
-        property: {
-          type: propertyType,
-          size: propertySize,
-          rooms: propertyRooms,
-          bathrooms: propertyBathrooms,
-          floors: propertyFloors,
-          serviceFrequency: serviceFrequency,
-        },
-        items,
-        totals: {
-          subtotal,
-          vat,
-          total,
-        },
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
-
-      if (quoteId) {
-        await updateDoc(doc(db, "users", user.uid, "quotations", quoteId), {
-          ...quoteData,
-          updatedAt: serverTimestamp(),
-        });
-      } else {
-        const ref = await addDoc(
-          collection(db, "users", user.uid, "quotations"),
-          quoteData,
-        );
-        setQuoteId(ref.id);
-        setShowConvertButton(true);
+      
+      #print-area,
+      #print-area * {
+        visibility: visible !important;
       }
-      alert("Quote saved successfully");
-      loadSavedQuotes();
-    } else {
-      // Saving as Invoice
-      if (!invoiceId) {
-        numberToUse = await generateInvoiceNumber(user.uid);
-        setInvoiceNumber(numberToUse);
+      
+      #print-area {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 210mm !important;
+        min-height: 297mm !important;
+        margin: 0 !important;
+        padding: 10mm !important;
+        box-sizing: border-box !important;
+        background: white !important;
+        box-shadow: none !important;
+        transform: none !important;
       }
-      const invoiceData = {
-        invoiceNumber: numberToUse,
-        locked: true,
-        status: "pending",
-        dates: {
-          serviceDate: new Date().toISOString(),
-          completedDate: null,
-        },
-        customer: {
-          name: customerName,
-          email: customerEmail,
-          phone: customerPhone,
-          address: customerAddress,
-          customerId,
-        },
-        property: {
-          type: propertyType,
-          size: propertySize,
-          rooms: propertyRooms,
-          bathrooms: propertyBathrooms,
-          floors: propertyFloors,
-          serviceFrequency: serviceFrequency,
-        },
-        items,
-        totals: {
-          subtotal,
-          vat,
-          total,
-          paid: 0,
-          due: total,
-        },
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
-
-      if (invoiceId) {
-        await updateDoc(doc(db, "users", user.uid, "invoices", invoiceId), {
-          ...invoiceData,
-          updatedAt: serverTimestamp(),
-        });
-      } else {
-        const ref = await addDoc(
-          collection(db, "users", user.uid, "invoices"),
-          invoiceData,
-        );
-        setInvoiceId(ref.id);
+      
+      @page {
+        size: A4 portrait;
+        margin: 0;
       }
-      alert("Invoice saved successfully");
-      loadSavedInvoices();
+      
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        background: white !important;
+      }
+      
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      
+      .logo img {
+        height: 60px;
+        width: auto;
+      }
+      
+      .shadow-lg, .rounded-lg, .shadow-xl, .shadow-2xl {
+        border: none !important;
+        box-shadow: none !important;
+      }
+      
+      table, tr, td, th, div {
+        page-break-inside: avoid !important;
+      }
+      
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
     }
+  `;
+
+  const [items, setItems] = useState([]);
+  const [newItem, setNewItem] = useState({
+    description: "",
+    rate: "",
+    qty: "",
+    serviceType: "Standard Cleaning",
+    taxRate: "15",
+    frequency: "One-time",
+  });
+
+  const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+  const totalTax = items.reduce((sum, item) => sum + item.taxAmount, 0);
+  const total = subtotal + totalTax;
+
+  useEffect(() => {
+    if (!quoteId) {
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+    }
+  }, [total, quoteId]);
+
+  const buildQuotePayload = (numberToUse) => ({
+    quoteNumber: numberToUse,
+    locked: true,
+    status: "pending",
+    documentType: documentType,
+
+    dates: {
+      quoteDate: new Date().toISOString(),
+      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+
+    customer: {
+      name: customerName,
+      email: customerEmail,
+      phone: customerPhone,
+      address: propertyAddress,
+    },
+
+    propertyDetails: {
+      type: propertyType,
+      size: propertySize,
+      rooms: rooms,
+      bathrooms: bathrooms,
+    },
+
+    items,
+
+    totals: {
+      subtotal,
+      tax: totalTax,
+      total,
+      paid: 0,
+      due: total,
+    },
+
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  const handleSaveQuote = async () => {
+    if (!user?.uid) return;
+
+    const db = getFirestore();
+    let numberToUse = quoteNumber;
+
+    if (!quoteId) {
+      numberToUse = await generateQuoteNumber(user.uid, documentType);
+      setQuoteNumber(numberToUse);
+    }
+
+    const quoteData = buildQuotePayload(numberToUse);
+
+    const collectionName = documentType === "quote" ? "quotes" : "invoices";
+
+    if (quoteId) {
+      await updateDoc(doc(db, "users", user.uid, collectionName, quoteId), {
+        ...quoteData,
+        updatedAt: serverTimestamp(),
+      });
+    } else {
+      const ref = await addDoc(
+        collection(db, "users", user.uid, collectionName),
+        quoteData,
+      );
+      setQuoteId(ref.id);
+    }
+
+    alert(
+      `${documentType === "quote" ? "Quote" : "Invoice"} saved successfully`,
+    );
+    loadSavedQuotes();
   };
 
   const handleConvertToInvoice = async () => {
-    if (!user?.uid || !quoteId) {
-      alert("Please save the quote first");
+    if (!user?.uid) return;
+
+    if (!quoteId) {
+      alert("Please save the quote first before converting to invoice");
       return;
     }
 
     if (
       !window.confirm(
-        "Are you sure you want to convert this quote to an invoice?",
+        "Convert this quote to an invoice? This will create a new invoice with the same details.",
       )
     ) {
       return;
@@ -585,522 +778,277 @@ const CleaningDashboard = () => {
 
     try {
       const db = getFirestore();
-      const invoiceNumber = await generateInvoiceNumber(user.uid);
 
-      const invoiceData = {
-        invoiceNumber,
-        locked: true,
-        status: "pending",
-        convertedFromQuote: quoteId,
-        dates: {
-          serviceDate: new Date().toISOString(),
-          completedDate: null,
-        },
-        customer: {
-          name: customerName,
-          email: customerEmail,
-          phone: customerPhone,
-          address: customerAddress,
-          customerId,
-        },
-        property: {
-          type: propertyType,
-          size: propertySize,
-          rooms: propertyRooms,
-          bathrooms: propertyBathrooms,
-          floors: propertyFloors,
-          serviceFrequency: serviceFrequency,
-        },
-        items,
-        totals: {
-          subtotal,
-          vat,
-          total,
-          paid: 0,
-          due: total,
-        },
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
+      const newInvoiceNumber = await generateQuoteNumber(user.uid, "invoice");
 
-      const ref = await addDoc(
+      const invoiceData = buildQuotePayload(newInvoiceNumber);
+      invoiceData.documentType = "invoice";
+      invoiceData.convertedFromQuote = quoteId;
+      invoiceData.convertedFromQuoteNumber = quoteNumber;
+      invoiceData.convertedAt = serverTimestamp();
+
+      const invoiceRef = await addDoc(
         collection(db, "users", user.uid, "invoices"),
         invoiceData,
       );
 
-      // Update quote status
-      await updateDoc(doc(db, "users", user.uid, "quotations", quoteId), {
+      await updateDoc(doc(db, "users", user.uid, "quotes", quoteId), {
+        convertedToInvoice: true,
+        convertedToInvoiceId: invoiceRef.id,
+        convertedToInvoiceNumber: newInvoiceNumber,
+        convertedAt: serverTimestamp(),
         status: "converted",
-        convertedToInvoice: ref.id,
-        updatedAt: serverTimestamp(),
       });
 
-      setIsQuoteMode(false);
-      setInvoiceId(ref.id);
-      setQuoteId(null);
-      setInvoiceNumber(invoiceNumber);
-      setShowConvertButton(false);
+      setDocumentType("invoice");
+      setQuoteId(invoiceRef.id);
+      setQuoteNumber(newInvoiceNumber);
 
-      alert("Quote converted to invoice successfully!");
-      loadSavedInvoices();
+      alert(`Quote successfully converted to Invoice ${newInvoiceNumber}`);
       loadSavedQuotes();
     } catch (error) {
-      console.error("Error converting quote:", error);
+      console.error("Error converting quote to invoice:", error);
       alert("Failed to convert quote to invoice");
     }
   };
 
-  const handleNewInvoice = () => {
-    setActiveView("invoice");
-    setIsQuoteMode(false);
-    setInvoiceId(null);
-    setQuoteId(null);
-    setShowConvertButton(false);
-    setInvoiceNumber("");
-    setCustomerName("Zoey Mor");
-    setCustomerId("CUST-2026-5678");
-    setCustomerEmail("jane.doe@example.com");
-    setCustomerPhone("082 765 4321");
-    setCustomerAddress("456 Oak Avenue, Pretoria, 0002");
-    setPropertyType("Residential");
-    setPropertySize("120");
-    setPropertyRooms("3");
-    setPropertyBathrooms("2");
-    setPropertyFloors("1");
-    setServiceFrequency("Weekly");
-    setItems([]);
-    const loadNewNumber = async () => {
-      if (user?.uid) {
-        const next = await generateInvoiceNumber(user.uid);
-        setInvoiceNumber(next);
-      }
-    };
-    loadNewNumber();
-  };
-
   const handleNewQuote = () => {
-    setActiveView("invoice");
-    setIsQuoteMode(true);
-    setInvoiceId(null);
+    setDocumentType("quote");
+    handleNewDocument();
+  };
+
+  const handleNewInvoice = () => {
+    setDocumentType("invoice");
+    handleNewDocument();
+  };
+
+  const handleNewDocument = () => {
     setQuoteId(null);
-    setShowConvertButton(false);
-    setInvoiceNumber("");
-    setCustomerName("Zoey Mor");
-    setCustomerId("CUST-2026-5678");
-    setCustomerEmail("jane.doe@example.com");
-    setCustomerPhone("082 765 4321");
-    setCustomerAddress("456 Oak Avenue, Pretoria, 0002");
+    setQuoteNumber("");
+    setCustomerName("Johnson Residence");
+    setCustomerEmail("johnson@email.com");
+    setCustomerPhone("+27 82 123 4567");
+    setPropertyAddress("123 Sunset Avenue, Sandton, Johannesburg, 2196");
     setPropertyType("Residential");
-    setPropertySize("120");
-    setPropertyRooms("3");
-    setPropertyBathrooms("2");
-    setPropertyFloors("1");
-    setServiceFrequency("Weekly");
+    setPropertySize("200");
+    setRooms("4");
+    setBathrooms("2");
     setItems([]);
+
     const loadNewNumber = async () => {
       if (user?.uid) {
-        const next = await generateQuoteNumber(user.uid);
-        setInvoiceNumber(next);
+        const nextQuote = await generateQuoteNumber(user.uid, documentType);
+        setQuoteNumber(nextQuote);
       }
     };
     loadNewNumber();
   };
-const handleSavePDFAlternative = async () => {
-  const element = document.getElementById('print-area');
-  
-  if (!element) {
-    alert('Invoice preview not found');
-    return;
-  }
 
-  try {
-    // Dynamic imports
-    const html2canvas = (await import('html2canvas')).default;
-    const { jsPDF } = await import('jspdf');
-    
-    // Capture the element as canvas
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff'
-    });
-    
-    // Convert to PDF
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-    
-    const imgWidth = 210; // A4 width in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-    pdf.save(`${isQuoteMode ? 'Quote' : 'Invoice'}_${invoiceNumber || 'draft'}.pdf`);
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    alert('Failed to generate PDF. Please try again.');
-  }
-};
- const handlePrint = () => {
-  // Add print styles to document
-  const styleSheet = document.createElement("style");
-  styleSheet.textContent = printStyles;
-  document.head.appendChild(styleSheet);
-  
-  // Trigger print
-  window.print();
-  
-  // Clean up (remove after print dialog closes)
-  setTimeout(() => {
-    document.head.removeChild(styleSheet);
-  }, 1000);
-};
-const printStyles = `
-  @media print {
-    /* Hide everything except the print area */
-    body * {
-      visibility: hidden !important;
-    }
-    
-    #print-area,
-    #print-area * {
-      visibility: visible !important;
-    }
-    
-    /* Reset page margins and size */
-    @page {
-      size: A4 portrait;
-      margin: 0;
-    }
-    
-    html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-      width: 210mm !important;
-      height: 297mm !important;
-      background: white !important;
-    }
-    
-    /* Position print area to fill the page */
-    #print-area {
-      position: absolute !important;
-      left: 0 !important;
-      top: 0 !important;
-      width: 210mm !important;
-      min-height: 297mm !important;
-      margin: 0 !important;
-      padding: 10mm !important;
-      box-sizing: border-box !important;
-      background: white !important;
-      box-shadow: none !important;
-    }
-    
-    /* Ensure colors print correctly */
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      color-adjust: exact !important;
-    }
-    
-    /* Remove any borders or shadows */
-    .shadow-lg, .rounded-lg {
-      border: none !important;
-      box-shadow: none !important;
-    }
-    
-    /* Prevent page breaks inside elements */
-    table, tr, td, th, div {
-      page-break-inside: avoid !important;
-    }
-  }
-`;
   const handleLogout = async () => {
     const auth = getAuth();
     try {
       await signOut(auth);
+      console.log("Logged out successfully");
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
 
-  const loadInvoiceForExport = async () => {
-    if (!user?.uid) return null;
-    const db = getFirestore();
-
-    if (isQuoteMode && quoteId) {
-      const snap = await getDoc(
-        doc(db, "users", user.uid, "quotations", quoteId),
-      );
-      return snap.exists() ? snap.data() : null;
-    } else if (invoiceId) {
-      const snap = await getDoc(
-        doc(db, "users", user.uid, "invoices", invoiceId),
-      );
-      return snap.exists() ? snap.data() : null;
-    }
-    return null;
-  };
-
-  const handleSavePDF = async () => {
-    const savedDoc = await loadInvoiceForExport();
-    if (!savedDoc) {
-      alert(
-        `Please save the ${isQuoteMode ? "quote" : "invoice"} before exporting PDF`,
-      );
-      return;
-    }
-
-    if (isQuoteMode) {
-      setInvoiceNumber(savedDoc.quoteNumber);
-    } else {
-      setInvoiceNumber(savedDoc.invoiceNumber);
-    }
-
-    setItems(savedDoc.items);
-    setCustomerName(savedDoc.customer.name);
-    setCustomerEmail(savedDoc.customer.email);
-    setCustomerPhone(savedDoc.customer.phone);
-    setCustomerAddress(savedDoc.customer.address);
-    setPropertyType(savedDoc.property.type);
-    setPropertySize(savedDoc.property.size);
-    setPropertyRooms(savedDoc.property.rooms);
-    setTimeout(() => window.print(), 300);
-  };
-
   return (
-    <div className="flex h-screen bg-gray-300">
+    <div className="flex h-screen w-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 overflow-hidden">
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         ></div>
       )}
 
-      {/* Collapsed Sidebar (Icon Only) */}
+      {/* Collapsed Sidebar */}
       <div
         className={`${
           sidebarOpen ? "hidden" : "block"
-        } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
+        } fixed z-40 w-16 md:w-20 bg-gradient-to-b from-cyan-900 via-cyan-800 to-cyan-900 border-r border-cyan-700/50 h-full print:hidden transition-all duration-300 shadow-2xl`}
       >
-        <div className="flex flex-col items-center py-4 space-y-4">
-          {/* Toggle Button */}
+        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
+            className="group p-2 md:p-3 text-cyan-400 hover:text-white hover:bg-gradient-to-r hover:from-cyan-600 hover:to-cyan-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-cyan-500/50 hover:scale-110"
             title="Expand Sidebar"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
           </button>
 
-          {/* Logo */}
-          <div className="w-10 h-10 mb-2 relative group">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
-            <img
-              src={logo}
-              alt="Logo"
-              className="relative w-full h-full object-contain rounded-2xl shadow-lg"
-            />
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
+            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-xl p-1 shadow-lg">
+              <Sparkles className="w-full h-full text-white p-1.5" />
+            </div>
           </div>
 
-          <div className="w-10 border-t border-slate-600"></div>
-
-          {/* Icon Navigation */}
-          <div className="flex flex-col items-center space-y-3 w-full px-2">
+          <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
             <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
               title="Home"
             >
-              <Home className="w-5 h-5" />
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
             </button>
 
             <button
               onClick={() => setShowSettings(true)}
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
+              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
               title="Settings"
             >
-              <Settings className="w-5 h-5" />
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-teal-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <Settings className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:rotate-90 transition-transform duration-500" />
             </button>
 
-            <button
-              onClick={() => setActiveView("financial-overview")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Business Overview"
-            >
-              <TrendingUp className="w-5 h-5" />
-            </button>
+            {!isMobile && (
+              <>
+                <button
+                  onClick={() => setActiveView("financial-overview")}
+                  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  title="Financial Dashboard"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <TrendingUp className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                </button>
 
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Invoices"
-            >
-              <ClipboardList className="w-5 h-5" />
-            </button>
+                <button
+                  onClick={() => {
+                    handleNewInvoice();
+                    setActiveView("quote");
+                  }}
+                  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  title="Quotes & Invoices"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <Receipt className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                </button>
 
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Quotes"
-            >
-              <Receipt className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Customers"
-            >
-              <Users className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Properties"
-            >
-              <Building className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={() => setActiveView("templates")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Invoice Templates"
-            >
-              <FileText className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Supplies"
-            >
-              <Package className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Analytics"
-            >
-              <BarChart3 className="w-5 h-5" />
-            </button>
+                <button
+                  onClick={() => setShowCustomersListModal(true)}
+                  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  title="Clients"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <Users className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        {/* User Icon at Bottom */}
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">
-              {user?.name?.charAt(0) || "U"}
-            </span>
+        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
+            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Expanded Sidebar (Full Width) */}
+      {/* Expanded Sidebar */}
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl`}
+        } fixed z-50 w-64 md:w-72 bg-gradient-to-b from-cyan-900 via-cyan-800 to-cyan-900 border-r border-cyan-700/50 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
       >
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-8">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <img
-                src={logo}
-                alt="Business Logo"
-                className="relative w-20 h-16 object-contain rounded-2xl  shadow-lg"
-              />
+        <div className="p-4 md:p-6">
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <div className="flex items-center space-x-3 md:space-x-4">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
+                <div className="relative bg-gradient-to-br from-cyan-500 to-teal-600 p-1 rounded-xl shadow-lg">
+                  <Sparkles className="w-12 h-10 md:w-16 md:h-12 text-white p-2" />
+                </div>
+              </div>
             </div>
-            {/* Close Button */}
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
+              className="group p-2 text-cyan-400 hover:text-white hover:bg-cyan-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
               title="Collapse Sidebar"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
           </div>
 
-          <nav className="space-y-1">
-            <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-              <Home className="w-5 h-5" />
-              <span className="text-sm font-medium">Home</span>
+          <nav className="space-y-1.5 md:space-y-2">
+            <div className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-cyan-600/20 hover:to-cyan-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30">
+              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-xs md:text-sm font-semibold">Home</span>
             </div>
+
             <div
               onClick={() => setShowSettings(true)}
-              className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
+              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-teal-600/20 hover:to-teal-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-teal-500/30"
             >
-              <Settings className="w-5 h-5" />
-              <span className="text-sm font-medium">Settings</span>
+              <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
+              <span className="text-xs md:text-sm font-semibold">Settings</span>
             </div>
 
-            <div className="pt-4 mt-4 border-t border-slate-700/50">
+            <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-cyan-700/50">
               <div
                 onClick={() => setActiveView("financial-overview")}
-                className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200"
+                className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
               >
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-sm font-medium">Business Overview</span>
+                <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                <span className="text-xs md:text-sm font-semibold truncate">
+                  Financial Dashboard
+                </span>
               </div>
 
-              {/* Invoices Section */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3">
-                    <ClipboardList className="w-5 h-5" />
-                    <span className="text-sm font-medium">Invoices</span>
+              <div className="mt-2 md:mt-3">
+                <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30">
+                  <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+                    <Receipt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Quotes & Invoices
+                    </span>
                   </div>
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="w-4 h-4 flex-shrink-0 group-hover:translate-y-0.5 transition-transform duration-300" />
                 </div>
 
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+                <div className="ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-cyan-700/50 pl-3 md:pl-4">
                   <div
-                    onClick={handleNewInvoice}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                    onClick={() => {
+                      handleNewQuote();
+                      setActiveView("quote");
+                      if (isMobile) setSidebarOpen(false);
+                    }}
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-cyan-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
                   >
-                    Create Invoice
+                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+                    <span className="truncate">Create Quote</span>
                   </div>
                   <div
-                    onClick={() => setShowInvoicesList(!showInvoicesList)}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                    onClick={() => {
+                      handleNewInvoice();
+                      setActiveView("quote");
+                      if (isMobile) setSidebarOpen(false);
+                    }}
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-cyan-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+                    <span className="truncate">Create Invoice</span>
+                  </div>
+                  <div
+                    onClick={() => {
+                      setShowQuotesList(!showQuotesList);
+                      if (isMobile) setSidebarOpen(false);
+                    }}
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-cyan-700/30 rounded-lg cursor-pointer transition-all duration-300"
                   >
                     <div className="flex items-center justify-between">
-                      <span>All Invoices</span>
-                      <span className="text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        {savedInvoices.length}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200">
-                    Scheduled
-                  </div>
-                </div>
-              </div>
-
-              {/* Quotes Section */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3">
-                    <Receipt className="w-5 h-5" />
-                    <span className="text-sm font-medium">Quotes</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-                  <div
-                    onClick={handleNewQuote}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    Create Quote
-                  </div>
-                  <div
-                    onClick={() => setShowQuotesList(!showQuotesList)}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>All Quotes</span>
-                      <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+                        <span className="truncate">
+                          All {documentType === "quote" ? "Quotes" : "Invoices"}
+                        </span>
+                      </div>
+                      <span className="bg-gradient-to-r from-cyan-600 to-teal-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
                         {savedQuotes.length}
                       </span>
                     </div>
@@ -1108,30 +1056,41 @@ const printStyles = `
                 </div>
               </div>
 
-              {/* Customers Section */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3">
-                    <Users className="w-5 h-5" />
-                    <span className="text-sm font-medium">Customers</span>
+              <div className="mt-2 md:mt-3">
+                <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30">
+                  <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+                    <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Clients
+                    </span>
                   </div>
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="w-4 h-4 flex-shrink-0 group-hover:translate-y-0.5 transition-transform duration-300" />
                 </div>
 
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+                <div className="ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-cyan-700/50 pl-3 md:pl-4">
                   <div
-                    onClick={handleAddNewCustomer}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                    onClick={() => {
+                      handleAddNewCustomer();
+                      if (isMobile) setSidebarOpen(false);
+                    }}
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-cyan-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
                   >
-                    Add Customer
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+                    <span className="truncate">Add Client</span>
                   </div>
                   <div
-                    onClick={() => setShowCustomersListModal(true)}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                    onClick={() => {
+                      setShowCustomersListModal(true);
+                      if (isMobile) setSidebarOpen(false);
+                    }}
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-cyan-700/30 rounded-lg cursor-pointer transition-all duration-300"
                   >
                     <div className="flex items-center justify-between">
-                      <span>All Customers</span>
-                      <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+                        <span className="truncate">All Clients</span>
+                      </div>
+                      <span className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
                         {savedCustomers.length}
                       </span>
                     </div>
@@ -1139,228 +1098,262 @@ const printStyles = `
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2">
-                <Building className="w-5 h-5" />
-                <span className="text-sm font-medium">Properties</span>
-              </div>
+              {!isMobile && (
+                <>
+                  <div
+                    onClick={() => setActiveView("schedule")}
+                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
+                  >
+                    <Calendar className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Schedule
+                    </span>
+                  </div>
 
-              <div
-                onClick={() => setActiveView("templates")}
-                className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
-              >
-                <FileText className="w-5 h-5" />
-                <span className="text-sm font-medium">Invoice Templates</span>
-              </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                <Package className="w-5 h-5" />
-                <span className="text-sm font-medium">Supplies</span>
-              </div>
-
-              <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                <div className="flex items-center space-x-3">
-                  <BarChart3 className="w-5 h-5" />
-                  <span className="text-sm font-medium">Analytics</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
+                  <div
+                    onClick={() => setActiveView("reports")}
+                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
+                  >
+                    <BarChart3 className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Reports
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </nav>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">
-                {user?.name?.charAt(0) || "U"}
-              </span>
+        <div className="sticky bottom-0 left-0 right-0 p-4 md:p-6 border-t border-cyan-700/50 bg-gradient-to-t from-cyan-900 to-transparent backdrop-blur-sm">
+          <div className="flex items-center space-x-2 md:space-x-3">
+            <div className="relative group flex-shrink-0">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
+              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
             </div>
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-white">
+            <div className="flex-1 min-w-0">
+              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent truncate">
                 {user?.name || "User"}
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-cyan-400 truncate">
                 {user?.email || "email@example.com"}
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 rounded-lg transition-all duration-200"
-              title="Logout"
+              className="group text-cyan-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
             </button>
           </div>
         </div>
       </div>
 
+      {/* Main Content Area */}
       <div
-        className={`flex-1 transition-all duration-300 ml-16 lg:ml-64`}
+        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-16 md:ml-20"}`}
       >
-        <div className="flex-1 overflow-auto">
-          <div className="sticky top-0 z-40 flex flex-col">
-            <div className="bg-gray-300 backdrop-blur-xl border-b border-gray-200/50 px-4 lg:px-8 py-5 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="p-2.5 hover:bg-gray-100 rounded-xl transition-all duration-200 hover:scale-105 lg:hidden"
-                  >
-                    <Menu className="w-5 h-5" />
-                  </button>
+        <div className="flex flex-col h-screen">
+          {/* Header */}
+          <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-300 lg:hidden flex-shrink-0"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
 
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-2 h-2 rounded-full animate-pulse ${
-                        isQuoteMode ? "bg-purple-500" : "bg-blue-500"
-                      }`}
-                    ></div>
-                    <h1 className="text-lg lg:text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">
-                      {isQuoteMode ? "Quote" : "Invoice"} #
-                      {invoiceNumber || "— not saved yet —"}
+                <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-xl shadow-lg flex-shrink-0">
+                    <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-cyan-800 to-teal-600 bg-clip-text text-transparent truncate">
+                      {documentType === "quote" ? "Quote" : "Invoice"} #{quoteNumber || "—"}
                     </h1>
+                    <p className="text-xs text-slate-500 hidden md:block truncate">
+                      Create and manage cleaning {documentType === "quote" ? "quotes" : "invoices"}
+                    </p>
                   </div>
                 </div>
+              </div>
 
-                {/* Enhanced Action Buttons */}
-                <div className="hidden lg:flex items-center gap-2">
-                  {showConvertButton && (
-                    <button
-                      onClick={handleConvertToInvoice}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium"
-                    >
-                      <RefreshCw className="w-4 h-4" />
-                      Convert to Invoice
-                    </button>
-                  )}
-                  <button className="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 hover:scale-105 font-medium">
-                    <CheckSquare className="w-4 h-4" />
-                    <span>Complete</span>
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 hover:scale-105 font-medium">
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
+              {/* Desktop Action Buttons */}
+              <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
+                {documentType === "quote" && quoteId && (
                   <button
-                    onClick={handleSaveInvoice}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium"
+                    onClick={handleConvertToInvoice}
+                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap"
                   >
-                    Save {isQuoteMode ? "Quote" : "Invoice"}
+                    <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+                    Convert to Invoice
                   </button>
-                  <button
-                    onClick={isQuoteMode ? handleNewQuote : handleNewInvoice}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium"
-                  >
-                    <Plus className="w-4 h-4" />
-                    New
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium">
-                    <Send className="w-4 h-4" />
-                    <span>Send</span>
-                  </button>
-                  <button
-                    onClick={handleSavePDFAlternative}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium"
-                  >
-                    <Download className="w-4 h-4" />
-                    PDF
-                  </button>
-                  <button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-xl hover:from-slate-700 hover:to-slate-800 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 font-medium"
-                  >
-                    <Printer className="w-4 h-4" />
-                    Print
-                  </button>
-                </div>
+                )}
+
+                <button
+                  onClick={handlePrint}
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"
+                >
+                  <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                  Print
+                </button>
+
+                <button
+                  onClick={documentType === "quote" ? handleNewQuote : handleNewInvoice}
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
+                >
+                  <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
+                  New
+                </button>
+
+                <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-xl hover:from-cyan-700 hover:to-teal-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-cyan-500/50 hover:scale-105 whitespace-nowrap">
+                  <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  <span>Send</span>
+                </button>
+
+                <button
+                  onClick={handleSavePDF}
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap"
+                >
+                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                  Save PDF
+                </button>
+
+                <button
+                  onClick={handleSaveQuote}
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap"
+                >
+                  <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                  Save
+                </button>
 
                 <button
                   onClick={handleLogout}
-                  className="lg:hidden p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-lg"
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                  Logout
                 </button>
               </div>
-            </div>
 
-            <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {showConvertButton && (
-                  <button
-                    onClick={handleConvertToInvoice}
-                    className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-gray-800 rounded-lg hover:bg-purple-700 whitespace-nowrap text-sm"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                    <span>To Invoice</span>
-                  </button>
-                )}
-                <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
-                  <CheckSquare className="w-4 h-4" />
-                  <span>Complete</span>
-                </button>
-                <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
-                  <Edit className="w-4 h-4" />
-                  <span>Edit</span>
-                </button>
-                <button className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
-                  <Send className="w-4 h-4" />
-                  <span>Send</span>
-                </button>
-                <button
-                  onClick={handleSavePDF}
-                  className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Save PDF</span>
-                </button>
-                <button
-                  onClick={handlePrint}
-                  className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>Print</span>
-                </button>
-              </div>
+              {/* Mobile Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
+              >
+                <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
             </div>
-
-           
           </div>
 
-          <div className="p-4 lg:p-6">
+          {/* Mobile Action Bar */}
+          <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
+            <div className="flex gap-2 min-w-max pb-1">
+              {documentType === "quote" && quoteId && (
+                <button
+                  onClick={handleConvertToInvoice}
+                  className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                >
+                  <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
+                  <span>To Invoice</span>
+                </button>
+              )}
+              <button
+                onClick={handleProcessPayment}
+                disabled={!quoteId}
+                className={`group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-lg md:rounded-xl whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95 ${
+                  !quoteId
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:from-emerald-700 hover:to-emerald-800"
+                }`}
+              >
+                <CreditCard className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                Payment
+              </button>
+              <button
+                onClick={handleSaveQuote}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-amber-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+              >
+                <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                Save
+              </button>
+
+              <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-lg md:rounded-xl hover:from-cyan-700 hover:to-teal-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                <span>Send</span>
+              </button>
+
+              <button
+                onClick={handleSavePDF}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+              >
+                <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                <span>PDF</span>
+              </button>
+
+              <button
+                onClick={handlePrint}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95"
+              >
+                <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                <span>Print</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 overflow-y-auto">
             {/* Settings Modal */}
             {showSettings && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-                  <div className="p-4 border-b flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">Business Settings</h2>
-                    <button
-                      onClick={() => setShowSettings(false)}
-                      className="text-gray-500 hover:text-gray-700 text-2xl"
-                    >
-                      ✕
-                    </button>
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
+                <div className="bg-white rounded-xl md:rounded-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
+                  <div className="p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-cyan-50 to-teal-50 flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 md:space-x-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-cyan-600 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <Settings className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                        </div>
+                        <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                          Business Settings
+                        </h2>
+                      </div>
+                      <button
+                        onClick={() => setShowSettings(false)}
+                        className="group p-1.5 md:p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300"
+                      >
+                        <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="overflow-auto p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Business Logo
+                  <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-50 to-white flex-1">
+                    <div className="space-y-4 md:space-y-6">
+                      {/* Logo Upload */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-3">
+                          Company Logo
                         </label>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
                           {businessInfo.logoUrl ? (
-                            <img
-                              src={businessInfo.logoUrl}
-                              alt="Business Logo"
-                              className="w-24 h-24 object-contain border rounded-lg"
-                            />
+                            <div className="relative group">
+                              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
+                              <img
+                                src={businessInfo.logoUrl}
+                                alt="Company Logo"
+                                className="relative w-20 h-20 md:w-24 md:h-24 object-contain border-2 border-slate-200 rounded-xl shadow-lg"
+                              />
+                            </div>
                           ) : (
-                            <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
-                              <Upload className="w-8 h-8 text-gray-400" />
+                            <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-cyan-400 transition-all duration-300">
+                              <Upload className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />
                             </div>
                           )}
 
-                          <div className="flex-1">
+                          <div className="flex-1 text-center sm:text-left">
                             <input
                               type="file"
                               accept="image/*"
@@ -1370,22 +1363,22 @@ const printStyles = `
                             />
                             <label
                               htmlFor="logo-upload"
-                              className="inline-block px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer"
+                              className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-lg md:rounded-xl hover:from-cyan-700 hover:to-teal-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
                             >
-                              {businessInfo.logoUrl
-                                ? "Change Logo"
-                                : "Upload Logo"}
+                              {businessInfo.logoUrl ? "Change Logo" : "Upload Logo"}
                             </label>
-                            <p className="text-xs text-gray-500 mt-2">
-                              Recommended: Square image, max 5MB
+                            <p className="text-xs text-slate-500 mt-2 md:mt-3 flex items-center justify-center sm:justify-start space-x-1">
+                              <span className="w-1 h-1 bg-cyan-500 rounded-full"></span>
+                              <span>Recommended: Square image, max 5MB</span>
                             </p>
                           </div>
                         </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Business Name
+                      {/* Business Information Fields */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Company Name
                         </label>
                         <input
                           type="text"
@@ -1396,315 +1389,52 @@ const printStyles = `
                               businessName: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-2 border rounded-lg"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-300 font-medium text-sm md:text-base"
+                          placeholder="Sparkle Clean Services"
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Address Line 1
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Registration Number
                         </label>
                         <input
                           type="text"
-                          value={businessInfo.addressLine1}
+                          value={businessInfo.registrationNumber}
                           onChange={(e) =>
                             setBusinessInfo({
                               ...businessInfo,
-                              addressLine1: e.target.value,
+                              registrationNumber: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-2 border rounded-lg"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="2024/123456/07"
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Address Line 2
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          VAT Number
                         </label>
                         <input
                           type="text"
-                          value={businessInfo.addressLine2}
+                          value={businessInfo.vatNumber}
                           onChange={(e) =>
                             setBusinessInfo({
                               ...businessInfo,
-                              addressLine2: e.target.value,
+                              vatNumber: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-2 border rounded-lg"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="4123456789"
                         />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            City
-                          </label>
-                          <input
-                            type="text"
-                            value={businessInfo.city}
-                            onChange={(e) =>
-                              setBusinessInfo({
-                                ...businessInfo,
-                                city: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2 border rounded-lg"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            Postal Code
-                          </label>
-                          <input
-                            type="text"
-                            value={businessInfo.postalCode}
-                            onChange={(e) =>
-                              setBusinessInfo({
-                                ...businessInfo,
-                                postalCode: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2 border rounded-lg"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Primary Phone
-                        </label>
-                        <input
-                          type="tel"
-                          value={businessInfo.primaryPhone}
-                          onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              primaryPhone: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Secondary Phone (Optional)
-                        </label>
-                        <input
-                          type="tel"
-                          value={businessInfo.secondaryPhone}
-                          onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              secondaryPhone: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
-                      </div>
-
-                      <div className="border-t pt-4 mt-6">
-                        <h3 className="text-lg font-semibold mb-4">
-                          Bank Details
-                        </h3>
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Bank Name
-                            </label>
-                            <input
-                              type="text"
-                              value={businessInfo.bankName}
-                              onChange={(e) =>
-                                setBusinessInfo({
-                                  ...businessInfo,
-                                  bankName: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Account Holder
-                            </label>
-                            <input
-                              type="text"
-                              value={businessInfo.accountHolder}
-                              onChange={(e) =>
-                                setBusinessInfo({
-                                  ...businessInfo,
-                                  accountHolder: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Account Number
-                            </label>
-                            <input
-                              type="text"
-                              value={businessInfo.accountNumber}
-                              onChange={(e) =>
-                                setBusinessInfo({
-                                  ...businessInfo,
-                                  accountNumber: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Branch Code
-                            </label>
-                            <input
-                              type="text"
-                              value={businessInfo.branchCode}
-                              onChange={(e) =>
-                                setBusinessInfo({
-                                  ...businessInfo,
-                                  branchCode: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="border-t pt-6 mt-6">
-                        <h3 className="text-lg font-semibold mb-4">
-                          📋 Invoice Stamp Settings
-                        </h3>
-                        <div className="space-y-4">
-                          <div>
-                            <label className="flex items-center space-x-2 mb-4">
-                              <input
-                                type="checkbox"
-                                checked={stampSettings.enabled}
-                                onChange={(e) =>
-                                  setStampSettings({
-                                    ...stampSettings,
-                                    enabled: e.target.checked,
-                                  })
-                                }
-                                className="w-4 h-4 rounded"
-                              />
-                              <span className="text-sm font-medium">
-                                Show approval stamp on invoices and quotes
-                              </span>
-                            </label>
-                          </div>
-
-                          {stampSettings.enabled && (
-                            <>
-                              <div>
-                                <label className="block text-sm font-medium mb-2">
-                                  Stamp Text
-                                </label>
-                                <input
-                                  type="text"
-                                  value={stampSettings.text}
-                                  onChange={(e) =>
-                                    setStampSettings({
-                                      ...stampSettings,
-                                      text: e.target.value.toUpperCase(),
-                                    })
-                                  }
-                                  className="w-full px-4 py-2 border rounded-lg uppercase"
-                                  placeholder="APPROVED"
-                                  maxLength={15}
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Max 15 characters
-                                </p>
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium mb-2">
-                                  Stamp Color
-                                </label>
-                                <select
-                                  value={stampSettings.color}
-                                  onChange={(e) =>
-                                    setStampSettings({
-                                      ...stampSettings,
-                                      color: e.target.value,
-                                    })
-                                  }
-                                  className="w-full px-4 py-2 border rounded-lg"
-                                >
-                                  <option value="#d32f2f">
-                                    🔴 Red (Traditional)
-                                  </option>
-                                  <option value="#1976d2">
-                                    🔵 Blue (Professional)
-                                  </option>
-                                  <option value="#388e3c">
-                                    🟢 Green (Approved)
-                                  </option>
-                                  <option value="#7b1fa2">
-                                    🟣 Purple (Premium)
-                                  </option>
-                                  <option value="#000000">
-                                    ⚫ Black (Formal)
-                                  </option>
-                                  <option value="#f57c00">
-                                    🟠 Orange (Attention)
-                                  </option>
-                                </select>
-                              </div>
-
-                              <div>
-                                <label className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={stampSettings.showDate}
-                                    onChange={(e) =>
-                                      setStampSettings({
-                                        ...stampSettings,
-                                        showDate: e.target.checked,
-                                      })
-                                    }
-                                    className="w-4 h-4 rounded"
-                                  />
-                                  <span className="text-sm font-medium">
-                                    Include date on stamp
-                                  </span>
-                                </label>
-                              </div>
-
-                              <div className="mt-4 p-6 bg-gray-800 rounded-lg border-2 border-dashed border-gray-300">
-                                <p className="text-sm font-medium mb-4 text-center text-gray-600">
-                                  Preview:
-                                </p>
-                                <div className="flex justify-center">
-                                  <SignatureStamp
-                                    text={stampSettings.text}
-                                    color={stampSettings.color}
-                                    showDate={stampSettings.showDate}
-                                    rotation={-5}
-                                    size="medium"
-                                  />
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
                       </div>
 
                       <button
                         onClick={handleSaveBusinessInfo}
-                        className="w-full bg-gray-50 text-gray-800 py-3 rounded-lg hover:bg-blue-700"
+                        className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 text-white py-4 rounded-xl hover:from-cyan-700 hover:to-teal-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
                       >
-                        Save Business Information
+                        ✨ Save Business Information
                       </button>
                     </div>
                   </div>
@@ -1712,7 +1442,6 @@ const printStyles = `
               </div>
             )}
 
-            {/* Customer Modals */}
             <CustomersListModal
               showModal={showCustomersListModal}
               setShowModal={setShowCustomersListModal}
@@ -1721,6 +1450,7 @@ const printStyles = `
               onEditCustomer={handleEditCustomer}
               onAddNewCustomer={handleAddNewCustomer}
             />
+
             <CustomerModal
               showModal={showCustomerModal}
               setShowModal={setShowCustomerModal}
@@ -1728,329 +1458,93 @@ const printStyles = `
               onCustomerSaved={handleCustomerSaved}
             />
 
-            {/* Invoices List Modal */}
-            {showInvoicesList && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-                  <div className="p-4 border-b flex items-center justify-between bg-gray-50">
-                    <h2 className="text-xl font-semibold text-gray-800">
-                      Saved Invoices
-                    </h2>
-                    <button
-                      onClick={() => setShowInvoicesList(false)}
-                      className="text-gray-500 hover:text-gray-700 text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div className="overflow-auto flex-1 p-4">
-                    {savedInvoices.length === 0 ? (
-                      <div className="flex items-center justify-center h-64">
-                        <div className="text-center">
-                          <p className="text-gray-500 text-lg">
-                            No saved invoices yet
-                          </p>
-                          <p className="text-gray-400 text-sm mt-2">
-                            Create your first invoice to get started
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full border-collapse bg-white min-w-[800px]">
-                          <thead>
-                            <tr className="bg-gray-800 text-white">
-                              <th className="text-left py-3 px-4 font-semibold text-sm">
-                                Invoice #
-                              </th>
-                              <th className="text-left py-3 px-4 font-semibold text-sm">
-                                Customer
-                              </th>
-                              <th className="text-left py-3 px-4 font-semibold text-sm">
-                                Property
-                              </th>
-                              <th className="text-left py-3 px-4 font-semibold text-sm">
-                                Service Date
-                              </th>
-                              <th className="text-left py-3 px-4 font-semibold text-sm">
-                                Frequency
-                              </th>
-                              <th className="text-right py-3 px-4 font-semibold text-sm">
-                                Amount
-                              </th>
-                              <th className="text-center py-3 px-4 font-semibold text-sm">
-                                Status
-                              </th>
-                              <th className="text-center py-3 px-4 font-semibold text-sm">
-                                Actions
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {savedInvoices.map((inv, index) => (
-                              <tr
-                                key={inv.id}
-                                className={`border-b border-gray-200 hover:bg-gray-50 transition-colors ${
-                                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                                }`}
-                              >
-                                <td className="py-3 px-4">
-                                  <span className="font-semibold text-gray-900">
-                                    {inv.invoiceNumber || "N/A"}
-                                  </span>
-                                </td>
-                                <td className="py-3 px-4">
-                                  <div className="flex flex-col">
-                                    <span className="text-sm font-medium text-gray-900">
-                                      {inv.customer?.name || "N/A"}
-                                    </span>
-                                    {inv.customer?.email && (
-                                      <span className="text-xs text-gray-500 mt-0.5">
-                                        {inv.customer.email}
-                                      </span>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4">
-                                  <div className="flex flex-col">
-                                    <span className="text-sm text-gray-900">
-                                      {inv.property?.type || "N/A"}
-                                    </span>
-                                    {inv.property?.size && (
-                                      <span className="text-xs text-gray-500 mt-0.5">
-                                        {inv.property.size}m²
-                                      </span>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4 text-sm text-gray-700">
-                                  {inv.dates?.serviceDate
-                                    ? new Date(
-                                        inv.dates.serviceDate,
-                                      ).toLocaleDateString("en-ZA")
-                                    : "N/A"}
-                                </td>
-                                <td className="py-3 px-4 text-sm text-gray-700">
-                                  {inv.property?.serviceFrequency || "N/A"}
-                                </td>
-                                <td className="py-3 px-4 text-right">
-                                  <span className="font-bold text-blue-600 text-base">
-                                    R{inv.totals?.total?.toFixed(2) || "0.00"}
-                                  </span>
-                                </td>
-                                <td className="py-3 px-4">
-                                  <div className="flex justify-center">
-                                    <span
-                                      className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
-                                        inv.status === "completed"
-                                          ? "bg-green-500"
-                                          : inv.status === "paid"
-                                            ? "bg-green-500"
-                                            : inv.status === "sent"
-                                              ? "bg-blue-500"
-                                              : inv.status === "pending"
-                                                ? "bg-blue-500"
-                                                : inv.status === "overdue"
-                                                  ? "bg-red-500"
-                                                  : inv.status === "draft"
-                                                    ? "bg-gray-500"
-                                                    : "bg-gray-500"
-                                      }`}
-                                    >
-                                      {inv.status || "unknown"}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4">
-                                  <div className="flex justify-center gap-2">
-                                    <button
-                                      onClick={() => loadInvoice(inv)}
-                                      className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors text-sm font-medium"
-                                    >
-                                      Load
-                                    </button>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        // Add view/preview functionality here
-                                        console.log("View invoice:", inv);
-                                      }}
-                                      className="px-3 py-1.5 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors text-sm font-medium"
-                                    >
-                                      View
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+            {showPaymentModal && selectedQuoteForPayment && (
+              <PaymentProcessor
+                showModal={showPaymentModal}
+                setShowModal={setShowPaymentModal}
+                invoice={selectedQuoteForPayment}
+                onPaymentComplete={handlePaymentComplete}
+                user={user}
+                businessInfo={businessInfo}
+              />
             )}
 
-            {/* Quotes List Modal */}
             {showQuotesList && (
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-                  <div className="p-4 border-b flex items-center justify-between bg-gray-50">
-                    <h2 className="text-xl font-semibold text-gray-800">
-                      Saved Quotes
+                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+                  <div className="p-4 border-b flex items-center justify-between">
+                    <h2 className="text-xl font-semibold">
+                      Saved {documentType === "quote" ? "Quotes" : "Invoices"}
                     </h2>
                     <button
                       onClick={() => setShowQuotesList(false)}
-                      className="text-gray-500 hover:text-gray-700 text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
+                      className="text-gray-500 hover:text-gray-700"
                     >
                       ✕
                     </button>
                   </div>
-                  <div className="overflow-auto flex-1 p-4">
+
+                  <div className="overflow-auto p-4">
                     {savedQuotes.length === 0 ? (
-                      <div className="flex items-center justify-center h-64">
-                        <div className="text-center">
-                          <p className="text-gray-500 text-lg">
-                            No saved quotes yet
-                          </p>
-                          <p className="text-gray-400 text-sm mt-2">
-                            Create your first quote to get started
-                          </p>
-                        </div>
+                      <div className="text-center py-8 text-gray-500">
+                        No saved {documentType === "quote" ? "quotes" : "invoices"} yet
                       </div>
                     ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full border-collapse bg-white min-w-[800px]">
-                          <thead>
-                            <tr className="bg-gray-800 text-white">
-                              <th className="text-left py-3 px-4 font-semibold text-sm">
-                                Quote #
-                              </th>
-                              <th className="text-left py-3 px-4 font-semibold text-sm">
-                                Customer
-                              </th>
-                              <th className="text-left py-3 px-4 font-semibold text-sm">
-                                Property
-                              </th>
-                              <th className="text-left py-3 px-4 font-semibold text-sm">
-                                Quote Date
-                              </th>
-                              <th className="text-left py-3 px-4 font-semibold text-sm">
-                                Frequency
-                              </th>
-                              <th className="text-right py-3 px-4 font-semibold text-sm">
-                                Amount
-                              </th>
-                              <th className="text-center py-3 px-4 font-semibold text-sm">
-                                Status
-                              </th>
-                              <th className="text-center py-3 px-4 font-semibold text-sm">
-                                Actions
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {savedQuotes.map((quote, index) => (
-                              <tr
-                                key={quote.id}
-                                className={`border-b border-gray-200 hover:bg-gray-50 transition-colors ${
-                                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                                }`}
-                              >
-                                <td className="py-3 px-4">
-                                  <span className="font-semibold text-gray-900">
-                                    {quote.quoteNumber || "N/A"}
-                                  </span>
-                                </td>
-                                <td className="py-3 px-4">
-                                  <div className="flex flex-col">
-                                    <span className="text-sm font-medium text-gray-900">
-                                      {quote.customer?.name || "N/A"}
-                                    </span>
-                                    {quote.customer?.email && (
-                                      <span className="text-xs text-gray-500 mt-0.5">
-                                        {quote.customer.email}
-                                      </span>
-                                    )}
+                      <div className="space-y-2">
+                        {savedQuotes.map((quote) => (
+                          <div
+                            key={quote.id}
+                            onClick={() => loadQuote(quote)}
+                            className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="font-semibold text-lg">
+                                  {quote.quoteNumber || "N/A"}
+                                </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  Client: {quote.customer?.name || "N/A"}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  Email: {quote.customer?.email || "N/A"}
+                                </div>
+                              </div>
+
+                              <div className="text-right">
+                                <div className="text-lg font-semibold text-orange-600">
+                                  R{quote.totals?.total?.toFixed(2) || "0.00"}
+                                </div>
+                                {quote.totals?.paid > 0 && (
+                                  <div className="text-sm text-emerald-600 font-semibold">
+                                    Paid: R{quote.totals.paid.toFixed(2)}
                                   </div>
-                                </td>
-                                <td className="py-3 px-4">
-                                  <div className="flex flex-col">
-                                    <span className="text-sm text-gray-900">
-                                      {quote.property?.type || "N/A"}
-                                    </span>
-                                    {quote.property?.size && (
-                                      <span className="text-xs text-gray-500 mt-0.5">
-                                        {quote.property.size}m²
-                                      </span>
-                                    )}
+                                )}
+                                {quote.totals?.due > 0 && (
+                                  <div className="text-sm text-rose-600 font-semibold">
+                                    Due: R{quote.totals.due.toFixed(2)}
                                   </div>
-                                </td>
-                                <td className="py-3 px-4 text-sm text-gray-700">
-                                  {quote.dates?.quoteDate
-                                    ? new Date(
-                                        quote.dates.quoteDate,
-                                      ).toLocaleDateString("en-ZA")
-                                    : "N/A"}
-                                </td>
-                                <td className="py-3 px-4 text-sm text-gray-700">
-                                  {quote.property?.serviceFrequency || "N/A"}
-                                </td>
-                                <td className="py-3 px-4 text-right">
-                                  <span className="font-bold text-purple-600 text-base">
-                                    R{quote.totals?.total?.toFixed(2) || "0.00"}
-                                  </span>
-                                </td>
-                                <td className="py-3 px-4">
-                                  <div className="flex justify-center">
-                                    <span
-                                      className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
-                                        quote.status === "converted"
-                                          ? "bg-green-500"
-                                          : quote.status === "accepted"
-                                            ? "bg-green-500"
-                                            : quote.status === "sent"
-                                              ? "bg-blue-500"
-                                              : quote.status === "pending"
-                                                ? "bg-purple-500"
-                                                : quote.status === "rejected"
-                                                  ? "bg-red-500"
-                                                  : quote.status === "expired"
-                                                    ? "bg-orange-500"
-                                                    : quote.status === "draft"
-                                                      ? "bg-gray-500"
-                                                      : "bg-gray-500"
-                                      }`}
-                                    >
-                                      {quote.status || "unknown"}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4">
-                                  <div className="flex justify-center gap-2">
-                                    <button
-                                      onClick={() => loadQuote(quote)}
-                                      className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors text-sm font-medium"
-                                    >
-                                      Load
-                                    </button>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        // Add view/preview functionality here
-                                        console.log("View quote:", quote);
-                                      }}
-                                      className="px-3 py-1.5 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors text-sm font-medium"
-                                    >
-                                      View
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                                )}
+                                <div
+                                  className={`text-xs mt-1 px-2 py-1 rounded ${
+                                    quote.status === "paid"
+                                      ? "bg-emerald-100 text-emerald-700"
+                                      : quote.status === "partially_paid"
+                                        ? "bg-amber-100 text-amber-700"
+                                        : quote.status === "pending"
+                                          ? "bg-blue-100 text-blue-700"
+                                          : "bg-gray-100 text-gray-700"
+                                  }`}
+                                >
+                                  {quote.status === "paid"
+                                    ? "Paid"
+                                    : quote.status === "partially_paid"
+                                      ? "Partial"
+                                      : "Pending"}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -2058,276 +1552,924 @@ const printStyles = `
               </div>
             )}
 
-            {/* Mobile Invoice Toggle Button */}
-           {!showInvoice && (
-            <button onClick={() => setShowInvoice(true)} className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors">
-              <FileText className="w-5 h-5" />
-              View {isQuoteMode ? "Quote" : "Invoice"}
-            </button>
-          )}
-
-            {/* Templates View */}
+            {activeView === "financial-overview" && <FinancialOverview user={user} />}
+            {activeView === "history-view" && <HistoryView user={user} />}
+            {activeView === "notes-view" && <NotesView user={user} />}
             {activeView === "templates" && <Templates user={user} />}
 
-            {/* Financial Overview */}
-            {activeView === "financial-overview" && (
-              <FinancialOverview user={user} />
-            )}
-
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
-              {activeView === "invoice" && (
-                <>
-                  {/* Left Panel - Form */}
-                  <div
-                    className={`${showInvoice ? "hidden" : "block"} space-y-6 lg:block print:hidden min-h-[calc(297mm)] overflow-y-auto`}
-                  >
-                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                      <div className="flex border-b">
-                        <button
-                          onClick={() => setInputMode("manual")}
-                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
-                            inputMode === "manual"
-                              ? "bg-white text-blue-600 border-b-2 border-blue-600"
-                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
-                          }`}
-                        >
-                          📝 Manual Entry
-                        </button>
-                        <button
-                          onClick={() => setInputMode("ai")}
-                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                            inputMode === "ai"
-                              ? "bg-white text-purple-600 border-b-2 border-purple-600"
-                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
-                          }`}
-                        >
-                          <Sparkles className="w-4 h-4" />
+            {activeView === "quote" && (
+              <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
+                <div className="space-y-6">
+                  {/* Tab Navigation */}
+                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
+                    <div className="flex border-b border-slate-200">
+                      <button
+                        onClick={() => setInputMode("manual")}
+                        className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
+                          inputMode === "manual"
+                            ? "bg-white text-cyan-600 border-b-2 border-cyan-600 shadow-sm"
+                            : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        }`}
+                      >
+                        <span className="flex items-center justify-center gap-2">
+                          <Edit className="w-5 h-5" />
+                          Manual Entry
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setInputMode("ai")}
+                        className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
+                          inputMode === "ai"
+                            ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm"
+                            : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        }`}
+                      >
+                        <span className="flex items-center justify-center gap-2">
+                          <Sparkles className="w-5 h-5" />
                           AI Assistant
-                        </button>
+                        </span>
+                      </button>
+                    </div>
+
+                    <div className="p-6">
+                      {inputMode === "ai" ? (
+                        <AIInvoiceExtractor
+                          onDataExtracted={handleAIDataExtracted}
+                          documentType={documentType}
+                        />
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {inputMode === "manual" && (
+                    <>
+                      {/* Summary Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-sm font-medium text-orange-700">Total Amount</div>
+                            <div className="w-8 h-8 bg-orange-200 rounded-lg flex items-center justify-center">
+                              <DollarSign className="w-5 h-5 text-orange-600" />
+                            </div>
+                          </div>
+                          <div className="text-2xl font-bold text-orange-900">
+                            R{total.toFixed(2)}
+                          </div>
+                        </div>
+
+                        <div
+                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                            paymentStatus.totalPaid > 0
+                              ? "from-emerald-50 to-emerald-100 border-emerald-200"
+                              : "from-slate-50 to-slate-100 border-slate-200"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div
+                              className={`text-sm font-medium ${
+                                paymentStatus.totalPaid > 0 ? "text-emerald-700" : "text-slate-600"
+                              }`}
+                            >
+                              Paid
+                            </div>
+                            <div
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                paymentStatus.totalPaid > 0 ? "bg-emerald-200" : "bg-slate-200"
+                              }`}
+                            >
+                              <CheckSquare
+                                className={`w-5 h-5 ${
+                                  paymentStatus.totalPaid > 0
+                                    ? "text-emerald-600"
+                                    : "text-slate-400"
+                                }`}
+                              />
+                            </div>
+                          </div>
+                          <div
+                            className={`text-2xl font-bold ${
+                              paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"
+                            }`}
+                          >
+                            R{paymentStatus.totalPaid.toFixed(2)}
+                          </div>
+                        </div>
+
+                        <div
+                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                            paymentStatus.balanceDue <= 0
+                              ? "from-emerald-50 to-emerald-100 border-emerald-200"
+                              : paymentStatus.totalPaid > 0
+                                ? "from-amber-50 to-amber-100 border-amber-200"
+                                : "from-rose-50 to-rose-100 border-rose-200"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div
+                              className={`text-sm font-medium ${
+                                paymentStatus.balanceDue <= 0
+                                  ? "text-emerald-700"
+                                  : paymentStatus.totalPaid > 0
+                                    ? "text-amber-700"
+                                    : "text-rose-700"
+                              }`}
+                            >
+                              Balance Due
+                            </div>
+                            <div
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                paymentStatus.balanceDue <= 0
+                                  ? "bg-emerald-200"
+                                  : paymentStatus.totalPaid > 0
+                                    ? "bg-amber-200"
+                                    : "bg-rose-200"
+                              }`}
+                            >
+                              <Wallet
+                                className={`w-5 h-5 ${
+                                  paymentStatus.balanceDue <= 0
+                                    ? "text-emerald-600"
+                                    : paymentStatus.totalPaid > 0
+                                      ? "text-amber-600"
+                                      : "text-rose-600"
+                                }`}
+                              />
+                            </div>
+                          </div>
+                          <div
+                            className={`text-2xl font-bold ${
+                              paymentStatus.balanceDue <= 0
+                                ? "text-emerald-900"
+                                : paymentStatus.totalPaid > 0
+                                  ? "text-amber-900"
+                                  : "text-rose-900"
+                            }`}
+                          >
+                            R{paymentStatus.balanceDue.toFixed(2)}
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Tab Content */}
-                      <div className="p-6">
-                        {inputMode === "ai" ? (
-                          <AIInvoiceExtractor
-                            onDataExtracted={handleAIDataExtracted}
-                            documentType={documentType}
-                          />
-                        ) : (
-                          <div className="text-sm text-gray-600">
-                            Fill out the forms below to create your{" "}
-                            {documentType}.
+                      {/* Payment Status Banner */}
+                      {quoteId && (
+                        <div
+                          className={`p-4 rounded-xl border-2 flex items-center justify-between ${
+                            paymentStatus.status === "paid"
+                              ? "bg-emerald-50 border-emerald-300"
+                              : paymentStatus.status === "partially_paid"
+                                ? "bg-amber-50 border-amber-300"
+                                : "bg-rose-50 border-rose-300"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            {paymentStatus.status === "paid" ? (
+                              <>
+                                <div className="w-10 h-10 bg-emerald-200 rounded-full flex items-center justify-center">
+                                  <CheckSquare className="w-6 h-6 text-emerald-600" />
+                                </div>
+                                <div>
+                                  <div className="font-bold text-emerald-900">
+                                    {documentType === "quote" ? "Quote" : "Invoice"} Fully Paid
+                                  </div>
+                                  <div className="text-sm text-emerald-700">
+                                    Payment complete - Thank you!
+                                  </div>
+                                </div>
+                              </>
+                            ) : paymentStatus.status === "partially_paid" ? (
+                              <>
+                                <div className="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center">
+                                  <CreditCard className="w-6 h-6 text-amber-600" />
+                                </div>
+                                <div>
+                                  <div className="font-bold text-amber-900">
+                                    Partial Payment Received
+                                  </div>
+                                  <div className="text-sm text-amber-700">
+                                    R{paymentStatus.totalPaid.toFixed(2)} paid • R
+                                    {paymentStatus.balanceDue.toFixed(2)} remaining
+                                  </div>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center">
+                                  <Wallet className="w-6 h-6 text-rose-600" />
+                                </div>
+                                <div>
+                                  <div className="font-bold text-rose-900">Payment Pending</div>
+                                  <div className="text-sm text-rose-700">
+                                    Full amount due: R{paymentStatus.balanceDue.toFixed(2)}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+
+                          {paymentStatus.status !== "paid" && (
+                            <button
+                              onClick={handleProcessPayment}
+                              className="px-4 py-2 bg-white border-2 border-current rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2"
+                            >
+                              <CreditCard className="w-4 h-4" />
+                              Record Payment
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Stepped Form */}
+                      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        {/* Step 1: Client Info */}
+                        {currentStep === 1 && (
+                          <div className="p-8">
+                            <div className="mb-8">
+                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
+                                  <Users className="w-6 h-6 text-cyan-600" />
+                                </div>
+                                Client Information
+                              </h2>
+                              <p className="text-slate-600 mt-2 ml-13">Enter client details</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                              <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                  Client Name <span className="text-rose-500">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={customerName}
+                                  onChange={(e) => setCustomerName(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  placeholder="Enter client name"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                  Email <span className="text-rose-500">*</span>
+                                </label>
+                                <input
+                                  type="email"
+                                  value={customerEmail}
+                                  onChange={(e) => setCustomerEmail(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  placeholder="contact@example.com"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                  Phone <span className="text-rose-500">*</span>
+                                </label>
+                                <input
+                                  type="tel"
+                                  value={customerPhone}
+                                  onChange={(e) => setCustomerPhone(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  placeholder="+27 82 123 4567"
+                                />
+                              </div>
+                              <div className="col-span-1 sm:col-span-2">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                  Property Address <span className="text-rose-500">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={propertyAddress}
+                                  onChange={(e) => setPropertyAddress(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  placeholder="123 Sunset Avenue, Sandton, Johannesburg, 2196"
+                                />
+                              </div>
+                            </div>
                           </div>
                         )}
-                      </div>
-                    </div>
-                    {inputMode === "manual" && (
-                      <>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div className="bg-white p-6 rounded-2xl border-2 border-blue-100 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                            <div className="text-sm text-gray-600 mb-2 font-semibold flex items-center gap-2">
-                              <DollarSign className="w-4 h-4 text-blue-600" />
-                              Total Amount
+
+                        {/* Step 2: Property Details */}
+                        {currentStep === 2 && (
+                          <div className="p-8">
+                            <div className="mb-8">
+                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+                                  <HomeIcon className="w-6 h-6 text-teal-600" />
+                                </div>
+                                Property Details
+                              </h2>
+                              <p className="text-slate-600 mt-2 ml-13">
+                                Enter property information for accurate quote
+                              </p>
                             </div>
-                            <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                              R{total.toFixed(2)}
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                              <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                  Property Type
+                                </label>
+                                <select
+                                  value={propertyType}
+                                  onChange={(e) => setPropertyType(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                >
+                                  <option value="Residential">Residential</option>
+                                  <option value="Commercial">Commercial</option>
+                                  <option value="Office">Office</option>
+                                  <option value="Retail">Retail</option>
+                                  <option value="Industrial">Industrial</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                  Property Size (sqm)
+                                </label>
+                                <input
+                                  type="number"
+                                  value={propertySize}
+                                  onChange={(e) => setPropertySize(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  placeholder="200"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                  Number of Rooms
+                                </label>
+                                <input
+                                  type="number"
+                                  value={rooms}
+                                  onChange={(e) => setRooms(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  placeholder="4"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                  Number of Bathrooms
+                                </label>
+                                <input
+                                  type="number"
+                                  value={bathrooms}
+                                  onChange={(e) => setBathrooms(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  placeholder="2"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Property Summary Card */}
+                            <div className="mt-6 p-4 bg-gradient-to-br from-cyan-50 to-teal-50 border border-cyan-200 rounded-lg">
+                              <h3 className="font-semibold text-cyan-900 mb-2 flex items-center gap-2">
+                                <MapPin className="w-4 h-4" />
+                                Property Summary
+                              </h3>
+                              <div className="text-sm text-cyan-800 space-y-1">
+                                <p>
+                                  <span className="font-medium">Type:</span> {propertyType}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Size:</span> {propertySize} sqm
+                                </p>
+                                <p>
+                                  <span className="font-medium">Rooms:</span> {rooms} | Bathrooms: {bathrooms}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                          {!isQuoteMode && (
-                            <>
-                              <div className="bg-white p-6 rounded-2xl border-2 border-green-100 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                                <div className="text-sm text-gray-600 mb-2 font-semibold flex items-center gap-2">
-                                  <CheckCircle className="w-4 h-4 text-green-600" />
-                                  Paid
+                        )}
+
+                        {/* Step 3: Services */}
+                        {currentStep === 3 && (
+                          <div className="p-8">
+                            <div className="mb-8">
+                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                  <ClipboardList className="w-6 h-6 text-purple-600" />
                                 </div>
-                                <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                                  R0.00
+                                Cleaning Services
+                              </h2>
+                              <p className="text-slate-600 mt-2 ml-13">
+                                Add cleaning services to the quote
+                              </p>
+                            </div>
+
+                            {/* Add Service Form */}
+                            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 mb-6 border border-slate-200">
+                              <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
+                                <Plus className="w-5 h-5 text-cyan-600" />
+                                Add New Service
+                              </h3>
+                              <div className="grid grid-cols-1 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                      Service Type
+                                    </label>
+                                    <select
+                                      value={newItem.serviceType}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          serviceType: e.target.value,
+                                        })
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
+                                    >
+                                      <option value="Standard Cleaning">Standard Cleaning</option>
+                                      <option value="Deep Cleaning">Deep Cleaning</option>
+                                      <option value="Move In/Out Cleaning">Move In/Out Cleaning</option>
+                                      <option value="Office Cleaning">Office Cleaning</option>
+                                      <option value="Carpet Cleaning">Carpet Cleaning</option>
+                                      <option value="Window Cleaning">Window Cleaning</option>
+                                      <option value="Post-Construction">Post-Construction</option>
+                                      <option value="Specialized Service">Specialized Service</option>
+                                    </select>
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                      Frequency
+                                    </label>
+                                    <select
+                                      value={newItem.frequency}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          frequency: e.target.value,
+                                        })
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
+                                    >
+                                      <option value="One-time">One-time</option>
+                                      <option value="Weekly">Weekly</option>
+                                      <option value="Bi-weekly">Bi-weekly</option>
+                                      <option value="Monthly">Monthly</option>
+                                      <option value="Quarterly">Quarterly</option>
+                                    </select>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                    Description
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder="Service description / Details"
+                                    value={newItem.description}
+                                    onChange={(e) =>
+                                      setNewItem({
+                                        ...newItem,
+                                        description: e.target.value,
+                                      })
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  />
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                  <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                      Rate (R)
+                                    </label>
+                                    <input
+                                      type="number"
+                                      placeholder="Rate"
+                                      value={newItem.rate}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          rate: e.target.value,
+                                        })
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                      Quantity
+                                    </label>
+                                    <input
+                                      type="number"
+                                      placeholder="Qty"
+                                      value={newItem.qty}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          qty: e.target.value,
+                                        })
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                      VAT (%)
+                                    </label>
+                                    <input
+                                      type="number"
+                                      placeholder="15"
+                                      value={newItem.taxRate}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          taxRate: e.target.value,
+                                        })
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    />
+                                  </div>
+
+                                  <div className="flex items-end">
+                                    <button
+                                      onClick={handleAddItem}
+                                      className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-lg px-4 py-2 hover:from-cyan-700 hover:to-teal-700 flex items-center justify-center gap-2 transition-all font-semibold shadow-md hover:shadow-lg"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                      Add Service
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
-                              <div className="bg-white p-6 rounded-2xl border-2 border-red-100 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                                <div className="text-sm text-gray-600 mb-2 font-semibold flex items-center gap-2">
-                                  <AlertCircle className="w-4 h-4 text-red-600" />
-                                  Balance Due
+                            </div>
+
+                            {/* Services List */}
+                            {items.length > 0 ? (
+                              <div className="mb-6">
+                                <h3 className="text-lg font-bold text-slate-900 mb-4">
+                                  Services Added ({items.length})
+                                </h3>
+                                <div className="overflow-x-auto rounded-xl border border-slate-200">
+                                  <table className="w-full">
+                                    <thead>
+                                      <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                          Service
+                                        </th>
+                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                          Type
+                                        </th>
+                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                          Frequency
+                                        </th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                          Rate
+                                        </th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                          Qty
+                                        </th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                          VAT
+                                        </th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                          Amount
+                                        </th>
+                                        <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">
+                                          Action
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="bg-white">
+                                      {items.map((item, index) => (
+                                        <tr
+                                          key={index}
+                                          className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                                        >
+                                          <td className="px-4 py-4 text-sm font-medium text-slate-700">
+                                            {item.description}
+                                          </td>
+                                          <td className="px-4 py-4 text-sm">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-cyan-100 text-cyan-700">
+                                              {item.serviceType || "Standard Cleaning"}
+                                            </span>
+                                          </td>
+                                          <td className="px-4 py-4 text-sm">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-700">
+                                              {item.frequency || "One-time"}
+                                            </span>
+                                          </td>
+                                          <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                            R{item.rate.toFixed(2)}
+                                          </td>
+                                          <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                            {item.qty}
+                                          </td>
+                                          <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                            R{item.taxAmount.toFixed(2)}
+                                          </td>
+                                          <td className="px-4 py-4 text-sm text-right font-bold text-slate-900">
+                                            R{item.totalAmount.toFixed(2)}
+                                          </td>
+                                          <td className="px-4 py-4 text-center">
+                                            <button
+                                              onClick={() => handleRemoveItem(index)}
+                                              className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all flex items-center gap-1 mx-auto"
+                                            >
+                                              <Trash2 className="w-3 h-3" />
+                                              Remove
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
                                 </div>
-                                <div className="text-3xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+                              </div>
+                            ) : (
+                              <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-dashed border-slate-300">
+                                <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                  <ClipboardList className="w-8 h-8 text-slate-400" />
+                                </div>
+                                <p className="text-slate-700 font-semibold text-lg">
+                                  No services added yet
+                                </p>
+                                <p className="text-sm text-slate-500 mt-2">
+                                  Add cleaning services using the form above
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Total Summary */}
+                            {items.length > 0 && (
+                              <div className="bg-gradient-to-br from-cyan-50 to-teal-50 rounded-xl p-6 border border-cyan-200">
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-slate-700 font-medium">Subtotal:</span>
+                                    <span className="font-bold text-slate-900 text-lg">
+                                      R{subtotal.toFixed(2)}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-slate-700 font-medium">VAT (15%):</span>
+                                    <span className="font-bold text-slate-900 text-lg">
+                                      R{totalTax.toFixed(2)}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-cyan-300">
+                                    <span className="text-slate-900">Total:</span>
+                                    <span className="text-cyan-700 text-2xl">
+                                      R{total.toFixed(2)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Step 4: Schedule & Payment */}
+                        {currentStep === 4 && (
+                          <div className="p-8">
+                            <div className="mb-8">
+                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                  <Calendar className="w-6 h-6 text-emerald-600" />
+                                </div>
+                                Schedule & Payment Terms
+                              </h2>
+                              <p className="text-slate-600 mt-2 ml-13">
+                                Review quote details and schedule information
+                              </p>
+                            </div>
+
+                            {/* Quote Summary Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 rounded-xl border border-cyan-200">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-cyan-700">
+                                    Quote Total
+                                  </span>
+                                  <DollarSign className="w-5 h-5 text-cyan-600" />
+                                </div>
+                                <div className="text-3xl font-bold text-cyan-900">
                                   R{total.toFixed(2)}
                                 </div>
                               </div>
-                            </>
-                          )}
-                          {isQuoteMode && (
-                            <div className="bg-white p-6 rounded-2xl border-2 border-purple-100 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 col-span-2">
-                              <div className="text-sm text-gray-600 mb-2 font-semibold flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-purple-600" />
-                                Quote Status
+
+                              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-emerald-700">
+                                    Services Count
+                                  </span>
+                                  <ClipboardList className="w-5 h-5 text-emerald-600" />
+                                </div>
+                                <div className="text-3xl font-bold text-emerald-900">
+                                  {items.length}
+                                </div>
                               </div>
-                              <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                                Pending
+
+                              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-purple-700">
+                                    VAT Amount
+                                  </span>
+                                  <Receipt className="w-5 h-5 text-purple-600" />
+                                </div>
+                                <div className="text-3xl font-bold text-purple-900">
+                                  R{totalTax.toFixed(2)}
+                                </div>
                               </div>
                             </div>
+
+                            {/* Payment Terms Section */}
+                            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-6">
+                              <div className="flex items-center gap-3 mb-5">
+                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                  <CreditCard className="w-5 h-5 text-purple-600" />
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900">
+                                  Payment Information
+                                </h3>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                  <span className="text-slate-600 font-medium">Payment Due:</span>
+                                  <span className="font-bold text-slate-900">
+                                    Upon Completion
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                  <span className="text-slate-600 font-medium">
+                                    Payment Methods:
+                                  </span>
+                                  <span className="font-bold text-slate-900">
+                                    Bank Transfer, Card, Cash
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                  <span className="text-slate-600 font-medium">
+                                    Quote Valid For:
+                                  </span>
+                                  <span className="font-bold text-slate-900">30 Days</span>
+                                </div>
+                                <div className="flex justify-between items-center py-3">
+                                  <span className="text-slate-600 font-medium">Currency:</span>
+                                  <span className="font-bold text-slate-900">
+                                    ZAR (South African Rand)
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Property & Client Summary */}
+                            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
+                              <h3 className="text-lg font-bold text-slate-900 mb-4">
+                                Quote Summary
+                              </h3>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                  <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                    <Users className="w-4 h-4" />
+                                    Client Details:
+                                  </h4>
+                                  <div className="text-sm text-slate-600 space-y-1">
+                                    <p className="font-semibold text-slate-900">{customerName}</p>
+                                    <p>{customerEmail}</p>
+                                    <p>{customerPhone}</p>
+                                  </div>
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                    <MapPin className="w-4 h-4" />
+                                    Property Details:
+                                  </h4>
+                                  <div className="text-sm text-slate-600 space-y-1">
+                                    <p className="font-semibold text-slate-900">{propertyAddress}</p>
+                                    <p>
+                                      <span className="font-semibold">Type:</span> {propertyType}
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">Size:</span> {propertySize} sqm
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">Rooms:</span> {rooms} | Bathrooms: {bathrooms}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="mt-6 pt-6 border-t border-slate-300">
+                                <h4 className="text-sm font-semibold text-slate-700 mb-2">
+                                  Quote Details:
+                                </h4>
+                                <div className="text-sm text-slate-600 space-y-1">
+                                  <p>
+                                    <span className="font-semibold">Number:</span> {quoteNumber}
+                                  </p>
+                                  <p>
+                                    <span className="font-semibold">Date:</span>{" "}
+                                    {new Date().toLocaleDateString()}
+                                  </p>
+                                  <p>
+                                    <span className="font-semibold">Type:</span>{" "}
+                                    {documentType === "quote" ? "Quote" : "Invoice"}
+                                  </p>
+                                  <p>
+                                    <span className="font-semibold">Status:</span>{" "}
+                                    <span className="text-amber-600 font-bold">Pending</span>
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            {quoteId && (
+                              <div className="mt-6 flex gap-3">
+                                <button
+                                  onClick={handleProcessPayment}
+                                  className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105"
+                                >
+                                  <CreditCard className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                                  Process Payment
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Navigation Buttons */}
+                        <div className="px-8 py-5 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+                          <button
+                            onClick={handlePrevious}
+                            disabled={currentStep === 1}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                              currentStep === 1
+                                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                                : "bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 shadow-sm"
+                            }`}
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                            Previous
+                          </button>
+
+                          <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">
+                            Step {currentStep} of {totalSteps}
+                          </div>
+
+                          {currentStep < totalSteps ? (
+                            <button
+                              onClick={handleNext}
+                              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-lg font-semibold hover:from-cyan-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg"
+                            >
+                              Next
+                              <ChevronRight className="w-5 h-5" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={handleSaveQuote}
+                              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
+                            >
+                              <Save className="w-5 h-5" />
+                              Save {documentType === "quote" ? "Quote" : "Invoice"}
+                            </button>
                           )}
                         </div>
+                      </div>
+                    </>
+                  )}
+                </div>
 
-                        {inputMode === "manual" && (
-                          <MultiStepForm
-                            // Customer Info Props
-                            customerName={customerName}
-                            setCustomerName={setCustomerName}
-                            customerId={customerId}
-                            setCustomerId={setCustomerId}
-                            customerEmail={customerEmail}
-                            setCustomerEmail={setCustomerEmail}
-                            customerPhone={customerPhone}
-                            setCustomerPhone={setCustomerPhone}
-                            customerAddress={customerAddress}
-                            setCustomerAddress={setCustomerAddress}
-                            // Property Info Props
-                            propertyType={propertyType}
-                            setPropertyType={setPropertyType}
-                            propertySize={propertySize}
-                            setPropertySize={setPropertySize}
-                            propertyRooms={propertyRooms}
-                            setPropertyRooms={setPropertyRooms}
-                            propertyBathrooms={propertyBathrooms}
-                            setPropertyBathrooms={setPropertyBathrooms}
-                            propertyFloors={propertyFloors}
-                            setPropertyFloors={setPropertyFloors}
-                            serviceFrequency={serviceFrequency}
-                            setServiceFrequency={setServiceFrequency}
-                            // Items Props
-                            items={items}
-                            newItem={newItem}
-                            setNewItem={setNewItem}
-                            handleAddItem={handleAddItem}
-
-                            paymentMethod={paymentMethod}
-                            setPaymentMethod={setPaymentMethod}
-                            paymentTerms={paymentTerms}
-                            setPaymentTerms={setPaymentTerms}
-                            serviceGuarantee={serviceGuarantee}
-                            setServiceGuarantee={setServiceGuarantee}
-                            isQuoteMode={isQuoteMode}
-                          />
-                        )}
-                       
-                      </>
-                    )}
-                  </div>
-
-                  {/* Right Panel - Invoice/Quote Preview */}
-                  <div
-                    id="print-area"
-                    className={`${!showInvoice ? "hidden" : "block"} lg:block mx-auto bg-white`}
-                    style={{ width: "210mm", minHeight: "297mm" }}
-                  >
-                    <div className="mb-4 print:hidden">
-                      <TemplateSelector
-                        user={user}
-                        selectedTemplate={selectedTemplate}
-                        onTemplateChange={setSelectedTemplate}
-                      />
-                    </div>
-
-                    <TemplateRenderer
-                      templateId={selectedTemplate}
-                      businessInfo={businessInfo}
-                      loading={loading}
-                      jobCardNumber={invoiceNumber}
-                      customerName={customerName}
-                      customerEmail={customerEmail}
-                      customerPhone={customerPhone}
-                      customerAddress={customerAddress}
-                      propertyType={propertyType}
-                      propertySize={propertySize}
-                      propertyRooms={propertyRooms}
-                      propertyBathrooms={propertyBathrooms}
-                      propertyFloors={propertyFloors}
-                      serviceFrequency={serviceFrequency}
-                      items={items}
-                      subtotal={subtotal}
-                      vat={vat}
-                      total={total}
-                      showStamp={stampSettings.enabled} // Add this
-                      stampText={stampSettings.text} // Add this
-                      stampColor={stampSettings.color} // Add this
-                      showStampDate={stampSettings.showDate} // Add this
-                    />
-                  </div>
-
-                  {/* Print Styles */}
-                  <style>{`
-                  .logo img {
-                    height: 60px;
-                    width: auto;
-                  }
-                  @media print {
-                    * {
-                      -webkit-print-color-adjust: exact !important;
-                      print-color-adjust: exact !important;
-                    }
-                    html, body {
-                      margin: 0 !important;
-                      padding: 0 !important;
-                      background: white !important;
-                      width: 100% !important;
-                      height: 100% !important;
-                    }
-                      
-                    @page {
-                      size: A4;
-                      margin: 0;
-                    }
-                    .print\\:hidden {
-                      display: none !important;
-                    }
-                    div[class*="border-b"][class*="border-gray"] {
-                      display: none !important;
-                    }
-                    nav, [class*="sidebar"], [class*="bg-gray-50"], button:not([style]) {
-                      display: none !important;
-                    }
-                    .space-y-6 {
-                      display: none !important;
-                    }
-                    .flex.h-screen {
-                      display: block !important;
-                      height: auto !important;
-                    }
-                    .flex-1 {
-                      display: block !important;
-                      overflow: visible !important;
-                    }
-                    .grid.grid-cols-1 {
-                      display: block !important;
-                      grid-template-columns: none !important;
-                    }
-                    div[style*="210mm"] {
-                      display: block !important;
-                      width: 210mm !important;
-                      height: auto !important;
-                      margin: 0 !important;
-                      padding: 0 !important;
-                      box-shadow: none !important;
-                      page-break-after: avoid !important;
-                    }
-                      
-                    .bg-white {
-                      background: white !important;
-                      box-shadow: none !important;
-                    }
-                    table {
-                      width: 100% !important;
-                      border-collapse: collapse !important;
-                    }
-                    tr, td, th {
-                      page-break-inside: avoid !important;
-                    }
-                  }
-                `}</style>
-                </>
-              )}
-            </div>
+                {/* Quote/Invoice Preview - This remains at the end */}
+                <div
+                  id="print-area"
+                  className="hidden print:block bg-white shadow-2xl origin-top"
+                  style={{
+                    width: "210mm",
+                    minHeight: "297mm",
+                    transform: "scale(0.75)",
+                    transformOrigin: "top center",
+                  }}
+                >
+                  <TemplateRenderer
+                    templateId={selectedTemplate}
+                    businessInfo={businessInfo}
+                    loading={loading}
+                    invoiceNumber={quoteNumber}
+                    customerName={customerName}
+                    billName={customerName}
+                    billEmail={customerEmail}
+                    billPhone={customerPhone}
+                    billAddress={propertyAddress}
+                    customerEmail={customerEmail}
+                    customerPhone={customerPhone}
+                    customerAddress={propertyAddress}
+                    taxId=""
+                    items={items}
+                    subtotal={subtotal}
+                    totalTax={totalTax}
+                    total={total}
+                    documentType={documentType}
+                    stampText={stampSettings.text}
+                    stampColor={stampSettings.color}
+                    showStampDate={stampSettings.showDate}
+                    showStamp={stampSettings.enabled}
+                    paymentStatus={paymentStatus}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

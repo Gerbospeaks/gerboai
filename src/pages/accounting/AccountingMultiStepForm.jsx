@@ -12,7 +12,7 @@ import {
 
 /* ─── shared input className ─── */
 const INPUT =
-  "w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400 text-sm";
+  "w-full px-4 py-2  border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400 text-sm";
 
 const AccountingMultiStepForm = ({
   /* client */
@@ -77,7 +77,7 @@ const AccountingMultiStepForm = ({
         return (
           <React.Fragment key={step}>
             {/* circle + label */}
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center pt-8">
               <div
                 className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 shadow-sm
                   ${active ? "bg-blue-600 text-white ring-4 ring-blue-100 scale-110" : ""}

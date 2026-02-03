@@ -240,15 +240,15 @@ export const DefaultTemplate = ({
       <div className="w-64 text-xs">
         <div className="flex justify-between py-1">
           <span>Subtotal:</span>
-          <span>R {subtotal.toFixed(2)}</span>
+          <span>R {(subtotal || 0).toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-1">
-          <span>VAT:</span>
-          <span>R {vat.toFixed(2)}</span>
+          <span>VAT (15%):</span>
+          <span>R {(vat || 0).toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-2 font-bold bg-gray-50 text-gray-800 px-2">
           <span>TOTAL:</span>
-          <span>R {total.toFixed(2)}</span>
+          <span>R {(total || 0).toFixed(2)}</span>
         </div>
       </div>
     </div>
