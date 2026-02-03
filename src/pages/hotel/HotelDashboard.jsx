@@ -729,7 +729,7 @@ const printStyles = `
   };
 
   return (
-    <div className="flex h-screen bg-gray-300">
+    <div className="flex h-screen bg-gray-300 overflow-hidden">
     {/* Mobile Sidebar Backdrop */}
 {sidebarOpen && (
   <div
@@ -870,21 +870,21 @@ const printStyles = `
 <div
   className={`${
     sidebarOpen ? "translate-x-0" : "-translate-x-full"
-  } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl`}
+  } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
 >
   <div className="p-4">
     <div className="flex items-center justify-between mb-8">
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-3 min-w-0">
         <img
           src={logo}
           alt="Business Logo"
-          className="w-16 h-12 object-contain rounded-lg"
+          className="w-16 h-12 object-contain rounded-lg flex-shrink-0"
         />
       </div>
       {/* Close Button */}
       <button
         onClick={() => setSidebarOpen(false)}
-        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
+        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200 flex-shrink-0"
         title="Collapse Sidebar"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -893,31 +893,31 @@ const printStyles = `
 
     <nav className="space-y-1">
       <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-        <Home className="w-5 h-5" />
-        <span className="text-sm font-medium">Dashboard</span>
+        <Home className="w-5 h-5 flex-shrink-0" />
+        <span className="text-sm font-medium truncate">Dashboard</span>
       </div>
       <div
         onClick={() => setShowSettings(true)}
         className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
-        <Settings className="w-5 h-5" />
-        <span className="text-sm font-medium">Settings</span>
+        <Settings className="w-5 h-5 flex-shrink-0" />
+        <span className="text-sm font-medium truncate">Settings</span>
       </div>
 
       <div className="pt-4 mt-4 border-t border-slate-700/50">
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200">
-          <TrendingUp className="w-5 h-5" />
-          <span className="text-sm font-medium">Property Overview</span>
+          <TrendingUp className="w-5 h-5 flex-shrink-0" />
+          <span className="text-sm font-medium truncate">Property Overview</span>
         </div>
 
         {/* Invoices Section */}
         <div className="mt-2">
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-            <div className="flex items-center space-x-3">
-              <Receipt className="w-5 h-5" />
-              <span className="text-sm font-medium">Invoices</span>
+            <div className="flex items-center space-x-3 min-w-0">
+              <Receipt className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-medium truncate">Invoices</span>
             </div>
-            <ChevronDown className="w-4 h-4" />
+            <ChevronDown className="w-4 h-4 flex-shrink-0" />
           </div>
 
           <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
@@ -926,7 +926,7 @@ const printStyles = `
                 handleNewInvoice();
                 setActiveView("invoice");
               }}
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200 truncate"
             >
               Create Invoice
             </div>
@@ -935,16 +935,16 @@ const printStyles = `
               className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
               <div className="flex items-center justify-between">
-                <span>All Invoices</span>
-                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className="truncate">All Invoices</span>
+                <span className="text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ml-2">
                   {savedInvoices.length}
                 </span>
               </div>
             </div>
             <div className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200">
               <div className="flex items-center justify-between">
-                <span>Pending Payment</span>
-                <span className="bg-amber-600/30 text-amber-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className="truncate">Pending Payment</span>
+                <span className="bg-amber-600/30 text-amber-300 px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ml-2">
                   0
                 </span>
               </div>
@@ -955,17 +955,17 @@ const printStyles = `
         {/* Guests Section */}
         <div className="mt-2">
           <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-            <div className="flex items-center space-x-3">
-              <Users className="w-5 h-5" />
-              <span className="text-sm font-medium">Guests</span>
+            <div className="flex items-center space-x-3 min-w-0">
+              <Users className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-medium truncate">Guests</span>
             </div>
-            <ChevronDown className="w-4 h-4" />
+            <ChevronDown className="w-4 h-4 flex-shrink-0" />
           </div>
 
           <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
             <div
               onClick={handleAddNewGuest}
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200 truncate"
             >
               Add Guest
             </div>
@@ -974,8 +974,8 @@ const printStyles = `
               className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
               <div className="flex items-center justify-between">
-                <span>All Guests</span>
-                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                <span className="truncate">All Guests</span>
+                <span className="text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ml-2">
                   {savedGuests.length}
                 </span>
               </div>
@@ -987,73 +987,73 @@ const printStyles = `
           onClick={() => setActiveView("templates")}
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
         >
-          <FileText className="w-5 h-5" />
-          <span className="text-sm font-medium">Invoice Templates</span>
+          <FileText className="w-5 h-5 flex-shrink-0" />
+          <span className="text-sm font-medium truncate">Invoice Templates</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-          <Calendar className="w-5 h-5" />
-          <span className="text-sm font-medium">Reservations</span>
+          <Calendar className="w-5 h-5 flex-shrink-0" />
+          <span className="text-sm font-medium truncate">Reservations</span>
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-          <Bed className="w-5 h-5" />
-          <span className="text-sm font-medium">Room Management</span>
+          <Bed className="w-5 h-5 flex-shrink-0" />
+          <span className="text-sm font-medium truncate">Room Management</span>
         </div>
 
         <div
           onClick={() => setShowCheckInOutModal(true)}
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
         >
-          <DoorOpen className="w-5 h-5" />
-          <span className="text-sm font-medium">Check-In/Out</span>
+          <DoorOpen className="w-5 h-5 flex-shrink-0" />
+          <span className="text-sm font-medium truncate">Check-In/Out</span>
         </div>
 
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-          <div className="flex items-center space-x-3">
-            <CreditCard className="w-5 h-5" />
-            <span className="text-sm font-medium">Payments</span>
+          <div className="flex items-center space-x-3 min-w-0">
+            <CreditCard className="w-5 h-5 flex-shrink-0" />
+            <span className="text-sm font-medium truncate">Payments</span>
           </div>
-          <ChevronDown className="w-4 h-4" />
+          <ChevronDown className="w-4 h-4 flex-shrink-0" />
         </div>
 
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-          <div className="flex items-center space-x-3">
-            <FileBarChart className="w-5 h-5" />
-            <span className="text-sm font-medium">Reports</span>
+          <div className="flex items-center space-x-3 min-w-0">
+            <FileBarChart className="w-5 h-5 flex-shrink-0" />
+            <span className="text-sm font-medium truncate">Reports</span>
           </div>
-          <ChevronDown className="w-4 h-4" />
+          <ChevronDown className="w-4 h-4 flex-shrink-0" />
         </div>
 
         <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-          <div className="flex items-center space-x-3">
-            <BarChart3 className="w-5 h-5" />
-            <span className="text-sm font-medium">Analytics</span>
+          <div className="flex items-center space-x-3 min-w-0">
+            <BarChart3 className="w-5 h-5 flex-shrink-0" />
+            <span className="text-sm font-medium truncate">Analytics</span>
           </div>
-          <ChevronDown className="w-4 h-4" />
+          <ChevronDown className="w-4 h-4 flex-shrink-0" />
         </div>
       </div>
     </nav>
   </div>
 
-  <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm">
+  <div className="sticky bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm">
     <div className="flex items-center space-x-3">
-      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
+      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center flex-shrink-0">
         <span className="text-white font-bold text-sm">
           {user?.name?.charAt(0) || "M"}
         </span>
       </div>
-      <div className="flex-1">
-        <div className="text-sm font-semibold text-white">
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-semibold text-white truncate">
           {user?.name || "Manager"}
         </div>
-        <div className="text-xs text-slate-400">
+        <div className="text-xs text-slate-400 truncate">
           {user?.email || "manager@hotel.com"}
         </div>
       </div>
       <button
         onClick={handleLogout}
-        className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 rounded-lg transition-all duration-200"
+        className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 rounded-lg transition-all duration-200 flex-shrink-0"
         title="Logout"
       >
         <LogOut className="w-4 h-4" />
@@ -1061,94 +1061,113 @@ const printStyles = `
     </div>
   </div>
 </div>
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
-      <div className="flex-1 overflow-auto">
-        <div className="sticky top-0 z-40 flex flex-col">
-        <div className="bg-gray-300 border-red-200 px-4 lg:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 lg:space-x-4">
+
+      {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-0 lg:ml-64' : 'ml-16'} overflow-hidden`}>
+      <div className="flex flex-col h-full">
+        <div className="flex-shrink-0 z-40">
+        <div className="bg-gray-300 border-b border-gray-200 px-3 md:px-4 lg:px-6 py-3 md:py-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center space-x-2 lg:space-x-4 min-w-0">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-gray-100 rounded-lg flex-shrink-0 lg:hidden"
               >
-              
+                <Menu className="w-5 h-5" />
               </button>
              
-              <h1 className="text-base lg:text-xl font-semibold">
-                Invoice #{invoiceNumber || "— not saved yet —"}
+              <h1 className="text-sm md:text-base lg:text-xl font-semibold truncate">
+                Invoice #{invoiceNumber || "—"}
               </h1>
-              
             </div>
 
-            <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800">
+            {/* Desktop Action Buttons */}
+            <div className="hidden lg:flex items-center space-x-2 xl:space-x-3 print:hidden flex-shrink-0">
+              <button className="flex items-center space-x-2 px-3 xl:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap">
                 <CheckSquare className="w-4 h-4" />
-                <span>Mark Paid</span>
+                <span className="hidden xl:inline">Mark Paid</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800">
+              <button className="flex items-center space-x-2 px-3 xl:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap">
                 <Edit className="w-4 h-4" />
-                <span>Edit</span>
+                <span className="hidden xl:inline">Edit</span>
               </button>
               <button
                 onClick={handleSaveInvoice}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-3 xl:px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap"
               >
-                Save Invoice
+                <span className="hidden xl:inline">Save Invoice</span>
+                <span className="xl:hidden">Save</span>
               </button>
 
               <button
                 onClick={handleNewInvoice}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
+                className="flex items-center gap-2 px-3 xl:px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 whitespace-nowrap"
               >
                 <Plus className="w-4 h-4" />
-                New
+                <span className="hidden xl:inline">New</span>
               </button>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700">
+              <button className="flex items-center space-x-2 px-3 xl:px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap">
                 <Send className="w-4 h-4" />
-                <span>Send</span>
+                <span className="hidden xl:inline">Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-3 xl:px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap"
               >
-                Save as PDF
+                <Download className="w-4 h-4" />
+                <span className="hidden xl:inline">PDF</span>
               </button>
 
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-3 xl:px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap"
               >
                 <Printer className="w-4 h-4" />
-                Print
+                <span className="hidden xl:inline">Print</span>
               </button>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors"
+                className="flex items-center gap-2 px-3 xl:px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors whitespace-nowrap"
               >
-                Log Out
+                <LogOut className="w-4 h-4" />
+                <span className="hidden xl:inline">Logout</span>
               </button>
             </div>
 
+            {/* Mobile Logout */}
             <button
               onClick={handleLogout}
-              className="lg:hidden p-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors print:hidden"
+              className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden flex-shrink-0"
             >
-              <span className="text-sm font-medium">Logout</span>
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Mobile action buttons */}
-        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
-          <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="lg:hidden bg-white border-b border-gray-200 px-3 py-2 print:hidden overflow-x-auto">
+          <div className="flex gap-2 min-w-max pb-1">
             <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
               <CheckSquare className="w-4 h-4" />
-              <span>Mark Paid</span>
+              <span>Paid</span>
             </button>
             <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
               <Edit className="w-4 h-4" />
               <span>Edit</span>
+            </button>
+            <button 
+              onClick={handleSaveInvoice}
+              className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
+            >
+              <span>Save</span>
+            </button>
+            <button 
+              onClick={handleNewInvoice}
+              className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>New</span>
             </button>
             <button className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
               <Send className="w-4 h-4" />
@@ -1159,11 +1178,11 @@ const printStyles = `
               className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
             >
               <Download className="w-4 h-4" />
-              <span>Save PDF</span>
+              <span>PDF</span>
             </button>
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
             >
               <Printer className="w-4 h-4" />
               <span>Print</span>
@@ -1171,14 +1190,14 @@ const printStyles = `
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="bg-gray-50 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
+        {/* Tabs - Now scrollable on mobile */}
+        <div className="bg-gray-50 border-b border-gray-200 px-3 md:px-4 lg:px-6 overflow-x-auto print:hidden">
           <div className="flex space-x-4 lg:space-x-8 min-w-max">
             {["Invoice", "Guest Details", "Booking", "Notes"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-4 border-b-2 ${
+                className={`py-3 md:py-4 border-b-2 whitespace-nowrap text-sm md:text-base ${
                   activeTab === tab
                     ? "border-blue-400 text-gray-800"
                     : "border-transparent text-gray-400 hover:text-gray-200"
@@ -1190,13 +1209,15 @@ const printStyles = `
           </div>
         </div>
         </div>
-        <div className="p-4 lg:p-6">
+
+        {/* Main Content Area - Now properly scrollable */}
+        <div className="flex-1 overflow-y-auto p-3 md:p-4 lg:p-6">
           {/* Property Settings Modal */}
           {showSettings && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-3 md:p-4">
               <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-                <div className="p-4 border-b flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Property Settings</h2>
+                <div className="p-3 md:p-4 border-b flex items-center justify-between flex-shrink-0">
+                  <h2 className="text-lg md:text-xl font-semibold">Property Settings</h2>
                   <button
                     onClick={() => setShowSettings(false)}
                     className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -1205,13 +1226,13 @@ const printStyles = `
                   </button>
                 </div>
 
-                <div className="overflow-auto p-6">
+                <div className="overflow-auto p-4 md:p-6">
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         Property Logo
                       </label>
-                      <div className="flex items-center gap-4">
+                      <div className="flex flex-col sm:flex-row items-center gap-4">
                         {propertyInfo.logoUrl ? (
                           <img
                             src={propertyInfo.logoUrl}
@@ -1224,7 +1245,7 @@ const printStyles = `
                           </div>
                         )}
 
-                        <div className="flex-1">
+                        <div className="flex-1 w-full sm:w-auto text-center sm:text-left">
                           <input
                             type="file"
                             accept="image/*"
@@ -1335,7 +1356,7 @@ const printStyles = `
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-2">
                           City
@@ -1601,18 +1622,20 @@ const printStyles = `
   
   <div className="space-y-4">
     <div>
-      <label className="flex items-center space-x-2">
+      <label className="flex items-start space-x-2">
         <input
           type="checkbox"
           checked={autoCreateCheckIn}
           onChange={(e) => setAutoCreateCheckIn(e.target.checked)}
-          className="w-4 h-4 rounded"
+          className="w-4 h-4 rounded mt-0.5 flex-shrink-0"
         />
-        <span className="text-sm font-medium">Automatically create check-in when saving new invoices</span>
+        <div>
+          <span className="text-sm font-medium block">Automatically create check-in when saving new invoices</span>
+          <p className="text-xs text-gray-500 mt-1">
+            When enabled, a pending check-in will be automatically created whenever you save a new invoice with booking details.
+          </p>
+        </div>
       </label>
-      <p className="text-xs text-gray-500 mt-1 ml-6">
-        When enabled, a pending check-in will be automatically created whenever you save a new invoice with booking details.
-      </p>
     </div>
   </div>
 </div>
@@ -1651,10 +1674,10 @@ const printStyles = `
 
           {/* Saved Invoices List Modal */}
           {showInvoicesList && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-3 md:p-4">
               <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-                <div className="p-4 border-b flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Saved Invoices</h2>
+                <div className="p-3 md:p-4 border-b flex items-center justify-between flex-shrink-0">
+                  <h2 className="text-lg md:text-xl font-semibold">Saved Invoices</h2>
                   <button
                     onClick={() => setShowInvoicesList(false)}
                     className="text-gray-500 hover:text-gray-700"
@@ -1663,7 +1686,7 @@ const printStyles = `
                   </button>
                 </div>
 
-                <div className="overflow-auto p-4">
+                <div className="overflow-auto p-3 md:p-4">
                   {savedInvoices.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
                       No saved invoices yet
@@ -1674,24 +1697,24 @@ const printStyles = `
                         <div
                           key={invoice.id}
                           onClick={() => loadInvoice(invoice)}
-                          className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
+                          className="border rounded-lg p-3 md:p-4 hover:bg-gray-800 cursor-pointer transition-colors"
                         >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <div className="font-semibold text-lg">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                            <div className="min-w-0">
+                              <div className="font-semibold text-base md:text-lg truncate">
                                 {invoice.invoiceNumber || "N/A"}
                               </div>
-                              <div className="text-sm text-gray-600 mt-1">
+                              <div className="text-sm text-gray-600 mt-1 truncate">
                                 Guest: {invoice.guest?.name || "N/A"}
                               </div>
-                              <div className="text-sm text-gray-600">
+                              <div className="text-sm text-gray-600 truncate">
                                 Room: {invoice.booking?.roomNumber || "N/A"} - {invoice.booking?.roomType || "N/A"}
                               </div>
-                              <div className="text-sm text-gray-600">
+                              <div className="text-sm text-gray-600 truncate">
                                 Check-in: {invoice.booking?.checkInDate || "N/A"}
                               </div>
                             </div>
-                            <div className="text-right">
+                            <div className="text-left sm:text-right flex-shrink-0">
                               <div className="text-lg font-semibold text-blue-600">
                                 R{invoice.totals?.total?.toFixed(2) || "0.00"}
                               </div>
@@ -1703,7 +1726,7 @@ const printStyles = `
                                   : "N/A"}
                               </div>
                               <div
-                                className={`text-xs mt-1 px-2 py-1 rounded ${
+                                className={`text-xs mt-1 px-2 py-1 rounded inline-block ${
                                   invoice.status === "paid"
                                     ? "bg-green-100 text-green-700"
                                     : invoice.status === "pending"
@@ -1737,17 +1760,17 @@ const printStyles = `
             {showInvoice ? "Hide Invoice" : "View Invoice"}
           </button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:gap-6">
             <div
               className={`${
                 showInvoice ? "hidden" : "block"
-              } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
+              } space-y-4 md:space-y-6 lg:block print:hidden`}
             >
              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                       <div className="flex border-b">
                                         <button
                                           onClick={() => setInputMode("manual")}
-                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
+                                          className={`flex-1 px-4 md:px-6 py-3 text-sm font-medium transition-colors ${
                                             inputMode === "manual"
                                               ? "bg-white text-blue-600 border-b-2 border-blue-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1757,7 +1780,7 @@ const printStyles = `
                                         </button>
                                         <button
                                           onClick={() => setInputMode("ai")}
-                                          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+                                          className={`flex-1 px-4 md:px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                                             inputMode === "ai"
                                               ? "bg-white text-purple-600 border-b-2 border-purple-600"
                                               : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -1769,7 +1792,7 @@ const printStyles = `
                                       </div>
                   
                                       {/* Tab Content */}
-                                      <div className="p-6">
+                                      <div className="p-4 md:p-6">
                                         {inputMode === "ai" ? (
                                           <HotelAIExtractor
                                             onDataExtracted={handleAIDataExtracted}
@@ -1786,22 +1809,22 @@ const printStyles = `
                                      {inputMode === "manual" && (
                     <>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Invoice Amount</div>
-                  <div className="text-2xl font-semibold text-blue-600">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+                <div className="bg-white p-3 md:p-4 rounded-lg border border-gray-200">
+                  <div className="text-xs md:text-sm text-gray-500 mb-1">Invoice Amount</div>
+                  <div className="text-xl md:text-2xl font-semibold text-blue-600">
                     R{total.toFixed(2)}
                   </div>
                 </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Nights</div>
-                  <div className="text-2xl font-semibold text-green-600">
+                <div className="bg-white p-3 md:p-4 rounded-lg border border-gray-200">
+                  <div className="text-xs md:text-sm text-gray-500 mb-1">Nights</div>
+                  <div className="text-xl md:text-2xl font-semibold text-green-600">
                     {numberOfNights}
                   </div>
                 </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Room</div>
-                  <div className="text-lg font-semibold text-gray-700">
+                <div className="bg-white p-3 md:p-4 rounded-lg border border-gray-200">
+                  <div className="text-xs md:text-sm text-gray-500 mb-1">Room</div>
+                  <div className="text-base md:text-lg font-semibold text-gray-700">
                     {roomNumber}
                   </div>
                 </div>
@@ -1854,23 +1877,23 @@ const printStyles = `
   />
 )}
 
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Terms & Conditions</h2>
+                  <h2 className="text-base md:text-lg font-semibold">Terms & Conditions</h2>
                 </div>
 
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b">
+                  <div className="flex flex-col sm:flex-row sm:justify-between py-2 border-b gap-1">
                     <span className="text-gray-600">Payment Terms:</span>
-                    <span className="text-sm font-medium">Due upon check-out</span>
+                    <span className="font-medium">Due upon check-out</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b">
+                  <div className="flex flex-col sm:flex-row sm:justify-between py-2 border-b gap-1">
                     <span className="text-gray-600">Cancellation Policy:</span>
-                    <span className="text-sm font-medium">48 hours notice</span>
+                    <span className="font-medium">48 hours notice</span>
                   </div>
-                  <div className="flex justify-between py-2">
+                  <div className="flex flex-col sm:flex-row sm:justify-between py-2 gap-1">
                     <span className="text-gray-600">Check-in / Check-out:</span>
-                    <span className="text-sm font-medium">2:00 PM / 11:00 AM</span>
+                    <span className="font-medium">2:00 PM / 11:00 AM</span>
                   </div>
                 </div>
               </div>
@@ -1880,8 +1903,8 @@ const printStyles = `
             {/* Invoice Preview/Print Section */}
             <div
   id="print-area"
-  className={`${!showInvoice ? "hidden lg:block" : "block"} mx-auto bg-white print:block`}
-  style={{ width: "210mm", minHeight: "297mm" }}
+  className={`${!showInvoice ? "hidden lg:block" : "block"} mx-auto bg-white print:block w-full`}
+  style={{ maxWidth: "210mm" }}
 >
           {activeView === 'invoice' && (
   <>

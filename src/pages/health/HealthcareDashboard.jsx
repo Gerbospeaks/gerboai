@@ -8,6 +8,7 @@ import Templates from "./Templates";
 import MedicalAIExtractor from "./MedicalAIExtractor";
 import MedicalMultiStepForm from "./MedicalMultiStepForm";  
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
+import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import {
   getFirestore,
   collection,
@@ -112,6 +113,16 @@ const [useAI, setUseAI] = useState(false);
   const [patients, setPatients] = useState([]);
   const [activeView, setActiveView] = useState("invoice");
   const [selectedPatient, setSelectedPatient] = useState(null);
+  
+  // Payment Processor States
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState({
+    totalPaid: 0,
+    balanceDue: 0,
+    status: "pending",
+  });
+  
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -128,6 +139,7 @@ const [useAI, setUseAI] = useState(false);
   const [doctorName, setDoctorName] = useState("Dr. Jane Smith");
   const [practiceNumber, setPracticeNumber] = useState("MP123456");
   const [additionalNotes, setAdditionalNotes] = useState("");
+  
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -207,7 +219,13 @@ const [useAI, setUseAI] = useState(false);
   useEffect(() => {
     loadPatients();
   }, []);
-
+const [items, setItems] = useState([]);
+  const [newItem, setNewItem] = useState({
+    description: "",
+    rate: "",
+    qty: "",
+    type: "Service",
+  });
   const loadInvoice = (invoice) => {
     setInvoiceId(invoice.id);
     setInvoiceNumber(invoice.invoiceNumber || "");
@@ -225,8 +243,18 @@ const [useAI, setUseAI] = useState(false);
     setPrescription(invoice.medical?.prescription || "");
     setItems(invoice.items || []);
     setShowInvoicesList(false);
+    
+    // Load payment status
+    setPaymentStatus({
+      totalPaid: invoice.totals?.paid || 0,
+      balanceDue: invoice.totals?.due || invoice.totals?.total || 0,
+      status: invoice.status || "pending",
+    });
   };
-const handleAIDataExtracted = (extractedData) => {
+   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+  const vat = subtotal * 0.15;
+  const total = subtotal + vat;
+  const handleAIDataExtracted = (extractedData) => {
   // Patient info
   if (extractedData.patient.name) setPatientName(extractedData.patient.name);
   if (extractedData.patient.email) setPatientEmail(extractedData.patient.email);
@@ -252,6 +280,94 @@ const handleAIDataExtracted = (extractedData) => {
 
   alert("✅ Medical data extracted and populated successfully!");
 };
+
+  // Payment Processor Functions
+  const handleProcessPayment = async () => {
+    if (!invoiceId || !user?.uid) {
+      alert("Please save the invoice before processing payment");
+      return;
+    }
+
+    try {
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, "invoices", invoiceId),
+      );
+
+      if (invoiceDoc.exists()) {
+        const invoiceData = invoiceDoc.data();
+        setSelectedInvoiceForPayment({
+          id: invoiceId,
+          ...invoiceData,
+        });
+        setShowPaymentModal(true);
+      } else {
+        alert("Invoice not found. Please save the invoice first.");
+      }
+    } catch (error) {
+      console.error("Error loading invoice:", error);
+      alert("Failed to load invoice for payment");
+    }
+  };
+
+  const loadPaymentStatus = async () => {
+    if (!user?.uid || !invoiceId) {
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+      return;
+    }
+
+    try {
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, "invoices", invoiceId),
+      );
+
+      if (invoiceDoc.exists()) {
+        const data = invoiceDoc.data();
+        setPaymentStatus({
+          totalPaid: data.totals?.paid || 0,
+          balanceDue: data.totals?.due || data.totals?.total || 0,
+          status: data.status || "pending",
+        });
+      } else {
+        setPaymentStatus({
+          totalPaid: 0,
+          balanceDue: total,
+          status: "pending",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading payment status:", error);
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+    }
+  };
+
+  const handlePaymentComplete = () => {
+    loadSavedInvoices();
+    loadPaymentStatus();
+    setShowPaymentModal(false);
+  };
+
+  useEffect(() => {
+    loadPaymentStatus();
+  }, [invoiceId, user?.uid]);
+
+  useEffect(() => {
+    if (!invoiceId) {
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+    }
+  }, [total, invoiceId]);
+  
   const loadSavedPatients = async () => {
     if (!user?.uid) return;
 
@@ -598,22 +714,14 @@ const printStyles = `
     window.print();
   };
 
-  const [items, setItems] = useState([]);
-  const [newItem, setNewItem] = useState({
-    description: "",
-    rate: "",
-    qty: "",
-    type: "Service",
-  });
+  
 
-  const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-  const vat = subtotal * 0.15;
-  const total = subtotal + vat;
+ 
 
   const buildInvoicePayload = (numberToUse) => ({
     invoiceNumber: numberToUse,
     locked: true,
-    status: "pending",
+    status: paymentStatus.status || "pending",
 
     dates: {
       serviceDate: new Date().toISOString(),
@@ -644,8 +752,8 @@ const printStyles = `
       subtotal,
       vat,
       total,
-      paid: 0,
-      due: total,
+      paid: paymentStatus.totalPaid || 0,
+      due: paymentStatus.balanceDue || total,
     },
 
     createdAt: serverTimestamp(),
@@ -698,6 +806,13 @@ const printStyles = `
     setTreatmentPlan("Routine examination and blood work");
     setPrescription("");
     setItems([]);
+    
+    // Reset payment status
+    setPaymentStatus({
+      totalPaid: 0,
+      balanceDue: 0,
+      status: "pending",
+    });
 
     const loadNewNumber = async () => {
       if (user?.uid) {
@@ -1056,8 +1171,8 @@ const printStyles = `
 
 
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
-      <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-16 md:ml-20"}`}>
+        <div className="flex flex-col h-screen">
         <div className="sticky top-0 z-40 flex flex-col">
           <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 py-4">
             <div className="flex items-center justify-between">
@@ -1084,6 +1199,21 @@ const printStyles = `
                   <Edit className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
+                
+                {/* Add Payment Button */}
+                <button
+                  onClick={handleProcessPayment}
+                  disabled={!invoiceId}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+                    !invoiceId
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-emerald-600 text-white hover:bg-emerald-700"
+                  }`}
+                >
+                  <CreditCard className="w-4 h-4" />
+                  Process Payment
+                </button>
+                
                 <button
                   onClick={handleSaveInvoice}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700"
@@ -1580,6 +1710,19 @@ const printStyles = `
             patientDOB={patientDOB}
             diagnosis={diagnosis}
           />
+          
+          {/* Payment Processor Modal */}
+          {showPaymentModal && selectedInvoiceForPayment && (
+            <PaymentProcessor
+              showModal={showPaymentModal}
+              setShowModal={setShowPaymentModal}
+              invoice={selectedInvoiceForPayment}
+              onPaymentComplete={handlePaymentComplete}
+              user={user}
+              businessInfo={facilityInfo}
+            />
+          )}
+          
           {/* Saved Invoices List Modal */}
           {showInvoicesList && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -1627,23 +1770,32 @@ const printStyles = `
                               <div className="text-lg font-semibold text-blue-600">
                                 R{invoice.totals?.total?.toFixed(2) || "0.00"}
                               </div>
-                              <div className="text-sm text-gray-500">
-                                {invoice.dates?.serviceDate
-                                  ? new Date(
-                                      invoice.dates.serviceDate,
-                                    ).toLocaleDateString("en-ZA")
-                                  : "N/A"}
-                              </div>
+                              {invoice.totals?.paid > 0 && (
+                                <div className="text-sm text-emerald-600 font-semibold">
+                                  Paid: R{invoice.totals.paid.toFixed(2)}
+                                </div>
+                              )}
+                              {invoice.totals?.due > 0 && (
+                                <div className="text-sm text-rose-600 font-semibold">
+                                  Due: R{invoice.totals.due.toFixed(2)}
+                                </div>
+                              )}
                               <div
                                 className={`text-xs mt-1 px-2 py-1 rounded ${
-                                  invoice.status === "completed"
-                                    ? "bg-green-100 text-green-700"
-                                    : invoice.status === "pending"
-                                      ? "bg-blue-100 text-blue-700"
-                                      : "bg-gray-100 text-gray-700"
+                                  invoice.status === "paid"
+                                    ? "bg-emerald-100 text-emerald-700"
+                                    : invoice.status === "partially_paid"
+                                      ? "bg-amber-100 text-amber-700"
+                                      : invoice.status === "pending"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "bg-gray-100 text-gray-700"
                                 }`}
                               >
-                                {invoice.status || "unknown"}
+                                {invoice.status === "paid"
+                                  ? "Paid"
+                                  : invoice.status === "partially_paid"
+                                    ? "Partial"
+                                    : "Pending"}
                               </div>
                             </div>
                           </div>
@@ -1676,7 +1828,7 @@ const printStyles = `
                 {showInvoice ? "Hide Invoice" : "View Invoice"}
               </button>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                 <div
                   className={`${
                     showInvoice ? "hidden" : "block"
@@ -1724,14 +1876,9 @@ const printStyles = `
                                     </div>
                                      {inputMode === "manual" && (
                     <>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-blue-700 text-sm font-medium">
-                      Pending Payment
-                    </span>
-                    <span className="text-blue-600">Created Today</span>
-                  </div>
+                  
 
+                  {/* Payment Status Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
                       <div className="text-sm text-gray-500 mb-1">
@@ -1741,21 +1888,111 @@ const printStyles = `
                         R{total.toFixed(2)}
                       </div>
                     </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div 
+                      className={`p-4 rounded-lg border transition-all ${
+                        paymentStatus.totalPaid > 0
+                          ? "bg-emerald-50 border-emerald-200"
+                          : "bg-white border-gray-200"
+                      }`}
+                    >
                       <div className="text-sm text-gray-500 mb-1">Paid</div>
-                      <div className="text-2xl font-semibold text-green-600">
-                        R0.00
+                      <div className={`text-2xl font-semibold ${
+                        paymentStatus.totalPaid > 0 ? "text-emerald-600" : "text-gray-600"
+                      }`}>
+                        R{paymentStatus.totalPaid.toFixed(2)}
                       </div>
                     </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div 
+                      className={`p-4 rounded-lg border transition-all ${
+                        paymentStatus.balanceDue <= 0
+                          ? "bg-emerald-50 border-emerald-200"
+                          : paymentStatus.totalPaid > 0
+                            ? "bg-amber-50 border-amber-200"
+                            : "bg-white border-gray-200"
+                      }`}
+                    >
                       <div className="text-sm text-gray-500 mb-1">
                         Balance Due
                       </div>
-                      <div className="text-2xl font-semibold text-red-600">
-                        R{total.toFixed(2)}
+                      <div className={`text-2xl font-semibold ${
+                        paymentStatus.balanceDue <= 0
+                          ? "text-emerald-600"
+                          : paymentStatus.totalPaid > 0
+                            ? "text-amber-600"
+                            : "text-red-600"
+                      }`}>
+                        R{paymentStatus.balanceDue.toFixed(2)}
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Payment Status Banner */}
+                  {invoiceId && (
+                    <div
+                      className={`p-4 rounded-xl border-2 flex items-center justify-between ${
+                        paymentStatus.status === "paid"
+                          ? "bg-emerald-50 border-emerald-300"
+                          : paymentStatus.status === "partially_paid"
+                            ? "bg-amber-50 border-amber-300"
+                            : "bg-rose-50 border-rose-300"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {paymentStatus.status === "paid" ? (
+                          <>
+                            <div className="w-10 h-10 bg-emerald-200 rounded-full flex items-center justify-center">
+                              <CheckSquare className="w-6 h-6 text-emerald-600" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-emerald-900">
+                                Invoice Fully Paid
+                              </div>
+                              <div className="text-sm text-emerald-700">
+                                Payment complete - Thank you!
+                              </div>
+                            </div>
+                          </>
+                        ) : paymentStatus.status === "partially_paid" ? (
+                          <>
+                            <div className="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center">
+                              <CreditCard className="w-6 h-6 text-amber-600" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-amber-900">
+                                Partial Payment Received
+                              </div>
+                              <div className="text-sm text-amber-700">
+                                R{paymentStatus.totalPaid.toFixed(2)} paid • R
+                                {paymentStatus.balanceDue.toFixed(2)} remaining
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center">
+                              <Wallet className="w-6 h-6 text-rose-600" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-rose-900">Payment Pending</div>
+                              <div className="text-sm text-rose-700">
+                                Full amount due: R{paymentStatus.balanceDue.toFixed(2)}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {paymentStatus.status !== "paid" && (
+                        <button
+                          onClick={handleProcessPayment}
+                          className="px-4 py-2 bg-white border-2 border-current rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2"
+                        >
+                          <CreditCard className="w-4 h-4" />
+                          Record Payment
+                        </button>
+                      )}
+                    </div>
+                  )}
 
                   {inputMode === "manual" && (
   <MedicalMultiStepForm
@@ -1861,11 +2098,11 @@ const printStyles = `
                         total={total}
                         serviceType="MEDICAL"
                         documentType="medical"
-                        showStamp={stampSettings.enabled} // Add this
-                        stampText={stampSettings.text} // Add this
-                        stampColor={stampSettings.color} // Add this
+                        showStamp={stampSettings.enabled}
+                        stampText={stampSettings.text}
+                        stampColor={stampSettings.color}
                         showStampDate={stampSettings.showDate}
-                        
+                        paymentStatus={paymentStatus}
                       />
                     </>
                   )}
