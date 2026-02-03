@@ -748,7 +748,7 @@ const ConstructionDashboard = () => {
 
       {/* ── Collapsed Sidebar ────────────────────────────────────────────── */}
       <div
-        className={`${sidebarOpen ? "hidden" : "block"} fixed z-40 w-16 md:w-20 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 border-r border-stone-700/50 h-full print:hidden transition-all duration-300 shadow-2xl`}
+        className={`${sidebarOpen ? "hidden" : "hidden md:block"} fixed z-40 w-16 md:w-20 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 border-r border-stone-700/50 h-full print:hidden transition-all duration-300 shadow-2xl`}
       >
         <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
           {/* expand toggle */}

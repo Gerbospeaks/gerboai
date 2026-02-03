@@ -953,7 +953,7 @@ const MechanicsDashboard = () => {
       {/* Collapsed Sidebar (Icon Only) - Enhanced for Mobile */}
       <div
         className={`${
-          sidebarOpen ? "hidden" : "block"
+          sidebarOpen ? "hidden" : "hidden md:block"
         } fixed z-40 w-16 md:w-20 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 h-full print:hidden transition-all duration-300 shadow-2xl`}
       >
         <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">

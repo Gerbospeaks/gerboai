@@ -675,7 +675,7 @@ const printStyles = `
 {/* Collapsed Sidebar (Icon Only) */}
 <div
   className={`${
-    sidebarOpen ? "hidden" : "block"
+    sidebarOpen ? "hidden" : "hidden md:block"
   } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
 >
   <div className="flex flex-col items-center py-4 space-y-4">
