@@ -871,7 +871,7 @@ const AccountingDashboard = () => {
           sidebarOpen ? "hidden" : "hidden md:block"
         } fixed z-40 w-16 md:w-20 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 h-full print:hidden transition-all duration-300 shadow-2xl`}
       >
-        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
+        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6 ">
           <button
             onClick={() => setSidebarOpen(true)}
             className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:scale-110"
@@ -1165,7 +1165,7 @@ const AccountingDashboard = () => {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-16 md:ml-20"}`}
+        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
       >
         <div className="flex flex-col h-screen">
           {/* Header */}

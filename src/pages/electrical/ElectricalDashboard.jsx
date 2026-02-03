@@ -953,7 +953,7 @@ const ElectricalDashboard = () => {
       </div>
 
       {/* ── Main Content Area ────────────────────────────────────────────── */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-16 md:ml-20"}`}>
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}>
         <div className="flex flex-col h-screen">
           {/* ── Header ──────────────────────────────────────────────────── */}
           <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">

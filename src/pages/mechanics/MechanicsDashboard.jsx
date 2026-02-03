@@ -1262,7 +1262,7 @@ const MechanicsDashboard = () => {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-16 md:ml-20"}`}
+        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
       >
         <div className="flex flex-col h-screen">
           {/* Enhanced Header - Mobile Optimized */}
