@@ -111,6 +111,8 @@ const generateQuoteNumber = async (userId) => {
 };
 
 const HvacDashboard = () => {
+    const [isMobile, setIsMobile] = useState(false);
+    const [isTablet, setIsTablet] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 const [inputMode, setInputMode] = useState("manual");
 const [documentType, setDocumentType] = useState("invoice"); 
@@ -138,7 +140,8 @@ const [useAI, setUseAI] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [activeView, setActiveView] = useState("invoice");
   const [showConvertModal, setShowConvertModal] = useState(false);
-
+  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
+  const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -1133,35 +1136,59 @@ const printStyles = `
         </div>
 
         {/* Customers Section */}
-        <div className="mt-2">
-          <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-            <div className="flex items-center space-x-3">
-              <Users className="w-5 h-5" />
-              <span className="text-sm font-medium">Customers</span>
-            </div>
-            <ChevronDown className="w-4 h-4" />
-          </div>
+       <div className="mt-2 md:mt-3">
+  <div 
+    onClick={() => setIsClientsOpen(!isClientsOpen)}
+    className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30"
+  >
+    <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+      <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+      <span className="text-xs md:text-sm font-semibold truncate">
+        Clients
+      </span>
+    </div>
+    <ChevronDown 
+      className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
+        isClientsOpen ? 'rotate-180' : ''
+      }`} 
+    />
+  </div>
 
-          <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-            <div
-              onClick={handleAddNewCustomer}
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-            >
-              Add Customer
-            </div>
-            <div
-              onClick={() => setShowCustomersListModal(true)}
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-            >
-              <div className="flex items-center justify-between">
-                <span>All Customers</span>
-                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                  {savedCustomers.length}
-                </span>
-              </div>
-            </div>
-          </div>
+  {/* Conditional rendering with animation */}
+  <div 
+    className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
+      isClientsOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+    }`}
+  >
+    <div
+      onClick={() => {
+        handleAddNewCustomer();
+        if (isMobile) setSidebarOpen(false);
+      }}
+      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
+    >
+      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+      <span className="truncate">Add Client</span>
+    </div>
+    <div
+      onClick={() => {
+        setShowCustomersListModal(true);
+        if (isMobile) setSidebarOpen(false);
+      }}
+      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 min-w-0">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+          <span className="truncate">All Clients</span>
         </div>
+        <span className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
+          {savedCustomers.length}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
 
         <div
           onClick={() => setActiveView("templates")}

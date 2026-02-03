@@ -92,6 +92,8 @@ const SecurityDashboard = () => {
   const [showIncidentsList, setShowIncidentsList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [activeView, setActiveView] = useState("invoice");
+  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
+  const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [stampSettings, setStampSettings] = useState({

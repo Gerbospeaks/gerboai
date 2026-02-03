@@ -102,6 +102,8 @@ const [useAI, setUseAI] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [activeView, setActiveView] = useState("invoice");
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
+    const [isClientsOpen, setIsClientsOpen] = useState(false);
 const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
   color: "#d32f2f",

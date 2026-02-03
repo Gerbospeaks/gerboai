@@ -113,6 +113,8 @@ const [useAI, setUseAI] = useState(false);
   const [patients, setPatients] = useState([]);
   const [activeView, setActiveView] = useState("invoice");
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
+  const [isClientsOpen, setIsClientsOpen] = useState(false);
   
   // Payment Processor States
   const [showPaymentModal, setShowPaymentModal] = useState(false);

@@ -143,7 +143,8 @@ const ConstructionDashboard = () => {
     balanceDue: 0,
     status: "pending",
   });
-
+const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
+  const [isClientsOpen, setIsClientsOpen] = useState(false);
   // ── stamp ────────────────────────────────────────────────────────────────
   const [stampSettings, setStampSettings] = useState({
     text: "PAID",
@@ -852,62 +853,124 @@ const ConstructionDashboard = () => {
               </div>
 
               {/* Quotes & Invoices dropdown */}
-              <div className="mt-2 md:mt-3">
-                <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-amber-600/20 hover:to-amber-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-amber-500/30">
-                  <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                    <Receipt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Quotes & Invoices</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4 flex-shrink-0 group-hover:translate-y-0.5 transition-transform duration-300" />
-                </div>
+             <div className="mt-2 md:mt-3">
+  <div 
+    onClick={() => setIsQuotesInvoicesOpen2(!isQuotesInvoicesOpen2)}
+    className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-amber-600/20 hover:to-amber-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-amber-500/30"
+  >
+    <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+      <Receipt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+      <span className="text-xs md:text-sm font-semibold truncate">Quotes & Invoices</span>
+    </div>
+    <ChevronDown 
+      className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
+        isQuotesInvoicesOpen2 ? 'rotate-180' : ''
+      }`} 
+    />
+  </div>
 
-                <div className="ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-stone-700/50 pl-3 md:pl-4">
-                  <div onClick={() => { handleNewQuote(); setActiveView("quote"); if (isMobile) setSidebarOpen(false); }} className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                    <span className="truncate">Create Quote</span>
-                  </div>
-                  <div onClick={() => { handleNewInvoice(); setActiveView("quote"); if (isMobile) setSidebarOpen(false); }} className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                    <span className="truncate">Create Invoice</span>
-                  </div>
-                  <div onClick={() => { setShowQuotesList(!showQuotesList); if (isMobile) setSidebarOpen(false); }} className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                        <span className="truncate">All {documentType === "quote" ? "Quotes" : "Invoices"}</span>
-                      </div>
-                      <span className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">{savedQuotes.length}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+  {/* Conditional rendering with animation */}
+  <div 
+    className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-stone-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
+      isQuotesInvoicesOpen2 ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+    }`}
+  >
+    <div 
+      onClick={() => { 
+        handleNewQuote(); 
+        setActiveView("quote"); 
+        if (isMobile) setSidebarOpen(false); 
+      }} 
+      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
+    >
+      <div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
+      <span className="truncate">Create Quote</span>
+    </div>
+    <div 
+      onClick={() => { 
+        handleNewInvoice(); 
+        setActiveView("quote"); 
+        if (isMobile) setSidebarOpen(false); 
+      }} 
+      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
+    >
+      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
+      <span className="truncate">Create Invoice</span>
+    </div>
+    <div 
+      onClick={() => { 
+        setShowQuotesList(!showQuotesList); 
+        if (isMobile) setSidebarOpen(false); 
+      }} 
+      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 min-w-0">
+          <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
+          <span className="truncate">All {documentType === "quote" ? "Quotes" : "Invoices"}</span>
+        </div>
+        <span className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
+          {savedQuotes.length}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
 
               {/* Clients dropdown */}
               <div className="mt-2 md:mt-3">
-                <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-sky-600/20 hover:to-sky-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-sky-500/30">
-                  <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                    <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Clients</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4 flex-shrink-0 group-hover:translate-y-0.5 transition-transform duration-300" />
-                </div>
+  <div 
+    onClick={() => setIsClientsOpen(!isClientsOpen)}
+    className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30"
+  >
+    <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+      <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+      <span className="text-xs md:text-sm font-semibold truncate">
+        Clients
+      </span>
+    </div>
+    <ChevronDown 
+      className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
+        isClientsOpen ? 'rotate-180' : ''
+      }`} 
+    />
+  </div>
 
-                <div className="ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-stone-700/50 pl-3 md:pl-4">
-                  <div onClick={() => { handleAddNewCustomer(); if (isMobile) setSidebarOpen(false); }} className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                    <span className="truncate">Add Client</span>
-                  </div>
-                  <div onClick={() => { setShowCustomersListModal(true); if (isMobile) setSidebarOpen(false); }} className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                        <span className="truncate">All Clients</span>
-                      </div>
-                      <span className="bg-gradient-to-r from-sky-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">{savedCustomers.length}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+  {/* Conditional rendering with animation */}
+  <div 
+    className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
+      isClientsOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+    }`}
+  >
+    <div
+      onClick={() => {
+        handleAddNewCustomer();
+        if (isMobile) setSidebarOpen(false);
+      }}
+      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
+    >
+      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+      <span className="truncate">Add Client</span>
+    </div>
+    <div
+      onClick={() => {
+        setShowCustomersListModal(true);
+        if (isMobile) setSidebarOpen(false);
+      }}
+      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 min-w-0">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+          <span className="truncate">All Clients</span>
+        </div>
+        <span className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
+          {savedCustomers.length}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
 
               {/* Schedule / Reports (desktop only) */}
               {!isMobile && (

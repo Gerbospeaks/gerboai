@@ -138,7 +138,8 @@ const ElectricalDashboard = () => {
   // ── template & input mode ────────────────────────────────────────────────
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [inputMode, setInputMode] = useState("manual");
-
+  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
+    const [isClientsOpen, setIsClientsOpen] = useState(false);
   // ── payment ──────────────────────────────────────────────────────────────
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState({
@@ -890,30 +891,58 @@ const ElectricalDashboard = () => {
 
               {/* Clients dropdown */}
               <div className="mt-2 md:mt-3">
-                <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-sky-600/20 hover:to-sky-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-sky-500/30">
-                  <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                    <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Clients</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4 flex-shrink-0 group-hover:translate-y-0.5 transition-transform duration-300" />
-                </div>
+  <div 
+    onClick={() => setIsClientsOpen(!isClientsOpen)}
+    className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30"
+  >
+    <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+      <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+      <span className="text-xs md:text-sm font-semibold truncate">
+        Clients
+      </span>
+    </div>
+    <ChevronDown 
+      className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
+        isClientsOpen ? 'rotate-180' : ''
+      }`} 
+    />
+  </div>
 
-                <div className="ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-stone-700/50 pl-3 md:pl-4">
-                  <div onClick={() => { handleAddNewCustomer(); if (isMobile) setSidebarOpen(false); }} className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                    <span className="truncate">Add Client</span>
-                  </div>
-                  <div onClick={() => { setShowCustomersListModal(true); if (isMobile) setSidebarOpen(false); }} className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                        <span className="truncate">All Clients</span>
-                      </div>
-                      <span className="bg-gradient-to-r from-sky-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">{savedCustomers.length}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+  {/* Conditional rendering with animation */}
+  <div 
+    className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
+      isClientsOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+    }`}
+  >
+    <div
+      onClick={() => {
+        handleAddNewCustomer();
+        if (isMobile) setSidebarOpen(false);
+      }}
+      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
+    >
+      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+      <span className="truncate">Add Client</span>
+    </div>
+    <div
+      onClick={() => {
+        setShowCustomersListModal(true);
+        if (isMobile) setSidebarOpen(false);
+      }}
+      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 min-w-0">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+          <span className="truncate">All Clients</span>
+        </div>
+        <span className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
+          {savedCustomers.length}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
 
               {/* Schedule / Reports (desktop only) */}
               {!isMobile && (

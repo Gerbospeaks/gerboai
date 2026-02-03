@@ -122,6 +122,8 @@ const MechanicsDashboard = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [inputMode, setInputMode] = useState("manual");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
+  const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
   const [useAI, setUseAI] = useState(false);
   const [isMobile, setIsMobile] = useState(false);

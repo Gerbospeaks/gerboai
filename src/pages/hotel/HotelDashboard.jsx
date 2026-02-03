@@ -110,6 +110,8 @@ const [useAI, setUseAI] = useState(false);
   const [guests, setGuests] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
+  const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
 const [stampSettings, setStampSettings] = useState({
    text: "APPROVED",

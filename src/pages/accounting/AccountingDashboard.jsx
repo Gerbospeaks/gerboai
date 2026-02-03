@@ -115,6 +115,8 @@ const AccountingDashboard = () => {
     useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
+  const [isClientsOpen, setIsClientsOpen] = useState(false);
 
   const [stampSettings, setStampSettings] = useState({
     text: "PAID",
@@ -311,7 +313,8 @@ const AccountingDashboard = () => {
     if (!user?.uid) return;
 
     const db = getFirestore();
-    const collectionName = documentType === "estimate" ? "estimates" : "invoices";
+    const collectionName =
+      documentType === "estimate" ? "estimates" : "invoices";
     const invoicesRef = collection(db, "users", user.uid, collectionName);
     const q = query(invoicesRef, orderBy("createdAt", "desc"), limit(50));
     const snapshot = await getDocs(q);
@@ -395,7 +398,8 @@ const AccountingDashboard = () => {
     if (!user?.uid || !invoiceId) return null;
 
     const db = getFirestore();
-    const collectionName = documentType === "estimate" ? "estimates" : "invoices";
+    const collectionName =
+      documentType === "estimate" ? "estimates" : "invoices";
     const snap = await getDoc(
       doc(db, "users", user.uid, collectionName, invoiceId),
     );
@@ -743,7 +747,8 @@ const AccountingDashboard = () => {
 
     const invoiceData = buildInvoicePayload(numberToUse);
 
-    const collectionName = documentType === "estimate" ? "estimates" : "invoices";
+    const collectionName =
+      documentType === "estimate" ? "estimates" : "invoices";
 
     if (invoiceId) {
       await updateDoc(doc(db, "users", user.uid, collectionName, invoiceId), {
@@ -1002,17 +1007,31 @@ const AccountingDashboard = () => {
               </div>
 
               <div className="mt-2 md:mt-3">
-                <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30">
+                <div
+                  onClick={() => setIsInvoicingOpen(!isInvoicingOpen)}
+                  className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
+                >
                   <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                     <Receipt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                     <span className="text-xs md:text-sm font-semibold truncate">
                       Invoicing
                     </span>
                   </div>
-                  <ChevronDown className="w-4 h-4 flex-shrink-0 group-hover:translate-y-0.5 transition-transform duration-300" />
+                  <ChevronDown
+                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
+                      isInvoicingOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </div>
 
-                <div className="ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4">
+                {/* Conditional rendering with animation */}
+                <div
+                  className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
+                    isInvoicingOpen
+                      ? "max-h-96 opacity-100"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
                   <div
                     onClick={() => {
                       handleNewEstimate();
@@ -1047,7 +1066,9 @@ const AccountingDashboard = () => {
                         <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
                         <span className="truncate">
                           All{" "}
-                          {documentType === "estimate" ? "Estimates" : "Invoices"}
+                          {documentType === "estimate"
+                            ? "Estimates"
+                            : "Invoices"}
                         </span>
                       </div>
                       <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
@@ -1059,17 +1080,29 @@ const AccountingDashboard = () => {
               </div>
 
               <div className="mt-2 md:mt-3">
-                <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30">
+                <div
+                  onClick={() => setIsClientsOpen(!isClientsOpen)}
+                  className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30"
+                >
                   <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                     <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                     <span className="text-xs md:text-sm font-semibold truncate">
                       Clients
                     </span>
                   </div>
-                  <ChevronDown className="w-4 h-4 flex-shrink-0 group-hover:translate-y-0.5 transition-transform duration-300" />
+                  <ChevronDown
+                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
+                      isClientsOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </div>
 
-                <div className="ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4">
+                {/* Conditional rendering with animation */}
+                <div
+                  className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
+                    isClientsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                  }`}
+                >
                   <div
                     onClick={() => {
                       handleAddNewCustomer();
@@ -1891,7 +1924,8 @@ const AccountingDashboard = () => {
                               </div>
                               <div className="col-span-1 sm:col-span-2">
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Address <span className="text-rose-500">*</span>
+                                  Address{" "}
+                                  <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                   type="text"
@@ -1966,7 +2000,9 @@ const AccountingDashboard = () => {
                                 <input
                                   type="text"
                                   value={billAddress}
-                                  onChange={(e) => setBillAddress(e.target.value)}
+                                  onChange={(e) =>
+                                    setBillAddress(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="Billing address if different from company address"
                                 />
@@ -2041,7 +2077,9 @@ const AccountingDashboard = () => {
                                   >
                                     <option value="Service">Service</option>
                                     <option value="Product">Product</option>
-                                    <option value="Consulting">Consulting</option>
+                                    <option value="Consulting">
+                                      Consulting
+                                    </option>
                                     <option value="Other">Other</option>
                                   </select>
                                 </div>
@@ -2149,7 +2187,9 @@ const AccountingDashboard = () => {
                                           </td>
                                           <td className="px-4 py-4 text-center">
                                             <button
-                                              onClick={() => handleRemoveItem(index)}
+                                              onClick={() =>
+                                                handleRemoveItem(index)
+                                              }
                                               className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all"
                                             >
                                               Remove
@@ -2196,7 +2236,9 @@ const AccountingDashboard = () => {
                                     </span>
                                   </div>
                                   <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-blue-300">
-                                    <span className="text-slate-900">Total:</span>
+                                    <span className="text-slate-900">
+                                      Total:
+                                    </span>
                                     <span className="text-blue-700 text-2xl">
                                       R{total.toFixed(2)}
                                     </span>
@@ -2333,21 +2375,29 @@ const AccountingDashboard = () => {
                                   </h4>
                                   <div className="text-sm text-slate-600 space-y-1">
                                     <p>
-                                      <span className="font-semibold">Number:</span>{" "}
+                                      <span className="font-semibold">
+                                        Number:
+                                      </span>{" "}
                                       {invoiceNumber}
                                     </p>
                                     <p>
-                                      <span className="font-semibold">Date:</span>{" "}
+                                      <span className="font-semibold">
+                                        Date:
+                                      </span>{" "}
                                       {new Date().toLocaleDateString()}
                                     </p>
                                     <p>
-                                      <span className="font-semibold">Type:</span>{" "}
+                                      <span className="font-semibold">
+                                        Type:
+                                      </span>{" "}
                                       {documentType === "estimate"
                                         ? "Estimate"
                                         : "Invoice"}
                                     </p>
                                     <p>
-                                      <span className="font-semibold">Status:</span>{" "}
+                                      <span className="font-semibold">
+                                        Status:
+                                      </span>{" "}
                                       <span className="text-amber-600 font-bold">
                                         Pending
                                       </span>
@@ -2405,7 +2455,10 @@ const AccountingDashboard = () => {
                               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
                             >
                               <Save className="w-5 h-5" />
-                              Save {documentType === "estimate" ? "Estimate" : "Invoice"}
+                              Save{" "}
+                              {documentType === "estimate"
+                                ? "Estimate"
+                                : "Invoice"}
                             </button>
                           )}
                         </div>

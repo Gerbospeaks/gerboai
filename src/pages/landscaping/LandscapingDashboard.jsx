@@ -107,6 +107,8 @@ const [useAI, setUseAI] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('professional');
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customers, setCustomers] = useState([]);
+  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
+  const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",

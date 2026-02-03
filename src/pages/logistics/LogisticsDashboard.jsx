@@ -110,6 +110,8 @@ const [useAI, setUseAI] = useState(false);
   const [showWaybillSticker, setShowWaybillSticker] = useState(false);
   const [savedWaybillData, setSavedWaybillData] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
+  const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
