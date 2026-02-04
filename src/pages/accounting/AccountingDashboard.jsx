@@ -887,7 +887,7 @@ const AccountingDashboard = () => {
 
           <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
-            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-1 shadow-lg">
+            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4  rounded-xl p-1 shadow-lg">
               <img src={logo} alt="" />
             </div>
           </div>
@@ -967,7 +967,7 @@ const AccountingDashboard = () => {
             <div className="flex items-center space-x-3 md:space-x-4">
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
-                <div className="relative bg-gradient-to-br from-blue-500 to-purple-600 p-1 rounded-xl shadow-lg">
+                <div className="relative  p-1 rounded-xl shadow-lg">
                  <img src={logo} alt="Company Logo" className="w-8 h-8 md:w-10 md:h-10" />
                 </div>
               </div>
@@ -1170,13 +1170,18 @@ const AccountingDashboard = () => {
           </nav>
         </div>
 
-        <div className="sticky bottom-0 left-0 right-0 p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
+        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
           <div className="flex items-center space-x-2 md:space-x-3">
             <div className="relative group flex-shrink-0">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
-                <Calculator className="w-5 h-5 text-white" />
-              </div>
+             <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
+  <img
+    src={businessInfo.logoUrl}
+    alt="Business Logo"
+    className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
+  />
+</div>
+
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">

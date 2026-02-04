@@ -974,9 +974,13 @@ const printStyles = `
 
   <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm">
     <div className="flex items-center space-x-3">
-      <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
-        <School className="w-6 h-6 text-white" />
-      </div>
+      <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
+  <img
+    src={schoolInfo.logoUrl}
+    alt="Business Logo"
+    className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
+  />
+</div>
       <div className="flex-1">
         <div className="text-sm font-semibold text-white">
           {user?.name || "Teacher"}

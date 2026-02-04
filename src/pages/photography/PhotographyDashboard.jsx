@@ -973,30 +973,35 @@ const printStyles = `
           </nav>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">
-                {user?.name?.charAt(0) || "U"}
-              </span>
-            </div>
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-white">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-slate-400">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 rounded-lg transition-all duration-200"
-              title="Logout"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+         <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
+                  <div className="flex items-center space-x-2 md:space-x-3">
+                    <div className="relative group flex-shrink-0">
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
+                     <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
+          <img
+            src={businessInfo.logoUrl}
+            alt="Business Logo"
+            className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
+          />
         </div>
+        
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
+                        {user?.name || "User"}
+                      </div>
+                      <div className="text-xs text-slate-400 truncate">
+                        {user?.email || "email@example.com"}
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
+                    >
+                      <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                    </button>
+                  </div>
+                </div>
       </div>
 
       {/* Main Content */}
