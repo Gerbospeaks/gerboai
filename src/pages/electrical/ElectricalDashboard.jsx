@@ -809,11 +809,11 @@ const ElectricalDashboard = () => {
         </div>
 
         {/* avatar bottom */}
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
+         <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center ring-2 ring-stone-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
-              <Zap className="w-6 h-6 text-white" />
+            <div className="absolute inset-0 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
+            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
+              <img src={businessInfo.logoUrl} alt="" />
             </div>
           </div>
         </div>
@@ -830,7 +830,7 @@ const ElectricalDashboard = () => {
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300" />
                 <div className="relative bg-gradient-to-br from-cyan-500 to-blue-600 p-1 rounded-xl shadow-lg">
-                  <Zap className="w-12 h-10 md:w-16 md:h-12 text-white p-2" />
+                  <img src="logo" className="w-12 h-10 md:w-16 md:h-12 text-white p-2" />
                 </div>
               </div>
             </div>

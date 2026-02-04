@@ -218,8 +218,8 @@ export default function Home() {
 
           {/* Logo */}
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
-            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-1 shadow-lg">
+            <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
+            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 rounded-xl p-1 shadow-lg">
               <img
                 src={logo}
                 alt="Logo"
@@ -278,12 +278,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* User Icon at Bottom */}
         <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300 text-white font-semibold">
-              {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
+            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
+              <img src alt="" />
             </div>
           </div>
         </div>
@@ -299,12 +298,12 @@ export default function Home() {
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <div className="flex items-center space-x-3 md:space-x-4">
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
-                <div className="relative bg-gradient-to-br from-blue-500 to-purple-600 p-1 rounded-xl shadow-lg">
+                <div className="absolute inset-0 rounded-xl opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
+                <div className="relative p-1 rounded-xl">
                   <img
                     src={logo}
                     alt="Business Logo"
-                    className="w-12 h-10 md:w-16 md:h-12 object-contain rounded-lg bg-white/10"
+                    className="w-12 h-10 md:w-16 md:h-12 object-contain rounded-lg"
                   />
                 </div>
               </div>
@@ -478,30 +477,27 @@ export default function Home() {
         </div>
 
         {/* User Profile at Bottom */}
-        <div className="sticky bottom-0 left-0 right-0 p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
-          <div className="flex items-center space-x-2 md:space-x-3">
-            <div className="relative group flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300 text-white font-semibold">
-                {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-slate-400 truncate">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-            >
-              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-            </button>
-          </div>
-        </div>
+        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
+                 <div className="flex items-center space-x-2 md:space-x-3">
+                   <div className="relative group flex-shrink-0">
+                     <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
+                     <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
+         <img
+           src={logo}
+           alt="Business Logo"
+           className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
+         />
+       </div>
+                   </div>
+                   <div className="flex-1 min-w-0">
+                     <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent truncate">{user?.name || "User"}</div>
+                     <div className="text-xs text-amber-400 truncate">{user?.email || "email@example.com"}</div>
+                   </div>
+                   <button onClick={handleLogout} className="group text-amber-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0">
+                     <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                   </button>
+                 </div>
+               </div>
       </div>
 
       {/* Main Content */}
