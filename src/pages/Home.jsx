@@ -34,6 +34,8 @@ export default function Home() {
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showInvoicesList, setShowInvoicesList] = useState(false);
+  const [invoices, setInvoices] = useState([]);
   
   const [stats, setStats] = useState({
     totalInvoices: 0,
@@ -67,6 +69,7 @@ export default function Home() {
       let totalInvoiced = 0;
       let pendingPayments = 0;
       let invoiceCount = 0;
+      const invoicesList = [];
 
       invoicesSnapshot.forEach(doc => {
         if (doc.id !== '_init') {
@@ -78,8 +81,23 @@ export default function Home() {
           if (data.status === 'pending' || data.status === 'unpaid') {
             pendingPayments += amount;
           }
+
+          // Add invoice to list
+          invoicesList.push({
+            id: doc.id,
+            ...data
+          });
         }
       });
+
+      // Sort invoices by date (newest first)
+      invoicesList.sort((a, b) => {
+        const dateA = a.date || a.createdAt || '';
+        const dateB = b.date || b.createdAt || '';
+        return dateB.localeCompare(dateA);
+      });
+
+      setInvoices(invoicesList);
 
       const quotesSnapshot = await db
         .collection('users')
@@ -362,6 +380,7 @@ export default function Home() {
                     <span className="truncate">Create Invoice</span>
                   </div>
                   <div
+                    onClick={() => setShowInvoicesList(!showInvoicesList)}
                     className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300"
                   >
                     <div className="flex items-center justify-between">
@@ -720,6 +739,114 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Invoices List Modal */}
+      {showInvoicesList && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden border border-slate-700/50">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-700/50">
+              <div>
+                <h2 className="text-2xl font-bold text-white">All Invoices</h2>
+                <p className="text-sm text-slate-400 mt-1">
+                  {stats.totalInvoices} {stats.totalInvoices === 1 ? 'invoice' : 'invoices'} found
+                </p>
+              </div>
+              <button
+                onClick={() => setShowInvoicesList(false)}
+                className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-300"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Invoices List */}
+            <div className="overflow-y-auto max-h-[calc(80vh-140px)] p-6">
+              {invoices.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <Receipt className="w-10 h-10 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-300 mb-2">No invoices yet</h3>
+                  <p className="text-slate-400 mb-6">Create your first invoice to get started</p>
+                  <button
+                    onClick={() => {
+                      setShowInvoicesList(false);
+                      navigate('/dashboard');
+                    }}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
+                  >
+                    Create Invoice
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {invoices.map((invoice) => (
+                    <div
+                      key={invoice.id}
+                      className="group bg-slate-800/50 hover:bg-slate-700/50 rounded-xl p-4 border border-slate-700/30 hover:border-slate-600/50 transition-all duration-300 cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h3 className="text-white font-semibold truncate">
+                              {invoice.invoiceNumber || invoice.id}
+                            </h3>
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0 ${
+                                invoice.status === 'paid'
+                                  ? 'bg-emerald-500/20 text-emerald-400'
+                                  : invoice.status === 'pending'
+                                  ? 'bg-yellow-500/20 text-yellow-400'
+                                  : 'bg-red-500/20 text-red-400'
+                              }`}
+                            >
+                              {invoice.status || 'Draft'}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-400">
+                            <span className="flex items-center">
+                              <Users className="w-4 h-4 mr-1.5" />
+                              {invoice.customerName || 'No customer'}
+                            </span>
+                            {invoice.date && (
+                              <span className="flex items-center">
+                                📅 {new Date(invoice.date).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4 ml-4">
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-white">
+                              {formatCurrency(invoice.total || 0)}
+                            </div>
+                            {invoice.subtotal && (
+                              <div className="text-xs text-slate-400">
+                                Subtotal: {formatCurrency(invoice.subtotal)}
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // You can add navigation to view/edit invoice here
+                              console.log('View invoice:', invoice.id);
+                            }}
+                            className="p-2 text-slate-400 hover:text-white hover:bg-slate-600/50 rounded-lg transition-all duration-300 opacity-0 group-hover:opacity-100"
+                          >
+                            <FileText className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

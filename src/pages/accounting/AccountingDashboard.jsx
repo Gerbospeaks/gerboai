@@ -888,7 +888,7 @@ const AccountingDashboard = () => {
           <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
             <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-1 shadow-lg">
-              <Calculator className="w-full h-full text-white p-1.5" />
+              <img src={logo} alt="" />
             </div>
           </div>
 
@@ -968,7 +968,7 @@ const AccountingDashboard = () => {
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
                 <div className="relative bg-gradient-to-br from-blue-500 to-purple-600 p-1 rounded-xl shadow-lg">
-                  <Calculator className="w-12 h-10 md:w-16 md:h-12 text-white p-2" />
+                 <img src={logo} alt="Company Logo" className="w-8 h-8 md:w-10 md:h-10" />
                 </div>
               </div>
             </div>
