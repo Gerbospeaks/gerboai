@@ -1004,7 +1004,7 @@ const printStyles = `
 </div>
 
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}'}`}>
       <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
         <div className="sticky top-0 z-40 flex flex-col">
         <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 py-4">
