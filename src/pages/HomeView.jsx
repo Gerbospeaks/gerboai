@@ -163,7 +163,7 @@ export default function Home() {
       {/* Welcome Section */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-          Welcome back, {user?.name || user?.email?.split('@')[0]}! 👋
+          Welcome, {user?.name || user?.email?.split('@')[0]}! 👋
         </h1>
         <p className="text-gray-600">
           Here's your business overview and performance metrics

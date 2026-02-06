@@ -22,7 +22,7 @@ import {
   limit,
   getDocs,
 } from "firebase/firestore";
-import { Printer, Download, Sparkles, Trash2, Home as HomeIcon } from "lucide-react";
+import { Printer, Download, Sparkles, Trash2, Home as HomeIcon, Wrench } from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
@@ -65,6 +65,8 @@ import {
   ArrowDownRight,
   MapPin,
   Clock,
+  Ruler,
+  Grid3x3,
 } from "lucide-react";
 
 const generateQuoteNumber = async (userId, documentType) => {
@@ -201,8 +203,8 @@ const WindowrepairDashboard = () => {
 
   const steps = [
     { number: 1, title: "Client Info", icon: Users },
-    { number: 2, title: "Property Details", icon: HomeIcon },
-    { number: 3, title: "Services", icon: ClipboardList },
+    { number: 2, title: "Window Details", icon: Grid3x3 },
+    { number: 3, title: "Repair Services", icon: Wrench },
     { number: 4, title: "Schedule & Payment", icon: Calendar },
   ];
 
@@ -355,10 +357,10 @@ const WindowrepairDashboard = () => {
     setCustomerEmail(quote.customer?.email || "");
     setCustomerPhone(quote.customer?.phone || "");
     setPropertyAddress(quote.customer?.address || "");
-    setPropertyType(quote.propertyDetails?.type || "");
-    setPropertySize(quote.propertyDetails?.size || "");
-    setRooms(quote.propertyDetails?.rooms || "");
-    setBathrooms(quote.propertyDetails?.bathrooms || "");
+    setWindowType(quote.windowDetails?.type || "");
+    setWindowCount(quote.windowDetails?.count || "");
+    setScreenType(quote.windowDetails?.screenType || "");
+    setFrameCondition(quote.windowDetails?.frameCondition || "");
     setItems(quote.items || []);
     setShowQuotesList(false);
     setPaymentStatus({
@@ -429,14 +431,14 @@ const WindowrepairDashboard = () => {
 
     const item = {
       description: newItem.description,
-      serviceType: newItem.serviceType || "Standard Cleaning",
+      serviceType: newItem.serviceType || "Screen Repair",
       rate,
       qty,
       amount,
       taxRate,
       taxAmount,
       totalAmount,
-      frequency: newItem.frequency || "One-time",
+      urgency: newItem.urgency || "Standard",
     };
 
     setItems((prev) => [...prev, item]);
@@ -444,9 +446,9 @@ const WindowrepairDashboard = () => {
       description: "",
       rate: "",
       qty: "",
-      serviceType: "Standard Cleaning",
+      serviceType: "Screen Repair",
       taxRate: "15",
-      frequency: "One-time",
+      urgency: "Standard",
     });
   };
 
@@ -456,21 +458,21 @@ const WindowrepairDashboard = () => {
   const [propertyAddress, setPropertyAddress] = useState(
     "123 Sunset Avenue, Sandton, Johannesburg, 2196",
   );
-  const [propertyType, setPropertyType] = useState("Residential");
-  const [propertySize, setPropertySize] = useState("200");
-  const [rooms, setRooms] = useState("4");
-  const [bathrooms, setBathrooms] = useState("2");
+  const [windowType, setWindowType] = useState("Standard Window");
+  const [windowCount, setWindowCount] = useState("4");
+  const [screenType, setScreenType] = useState("Fiberglass");
+  const [frameCondition, setFrameCondition] = useState("Good");
 
   const [businessInfo, setBusinessInfo] = useState({
-    businessName: "SPARKLE CLEAN SERVICES",
+    businessName: "CLEARVIEW WINDOW REPAIR",
     addressLine1: "456 Commercial Plaza",
     addressLine2: "Rosebank",
     city: "Johannesburg",
     postalCode: "2196",
     primaryPhone: "+27 11 555 0001",
     secondaryPhone: "+27 11 555 0002",
-    email: "info@sparkleclean.co.za",
-    website: "www.sparkleclean.co.za",
+    email: "info@clearviewrepair.co.za",
+    website: "www.clearviewrepair.co.za",
     registrationNumber: "2024/123456/07",
     vatNumber: "4123456789",
     logoUrl: "",
@@ -671,9 +673,9 @@ const WindowrepairDashboard = () => {
     description: "",
     rate: "",
     qty: "",
-    serviceType: "Standard Cleaning",
+    serviceType: "Screen Repair",
     taxRate: "15",
-    frequency: "One-time",
+    urgency: "Standard",
   });
 
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
@@ -708,11 +710,11 @@ const WindowrepairDashboard = () => {
       address: propertyAddress,
     },
 
-    propertyDetails: {
-      type: propertyType,
-      size: propertySize,
-      rooms: rooms,
-      bathrooms: bathrooms,
+    windowDetails: {
+      type: windowType,
+      count: windowCount,
+      screenType: screenType,
+      frameCondition: frameCondition,
     },
 
     items,
@@ -832,10 +834,10 @@ const WindowrepairDashboard = () => {
     setCustomerEmail("johnson@email.com");
     setCustomerPhone("+27 82 123 4567");
     setPropertyAddress("123 Sunset Avenue, Sandton, Johannesburg, 2196");
-    setPropertyType("Residential");
-    setPropertySize("200");
-    setRooms("4");
-    setBathrooms("2");
+    setWindowType("Standard Window");
+    setWindowCount("4");
+    setScreenType("Fiberglass");
+    setFrameCondition("Good");
     setItems([]);
 
     const loadNewNumber = async () => {
@@ -858,7 +860,7 @@ const WindowrepairDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 overflow-hidden">
+    <div className="flex h-screen w-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-50 overflow-hidden">
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
@@ -871,12 +873,12 @@ const WindowrepairDashboard = () => {
       <div
         className={`${
           sidebarOpen ? "hidden" : "hidden md:block"
-        } fixed z-40 w-16 md:w-20 bg-gradient-to-b from-cyan-900 via-cyan-800 to-cyan-900 border-r border-cyan-700/50 h-full print:hidden transition-all duration-300 shadow-2xl`}
+        } fixed z-40 w-16 md:w-20 bg-gradient-to-b from-blue-900 via-blue-800 to-blue-900 border-r border-blue-700/50 h-full print:hidden transition-all duration-300 shadow-2xl`}
       >
         <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="group p-2 md:p-3 text-cyan-400 hover:text-white hover:bg-gradient-to-r hover:from-cyan-600 hover:to-cyan-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-cyan-500/50 hover:scale-110"
+            className="group p-2 md:p-3 text-blue-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:scale-110"
             title="Expand Sidebar"
           >
             <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
@@ -885,26 +887,26 @@ const WindowrepairDashboard = () => {
           <div className="relative group">
             <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
             <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 rounded-xl p-1 shadow-lg">
-              <img src={logo} alt="Logo" className="w-full h-full text-white p-1.5" />
+              <Grid3x3 className="w-full h-full text-white p-1.5" />
             </div>
           </div>
 
           <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
             <button
-  onClick={() => setActiveView("home")}  // ADD THIS
-  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-  title="Home"
->
-  <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-  <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-</button>
+              onClick={() => setActiveView("home")}
+              className="group relative p-2 md:p-3 text-blue-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+              title="Home"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+            </button>
 
             <button
               onClick={() => setShowSettings(true)}
-              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+              className="group relative p-2 md:p-3 text-blue-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
               title="Settings"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-teal-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <Settings className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:rotate-90 transition-transform duration-500" />
             </button>
 
@@ -912,7 +914,7 @@ const WindowrepairDashboard = () => {
               <>
                 <button
                   onClick={() => setActiveView("financial-overview")}
-                  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  className="group relative p-2 md:p-3 text-blue-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
                   title="Financial Dashboard"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -924,7 +926,7 @@ const WindowrepairDashboard = () => {
                     handleNewInvoice();
                     setActiveView("quote");
                   }}
-                  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  className="group relative p-2 md:p-3 text-blue-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
                   title="Quotes & Invoices"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -933,7 +935,7 @@ const WindowrepairDashboard = () => {
 
                 <button
                   onClick={() => setShowCustomersListModal(true)}
-                  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  className="group relative p-2 md:p-3 text-blue-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
                   title="Clients"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -946,8 +948,8 @@ const WindowrepairDashboard = () => {
 
         <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
+            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center ring-2 ring-blue-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
               <img src={businessInfo.logoUrl} alt="" />
             </div>
           </div>
@@ -958,21 +960,21 @@ const WindowrepairDashboard = () => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed z-50 w-64 md:w-72 bg-gradient-to-b from-cyan-900 via-cyan-800 to-cyan-900 border-r border-cyan-700/50 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
+        } fixed z-50 w-64 md:w-72 bg-gradient-to-b from-blue-900 via-blue-800 to-blue-900 border-r border-blue-700/50 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
       >
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <div className="flex items-center space-x-3 md:space-x-4">
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
                 <div className="relative p-1 rounded-xl shadow-lg">
-                  <img src={logo} alt="Logo" className="w-10 h-12 md:w-16 md:h-12 text-white p-2" />
+                  <Grid3x3 className="w-10 h-12 md:w-16 md:h-12 text-white p-2" />
                 </div>
               </div>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="group p-2 text-cyan-400 hover:text-white hover:bg-cyan-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
+              className="group p-2 text-blue-400 hover:text-white hover:bg-blue-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
               title="Collapse Sidebar"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -981,25 +983,25 @@ const WindowrepairDashboard = () => {
 
           <nav className="space-y-1.5 md:space-y-2">
             <div
-  onClick={() => setActiveView("home")}  // ADD THIS
-  className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
->
-  <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-  <span className="text-xs md:text-sm font-semibold">Home</span>
-</div>
+              onClick={() => setActiveView("home")}
+              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-slate-600/20 hover:to-slate-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
+            >
+              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-xs md:text-sm font-semibold">Home</span>
+            </div>
 
             <div
               onClick={() => setShowSettings(true)}
-              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-teal-600/20 hover:to-teal-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-teal-500/30"
+              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-indigo-500/30"
             >
               <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
               <span className="text-xs md:text-sm font-semibold">Settings</span>
             </div>
 
-            <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-cyan-700/50">
+            <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-blue-700/50">
               <div
                 onClick={() => setActiveView("financial-overview")}
-                className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
+                className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
               >
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                 <span className="text-xs md:text-sm font-semibold truncate">
@@ -1008,132 +1010,130 @@ const WindowrepairDashboard = () => {
               </div>
 
               <div className="mt-2 md:mt-3">
-  <div 
-    onClick={() => setIsQuotesInvoicesOpen(!isQuotesInvoicesOpen)}
-    className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
-  >
-    <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-      <Receipt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-      <span className="text-xs md:text-sm font-semibold truncate">
-        Quotes & Invoices
-      </span>
-    </div>
-    <ChevronDown 
-      className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
-        isQuotesInvoicesOpen ? 'rotate-180' : ''
-      }`} 
-    />
-  </div>
+                <div 
+                  onClick={() => setIsQuotesInvoicesOpen(!isQuotesInvoicesOpen)}
+                  className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
+                >
+                  <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+                    <Receipt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Quotes & Invoices
+                    </span>
+                  </div>
+                  <ChevronDown 
+                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
+                      isQuotesInvoicesOpen ? 'rotate-180' : ''
+                    }`} 
+                  />
+                </div>
 
-  {/* Conditional rendering with animation */}
-  <div 
-    className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-cyan-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
-      isQuotesInvoicesOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-    }`}
-  >
-    <div
-      onClick={() => {
-        handleNewQuote();
-        setActiveView("quote");
-        if (isMobile) setSidebarOpen(false);
-      }}
-      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-cyan-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
-    >
-      <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-      <span className="truncate">Create Quote</span>
-    </div>
-    <div
-      onClick={() => {
-        handleNewInvoice();
-        setActiveView("quote");
-        if (isMobile) setSidebarOpen(false);
-      }}
-      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-cyan-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
-    >
-      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-      <span className="truncate">Create Invoice</span>
-    </div>
-    <div
-      onClick={() => {
-        setShowQuotesList(!showQuotesList);
-        if (isMobile) setSidebarOpen(false);
-      }}
-      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-cyan-700/30 rounded-lg cursor-pointer transition-all duration-300"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 min-w-0">
-          <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-          <span className="truncate">
-            All {documentType === "quote" ? "Quotes" : "Invoices"}
-          </span>
-        </div>
-        <span className="bg-gradient-to-r from-cyan-600 to-teal-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
-          {savedQuotes.length}
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
+                <div 
+                  className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-blue-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
+                    isQuotesInvoicesOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div
+                    onClick={() => {
+                      handleNewQuote();
+                      setActiveView("quote");
+                      if (isMobile) setSidebarOpen(false);
+                    }}
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-blue-400 hover:text-white hover:bg-blue-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+                    <span className="truncate">Create Quote</span>
+                  </div>
+                  <div
+                    onClick={() => {
+                      handleNewInvoice();
+                      setActiveView("quote");
+                      if (isMobile) setSidebarOpen(false);
+                    }}
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-blue-400 hover:text-white hover:bg-blue-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+                    <span className="truncate">Create Invoice</span>
+                  </div>
+                  <div
+                    onClick={() => {
+                      setShowQuotesList(!showQuotesList);
+                      if (isMobile) setSidebarOpen(false);
+                    }}
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-blue-400 hover:text-white hover:bg-blue-700/30 rounded-lg cursor-pointer transition-all duration-300"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+                        <span className="truncate">
+                          All {documentType === "quote" ? "Quotes" : "Invoices"}
+                        </span>
+                      </div>
+                      <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
+                        {savedQuotes.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <div className="mt-2 md:mt-3">
-  <div 
-    onClick={() => setIsClientsOpen(!isClientsOpen)}
-    className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30"
-  >
-    <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-      <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-      <span className="text-xs md:text-sm font-semibold truncate">
-        Clients
-      </span>
-    </div>
-    <ChevronDown 
-      className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
-        isClientsOpen ? 'rotate-180' : ''
-      }`} 
-    />
-  </div>
+                <div 
+                  onClick={() => setIsClientsOpen(!isClientsOpen)}
+                  className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30"
+                >
+                  <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+                    <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Clients
+                    </span>
+                  </div>
+                  <ChevronDown 
+                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
+                      isClientsOpen ? 'rotate-180' : ''
+                    }`} 
+                  />
+                </div>
 
-  {/* Conditional rendering with animation */}
-  <div 
-    className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
-      isClientsOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-    }`}
-  >
-    <div
-      onClick={() => {
-        handleAddNewCustomer();
-        if (isMobile) setSidebarOpen(false);
-      }}
-      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
-    >
-      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-      <span className="truncate">Add Client</span>
-    </div>
-    <div
-      onClick={() => {
-        setShowCustomersListModal(true);
-        if (isMobile) setSidebarOpen(false);
-      }}
-      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 min-w-0">
-          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-          <span className="truncate">All Clients</span>
-        </div>
-        <span className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
-          {savedCustomers.length}
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
+                <div 
+                  className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-blue-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
+                    isClientsOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div
+                    onClick={() => {
+                      handleAddNewCustomer();
+                      if (isMobile) setSidebarOpen(false);
+                    }}
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-blue-400 hover:text-white hover:bg-blue-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+                    <span className="truncate">Add Client</span>
+                  </div>
+                  <div
+                    onClick={() => {
+                      setShowCustomersListModal(true);
+                      if (isMobile) setSidebarOpen(false);
+                    }}
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-blue-400 hover:text-white hover:bg-blue-700/30 rounded-lg cursor-pointer transition-all duration-300"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+                        <span className="truncate">All Clients</span>
+                      </div>
+                      <span className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
+                        {savedCustomers.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {!isMobile && (
                 <>
                   <div
                     onClick={() => setActiveView("schedule")}
-                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
+                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
                   >
                     <Calendar className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                     <span className="text-xs md:text-sm font-semibold truncate">
@@ -1143,7 +1143,7 @@ const WindowrepairDashboard = () => {
 
                   <div
                     onClick={() => setActiveView("reports")}
-                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
+                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
                   >
                     <BarChart3 className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                     <span className="text-xs md:text-sm font-semibold truncate">
@@ -1159,26 +1159,26 @@ const WindowrepairDashboard = () => {
         <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
           <div className="flex items-center space-x-2 md:space-x-3">
             <div className="relative group flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
-  <img
-    src={businessInfo.logoUrl}
-    alt="Business Logo"
-    className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-  />
-</div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
+              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-blue-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
+                <img
+                  src={businessInfo.logoUrl}
+                  alt="Business Logo"
+                  className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
+                />
+              </div>
             </div>
-            <div className="flex-1 min-w-0 ">
-              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent truncate">
+            <div className="flex-1 min-w-0">
+              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent truncate">
                 {user?.name || "User"}
               </div>
-              <div className="text-xs text-cyan-400 truncate">
+              <div className="text-xs text-blue-400 truncate">
                 {user?.email || "email@example.com"}
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="group text-cyan-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
+              className="group text-blue-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
             >
               <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
             </button>
@@ -1203,15 +1203,15 @@ const WindowrepairDashboard = () => {
                 </button>
 
                 <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl shadow-lg flex-shrink-0">
-                    <img src={businessInfo.logoUrl} className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl shadow-lg flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600">
+                    <Grid3x3 className="w-4 h-4 md:w-5 md:h-5 text-white" />
                   </div>
                   <div className="min-w-0">
-                    <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-cyan-800 to-teal-600 bg-clip-text text-transparent truncate">
+                    <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-blue-800 to-indigo-600 bg-clip-text text-transparent truncate">
                       {documentType === "quote" ? "Quote" : "Invoice"} #{quoteNumber || "—"}
                     </h1>
                     <p className="text-xs text-slate-500 hidden md:block truncate">
-                      Create and manage cleaning {documentType === "quote" ? "quotes" : "invoices"}
+                      Window Screen Repair {documentType === "quote" ? "Quotes" : "Invoices"}
                     </p>
                   </div>
                 </div>
@@ -1245,7 +1245,7 @@ const WindowrepairDashboard = () => {
                   New
                 </button>
 
-                <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-xl hover:from-cyan-700 hover:to-teal-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-cyan-500/50 hover:scale-105 whitespace-nowrap">
+                <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-blue-500/50 hover:scale-105 whitespace-nowrap">
                   <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                   <span>Send</span>
                 </button>
@@ -1317,7 +1317,7 @@ const WindowrepairDashboard = () => {
                 Save
               </button>
 
-              <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-lg md:rounded-xl hover:from-cyan-700 hover:to-teal-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+              <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg md:rounded-xl hover:from-blue-700 hover:to-indigo-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
                 <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 <span>Send</span>
               </button>
@@ -1346,10 +1346,10 @@ const WindowrepairDashboard = () => {
             {showSettings && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
                 <div className="bg-white rounded-xl md:rounded-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
-                  <div className="p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-cyan-50 to-teal-50 flex-shrink-0">
+                  <div className="p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 md:space-x-3">
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-cyan-600 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
                           <Settings className="w-4 h-4 md:w-5 md:h-5 text-white" />
                         </div>
                         <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
@@ -1375,7 +1375,7 @@ const WindowrepairDashboard = () => {
                         <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
                           {businessInfo.logoUrl ? (
                             <div className="relative group">
-                              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
+                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
                               <img
                                 src={businessInfo.logoUrl}
                                 alt="Company Logo"
@@ -1383,7 +1383,7 @@ const WindowrepairDashboard = () => {
                               />
                             </div>
                           ) : (
-                            <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-cyan-400 transition-all duration-300">
+                            <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-blue-400 transition-all duration-300">
                               <Upload className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />
                             </div>
                           )}
@@ -1398,12 +1398,12 @@ const WindowrepairDashboard = () => {
                             />
                             <label
                               htmlFor="logo-upload"
-                              className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-lg md:rounded-xl hover:from-cyan-700 hover:to-teal-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
+                              className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg md:rounded-xl hover:from-blue-700 hover:to-indigo-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
                             >
                               {businessInfo.logoUrl ? "Change Logo" : "Upload Logo"}
                             </label>
                             <p className="text-xs text-slate-500 mt-2 md:mt-3 flex items-center justify-center sm:justify-start space-x-1">
-                              <span className="w-1 h-1 bg-cyan-500 rounded-full"></span>
+                              <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
                               <span>Recommended: Square image, max 5MB</span>
                             </p>
                           </div>
@@ -1424,8 +1424,8 @@ const WindowrepairDashboard = () => {
                               businessName: e.target.value,
                             })
                           }
-                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-300 font-medium text-sm md:text-base"
-                          placeholder="Sparkle Clean Services"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-medium text-sm md:text-base"
+                          placeholder="ClearView Window Repair"
                         />
                       </div>
 
@@ -1442,7 +1442,7 @@ const WindowrepairDashboard = () => {
                               registrationNumber: e.target.value,
                             })
                           }
-                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-300 text-sm md:text-base"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                           placeholder="2024/123456/07"
                         />
                       </div>
@@ -1460,14 +1460,14 @@ const WindowrepairDashboard = () => {
                               vatNumber: e.target.value,
                             })
                           }
-                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-300 text-sm md:text-base"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                           placeholder="4123456789"
                         />
                       </div>
 
                       <button
                         onClick={handleSaveBusinessInfo}
-                        className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 text-white py-4 rounded-xl hover:from-cyan-700 hover:to-teal-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
                       >
                         ✨ Save Business Information
                       </button>
@@ -1590,7 +1590,7 @@ const WindowrepairDashboard = () => {
             {activeView === "financial-overview" && <FinancialOverview user={user} />}
             {activeView === "history-view" && <HistoryView user={user} />}
             {activeView === "notes-view" && <NotesView user={user} />}
-             {activeView === "templates" && <Templates user={user} />}
+            {activeView === "templates" && <Templates user={user} />}
             {activeView === "home" && <HomeView user={user} />}
 
             {activeView === "quote" && (
@@ -1603,7 +1603,7 @@ const WindowrepairDashboard = () => {
                         onClick={() => setInputMode("manual")}
                         className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
                           inputMode === "manual"
-                            ? "bg-white text-cyan-600 border-b-2 border-cyan-600 shadow-sm"
+                            ? "bg-white text-blue-600 border-b-2 border-blue-600 shadow-sm"
                             : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                         }`}
                       >
@@ -1821,8 +1821,8 @@ const WindowrepairDashboard = () => {
                           <div className="p-8">
                             <div className="mb-8">
                               <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-                                  <Users className="w-6 h-6 text-cyan-600" />
+                                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                  <Users className="w-6 h-6 text-blue-600" />
                                 </div>
                                 Client Information
                               </h2>
@@ -1838,7 +1838,7 @@ const WindowrepairDashboard = () => {
                                   type="text"
                                   value={customerName}
                                   onChange={(e) => setCustomerName(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="Enter client name"
                                 />
                               </div>
@@ -1850,7 +1850,7 @@ const WindowrepairDashboard = () => {
                                   type="email"
                                   value={customerEmail}
                                   onChange={(e) => setCustomerEmail(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="contact@example.com"
                                 />
                               </div>
@@ -1862,7 +1862,7 @@ const WindowrepairDashboard = () => {
                                   type="tel"
                                   value={customerPhone}
                                   onChange={(e) => setCustomerPhone(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="+27 82 123 4567"
                                 />
                               </div>
@@ -1874,7 +1874,7 @@ const WindowrepairDashboard = () => {
                                   type="text"
                                   value={propertyAddress}
                                   onChange={(e) => setPropertyAddress(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="123 Sunset Avenue, Sandton, Johannesburg, 2196"
                                 />
                               </div>
@@ -1882,116 +1882,129 @@ const WindowrepairDashboard = () => {
                           </div>
                         )}
 
-                        {/* Step 2: Property Details */}
+                        {/* Step 2: Window Details */}
                         {currentStep === 2 && (
                           <div className="p-8">
                             <div className="mb-8">
                               <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
-                                  <HomeIcon className="w-6 h-6 text-teal-600" />
+                                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                  <Grid3x3 className="w-6 h-6 text-blue-600" />
                                 </div>
-                                Property Details
+                                Window Details
                               </h2>
                               <p className="text-slate-600 mt-2 ml-13">
-                                Enter property information for accurate quote
+                                Enter window and screen information for accurate quote
                               </p>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                               <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property Type
+                                  Window Type
                                 </label>
                                 <select
-                                  value={propertyType}
-                                  onChange={(e) => setPropertyType(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  value={windowType}
+                                  onChange={(e) => setWindowType(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                 >
-                                  <option value="Residential">Residential</option>
-                                  <option value="Commercial">Commercial</option>
-                                  <option value="Office">Office</option>
-                                  <option value="Retail">Retail</option>
-                                  <option value="Industrial">Industrial</option>
+                                  <option value="Standard Window">Standard Window</option>
+                                  <option value="Sliding Window">Sliding Window</option>
+                                  <option value="Bay Window">Bay Window</option>
+                                  <option value="Picture Window">Picture Window</option>
+                                  <option value="Casement Window">Casement Window</option>
+                                  <option value="Double-Hung Window">Double-Hung Window</option>
+                                  <option value="Awning Window">Awning Window</option>
                                 </select>
                               </div>
                               <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property Size (sqm)
+                                  Number of Windows
                                 </label>
                                 <input
                                   type="number"
-                                  value={propertySize}
-                                  onChange={(e) => setPropertySize(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="200"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Number of Rooms
-                                </label>
-                                <input
-                                  type="number"
-                                  value={rooms}
-                                  onChange={(e) => setRooms(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  value={windowCount}
+                                  onChange={(e) => setWindowCount(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="4"
                                 />
                               </div>
                               <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Number of Bathrooms
+                                  Screen Type
                                 </label>
-                                <input
-                                  type="number"
-                                  value={bathrooms}
-                                  onChange={(e) => setBathrooms(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="2"
-                                />
+                                <select
+                                  value={screenType}
+                                  onChange={(e) => setScreenType(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                >
+                                  <option value="Fiberglass">Fiberglass</option>
+                                  <option value="Aluminum">Aluminum</option>
+                                  <option value="Pet-Resistant">Pet-Resistant</option>
+                                  <option value="Solar">Solar Screen</option>
+                                  <option value="Privacy">Privacy Screen</option>
+                                  <option value="Retractable">Retractable</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                  Frame Condition
+                                </label>
+                                <select
+                                  value={frameCondition}
+                                  onChange={(e) => setFrameCondition(e.target.value)}
+                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                >
+                                  <option value="Good">Good</option>
+                                  <option value="Fair">Fair</option>
+                                  <option value="Needs Repair">Needs Repair</option>
+                                  <option value="Replacement Required">Replacement Required</option>
+                                </select>
                               </div>
                             </div>
 
-                            {/* Property Summary Card */}
-                            <div className="mt-6 p-4 bg-gradient-to-br from-cyan-50 to-teal-50 border border-cyan-200 rounded-lg">
-                              <h3 className="font-semibold text-cyan-900 mb-2 flex items-center gap-2">
-                                <MapPin className="w-4 h-4" />
-                                Property Summary
+                            {/* Window Summary Card */}
+                            <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                              <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                                <Grid3x3 className="w-4 h-4" />
+                                Window Summary
                               </h3>
-                              <div className="text-sm text-cyan-800 space-y-1">
+                              <div className="text-sm text-blue-800 space-y-1">
                                 <p>
-                                  <span className="font-medium">Type:</span> {propertyType}
+                                  <span className="font-medium">Type:</span> {windowType}
                                 </p>
                                 <p>
-                                  <span className="font-medium">Size:</span> {propertySize} sqm
+                                  <span className="font-medium">Count:</span> {windowCount} windows
                                 </p>
                                 <p>
-                                  <span className="font-medium">Rooms:</span> {rooms} | Bathrooms: {bathrooms}
+                                  <span className="font-medium">Screen:</span> {screenType}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Frame:</span> {frameCondition}
                                 </p>
                               </div>
                             </div>
                           </div>
                         )}
 
-                        {/* Step 3: Services */}
+                        {/* Step 3: Repair Services */}
                         {currentStep === 3 && (
                           <div className="p-8">
                             <div className="mb-8">
                               <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                  <ClipboardList className="w-6 h-6 text-purple-600" />
+                                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                  <Wrench className="w-6 h-6 text-orange-600" />
                                 </div>
-                                Cleaning Services
+                                Repair Services
                               </h2>
                               <p className="text-slate-600 mt-2 ml-13">
-                                Add cleaning services to the quote
+                                Add window repair services to the quote
                               </p>
                             </div>
 
                             {/* Add Service Form */}
                             <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 mb-6 border border-slate-200">
                               <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
-                                <Plus className="w-5 h-5 text-cyan-600" />
+                                <Plus className="w-5 h-5 text-blue-600" />
                                 Add New Service
                               </h3>
                               <div className="grid grid-cols-1 gap-4">
@@ -2008,38 +2021,37 @@ const WindowrepairDashboard = () => {
                                           serviceType: e.target.value,
                                         })
                                       }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
                                     >
-                                      <option value="Standard Cleaning">Standard Cleaning</option>
-                                      <option value="Deep Cleaning">Deep Cleaning</option>
-                                      <option value="Move In/Out Cleaning">Move In/Out Cleaning</option>
-                                      <option value="Office Cleaning">Office Cleaning</option>
-                                      <option value="Carpet Cleaning">Carpet Cleaning</option>
-                                      <option value="Window Cleaning">Window Cleaning</option>
-                                      <option value="Post-Construction">Post-Construction</option>
-                                      <option value="Specialized Service">Specialized Service</option>
+                                      <option value="Screen Repair">Screen Repair</option>
+                                      <option value="Screen Replacement">Screen Replacement</option>
+                                      <option value="Frame Repair">Frame Repair</option>
+                                      <option value="Track Cleaning">Track Cleaning</option>
+                                      <option value="Custom Screens">Custom Screens</option>
+                                      <option value="Re-screening">Re-screening</option>
+                                      <option value="Emergency Repair">Emergency Repair</option>
+                                      <option value="Hardware Replacement">Hardware Replacement</option>
                                     </select>
                                   </div>
 
                                   <div>
                                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                      Frequency
+                                      Urgency
                                     </label>
                                     <select
-                                      value={newItem.frequency}
+                                      value={newItem.urgency}
                                       onChange={(e) =>
                                         setNewItem({
                                           ...newItem,
-                                          frequency: e.target.value,
+                                          urgency: e.target.value,
                                         })
                                       }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
                                     >
-                                      <option value="One-time">One-time</option>
-                                      <option value="Weekly">Weekly</option>
-                                      <option value="Bi-weekly">Bi-weekly</option>
-                                      <option value="Monthly">Monthly</option>
-                                      <option value="Quarterly">Quarterly</option>
+                                      <option value="Standard">Standard</option>
+                                      <option value="Urgent">Urgent (24-48hrs)</option>
+                                      <option value="Emergency">Emergency (Same Day)</option>
+                                      <option value="Scheduled">Scheduled</option>
                                     </select>
                                   </div>
                                 </div>
@@ -2058,7 +2070,7 @@ const WindowrepairDashboard = () => {
                                         description: e.target.value,
                                       })
                                     }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   />
                                 </div>
 
@@ -2077,7 +2089,7 @@ const WindowrepairDashboard = () => {
                                           rate: e.target.value,
                                         })
                                       }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                     />
                                   </div>
 
@@ -2095,7 +2107,7 @@ const WindowrepairDashboard = () => {
                                           qty: e.target.value,
                                         })
                                       }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                     />
                                   </div>
 
@@ -2113,14 +2125,14 @@ const WindowrepairDashboard = () => {
                                           taxRate: e.target.value,
                                         })
                                       }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                     />
                                   </div>
 
                                   <div className="flex items-end">
                                     <button
                                       onClick={handleAddItem}
-                                      className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-lg px-4 py-2 hover:from-cyan-700 hover:to-teal-700 flex items-center justify-center gap-2 transition-all font-semibold shadow-md hover:shadow-lg"
+                                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg px-4 py-2 hover:from-blue-700 hover:to-indigo-700 flex items-center justify-center gap-2 transition-all font-semibold shadow-md hover:shadow-lg"
                                     >
                                       <Plus className="w-4 h-4" />
                                       Add Service
@@ -2147,7 +2159,7 @@ const WindowrepairDashboard = () => {
                                           Type
                                         </th>
                                         <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                          Frequency
+                                          Urgency
                                         </th>
                                         <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
                                           Rate
@@ -2176,13 +2188,19 @@ const WindowrepairDashboard = () => {
                                             {item.description}
                                           </td>
                                           <td className="px-4 py-4 text-sm">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-cyan-100 text-cyan-700">
-                                              {item.serviceType || "Standard Cleaning"}
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                                              {item.serviceType || "Screen Repair"}
                                             </span>
                                           </td>
                                           <td className="px-4 py-4 text-sm">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-700">
-                                              {item.frequency || "One-time"}
+                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                                              item.urgency === "Emergency" 
+                                                ? "bg-red-100 text-red-700" 
+                                                : item.urgency === "Urgent"
+                                                ? "bg-orange-100 text-orange-700"
+                                                : "bg-green-100 text-green-700"
+                                            }`}>
+                                              {item.urgency || "Standard"}
                                             </span>
                                           </td>
                                           <td className="px-4 py-4 text-sm text-right text-slate-700">
@@ -2215,20 +2233,20 @@ const WindowrepairDashboard = () => {
                             ) : (
                               <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-dashed border-slate-300">
                                 <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                  <ClipboardList className="w-8 h-8 text-slate-400" />
+                                  <Wrench className="w-8 h-8 text-slate-400" />
                                 </div>
                                 <p className="text-slate-700 font-semibold text-lg">
                                   No services added yet
                                 </p>
                                 <p className="text-sm text-slate-500 mt-2">
-                                  Add cleaning services using the form above
+                                  Add window repair services using the form above
                                 </p>
                               </div>
                             )}
 
                             {/* Total Summary */}
                             {items.length > 0 && (
-                              <div className="bg-gradient-to-br from-cyan-50 to-teal-50 rounded-xl p-6 border border-cyan-200">
+                              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                                 <div className="space-y-3">
                                   <div className="flex justify-between items-center">
                                     <span className="text-slate-700 font-medium">Subtotal:</span>
@@ -2242,9 +2260,9 @@ const WindowrepairDashboard = () => {
                                       R{totalTax.toFixed(2)}
                                     </span>
                                   </div>
-                                  <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-cyan-300">
+                                  <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-blue-300">
                                     <span className="text-slate-900">Total:</span>
-                                    <span className="text-cyan-700 text-2xl">
+                                    <span className="text-blue-700 text-2xl">
                                       R{total.toFixed(2)}
                                     </span>
                                   </div>
@@ -2254,7 +2272,7 @@ const WindowrepairDashboard = () => {
                           </div>
                         )}
 
-                        {/* Step 4: Schedule & Payment */}
+                        {/* Step 4: Schedule & Payment - Updated with Window Details */}
                         {currentStep === 4 && (
                           <div className="p-8">
                             <div className="mb-8">
@@ -2271,14 +2289,14 @@ const WindowrepairDashboard = () => {
 
                             {/* Quote Summary Cards */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 rounded-xl border border-cyan-200">
+                              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
                                 <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-cyan-700">
+                                  <span className="text-sm font-semibold text-blue-700">
                                     Quote Total
                                   </span>
-                                  <DollarSign className="w-5 h-5 text-cyan-600" />
+                                  <DollarSign className="w-5 h-5 text-blue-600" />
                                 </div>
-                                <div className="text-3xl font-bold text-cyan-900">
+                                <div className="text-3xl font-bold text-blue-900">
                                   R{total.toFixed(2)}
                                 </div>
                               </div>
@@ -2349,7 +2367,7 @@ const WindowrepairDashboard = () => {
                               </div>
                             </div>
 
-                            {/* Property & Client Summary */}
+                            {/* Window & Client Summary */}
                             <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
                               <h3 className="text-lg font-bold text-slate-900 mb-4">
                                 Quote Summary
@@ -2368,19 +2386,19 @@ const WindowrepairDashboard = () => {
                                 </div>
                                 <div>
                                   <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                                    <MapPin className="w-4 h-4" />
-                                    Property Details:
+                                    <Grid3x3 className="w-4 h-4" />
+                                    Window Details:
                                   </h4>
                                   <div className="text-sm text-slate-600 space-y-1">
                                     <p className="font-semibold text-slate-900">{propertyAddress}</p>
                                     <p>
-                                      <span className="font-semibold">Type:</span> {propertyType}
+                                      <span className="font-semibold">Type:</span> {windowType}
                                     </p>
                                     <p>
-                                      <span className="font-semibold">Size:</span> {propertySize} sqm
+                                      <span className="font-semibold">Count:</span> {windowCount} windows
                                     </p>
                                     <p>
-                                      <span className="font-semibold">Rooms:</span> {rooms} | Bathrooms: {bathrooms}
+                                      <span className="font-semibold">Screen:</span> {screenType} | Frame: {frameCondition}
                                     </p>
                                   </div>
                                 </div>
@@ -2447,7 +2465,7 @@ const WindowrepairDashboard = () => {
                           {currentStep < totalSteps ? (
                             <button
                               onClick={handleNext}
-                              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-lg font-semibold hover:from-cyan-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg"
+                              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
                             >
                               Next
                               <ChevronRight className="w-5 h-5" />
