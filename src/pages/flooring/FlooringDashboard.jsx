@@ -2051,7 +2051,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                             Previous
                           </button>
 
-                          <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">Step {currentStep} of {totalSteps}</div>
+                          <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">{currentStep} of {totalSteps}</div>
 
                           {currentStep < totalSteps ? (
                             <button onClick={handleNext} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-orange-700 transition-all shadow-md hover:shadow-lg">
