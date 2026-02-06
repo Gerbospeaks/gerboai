@@ -1125,15 +1125,20 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
             {showSettings && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
                 <div className="bg-white rounded-xl md:rounded-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
-                  <div className="p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-amber-50 to-orange-50 flex-shrink-0">
+                  <div className="p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-purple-50 flex-shrink-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 md:space-x-3">
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-amber-600 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                           <Settings className="w-4 h-4 md:w-5 md:h-5 text-white" />
                         </div>
-                        <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Business Settings</h2>
+                        <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                          Business Settings
+                        </h2>
                       </div>
-                      <button onClick={() => setShowSettings(false)} className="group p-1.5 md:p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300">
+                      <button
+                        onClick={() => setShowSettings(false)}
+                        className="group p-1.5 md:p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300"
+                      >
                         <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
                       </button>
                     </div>
@@ -1141,60 +1146,408 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
 
                   <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-50 to-white flex-1">
                     <div className="space-y-4 md:space-y-6">
-                      {/* Logo */}
+                      {/* Logo Upload */}
                       <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                        <label className="block text-sm font-bold text-slate-700 mb-3">Company Logo</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-3">
+                          Business Logo
+                        </label>
                         <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
                           {businessInfo.logoUrl ? (
                             <div className="relative group">
-                              <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300" />
-                              <img src={businessInfo.logoUrl} alt="Company Logo" className="relative w-20 h-20 md:w-24 md:h-24 object-contain border-2 border-slate-200 rounded-xl shadow-lg" />
+                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
+                              <img
+                                src={businessInfo.logoUrl}
+                                alt="Business Logo"
+                                className="relative w-20 h-20 md:w-24 md:h-24 object-contain border-2 border-slate-200 rounded-xl shadow-lg"
+                              />
                             </div>
                           ) : (
-                            <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-amber-400 transition-all duration-300">
+                            <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-blue-400 transition-all duration-300">
                               <Upload className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />
                             </div>
                           )}
+
                           <div className="flex-1 text-center sm:text-left">
-                            <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-upload" />
-                            <label htmlFor="logo-upload" className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base">
-                              {businessInfo.logoUrl ? "Change Logo" : "Upload Logo"}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleLogoUpload}
+                              className="hidden"
+                              id="logo-upload"
+                            />
+                            <label
+                              htmlFor="logo-upload"
+                              className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg md:rounded-xl hover:from-blue-700 hover:to-purple-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
+                            >
+                              {businessInfo.logoUrl
+                                ? "Change Logo"
+                                : "Upload Logo"}
                             </label>
                             <p className="text-xs text-slate-500 mt-2 md:mt-3 flex items-center justify-center sm:justify-start space-x-1">
-                              <span className="w-1 h-1 bg-amber-500 rounded-full" />
+                              <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
                               <span>Recommended: Square image, max 5MB</span>
                             </p>
                           </div>
                         </div>
                       </div>
 
-                      {/* Company Name */}
+                      {/* Business Name */}
                       <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">Company Name</label>
-                        <input type="text" value={businessInfo.businessName} onChange={(e) => setBusinessInfo({ ...businessInfo, businessName: e.target.value })} className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 font-medium text-sm md:text-base" placeholder="Apex Construction Co." />
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Business Name
+                        </label>
+                        <input
+                          type="text"
+                          value={businessInfo.businessName}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              businessName: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-medium text-sm md:text-base"
+                          placeholder="V8 Powered Auto Service"
+                        />
                       </div>
 
-                      {/* Registration */}
+                      {/* Address Fields */}
                       <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">Registration Number</label>
-                        <input type="text" value={businessInfo.registrationNumber} onChange={(e) => setBusinessInfo({ ...businessInfo, registrationNumber: e.target.value })} className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 text-sm md:text-base" placeholder="2023/089412/07" />
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Address Line 1
+                        </label>
+                        <input
+                          type="text"
+                          value={businessInfo.addressLine1}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              addressLine1: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
+                        />
                       </div>
 
-                      {/* VAT */}
                       <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">VAT Number</label>
-                        <input type="text" value={businessInfo.vatNumber} onChange={(e) => setBusinessInfo({ ...businessInfo, vatNumber: e.target.value })} className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 text-sm md:text-base" placeholder="7891234567" />
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Address Line 2
+                        </label>
+                        <input
+                          type="text"
+                          value={businessInfo.addressLine2}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              addressLine2: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="WYNBERG"
+                        />
                       </div>
 
-                      <button onClick={handleSaveBusinessInfo} className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white py-4 rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg">
-                        ✨ Save Business Information
+                      {/* City and Postal Code */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                            City
+                          </label>
+                          <input
+                            type="text"
+                            value={businessInfo.city}
+                            onChange={(e) =>
+                              setBusinessInfo({
+                                ...businessInfo,
+                                city: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            placeholder="SANDTON"
+                          />
+                        </div>
+
+                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                            Postal Code
+                          </label>
+                          <input
+                            type="text"
+                            value={businessInfo.postalCode}
+                            onChange={(e) =>
+                              setBusinessInfo({
+                                ...businessInfo,
+                                postalCode: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            placeholder="2090"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Phone Numbers */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Primary Phone <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          value={businessInfo.primaryPhone}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              primaryPhone: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="082 514 4509"
+                          required
+                        />
+                      </div>
+
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Secondary Phone (Optional)
+                        </label>
+                        <input
+                          type="tel"
+                          value={businessInfo.secondaryPhone}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              secondaryPhone: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="084 583 9929"
+                        />
+                      </div>
+
+                      {/* Bank Details Section */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            Bank Details
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Bank Name
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.bankName}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  bankName: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Account Holder
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.accountHolder}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  accountHolder: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Account Number
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.accountNumber}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  accountNumber: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Branch Code
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.branchCode}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  branchCode: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stamp Settings */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <CheckSquare className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            📋 Invoice Stamp Settings
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="flex items-center space-x-2 md:space-x-3 cursor-pointer group">
+                              <input
+                                type="checkbox"
+                                checked={stampSettings.enabled}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    enabled: e.target.checked,
+                                  })
+                                }
+                                className="w-4 h-4 md:w-5 md:h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
+                              />
+                              <span className="text-xs md:text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
+                                Show approval stamp on invoices and quotes
+                              </span>
+                            </label>
+                          </div>
+
+                          {stampSettings.enabled && (
+                            <>
+                              <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                                  Stamp Text
+                                </label>
+                                <input
+                                  type="text"
+                                  value={stampSettings.text}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      text: e.target.value.toUpperCase(),
+                                    })
+                                  }
+                                  className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-bold text-sm md:text-base"
+                                  placeholder="APPROVED"
+                                  maxLength={15}
+                                />
+                                <p className="text-xs text-slate-500 mt-2 flex items-center space-x-1">
+                                  <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                                  <span>Max 15 characters</span>
+                                </p>
+                              </div>
+
+
+                              <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="block text-sm font-bold text-slate-700 mb-3">
+                                  Stamp Color
+                                </label>
+                                <select
+                                  value={stampSettings.color}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      color: e.target.value,
+                                    })
+                                  }
+                                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-semibold cursor-pointer"
+                                >
+                                  <option value="#d32f2f">
+                                    🔴 Red (Traditional)
+                                  </option>
+                                  <option value="#1976d2">
+                                    🔵 Blue (Professional)
+                                  </option>
+                                  <option value="#388e3c">
+                                    🟢 Green (Approved)
+                                  </option>
+                                  <option value="#7b1fa2">
+                                    🟣 Purple (Premium)
+                                  </option>
+                                  <option value="#000000">
+                                    ⚫ Black (Formal)
+                                  </option>
+                                  <option value="#f57c00">
+                                    🟠 Orange (Attention)
+                                  </option>
+                                </select>
+                              </div>
+
+                              <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="flex items-center space-x-3 cursor-pointer group">
+                                  <input
+                                    type="checkbox"
+                                    checked={stampSettings.showDate}
+                                    onChange={(e) =>
+                                      setStampSettings({
+                                        ...stampSettings,
+                                        showDate: e.target.checked,
+                                      })
+                                    }
+                                    className="w-5 h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
+                                  />
+                                  <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
+                                    Include date on stamp
+                                  </span>
+                                </label>
+                              </div>
+
+                              {/* Preview */}
+                              <div className="mt-6 p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-2 border-dashed border-slate-300">
+                                <p className="text-sm font-bold mb-6 text-center text-slate-600">
+                                  Stamp Preview:
+                                </p>
+                                <div className="flex justify-center">
+                                  <SignatureStamp
+                                    text={stampSettings.text}
+                                    color={stampSettings.color}
+                                    showDate={stampSettings.showDate}
+                                    rotation={-5}
+                                    size="medium"
+                                  />
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleSaveBusinessInfo}
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
+                      >
+                        💾 Save Business Information
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
             )}
-
             {/* ── Shared Modals ────────────────────────────────────────── */}
             <CustomersListModal showModal={showCustomersListModal} setShowModal={setShowCustomersListModal} customers={customers} onLoadCustomer={loadCustomer} onEditCustomer={handleEditCustomer} onAddNewCustomer={handleAddNewCustomer} />
             <CustomerModal showModal={showCustomerModal} setShowModal={setShowCustomerModal} existingCustomer={selectedCustomer} onCustomerSaved={handleCustomerSaved} />

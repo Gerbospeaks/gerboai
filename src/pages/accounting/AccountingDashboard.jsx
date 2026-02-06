@@ -1371,7 +1371,7 @@ const AccountingDashboard = () => {
           {/* Main Content */}
           <div className="flex-1 overflow-y-auto">
             {/* Settings Modal */}
-            {showSettings && (
+             {showSettings && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
                 <div className="bg-white rounded-xl md:rounded-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
                   <div className="p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-purple-50 flex-shrink-0">
@@ -1440,7 +1440,7 @@ const AccountingDashboard = () => {
                         </div>
                       </div>
 
-                      {/* Business Information Fields */}
+                      {/* Business Name */}
                       <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                         <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                           Business Name
@@ -1455,45 +1455,335 @@ const AccountingDashboard = () => {
                             })
                           }
                           className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-medium text-sm md:text-base"
-                          placeholder="Professional Accounting Services"
+                          placeholder="V8 Powered Auto Service"
                         />
                       </div>
 
-                      {/* Additional fields similar to above */}
+                      {/* Address Fields */}
                       <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                         <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                          Registration Number
+                          Address Line 1
                         </label>
                         <input
                           type="text"
-                          value={businessInfo.registrationNumber}
+                          value={businessInfo.addressLine1}
                           onChange={(e) =>
                             setBusinessInfo({
                               ...businessInfo,
-                              registrationNumber: e.target.value,
+                              addressLine1: e.target.value,
                             })
                           }
                           className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                          placeholder="2024/123456/07"
+                          placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
                         />
                       </div>
 
                       <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                         <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                          VAT Number
+                          Address Line 2
                         </label>
                         <input
                           type="text"
-                          value={businessInfo.vatNumber}
+                          value={businessInfo.addressLine2}
                           onChange={(e) =>
                             setBusinessInfo({
                               ...businessInfo,
-                              vatNumber: e.target.value,
+                              addressLine2: e.target.value,
                             })
                           }
                           className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                          placeholder="4123456789"
+                          placeholder="WYNBERG"
                         />
+                      </div>
+
+                      {/* City and Postal Code */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                            City
+                          </label>
+                          <input
+                            type="text"
+                            value={businessInfo.city}
+                            onChange={(e) =>
+                              setBusinessInfo({
+                                ...businessInfo,
+                                city: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            placeholder="SANDTON"
+                          />
+                        </div>
+
+                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                            Postal Code
+                          </label>
+                          <input
+                            type="text"
+                            value={businessInfo.postalCode}
+                            onChange={(e) =>
+                              setBusinessInfo({
+                                ...businessInfo,
+                                postalCode: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            placeholder="2090"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Phone Numbers */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Primary Phone <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          value={businessInfo.primaryPhone}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              primaryPhone: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="082 514 4509"
+                          required
+                        />
+                      </div>
+
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Secondary Phone (Optional)
+                        </label>
+                        <input
+                          type="tel"
+                          value={businessInfo.secondaryPhone}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              secondaryPhone: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="084 583 9929"
+                        />
+                      </div>
+
+                      {/* Bank Details Section */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            Bank Details
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Bank Name
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.bankName}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  bankName: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Account Holder
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.accountHolder}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  accountHolder: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Account Number
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.accountNumber}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  accountNumber: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Branch Code
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.branchCode}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  branchCode: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stamp Settings */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <CheckSquare className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            📋 Invoice Stamp Settings
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="flex items-center space-x-2 md:space-x-3 cursor-pointer group">
+                              <input
+                                type="checkbox"
+                                checked={stampSettings.enabled}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    enabled: e.target.checked,
+                                  })
+                                }
+                                className="w-4 h-4 md:w-5 md:h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
+                              />
+                              <span className="text-xs md:text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
+                                Show approval stamp on invoices and quotes
+                              </span>
+                            </label>
+                          </div>
+
+                          {stampSettings.enabled && (
+                            <>
+                              <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                                  Stamp Text
+                                </label>
+                                <input
+                                  type="text"
+                                  value={stampSettings.text}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      text: e.target.value.toUpperCase(),
+                                    })
+                                  }
+                                  className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-bold text-sm md:text-base"
+                                  placeholder="APPROVED"
+                                  maxLength={15}
+                                />
+                                <p className="text-xs text-slate-500 mt-2 flex items-center space-x-1">
+                                  <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                                  <span>Max 15 characters</span>
+                                </p>
+                              </div>
+
+
+                              <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="block text-sm font-bold text-slate-700 mb-3">
+                                  Stamp Color
+                                </label>
+                                <select
+                                  value={stampSettings.color}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      color: e.target.value,
+                                    })
+                                  }
+                                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-semibold cursor-pointer"
+                                >
+                                  <option value="#d32f2f">
+                                    🔴 Red (Traditional)
+                                  </option>
+                                  <option value="#1976d2">
+                                    🔵 Blue (Professional)
+                                  </option>
+                                  <option value="#388e3c">
+                                    🟢 Green (Approved)
+                                  </option>
+                                  <option value="#7b1fa2">
+                                    🟣 Purple (Premium)
+                                  </option>
+                                  <option value="#000000">
+                                    ⚫ Black (Formal)
+                                  </option>
+                                  <option value="#f57c00">
+                                    🟠 Orange (Attention)
+                                  </option>
+                                </select>
+                              </div>
+
+                              <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="flex items-center space-x-3 cursor-pointer group">
+                                  <input
+                                    type="checkbox"
+                                    checked={stampSettings.showDate}
+                                    onChange={(e) =>
+                                      setStampSettings({
+                                        ...stampSettings,
+                                        showDate: e.target.checked,
+                                      })
+                                    }
+                                    className="w-5 h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
+                                  />
+                                  <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
+                                    Include date on stamp
+                                  </span>
+                                </label>
+                              </div>
+
+                              {/* Preview */}
+                              <div className="mt-6 p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-2 border-dashed border-slate-300">
+                                <p className="text-sm font-bold mb-6 text-center text-slate-600">
+                                  Stamp Preview:
+                                </p>
+                                <div className="flex justify-center">
+                                  <SignatureStamp
+                                    text={stampSettings.text}
+                                    color={stampSettings.color}
+                                    showDate={stampSettings.showDate}
+                                    rotation={-5}
+                                    size="medium"
+                                  />
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
 
                       <button

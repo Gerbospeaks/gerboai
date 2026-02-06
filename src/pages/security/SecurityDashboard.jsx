@@ -965,38 +965,51 @@ const printStyles = `
           </div>
           <div className="flex-1 overflow-y-auto">
             {showSettings && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-                  <div className="p-4 border-b flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">Business Settings</h2>
-                    <button
-                      onClick={() => setShowSettings(false)}
-                      className="text-gray-500 hover:text-gray-700 text-2xl"
-                    >
-                      ✕
-                    </button>
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
+                <div className="bg-white rounded-xl md:rounded-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
+                  <div className="p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-purple-50 flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 md:space-x-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <Settings className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                        </div>
+                        <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                          Business Settings
+                        </h2>
+                      </div>
+                      <button
+                        onClick={() => setShowSettings(false)}
+                        className="group p-1.5 md:p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300"
+                      >
+                        <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="overflow-auto p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
+                  <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-50 to-white flex-1">
+                    <div className="space-y-4 md:space-y-6">
+                      {/* Logo Upload */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-3">
                           Business Logo
                         </label>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
                           {businessInfo.logoUrl ? (
-                            <img
-                              src={businessInfo.logoUrl}
-                              alt="Business Logo"
-                              className="w-24 h-24 object-contain border rounded-lg"
-                            />
+                            <div className="relative group">
+                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
+                              <img
+                                src={businessInfo.logoUrl}
+                                alt="Business Logo"
+                                className="relative w-20 h-20 md:w-24 md:h-24 object-contain border-2 border-slate-200 rounded-xl shadow-lg"
+                              />
+                            </div>
                           ) : (
-                            <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
-                              <Upload className="w-8 h-8 text-gray-400" />
+                            <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-blue-400 transition-all duration-300">
+                              <Upload className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />
                             </div>
                           )}
 
-                          <div className="flex-1">
+                          <div className="flex-1 text-center sm:text-left">
                             <input
                               type="file"
                               accept="image/*"
@@ -1006,21 +1019,23 @@ const printStyles = `
                             />
                             <label
                               htmlFor="logo-upload"
-                              className="inline-block px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer"
+                              className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg md:rounded-xl hover:from-blue-700 hover:to-purple-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
                             >
                               {businessInfo.logoUrl
                                 ? "Change Logo"
                                 : "Upload Logo"}
                             </label>
-                            <p className="text-xs text-gray-500 mt-2">
-                              Recommended: Square image, max 5MB
+                            <p className="text-xs text-slate-500 mt-2 md:mt-3 flex items-center justify-center sm:justify-start space-x-1">
+                              <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                              <span>Recommended: Square image, max 5MB</span>
                             </p>
                           </div>
                         </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
+                      {/* Business Name */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                           Business Name
                         </label>
                         <input
@@ -1032,29 +1047,14 @@ const printStyles = `
                               businessName: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-2 border rounded-lg"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-medium text-sm md:text-base"
+                          placeholder="V8 Powered Auto Service"
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          PSIRA Registration Number
-                        </label>
-                        <input
-                          type="text"
-                          value={businessInfo.psiraReg}
-                          onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              psiraReg: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
+                      {/* Address Fields */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                           Address Line 1
                         </label>
                         <input
@@ -1066,12 +1066,13 @@ const printStyles = `
                               addressLine1: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-2 border rounded-lg"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                           Address Line 2
                         </label>
                         <input
@@ -1083,13 +1084,15 @@ const printStyles = `
                               addressLine2: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-2 border rounded-lg"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="WYNBERG"
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
+                      {/* City and Postal Code */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                             City
                           </label>
                           <input
@@ -1101,12 +1104,13 @@ const printStyles = `
                                 city: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2 border rounded-lg"
+                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            placeholder="SANDTON"
                           />
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
+                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                             Postal Code
                           </label>
                           <input
@@ -1118,14 +1122,16 @@ const printStyles = `
                                 postalCode: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2 border rounded-lg"
+                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            placeholder="2090"
                           />
                         </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Primary Phone
+                      {/* Phone Numbers */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Primary Phone <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="tel"
@@ -1136,12 +1142,14 @@ const printStyles = `
                               primaryPhone: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-2 border rounded-lg"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="082 514 4509"
+                          required
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                           Secondary Phone (Optional)
                         </label>
                         <input
@@ -1153,17 +1161,25 @@ const printStyles = `
                               secondaryPhone: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-2 border rounded-lg"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="084 583 9929"
                         />
                       </div>
-                      <div className="border-t pt-4 mt-6">
-                        <h3 className="text-lg font-semibold mb-4">
-                          Bank Details
-                        </h3>
 
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
+                      {/* Bank Details Section */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            Bank Details
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                               Bank Name
                             </label>
                             <input
@@ -1175,12 +1191,12 @@ const printStyles = `
                                   bankName: e.target.value,
                                 })
                               }
-                              className="w-full px-4 py-2 border rounded-lg"
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                             />
                           </div>
 
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                               Account Holder
                             </label>
                             <input
@@ -1192,12 +1208,12 @@ const printStyles = `
                                   accountHolder: e.target.value,
                                 })
                               }
-                              className="w-full px-4 py-2 border rounded-lg"
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                             />
                           </div>
 
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                               Account Number
                             </label>
                             <input
@@ -1209,12 +1225,12 @@ const printStyles = `
                                   accountNumber: e.target.value,
                                 })
                               }
-                              className="w-full px-4 py-2 border rounded-lg"
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                             />
                           </div>
 
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                               Branch Code
                             </label>
                             <input
@@ -1226,19 +1242,26 @@ const printStyles = `
                                   branchCode: e.target.value,
                                 })
                               }
-                              className="w-full px-4 py-2 border rounded-lg"
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                             />
                           </div>
                         </div>
                       </div>
-                      <div className="border-t pt-6 mt-6">
-                        <h3 className="text-lg font-semibold mb-4">
-                          📋 Invoice Stamp Settings
-                        </h3>
 
-                        <div className="space-y-4">
-                          <div>
-                            <label className="flex items-center space-x-2 mb-4">
+                      {/* Stamp Settings */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <CheckSquare className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            📋 Invoice Stamp Settings
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="flex items-center space-x-2 md:space-x-3 cursor-pointer group">
                               <input
                                 type="checkbox"
                                 checked={stampSettings.enabled}
@@ -1248,9 +1271,9 @@ const printStyles = `
                                     enabled: e.target.checked,
                                   })
                                 }
-                                className="w-4 h-4 rounded"
+                                className="w-4 h-4 md:w-5 md:h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
                               />
-                              <span className="text-sm font-medium">
+                              <span className="text-xs md:text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
                                 Show approval stamp on invoices and quotes
                               </span>
                             </label>
@@ -1258,8 +1281,8 @@ const printStyles = `
 
                           {stampSettings.enabled && (
                             <>
-                              <div>
-                                <label className="block text-sm font-medium mb-2">
+                              <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                                   Stamp Text
                                 </label>
                                 <input
@@ -1271,17 +1294,19 @@ const printStyles = `
                                       text: e.target.value.toUpperCase(),
                                     })
                                   }
-                                  className="w-full px-4 py-2 border rounded-lg uppercase"
+                                  className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-bold text-sm md:text-base"
                                   placeholder="APPROVED"
                                   maxLength={15}
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Max 15 characters
+                                <p className="text-xs text-slate-500 mt-2 flex items-center space-x-1">
+                                  <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                                  <span>Max 15 characters</span>
                                 </p>
                               </div>
 
-                              <div>
-                                <label className="block text-sm font-medium mb-2">
+
+                              <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="block text-sm font-bold text-slate-700 mb-3">
                                   Stamp Color
                                 </label>
                                 <select
@@ -1292,7 +1317,7 @@ const printStyles = `
                                       color: e.target.value,
                                     })
                                   }
-                                  className="w-full px-4 py-2 border rounded-lg"
+                                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-semibold cursor-pointer"
                                 >
                                   <option value="#d32f2f">
                                     🔴 Red (Traditional)
@@ -1315,8 +1340,8 @@ const printStyles = `
                                 </select>
                               </div>
 
-                              <div>
-                                <label className="flex items-center space-x-2">
+                              <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="flex items-center space-x-3 cursor-pointer group">
                                   <input
                                     type="checkbox"
                                     checked={stampSettings.showDate}
@@ -1326,18 +1351,18 @@ const printStyles = `
                                         showDate: e.target.checked,
                                       })
                                     }
-                                    className="w-4 h-4 rounded"
+                                    className="w-5 h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
                                   />
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
                                     Include date on stamp
                                   </span>
                                 </label>
                               </div>
 
                               {/* Preview */}
-                              <div className="mt-4 p-6 bg-gray-800 rounded-lg border-2 border-dashed border-gray-300">
-                                <p className="text-sm font-medium mb-4 text-center text-gray-600">
-                                  Preview:
+                              <div className="mt-6 p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-2 border-dashed border-slate-300">
+                                <p className="text-sm font-bold mb-6 text-center text-slate-600">
+                                  Stamp Preview:
                                 </p>
                                 <div className="flex justify-center">
                                   <SignatureStamp
@@ -1353,11 +1378,12 @@ const printStyles = `
                           )}
                         </div>
                       </div>
+
                       <button
                         onClick={handleSaveBusinessInfo}
-                        className="w-full bg-gray-50 text-gray-800 py-3 rounded-lg hover:bg-blue-700"
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
                       >
-                        Save Business Information
+                        💾 Save Business Information
                       </button>
                     </div>
                   </div>
