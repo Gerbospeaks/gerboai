@@ -1116,7 +1116,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
 </div>
 
           {/* ── Scrollable Main Content ──────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto">
+         <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {/* ── Settings Modal ──────────────────────────────────────── */}
             {showSettings && (
                          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
