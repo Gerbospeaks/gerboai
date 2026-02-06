@@ -854,10 +854,10 @@ const SolarDashboard = () => {
           </button>
 
           {/* brand icon */}
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
-            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 rounded-xl p-1 shadow-lg">
-              <Sun className="w-full h-full text-amber-400 p-1.5" />
+         <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
+            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4  rounded-xl p-1 shadow-lg">
+              <img src={logo} alt="" />
             </div>
           </div>
 
@@ -938,13 +938,12 @@ const SolarDashboard = () => {
           {/* header */}
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <div className="flex items-center space-x-3 md:space-x-4">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300" />
-                <div className="relative p-1 rounded-xl shadow-lg">
-                  <Sun className="w-10 h-10 md:w-16 md:h-12 text-amber-400 p-2" />
-                </div>
-              </div>
-            </div>
+        <img
+          src={logo}
+          alt="Business Logo"
+          className="w-16 h-12 object-contain rounded-lg"
+        />
+      </div>
             <button
               onClick={() => setSidebarOpen(false)}
               className="group p-2 text-amber-400 hover:text-white hover:bg-orange-700/50 rounded-xl transition-all duration-300 hover:rotate-90"

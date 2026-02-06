@@ -987,14 +987,10 @@ const [incidentType, setIncidentType] = useState("");
           </button>
 
           {/* Logo */}
-          <div className="relative group">
+         <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
-            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-1 shadow-lg">
-              <img
-                src={logo}
-                alt="Logo"
-                className="w-full h-full object-contain rounded-lg"
-              />
+            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4  rounded-xl p-1 shadow-lg">
+              <img src={logo} alt="" />
             </div>
           </div>
 

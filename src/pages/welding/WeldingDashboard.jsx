@@ -74,6 +74,8 @@ import {
   Clock,
   Wrench,
   Layers,
+  Flame,
+  Shield,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -99,11 +101,9 @@ const generateQuoteNumber = async (userId, documentType) => {
       lastNumber = Number(match[1]);
     }
   }
-
-  const nextNumber = lastNumber + 1;
+const nextNumber = lastNumber + 1;
   return `${prefix}-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
-
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -139,15 +139,17 @@ const WeldingDashboard = () => {
   const [customers, setCustomers] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [propertyType, setPropertyType] = useState("Commercial");
-  const [propertySize, setPropertySize] = useState("850");
-  const [powerRating, setPowerRating] = useState("400");
+  const [projectType, setProjectType] = useState("Structural Welding");
+  const [materialType, setMaterialType] = useState("Mild Steel");
+  const [materialThickness, setMaterialThickness] = useState("10");
   const [urgencyLevel, setUrgencyLevel] = useState("Standard");
+  
   // ── template & input mode ────────────────────────────────────────────────
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [inputMode, setInputMode] = useState("manual");
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
+  
   // ── payment ──────────────────────────────────────────────────────────────
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState({
@@ -164,34 +166,37 @@ const WeldingDashboard = () => {
     enabled: true,
   });
 
-  // ── client / site fields ─────────────────────────────────────────────────
-  const [customerName, setCustomerName] = useState("Meridian Developments");
-  const [customerEmail, setCustomerEmail] = useState("projects@meridian.co.za");
-  const [customerPhone, setCustomerPhone] = useState("+27 11 234 5678");
-  const [propertyAddress, setPropertyAddress] = useState(
-    "45 Corporate Boulevard, Sandton, Johannesburg, 2196",
+  // ── client / project fields ─────────────────────────────────────────────
+  const [customerName, setCustomerName] = useState("ABC Manufacturing Ltd");
+  const [customerEmail, setCustomerEmail] = useState("procurement@abcmfg.co.za");
+  const [customerPhone, setCustomerPhone] = useState("+27 11 456 7890");
+  const [projectAddress, setProjectAddress] = useState(
+    "Industrial Park, 123 Factory Road, Germiston, 1401",
   );
 
-  // ── site-detail fields ───────────────────────────────────────────────────
-  const [siteType, setSiteType] = useState("Commercial");
-  const [siteSize, setSiteSize] = useState("1200");
-  const [floors, setFloors] = useState("3");
-  const [phases, setPhases] = useState("2");
+  // ── project detail fields ────────────────────────────────────────────────
+  const [weldingProcess, setWeldingProcess] = useState("MIG/GMAW");
+  const [projectScale, setProjectScale] = useState("Medium");
+  const [estimatedHours, setEstimatedHours] = useState("40");
+  const [certificationRequired, setCertificationRequired] = useState("Yes");
 
   // ── business info ────────────────────────────────────────────────────────
   const [businessInfo, setBusinessInfo] = useState({
-    businessName: "APEX CONSTRUCTION CO.",
-    addressLine1: "12 Industrial Park",
-    addressLine2: "Kempton Park",
+    businessName: "PRECISION WELDING SERVICES",
+    addressLine1: "45 Industrial Avenue",
+    addressLine2: "Benoni",
     city: "Johannesburg",
-    postalCode: "1619",
-    primaryPhone: "+27 11 777 0001",
-    secondaryPhone: "+27 11 777 0002",
-    email: "info@apexconstruction.co.za",
-    website: "www.apexconstruction.co.za",
-    registrationNumber: "2023/089412/07",
-    vatNumber: "7891234567",
+    postalCode: "1501",
+    primaryPhone: "+27 11 888 0001",
+    secondaryPhone: "+27 11 888 0002",
+    email: "info@precisionwelding.co.za",
+    website: "www.precisionwelding.co.za",
+    registrationNumber: "2022/045678/07",
+    vatNumber: "4567890123",
     logoUrl: "",
+    bankName: "FNB",
+    branchName: "Main Branch",
+    accountNumber: "62146991441",
   });
   const [loading, setLoading] = useState(true);
 
@@ -201,10 +206,12 @@ const WeldingDashboard = () => {
     description: "",
     rate: "",
     qty: "",
-    workCategory: "Electrical Installation", // Changed default
+    workCategory: "Structural Welding",
     taxRate: "15",
-    urgency: "Standard", // Changed from "phase"
+    urgency: "Standard",
+    phase: "Phase 1",
   });
+  
   // ── derived totals ───────────────────────────────────────────────────────
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
   const totalTax = items.reduce((sum, item) => sum + item.taxAmount, 0);
@@ -213,8 +220,8 @@ const WeldingDashboard = () => {
   // ── step definitions ─────────────────────────────────────────────────────
   const steps = [
     { number: 1, title: "Client Info", icon: Users },
-    { number: 2, title: "Property Details", icon: Building },
-    { number: 3, title: "Electrical Work", icon: Wrench },
+    { number: 2, title: "Project Details", icon: Flame },
+    { number: 3, title: "Welding Work", icon: Shield },
     { number: 4, title: "Schedule & Payment", icon: Calendar },
   ];
 
@@ -232,6 +239,7 @@ const WeldingDashboard = () => {
   }, [user, documentType]);
 
   // responsive
+ 
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
@@ -247,6 +255,7 @@ const WeldingDashboard = () => {
   useEffect(() => {
     loadCustomers();
   }, []);
+  
   useEffect(() => {
     loadPaymentStatus();
   }, [quoteId, user?.uid, documentType]);
@@ -273,12 +282,11 @@ const WeldingDashboard = () => {
     fetchBusinessInfo();
   }, [user]);
 
-  useEffect(() => {
+   useEffect(() => {
     if (!quoteId) {
       setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
     }
   }, [total, quoteId]);
-
   // ============================================================================
   // Data loaders
   // ============================================================================
@@ -297,7 +305,8 @@ const WeldingDashboard = () => {
     }
   };
 
-  const loadSavedQuotes = async () => {
+
+   const loadSavedQuotes = async () => {
     if (!user?.uid) return;
     const db = getFirestore();
     const collectionName = documentType === "quote" ? "quotes" : "invoices";
@@ -333,7 +342,8 @@ const WeldingDashboard = () => {
     }
   };
 
-  const loadPaymentStatus = async () => {
+
+ const loadPaymentStatus = async () => {
     if (!user?.uid || !quoteId) {
       setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
       return;
@@ -390,7 +400,7 @@ const WeldingDashboard = () => {
     setCustomerName(customer.name || "");
     setCustomerEmail(customer.email || "");
     setCustomerPhone(customer.phone || "");
-    setPropertyAddress(customer.address || "");
+    setProjectAddress(customer.address || "");
   };
 
   const handleCustomerSaved = () => {
@@ -406,17 +416,17 @@ const WeldingDashboard = () => {
     setCustomerName(quote.customer?.name || "");
     setCustomerEmail(quote.customer?.email || "");
     setCustomerPhone(quote.customer?.phone || "");
-    setPropertyAddress(quote.customer?.address || "");
-    setSiteType(quote.siteDetails?.type || "");
-    setSiteSize(quote.siteDetails?.size || "");
-    setFloors(quote.siteDetails?.floors || "");
-    setPhases(quote.siteDetails?.phases || "");
+    setProjectAddress(quote.customer?.address || "");
+    setWeldingProcess(quote.projectDetails?.weldingProcess || "");
+    setProjectScale(quote.projectDetails?.scale || "");
+    setEstimatedHours(quote.projectDetails?.estimatedHours || "");
+    setCertificationRequired(quote.projectDetails?.certification || "");
     setItems(quote.items || []);
     setShowQuotesList(false);
-    setPropertyType(quote.propertyDetails?.type || "");
-    setPropertySize(quote.propertyDetails?.size || "");
-    setPowerRating(quote.propertyDetails?.powerRating || "");
-    setUrgencyLevel(quote.propertyDetails?.urgency || "");
+    setProjectType(quote.projectDetails?.type || "");
+    setMaterialType(quote.projectDetails?.materialType || "");
+    setMaterialThickness(quote.projectDetails?.materialThickness || "");
+    setUrgencyLevel(quote.projectDetails?.urgency || "");
     setPaymentStatus({
       totalPaid: quote.totals?.paid || 0,
       balanceDue: quote.totals?.due || quote.totals?.total || 0,
@@ -439,15 +449,18 @@ const WeldingDashboard = () => {
       name: customerName,
       email: customerEmail,
       phone: customerPhone,
-      address: propertyAddress,
+      address: projectAddress,
     },
 
-    propertyDetails: {
-      // Changed from siteDetails
-      type: propertyType,
-      size: propertySize,
-      powerRating, // Changed from floors
-      urgency: urgencyLevel, // Changed from phases
+    projectDetails: {
+      type: projectType,
+      materialType,
+      materialThickness,
+      urgency: urgencyLevel,
+      weldingProcess,
+      scale: projectScale,
+      estimatedHours,
+      certification: certificationRequired,
     },
 
     items,
@@ -550,14 +563,14 @@ const WeldingDashboard = () => {
   const handleNewDocument = () => {
     setQuoteId(null);
     setQuoteNumber("");
-    setCustomerName("Meridian Developments");
-    setCustomerEmail("projects@meridian.co.za");
-    setCustomerPhone("+27 11 234 5678");
-    setPropertyAddress("45 Corporate Boulevard, Sandton, Johannesburg, 2196");
-    setSiteType("Commercial");
-    setSiteSize("1200");
-    setFloors("3");
-    setPhases("2");
+    setCustomerName("ABC Manufacturing Ltd");
+    setCustomerEmail("procurement@abcmfg.co.za");
+    setCustomerPhone("+27 11 456 7890");
+    setProjectAddress("Industrial Park, 123 Factory Road, Germiston, 1401");
+    setWeldingProcess("MIG/GMAW");
+    setProjectScale("Medium");
+    setEstimatedHours("40");
+    setCertificationRequired("Yes");
     setItems([]);
     setCurrentStep(1);
 
@@ -596,23 +609,25 @@ const WeldingDashboard = () => {
       ...prev,
       {
         description: newItem.description,
-        workCategory: newItem.workCategory || "Foundation Work",
+        workCategory: newItem.workCategory || "Structural Welding",
         rate,
         qty,
         amount,
         taxRate,
         taxAmount,
         totalAmount: amount + taxAmount,
+        urgency: newItem.urgency || "Standard",
         phase: newItem.phase || "Phase 1",
       },
     ]);
 
     setNewItem({
-      description: "",
+     description: "",
       rate: "",
       qty: "",
-      workCategory: "Foundation Work",
+      workCategory: "Structural Welding",
       taxRate: "15",
+      urgency: "Standard",
       phase: "Phase 1",
     });
   };
@@ -755,7 +770,7 @@ const WeldingDashboard = () => {
     setCustomerName(savedQuote.customer.name);
     setCustomerEmail(savedQuote.customer.email);
     setCustomerPhone(savedQuote.customer.phone);
-    setPropertyAddress(savedQuote.customer.address);
+    setProjectAddress(savedQuote.customer.address);
     setTimeout(() => window.print(), 300);
   };
 
@@ -768,7 +783,7 @@ const WeldingDashboard = () => {
     if (extractedData.customer?.phone)
       setCustomerPhone(extractedData.customer.phone);
     if (extractedData.customer?.address)
-      setPropertyAddress(extractedData.customer.address);
+      setProjectAddress(extractedData.customer.address);
     if (extractedData.items?.length > 0) setItems(extractedData.items);
     alert("✨ Data extracted and populated successfully!");
   };
@@ -789,12 +804,14 @@ const WeldingDashboard = () => {
       console.error("Error logging out:", error);
     }
   };
-
+const handleTemplateChange = (templateId) => {
+    setSelectedTemplate(templateId);
+  };
   // ============================================================================
   // RENDER
   // ============================================================================
   return (
-    <div className="flex h-screen w-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 overflow-hidden">
+    <div className="flex h-screen w-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50 overflow-hidden">
       {/* ── Mobile Sidebar Backdrop ──────────────────────────────────────── */}
       {sidebarOpen && (
         <div
@@ -813,7 +830,7 @@ const WeldingDashboard = () => {
           {/* expand toggle */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="group p-2 md:p-3 text-cyan-400 hover:text-white hover:bg-gradient-to-r hover:from-stone-600 hover:to-stone-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-cyan-500/50 hover:scale-110"
+            className="group p-2 md:p-3 text-orange-400 hover:text-white hover:bg-gradient-to-r hover:from-stone-600 hover:to-stone-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-orange-500/50 hover:scale-110"
             title="Expand Sidebar"
           >
             <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
@@ -821,29 +838,29 @@ const WeldingDashboard = () => {
 
           {/* brand icon */}
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
-            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 rounded-xl p-1 shadow-lg">
-              <img src={logo} className="w-full h-full text-white p-1.5" />
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
+            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4  rounded-xl p-1 shadow-lg">
+              <img src={logo} alt="" />
             </div>
           </div>
 
           {/* icon nav */}
           <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
             <button
-  onClick={() => setActiveView("home")}  // ADD THIS
-  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-  title="Home"
->
-  <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-  <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-</button>
+              onClick={() => setActiveView("home")}
+              className="group relative p-2 md:p-3 text-orange-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+              title="Home"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+            </button>
 
             <button
               onClick={() => setShowSettings(true)}
-              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+              className="group relative p-2 md:p-3 text-orange-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
               title="Settings"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <Settings className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:rotate-90 transition-transform duration-500" />
             </button>
 
@@ -851,7 +868,7 @@ const WeldingDashboard = () => {
               <>
                 <button
                   onClick={() => setActiveView("financial-overview")}
-                  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  className="group relative p-2 md:p-3 text-orange-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
                   title="Financial Dashboard"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -863,19 +880,19 @@ const WeldingDashboard = () => {
                     handleNewInvoice();
                     setActiveView("quote");
                   }}
-                  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  className="group relative p-2 md:p-3 text-orange-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
                   title="Quotes & Invoices"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <Receipt className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
                 </button>
 
                 <button
                   onClick={() => setShowCustomersListModal(true)}
-                  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  className="group relative p-2 md:p-3 text-orange-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
                   title="Clients"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-sky-600 to-sky-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-600 to-yellow-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <Users className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
                 </button>
               </>
@@ -887,7 +904,7 @@ const WeldingDashboard = () => {
         <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
           <div className="relative group">
             <div className="absolute inset-0 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
+            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center ring-2 ring-orange-700 shadow-lg group-hover:ring-4 group-hover:ring-orange-500/50 transition-all duration-300">
               <img src={businessInfo.logoUrl} alt="" />
             </div>
           </div>
@@ -904,19 +921,15 @@ const WeldingDashboard = () => {
           {/* header */}
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <div className="flex items-center space-x-3 md:space-x-4">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300" />
-                <div className="relative p-1 rounded-xl shadow-lg">
-                  <img
-                    src={logo}
-                    className="w-10 h-10 md:w-16 md:h-12 text-white p-2"
-                  />
-                </div>
-              </div>
-            </div>
+        <img
+          src={logo}
+          alt="Business Logo"
+          className="w-16 h-12 object-contain rounded-lg"
+        />
+      </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="group p-2 text-cyan-400 hover:text-white hover:bg-stone-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
+              className="group p-2 text-orange-400 hover:text-white hover:bg-stone-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
               title="Collapse Sidebar"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -926,16 +939,16 @@ const WeldingDashboard = () => {
           {/* nav */}
           <nav className="space-y-1.5 md:space-y-2">
             <div
-  onClick={() => setActiveView("home")}  // ADD THIS
-  className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
->
-  <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-  <span className="text-xs md:text-sm font-semibold">Home</span>
-</div>
+              onClick={() => setActiveView("home")}
+              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
+            >
+              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-xs md:text-sm font-semibold">Home</span>
+            </div>
 
             <div
               onClick={() => setShowSettings(true)}
-              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
+              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-red-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
             >
               <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
               <span className="text-xs md:text-sm font-semibold">Settings</span>
@@ -945,7 +958,7 @@ const WeldingDashboard = () => {
               {/* Financial Dashboard */}
               <div
                 onClick={() => setActiveView("financial-overview")}
-                className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
+                className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
               >
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                 <span className="text-xs md:text-sm font-semibold truncate">
@@ -955,7 +968,7 @@ const WeldingDashboard = () => {
 
               {/* Quotes & Invoices dropdown */}
               <div className="mt-2 md:mt-3">
-                <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-cyan-600/20 hover:to-cyan-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30">
+                <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-red-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30">
                   <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                     <Receipt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                     <span className="text-xs md:text-sm font-semibold truncate">
@@ -972,9 +985,9 @@ const WeldingDashboard = () => {
                       setActiveView("quote");
                       if (isMobile) setSidebarOpen(false);
                     }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-orange-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
                   >
-                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
                     <span className="truncate">Create Quote</span>
                   </div>
                   <div
@@ -983,7 +996,7 @@ const WeldingDashboard = () => {
                       setActiveView("quote");
                       if (isMobile) setSidebarOpen(false);
                     }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-orange-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
                     <span className="truncate">Create Invoice</span>
@@ -993,7 +1006,7 @@ const WeldingDashboard = () => {
                       setShowQuotesList(!showQuotesList);
                       if (isMobile) setSidebarOpen(false);
                     }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-cyan-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300"
+                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-orange-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 min-w-0">
@@ -1002,7 +1015,7 @@ const WeldingDashboard = () => {
                           All {documentType === "quote" ? "Quotes" : "Invoices"}
                         </span>
                       </div>
-                      <span className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
+                      <span className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
                         {savedQuotes.length}
                       </span>
                     </div>
@@ -1014,7 +1027,7 @@ const WeldingDashboard = () => {
               <div className="mt-2 md:mt-3">
                 <div
                   onClick={() => setIsClientsOpen(!isClientsOpen)}
-                  className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30"
+                  className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-amber-600/20 hover:to-yellow-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-amber-500/30"
                 >
                   <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                     <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1054,10 +1067,10 @@ const WeldingDashboard = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 min-w-0">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
                         <span className="truncate">All Clients</span>
                       </div>
-                      <span className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
+                      <span className="bg-gradient-to-r from-amber-600 to-yellow-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
                         {savedCustomers.length}
                       </span>
                     </div>
@@ -1070,7 +1083,7 @@ const WeldingDashboard = () => {
                 <>
                   <div
                     onClick={() => setActiveView("schedule")}
-                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
+                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
                   >
                     <Calendar className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                     <span className="text-xs md:text-sm font-semibold truncate">
@@ -1079,7 +1092,7 @@ const WeldingDashboard = () => {
                   </div>
                   <div
                     onClick={() => setActiveView("reports")}
-                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
+                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-red-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
                   >
                     <BarChart3 className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                     <span className="text-xs md:text-sm font-semibold truncate">
@@ -1096,8 +1109,8 @@ const WeldingDashboard = () => {
         <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
           <div className="flex items-center space-x-2 md:space-x-3">
             <div className="relative group flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
+              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-orange-500/50 transition-all duration-300">
                 <img
                   src={businessInfo.logoUrl}
                   alt="Business Logo"
@@ -1106,16 +1119,16 @@ const WeldingDashboard = () => {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent truncate">
+              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent truncate">
                 {user?.name || "User"}
               </div>
-              <div className="text-xs text-cyan-400 truncate">
+              <div className="text-xs text-orange-400 truncate">
                 {user?.email || "email@example.com"}
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="group text-cyan-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
+              className="group text-orange-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
             >
               <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
             </button>
@@ -1139,19 +1152,16 @@ const WeldingDashboard = () => {
                   <Menu className="w-5 h-5" />
                 </button>
                 <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl shadow-lg flex-shrink-0">
-                    <img
-                      src={businessInfo.logoUrl}
-                      className="w-4 h-4 md:w-5 md:h-5 text-white"
-                    />
+                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl shadow-lg flex-shrink-0 bg-gradient-to-br from-orange-500 to-red-600">
+                    <Flame className="w-5 h-5 md:w-6 md:h-6 text-white" />
                   </div>
                   <div className="min-w-0">
-                    <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-stone-800 to-blue-600 bg-clip-text text-transparent truncate">
+                    <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-stone-800 to-orange-600 bg-clip-text text-transparent truncate">
                       {documentType === "quote" ? "Quote" : "Invoice"} #
                       {quoteNumber || "—"}
                     </h1>
                     <p className="text-xs text-slate-500 hidden md:block truncate">
-                      Create and manage construction{" "}
+                      Create and manage welding{" "}
                       {documentType === "quote" ? "quotes" : "invoices"}
                     </p>
                   </div>
@@ -1185,13 +1195,13 @@ const WeldingDashboard = () => {
                   <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
                   New
                 </button>
-                <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-cyan-500/50 hover:scale-105 whitespace-nowrap">
+                <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl hover:from-orange-700 hover:to-red-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap">
                   <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                   <span>Send</span>
                 </button>
                 <button
                   onClick={handleSavePDF}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-blue-500/50 hover:scale-105 whitespace-nowrap"
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-red-700 text-white rounded-xl hover:from-orange-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap"
                 >
                   <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
                   Save PDF
@@ -1249,13 +1259,13 @@ const WeldingDashboard = () => {
                 <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
                 Save
               </button>
-              <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg md:rounded-xl hover:from-cyan-700 hover:to-blue-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+              <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-red-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
                 <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 <span>Send</span>
               </button>
               <button
                 onClick={handleSavePDF}
-                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg md:rounded-xl hover:from-blue-700 hover:to-blue-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-red-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-red-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
               >
                 <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
                 <span>PDF</span>
@@ -1276,10 +1286,10 @@ const WeldingDashboard = () => {
             {showSettings && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
                 <div className="bg-white rounded-xl md:rounded-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
-                  <div className="p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-cyan-50 to-blue-50 flex-shrink-0">
+                  <div className="p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-orange-50 to-red-50 flex-shrink-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 md:space-x-3">
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-orange-600 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
                           <Settings className="w-4 h-4 md:w-5 md:h-5 text-white" />
                         </div>
                         <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
@@ -1305,7 +1315,7 @@ const WeldingDashboard = () => {
                         <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
                           {businessInfo.logoUrl ? (
                             <div className="relative group">
-                              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300" />
+                              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300" />
                               <img
                                 src={businessInfo.logoUrl}
                                 alt="Company Logo"
@@ -1313,7 +1323,7 @@ const WeldingDashboard = () => {
                               />
                             </div>
                           ) : (
-                            <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-cyan-400 transition-all duration-300">
+                            <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-orange-400 transition-all duration-300">
                               <Upload className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />
                             </div>
                           )}
@@ -1327,14 +1337,14 @@ const WeldingDashboard = () => {
                             />
                             <label
                               htmlFor="logo-upload"
-                              className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg md:rounded-xl hover:from-cyan-700 hover:to-blue-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
+                              className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-red-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
                             >
                               {businessInfo.logoUrl
                                 ? "Change Logo"
                                 : "Upload Logo"}
                             </label>
                             <p className="text-xs text-slate-500 mt-2 md:mt-3 flex items-center justify-center sm:justify-start space-x-1">
-                              <span className="w-1 h-1 bg-cyan-500 rounded-full" />
+                              <span className="w-1 h-1 bg-orange-500 rounded-full" />
                               <span>Recommended: Square image, max 5MB</span>
                             </p>
                           </div>
@@ -1355,8 +1365,8 @@ const WeldingDashboard = () => {
                               businessName: e.target.value,
                             })
                           }
-                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-300 font-medium text-sm md:text-base"
-                          placeholder="Apex Construction Co."
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 font-medium text-sm md:text-base"
+                          placeholder="Precision Welding Services"
                         />
                       </div>
 
@@ -1374,8 +1384,8 @@ const WeldingDashboard = () => {
                               registrationNumber: e.target.value,
                             })
                           }
-                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-300 text-sm md:text-base"
-                          placeholder="2023/089412/07"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="2022/045678/07"
                         />
                       </div>
 
@@ -1393,14 +1403,14 @@ const WeldingDashboard = () => {
                               vatNumber: e.target.value,
                             })
                           }
-                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-300 text-sm md:text-base"
-                          placeholder="7891234567"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="4567890123"
                         />
                       </div>
 
                       <button
                         onClick={handleSaveBusinessInfo}
-                        className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-4 rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
+                        className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl hover:from-orange-700 hover:to-red-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
                       >
                         ✨ Save Business Information
                       </button>
@@ -1479,7 +1489,7 @@ const WeldingDashboard = () => {
                                 </div>
                               </div>
                               <div className="text-right">
-                                <div className="text-lg font-semibold text-cyan-600">
+                                <div className="text-lg font-semibold text-orange-600">
                                   R{quote.totals?.total?.toFixed(2) || "0.00"}
                                 </div>
                                 {quote.totals?.paid > 0 && (
@@ -1493,7 +1503,7 @@ const WeldingDashboard = () => {
                                   </div>
                                 )}
                                 <div
-                                  className={`text-xs mt-1 px-2 py-1 rounded ${quote.status === "paid" ? "bg-emerald-100 text-emerald-700" : quote.status === "partially_paid" ? "bg-cyan-100 text-cyan-700" : quote.status === "pending" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}
+                                  className={`text-xs mt-1 px-2 py-1 rounded ${quote.status === "paid" ? "bg-emerald-100 text-emerald-700" : quote.status === "partially_paid" ? "bg-orange-100 text-orange-700" : quote.status === "pending" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}
                                 >
                                   {quote.status === "paid"
                                     ? "Paid"
@@ -1518,19 +1528,30 @@ const WeldingDashboard = () => {
             )}
             {activeView === "history-view" && <HistoryView user={user} />}
             {activeView === "notes-view" && <NotesView user={user} />}
-             {activeView === "templates" && <Templates user={user} />}
+            {activeView === "templates" && <Templates user={user} />}
             {activeView === "home" && <HomeView user={user} />}
 
             {/* ── Quote / Invoice Builder ──────────────────────────────── */}
             {activeView === "quote" && (
               <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
                 <div className="space-y-6">
-                  {/* Tab: Manual / AI */}
+                  <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        Document Template
+                      </h3>
+                      <TemplateSelector
+                        user={user}
+                        selectedTemplate={selectedTemplate}
+                        onTemplateChange={handleTemplateChange}
+                      />
+                    </div>
+                  </div>
                   <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
                     <div className="flex border-b border-slate-200">
                       <button
                         onClick={() => setInputMode("manual")}
-                        className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "manual" ? "bg-white text-cyan-600 border-b-2 border-cyan-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                        className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "manual" ? "bg-white text-orange-600 border-b-2 border-orange-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
                       >
                         <span className="flex items-center justify-center gap-2">
                           <Edit className="w-5 h-5" />
@@ -1561,16 +1582,16 @@ const WeldingDashboard = () => {
                     <>
                       {/* Summary Cards */}
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-3 rounded-xl border border-cyan-200 shadow-sm">
+                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
                           <div className="flex items-center justify-between mb-2">
-                            <div className="text-sm font-medium text-cyan-700">
+                            <div className="text-sm font-medium text-orange-700">
                               Total Amount
                             </div>
-                            <div className="w-8 h-8 bg-cyan-200 rounded-lg flex items-center justify-center">
-                              <DollarSign className="w-5 h-5 text-cyan-600" />
+                            <div className="w-8 h-8 bg-orange-200 rounded-lg flex items-center justify-center">
+                              <DollarSign className="w-5 h-5 text-orange-600" />
                             </div>
                           </div>
-                          <div className="text-2xl font-bold text-cyan-900">
+                          <div className="text-2xl font-bold text-orange-900">
                             R{total.toFixed(2)}
                           </div>
                         </div>
@@ -1600,24 +1621,24 @@ const WeldingDashboard = () => {
                         </div>
 
                         <div
-                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.balanceDue <= 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : paymentStatus.totalPaid > 0 ? "from-cyan-50 to-cyan-100 border-cyan-200" : "from-rose-50 to-rose-100 border-rose-200"}`}
+                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.balanceDue <= 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : paymentStatus.totalPaid > 0 ? "from-orange-50 to-orange-100 border-orange-200" : "from-rose-50 to-rose-100 border-rose-200"}`}
                         >
                           <div className="flex items-center justify-between mb-2">
                             <div
-                              className={`text-sm font-medium ${paymentStatus.balanceDue <= 0 ? "text-emerald-700" : paymentStatus.totalPaid > 0 ? "text-cyan-700" : "text-rose-700"}`}
+                              className={`text-sm font-medium ${paymentStatus.balanceDue <= 0 ? "text-emerald-700" : paymentStatus.totalPaid > 0 ? "text-orange-700" : "text-rose-700"}`}
                             >
                               Balance Due
                             </div>
                             <div
-                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.balanceDue <= 0 ? "bg-emerald-200" : paymentStatus.totalPaid > 0 ? "bg-cyan-200" : "bg-rose-200"}`}
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.balanceDue <= 0 ? "bg-emerald-200" : paymentStatus.totalPaid > 0 ? "bg-orange-200" : "bg-rose-200"}`}
                             >
                               <Wallet
-                                className={`w-5 h-5 ${paymentStatus.balanceDue <= 0 ? "text-emerald-600" : paymentStatus.totalPaid > 0 ? "text-cyan-600" : "text-rose-600"}`}
+                                className={`w-5 h-5 ${paymentStatus.balanceDue <= 0 ? "text-emerald-600" : paymentStatus.totalPaid > 0 ? "text-orange-600" : "text-rose-600"}`}
                               />
                             </div>
                           </div>
                           <div
-                            className={`text-2xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-cyan-900" : "text-rose-900"}`}
+                            className={`text-2xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-orange-900" : "text-rose-900"}`}
                           >
                             R{paymentStatus.balanceDue.toFixed(2)}
                           </div>
@@ -1627,7 +1648,7 @@ const WeldingDashboard = () => {
                       {/* Payment Status Banner */}
                       {quoteId && (
                         <div
-                          className={`p-4 rounded-xl border-2 flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-emerald-50 border-emerald-300" : paymentStatus.status === "partially_paid" ? "bg-cyan-50 border-cyan-300" : "bg-rose-50 border-rose-300"}`}
+                          className={`p-4 rounded-xl border-2 flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-emerald-50 border-emerald-300" : paymentStatus.status === "partially_paid" ? "bg-orange-50 border-orange-300" : "bg-rose-50 border-rose-300"}`}
                         >
                           <div className="flex items-center gap-3">
                             {paymentStatus.status === "paid" ? (
@@ -1649,14 +1670,14 @@ const WeldingDashboard = () => {
                               </>
                             ) : paymentStatus.status === "partially_paid" ? (
                               <>
-                                <div className="w-10 h-10 bg-cyan-200 rounded-full flex items-center justify-center">
-                                  <CreditCard className="w-6 h-6 text-cyan-600" />
+                                <div className="w-10 h-10 bg-orange-200 rounded-full flex items-center justify-center">
+                                  <CreditCard className="w-6 h-6 text-orange-600" />
                                 </div>
                                 <div>
-                                  <div className="font-bold text-cyan-900">
+                                  <div className="font-bold text-orange-900">
                                     Partial Payment Received
                                   </div>
-                                  <div className="text-sm text-cyan-700">
+                                  <div className="text-sm text-orange-700">
                                     R{paymentStatus.totalPaid.toFixed(2)} paid •
                                     R{paymentStatus.balanceDue.toFixed(2)}{" "}
                                     remaining
@@ -1754,14 +1775,14 @@ const WeldingDashboard = () => {
                               </div>
                               <div className="col-span-1 sm:col-span-2">
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property Address{" "}
+                                  Project Address{" "}
                                   <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                   type="text"
-                                  value={propertyAddress}
+                                  value={projectAddress}
                                   onChange={(e) =>
-                                    setPropertyAddress(e.target.value)
+                                    setProjectAddress(e.target.value)
                                   }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="45 Corporate Boulevard, Sandton, Johannesburg, 2196"
@@ -1789,11 +1810,11 @@ const WeldingDashboard = () => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                               <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property / Building Type
+                                  Material Type
                                 </label>
                                 <select
-                                  value={siteType}
-                                  onChange={(e) => setSiteType(e.target.value)}
+                                  value={materialType}
+                                  onChange={(e) => setMaterialType(e.target.value)}
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
                                 >
                                   <option value="Commercial">Commercial</option>
@@ -1810,24 +1831,23 @@ const WeldingDashboard = () => {
                               </div>
                               <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property Area (sqm)
-                                </label>
+                                  Material Type                                </label>
                                 <input
                                   type="number"
-                                  value={siteSize}
-                                  onChange={(e) => setSiteSize(e.target.value)}
+                                  value={materialType}
+                                  onChange={(e) => setMaterialType(e.target.value)}
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="1200"
                                 />
                               </div>
                               <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Power Rating (Amps)
+                                  Material Thickness
                                 </label>
                                 <input
                                   type="number"
-                                  value={floors}
-                                  onChange={(e) => setFloors(e.target.value)}
+                                  value={materialThickness}
+                                  onChange={(e) => setMaterialThickness(e.target.value)}
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="3"
                                 />
@@ -1838,8 +1858,8 @@ const WeldingDashboard = () => {
                                 </label>
                                 <input
                                   type="number"
-                                  value={phases}
-                                  onChange={(e) => setPhases(e.target.value)}
+                                  value={projectScale}
+                                  onChange={(e) => setProjectScale(e.target.value)}
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="2"
                                 />
@@ -1855,15 +1875,15 @@ const WeldingDashboard = () => {
                               <div className="text-sm text-cyan-800 space-y-1">
                                 <p>
                                   <span className="font-medium">Type:</span>{" "}
-                                  {siteType}
+                                  {projectType}
                                 </p>
                                 <p>
                                   <span className="font-medium">Area:</span>{" "}
-                                  {siteSize} sqm
+                                  {materialType} sqm
                                 </p>
                                 <p>
-                                  <span className="font-medium">Floors:</span>{" "}
-                                  {floors} | Phases: {phases}
+                                  <span className="font-medium">Welding Process:</span>{" "}
+                                  {weldingProcess} | Project Scale: {projectScale}
                                 </p>
                               </div>
                             </div>
@@ -1908,41 +1928,44 @@ const WeldingDashboard = () => {
                                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
                                     >
                                       <option value="Foundation Work">
-                                        Foundation Work
+                                        Structural Welding
                                       </option>
-                                      <option value="Structural Steel">
-                                        Structural Steel
+                                      <option value="Pipe Welding">
+                                        Pipe Welding
                                       </option>
-                                      <option value="Concrete & Masonry">
-                                        Concrete & Masonry
+                                      <option value="TIG/GTAW Welding">
+                                        TIG/GTAW Welding
                                       </option>
-                                      <option value="Electrical">
-                                        Electrical
+                                      <option value="MIG/GMAW Welding">
+                                        MIG/GMAW Welding
                                       </option>
-                                      <option value="Plumbing">Plumbing</option>
-                                      <option value="Roofing">Roofing</option>
-                                      <option value="Finishing & Plastering">
-                                        Finishing & Plastering
+                                      <option value="Stick/SMAW Welding">Stick/SMAW Welding</option>
+                                      <option value="Flux-Cored Arc Welding">Flux-Cored Arc Welding</option>
+                                      <option value="Fabrication & Assembly">
+                                        Fabrication & Assembly
                                       </option>
-                                      <option value="Earthworks">
-                                        Earthworks
+                                      <option value="Metal Repairs">
+                                        Metal Repairs
                                       </option>
-                                      <option value="Landscaping">
-                                        Landscaping
+                                      <option value="Custom Metalwork">
+                                        Custom Metalwork
                                       </option>
                                       <option value="Site Preparation">
                                         Site Preparation
                                       </option>
-                                      <option value="HVAC">HVAC</option>
-                                      <option value="Windows & Doors">
-                                        Windows & Doors
+                                      <option value="On-site Welding">On-site Welding</option>
+                                      <option value="Shop Welding">
+                                        Shop Welding
                                       </option>
-                                      <option value="Painting">Painting</option>
-                                      <option value="Tiling & Flooring">
-                                        Tiling & Flooring
+                                      <option value="Inspection & Testing">Inspection & Testing</option>
+                                      <option value="Surface Preparation">
+                                        Surface Preparation
                                       </option>
-                                      <option value="Materials Supply">
-                                        Materials Supply
+                                      <option value="Heat Treatment">
+                                        Heat Treatment
+                                      </option>
+                                      <option value="Equipment Rental">
+                                        Equipment Rental
                                       </option>
                                     </select>
                                   </div>
@@ -2309,25 +2332,25 @@ const WeldingDashboard = () => {
                                   </h4>
                                   <div className="text-sm text-slate-600 space-y-1">
                                     <p className="font-semibold text-slate-900">
-                                      {propertyAddress}
+                                      {projectAddress}
                                     </p>
                                     <p>
                                       <span className="font-semibold">
                                         Type:
                                       </span>{" "}
-                                      {siteType}
+                                      {projectType}
                                     </p>
                                     <p>
                                       <span className="font-semibold">
                                         Area:
                                       </span>{" "}
-                                      {siteSize} sqm
+                                      {materialType} sqm
                                     </p>
                                     <p>
                                       <span className="font-semibold">
-                                        Floors:
+                                        Project Scale:
                                       </span>{" "}
-                                      {floors} | Phases: {phases}
+                                      {projectScale} | Welding Process: {weldingProcess}
                                     </p>
                                   </div>
                                 </div>
@@ -2435,25 +2458,44 @@ const WeldingDashboard = () => {
                     templateId={selectedTemplate}
                     businessInfo={businessInfo}
                     loading={loading}
-                    invoiceNumber={quoteNumber}
+                    
+                    // Fixed: Map jobCardNumber to quoteNumber
+                    jobCardNumber={quoteNumber}
+                    
+                    // Customer fields
                     customerName={customerName}
-                    billName={customerName}
-                    billEmail={customerEmail}
-                    billPhone={customerPhone}
-                    billAddress={propertyAddress}
                     customerEmail={customerEmail}
                     customerPhone={customerPhone}
-                    customerAddress={propertyAddress}
-                    taxId=""
+                    customerAddress={projectAddress}
+                    
+                    // Equipment fields (for welding, we'll map project details)
+                    equipmentType={projectType}
+                    equipmentManufacturer={materialType}
+                    equipmentModel={weldingProcess}
+                    equipmentSerial={`W-${materialThickness}mm`}
+                    equipmentId={`WLD-${projectScale}`}
+                    equipmentLocation={projectAddress}
+                    
+                    // Service details
+                    serviceCode={quoteNumber}
+                    serviceType="WELDING SERVICE"
+                    
+                    // Items and totals
                     items={items}
                     subtotal={subtotal}
-                    totalTax={totalTax}
+                    vat={totalTax}
                     total={total}
+                    
+                    // Document type
                     documentType={documentType}
+                    
+                    // Stamp settings
                     stampText={stampSettings.text}
                     stampColor={stampSettings.color}
                     showStampDate={stampSettings.showDate}
-                    showStamp={stampSettings.enabled}
+                    showStamp={stampSettings.enabled && paymentStatus.status === "paid"}
+                    
+                    // Payment status
                     paymentStatus={paymentStatus}
                   />
                 </div>
