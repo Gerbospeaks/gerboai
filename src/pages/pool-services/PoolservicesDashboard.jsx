@@ -1089,17 +1089,13 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
 
           {/* ── Mobile Action Bar ──────────────────────────────────────── */}
           <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
-            <div className="flex gap-2 min-w-max pb-1">
+            <div className="flex gap-2 min-w-max pb-1 pr-3">
               {documentType === "quote" && quoteId && (
                 <button onClick={handleConvertToInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
                   <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
                   <span>To Invoice</span>
                 </button>
               )}
-              <button onClick={handleProcessPayment} disabled={!quoteId} className={`group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-lg md:rounded-xl whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95 ${!quoteId ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:from-emerald-700 hover:to-emerald-800"}`}>
-                <CreditCard className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                Payment
-              </button>
               <button onClick={handleSaveQuote} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
                 <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
                 Save
@@ -1108,7 +1104,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                 <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 <span>Send</span>
               </button>
-              <button onClick={handleSavePDF} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
                 <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
                 <span>PDF</span>
               </button>
@@ -1118,9 +1114,9 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
               </button>
             </div>
           </div>
-
-          {/* ── Scrollable Main Content ──────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto">
+          
+                    {/* ── Scrollable Main Content ──────────────────────────────── */}
+                   <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {/* ── Settings Modal ──────────────────────────────────────── */}
             {showSettings && (
                          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">

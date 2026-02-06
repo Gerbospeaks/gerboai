@@ -888,7 +888,7 @@ const printStyles = `
         className={`flex-1 transition-all duration-300 ml-16 lg:ml-64`}
       >
         <div className="flex-1 overflow-auto">
-          <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
+          <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-2.5 md:py-3 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 lg:space-x-4">
                 <button
@@ -942,28 +942,8 @@ const printStyles = `
                               </button>
             </div>
           </div>
-          <div className="sticky top-0 z-40 flex flex-col">
-            <div className="bg-gray-50 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-              <div className="flex space-x-4 lg:space-x-8 min-w-max">
-                {["IncidentReport", "Follow-up", "Photos", "Notes"].map(
-                  (tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`py-4 border-b-2 ${
-                        activeTab === tab
-                          ? "border-blue-400 text-gray-800"
-                          : "border-transparent text-gray-400 hover:text-gray-200"
-                      }`}
-                    >
-                      {tab}
-                    </button>
-                  ),
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto">
+         
+          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {showSettings && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
                 <div className="bg-white rounded-xl md:rounded-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">

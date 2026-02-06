@@ -36,6 +36,7 @@ import {
   Settings,
   X,
   Users,
+  Save,
   Calendar,
   FileText,
   Building2,
@@ -216,7 +217,48 @@ const [paymentStatus, setPaymentStatus] = useState({
       });
     }
   };
+const handleConvertToInvoice = async () => {
+    if (!user?.uid) return;
+    if (!invoiceId) {
+      alert("Please save the quote first before converting to invoice");
+      return;
+    }
+    if (!window.confirm("Convert this quote to an invoice? This will create a new invoice with the same details.")) return;
 
+    try {
+      const db = getFirestore();
+      const newInvoiceNumber = await generateInvoiceNumber(user.uid);
+
+      const invoiceData = buildInvoicePayload(newInvoiceNumber);
+      invoiceData.documentType = "invoice";
+      invoiceData.convertedFromQuote = invoiceId;
+      invoiceData.convertedFromQuoteNumber = invoiceNumber;
+      invoiceData.convertedAt = serverTimestamp();
+
+      const invoiceRef = await addDoc(
+        collection(db, "users", user.uid, "invoices"),
+        invoiceData,
+      );
+
+      await updateDoc(doc(db, "users", user.uid, "invoices", invoiceId), {
+        convertedToInvoice: true,
+        convertedToInvoiceId: invoiceRef.id,
+        convertedToInvoiceNumber: newInvoiceNumber,
+        convertedAt: serverTimestamp(),
+        status: "converted",
+      });
+
+      setDocumentType("invoice");
+      setInvoiceId(invoiceRef.id);
+      setInvoiceNumber(newInvoiceNumber);
+
+      alert(`Quote successfully converted to Invoice ${newInvoiceNumber}`);
+      loadSavedInvoices();
+    } catch (error) {
+      console.error("Error converting quote to invoice:", error);
+      alert("Failed to convert quote to invoice");
+    }
+  };
   const handlePaymentComplete = () => {
     loadSavedInvoices();
     loadPaymentStatus();
@@ -1135,59 +1177,37 @@ const printStyles = `
                               </button>
             </div>
           </div>
-
+          </div>
           {/* Mobile Action Buttons Bar */}
-          <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
-                <CheckSquare className="w-4 h-4" />
-                <span>Mark Paid</span>
-              </button>
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
-                <Edit className="w-4 h-4" />
-                <span>Edit</span>
-              </button>
-              <button className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
-                <Send className="w-4 h-4" />
-                <span>Send</span>
-              </button>
-              <button
-                onClick={handleSave}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
-              >
-                <Download className="w-4 h-4" />
-                <span>Save PDF</span>
-              </button>
-              <button
-                onClick={handlePrint}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
-              >
-                <Printer className="w-4 h-4" />
-                <span>Print</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-gray-100 border-b border-gray-200 px-4 lg:px-6 overflow-x-auto print:hidden">
-            <div className="flex space-x-4 lg:space-x-8 min-w-max">
-              {["Invoice", "Property", "History", "Notes"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`py-4 border-b-2 ${
-                    activeTab === tab
-                      ? "border-blue-400 text-gray-800"
-                      : "border-transparent text-gray-400 hover:text-gray-200"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto">
+         <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
+           <div className="flex gap-2 min-w-max pb-1 pr-3">
+             {documentType === "quote" && invoiceId && (
+               <button onClick={handleConvertToInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                 <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
+                 <span>To Invoice</span>
+               </button>
+             )}
+             <button onClick={handleSaveInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+               <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+               Save
+             </button>
+             <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+               <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
+               <span>Send</span>
+             </button>
+             <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+               <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+               <span>PDF</span>
+             </button>
+             <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95">
+               <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+               <span>Print</span>
+             </button>
+           </div>
+         </div>
+         
+                   {/* ── Scrollable Main Content ──────────────────────────────── */}
+                  <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
           {/* Business Settings Modal */}
           {showSettings && (
                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">

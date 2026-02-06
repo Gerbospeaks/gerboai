@@ -1163,7 +1163,7 @@ const printStyles = `
                            </button>
           </div>
         </div>
-
+</div>
         <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
           <div className="flex gap-2 overflow-x-auto pb-2">
             <button className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 whitespace-nowrap text-sm">
@@ -1188,7 +1188,7 @@ const printStyles = `
         </div>
 
        
-        </div>
+        
         <div className="flex-1 overflow-y-auto">
           {showSettings && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
