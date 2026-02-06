@@ -73,7 +73,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 
-const generateJobCardNumber = async (userId, documentType) => {
+const generateServiceCallNumber = async (userId, documentType) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
 
@@ -126,6 +126,12 @@ const TowingDashboard = () => {
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
+  const [towLocation, setTowLocation] = useState(""); // Pickup location
+const [destination, setDestination] = useState(""); // Drop-off location
+const [towDistance, setTowDistance] = useState(""); // Distance in km
+const [towType, setTowType] = useState("Flatbed"); // Type of tow
+const [vehicleCondition, setVehicleCondition] = useState(""); // Driveable/Non-driveable
+const [incidentType, setIncidentType] = useState("");
   const [useAI, setUseAI] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -204,7 +210,7 @@ const TowingDashboard = () => {
     if (!user?.uid) return;
 
     const loadJobCardNumber = async () => {
-      const nextJobCard = await generateJobCardNumber(user.uid, documentType);
+      const nextJobCard = await generateServiceCallNumber(user.uid, documentType);
       setJobCardNumber(nextJobCard);
     };
 
@@ -233,12 +239,12 @@ const TowingDashboard = () => {
   }, []);
 
   const steps = [
-    { number: 1, title: "Customer Info", icon: Users },
-    { number: 2, title: "Bill To", icon: Users },
-    { number: 3, title: "Vehicle Info", icon: Car },
-    { number: 4, title: "Services/Parts", icon: FileText },
-    { number: 5, title: "Payment Terms", icon: CreditCard },
-  ];
+  { number: 1, title: "Customer Info", icon: Users },
+  { number: 2, title: "Bill To", icon: Users },
+  { number: 3, title: "Vehicle & Tow Details", icon: Car }, // CHANGED
+  { number: 4, title: "Service Charges", icon: FileText }, // CHANGED
+  { number: 5, title: "Payment Terms", icon: CreditCard },
+];
 
   const loadCustomers = async () => {
     try {
@@ -514,20 +520,21 @@ const TowingDashboard = () => {
     setNewItem({ description: "", rate: "", qty: "", type: "Labor" });
   };
 
-  const [customerName, setCustomerName] = useState("John Smith");
+  const [customerName, setCustomerName] = useState("");
   const [merchant_code, setCustomerId] = useState("V*R-9890");
   const [customerEmail, setCustomerEmail] = useState("john.smith@example.com");
   const [customerPhone, setCustomerPhone] = useState("082 123 4567");
   const [customerAddress, setCustomerAddress] = useState(
     "123 Main Street, Pretoria, 0001",
   );
+  
   const [billName, setBillName] = useState("John Smith");
   const [billEmail, setBillEmail] = useState("john.smith@example.com");
   const [billPhone, setBillPhone] = useState("082 123 4567");
   const [billAddress, setBillAddress] = useState(
     "123 Main Street, Pretoria, 0001",
   );
-  const [vehicleMake, setVehicleMake] = useState("Toyota");
+  const [vehicleMake, setVehicleMake] = useState("");
   const [vehicleModel, setVehicleModel] = useState("Hilux");
   const [vehicleYear, setVehicleYear] = useState("2020");
   const [vehicleReg, setVehicleReg] = useState("ABC 123 GP");
@@ -537,7 +544,7 @@ const TowingDashboard = () => {
   const [authCode, setAuthCode] = useState("456789");
 
   const [businessInfo, setBusinessInfo] = useState({
-    businessName: "V8 POWERED AUTO SERVICE",
+    businessName: "YOUR TOWING COMPANY NAME",
     addressLine1: "9-10 CNR THIRD & ARKWRIGHT AVENUE",
     addressLine2: "WYNBERG",
     city: "SANDTON",
@@ -771,46 +778,56 @@ const TowingDashboard = () => {
   }, [total, jobCardId]);
 
   const buildJobCardPayload = (numberToUse) => ({
-    jobCardNumber: numberToUse,
-    locked: true,
-    status: "pending",
-    documentType: documentType,
+  jobCardNumber: numberToUse,
+  locked: true,
+  status: "pending",
+  documentType: documentType,
 
-    dates: {
-      serviceDate: new Date().toISOString(),
-      completedDate: null,
-    },
+  dates: {
+    serviceDate: new Date().toISOString(),
+    completedDate: null,
+  },
 
-    customer: {
-      name: customerName,
-      email: customerEmail,
-      phone: customerPhone,
-      address: customerAddress,
-      merchant_code: merchant_code,
-    },
+  customer: {
+    name: customerName,
+    email: customerEmail,
+    phone: customerPhone,
+    address: customerAddress,
+    merchant_code: merchant_code,
+  },
 
-    vehicle: {
-      make: vehicleMake,
-      model: vehicleModel,
-      year: vehicleYear,
-      registration: vehicleReg,
-      vin: vehicleVin,
-      mileage: vehicleMileage,
-    },
+  vehicle: {
+    make: vehicleMake,
+    model: vehicleModel,
+    year: vehicleYear,
+    registration: vehicleReg,
+    vin: vehicleVin,
+    mileage: vehicleMileage,
+  },
 
-    items,
+  // ADD THIS SECTION:
+  towingDetails: {
+    pickupLocation: towLocation,
+    destination: destination,
+    distance: towDistance,
+    towType: towType,
+    vehicleCondition: vehicleCondition,
+    incidentType: incidentType,
+  },
 
-    totals: {
-      subtotal,
-      vat,
-      total,
-      paid: 0,
-      due: total,
-    },
+  items,
 
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
+  totals: {
+    subtotal,
+    vat,
+    total,
+    paid: 0,
+    due: total,
+  },
+
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
+});
 
   const handleSaveJobCard = async () => {
     if (!user?.uid) return;
@@ -819,7 +836,7 @@ const TowingDashboard = () => {
     let numberToUse = jobCardNumber;
 
     if (!jobCardId) {
-      numberToUse = await generateJobCardNumber(user.uid, documentType);
+      numberToUse = await generateServiceCallNumber(user.uid, documentType);
       setJobCardNumber(numberToUse);
     }
 
@@ -865,7 +882,7 @@ const TowingDashboard = () => {
     try {
       const db = getFirestore();
 
-      const newInvoiceNumber = await generateJobCardNumber(user.uid, "invoice");
+      const newInvoiceNumber = await generateServiceCallNumber(user.uid, "invoice");
 
       const invoiceData = buildJobCardPayload(newInvoiceNumber);
       invoiceData.documentType = "invoice";
@@ -926,7 +943,7 @@ const TowingDashboard = () => {
 
     const loadNewNumber = async () => {
       if (user?.uid) {
-        const nextJobCard = await generateJobCardNumber(user.uid, documentType);
+        const nextJobCard = await generateServiceCallNumber(user.uid, documentType);
         setJobCardNumber(nextJobCard);
       }
     };
@@ -1104,7 +1121,7 @@ const TowingDashboard = () => {
                 className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
               >
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-xs md:text-sm font-semibold truncate">Business Overview</span>
+                <span className="text-xs md:text-sm font-semibold truncate">Towing Operations</span>
               </div>
 
               {/* Job Cards Section */}
@@ -1151,9 +1168,7 @@ const TowingDashboard = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 min-w-0">
                         <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-                        <span className="truncate">
-                          All {documentType === "quote" ? "Quotes" : "Invoices"}
-                        </span>
+                       <span className="truncate">All {documentType === "quote" ? "Estimates" : "Service Calls"}</span>
                       </div>
                       <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
                         {savedJobCards.length}
@@ -1223,13 +1238,7 @@ const TowingDashboard = () => {
                     <span className="text-xs md:text-sm font-semibold truncate">Vehicles</span>
                   </div>
 
-                  <div
-                    onClick={() => setActiveView("parts-inventory")}
-                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-teal-600/20 hover:to-teal-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-teal-500/30"
-                  >
-                    <Package className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Parts Inventory</span>
-                  </div>
+                 
                 </>
               )}
             </div>
@@ -1514,7 +1523,7 @@ const TowingDashboard = () => {
                             })
                           }
                           className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-medium text-sm md:text-base"
-                          placeholder="V8 Powered Auto Service"
+                          placeholder="YOUR TOWING COMPANY NAME"
                         />
                       </div>
 
@@ -2534,137 +2543,105 @@ const TowingDashboard = () => {
                           {/* Step 3: Vehicle Information */}
                           {currentStep === 3 && (
                             <div className="p-8">
-                              <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <Car className="w-6 h-6 text-blue-600" />
-                                  </div>
-                                  Vehicle Information
-                                </h2>
-                                <p className="text-slate-600 mt-2 ml-13">
-                                  Enter vehicle details and authorization codes
-                                </p>
-                              </div>
-
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Make{" "}
-                                    <span className="text-rose-500">*</span>
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={vehicleMake}
-                                    onChange={(e) =>
-                                      setVehicleMake(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="Toyota"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Model{" "}
-                                    <span className="text-rose-500">*</span>
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={vehicleModel}
-                                    onChange={(e) =>
-                                      setVehicleModel(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="Hilux"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Year{" "}
-                                    <span className="text-rose-500">*</span>
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={vehicleYear}
-                                    onChange={(e) =>
-                                      setVehicleYear(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="2020"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Registration{" "}
-                                    <span className="text-rose-500">*</span>
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={vehicleReg}
-                                    onChange={(e) =>
-                                      setVehicleReg(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="ABC 123 GP"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    VIN
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={vehicleVin}
-                                    onChange={(e) =>
-                                      setVehicleVin(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="1HGBH41JXMN109186"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Mileage (km){" "}
-                                    <span className="text-rose-500">*</span>
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={vehicleMileage}
-                                    onChange={(e) =>
-                                      setVehicleMileage(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="45000"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Pre Auth
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={preAuth}
-                                    onChange={(e) => setPreAuth(e.target.value)}
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="AUTH123"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Auth Code
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={authCode}
-                                    onChange={(e) =>
-                                      setAuthCode(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="456789"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          )}
+                              <div className="border-t-2 border-slate-200 pt-6 mt-6">
+      <div className="flex items-center gap-2 mb-5">
+        <div className="h-8 w-1 bg-red-600 rounded-full"></div>
+        <h3 className="text-lg font-bold text-slate-900">TOWING DETAILS</h3>
+      </div>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="col-span-2">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Pickup Location <span className="text-rose-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={towLocation}
+            onChange={(e) => setTowLocation(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg..."
+            placeholder="Street address where vehicle was picked up"
+          />
+        </div>
+        
+        <div className="col-span-2">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Destination <span className="text-rose-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg..."
+            placeholder="Drop-off location"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Distance (km) <span className="text-rose-500">*</span>
+          </label>
+          <input
+            type="number"
+            value={towDistance}
+            onChange={(e) => setTowDistance(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg..."
+            placeholder="50"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Tow Type <span className="text-rose-500">*</span>
+          </label>
+          <select
+            value={towType}
+            onChange={(e) => setTowType(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg..."
+          >
+            <option value="Flatbed">Flatbed</option>
+            <option value="Wheel Lift">Wheel Lift</option>
+            <option value="Hook and Chain">Hook and Chain</option>
+            <option value="Heavy Duty">Heavy Duty</option>
+          </select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Vehicle Condition
+          </label>
+          <select
+            value={vehicleCondition}
+            onChange={(e) => setVehicleCondition(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg..."
+          >
+            <option value="">Select condition</option>
+            <option value="Driveable">Driveable</option>
+            <option value="Non-Driveable">Non-Driveable</option>
+            <option value="Accident Damage">Accident Damage</option>
+          </select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Incident Type
+          </label>
+          <select
+            value={incidentType}
+            onChange={(e) => setIncidentType(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg..."
+          >
+            <option value="">Select type</option>
+            <option value="Breakdown">Breakdown</option>
+            <option value="Accident">Accident</option>
+            <option value="Repossession">Repossession</option>
+            <option value="Police Impound">Police Impound</option>
+            <option value="Parking Violation">Parking Violation</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
                           {/* Step 4: Services/Parts */}
                           {currentStep === 4 && (
@@ -2689,18 +2666,15 @@ const TowingDashboard = () => {
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
                                   <select
-                                    value={newItem.type}
-                                    onChange={(e) =>
-                                      setNewItem({
-                                        ...newItem,
-                                        type: e.target.value,
-                                      })
-                                    }
-                                    className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
-                                  >
-                                    <option value="Labor">Labor</option>
-                                    <option value="Parts">Parts</option>
-                                  </select>
+  value={newItem.type}
+  onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
+  className="px-4 py-2 border border-slate-300 rounded-lg..."
+>
+  <option value="Towing">Towing Service</option>
+  <option value="Recovery">Vehicle Recovery</option>
+  <option value="Storage">Storage Fees</option>
+  <option value="Additional">Additional Services</option>
+</select>
 
                                   <input
                                     type="text"
