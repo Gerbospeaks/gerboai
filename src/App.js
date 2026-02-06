@@ -40,7 +40,14 @@ import LandscapingDashboard from './pages/landscaping/LandscapingDashboard';
 import LogisticsDashboard from './pages/logistics/LogisticsDashboard';
 import PhotographyDashboard from './pages/photography/PhotographyDashboard';
 import RealEstateDashboard from './pages/realEstate/RealEstateDashboard';
-import VeterinaryDashboard from './pages/veterinary/VeterinaryDashboard';
+import FlooringDashboard from './pages/flooring/FlooringDashboard';
+import WeldingDashboard from './pages/welding/WeldingDashboard';  
+import PaintingDashboard from './pages/painting/PaintingDashboard';
+import PestcontrolDashboard from './pages/pest-contrrol/PestcontrolDashboard';
+import PoolservicesDashboard from './pages/pool-services/PoolservicesDashboard';
+import SolarDashboard from './pages/solar-installation/SolarDashboard'; 
+import TowingDashboard from './pages/towing/TowingDashboard';
+import WindowrepairDashboard from './pages/window-repair/WindowrepairDashboard';  
 import HVACDashboard from './pages/hvac/HVACDashboard';
 import AccountingDashboard from './pages/accounting/AccountingDashboard';
 import VerifyEmail from './pages/VerifyEmail';
@@ -333,10 +340,10 @@ function App() {
               }
             />
             <Route 
-              path="/veterinary" 
+              path="/flooring" 
               element={
                 <ProtectedRoute>
-                  <VeterinaryDashboard />
+                  <FlooringDashboard />
                 </ProtectedRoute>
               }
             />
@@ -353,6 +360,62 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AccountingDashboard />
+                </ProtectedRoute>
+              } 
+            />
+             <Route 
+              path="/painting" 
+              element={
+                <ProtectedRoute>
+                  <PaintingDashboard />
+                </ProtectedRoute>
+              } 
+            />
+             <Route 
+              path="/pest-control" 
+              element={
+                <ProtectedRoute>
+                  <PestcontrolDashboard />
+                </ProtectedRoute>
+              } 
+            />
+             <Route 
+              path="/pool-services" 
+              element={
+                <ProtectedRoute>
+                  <PoolservicesDashboard />
+                </ProtectedRoute>
+              } 
+            />
+             <Route 
+              path="/solar-installation" 
+              element={
+                <ProtectedRoute>
+                  <SolarDashboard />
+                </ProtectedRoute>
+              } 
+            />
+             <Route 
+              path="/towing" 
+              element={
+                <ProtectedRoute>
+                  <TowingDashboard />
+                </ProtectedRoute>
+              } 
+            />
+             <Route 
+              path="/welding" 
+              element={
+                <ProtectedRoute>
+                  <WeldingDashboard />
+                </ProtectedRoute>
+              } 
+            />
+             <Route 
+              path="/window-repair" 
+              element={
+                <ProtectedRoute>
+                  <WindowrepairDashboard />
                 </ProtectedRoute>
               } 
             />
