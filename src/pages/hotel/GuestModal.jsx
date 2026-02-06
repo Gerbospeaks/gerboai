@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, User, Mail, Phone, MapPin, Calendar, CreditCard, Globe } from 'lucide-react';
 import { createCheckInFromGuest } from './CheckInOutModal';
 import { useAuth } from "../../contexts/AuthContext";
+import HomeView from "../HomeView";
 import { 
   getFirestore, 
   collection, 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import HomeView from "../HomeView";
 import { 
   getFirestore, 
   collection, 
@@ -132,7 +133,7 @@ const GuestsListModal = ({
         {/* Header */}
         <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-blue-700">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 md:space-x-4">
               <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
                 <User className="w-6 h-6 text-gray-800" />
               </div>

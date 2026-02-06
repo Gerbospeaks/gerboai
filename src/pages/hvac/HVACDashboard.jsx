@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import HomeView from "../HomeView";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import logo from "../../assets/img/solidflo-logo.png";
@@ -123,9 +124,11 @@ const HvacDashboard = () => {
   const [serviceNumber, setServiceNumber] = useState("");
   const [quoteNumber, setQuoteNumber] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [serviceId, setServiceId] = useState(null);
   const [quoteId, setQuoteId] = useState(null);
   const [savedServices, setSavedServices] = useState([]);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [showServicesList, setShowServicesList] = useState(false);
   const [showQuotesList, setShowQuotesList] = useState(false);
@@ -138,7 +141,7 @@ const HvacDashboard = () => {
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [activeView, setActiveView] = useState("invoice");
+  const [activeView, setActiveView] = useState("home");
   const [showConvertModal, setShowConvertModal] = useState(false);
   const [isQuotesOpen, setIsQuotesOpen] = useState(false);
   const [isInvoicesOpen, setIsInvoicesOpen] = useState(false);
@@ -792,7 +795,81 @@ const HvacDashboard = () => {
 
     loadSavedQuotes();
   };
+const handleProcessPayment = async () => {
+    if (!serviceId || !user?.uid) {
+      alert("Please save the invoice before processing payment");
+      return;
+    }
 
+    try {
+      const collectionName =
+        documentType === "estimate" ? "estimates" : "invoices";
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, serviceId),
+      );
+
+      if (invoiceDoc.exists()) {
+        const invoiceData = invoiceDoc.data();
+        setSelectedInvoiceForPayment({
+          id: serviceId,
+          ...invoiceData,
+        });
+        setShowPaymentModal(true);
+      } else {
+        alert("Invoice not found. Please save the invoice first.");
+      }
+    } catch (error) {
+      console.error("Error loading invoice:", error);
+      alert("Failed to load invoice for payment");
+    }
+  };
+
+  const loadPaymentStatus = async () => {
+    if (!user?.uid || !serviceId) {
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+      return;
+    }
+
+    try {
+      const collectionName =
+        documentType === "estimate" ? "estimates" : "invoices";
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, serviceId),
+      );
+
+      if (invoiceDoc.exists()) {
+        const data = invoiceDoc.data();
+        setPaymentStatus({
+          totalPaid: data.totals?.paid || 0,
+          balanceDue: data.totals?.due || data.totals?.total || 0,
+          status: data.status || "pending",
+        });
+      } else {
+        setPaymentStatus({
+          totalPaid: 0,
+          balanceDue: total,
+          status: "pending",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading payment status:", error);
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: total,
+        status: "pending",
+      });
+    }
+  };
+
+  const handlePaymentComplete = () => {
+    loadSavedServices();
+    loadPaymentStatus();
+    setShowPaymentModal(false);
+  };
   const handleConvertToInvoice = async () => {
     if (!user?.uid || !quoteId) return;
 
@@ -836,7 +913,7 @@ const HvacDashboard = () => {
 
       await updateDoc(quoteRef, {
         convertedToInvoice: true,
-        invoiceId: invoiceRef.id,
+        serviceId: invoiceRef.id,
         invoiceNumber: invoiceNumber,
         updatedAt: serverTimestamp(),
       });
@@ -929,14 +1006,14 @@ const HvacDashboard = () => {
           sidebarOpen ? "hidden" : "hidden md:block"
         } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
       >
-        <div className="flex flex-col items-center py-4 space-y-4">
+        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
           {/* Toggle Button */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
+            className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:scale-110"
             title="Expand Sidebar"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
           </button>
 
           {/* Logo */}
@@ -951,13 +1028,15 @@ const HvacDashboard = () => {
           <div className="w-10 border-t border-slate-600"></div>
 
           {/* Icon Navigation */}
-          <div className="flex flex-col items-center space-y-3 w-full px-2">
+          <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
             <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Home"
-            >
-              <Home className="w-5 h-5" />
-            </button>
+  onClick={() => setActiveView("home")}  // ADD THIS
+  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+  title="Home"
+>
+  <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+  <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+</button>
 
             <button
               onClick={() => setShowSettings(true)}
@@ -1044,9 +1123,9 @@ const HvacDashboard = () => {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
       >
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-3">
+        <div className="p-4 md:p-6">
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <div className="flex items-center space-x-3 md:space-x-4">
               <img
                 src={logo}
                 alt="Business Logo"
@@ -1064,10 +1143,13 @@ const HvacDashboard = () => {
           </div>
 
           <nav className="space-y-1">
-            <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-              <Home className="w-5 h-5" />
-              <span className="text-sm font-medium">Home</span>
-            </div>
+            <div
+  onClick={() => setActiveView("home")}  // ADD THIS
+  className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
+>
+  <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+  <span className="text-xs md:text-sm font-semibold">Home</span>
+</div>
             <div
               onClick={() => setShowSettings(true)}
               className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
@@ -1091,7 +1173,7 @@ const HvacDashboard = () => {
                   onClick={() => setIsQuotesOpen(!isQuotesOpen)}
                   className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
                 >
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 md:space-x-4">
                     <ClipboardList className="w-5 h-5" />
                     <span className="text-sm font-medium">Quotes</span>
                   </div>
@@ -1137,7 +1219,7 @@ const HvacDashboard = () => {
                   onClick={() => setIsInvoicesOpen(!isInvoicesOpen)}
                   className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
                 >
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 md:space-x-4">
                     <Receipt className="w-5 h-5" />
                     <span className="text-sm font-medium">Invoices</span>
                   </div>
@@ -1297,7 +1379,7 @@ const HvacDashboard = () => {
       >
         <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
           <div className="sticky top-0 z-40 flex flex-col">
-            <div className="bg-gray-300 border-b border-gray-200 px-4 lg:px-6 py-4">
+            <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2 lg:space-x-4">
                   <button
@@ -1359,24 +1441,26 @@ const HvacDashboard = () => {
                     <Printer className="w-4 h-4" />
                     Print
                   </button>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors"
-                  >
-                    Log Out
-                  </button>
-                </div>
-
-                <button
-                  onClick={handleLogout}
-                  className="lg:hidden p-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors print:hidden"
-                >
-                  <span className="text-sm font-medium">Logout</span>
-                </button>
+                   <button
+                                    onClick={handleLogout}
+                                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
+                                  >
+                                    <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                                    Logout
+                                  </button>
+                                </div>
+                  
+                                {/* Mobile logout */}
+                                <button
+                                  onClick={handleLogout}
+                                  className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
+                                >
+                                  <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+                                </button>
               </div>
             </div>
 
-            <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 print:hidden">
+            <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
               <div className="flex gap-2 overflow-x-auto pb-2">
                 <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
                   <CheckSquare className="w-4 h-4" />
@@ -1408,7 +1492,7 @@ const HvacDashboard = () => {
             </div>
           </div>
 
-          <div className="p-4 lg:p-6">
+          <div className="flex-1 overflow-y-auto">
             {showSettings && (
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
@@ -1999,7 +2083,8 @@ const HvacDashboard = () => {
               </div>
             )}
 
-            {activeView === "templates" && <Templates user={user} />}
+             {activeView === "templates" && <Templates user={user} />}
+            {activeView === "home" && <HomeView user={user} />}
             {activeView === "financial-overview" && (
               <FinancialOverview user={user} />
             )}
@@ -2021,8 +2106,8 @@ const HvacDashboard = () => {
                       showServiceCard ? "hidden" : "block"
                     } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
                   >
-                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                      <div className="flex border-b">
+                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
+                      <div className="flex border-b border-slate-200">
                         <button
                           onClick={() => setInputMode("manual")}
                           className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
@@ -2076,8 +2161,8 @@ const HvacDashboard = () => {
                           <div
                             className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
                               paymentStatus.totalPaid > 0
-                                ? "from-emerald-50 to-emerald-100 border-emerald-200"
-                                : "from-slate-50 to-slate-100 border-slate-200"
+                                ? "from-emerald-100 to-emerald-300 border-emerald-600"
+                                : "from-slate-100 to-slate-300 border-slate-300"
                             }`}
                           >
                             <div className="flex items-center justify-between mb-2">
@@ -2120,7 +2205,7 @@ const HvacDashboard = () => {
                           <div
                             className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
                               paymentStatus.balanceDue <= 0
-                                ? "from-emerald-50 to-emerald-100 border-emerald-200"
+                                ? "from-emerald-100 to-emerald-300 border-emerald-600"
                                 : paymentStatus.totalPaid > 0
                                   ? "from-amber-50 to-amber-100 border-amber-200"
                                   : "from-rose-50 to-rose-100 border-rose-200"

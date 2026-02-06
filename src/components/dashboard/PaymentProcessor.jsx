@@ -279,7 +279,7 @@ const PaymentProcessor = ({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
             {/* Left Column - Payment Summary */}
             <div className="space-y-6">
               {/* Amount Summary */}

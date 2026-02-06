@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import HomeView from "../HomeView";
 import { serverTimestamp } from "firebase/firestore";
 import logo from '../../assets/img/solidflo-logo.png';
 import { getAuth, signOut } from "firebase/auth";
@@ -99,7 +100,7 @@ const [useAI, setUseAI] = useState(false);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showGuestsList, setShowGuestsList] = useState(false);
-  const [activeView, setActiveView] = useState("invoice");
+ const [activeView, setActiveView] = useState("home");
   const [savedGuests, setSavedGuests] = useState([]);
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [showGuestsListModal, setShowGuestsListModal] = useState(false);
@@ -855,35 +856,36 @@ const printStyles = `
     sidebarOpen ? "hidden" : "hidden md:block"
   } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
 >
-  <div className="flex flex-col items-center py-4 space-y-4">
+  <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
     {/* Toggle Button */}
     <button
       onClick={() => setSidebarOpen(true)}
-      className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
+      className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:scale-110"
       title="Expand Sidebar"
     >
-      <ChevronRight className="w-6 h-6" />
+      <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
     </button>
 
     {/* Logo */}
-    <div className="w-10 h-10 mb-2">
-      <img
-        src={logo}
-        alt="Logo"
-        className="w-full h-full object-contain rounded-lg"
-      />
-    </div>
+    <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
+            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4  rounded-xl p-1 shadow-lg">
+              <img src={logo} alt="" />
+            </div>
+          </div>
 
     <div className="w-10 border-t border-slate-600"></div>
 
     {/* Icon Navigation */}
-    <div className="flex flex-col items-center space-y-3 w-full px-2">
+    <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
       <button
-        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-        title="Dashboard"
-      >
-        <Home className="w-5 h-5" />
-      </button>
+  onClick={() => setActiveView("home")}  // ADD THIS
+  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+  title="Home"
+>
+  <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+  <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+</button>
       
       <button
         onClick={() => setShowSettings(true)}
@@ -984,8 +986,8 @@ const printStyles = `
     sidebarOpen ? "translate-x-0" : "-translate-x-full"
   } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
 >
-  <div className="p-4">
-    <div className="flex items-center justify-between mb-8">
+  <div className="p-4 md:p-6">
+    <div className="flex items-center justify-between mb-6 md:mb-8">
       <div className="flex items-center space-x-3 min-w-0">
         <img
           src={logo}
@@ -1004,10 +1006,13 @@ const printStyles = `
     </div>
 
     <nav className="space-y-1">
-      <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-        <Home className="w-5 h-5 flex-shrink-0" />
-        <span className="text-sm font-medium truncate">Dashboard</span>
-      </div>
+      <div
+  onClick={() => setActiveView("home")}  // ADD THIS
+  className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
+>
+  <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+  <span className="text-xs md:text-sm font-semibold">Home</span>
+</div>
       <div
         onClick={() => setShowSettings(true)}
         className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
@@ -1256,21 +1261,21 @@ const printStyles = `
                 <span className="hidden xl:inline">Print</span>
               </button>
               <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-3 xl:px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700 transition-colors whitespace-nowrap"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden xl:inline">Logout</span>
-              </button>
-            </div>
-
-            {/* Mobile Logout */}
-            <button
-              onClick={handleLogout}
-              className="lg:hidden p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors print:hidden flex-shrink-0"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+                               onClick={handleLogout}
+                               className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
+                             >
+                               <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                               Logout
+                             </button>
+                           </div>
+             
+                           {/* Mobile logout */}
+                           <button
+                             onClick={handleLogout}
+                             className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
+                           >
+                             <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+                           </button>
           </div>
         </div>
 
@@ -1901,7 +1906,8 @@ const printStyles = `
             {activeView === "financial-overview" && (
             <FinancialOverview user={user} />
           )}
-           {activeView === "templates" && <Templates user={user} />}
+            {activeView === "templates" && <Templates user={user} />}
+            {activeView === "home" && <HomeView user={user} />}
                      {activeView === "invoice" && (
                        <>
           <button
@@ -1918,8 +1924,8 @@ const printStyles = `
                 showInvoice ? "hidden" : "block"
               } space-y-4 md:space-y-6 lg:block print:hidden`}
             >
-             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                      <div className="flex border-b">
+             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
+                                      <div className="flex border-b border-slate-200">
                                         <button
                                           onClick={() => setInputMode("manual")}
                                           className={`flex-1 px-4 md:px-6 py-3 text-sm font-medium transition-colors ${

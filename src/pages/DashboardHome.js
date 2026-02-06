@@ -26,7 +26,7 @@ function DashboardHome() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <div className="bg-gray-50 shadow-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center flex-wrap gap-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 md:space-x-4">
             <span className="text-4xl">{dashboard.icon}</span>
             <h1 className="text-2xl font-bold text-gray-800">{dashboard.name}</h1>
           </div>

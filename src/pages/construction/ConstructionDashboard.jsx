@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import HomeView from "../HomeView";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
@@ -122,7 +123,7 @@ const ConstructionDashboard = () => {
 
   // ── views / modals ───────────────────────────────────────────────────────
   const [showSettings, setShowSettings] = useState(false);
-  const [activeView, setActiveView] = useState("quote");
+  const [activeView, setActiveView] = useState("home");
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -771,10 +772,14 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
 
           {/* icon nav */}
           <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
-            <button className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden" title="Home">
-              <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-            </button>
+            <button
+  onClick={() => setActiveView("home")}  // ADD THIS
+  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+  title="Home"
+>
+  <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+  <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+</button>
 
             <button onClick={() => setShowSettings(true)} className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden" title="Settings">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -835,10 +840,13 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
 
           {/* nav */}
           <nav className="space-y-1.5 md:space-y-2">
-            <div className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-amber-500/30">
-              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-xs md:text-sm font-semibold">Home</span>
-            </div>
+           <div
+  onClick={() => setActiveView("home")}  // ADD THIS
+  className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
+>
+  <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+  <span className="text-xs md:text-sm font-semibold">Home</span>
+</div>
 
             <div onClick={() => setShowSettings(true)} className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30">
               <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
@@ -1238,7 +1246,8 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
             {activeView === "financial-overview" && <FinancialOverview user={user} />}
             {activeView === "history-view" && <HistoryView user={user} />}
             {activeView === "notes-view" && <NotesView user={user} />}
-            {activeView === "templates" && <Templates user={user} />}
+             {activeView === "templates" && <Templates user={user} />}
+            {activeView === "home" && <HomeView user={user} />}
 
             {/* ── Quote / Invoice Builder ──────────────────────────────── */}
             {activeView === "quote" && (
@@ -1279,7 +1288,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                           <div className="text-2xl font-bold text-amber-900">R{total.toFixed(2)}</div>
                         </div>
 
-                        <div className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.totalPaid > 0 ? "from-emerald-50 to-emerald-100 border-emerald-200" : "from-slate-50 to-slate-100 border-slate-200"}`}>
+                        <div className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.totalPaid > 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : "from-slate-100 to-slate-300 border-slate-300"}`}>
                           <div className="flex items-center justify-between mb-2">
                             <div className={`text-sm font-medium ${paymentStatus.totalPaid > 0 ? "text-emerald-700" : "text-slate-600"}`}>Paid</div>
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.totalPaid > 0 ? "bg-emerald-200" : "bg-slate-200"}`}>
@@ -1289,7 +1298,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                           <div className={`text-2xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}>R{paymentStatus.totalPaid.toFixed(2)}</div>
                         </div>
 
-                        <div className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.balanceDue <= 0 ? "from-emerald-50 to-emerald-100 border-emerald-200" : paymentStatus.totalPaid > 0 ? "from-amber-50 to-amber-100 border-amber-200" : "from-rose-50 to-rose-100 border-rose-200"}`}>
+                        <div className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.balanceDue <= 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : paymentStatus.totalPaid > 0 ? "from-amber-50 to-amber-100 border-amber-200" : "from-rose-50 to-rose-100 border-rose-200"}`}>
                           <div className="flex items-center justify-between mb-2">
                             <div className={`text-sm font-medium ${paymentStatus.balanceDue <= 0 ? "text-emerald-700" : paymentStatus.totalPaid > 0 ? "text-amber-700" : "text-rose-700"}`}>Balance Due</div>
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.balanceDue <= 0 ? "bg-emerald-200" : paymentStatus.totalPaid > 0 ? "bg-amber-200" : "bg-rose-200"}`}>

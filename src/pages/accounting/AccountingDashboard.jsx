@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import HomeView from "../HomeView";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
@@ -101,7 +102,7 @@ const AccountingDashboard = () => {
   const [savedInvoices, setSavedInvoices] = useState([]);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [activeView, setActiveView] = useState("invoice");
+  const [activeView, setActiveView] = useState("home");
   const [currentInvoiceId, setCurrentInvoiceId] = useState(null);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
@@ -111,8 +112,7 @@ const AccountingDashboard = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [inputMode, setInputMode] = useState("manual");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
-    useState(null);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
@@ -894,12 +894,13 @@ const AccountingDashboard = () => {
 
           <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
             <button
-              className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-              title="Home"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-            </button>
+  onClick={() => setActiveView("home")}  // ADD THIS
+  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+  title="Home"
+>
+  <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+  <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+</button>
 
             <button
               onClick={() => setShowSettings(true)}
@@ -982,10 +983,13 @@ const AccountingDashboard = () => {
           </div>
 
           <nav className="space-y-1.5 md:space-y-2">
-            <div className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30">
-              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-xs md:text-sm font-semibold">Home</span>
-            </div>
+            <div
+  onClick={() => setActiveView("home")}  // ADD THIS
+  className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
+>
+  <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+  <span className="text-xs md:text-sm font-semibold">Home</span>
+</div>
 
             <div
               onClick={() => setShowSettings(true)}
@@ -1218,8 +1222,11 @@ const AccountingDashboard = () => {
                 </button>
 
                 <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg flex-shrink-0">
-                    <Receipt className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl shadow-lg flex-shrink-0">
+                    <img
+                      src={businessInfo.logoUrl}
+                      className="w-4 h-4 md:w-5 md:h-5 text-white"
+                    />
                   </div>
                   <div className="min-w-0">
                     <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent truncate">
@@ -1620,7 +1627,7 @@ const AccountingDashboard = () => {
             {activeView === "history-view" && <HistoryView user={user} />}
             {activeView === "notes-view" && <NotesView user={user} />}
             {activeView === "templates" && <Templates user={user} />}
-
+            {activeView === "home" && <HomeView user={user} />}
             {activeView === "invoice" && (
               <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
                 <div className="space-y-6">
@@ -1686,8 +1693,8 @@ const AccountingDashboard = () => {
                         <div
                           className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
                             paymentStatus.totalPaid > 0
-                              ? "from-emerald-50 to-emerald-100 border-emerald-200"
-                              : "from-slate-50 to-slate-100 border-slate-200"
+                              ? "from-emerald-100 to-emerald-300 border-emerald-600"
+                              : "from-slate-100 to-slate-300 border-slate-300"
                           }`}
                         >
                           <div className="flex items-center justify-between mb-2">
@@ -1730,9 +1737,9 @@ const AccountingDashboard = () => {
                         <div
                           className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
                             paymentStatus.balanceDue <= 0
-                              ? "from-emerald-50 to-emerald-100 border-emerald-200"
+                              ? "from-emerald-100 to-emerald-300 border-emerald-600"
                               : paymentStatus.totalPaid > 0
-                                ? "from-amber-50 to-amber-100 border-amber-200"
+                                ? "from-amber-100 to-amber-300 border-amber-300"
                                 : "from-rose-50 to-rose-100 border-rose-200"
                           }`}
                         >

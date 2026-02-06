@@ -3,6 +3,7 @@ import Templates from "./Templates";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
 import { useAuth } from "../../contexts/AuthContext";
+import HomeView from "../HomeView";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
@@ -54,14 +55,18 @@ import {
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const RestaurantDashboard = () => {
+  const db = getFirestore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 const [inputMode, setInputMode] = useState("manual");
 const [documentType, setDocumentType] = useState("invoice"); 
 const {user, authUser} = useAuth();
 const [useAI, setUseAI] = useState(false);
+const [invoiceId, setInvoiceId] = useState(null);
   const [activeTab, setActiveTab] = useState('Overview');
-  const [activeView, setActiveView] = useState("invoice");
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
+  const [activeView, setActiveView] = useState("home");
   const [selectedTemplate, setSelectedTemplate] = useState('professional');  
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [menuItems, setMenuItems] = useState([
     {
       id: '1',
@@ -129,7 +134,85 @@ const [useAI, setUseAI] = useState(false);
       createdAt: new Date()
     }
   ]);
+  const [paymentStatus, setPaymentStatus] = useState({
+      totalPaid: 0,
+      balanceDue: 0,
+      status: "pending",
+    });
+const handleProcessPayment = async () => {
+    if (!invoiceId || !user?.uid) {
+      alert("Please save the invoice before processing payment");
+      return;
+    }
 
+    try {
+      const collectionName =
+        documentType === "estimate" ? "estimates" : "invoices";
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, invoiceId),
+      );
+
+      if (invoiceDoc.exists()) {
+        const invoiceData = invoiceDoc.data();
+        setSelectedInvoiceForPayment({
+          id: invoiceId,
+          ...invoiceData,
+        });
+        setShowPaymentModal(true);
+      } else {
+        alert("Invoice not found. Please save the invoice first.");
+      }
+    } catch (error) {
+      console.error("Error loading invoice:", error);
+      alert("Failed to load invoice for payment");
+    }
+  };
+
+  const loadPaymentStatus = async () => {
+    if (!user?.uid || !invoiceId) {
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: 0, // ✅ Use 0 as default
+        status: "pending",
+      });
+      return;
+    }
+
+    try {
+      const collectionName =
+        documentType === "estimate" ? "estimates" : "invoices";
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, invoiceId),
+      );
+
+      if (invoiceDoc.exists()) {
+        const data = invoiceDoc.data();
+        setPaymentStatus({
+          totalPaid: data.totals?.paid || 0,
+          balanceDue: data.totals?.due || data.totals?.total || 0,
+          status: data.status || "pending",
+        });
+      } else {
+        setPaymentStatus({
+          totalPaid: 0,
+          balanceDue: 0, // ✅ Use 0 since no invoice exists
+          status: "pending",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading payment status:", error);
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: 0, // ✅ Use 0 on error
+        status: "pending",
+      });
+    }
+  };
+
+  const handlePaymentComplete = () => {
+    loadPaymentStatus();
+    setShowPaymentModal(false);
+  };
   const [restaurantInfo, setRestaurantInfo] = useState({
     restaurantName: 'MY RESTAURANT',
     address: '123 Food Street',
@@ -348,7 +431,7 @@ const [useAI, setUseAI] = useState(false);
            sidebarOpen ? "translate-x-0" : "-translate-x-full"
          } fixed z-40 w-64 bg-gray-800 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
        >
-        <div className="p-4">
+        <div className="p-4 md:p-6">
           <div className="flex items-center space-x-2 mb-8">
             <div className="w-16 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
               <UtensilsCrossed className="w-8 h-8 text-gray-800" />
@@ -426,7 +509,7 @@ const [useAI, setUseAI] = useState(false);
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-indigo-700 bg-gray-500">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 md:space-x-4">
             <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
               <ChefHat className="w-6 h-6 text-gray-800" />
             </div>
@@ -447,7 +530,7 @@ const [useAI, setUseAI] = useState(false);
           </div>
         </div>
       </div>
-       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}'}`}>
+       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : "ml-0 md:ml-16"}`}>
       <div className="flex-1 overflow-auto">
         <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
@@ -532,7 +615,7 @@ const [useAI, setUseAI] = useState(false);
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
                 <div className="bg-white rounded-xl shadow-sm p-6">
                   <h2 className="text-lg font-bold text-gray-900 mb-4">Sales Overview</h2>
                   <ResponsiveContainer width="100%" height={300}>
@@ -638,7 +721,7 @@ const [useAI, setUseAI] = useState(false);
                           </span>
                         </div>
                       </div>
-                      <div className="p-4">
+                      <div className="p-4 md:p-6">
                         <h3 className="font-semibold text-lg mb-1">{item.name}</h3>
                         <p className="text-sm text-gray-500 mb-2">{item.category}</p>
                         <div className="flex items-center justify-between mb-3">
@@ -738,7 +821,7 @@ const [useAI, setUseAI] = useState(false);
 
           {activeTab === 'Analytics' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
                 <div className="bg-white rounded-xl shadow-sm p-6">
                   <h2 className="text-lg font-bold text-gray-900 mb-4">Weekly Sales Trend</h2>
                   <ResponsiveContainer width="100%" height={350}>

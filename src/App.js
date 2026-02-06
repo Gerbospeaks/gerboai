@@ -16,7 +16,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 
 // Protected Pages
-import Home from './pages/Home';
+import Home from './pages/HomeView';
 import DashboardRouter from './components/DashboardRouter';
 import FinancialOverview from './pages/FinancialOverview';
 

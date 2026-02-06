@@ -61,12 +61,15 @@ const {user, authUser} = useAuth();
 const [documentType, setDocumentType] = useState("invoice"); 
 const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState('Overview');
-  const [activeView, setActiveView] = useState("invoice");
+  const [activeView, setActiveView] = useState("home");
   // Products state
   const [products, setProducts] = useState([]);
+  const [invoiceId, setInvoiceId] = useState(null);
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState('professional');
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [productForm, setProductForm] = useState({
     name: '',
     sku: '',
@@ -94,7 +97,11 @@ const [useAI, setUseAI] = useState(false);
     logoUrl: ''
   });
   const [showSettings, setShowSettings] = useState(false);
-
+const [paymentStatus, setPaymentStatus] = useState({
+    totalPaid: 0,
+    balanceDue: 0,
+    status: "pending",
+  });
   // Analytics state
   const [salesData, setSalesData] = useState([]);
   const [metrics, setMetrics] = useState({
@@ -103,7 +110,80 @@ const [useAI, setUseAI] = useState(false);
     totalProducts: 0,
     lowStockItems: 0
   });
+const handleProcessPayment = async () => {
+    if (!invoiceId || !user?.uid) {
+      alert("Please save the invoice before processing payment");
+      return;
+    }
 
+    try {
+      const collectionName =
+        documentType === "estimate" ? "estimates" : "invoices";
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, invoiceId),
+      );
+
+      if (invoiceDoc.exists()) {
+        const invoiceData = invoiceDoc.data();
+        setSelectedInvoiceForPayment({
+          id: invoiceId,
+          ...invoiceData,
+        });
+        setShowPaymentModal(true);
+      } else {
+        alert("Invoice not found. Please save the invoice first.");
+      }
+    } catch (error) {
+      console.error("Error loading invoice:", error);
+      alert("Failed to load invoice for payment");
+    }
+  };
+
+  const loadPaymentStatus = async () => {
+    if (!user?.uid || !invoiceId) {
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: 0, // ✅ Use 0 as default
+        status: "pending",
+      });
+      return;
+    }
+
+    try {
+      const collectionName =
+        documentType === "estimate" ? "estimates" : "invoices";
+      const invoiceDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, invoiceId),
+      );
+
+      if (invoiceDoc.exists()) {
+        const data = invoiceDoc.data();
+        setPaymentStatus({
+          totalPaid: data.totals?.paid || 0,
+          balanceDue: data.totals?.due || data.totals?.total || 0,
+          status: data.status || "pending",
+        });
+      } else {
+        setPaymentStatus({
+          totalPaid: 0,
+          balanceDue: 0, // ✅ Use 0 since no invoice exists
+          status: "pending",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading payment status:", error);
+      setPaymentStatus({
+        totalPaid: 0,
+        balanceDue: 0, // ✅ Use 0 on error
+        status: "pending",
+      });
+    }
+  };
+
+  const handlePaymentComplete = () => {
+    loadPaymentStatus();
+    setShowPaymentModal(false);
+  };
   useEffect(() => {
     if (user?.uid) {
       loadProducts();
@@ -391,7 +471,7 @@ const [useAI, setUseAI] = useState(false);
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } fixed z-40 w-64 bg-gray-50 border-r border-gray-200 transition-transform duration-300 h-full print:hidden`}
       >
-        <div className="p-4">
+        <div className="p-4 md:p-6">
           <div className="flex items-center space-x-2 mb-8">
             <img
               src={logo}
@@ -471,7 +551,7 @@ const [useAI, setUseAI] = useState(false);
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-indigo-700 bg-gray-500">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 md:space-x-4">
             <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
               <ShoppingBag className="w-6 h-6 text-gray-800" />
             </div>
@@ -587,7 +667,7 @@ const [useAI, setUseAI] = useState(false);
               </div>
 
               {/* Charts */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
                 <div className="bg-white rounded-xl shadow-sm p-6">
                   <h2 className="text-lg font-bold text-gray-900 mb-4">Sales Overview</h2>
                   <ResponsiveContainer width="100%" height={300}>
@@ -675,7 +755,7 @@ const [useAI, setUseAI] = useState(false);
                             </span>
                           </div>
                         </div>
-                        <div className="p-4">
+                        <div className="p-4 md:p-6">
                           <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
                           <p className="text-sm text-gray-500 mb-2">{product.sku}</p>
                           <div className="flex items-center justify-between mb-3">

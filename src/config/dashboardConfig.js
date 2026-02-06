@@ -80,20 +80,21 @@ export const dashboards = [
     description: 'Lawn care & landscaping'
   },
   { 
-    id: 'salon',
-    name: 'Salon', 
-    path: '/salon',
-    icon: '💇', 
-    color: 'bg-pink-500',
-    description: 'Appointments & client management'
+    id: 'carpentry',
+    name: 'Carpentry', 
+    path: '/carpentry',
+    icon: '🪚', 
+    color: 'bg-amber-500',
+    description: 'Woodwork & construction projects'
+
   },
   { 
-    id: 'fitness',
-    name: 'Fitness', 
-    path: '/fitness',
-    icon: '💪', 
+    id: 'towing',
+    name: 'Towing', 
+    path: '/towing',
+    icon: '🚛', 
     color: 'bg-rose-500',
-    description: 'Gym & training management'
+    description: 'Towing & vehicle recovery services'
   },
   { 
     id: 'retail',
@@ -144,12 +145,12 @@ export const dashboards = [
     description: 'Bookings & portfolio management'
   },
   { 
-    id: 'veterinary',
-    name: 'Veterinary', 
-    path: '/veterinary',
-    icon: '🐾', 
-    color: 'bg-fuchsia-500',
-    description: 'Pet care & appointments'
+    id: 'welding',
+    name: 'Welding', 
+    path: '/welding',
+    icon: '⚙️', 
+    color: 'bg-orange-500',
+    description: 'Welding services & project tracking'
   },
   { 
     id: 'education',
@@ -166,5 +167,63 @@ export const dashboards = [
     icon: '🏨', 
     color: 'bg-brown-500',
     description: 'Reservations & guest management'
+  },
+  { 
+    id: 'painting',
+    name: 'Painting', 
+    path: '/painting',
+    icon: '🎨', 
+    color: 'bg-amber-500',
+    description: 'Painting services & project management'
+  },
+  { 
+    id: 'flooring',
+    name: 'Flooring', 
+    path: '/flooring',
+    icon: '🪵', 
+    color: 'bg-amber-500',
+    description: 'Flooring services & installation'
+
+  },
+  { 
+    id: 'appliance-repair',
+    name: 'Appliance Repair', 
+    path: '/appliance-repair',
+    icon: '🔧', 
+    color: 'bg-blue-500',
+    description: 'Appliance repair & maintenance services'
+  },
+  { 
+    id: 'pest-control',
+    name: 'Pest Control', 
+    path: '/pest-control',
+    icon: '🐜', 
+    color: 'bg-green-500',
+    description: 'Pest control & prevention services'
+  },
+  { 
+    id: 'pool-services',
+    name: 'Pool Services', 
+    path: '/pool-services',
+    icon: '�', 
+    color: 'bg-blue-400',
+    description: 'Pool maintenance & repair services'
+  },
+  { 
+    id: 'solar-installation',
+    name: 'Solar Installation', 
+    path: '/solar-installation',
+    icon: '☀️', 
+    color: 'bg-yellow-500',
+    description: 'Solar panel installation & maintenance'
+
+  },
+  { 
+    id: 'window-repair',
+    name: 'Window Repair', 
+    path: '/window-repair',
+    icon: '🪟', 
+    color: 'bg-blue-500',
+    description: 'Window repair & installation services'
   },
 ];

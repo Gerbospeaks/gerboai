@@ -178,7 +178,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
       {/* Secondary Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 md:space-x-4">
             <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
               <CreditCard className="w-5 h-5 text-indigo-600" />
             </div>
@@ -192,7 +192,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 md:space-x-4">
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
               <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
@@ -206,7 +206,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 md:space-x-4">
             <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
               <Heart className="w-5 h-5 text-pink-600" />
             </div>
@@ -221,7 +221,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* Revenue Trend */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2">

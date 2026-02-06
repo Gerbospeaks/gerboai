@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import HomeView from "../HomeView";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import v8logo from "../../assets/img/v8-logo.png";
@@ -111,7 +112,7 @@ const MechanicsDashboard = () => {
   const [showJobCardsList, setShowJobCardsList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersList, setShowCustomersList] = useState(false);
-  const [activeView, setActiveView] = useState("invoice");
+  const [activeView, setActiveView] = useState("home");
   const [currentJobCardId, setCurrentJobCardId] = useState(null);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
@@ -983,12 +984,13 @@ const MechanicsDashboard = () => {
           {/* Icon Navigation - Simplified for mobile */}
           <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
             <button
-              className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-              title="Home"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-            </button>
+  onClick={() => setActiveView("home")}  // ADD THIS
+  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+  title="Home"
+>
+  <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+  <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+</button>
 
             <button
               onClick={() => setShowSettings(true)}
@@ -1078,10 +1080,13 @@ const MechanicsDashboard = () => {
 
           <nav className="space-y-1.5 md:space-y-2">
             {/* Home */}
-            <div className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30">
-              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-xs md:text-sm font-semibold">Home</span>
-            </div>
+            <div
+  onClick={() => setActiveView("home")}  // ADD THIS
+  className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
+>
+  <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+  <span className="text-xs md:text-sm font-semibold">Home</span>
+</div>
 
             {/* Settings */}
             <div
@@ -1979,7 +1984,8 @@ const MechanicsDashboard = () => {
             {activeView === "history-view" && <HistoryView user={user} />}
             {activeView === "notes-view" && <NotesView user={user} />}
             {activeView === "vehicles" && <Vehicles user={user} />}
-            {activeView === "templates" && <Templates user={user} />}
+             {activeView === "templates" && <Templates user={user} />}
+            {activeView === "home" && <HomeView user={user} />}
 
             {activeView === "invoice" && (
               <>
@@ -2084,8 +2090,8 @@ const MechanicsDashboard = () => {
                              <div
                               className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
                                 paymentStatus.totalPaid > 0
-                                  ? "from-emerald-50 to-emerald-100 border-emerald-200"
-                                  : "from-slate-50 to-slate-100 border-slate-200"
+                                  ? "from-emerald-100 to-emerald-300 border-emerald-200"
+                                  : "from-slate-100 to-slate-300 border-slate-200"
                               }`}
                             >
                               <div className="flex items-center justify-between mb-2">
@@ -2150,7 +2156,7 @@ const MechanicsDashboard = () => {
                             <div
                               className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
                                 paymentStatus.balanceDue <= 0
-                                  ? "from-emerald-50 to-emerald-100 border-emerald-200"
+                                  ? "from-emerald-100 to-emerald-300 border-emerald-600"
                                   : paymentStatus.totalPaid > 0
                                     ? "from-amber-50 to-amber-100 border-amber-200"
                                     : "from-rose-50 to-rose-100 border-rose-200"

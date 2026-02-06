@@ -161,7 +161,7 @@ export const DefaultTemplate = ({
     {/* Three Column Section */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-gray-100 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1">INVOICE TO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">INVOICE TO</div>
         <div className="text-xs space-y-1">
           <div>{customerName}</div>
           <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
@@ -171,7 +171,7 @@ export const DefaultTemplate = ({
       </div>
 
       <div className="bg-gray-100 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1">BILL TO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">BILL TO</div>
         <div className="text-xs space-y-1">
           <div>{customerName}</div>
           <div className="h-16 overflow-hidden text-xs leading-tight">{customerAddress}</div>
@@ -181,7 +181,7 @@ export const DefaultTemplate = ({
       </div>
 
       <div className="bg-gray-100 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1">EQUIPMENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">EQUIPMENT DETAILS</div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Type:</span>
