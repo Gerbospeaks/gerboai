@@ -96,7 +96,26 @@ const generateQuoteNumber = async (userId, documentType) => {
   const nextNumber = lastNumber + 1;
   return `${prefix}-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
+const sendQuoteEmail = async (emailData) => {
+  try {
+    const response = await fetch('/api/send-quote-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(emailData),
+    });
 
+    if (!response.ok) {
+      throw new Error('Failed to send email');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
+};
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -465,7 +484,286 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
     alert(`${documentType === "quote" ? "Quote" : "Invoice"} saved successfully`);
     loadSavedQuotes();
   };
+// ============================================================================
+// Handlers – email sending
+// ============================================================================
+const handleSendEmail = async () => {
+  // Validation
+  if (!customerEmail) {
+    alert('Please enter a customer email address before sending.');
+    return;
+  }
 
+  if (!quoteId) {
+    const confirmSave = window.confirm(
+      `This ${documentType} hasn't been saved yet. Would you like to save it before sending?`
+    );
+    if (confirmSave) {
+      await handleSaveQuote();
+    } else {
+      return;
+    }
+  }
+
+  try {
+    // Show loading alert
+    alert('Generating PDF and preparing email...');
+
+    // Generate PDF from the print area
+    const pdfBlob = await generatePDFBlob();
+    
+    if (!pdfBlob) {
+      throw new Error('Failed to generate PDF');
+    }
+
+    // Convert blob to base64
+    const pdfBase64 = await blobToBase64(pdfBlob);
+
+    // Email template based on document type
+    const emailSubject = documentType === 'quote' 
+      ? `Quote ${quoteNumber} from ${businessInfo.businessName}`
+      : `Invoice ${quoteNumber} from ${businessInfo.businessName}`;
+
+    const emailMessage = documentType === 'quote' 
+      ? getQuoteEmailTemplate()
+      : getInvoiceEmailTemplate();
+
+    // Prepare email data with PDF attachment
+    const emailData = {
+      to: customerEmail,
+      subject: emailSubject,
+      message: emailMessage,
+      documentType: documentType,
+      documentNumber: quoteNumber,
+      customerName: customerName,
+      businessInfo: businessInfo,
+      items: items,
+      subtotal: subtotal,
+      totalTax: totalTax,
+      total: total,
+      paymentStatus: paymentStatus,
+      attachment: {
+        filename: `${documentType}_${quoteNumber}.pdf`,
+        content: pdfBase64,
+        contentType: 'application/pdf'
+      }
+    };
+
+    await sendQuoteEmail(emailData);
+    
+    alert(`${documentType === 'quote' ? 'Quote' : 'Invoice'} sent successfully to ${customerEmail}!`);
+  } catch (error) {
+    console.error('Error sending email:', error);
+    alert(`Failed to send ${documentType}. Please try again. Error: ${error.message}`);
+  }
+};
+const getQuoteEmailTemplate = () => {
+  return `
+Dear ${customerName},
+
+Thank you for your interest in our construction services. Please find attached your detailed quote for the project at ${propertyAddress}.
+
+QUOTE DETAILS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Quote Number: ${quoteNumber}
+Date: ${new Date().toLocaleDateString()}
+Project Type: ${siteType}
+Site Area: ${siteSize} sqm
+
+PRICING SUMMARY:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Subtotal: R${subtotal.toFixed(2)}
+VAT (15%): R${totalTax.toFixed(2)}
+Total Amount: R${total.toFixed(2)}
+
+This quote is valid for 30 days from the date of issue.
+
+NEXT STEPS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Review the detailed breakdown of work items and pricing
+2. Contact us if you have any questions or require modifications
+3. Accept the quote to proceed with scheduling and planning
+4. Initial deposit required to commence work
+
+PAYMENT TERMS:
+We offer flexible payment options including milestone-based payments. Our standard terms include:
+- Deposit: 30% upon acceptance
+- Progress payments: 40% at key milestones
+- Final payment: 30% upon completion
+
+Should you have any questions or require any clarifications regarding this quote, please don't hesitate to contact us.
+
+We look forward to the opportunity to work with you on this project.
+
+Best regards,
+
+${businessInfo.businessName}
+${businessInfo.addressLine1}
+${businessInfo.addressLine2 ? businessInfo.addressLine2 + '\n' : ''}${businessInfo.city}, ${businessInfo.postalCode}
+
+Phone: ${businessInfo.primaryPhone}${businessInfo.secondaryPhone ? '\nAlt: ' + businessInfo.secondaryPhone : ''}
+Email: ${businessInfo.email}
+${businessInfo.website ? 'Web: ' + businessInfo.website : ''}
+
+${businessInfo.registrationNumber ? 'Registration: ' + businessInfo.registrationNumber : ''}
+${businessInfo.vatNumber ? 'VAT Number: ' + businessInfo.vatNumber : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+This is an automated message. Please do not reply directly to this email.
+For inquiries, please contact us at ${businessInfo.primaryPhone}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  `.trim();
+};
+
+// Invoice Email Template
+const getInvoiceEmailTemplate = () => {
+  const isPaid = paymentStatus.status === 'paid';
+  const isPartiallyPaid = paymentStatus.status === 'partially_paid';
+  
+  return `
+Dear ${customerName},
+
+${isPaid 
+  ? 'Thank you for your payment! This email confirms that your invoice has been fully paid.'
+  : 'Please find attached your invoice for the construction work completed at ' + propertyAddress + '.'
+}
+
+INVOICE DETAILS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Invoice Number: ${quoteNumber}
+Date: ${new Date().toLocaleDateString()}
+Project Type: ${siteType}
+Site Area: ${siteSize} sqm
+
+PAYMENT SUMMARY:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total Amount: R${total.toFixed(2)}
+${isPartiallyPaid || isPaid ? `Amount Paid: R${paymentStatus.totalPaid.toFixed(2)}` : ''}
+${isPaid 
+  ? '✓ STATUS: PAID IN FULL' 
+  : `Balance Due: R${paymentStatus.balanceDue.toFixed(2)}
+${isPartiallyPaid ? '⚠ STATUS: PARTIALLY PAID' : '⚠ STATUS: PAYMENT PENDING'}`
+}
+
+${!isPaid ? `
+PAYMENT INSTRUCTIONS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Please make payment to the following account:
+
+Bank: ${businessInfo.bankName || '[Bank Name]'}
+Account Holder: ${businessInfo.accountHolder || businessInfo.businessName}
+Account Number: ${businessInfo.accountNumber || '[Account Number]'}
+Branch Code: ${businessInfo.branchCode || '[Branch Code]'}
+
+Reference: ${quoteNumber}
+
+PAYMENT METHODS ACCEPTED:
+- Direct Bank Transfer (EFT)
+- Credit/Debit Card
+- Cash (at office)
+
+⏰ Payment Due: Within 7 days of invoice date
+` : ''}
+
+${isPaid ? `
+Thank you for your business! We appreciate your prompt payment.
+
+If you require a receipt or have any questions about this invoice, please contact us.
+` : `
+For questions regarding this invoice or payment arrangements, please contact us immediately.
+
+Late payments may incur additional charges as per our terms and conditions.
+`}
+
+WORK COMPLETED:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${items.slice(0, 5).map(item => `• ${item.description} - R${item.totalAmount.toFixed(2)}`).join('\n')}
+${items.length > 5 ? `... and ${items.length - 5} more items (see attached invoice)` : ''}
+
+Should you have any questions or concerns, please don't hesitate to reach out.
+
+${isPaid ? 'Thank you for your business!' : 'We appreciate your business and look forward to serving you again.'}
+
+Best regards,
+
+${businessInfo.businessName}
+${businessInfo.addressLine1}
+${businessInfo.addressLine2 ? businessInfo.addressLine2 + '\n' : ''}${businessInfo.city}, ${businessInfo.postalCode}
+
+Phone: ${businessInfo.primaryPhone}${businessInfo.secondaryPhone ? '\nAlt: ' + businessInfo.secondaryPhone : ''}
+Email: ${businessInfo.email}
+${businessInfo.website ? 'Web: ' + businessInfo.website : ''}
+
+${businessInfo.registrationNumber ? 'Registration: ' + businessInfo.registrationNumber : ''}
+${businessInfo.vatNumber ? 'VAT Number: ' + businessInfo.vatNumber : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+This is an automated invoice notification.
+For inquiries, please contact us at ${businessInfo.primaryPhone}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  `.trim();
+};
+// Generate PDF Blob from print area
+const generatePDFBlob = async () => {
+  return new Promise((resolve, reject) => {
+    try {
+      // Import html2pdf dynamically
+      import('html2pdf.js').then(({ default: html2pdf }) => {
+        const element = document.getElementById('print-area');
+        
+        if (!element) {
+          reject(new Error('Print area not found'));
+          return;
+        }
+
+        const opt = {
+          margin: 10,
+          filename: `${documentType}_${quoteNumber}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            logging: false
+          },
+          jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
+          }
+        };
+
+        html2pdf()
+          .set(opt)
+          .from(element)
+          .outputPdf('blob')
+          .then(blob => {
+            resolve(blob);
+          })
+          .catch(error => {
+            reject(error);
+          });
+      }).catch(error => {
+        reject(new Error('Failed to load PDF library'));
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+// Convert Blob to Base64
+const blobToBase64 = (blob) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // Remove the data URL prefix (e.g., "data:application/pdf;base64,")
+      const base64String = reader.result.split(',')[1];
+      resolve(base64String);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
   const handleConvertToInvoice = async () => {
     if (!user?.uid) return;
     if (!quoteId) {
@@ -1120,8 +1418,8 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
             {/* ── Settings Modal ──────────────────────────────────────── */}
             {showSettings && (
                          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
-                           <div className="bg-white rounded-xl md:rounded-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
-                             <div className="p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-purple-50 flex-shrink-0">
+                           <div className="bg-gray-300 max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
+                             <div className="p-4 md:p-6 border-b border-slate-300 bg-gradient-to-r from-gray0 to-purple-50 flex-shrink-0">
                                <div className="flex items-center justify-between">
                                  <div className="flex items-center space-x-2 md:space-x-3">
                                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -1140,7 +1438,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                </div>
                              </div>
            
-                             <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-50 to-white flex-1">
+                             <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-300 to-slate-400 flex-1">
                                <div className="space-y-4 md:space-y-6">
                                  {/* Logo Upload */}
                                  <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
@@ -1163,7 +1461,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                        </div>
                                      )}
            
-                                     <div className="flex-1 text-center sm:text-left">
+                                     <div className="flex-1 text-center sm:text-left ">
                                        <input
                                          type="file"
                                          accept="image/*"
@@ -1201,13 +1499,13 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                          businessName: e.target.value,
                                        })
                                      }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-medium text-sm md:text-base"
-                                     placeholder="V8 Powered Auto Service"
+                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-black-500 transition-all duration-300 font-medium text-sm md:text-base"
+                                     placeholder="Solidflo Invoicing Saas"
                                    />
                                  </div>
            
                                  {/* Address Fields */}
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                    <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                                      Address Line 1
                                    </label>
@@ -1220,12 +1518,12 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                          addressLine1: e.target.value,
                                        })
                                      }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                                      placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
                                    />
                                  </div>
            
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                    <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                                      Address Line 2
                                    </label>
@@ -1238,14 +1536,14 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                          addressLine2: e.target.value,
                                        })
                                      }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                                      placeholder="WYNBERG"
                                    />
                                  </div>
            
                                  {/* City and Postal Code */}
                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                                   <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                   <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                      <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                                        City
                                      </label>
@@ -1258,12 +1556,12 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                            city: e.target.value,
                                          })
                                        }
-                                       className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                                       className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                                        placeholder="SANDTON"
                                      />
                                    </div>
            
-                                   <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                   <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                      <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                                        Postal Code
                                      </label>
@@ -1276,14 +1574,14 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                            postalCode: e.target.value,
                                          })
                                        }
-                                       className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                                       className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                                        placeholder="2090"
                                      />
                                    </div>
                                  </div>
            
                                  {/* Phone Numbers */}
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                    <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                                      Primary Phone <span className="text-red-500">*</span>
                                    </label>
@@ -1296,13 +1594,13 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                          primaryPhone: e.target.value,
                                        })
                                      }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                                      placeholder="082 514 4509"
                                      required
                                    />
                                  </div>
            
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                    <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                                      Secondary Phone (Optional)
                                    </label>
@@ -1315,7 +1613,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                          secondaryPhone: e.target.value,
                                        })
                                      }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                                      placeholder="084 583 9929"
                                    />
                                  </div>
@@ -1332,7 +1630,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                    </div>
            
                                    <div className="space-y-3 md:space-y-4">
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                                          Bank Name
                                        </label>
@@ -1345,11 +1643,11 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                              bankName: e.target.value,
                                            })
                                          }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                                        />
                                      </div>
            
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                                          Account Holder
                                        </label>
@@ -1362,11 +1660,11 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                              accountHolder: e.target.value,
                                            })
                                          }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                                        />
                                      </div>
            
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                                          Account Number
                                        </label>
@@ -1379,11 +1677,11 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                              accountNumber: e.target.value,
                                            })
                                          }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                                        />
                                      </div>
            
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
                                          Branch Code
                                        </label>
@@ -1396,7 +1694,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                              branchCode: e.target.value,
                                            })
                                          }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
                                        />
                                      </div>
                                    </div>
@@ -1448,7 +1746,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                                  text: e.target.value.toUpperCase(),
                                                })
                                              }
-                                             className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-bold text-sm md:text-base"
+                                             className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-bold text-sm md:text-base"
                                              placeholder="APPROVED"
                                              maxLength={15}
                                            />
@@ -1459,7 +1757,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                          </div>
            
            
-                                         <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                         <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                            <label className="block text-sm font-bold text-slate-700 mb-3">
                                              Stamp Color
                                            </label>
@@ -1471,7 +1769,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                                  color: e.target.value,
                                                })
                                              }
-                                             className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-semibold cursor-pointer"
+                                             className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-semibold cursor-pointer"
                                            >
                                              <option value="#d32f2f">
                                                🔴 Red (Traditional)
@@ -1494,7 +1792,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
                                            </select>
                                          </div>
            
-                                         <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                         <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
                                            <label className="flex items-center space-x-3 cursor-pointer group">
                                              <input
                                                type="checkbox"

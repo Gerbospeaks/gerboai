@@ -146,7 +146,7 @@ const [stampSettings, setStampSettings] = useState({
             value={businessInfo.businessName}
             onChange={(e) => setBusinessInfo({...businessInfo, businessName: e.target.value})}
             className="w-full px-4 py-2 border rounded-lg"
-            placeholder="V8 Powered Auto Service"
+            placeholder="Solidflo Invoicing Saas"
           />
         </div>
 

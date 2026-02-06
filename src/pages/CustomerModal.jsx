@@ -179,7 +179,7 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
         </div>
 
         {/* Content */}
-        <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-50 to-white flex-1">
+        <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-300 to-slate-400 flex-1">
           <div className="space-y-4 md:space-y-5">
             {/* Error Message */}
             {error && (

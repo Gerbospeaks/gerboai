@@ -363,7 +363,7 @@ export default function Home() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-center shadow-lg">
+      <div className="bg-gradient-to-r from-gray-600 to-slate-600 rounded-xl p-8 text-center shadow-lg">
         <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
           Ready to manage your business?
         </h3>

@@ -1381,7 +1381,7 @@ const LegalDashboard = () => {
                                 </div>
                               </div>
             
-                              <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-50 to-white flex-1">
+                              <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-300 to-slate-400 flex-1">
                                 <div className="space-y-4 md:space-y-6">
                                   {/* Logo Upload */}
                                   <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
@@ -1443,7 +1443,7 @@ const LegalDashboard = () => {
                                         })
                                       }
                                       className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-medium text-sm md:text-base"
-                                      placeholder="V8 Powered Auto Service"
+                                      placeholder="Solidflo Invoicing Saas"
                                     />
                                   </div>
             

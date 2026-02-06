@@ -142,7 +142,7 @@ const CustomersListModal = ({
         </div>
 
         {/* Content */}
-        <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-50 to-white flex-1">
+        <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-300 to-slate-400 flex-1">
           {/* Add New Customer Button */}
           <button
             onClick={() => {
