@@ -9,6 +9,7 @@ import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import {
   getFirestore,
   collection,
@@ -96,29 +97,8 @@ const generateQuoteNumber = async (userId, documentType) => {
   const nextNumber = lastNumber + 1;
   return `${prefix}-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
-const sendQuoteEmail = async (emailData) => {
-  try {
-    const response = await fetch('/api/send-quote-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(emailData),
-    });
 
-    if (!response.ok) {
-      throw new Error('Failed to send email');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error sending email:', error);
-    throw error;
-  }
-};
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
+const functions = getFunctions();
 const ConstructionDashboard = () => {
   // ── step navigation ──────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(1);
@@ -484,286 +464,7 @@ const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
     alert(`${documentType === "quote" ? "Quote" : "Invoice"} saved successfully`);
     loadSavedQuotes();
   };
-// ============================================================================
-// Handlers – email sending
-// ============================================================================
-const handleSendEmail = async () => {
-  // Validation
-  if (!customerEmail) {
-    alert('Please enter a customer email address before sending.');
-    return;
-  }
 
-  if (!quoteId) {
-    const confirmSave = window.confirm(
-      `This ${documentType} hasn't been saved yet. Would you like to save it before sending?`
-    );
-    if (confirmSave) {
-      await handleSaveQuote();
-    } else {
-      return;
-    }
-  }
-
-  try {
-    // Show loading alert
-    alert('Generating PDF and preparing email...');
-
-    // Generate PDF from the print area
-    const pdfBlob = await generatePDFBlob();
-    
-    if (!pdfBlob) {
-      throw new Error('Failed to generate PDF');
-    }
-
-    // Convert blob to base64
-    const pdfBase64 = await blobToBase64(pdfBlob);
-
-    // Email template based on document type
-    const emailSubject = documentType === 'quote' 
-      ? `Quote ${quoteNumber} from ${businessInfo.businessName}`
-      : `Invoice ${quoteNumber} from ${businessInfo.businessName}`;
-
-    const emailMessage = documentType === 'quote' 
-      ? getQuoteEmailTemplate()
-      : getInvoiceEmailTemplate();
-
-    // Prepare email data with PDF attachment
-    const emailData = {
-      to: customerEmail,
-      subject: emailSubject,
-      message: emailMessage,
-      documentType: documentType,
-      documentNumber: quoteNumber,
-      customerName: customerName,
-      businessInfo: businessInfo,
-      items: items,
-      subtotal: subtotal,
-      totalTax: totalTax,
-      total: total,
-      paymentStatus: paymentStatus,
-      attachment: {
-        filename: `${documentType}_${quoteNumber}.pdf`,
-        content: pdfBase64,
-        contentType: 'application/pdf'
-      }
-    };
-
-    await sendQuoteEmail(emailData);
-    
-    alert(`${documentType === 'quote' ? 'Quote' : 'Invoice'} sent successfully to ${customerEmail}!`);
-  } catch (error) {
-    console.error('Error sending email:', error);
-    alert(`Failed to send ${documentType}. Please try again. Error: ${error.message}`);
-  }
-};
-const getQuoteEmailTemplate = () => {
-  return `
-Dear ${customerName},
-
-Thank you for your interest in our construction services. Please find attached your detailed quote for the project at ${propertyAddress}.
-
-QUOTE DETAILS:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Quote Number: ${quoteNumber}
-Date: ${new Date().toLocaleDateString()}
-Project Type: ${siteType}
-Site Area: ${siteSize} sqm
-
-PRICING SUMMARY:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Subtotal: R${subtotal.toFixed(2)}
-VAT (15%): R${totalTax.toFixed(2)}
-Total Amount: R${total.toFixed(2)}
-
-This quote is valid for 30 days from the date of issue.
-
-NEXT STEPS:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. Review the detailed breakdown of work items and pricing
-2. Contact us if you have any questions or require modifications
-3. Accept the quote to proceed with scheduling and planning
-4. Initial deposit required to commence work
-
-PAYMENT TERMS:
-We offer flexible payment options including milestone-based payments. Our standard terms include:
-- Deposit: 30% upon acceptance
-- Progress payments: 40% at key milestones
-- Final payment: 30% upon completion
-
-Should you have any questions or require any clarifications regarding this quote, please don't hesitate to contact us.
-
-We look forward to the opportunity to work with you on this project.
-
-Best regards,
-
-${businessInfo.businessName}
-${businessInfo.addressLine1}
-${businessInfo.addressLine2 ? businessInfo.addressLine2 + '\n' : ''}${businessInfo.city}, ${businessInfo.postalCode}
-
-Phone: ${businessInfo.primaryPhone}${businessInfo.secondaryPhone ? '\nAlt: ' + businessInfo.secondaryPhone : ''}
-Email: ${businessInfo.email}
-${businessInfo.website ? 'Web: ' + businessInfo.website : ''}
-
-${businessInfo.registrationNumber ? 'Registration: ' + businessInfo.registrationNumber : ''}
-${businessInfo.vatNumber ? 'VAT Number: ' + businessInfo.vatNumber : ''}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-This is an automated message. Please do not reply directly to this email.
-For inquiries, please contact us at ${businessInfo.primaryPhone}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  `.trim();
-};
-
-// Invoice Email Template
-const getInvoiceEmailTemplate = () => {
-  const isPaid = paymentStatus.status === 'paid';
-  const isPartiallyPaid = paymentStatus.status === 'partially_paid';
-  
-  return `
-Dear ${customerName},
-
-${isPaid 
-  ? 'Thank you for your payment! This email confirms that your invoice has been fully paid.'
-  : 'Please find attached your invoice for the construction work completed at ' + propertyAddress + '.'
-}
-
-INVOICE DETAILS:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Invoice Number: ${quoteNumber}
-Date: ${new Date().toLocaleDateString()}
-Project Type: ${siteType}
-Site Area: ${siteSize} sqm
-
-PAYMENT SUMMARY:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Total Amount: R${total.toFixed(2)}
-${isPartiallyPaid || isPaid ? `Amount Paid: R${paymentStatus.totalPaid.toFixed(2)}` : ''}
-${isPaid 
-  ? '✓ STATUS: PAID IN FULL' 
-  : `Balance Due: R${paymentStatus.balanceDue.toFixed(2)}
-${isPartiallyPaid ? '⚠ STATUS: PARTIALLY PAID' : '⚠ STATUS: PAYMENT PENDING'}`
-}
-
-${!isPaid ? `
-PAYMENT INSTRUCTIONS:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Please make payment to the following account:
-
-Bank: ${businessInfo.bankName || '[Bank Name]'}
-Account Holder: ${businessInfo.accountHolder || businessInfo.businessName}
-Account Number: ${businessInfo.accountNumber || '[Account Number]'}
-Branch Code: ${businessInfo.branchCode || '[Branch Code]'}
-
-Reference: ${quoteNumber}
-
-PAYMENT METHODS ACCEPTED:
-- Direct Bank Transfer (EFT)
-- Credit/Debit Card
-- Cash (at office)
-
-⏰ Payment Due: Within 7 days of invoice date
-` : ''}
-
-${isPaid ? `
-Thank you for your business! We appreciate your prompt payment.
-
-If you require a receipt or have any questions about this invoice, please contact us.
-` : `
-For questions regarding this invoice or payment arrangements, please contact us immediately.
-
-Late payments may incur additional charges as per our terms and conditions.
-`}
-
-WORK COMPLETED:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${items.slice(0, 5).map(item => `• ${item.description} - R${item.totalAmount.toFixed(2)}`).join('\n')}
-${items.length > 5 ? `... and ${items.length - 5} more items (see attached invoice)` : ''}
-
-Should you have any questions or concerns, please don't hesitate to reach out.
-
-${isPaid ? 'Thank you for your business!' : 'We appreciate your business and look forward to serving you again.'}
-
-Best regards,
-
-${businessInfo.businessName}
-${businessInfo.addressLine1}
-${businessInfo.addressLine2 ? businessInfo.addressLine2 + '\n' : ''}${businessInfo.city}, ${businessInfo.postalCode}
-
-Phone: ${businessInfo.primaryPhone}${businessInfo.secondaryPhone ? '\nAlt: ' + businessInfo.secondaryPhone : ''}
-Email: ${businessInfo.email}
-${businessInfo.website ? 'Web: ' + businessInfo.website : ''}
-
-${businessInfo.registrationNumber ? 'Registration: ' + businessInfo.registrationNumber : ''}
-${businessInfo.vatNumber ? 'VAT Number: ' + businessInfo.vatNumber : ''}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-This is an automated invoice notification.
-For inquiries, please contact us at ${businessInfo.primaryPhone}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  `.trim();
-};
-// Generate PDF Blob from print area
-const generatePDFBlob = async () => {
-  return new Promise((resolve, reject) => {
-    try {
-      // Import html2pdf dynamically
-      import('html2pdf.js').then(({ default: html2pdf }) => {
-        const element = document.getElementById('print-area');
-        
-        if (!element) {
-          reject(new Error('Print area not found'));
-          return;
-        }
-
-        const opt = {
-          margin: 10,
-          filename: `${documentType}_${quoteNumber}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { 
-            scale: 2,
-            useCORS: true,
-            logging: false
-          },
-          jsPDF: { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'portrait' 
-          }
-        };
-
-        html2pdf()
-          .set(opt)
-          .from(element)
-          .outputPdf('blob')
-          .then(blob => {
-            resolve(blob);
-          })
-          .catch(error => {
-            reject(error);
-          });
-      }).catch(error => {
-        reject(new Error('Failed to load PDF library'));
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
-
-// Convert Blob to Base64
-const blobToBase64 = (blob) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      // Remove the data URL prefix (e.g., "data:application/pdf;base64,")
-      const base64String = reader.result.split(',')[1];
-      resolve(base64String);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-};
   const handleConvertToInvoice = async () => {
     if (!user?.uid) return;
     if (!quoteId) {
@@ -1023,7 +724,64 @@ const blobToBase64 = (blob) => {
     if (extractedData.items?.length > 0) setItems(extractedData.items);
     alert("✨ Data extracted and populated successfully!");
   };
+const handleTestEmail = async () => {
+  if (!businessInfo.emailPassword) {
+    alert('⚠️ Please enter your email app password first.');
+    return;
+  }
 
+  const userEmail = user?.email || authUser?.email;
+  
+  if (!userEmail) {
+    alert('⚠️ Could not find your email address. Please log in again.');
+    return;
+  }
+
+  try {
+    const testEmailData = {
+      userId: user.uid,
+      to: userEmail, // Send test to self
+      subject: '✅ Test Email - Email Configuration Successful',
+      message: `
+Hello,
+
+This is a test email from your construction quote/invoice system.
+
+✓ Your email configuration is working correctly!
+
+Account Details:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Business: ${businessInfo.businessName}
+Email: ${userEmail}
+Provider: ${businessInfo.emailProvider || 'Gmail'}
+Date: ${new Date().toLocaleString()}
+
+You can now send quotes and invoices to your clients from this email address.
+
+Best regards,
+Your Construction Quote System
+      `.trim(),
+      documentType: 'test',
+      documentNumber: 'TEST-001',
+    };
+
+    const sendEmail = httpsCallable(functions, 'sendQuoteEmail');
+    await sendEmail(testEmailData);
+    
+    alert(`✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`);
+  } catch (error) {
+    console.error('Test email error:', error);
+    
+    let errorMsg = '❌ Test email failed!\n\n';
+    if (error.message.includes('Invalid login')) {
+      errorMsg += 'Your app password is incorrect. Please check and try again.\n\nMake sure you\'re using an APP PASSWORD, not your regular password.';
+    } else {
+      errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+    }
+    
+    alert(errorMsg);
+  }
+};
   // ── navigation ───────────────────────────────────────────────────────────
   const handleNext = () => { if (currentStep < totalSteps) setCurrentStep(currentStep + 1); };
   const handlePrevious = () => { if (currentStep > 1) setCurrentStep(currentStep - 1); };
@@ -1830,7 +1588,139 @@ const blobToBase64 = (blob) => {
                                      )}
                                    </div>
                                  </div>
-           
+                                   {/* Email Configuration Section */}
+                                   <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                                     <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                                       <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
+                                         <Send className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                                       </div>
+                                       <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                                         Email Configuration
+                                       </h3>
+                                     </div>
+                                   
+                                     <div className="space-y-3 md:space-y-4">
+                                       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                         <p className="text-sm text-blue-800">
+                                           <strong>📧 Your Sending Email:</strong> {user?.email || authUser?.email}
+                                         </p>
+                                         <p className="text-xs text-blue-600 mt-2">
+                                           Quotes and invoices will be sent from this email address.
+                                         </p>
+                                       </div>
+                                   
+                                       <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                         <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                                           Email Provider
+                                         </label>
+                                         <select
+                                           value={businessInfo.emailProvider || 'gmail'}
+                                           onChange={(e) =>
+                                             setBusinessInfo({
+                                               ...businessInfo,
+                                               emailProvider: e.target.value,
+                                             })
+                                           }
+                                           className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                                         >
+                                           <option value="gmail">Gmail</option>
+                                           <option value="outlook">Outlook/Hotmail</option>
+                                           <option value="yahoo">Yahoo Mail</option>
+                                           <option value="other">Other SMTP</option>
+                                         </select>
+                                       </div>
+                                   
+                                       <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                         <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                                           Email App Password <span className="text-red-500">*</span>
+                                         </label>
+                                         <input
+                                           type="password"
+                                           value={businessInfo.emailPassword || ''}
+                                           onChange={(e) =>
+                                             setBusinessInfo({
+                                               ...businessInfo,
+                                               emailPassword: e.target.value,
+                                             })
+                                           }
+                                           className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base font-mono"
+                                           placeholder="••••••••••••••••"
+                                         />
+                                         <p className="text-xs text-slate-500 mt-2">
+                                           <strong>⚠️ Security Note:</strong> Use an App Password, not your regular login password
+                                         </p>
+                                       </div>
+                                   
+                                       {/* Gmail Setup Instructions */}
+                                       {(businessInfo.emailProvider === 'gmail' || !businessInfo.emailProvider) && (
+                                         <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4">
+                                           <h4 className="font-bold text-red-900 mb-2 flex items-center gap-2">
+                                             <span>📖</span> How to Get Gmail App Password:
+                                           </h4>
+                                           <ol className="text-xs md:text-sm text-red-800 space-y-1 ml-4 list-decimal">
+                                             <li>Go to <strong>myaccount.google.com</strong></li>
+                                             <li>Click <strong>Security</strong> in the left menu</li>
+                                             <li>Enable <strong>2-Step Verification</strong> (if not already enabled)</li>
+                                             <li>Search for <strong>"App passwords"</strong> in the search bar</li>
+                                             <li>Click <strong>App passwords</strong></li>
+                                             <li>Enter your Google password if prompted</li>
+                                             <li>In the "App name" field, type <strong>"Construction Quotes"</strong></li>
+                                             <li>Click <strong>Create</strong></li>
+                                             <li>Copy the 16-character password (shown in yellow box)</li>
+                                             <li>Paste it in the field above</li>
+                                           </ol>
+                                           
+                                            <a href="https://support.google.com/accounts/answer/185833"
+                                             target="_blank"
+                                             rel="noopener noreferrer"
+                                             className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline">
+                                           
+                                             📺 View Video Tutorial →
+                                           </a>
+                                         </div>
+                                       )}
+                                   
+                                       {/* Outlook Setup Instructions */}
+                                       {businessInfo.emailProvider === 'outlook' && (
+                                         <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
+                                           <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                                             <span>📖</span> How to Get Outlook App Password:
+                                           </h4>
+                                           <ol className="text-xs md:text-sm text-blue-800 space-y-1 ml-4 list-decimal">
+                                             <li>Go to <strong>account.microsoft.com/security</strong></li>
+                                             <li>Sign in with your Outlook account</li>
+                                             <li>Click <strong>Advanced security options</strong></li>
+                                             <li>Under "Additional security", click <strong>App passwords</strong></li>
+                                             <li>Click <strong>Create a new app password</strong></li>
+                                             <li>Copy the generated password</li>
+                                             <li>Paste it in the field above</li>
+                                           </ol>
+                                           
+                                            <a href="https://support.microsoft.com/en-us/account-billing/manage-app-passwords-for-two-step-verification-d6dc8c6d-4bf7-4851-ad95-6d07799387e9"
+                                             target="_blank"
+                                             rel="noopener noreferrer"
+                                             className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
+                                           >
+                                             📺 View Microsoft Instructions →
+                                           </a>
+                                         </div>
+                                       )}
+                                   
+                                       {/* Test Email Button */}
+                                       <button
+                                         onClick={handleTestEmail}
+                                         disabled={!businessInfo.emailPassword}
+                                         className={`w-full px-4 py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${
+                                           !businessInfo.emailPassword
+                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                             : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800'
+                                         }`}
+                                       >
+                                         <Send className="w-4 h-4" />
+                                         {businessInfo.emailPassword ? 'Send Test Email' : 'Enter App Password First'}
+                                       </button>
+                                     </div>
+                                   </div>
                                  <button
                                    onClick={handleSaveBusinessInfo}
                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"

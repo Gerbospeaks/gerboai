@@ -219,7 +219,7 @@ const Vehicles = ({ user }) => {
   };
 
   return (
-    <div className="p-6 bg-gray-800 min-h-screen">
+    <div className="p-6 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Vehicles</h1>
@@ -241,7 +241,7 @@ const Vehicles = ({ user }) => {
           </div>
           <button
             onClick={handleAddNew}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-50 rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap"
           >
             <Plus className="w-5 h-5" />
             Add Vehicle
@@ -314,7 +314,7 @@ const Vehicles = ({ user }) => {
           {!searchTerm && (
             <button
               onClick={handleAddNew}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-700 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-600 text-gray-50 rounded-lg hover:bg-orange-700 transition-colors"
             >
               <Plus className="w-5 h-5" />
               Add Your First Vehicle

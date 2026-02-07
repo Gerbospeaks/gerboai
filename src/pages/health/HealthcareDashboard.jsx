@@ -9,6 +9,7 @@ import Templates from "./Templates";
 import MedicalAIExtractor from "./MedicalAIExtractor";
 import MedicalMultiStepForm from "./MedicalMultiStepForm";  
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import {
   getFirestore,
@@ -90,7 +91,7 @@ const generateInvoiceNumber = async (userId) => {
   const nextNumber = lastNumber + 1;
   return `INV-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
-
+const functions = getFunctions();
 const HealthcareDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 const [inputMode, setInputMode] = useState("manual");
@@ -283,7 +284,64 @@ const [items, setItems] = useState([]);
 
   alert("✅ Medical data extracted and populated successfully!");
 };
+const handleTestEmail = async () => {
+  if (!facilityInfo.emailPassword) {
+    alert('⚠️ Please enter your email app password first.');
+    return;
+  }
 
+  const userEmail = user?.email || authUser?.email;
+  
+  if (!userEmail) {
+    alert('⚠️ Could not find your email address. Please log in again.');
+    return;
+  }
+
+  try {
+    const testEmailData = {
+      userId: user.uid,
+      to: userEmail, // Send test to self
+      subject: '✅ Test Email - Email Configuration Successful',
+      message: `
+Hello,
+
+This is a test email from your construction quote/invoice system.
+
+✓ Your email configuration is working correctly!
+
+Account Details:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Business: ${facilityInfo.businessName}
+Email: ${userEmail}
+Provider: ${facilityInfo.emailProvider || 'Gmail'}
+Date: ${new Date().toLocaleString()}
+
+You can now send quotes and invoices to your clients from this email address.
+
+Best regards,
+Your Construction Quote System
+      `.trim(),
+      documentType: 'test',
+      documentNumber: 'TEST-001',
+    };
+
+    const sendEmail = httpsCallable(functions, 'sendQuoteEmail');
+    await sendEmail(testEmailData);
+    
+    alert(`✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`);
+  } catch (error) {
+    console.error('Test email error:', error);
+    
+    let errorMsg = '❌ Test email failed!\n\n';
+    if (error.message.includes('Invalid login')) {
+      errorMsg += 'Your app password is incorrect. Please check and try again.\n\nMake sure you\'re using an APP PASSWORD, not your regular password.';
+    } else {
+      errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+    }
+    
+    alert(errorMsg);
+  }
+};
   // Payment Processor Functions
   const handleProcessPayment = async () => {
     if (!invoiceId || !user?.uid) {
