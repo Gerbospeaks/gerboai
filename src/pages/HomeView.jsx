@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getDashboardRoute } from '../utils/dashboardRoutes';
 import { useAuth } from '../contexts/AuthContext';
 import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { 
@@ -28,7 +29,26 @@ export default function Home() {
     pendingPayments: 0,
     loading: true
   });
-
+const handleCreateInvoice = () => {
+    const dashboardRoute = getDashboardRoute(user?.dashboardId);
+    
+    navigate(dashboardRoute, { 
+      state: { 
+        action: 'createInvoice',
+        activeView: 'invoice' 
+      } 
+    });
+  };
+const handleCreateQuote = () => {
+    const dashboardRoute = getDashboardRoute(user?.dashboardId);
+    
+    navigate(dashboardRoute, { 
+      state: { 
+        action: 'createQuote',
+        activeView: 'invoice' 
+      } 
+    });
+  };
   useEffect(() => {
     if (user?.uid) {
       fetchBusinessStats();
@@ -241,12 +261,15 @@ export default function Home() {
               onClick={() => navigate('/dashboard')}
               className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border border-purple-200 rounded-lg transition-all duration-300 group"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-sm font-semibold text-purple-900">Create New Invoice</span>
-              </div>
+             <div 
+      className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+      onClick={handleCreateInvoice}
+    >
+      <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+        <FileText className="w-4 h-4 text-white" />
+      </div>
+      <span className="text-sm font-semibold text-purple-900">Create New Invoice</span>
+    </div>
               <ArrowRight className="w-5 h-5 text-purple-600 group-hover:translate-x-1 transition-transform duration-300" />
             </button>
 
@@ -254,12 +277,15 @@ export default function Home() {
               onClick={() => navigate('/dashboard')}
               className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-cyan-50 to-cyan-100 hover:from-cyan-100 hover:to-cyan-200 border border-cyan-200 rounded-lg transition-all duration-300 group"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-cyan-600 rounded-lg flex items-center justify-center">
-                  <Receipt className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-sm font-semibold text-cyan-900">Create New Quote</span>
-              </div>
+              <div 
+      className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+      onClick={handleCreateQuote}
+    >
+      <div className="w-8 h-8 bg-cyan-600 rounded-lg flex items-center justify-center">
+        <FileText className="w-4 h-4 text-white" />
+      </div>
+      <span className="text-sm font-semibold text-cyan-900">Create New Quote</span>
+    </div>
               <ArrowRight className="w-5 h-5 text-cyan-600 group-hover:translate-x-1 transition-transform duration-300" />
             </button>
 

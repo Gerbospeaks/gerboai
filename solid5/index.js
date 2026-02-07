@@ -637,3 +637,206 @@ exports.sendQuoteEmail = functions.firestore
 
       return null;
     });
+    // Get SMTP configuration based on provider
+const getSMTPConfig = (provider) => {
+  const configs = {
+    gmail: {
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+    },
+    outlook: {
+      host: 'smtp-mail.outlook.com',
+      port: 587,
+      secure: false,
+    },
+    yahoo: {
+      host: 'smtp.mail.yahoo.com',
+      port: 587,
+      secure: false,
+    },
+    other: {
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+    },
+  };
+  return configs[provider] || configs.gmail;
+};
+
+// NEW CALLABLE FUNCTION - User sends quote/invoice email with their own credentials
+exports.sendUserQuoteEmail = functions.https.onCall(async (data, context) => {
+  // Verify authentication
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'User must be authenticated to send emails',
+    );
+  }
+
+  const userId = context.auth.uid;
+  const userEmail = context.auth.token.email; // Get email from auth token
+  
+  const {
+    to,
+    subject,
+    message,
+    documentType,
+    documentNumber,
+    attachment,
+  } = data;
+
+  // Validate required fields
+  if (!to || !subject || !message) {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Missing required email fields',
+    );
+  }
+
+  if (!userEmail) {
+    throw new functions.https.HttpsError(
+      'failed-precondition',
+      'User email not found. Please log in again.',
+    );
+  }
+
+  try {
+    // Fetch user's business info and email configuration from Firestore
+    const userDoc = await admin
+      .firestore()
+      .collection('users')
+      .doc(userId)
+      .collection('settings')
+      .doc('businessInfo')
+      .get();
+
+    if (!userDoc.exists) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'Business information not found. Please configure your settings.',
+      );
+    }
+
+    const businessInfo = userDoc.data();
+    
+    if (!businessInfo.emailPassword) {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'Email app password not configured. Please set up your email in Settings.',
+      );
+    }
+
+    // Get SMTP configuration
+    const smtpConfig = getSMTPConfig(businessInfo.emailProvider || 'gmail');
+
+    // Create transporter with user's account email and app password
+    const userTransporter = nodemailer.createTransport({
+      host: smtpConfig.host,
+      port: smtpConfig.port,
+      secure: smtpConfig.secure,
+      auth: {
+        user: userEmail, // Use the user's login email
+        pass: businessInfo.emailPassword, // Use stored app password
+      },
+    });
+
+    // Verify transporter configuration
+    try {
+      await userTransporter.verify();
+    } catch (verifyError) {
+      console.error('SMTP verification failed:', verifyError);
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'Invalid email credentials. Please check your app password in Settings.',
+      );
+    }
+
+    const mailOptions = {
+      from: `${businessInfo.businessName || 'Your Business'} <${userEmail}>`,
+      to: to,
+      subject: subject,
+      text: message,
+      html: message.replace(/\n/g, '<br>'),
+      replyTo: userEmail,
+    };
+
+    // Add PDF attachment if provided
+    if (attachment && attachment.content) {
+      mailOptions.attachments = [
+        {
+          filename: attachment.filename || `${documentType}_${documentNumber}.pdf`,
+          content: attachment.content,
+          encoding: 'base64',
+          contentType: attachment.contentType || 'application/pdf',
+        },
+      ];
+    }
+
+    // Send email
+    const info = await userTransporter.sendMail(mailOptions);
+
+    // Log success to Firestore
+    await admin
+      .firestore()
+      .collection('users')
+      .doc(userId)
+      .collection('emailLogs')
+      .add({
+        from: userEmail,
+        to: to,
+        subject: subject,
+        documentType: documentType,
+        documentNumber: documentNumber,
+        status: 'sent',
+        sentAt: admin.firestore.FieldValue.serverTimestamp(),
+        messageId: info.messageId,
+      });
+
+    console.log(`Email sent successfully from ${userEmail} to ${to}`);
+
+    return {
+      success: true,
+      message: `${documentType} sent successfully to ${to}`,
+      messageId: info.messageId,
+    };
+  } catch (error) {
+    console.error('Error sending email:', error);
+
+    // Log failure to Firestore
+    try {
+      await admin
+        .firestore()
+        .collection('users')
+        .doc(userId)
+        .collection('emailLogs')
+        .add({
+          from: userEmail,
+          to: to,
+          subject: subject,
+          documentType: documentType,
+          documentNumber: documentNumber,
+          status: 'failed',
+          error: error.message,
+          failedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+    } catch (logError) {
+      console.error('Failed to log error:', logError);
+    }
+
+    // Provide helpful error messages
+    let errorMessage = 'Failed to send email';
+    
+    if (error.code === 'EAUTH' || error.responseCode === 535) {
+      errorMessage = 'Invalid email app password. Please check your app password in Settings and make sure 2-Step Verification is enabled.';
+    } else if (error.code === 'ECONNECTION' || error.code === 'ETIMEDOUT') {
+      errorMessage = 'Could not connect to email server. Please check your internet connection.';
+    } else if (error.code === 'EMESSAGE') {
+      errorMessage = 'Invalid email format or content. Please check the recipient email address.';
+    } else {
+      errorMessage = error.message;
+    }
+
+    throw new functions.https.HttpsError('internal', errorMessage);
+  }
+});

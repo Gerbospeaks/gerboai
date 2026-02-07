@@ -113,7 +113,7 @@ const MechanicsDashboard = () => {
   const [showJobCardsList, setShowJobCardsList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersList, setShowCustomersList] = useState(false);
-  const [activeView, setActiveView] = useState("home");
+  const [activeView, setActiveView] = useState("invoice");
   const [currentJobCardId, setCurrentJobCardId] = useState(null);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
