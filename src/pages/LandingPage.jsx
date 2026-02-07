@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VapiAssistant from './VapiAssistant';
+import ChatAssistant from '../components/ChatAssistant';
 import { Helmet } from 'react-helmet';
 import { 
   Zap, 
@@ -28,35 +29,46 @@ import greylogo from '../assets/images/grey-logo.png';
 import computer from '../assets/images/new_solidflo_bg_transp_text.png';
 
 const LandingPage = () => {
-   useEffect(() => {
-    // Add CSS
-    const link = document.createElement('link');
-    link.href = 'https://assets.calendly.com/assets/external/widget.css';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
+ useEffect(() => {
+  // Add Calendly CSS
+  const link = document.createElement('link');
+  link.href = 'https://assets.calendly.com/assets/external/widget.css';
+  link.rel = 'stylesheet';
+  document.head.appendChild(link);
 
-    // Add Script
-    const script = document.createElement('script');
-    script.src = 'https://assets.calendly.com/assets/external/widget.js';
-    script.async = true;
-    
-    script.onload = () => {
-      // This runs ONLY after script is fully loaded
-      window.Calendly.initBadgeWidget({
-        url: 'https://calendly.com/gabriel-solidflo/30min?background_color=2c448c&text_color=ffffff&primary_color=9effbe',
-        text: 'Schedule time with me',
-        color: '#ff711f',
-        textColor: '#ffffff',
-        branding: false
-      });
-    };
-    
-    document.body.appendChild(script);
-    return () => {
-      if (document.head.contains(link)) document.head.removeChild(link);
-      if (document.body.contains(script)) document.body.removeChild(script);
-    };
-  }, []);
+  // Add custom positioning CSS
+  const style = document.createElement('style');
+  style.textContent = `
+    .calendly-badge-widget {
+      bottom: 40px !important;  
+      left: 20px !important;   
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Add Script
+  const script = document.createElement('script');
+  script.src = 'https://assets.calendly.com/assets/external/widget.js';
+  script.async = true;
+  
+  script.onload = () => {
+    window.Calendly.initBadgeWidget({
+      url: 'https://calendly.com/gabriel-solidflo/30min?background_color=2c448c&text_color=ffffff&primary_color=9effbe',
+      text: 'Book A Demo',
+      color: '#ff711f',
+      textColor: '#ffffff',
+      branding: false
+    });
+  };
+  
+  document.body.appendChild(script);
+
+  return () => {
+    if (document.head.contains(link)) document.head.removeChild(link);
+    if (document.head.contains(style)) document.head.removeChild(style);
+    if (document.body.contains(script)) document.body.removeChild(script);
+  };
+}, []);
 
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -1051,7 +1063,7 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
-     <VapiAssistant />
+    <ChatAssistant />
     
     </div>  
     
