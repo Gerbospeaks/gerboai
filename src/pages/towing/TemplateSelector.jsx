@@ -337,7 +337,7 @@ export const DefaultTemplate = ({
       <div className="text-xs space-y-1">
         <div><span className="font-semibold">Bank Name:</span> {businessInfo.bankName || 'First National Bank'}</div>
         <div><span className="font-semibold">Account Holder:</span> {businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber || '63149991431'}</div>
+        <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber || '23251412201'}</div>
         <div><span className="font-semibold">Branch Code:</span> {businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
@@ -513,7 +513,7 @@ export const ClassicTemplate = (props) => (
       <div className="text-xs space-y-1 text-gray-700">
         <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
         <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '63149991431'}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '23251412201'}</div>
         <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
@@ -655,7 +655,7 @@ export const ModernTemplate = (props) => (
       <div className="text-xs space-y-1 text-gray-700">
         <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
         <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '63149991431'}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '23251412201'}</div>
         <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
@@ -787,7 +787,7 @@ export const ElegantTemplate = (props) => (
         <div className="text-xs space-y-1 text-gray-700">
           <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
           <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '63149991431'}</div>
+          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '23251412201'}</div>
           <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
         </div>
       </div>
@@ -933,7 +933,7 @@ export const SpeedTemplate = (props) => (
       <div className="text-xs space-y-1 text-gray-400">
         <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
         <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '63149991431'}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '23251412201'}</div>
         <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
@@ -1084,7 +1084,7 @@ export const DiagnosticTemplate = (props) => (
       <div className="text-xs space-y-1 text-gray-700">
         <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
         <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '63149991431'}</div>
+        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '23251412201'}</div>
         <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
       </div>
     </div>
