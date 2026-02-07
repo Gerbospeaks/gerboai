@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import VapiAssistant from './VapiAssistant';
+import { Helmet } from 'react-helmet';
 import { 
   Zap, 
   Shield, 
@@ -26,6 +28,36 @@ import greylogo from '../assets/images/grey-logo.png';
 import computer from '../assets/images/new_solidflo_bg_transp_text.png';
 
 const LandingPage = () => {
+   useEffect(() => {
+    // Add CSS
+    const link = document.createElement('link');
+    link.href = 'https://assets.calendly.com/assets/external/widget.css';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+
+    // Add Script
+    const script = document.createElement('script');
+    script.src = 'https://assets.calendly.com/assets/external/widget.js';
+    script.async = true;
+    
+    script.onload = () => {
+      // This runs ONLY after script is fully loaded
+      window.Calendly.initBadgeWidget({
+        url: 'https://calendly.com/gabriel-solidflo/30min?background_color=2c448c&text_color=ffffff&primary_color=9effbe',
+        text: 'Schedule time with me',
+        color: '#ff711f',
+        textColor: '#ffffff',
+        branding: false
+      });
+    };
+    
+    document.body.appendChild(script);
+    return () => {
+      if (document.head.contains(link)) document.head.removeChild(link);
+      if (document.body.contains(script)) document.body.removeChild(script);
+    };
+  }, []);
+
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentWord, setCurrentWord] = useState(0);
@@ -220,7 +252,7 @@ const LandingPage = () => {
     }
   ];
 
-  return (
+  return (   
     <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50">
       <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -563,10 +595,19 @@ const LandingPage = () => {
                 Start Free Trial
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-xl font-semibold text-lg hover:border-orange-500 hover:text-orange-500 transition-all flex items-center gap-2">
-                <Play className="w-5 h-5" />
-                Watch Demo
-              </button>
+             <button 
+  onClick={() => {
+    if (window.Calendly) {
+      window.Calendly.initPopupWidget({
+        url: 'https://calendly.com/gabriel-solidflo/30min?background_color=2c448c&text_color=ffffff&primary_color=9effbe'
+      });
+    }
+  }}
+  className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-xl font-semibold text-lg hover:border-orange-500 hover:text-orange-500 transition-all flex items-center gap-2"
+>
+  <Play className="w-5 h-5" />
+ Book a Demo
+</button>
             </div>
 
             {/* Trust Indicators */}
@@ -577,7 +618,7 @@ const LandingPage = () => {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-green-500" />
-                <span>14-day free trial</span>
+                <span>30-day free trial</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-green-500" />
@@ -1010,7 +1051,10 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
-    </div>
+     <VapiAssistant />
+    
+    </div>  
+    
   );
 };
 
