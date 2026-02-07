@@ -821,10 +821,10 @@ Your Carpentry Quote System
             <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
           </button>
 
-          <div className="relative group">
-            <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
+         <div className="relative group">
+            <div className="absolute inset-0  rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
             <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 rounded-xl p-1 shadow-lg">
-              <Hammer className="w-full h-full text-amber-400 p-1.5" />
+              <img src={logo} className="w-full h-full text-white p-1.5" />
             </div>
           </div>
 
@@ -880,11 +880,11 @@ Your Carpentry Quote System
       >
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-6 md:mb-8">
-            <div className="flex items-center space-x-3 md:space-x-4">
+             <div className="flex items-center space-x-3 md:space-x-4">
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300" />
                 <div className="relative p-1 rounded-xl shadow-lg">
-                  <Hammer className="w-12 h-12 text-amber-400" />
+                  <img src={logo} className="w-12 h-auto" alt="" />
                 </div>
               </div>
             </div>
@@ -1920,12 +1920,15 @@ Your Carpentry Quote System
                               <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">Site / Project Type</label>
                                 <select value={projectType} onChange={(e) => setProjectType(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400">
-                                  <option value="Commercial">Commercial</option>
-                                  <option value="Residential">Residential</option>
-                                  <option value="Industrial">Industrial</option>
-                                  <option value="Infrastructure">Infrastructure</option>
-                                  <option value="Renovation">Renovation</option>
-                                  <option value="Government">Government</option>
+                                   <option value="Kitchen Cabinetry">Kitchen Cabinetry</option>
+    <option value="Bedroom Furniture">Bedroom Furniture</option>
+    <option value="Built-in Wardrobes">Built-in Wardrobes</option>
+    <option value="Custom Shelving">Custom Shelving</option>
+    <option value="Decking">Decking</option>
+    <option value="Doors & Frames">Doors & Frames</option>
+    <option value="Flooring">Flooring</option>
+    <option value="Ceilings">Ceilings</option>
+    <option value="Custom Furniture">Custom Furniture</option>
                                 </select>
                               </div>
                               <div>
@@ -1977,34 +1980,27 @@ Your Carpentry Quote System
                               <div className="grid grid-cols-1 gap-4">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                   <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">Work Category</label>
-                                    <select value={newItem.workCategory} onChange={(e) => setNewItem({ ...newItem, workCategory: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white text-sm font-medium hover:border-slate-400">
-                                      <option value="Foundation Work">Foundation Work</option>
-                                      <option value="Structural Steel">Structural Steel</option>
-                                      <option value="Concrete & Masonry">Concrete & Masonry</option>
-                                      <option value="Electrical">Electrical</option>
-                                      <option value="Plumbing">Plumbing</option>
-                                      <option value="Roofing">Roofing</option>
-                                      <option value="Finishing & Plastering">Finishing & Plastering</option>
-                                      <option value="Earthworks">Earthworks</option>
-                                      <option value="Landscaping">Landscaping</option>
-                                      <option value="Site Preparation">Site Preparation</option>
-                                      <option value="HVAC">HVAC</option>
-                                      <option value="Windows & Doors">Windows & Doors</option>
-                                      <option value="Painting">Painting</option>
-                                      <option value="Tiling & Flooring">Tiling & Flooring</option>
-                                      <option value="Materials Supply">Materials Supply</option>
-                                    </select>
+                                     <label>Wood Type</label>
+  <select value={woodType} onChange={(e) => setWoodType(e.target.value)}>
+    <option value="Oak">Oak</option>
+    <option value="Pine">Pine</option>
+    <option value="Meranti">Meranti</option>
+    <option value="Sapele">Sapele</option>
+    <option value="MDF">MDF</option>
+    <option value="Plywood">Plywood</option>
+    <option value="Melamine">Melamine</option>
+  </select>
                                   </div>
                                   <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">Phase</label>
-                                    <select value={newItem.phase} onChange={(e) => setNewItem({ ...newItem, phase: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white text-sm font-medium hover:border-slate-400">
-                                      <option value="Phase 1">Phase 1</option>
-                                      <option value="Phase 2">Phase 2</option>
-                                      <option value="Phase 3">Phase 3</option>
-                                      <option value="Phase 4">Phase 4</option>
-                                      <option value="Ongoing">Ongoing</option>
-                                    </select>
+                                    <label>Finish Type</label>
+  <select value={finishType} onChange={(e) => setFinishType(e.target.value)}>
+    <option value="Varnish">Varnish</option>
+    <option value="Stain">Stain & Varnish</option>
+    <option value="Paint">Paint</option>
+    <option value="Oil">Oil Finish</option>
+    <option value="Lacquer">Lacquer</option>
+    <option value="Natural">Natural/Unfinished</option>
+  </select>
                                   </div>
                                 </div>
 
