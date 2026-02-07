@@ -49,6 +49,7 @@ import SolarDashboard from './pages/solar-installation/SolarDashboard';
 import TowingDashboard from './pages/towing/TowingDashboard';
 import WindowrepairDashboard from './pages/window-repair/WindowrepairDashboard';  
 import HVACDashboard from './pages/hvac/HVACDashboard';
+import CarpentryDashboard from './pages/carpentry/CarpentryDashboard';
 import AccountingDashboard from './pages/accounting/AccountingDashboard';
 import VerifyEmail from './pages/VerifyEmail';
 // Healthcare specific
@@ -408,6 +409,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <WeldingDashboard />
+                </ProtectedRoute>
+              } 
+            />
+             <Route 
+              path="/carpentry" 
+              element={
+                <ProtectedRoute>
+                  <CarpentryDashboard />
                 </ProtectedRoute>
               } 
             />
