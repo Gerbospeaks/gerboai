@@ -867,8 +867,8 @@ Your Carpentry Quote System
         <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
           <div className="relative group">
             <div className="absolute inset-0 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center ring-2 ring-amber-700 shadow-lg group-hover:ring-4 group-hover:ring-amber-500/50 transition-all duration-300">
-              <Hammer className="w-6 h-6 text-amber-600" />
+            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center ring-2 ring-stone-700 shadow-lg group-hover:ring-4 group-hover:ring-amber-500/50 transition-all duration-300">
+              <img src={businessInfo.logoUrl} className="w-6 h-6" />
             </div>
           </div>
         </div>
@@ -1047,9 +1047,13 @@ Your Carpentry Quote System
           <div className="flex items-center space-x-2 md:space-x-3">
             <div className="relative group flex-shrink-0">
               <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300 flex items-center justify-center">
-                <Hammer className="w-5 h-5 text-amber-600" />
-              </div>
+              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
+  <img
+    src={businessInfo.logoUrl}
+    alt="Business Logo"
+    className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
+  />
+</div>
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent truncate">{user?.name || "User"}</div>
