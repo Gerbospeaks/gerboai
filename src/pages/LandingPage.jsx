@@ -16,6 +16,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import logo from '../assets/img/solidflo.png';
+import logo1 from '../assets/img/solidflo-logo.png';
 import globe from '../assets/images/globe.webp';
 import instagram from '../assets/images/instagram.png';
 import facebook from '../assets/images/facebook.png';
@@ -136,7 +137,7 @@ const LandingPage = () => {
 
   const stats = [
     { value: "10K+", label: "Active Users", icon: <Users className="w-6 h-6" /> },
-    { value: "$5M+", label: "Processed Monthly", icon: <TrendingUp className="w-6 h-6" /> },
+    { value: "$5k+", label: "Processed Monthly", icon: <TrendingUp className="w-6 h-6" /> },
     { value: "99.9%", label: "Uptime", icon: <Shield className="w-6 h-6" /> },
     { value: "24/7", label: "Support", icon: <Clock className="w-6 h-6" /> }
   ];
@@ -938,7 +939,7 @@ const LandingPage = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             {/* Company Info */}
             <div>
-              <img src={logo} alt="SolidFlo" className="h-10 mb-4" />
+              <img src={logo1} alt="SolidFlo" className="h-10 mb-4" />
               <p className="text-gray-400 mb-6 leading-relaxed">
                 Free online invoicing for small businesses. Create and send invoices, track time and expenses, and accept online payments.
               </p>
