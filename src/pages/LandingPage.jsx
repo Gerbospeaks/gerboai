@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VapiAssistant from './VapiAssistant';
 import ChatAssistant from '../components/ChatAssistant';
+import TimelineNavigation from './TimelineNavigation';
 import { Helmet } from 'react-helmet';
 import { 
   Zap, 
@@ -460,7 +461,7 @@ const LandingPage = () => {
           background: linear-gradient(135deg, rgba(255, 157, 0, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%);
         }
       `}</style>
-
+<TimelineNavigation />
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div 
