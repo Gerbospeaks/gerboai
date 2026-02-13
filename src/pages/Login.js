@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { forgotpassword } from './ForgotPassword'
 import logon from '../assets/img/reg2.png';
 import logo from '../assets/img/solidflo.png';
 import slide1 from '../assets/img/slide1.avif';

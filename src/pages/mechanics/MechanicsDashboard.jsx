@@ -2693,6 +2693,21 @@ Your Construction Quote System
                                   </div>
                                 </div>
                               </div>
+                              {/* Quick Copy Option */}
+                                                          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                                            <button
+                                                              onClick={() => {
+                                                                setBillName(customerName);
+                                                                setBillEmail(customerEmail);
+                                                                setBillPhone(customerPhone);
+                                                                setBillAddress(customerAddress);
+                                                              }}
+                                                              className="flex items-center gap-2 text-blue-700 hover:text-blue-800 font-semibold transition-colors"
+                                                            >
+                                                              <Users className="w-4 h-4" />
+                                                              Copy from Client Information
+                                                            </button>
+                                                          </div>
                             </div>
                           )}
                           {/* Step 3: Vehicle Information */}
