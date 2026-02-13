@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../firebase'; // Adjust path to your firebase config
+import { useAuth } from '../contexts/AuthContext';
 import logo from '../assets/img/solidflo.png';
 import slide1 from '../assets/img/slide1.avif';
 import slide2 from '../assets/img/slide2.avif';
@@ -10,27 +9,28 @@ import slide3 from '../assets/img/slide3.jpg';
 const slides = [
   {
     image: slide1,
-    title: "Forgot your password?",
-    description: "Don't worry, we'll help you get back in"
+    title: "Reset your password",
+    description: "We'll send you a link to reset your password"
   },
   {
     image: slide2,
-    title: "Quick recovery",
-    description: "Reset your password in just a few clicks"
+    title: "Secure process",
+    description: "Your security is our top priority"
   },
   {
     image: slide3,
-    title: "Secure process",
-    description: "Your account security is our priority"
+    title: "Quick recovery",
+    description: "Get back to work in minutes"
   }
 ];
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { resetPassword } = useAuth();
 
   // Auto-advance slides
   useEffect(() => {
@@ -44,7 +44,7 @@ function ForgotPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
+    setMessage('');
 
     if (!email) {
       setError('Please enter your email address');
@@ -59,55 +59,17 @@ function ForgotPassword() {
     }
 
     setIsSubmitting(true);
+    const result = await resetPassword(email);
+    setIsSubmitting(false);
 
-    try {
-      // Configure action code settings (optional - customize the redirect URL)
-      const actionCodeSettings = {
-        // URL you want to redirect back to after password reset
-        // Make sure this URL is whitelisted in Firebase Console
-        url: window.location.origin + 'https://solidflo.co.za/login',
-        handleCodeInApp: false,
-      };
-
-      await sendPasswordResetEmail(auth, email, actionCodeSettings);
-      
-      setSuccess(`Password reset email sent! Please check your inbox at ${email}. If you don't see it, check your spam folder.`);
-      setEmail(''); // Clear the email field
-    } catch (err) {
-      console.error('Error sending password reset email:', err);
-      
-      // Handle specific error codes
-      if (err.code === 'auth/user-not-found') {
-        // For security reasons, don't reveal if email exists or not
-        setSuccess(`If an account exists with ${email}, a password reset email has been sent.`);
-      } else if (err.code === 'auth/invalid-email') {
-        setError('Invalid email address format');
-      } else if (err.code === 'auth/too-many-requests') {
-        setError('Too many requests. Please try again later.');
-      } else {
-        setError('Failed to send reset email. Please try again.');
-      }
-    } finally {
-      setIsSubmitting(false);
+    if (result.success) {
+      setMessage(result.message);
+      setEmail(''); // Clear the email field on success
+    } else {
+      setError(result.message);
     }
   };
-// In your forgot password function
 
-
-async function resetPassword(email) {
-  try {
-    const resetSettings = {
-      url: 'https://solidflo.co.za/reset-password',
-      handleCodeInApp: true
-    };
-    
-    await sendPasswordResetEmail(auth, email, resetSettings);
-    
-    console.log('Password reset email sent!');
-  } catch (error) {
-    console.error(error);
-  }
-}
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Forgot Password Form */}
@@ -122,23 +84,11 @@ async function resetPassword(email) {
             />
           </div>
 
-          {/* Header */}
+          {/* Welcome Text */}
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Forgot Password?</h2>
           <p className="text-gray-500 mb-8">
-            Enter your email address and we'll send you a link to reset your password
+            No worries! Enter your email and we'll send you reset instructions.
           </p>
-
-          {/* Success Message */}
-          {success && (
-            <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6">
-              <div className="flex items-start">
-                <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>{success}</span>
-              </div>
-            </div>
-          )}
 
           {/* Error Message */}
           {error && (
@@ -147,7 +97,24 @@ async function resetPassword(email) {
             </div>
           )}
 
-          {/* Form */}
+          {/* Success Message */}
+          {message && (
+            <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <p className="font-medium">{message}</p>
+                  <p className="text-sm mt-1">
+                    Please check your inbox and spam folder. The link will expire in 1 hour.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Forgot Password Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-2">
@@ -163,41 +130,43 @@ async function resetPassword(email) {
               />
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              {isSubmitting ? 'Sending...' : 'Send Reset Link'}
-              {!isSubmitting && (
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Sending...
+                </>
+              ) : (
+                <>
+                  Send Reset Link
+                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </>
               )}
             </button>
           </form>
 
-          {/* Additional Info */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Didn't receive the email?</strong>
-            </p>
-            <ul className="text-sm text-blue-700 mt-2 space-y-1 ml-4 list-disc">
-              <li>Check your spam or junk folder</li>
-              <li>Make sure you entered the correct email</li>
-              <li>Wait a few minutes and try again</li>
-            </ul>
-          </div>
-
-          {/* Back to Login */}
-          <p className="text-gray-600 text-center mt-6">
-            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium flex items-center justify-center">
+          {/* Back to Login Link */}
+          <div className="mt-6 text-center">
+            <Link 
+              to="/login" 
+              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+            >
               <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               Back to Login
             </Link>
-          </p>
+          </div>
         </div>
       </div>
 
