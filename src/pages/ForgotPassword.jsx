@@ -65,7 +65,7 @@ function ForgotPassword() {
       const actionCodeSettings = {
         // URL you want to redirect back to after password reset
         // Make sure this URL is whitelisted in Firebase Console
-        url: window.location.origin + '/login',
+        url: window.location.origin + 'https://solidflo.co.za/login',
         handleCodeInApp: false,
       };
 
