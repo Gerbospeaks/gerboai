@@ -104,7 +104,7 @@ useEffect(() => {
     if (container && !container.querySelector('vapi-widget')) {
       const widget = document.createElement('vapi-widget');
       widget.setAttribute('public-key', '6fbcc6b2-c19e-4f0a-b3fb-dac4a5a4f377');
-      widget.setAttribute('assistant-id', '0ef8c3c9-a7c1-4b33-bef2-374ca299ffc0');
+      widget.setAttribute('assistant-id', '7e49f9c1-b56a-4892-8c1f-28de1bb0428c');
       widget.setAttribute('mode', 'chat');
       widget.setAttribute('theme', 'dark');
       widget.setAttribute('base-bg-color', '#000000');
@@ -114,7 +114,7 @@ useEffect(() => {
       widget.setAttribute('border-radius', 'large');
       widget.setAttribute('size', 'full');
       widget.setAttribute('position', 'bottom-right');
-      widget.setAttribute('title', 'TALK WITH GERBO');
+      widget.setAttribute('title', 'TALK WITH AARON');
       widget.setAttribute('start-button-text', 'Start');
       widget.setAttribute('end-button-text', 'End Call');
       widget.setAttribute('cta-subtitle', 'Need help?');
@@ -696,6 +696,8 @@ const interpolateGradient = (grad1, grad2, factor) => {
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center max-w-4xl mx-auto">
            
+              <img src={logo} alt="SolidFlo" className="w-14 md:w-8 lg:w-24 h-auto mx-auto block mb-4" />
+            
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 rounded-full mb-8 animate-slide-up">
               <Sparkles className="w-4 h-4 text-orange-600" />
