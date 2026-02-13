@@ -18,7 +18,19 @@
   margin-bottom: var(--nav-travel-distance);
   pointer-events: none;
 }
+.stickyWrapper.inline-variant {
+  position: relative;
+  height: auto;
+  margin: 0 auto 2rem auto;
+  display: flex;
+  justify-content: center;
+}
 
+.stickyWrapper.inline-variant .container {
+  position: relative;
+  bottom: auto;
+  transform: none !important;
+}
 @media only screen and (min-width: 1024px) {
   .stickyWrapper {
     --nav-height: 2.75rem;
@@ -82,7 +94,7 @@
 }
 
 .backgroundBar {
-  background: var(--nav-color-text);
+  background: transparent;
 }
 
 .backgroundBarActive {
@@ -94,6 +106,7 @@
   z-index: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   height: 100%;
 }
 

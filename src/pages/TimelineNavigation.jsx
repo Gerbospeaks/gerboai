@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import './TimelineNavigation.css';
 
-function TimelineNavigation() {
+function TimelineNavigation({ variant = 'sticky' }) {
   const [activeTab, setActiveTab] = useState('present');
   const [targetTab, setTargetTab] = useState(null);
   const [mode, setMode] = useState('idle');
@@ -56,7 +56,7 @@ function TimelineNavigation() {
   };
 
   return (
-    <div className="stickyWrapper">
+    <div className={`stickyWrapper ${variant === 'inline' ? 'inline-variant' : ''}`}>
       <nav
         className="container"
         data-center="true"

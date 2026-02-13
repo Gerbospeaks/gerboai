@@ -30,6 +30,7 @@ import greylogo from '../assets/images/grey-logo.png';
 import computer from '../assets/images/new_solidflo_bg_transp_text.png';
 
 const LandingPage = () => {
+const [scrollProgress, setScrollProgress] = useState(0);
  useEffect(() => {
   // Add Calendly CSS
   const link = document.createElement('link');
@@ -92,7 +93,48 @@ const LandingPage = () => {
     }, 2500);
     return () => clearInterval(interval);
   }, []);
+useEffect(() => {
+  // Load Vapi Web SDK
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/@vapi-ai/client-sdk-react/dist/embed/widget.umd.js';
+  script.async = true;
+  
+  script.onload = () => {
+    const container = document.getElementById('vapi-widget-container');
+    if (container && !container.querySelector('vapi-widget')) {
+      const widget = document.createElement('vapi-widget');
+      widget.setAttribute('public-key', '6fbcc6b2-c19e-4f0a-b3fb-dac4a5a4f377');
+      widget.setAttribute('assistant-id', '0ef8c3c9-a7c1-4b33-bef2-374ca299ffc0');
+      widget.setAttribute('mode', 'chat');
+      widget.setAttribute('theme', 'dark');
+      widget.setAttribute('base-bg-color', '#000000');
+      widget.setAttribute('accent-color', '#de5a02');
+      widget.setAttribute('cta-button-color', '#000000');
+      widget.setAttribute('cta-button-text-color', '#ffffff');
+      widget.setAttribute('border-radius', 'large');
+      widget.setAttribute('size', 'full');
+      widget.setAttribute('position', 'bottom-right');
+      widget.setAttribute('title', 'TALK WITH GERBO');
+      widget.setAttribute('start-button-text', 'Start');
+      widget.setAttribute('end-button-text', 'End Call');
+      widget.setAttribute('cta-subtitle', 'Need help?');
+      widget.setAttribute('chat-first-message', 'Hey, How can I help you today?');
+      widget.setAttribute('chat-placeholder', 'Type your message...');
+      widget.setAttribute('voice-show-transcript', 'true');
+      widget.setAttribute('consent-required', 'false');
+      
+      container.appendChild(widget);
+    }
+  };
+  
+  document.body.appendChild(script);
 
+  return () => {
+    if (document.body.contains(script)) {
+      document.body.removeChild(script);
+    }
+  };
+}, []);
   // Slide rotation
   useEffect(() => {
     const slideInterval = setInterval(() => {
@@ -101,13 +143,24 @@ const LandingPage = () => {
     return () => clearInterval(slideInterval);
   }, [slides.length]);
 
-  // Scroll effect
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
+ // Replace your existing scroll effect with this enhanced version
+useEffect(() => {
+  const handleScroll = () => {
+    const scrollPosition = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    
+    // Calculate scroll progress (0 to 1)
+    const maxScroll = documentHeight - windowHeight;
+    const progress = Math.min(scrollPosition / maxScroll, 1);
+    
+    setScrollY(scrollPosition);
+    setScrollProgress(progress);
+  };
+  
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
   // Intersection Observer for animations
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -140,7 +193,62 @@ const LandingPage = () => {
 
   const handleLogin = () => navigate('/login');
   const handleSignup = () => navigate('/register');
+// Add this function inside your component (before the return statement)
+const getScrollGradient = () => {
+  const progress = Math.min(scrollY / 1000, 1); // Adjust 1000 to control transition speed
+  
+  // Define color stops for different scroll positions
+  const gradients = [
+    { // Initial state
+      from: 'rgb(248, 250, 252)', // slate-50
+      via: 'rgb(253, 160, 74)',
+      to: 'rgb(247, 151, 62)'
+    },
+    { // Mid scroll
+      from: 'rgb(254, 243, 199)', // orange-100
+      via: 'rgb(255, 237, 213)', // orange-50
+      to: 'rgb(219, 234, 254)' // blue-100
+    },
+    { // Deep scroll
+      from: 'rgb(255, 237, 213)', // orange-50
+      via: 'rgb(254, 215, 170)', // orange-200
+      to: 'rgb(191, 219, 254)' // blue-200
+    }
+  ];
+  
+  // Interpolate between gradients based on progress
+  let currentGradient;
+  if (progress < 0.5) {
+    const t = progress * 2; // 0 to 1 for first half
+    currentGradient = interpolateGradient(gradients[0], gradients[1], t);
+  } else {
+    const t = (progress - 0.5) * 2; // 0 to 1 for second half
+    currentGradient = interpolateGradient(gradients[1], gradients[2], t);
+  }
+  
+  return `linear-gradient(135deg, ${currentGradient.from} 0%, ${currentGradient.via} 50%, ${currentGradient.to} 100%)`;
+};
 
+// Helper function to interpolate between two colors
+const interpolateColor = (color1, color2, factor) => {
+  const rgb1 = color1.match(/\d+/g).map(Number);
+  const rgb2 = color2.match(/\d+/g).map(Number);
+  
+  const result = rgb1.map((channel, i) => {
+    return Math.round(channel + factor * (rgb2[i] - channel));
+  });
+  
+  return `rgb(${result[0]}, ${result[1]}, ${result[2]})`;
+};
+
+// Helper function to interpolate between two gradients
+const interpolateGradient = (grad1, grad2, factor) => {
+  return {
+    from: interpolateColor(grad1.from, grad2.from, factor),
+    via: interpolateColor(grad1.via, grad2.via, factor),
+    to: interpolateColor(grad1.to, grad2.to, factor)
+  };
+};
   const features = [
     {
       icon: <Zap className="w-8 h-8" />,
@@ -266,6 +374,7 @@ const LandingPage = () => {
   ];
 
   return (   
+    <>
     <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50">
       <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -298,7 +407,7 @@ const LandingPage = () => {
 
         /* Gradient text */
         .gradient-text {
-          background: linear-gradient(135deg, #ff9d00 0%, #e68a00 100%);
+          background: linear-gradient(135deg, #fb470b 0%, #000000 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -461,7 +570,7 @@ const LandingPage = () => {
           background: linear-gradient(135deg, rgba(255, 157, 0, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%);
         }
       `}</style>
-<TimelineNavigation />
+
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div 
@@ -524,7 +633,7 @@ const LandingPage = () => {
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex items-center">
-              <img src={logo} alt="SolidFlo" className="h-12 w-auto" />
+              <img src={logo} alt="SolidFlo" className="h-16 w-auto" />
             </div>
 
             {/* Desktop Navigation */}
@@ -572,7 +681,13 @@ const LandingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+     <section 
+  className="relative min-h-screen pt-[380px] pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden transition-all duration-500"
+  style={{
+    background: getScrollGradient()
+  }}
+>
+       
         {/* Background Elements */}
         <div className="absolute inset-0 dot-pattern opacity-50" />
         <div className="absolute top-20 right-0 w-96 h-96 bg-orange-200 rounded-full filter blur-3xl opacity-20 animate-pulse" />
@@ -580,12 +695,13 @@ const LandingPage = () => {
         
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center max-w-4xl mx-auto">
+           
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 rounded-full mb-8 animate-slide-up">
               <Sparkles className="w-4 h-4 text-orange-600" />
               <span className="text-sm font-semibold text-orange-600">Trusted by 10,000+ businesses worldwide</span>
             </div>
-
+              
             {/* Main Headline */}
             <h1 className="hero-title text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-gray-900 animate-slide-up" style={{ animationDelay: '0.1s' }}>
               Invoicing Made{' '}
@@ -638,6 +754,9 @@ const LandingPage = () => {
                 <span>Cancel anytime</span>
               </div>
             </div>
+            <div className="flex justify-center mb-8">
+  <TimelineNavigation variant="inline" />
+</div>
           </div>
 
           {/* Product Screenshot */}
@@ -1064,10 +1183,12 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
-    <ChatAssistant />
+    
     
     </div>  
-    
+    {/* Vapi Widget */}
+<div id="vapi-widget-container"></div>
+    </>
   );
 };
 
