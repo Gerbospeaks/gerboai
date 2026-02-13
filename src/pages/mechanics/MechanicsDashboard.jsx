@@ -737,72 +737,214 @@ Your Construction Quote System
     }, 1000);
   };
 
-  const printStyles = `
-    @media print {
-      body * {
-        visibility: hidden !important;
-      }
-      
-      #print-area,
-      #print-area * {
-        visibility: visible !important;
-      }
-      
-      #print-area {
-        display: block !important;
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 210mm !important;
-        min-height: 297mm !important;
-        margin: 0 !important;
-        padding: 10mm !important;
-        box-sizing: border-box !important;
-        background: white !important;
-        box-shadow: none !important;
-        transform: none !important;
-      }
-      
-      @page {
-        size: A4 portrait;
-        margin: 0;
-      }
-      
-      html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 210mm !important;
-        height: 297mm !important;
-        background: white !important;
-      }
-      
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-      }
-      
-      .logo img {
-        height: 60px;
-        width: auto;
-      }
-      
-      .shadow-lg, .rounded-lg, .shadow-xl, .shadow-2xl {
-        border: none !important;
-        box-shadow: none !important;
-      }
-      
-      table, tr, td, th, div {
-        page-break-inside: avoid !important;
-      }
-      
-      table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-      }
+const printStyles = `
+  @media print {
+    /* Reset and base setup */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+      box-sizing: border-box !important;
     }
-  `;
-
+    
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 210mm !important;
+      background: white !important;
+    }
+    
+    /* Hide everything except print area */
+    body * {
+      visibility: hidden !important;
+    }
+    
+    #print-area,
+    #print-area * {
+      visibility: visible !important;
+    }
+    
+    /* Position and size the print area */
+    #print-area {
+      display: block !important;
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 210mm !important;
+      min-height: 297mm !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      box-sizing: border-box !important;
+      background: white !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+    
+    /* Page setup with margins */
+    @page {
+      size: A4 portrait;
+      margin: 40px !important;
+    }
+    
+    /* COMPACT HEADER BOXES - Invoice To, Bill To, Vehicle Details */
+    #print-area > div:has(> div[class*="INVOICE TO"]),
+    #print-area > div:has(> div[class*="BILL TO"]),
+    #print-area > div:has(> div[class*="VEHICLE DETAILS"]),
+    #print-area div[class*="grid"] > div:has(h3),
+    #print-area div[class*="grid"] > div:has(h4),
+    #print-area div[class*="grid-cols"] > div {
+      min-height: auto !important;
+      height: auto !important;
+      padding: 8px 12px !important;
+    }
+    
+    /* Header box titles */
+    #print-area h3:contains("INVOICE TO"),
+    #print-area h3:contains("BILL TO"),
+    #print-area h3:contains("VEHICLE DETAILS"),
+    #print-area div[class*="bg-"] > h3,
+    #print-area div[class*="bg-"] > h4 {
+      margin: 0 0 8px 0 !important;
+      padding: 6px 8px !important;
+      line-height: 1.2 !important;
+      font-size: 13px !important;
+    }
+    
+    /* Content inside header boxes */
+    #print-area div[class*="INVOICE TO"] p,
+    #print-area div[class*="BILL TO"] p,
+    #print-area div[class*="VEHICLE DETAILS"] p,
+    #print-area div[class*="bg-gray"] p,
+    #print-area div[class*="bg-slate"] p {
+      margin: 2px 0 !important;
+      padding: 0 !important;
+      line-height: 1.4 !important;
+      font-size: 12px !important;
+    }
+    
+    /* TOTALS SECTION - CRITICAL: Make sure it's visible */
+    #print-area table tfoot,
+    #print-area table tfoot tr,
+    #print-area table tfoot td,
+    #print-area div:has(> *:contains("Subtotal")),
+    #print-area div:has(> *:contains("VAT")),
+    #print-area div:has(> *:contains("Total")),
+    #print-area *:contains("Subtotal"),
+    #print-area *:contains("VAT:"),
+    #print-area td:contains("Subtotal"),
+    #print-area td:contains("VAT") {
+      display: table-row !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      height: auto !important;
+      padding: 8px !important;
+      font-weight: bold !important;
+      text-align: right !important;
+    }
+    
+    /* Ensure table shows all rows including totals */
+    #print-area table {
+      width: 100% !important;
+      display: table !important;
+      border-collapse: collapse !important;
+    }
+    
+    #print-area table tbody,
+    #print-area table tfoot {
+      display: table-row-group !important;
+    }
+    
+    /* Compact item descriptions */
+    #print-area table tbody tr {
+      page-break-inside: avoid !important;
+      line-height: 1.2 !important;
+      height: auto !important;
+    }
+    
+    #print-area table tbody td {
+      padding: 4px 8px !important;
+      line-height: 1.2 !important;
+      font-size: 12px !important;
+    }
+    
+    #print-area table tbody td:nth-child(2) {
+      line-height: 1.3 !important;
+      padding: 4px 8px !important;
+    }
+    
+    #print-area table thead th {
+      padding: 6px 8px !important;
+      line-height: 1.3 !important;
+      font-size: 13px !important;
+    }
+    
+    /* Page break controls */
+    table {
+      page-break-inside: auto !important;
+    }
+    
+    tr {
+      page-break-inside: avoid !important;
+      page-break-after: auto !important;
+    }
+    
+    thead {
+      display: table-header-group !important;
+    }
+    
+    tfoot {
+      display: table-footer-group !important;
+    }
+    
+    /* Banking details section - Keep together */
+    div:has(> *:contains("BANKING DETAILS")),
+    *:has(> *:contains("Bank Name")) {
+      page-break-inside: avoid !important;
+      page-break-before: auto !important;
+      page-break-after: avoid !important;
+      display: block !important;
+      margin-top: 20px !important;
+      min-height: 150px !important;
+    }
+    
+    /* Signature section wrapper */
+    #print-area > div:has(div:contains("WORKSHOP SIGNATURE")) {
+      page-break-inside: avoid !important;
+      page-break-after: avoid !important;
+      margin-bottom: 12px !important;
+    }
+    
+    /* Ensure sections maintain spacing */
+    #print-area > div,
+    #print-area > section {
+      margin-bottom: 12px !important;
+    }
+    
+    /* Logo sizing */
+    .logo img {
+      height: 60px !important;
+      width: auto !important;
+      max-width: 200px !important;
+    }
+    
+    /* Remove shadows and borders */
+    .shadow-lg, .rounded-lg, .shadow-xl, .shadow-2xl {
+      border: none !important;
+      box-shadow: none !important;
+    }
+    
+    /* Orphans and widows */
+    p, div, section {
+      orphans: 4 !important;
+      widows: 4 !important;
+    }
+    
+    tr {
+      orphans: 3 !important;
+      widows: 3 !important;
+    }
+  }
+`;
   const handleSave = () => {
     window.print();
   };

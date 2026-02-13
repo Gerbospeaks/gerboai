@@ -298,7 +298,7 @@ export const DefaultTemplate = ({
           <span>VAT:</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-gray-50 text-white px-2">
+        <div className="flex justify-between py-2 font-bold bg-gray-50 text-black px-2">
           <span>TOTAL:</span>
           <span>R {total.toFixed(2)}</span>
         </div>
@@ -714,7 +714,7 @@ export const ElegantTemplate = (props) => (
             <span>VAT:</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-3 font-bold text-lg bg-purple-900 text-white px-4">
+          <div className="flex justify-between py-3 font-bold text-lg bg-purple-900 text-black px-4">
             <span>TOTAL:</span>
             <span>R {props.total.toFixed(2)}</span>
           </div>
