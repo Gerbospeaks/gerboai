@@ -5,7 +5,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  sendEmailVerification
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  verifyBeforeUpdateEmail
 } from 'firebase/auth';
 import { 
   doc, 
@@ -29,27 +31,26 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-     if (firebaseUser) {
-  setAuthUser(firebaseUser); // ✅ KEEP the real Firebase user
+      if (firebaseUser) {
+        setAuthUser(firebaseUser);
 
-  const userDocRef = doc(db, 'users', firebaseUser.uid);
-  const userDoc = await getDoc(userDocRef);
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        const userDoc = await getDoc(userDocRef);
 
-  if (userDoc.exists()) {
-    const userData = userDoc.data();
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
 
-    setUser({
-      uid: firebaseUser.uid,
-      email: firebaseUser.email,
-      name: userData.name,
-      emailVerified: firebaseUser.emailVerified
-    });
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            name: userData.name,
+            emailVerified: firebaseUser.emailVerified
+          });
 
-    setUserDashboard(userData.dashboardId);
-    setIsAdmin(userData.isAdmin === true);
-  }
-}
- else {
+          setUserDashboard(userData.dashboardId);
+          setIsAdmin(userData.isAdmin === true);
+        }
+      } else {
         setAuthUser(null);
         setUser(null);
         setUserDashboard(null);
@@ -68,7 +69,12 @@ export const AuthProvider = ({ children }) => {
       console.log('User created:', user.uid);
 
       console.log('2. Sending verification email...');
-      await sendEmailVerification(user);
+      // ✅ ADD CUSTOM URL HERE
+      const actionCodeSettings = {
+        url: 'https://solidflo.co.za/verify-email', // Change to your actual domain
+        handleCodeInApp: true
+      };
+      await sendEmailVerification(user, actionCodeSettings);
       console.log('Verification email sent');
 
       console.log('3. Skipping logo upload for now');
@@ -81,14 +87,13 @@ export const AuthProvider = ({ children }) => {
         createdAt: serverTimestamp(),
         emailVerified: false,
         role: 'user',
-        isAdmin: false // Default to false for new users
+        isAdmin: false
       });
       console.log('User document created');
 
       console.log('5. Creating collections...');
       const batch = writeBatch(db);
 
-      // Initialize collections
       const clientsRef = doc(db, 'users', user.uid, 'clients', '_init');
       batch.set(clientsRef, { _placeholder: true, createdAt: serverTimestamp() });
 
@@ -104,7 +109,6 @@ export const AuthProvider = ({ children }) => {
       const quotationsRef = doc(db, 'users', user.uid, 'quotations', '_init');
       batch.set(quotationsRef, { _placeholder: true, createdAt: serverTimestamp() });
 
-      // Add business info to settings subcollection
       console.log('6. Adding business info...');
       const businessInfoData = {
         businessName: companyInfo?.companyName || '',
@@ -164,7 +168,6 @@ export const AuthProvider = ({ children }) => {
         };
       }
 
-      // Get user data to check admin status
       const userDocRef = doc(db, 'users', userCredential.user.uid);
       const userDoc = await getDoc(userDocRef);
       const userData = userDoc.data();
@@ -188,18 +191,83 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // ✅ ADD PASSWORD RESET FUNCTION
+  const resetPassword = async (email) => {
+    try {
+      const resetSettings = {
+        url: 'https://solidflo.co.za/reset-password', // Change to your actual domain
+        handleCodeInApp: true
+      };
+      
+      await sendPasswordResetEmail(auth, email, resetSettings);
+      
+      return {
+        success: true,
+        message: 'Password reset email sent! Check your inbox.'
+      };
+    } catch (error) {
+      let errorMessage = error.message;
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address.';
+      }
+      
+      return {
+        success: false,
+        message: errorMessage
+      };
+    }
+  };
+
+  // ✅ ADD EMAIL CHANGE FUNCTION
+  const updateUserEmail = async (newEmail) => {
+    try {
+      if (!authUser) {
+        return { success: false, message: 'No user logged in' };
+      }
+
+      const changeSettings = {
+        url: 'https://solidflo.co.za/change-email', // Change to your actual domain
+        handleCodeInApp: true
+      };
+      
+      await verifyBeforeUpdateEmail(authUser, newEmail, changeSettings);
+      
+      return {
+        success: true,
+        message: 'Verification email sent to your new email address!'
+      };
+    } catch (error) {
+      let errorMessage = error.message;
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'This email is already in use.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address.';
+      } else if (error.code === 'auth/requires-recent-login') {
+        errorMessage = 'Please log out and log back in before changing your email.';
+      }
+      
+      return {
+        success: false,
+        message: errorMessage
+      };
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
-  user,          // Firestore profile
-  authUser,      // ✅ Firebase Auth user
-  userDashboard,
-  isAdmin,
-  login,
-  register,
-  logout,
-  loading
-}}>
-
+      user,
+      authUser,
+      userDashboard,
+      isAdmin,
+      login,
+      register,
+      logout,
+      resetPassword,      // ✅ ADD THIS
+      updateUserEmail,    // ✅ ADD THIS
+      loading
+    }}>
       {children}
     </AuthContext.Provider>
   );

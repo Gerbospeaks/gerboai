@@ -91,7 +91,23 @@ function ForgotPassword() {
       setIsSubmitting(false);
     }
   };
+// In your forgot password function
 
+
+async function resetPassword(email) {
+  try {
+    const resetSettings = {
+      url: 'https://solidflo.co.za/reset-password',
+      handleCodeInApp: true
+    };
+    
+    await sendPasswordResetEmail(auth, email, resetSettings);
+    
+    console.log('Password reset email sent!');
+  } catch (error) {
+    console.error(error);
+  }
+}
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Forgot Password Form */}
