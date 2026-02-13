@@ -4,8 +4,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { AdminProvider } from './contexts/AdminContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
-
-// Public Pages
+import ResetPassword from './components/ResetPassword'; // or wherever you place it
+import ForgotPassword from './components/ForgotPassword';
 import LandingPage from './pages/LandingPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
@@ -83,6 +83,8 @@ function App() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Admin Route */}
             <Route 
