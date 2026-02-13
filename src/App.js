@@ -4,8 +4,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { AdminProvider } from './contexts/AdminContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
-import ResetPassword from './components/ResetPassword'; // or wherever you place it
-import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './pages/ResetPassword'; // or wherever you place it
+import ForgotPassword from './pages/ForgotPassword';
 import LandingPage from './pages/LandingPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
