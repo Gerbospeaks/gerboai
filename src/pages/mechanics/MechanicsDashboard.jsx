@@ -1538,7 +1538,7 @@ const printStyles = `
                 </button>
 
                 <button
-                  onClick={handleSavePDF}
+                  onClick={handlePrint}
                   className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap"
                 >
                   <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
@@ -3279,7 +3279,7 @@ const printStyles = `
                               </button>
                             ) : (
                               <button
-                                onClick={handlePrint}
+                                onClick={handleSaveJobCard}
                                 className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
                               >
                                 <Save className="w-5 h-5" />
