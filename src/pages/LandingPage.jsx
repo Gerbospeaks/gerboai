@@ -1156,8 +1156,7 @@ const interpolateGradient = (grad1, grad2, factor) => {
                   <li key={item.label}>
                     <a 
                       onClick={() => navigate(item.path)}
-                      className="text-gray-400 hover:text-white transition-colors cursor-pointer"
-                    >
+                      className="text-gray-400 hover:text-white transition-colors cursor-pointer">
                       {item.label}
                     </a>
                   </li>
@@ -1171,7 +1170,7 @@ const interpolateGradient = (grad1, grad2, factor) => {
                <ul className="space-y-3">
                 {[
                   { label: 'Help Center', path: '/help-center' },
-                  { label: 'Blog', path: '/blog' },
+                  { label: 'Blogs', path: '/blogs' },
                   { label: 'Tutorials', path: '/tutorials' },
                   { label: 'Community', path: '/community' },
                   { label: 'Privacy Policy', path: '/privacy' },
@@ -1180,8 +1179,7 @@ const interpolateGradient = (grad1, grad2, factor) => {
                   <li key={item.label}>
                     <a 
                       onClick={() => navigate(item.path)}
-                      className="text-gray-400 hover:text-white transition-colors cursor-pointer"
-                    >
+                      className="text-gray-400 hover:text-white transition-colors cursor-pointer">
                       {item.label}
                     </a>
                   </li>

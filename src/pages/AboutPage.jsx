@@ -701,77 +701,100 @@ const AboutPage = () => {
         </section>
 
         {/* Footer */}
-        <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-              <div>
-                <img src={logo1} alt="SolidFlo" className="h-10 mb-4" />
-                <p className="text-gray-400 mb-6 leading-relaxed">
-                  Free online invoicing for small businesses. Create and send invoices, track time and expenses, and accept online payments.
-                </p>
-                <div className="flex gap-4">
-                  {[
-                    { icon: facebook, alt: 'Facebook' },
-                    { icon: twitter, alt: 'Twitter' },
-                    { icon: linkedin, alt: 'LinkedIn' },
-                    { icon: instagram, alt: 'Instagram' }
-                  ].map((social, index) => (
-                    <a 
-                      key={index}
-                      href="#" 
-                      className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-orange-500 transition-colors"
-                    >
-                      <img src={social.icon} alt={social.alt} className="w-5 h-5" />
-                    </a>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-orange-400">Product</h3>
-                <ul className="space-y-3">
-                  {['Features', 'Pricing', 'Integrations', 'API Docs', 'Updates'].map((item) => (
-                    <li key={item}>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-orange-400">Company</h3>
-                <ul className="space-y-3">
-                  {['About', 'Careers', 'Press Kit', 'Contact', 'Partners'].map((item) => (
-                    <li key={item}>
-                      <a href={item === 'About' ? '/about' : '#'} className="text-gray-400 hover:text-white transition-colors">
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-orange-400">Resources</h3>
-                <ul className="space-y-3">
-                  {['Help Center', 'Blog', 'Tutorials', 'Community', 'Privacy', 'Terms'].map((item) => (
-                    <li key={item}>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+       <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            {/* Company Info */}
+            <div>
+              <img src={logo1} alt="SolidFlo" className="h-10 mb-4" />
+              <p className="text-gray-400 mb-6 leading-relaxed">
+                Free online invoicing for small businesses. Create and send invoices, track time and expenses, and accept online payments.
+              </p>
+              <div className="flex gap-4">
+                {[
+                  { icon: facebook, alt: 'Facebook' },
+                  { icon: twitter, alt: 'Twitter' },
+                  { icon: linkedin, alt: 'LinkedIn' },
+                  { icon: instagram, alt: 'Instagram' }
+                ].map((social, index) => (
+                  <a 
+                    key={index}
+                    href="#" 
+                    className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-orange-500 transition-colors"
+                  >
+                    <img src={social.icon} alt={social.alt} className="w-5 h-5" />
+                  </a>
+                ))}
               </div>
             </div>
 
-            <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
-              <p>&copy; {new Date().getFullYear()} SolidFlo. All rights reserved.</p>
+            {/* Product */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-orange-400">Product</h3>
+              <ul className="space-y-3">
+                {['Features', 'Pricing', 'Integrations', 'API Docs', 'Updates'].map((item) => (
+                  <li key={item}>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                      {item}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-orange-400">Company</h3>
+              <ul className="space-y-3">
+                {[
+                  { label: 'About', path: '/about' },
+                  { label: 'Careers', path: '/careers' },
+                  { label: 'Press Kit', path: '/press-kit' },
+                  { label: 'Contact', path: '/contact' },
+                  { label: 'Partners', path: '/partners' }
+                ].map((item) => (
+                  <li key={item.label}>
+                    <a 
+                      onClick={() => navigate(item.path)}
+                      className="text-gray-400 hover:text-white transition-colors cursor-pointer">
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-orange-400">Resources</h3>
+               <ul className="space-y-3">
+                {[
+                  { label: 'Help Center', path: '/help-center' },
+                  { label: 'Blogs', path: '/blogs' },
+                  { label: 'Tutorials', path: '/tutorials' },
+                  { label: 'Community', path: '/community' },
+                  { label: 'Privacy Policy', path: '/privacy' },
+                  { label: 'Terms of Service', path: '/terms' }
+                ].map((item) => (
+                  <li key={item.label}>
+                    <a 
+                      onClick={() => navigate(item.path)}
+                      className="text-gray-400 hover:text-white transition-colors cursor-pointer">
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+             
             </div>
           </div>
-        </footer>
+
+          {/* Bottom Bar */}
+          <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
+            <p>&copy; {new Date().getFullYear()} SolidFlo. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
       </div>
     </>
   );
