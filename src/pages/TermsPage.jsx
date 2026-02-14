@@ -1,1010 +1,994 @@
-import React, { useState } from 'react';
-import { FileText, AlertCircle, Scale, CreditCard, Users, Shield, Ban, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
+import { 
+  FileText,
+  User,
+  Settings,
+  CreditCard,
+  XCircle,
+  Shield,
+  Scale,
+  AlertTriangle,
+  Calendar,
+  Mail,
+  Menu,
+  X,
+  ArrowLeft,
+  CheckCircle,
+  Info
+} from 'lucide-react';
+import logo from '../assets/img/solidflo.png';
+import logo1 from '../assets/img/solidflo-logo.png';
+import instagram from '../assets/images/instagram.png';
+import facebook from '../assets/images/facebook.png';
+import twitter from '../assets/images/twitter.png';
+import linkedin from '../assets/images/linkedin.png';
 
 const TermsPage = () => {
-  const [expandedSection, setExpandedSection] = useState(null);
+  const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [activeSection, setActiveSection] = useState('');
 
-  const toggleSection = (sectionId) => {
-    setExpandedSection(expandedSection === sectionId ? null : sectionId);
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+
+      // Update active section based on scroll position
+      const sections = document.querySelectorAll('[data-section]');
+      sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 100 && rect.bottom >= 100) {
+          setActiveSection(section.id);
+        }
+      });
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+    document.body.style.overflow = !mobileMenuOpen ? 'hidden' : '';
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+    document.body.style.overflow = '';
+  };
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 100;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+    closeMobileMenu();
   };
 
   const sections = [
-    {
-      id: 1,
-      icon: <FileText className="w-6 h-6" />,
-      title: "Agreement to Terms",
-      content: `
-        <h3>Acceptance of Terms</h3>
-        <p>By accessing or using SolidFlo ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not access or use the Service.</p>
-
-        <h3>Who May Use the Service</h3>
-        <p>You may use the Service only if:</p>
-        <ul>
-          <li>You are at least 18 years old and capable of forming a binding contract</li>
-          <li>You are not prohibited from using the Service under applicable law</li>
-          <li>Your use complies with all local, state, national, and international laws</li>
-          <li>You have not previously been suspended or removed from the Service</li>
-        </ul>
-
-        <h3>Business Use</h3>
-        <p>SolidFlo is intended for business and professional use. You represent that you are using the Service for legitimate business purposes related to invoicing, billing, and financial management.</p>
-
-        <h3>Changes to Terms</h3>
-        <p>We reserve the right to modify these Terms at any time. We will notify you of material changes via:</p>
-        <ul>
-          <li>Email notification to your registered email address</li>
-          <li>Prominent notice on the SolidFlo platform</li>
-          <li>In-app notification upon your next login</li>
-        </ul>
-        <p>Your continued use of the Service after changes become effective constitutes acceptance of the modified Terms.</p>
-
-        <h3>Additional Policies</h3>
-        <p>These Terms incorporate by reference our:</p>
-        <ul>
-          <li>Privacy Policy</li>
-          <li>Acceptable Use Policy</li>
-          <li>Payment Terms and Conditions</li>
-          <li>Data Processing Agreement (for applicable users)</li>
-        </ul>
-      `
-    },
-    {
-      id: 2,
-      icon: <Users className="w-6 h-6" />,
-      title: "Account Registration and Security",
-      content: `
-        <h3>Account Creation</h3>
-        <p>To use SolidFlo, you must create an account by providing:</p>
-        <ul>
-          <li>Accurate and complete registration information</li>
-          <li>A valid email address</li>
-          <li>Business information (name, address, tax details)</li>
-          <li>Payment information (for paid plans)</li>
-        </ul>
-
-        <h3>Account Responsibility</h3>
-        <p>You are responsible for:</p>
-        <ul>
-          <li>Maintaining the confidentiality of your account credentials</li>
-          <li>All activities that occur under your account</li>
-          <li>Immediately notifying us of any unauthorized access or security breach</li>
-          <li>Ensuring your account information remains accurate and up-to-date</li>
-          <li>All charges incurred under your account, whether authorized by you or not</li>
-        </ul>
-
-        <h3>Account Security</h3>
-        <p>To maintain account security, you must:</p>
-        <ul>
-          <li>Use a strong, unique password</li>
-          <li>Enable two-factor authentication when available</li>
-          <li>Not share your login credentials with others</li>
-          <li>Log out after each session on shared devices</li>
-          <li>Report suspicious activity immediately</li>
-        </ul>
-
-        <h3>Multiple Users</h3>
-        <p>If your plan allows multiple users:</p>
-        <ul>
-          <li>The account owner is responsible for all user activity</li>
-          <li>Users must comply with these Terms</li>
-          <li>The account owner can manage user permissions and access</li>
-          <li>Removed users no longer have access to account data</li>
-        </ul>
-
-        <h3>Account Termination by User</h3>
-        <p>You may terminate your account at any time by:</p>
-        <ul>
-          <li>Accessing account settings and selecting "Delete Account"</li>
-          <li>Contacting our support team</li>
-          <li>Following our account closure procedures</li>
-        </ul>
-        <p>Account deletion is permanent and cannot be reversed. Certain data may be retained as required by law.</p>
-      `
-    },
-    {
-      id: 3,
-      icon: <CreditCard className="w-6 h-6" />,
-      title: "Subscription Plans and Billing",
-      content: `
-        <h3>Plan Types</h3>
-        <p>SolidFlo offers multiple subscription plans:</p>
-        <ul>
-          <li><strong>Free Plan:</strong> Limited features with basic functionality</li>
-          <li><strong>Professional Plan:</strong> Monthly subscription with full features</li>
-          <li><strong>Enterprise Plan:</strong> Custom pricing for larger organizations</li>
-        </ul>
-
-        <h3>Billing Cycle</h3>
-        <p>Paid subscriptions are billed:</p>
-        <ul>
-          <li>Monthly or annually, as selected during signup</li>
-          <li>In advance at the beginning of each billing cycle</li>
-          <li>Automatically using your stored payment method</li>
-          <li>In the currency specified at the time of purchase</li>
-        </ul>
-
-        <h3>Payment Methods</h3>
-        <p>We accept payment via:</p>
-        <ul>
-          <li>Credit cards (Visa, Mastercard, American Express)</li>
-          <li>Debit cards</li>
-          <li>PayPal</li>
-          <li>Bank transfers (for Enterprise plans)</li>
-        </ul>
-
-        <h3>Automatic Renewal</h3>
-        <p>Your subscription automatically renews unless you cancel before the renewal date. You will be charged at the then-current rate for your plan level.</p>
-
-        <h3>Price Changes</h3>
-        <p>We may change subscription prices with 30 days' notice. Price changes:</p>
-        <ul>
-          <li>Do not affect your current billing cycle</li>
-          <li>Take effect at your next renewal</li>
-          <li>Will be communicated via email and in-app notification</li>
-          <li>Give you the option to cancel before the new price takes effect</li>
-        </ul>
-
-        <h3>Refund Policy</h3>
-        <p>Refunds are handled as follows:</p>
-        <ul>
-          <li><strong>Free Trial:</strong> No charges if canceled during trial period</li>
-          <li><strong>Monthly Plans:</strong> No refunds for partial months</li>
-          <li><strong>Annual Plans:</strong> Pro-rated refunds within 30 days of purchase</li>
-          <li><strong>Disputed Charges:</strong> Reviewed on a case-by-case basis</li>
-        </ul>
-
-        <h3>Failed Payments</h3>
-        <p>If a payment fails:</p>
-        <ul>
-          <li>We will retry the charge up to 3 times over 7 days</li>
-          <li>Your account may be downgraded to the Free plan</li>
-          <li>Access to paid features will be suspended</li>
-          <li>We will notify you via email to update payment information</li>
-        </ul>
-
-        <h3>Taxes</h3>
-        <p>You are responsible for all applicable taxes. We may collect taxes where legally required. Prices displayed may not include applicable taxes, which will be added at checkout.</p>
-
-        <h3>Plan Upgrades and Downgrades</h3>
-        <p><strong>Upgrades:</strong> Take effect immediately. You will be charged a pro-rated amount for the remainder of your billing cycle.</p>
-        <p><strong>Downgrades:</strong> Take effect at the end of your current billing cycle. No refunds are provided for unused time on the higher plan.</p>
-      `
-    },
-    {
-      id: 4,
-      icon: <Scale className="w-6 h-6" />,
-      title: "User Content and Data Ownership",
-      content: `
-        <h3>Your Content</h3>
-        <p>"Your Content" includes all data you input into SolidFlo:</p>
-        <ul>
-          <li>Client information and contact details</li>
-          <li>Invoice data and financial records</li>
-          <li>Business documents and attachments</li>
-          <li>Time tracking and expense entries</li>
-          <li>Custom templates and branding</li>
-        </ul>
-
-        <h3>Content Ownership</h3>
-        <p>You retain all ownership rights to Your Content. By using SolidFlo, you do NOT transfer ownership of your data to us.</p>
-
-        <h3>License to Use Your Content</h3>
-        <p>You grant SolidFlo a limited license to:</p>
-        <ul>
-          <li>Store and process Your Content to provide the Service</li>
-          <li>Display Your Content as necessary for Service functionality</li>
-          <li>Transmit Your Content to your clients (e.g., sending invoices)</li>
-          <li>Create backups for data protection and recovery</li>
-          <li>Use anonymized, aggregated data for analytics and improvement</li>
-        </ul>
-        <p>This license ends when you delete Your Content or terminate your account.</p>
-
-        <h3>Content Responsibility</h3>
-        <p>You are solely responsible for:</p>
-        <ul>
-          <li>The accuracy and legality of Your Content</li>
-          <li>Ensuring Your Content does not violate any laws or third-party rights</li>
-          <li>Obtaining necessary permissions to use client data</li>
-          <li>Compliance with data protection regulations</li>
-          <li>Backing up Your Content independently</li>
-        </ul>
-
-        <h3>Prohibited Content</h3>
-        <p>You may not use SolidFlo to store, transmit, or process content that:</p>
-        <ul>
-          <li>Is illegal, fraudulent, or deceptive</li>
-          <li>Infringes on intellectual property rights</li>
-          <li>Contains malware, viruses, or harmful code</li>
-          <li>Violates privacy laws or regulations</li>
-          <li>Harasses, threatens, or defames others</li>
-          <li>Is used for money laundering or terrorist financing</li>
-        </ul>
-
-        <h3>Data Portability</h3>
-        <p>You can export Your Content at any time in standard formats (CSV, PDF, JSON) through the platform interface.</p>
-
-        <h3>Data Deletion</h3>
-        <p>You can delete Your Content at any time. Upon account deletion:</p>
-        <ul>
-          <li>Your Content is permanently deleted within 30 days</li>
-          <li>Certain records may be retained for legal compliance (up to 7 years)</li>
-          <li>Backup copies are purged according to our retention schedule</li>
-        </ul>
-
-        <h3>SolidFlo's Content</h3>
-        <p>The Service itself, including software, templates, features, and documentation, remains the property of SolidFlo. You may not:</p>
-        <ul>
-          <li>Copy, modify, or distribute our software</li>
-          <li>Reverse engineer or decompile the Service</li>
-          <li>Remove copyright or proprietary notices</li>
-          <li>Use our trademarks without permission</li>
-        </ul>
-      `
-    },
-    {
-      id: 5,
-      icon: <Ban className="w-6 h-6" />,
-      title: "Acceptable Use Policy",
-      content: `
-        <h3>Permitted Uses</h3>
-        <p>SolidFlo may be used for:</p>
-        <ul>
-          <li>Creating and managing business invoices</li>
-          <li>Tracking time and expenses</li>
-          <li>Processing legitimate business payments</li>
-          <li>Managing client relationships</li>
-          <li>Generating financial reports</li>
-        </ul>
-
-        <h3>Prohibited Activities</h3>
-        <p>You may NOT use SolidFlo to:</p>
-        <ul>
-          <li><strong>Illegal Activities:</strong> Money laundering, fraud, tax evasion, or any illegal business activity</li>
-          <li><strong>Prohibited Industries:</strong> Adult content, gambling, weapons, illegal substances, or pyramid schemes</li>
-          <li><strong>Abuse:</strong> Spam, phishing, harassment, or unauthorized marketing</li>
-          <li><strong>System Abuse:</strong> Attempting to breach security, overload servers, or scrape data</li>
-          <li><strong>Impersonation:</strong> Misrepresenting your identity or business</li>
-          <li><strong>Intellectual Property Violations:</strong> Using copyrighted material without permission</li>
-        </ul>
-
-        <h3>Fair Use</h3>
-        <p>To ensure quality service for all users:</p>
-        <ul>
-          <li>Do not create excessive API calls or automated requests</li>
-          <li>Do not circumvent usage limits or restrictions</li>
-          <li>Do not use the Service in ways that degrade performance for others</li>
-          <li>Do not create multiple accounts to evade restrictions</li>
-        </ul>
-
-        <h3>Compliance with Laws</h3>
-        <p>You must comply with all applicable laws, including:</p>
-        <ul>
-          <li>Tax regulations and reporting requirements</li>
-          <li>Data protection and privacy laws (GDPR, CCPA, etc.)</li>
-          <li>Anti-money laundering regulations</li>
-          <li>Consumer protection laws</li>
-          <li>Industry-specific regulations applicable to your business</li>
-        </ul>
-
-        <h3>Reporting Violations</h3>
-        <p>If you become aware of violations of these Terms or illegal activity, report it to: <strong>abuse@solidflo.com</strong></p>
-
-        <h3>Enforcement</h3>
-        <p>Violations may result in:</p>
-        <ul>
-          <li>Warning and requirement to cease prohibited activity</li>
-          <li>Temporary suspension of account access</li>
-          <li>Permanent account termination</li>
-          <li>Legal action and cooperation with law enforcement</li>
-          <li>No refund of fees paid</li>
-        </ul>
-      `
-    },
-    {
-      id: 6,
-      icon: <Shield className="w-6 h-6" />,
-      title: "Service Availability and Support",
-      content: `
-        <h3>Service Availability</h3>
-        <p>We strive to provide reliable service with:</p>
-        <ul>
-          <li>99.9% uptime target (excluding scheduled maintenance)</li>
-          <li>24/7 system monitoring</li>
-          <li>Redundant data storage and backup systems</li>
-          <li>Regular security updates and improvements</li>
-        </ul>
-
-        <h3>Scheduled Maintenance</h3>
-        <p>We may perform scheduled maintenance:</p>
-        <ul>
-          <li>During off-peak hours when possible</li>
-          <li>With advance notice (typically 48-72 hours)</li>
-          <li>For security updates, feature releases, and system improvements</li>
-        </ul>
-
-        <h3>Service Interruptions</h3>
-        <p>The Service may be temporarily unavailable due to:</p>
-        <ul>
-          <li>Emergency maintenance or security issues</li>
-          <li>Force majeure events (natural disasters, wars, etc.)</li>
-          <li>Third-party service failures (hosting, payment processors)</li>
-          <li>Network or infrastructure issues beyond our control</li>
-        </ul>
-        <p>We are not liable for service interruptions or resulting losses.</p>
-
-        <h3>Customer Support</h3>
-        <p>Support levels vary by plan:</p>
-        <ul>
-          <li><strong>Free Plan:</strong> Email support, community forums</li>
-          <li><strong>Professional Plan:</strong> Priority email support, live chat</li>
-          <li><strong>Enterprise Plan:</strong> Dedicated account manager, phone support</li>
-        </ul>
-
-        <h3>Support Response Times</h3>
-        <ul>
-          <li><strong>Critical Issues:</strong> 2-4 hours (paid plans)</li>
-          <li><strong>High Priority:</strong> 12-24 hours</li>
-          <li><strong>General Inquiries:</strong> 24-48 hours</li>
-          <li><strong>Feature Requests:</strong> Acknowledged within 5 business days</li>
-        </ul>
-
-        <h3>Service Modifications</h3>
-        <p>We reserve the right to:</p>
-        <ul>
-          <li>Modify, suspend, or discontinue features with notice</li>
-          <li>Update the Service to improve functionality</li>
-          <li>Change APIs and integrations as needed</li>
-          <li>Retire features that are no longer viable</li>
-        </ul>
-        <p>Major changes will be communicated with reasonable advance notice.</p>
-
-        <h3>No Guarantee of Specific Features</h3>
-        <p>We do not guarantee that specific features will always be available or that the Service will meet your specific needs.</p>
-      `
-    },
-    {
-      id: 7,
-      icon: <AlertCircle className="w-6 h-6" />,
-      title: "Limitation of Liability and Disclaimers",
-      content: `
-        <h3>Service "As Is"</h3>
-        <p>SolidFlo is provided "AS IS" and "AS AVAILABLE" without warranties of any kind, either express or implied, including but not limited to:</p>
-        <ul>
-          <li>Warranties of merchantability or fitness for a particular purpose</li>
-          <li>Warranties that the Service will be uninterrupted or error-free</li>
-          <li>Warranties regarding accuracy, reliability, or completeness</li>
-          <li>Warranties that defects will be corrected</li>
-        </ul>
-
-        <h3>No Financial or Legal Advice</h3>
-        <p>SolidFlo provides invoicing tools but does NOT provide:</p>
-        <ul>
-          <li>Financial, tax, or accounting advice</li>
-          <li>Legal advice or contract review</li>
-          <li>Compliance guidance for specific industries</li>
-          <li>Audit or validation of your financial data</li>
-        </ul>
-        <p>Consult qualified professionals for financial and legal matters.</p>
-
-        <h3>User Responsibility for Accuracy</h3>
-        <p>You are solely responsible for:</p>
-        <ul>
-          <li>Accuracy of invoices and financial data</li>
-          <li>Compliance with tax and reporting requirements</li>
-          <li>Proper classification of income and expenses</li>
-          <li>Retention of necessary records</li>
-        </ul>
-
-        <h3>Limitation of Liability</h3>
-        <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, SOLIDFLO SHALL NOT BE LIABLE FOR:</p>
-        <ul>
-          <li>Indirect, incidental, consequential, or punitive damages</li>
-          <li>Loss of profits, revenue, data, or business opportunities</li>
-          <li>Service interruptions or data loss</li>
-          <li>Third-party actions or content</li>
-          <li>Errors in calculations or reports</li>
-        </ul>
-
-        <h3>Liability Cap</h3>
-        <p>Our total liability to you for all claims shall not exceed the greater of:</p>
-        <ul>
-          <li>The amount you paid to SolidFlo in the 12 months preceding the claim, OR</li>
-          <li>$100 USD</li>
-        </ul>
-
-        <h3>Exceptions</h3>
-        <p>These limitations do not apply to:</p>
-        <ul>
-          <li>Liability that cannot be excluded by law</li>
-          <li>Death or personal injury caused by our negligence</li>
-          <li>Fraud or fraudulent misrepresentation</li>
-          <li>Gross negligence or willful misconduct</li>
-        </ul>
-
-        <h3>Third-Party Services</h3>
-        <p>We are not responsible for:</p>
-        <ul>
-          <li>Payment processor errors or failures (Stripe, PayPal)</li>
-          <li>Third-party integrations or services</li>
-          <li>Client disputes or payment issues</li>
-          <li>Banking or financial institution actions</li>
-        </ul>
-
-        <h3>Data Loss</h3>
-        <p>While we implement robust backup systems, you are responsible for maintaining your own backups. We are not liable for data loss or corruption.</p>
-
-        <h3>Force Majeure</h3>
-        <p>We are not liable for failures caused by events beyond our reasonable control, including natural disasters, wars, strikes, government actions, or internet/telecommunications failures.</p>
-      `
-    },
-    {
-      id: 8,
-      icon: <CheckCircle className="w-6 h-6" />,
-      title: "Termination and Account Suspension",
-      content: `
-        <h3>Termination by User</h3>
-        <p>You may terminate your account at any time:</p>
-        <ul>
-          <li>Through account settings</li>
-          <li>By contacting customer support</li>
-          <li>No penalties for cancellation</li>
-          <li>Access continues until end of paid period</li>
-        </ul>
-
-        <h3>Termination by SolidFlo</h3>
-        <p>We may suspend or terminate your account if:</p>
-        <ul>
-          <li>You violate these Terms of Service</li>
-          <li>Your account is used for illegal activities</li>
-          <li>Payment fails and remains unpaid for 30 days</li>
-          <li>You engage in abusive behavior toward our staff</li>
-          <li>Your account poses security risks to other users</li>
-          <li>We're required to do so by law</li>
-        </ul>
-
-        <h3>Suspension Process</h3>
-        <p>Before termination, we typically:</p>
-        <ul>
-          <li>Send warning notices via email</li>
-          <li>Provide opportunity to cure violations</li>
-          <li>Suspend account temporarily (7-30 days)</li>
-          <li>Allow data export before permanent deletion</li>
-        </ul>
-        <p>Serious violations may result in immediate termination without warning.</p>
-
-        <h3>Effects of Termination</h3>
-        <p>Upon termination:</p>
-        <ul>
-          <li>Access to the Service is immediately revoked</li>
-          <li>Your Content becomes inaccessible</li>
-          <li>Data deletion begins (completed within 30 days)</li>
-          <li>No refunds for unused subscription time</li>
-          <li>Outstanding invoices become immediately due</li>
-        </ul>
-
-        <h3>Data Retrieval</h3>
-        <p>You have 30 days after termination to:</p>
-        <ul>
-          <li>Export Your Content</li>
-          <li>Download invoices and reports</li>
-          <li>Retrieve any necessary business records</li>
-        </ul>
-        <p>After 30 days, data may be permanently deleted and unrecoverable.</p>
-
-        <h3>Surviving Provisions</h3>
-        <p>The following sections survive termination:</p>
-        <ul>
-          <li>Payment obligations for services rendered</li>
-          <li>Intellectual property provisions</li>
-          <li>Limitation of liability</li>
-          <li>Dispute resolution and arbitration</li>
-          <li>Confidentiality obligations</li>
-        </ul>
-
-        <h3>Reinstatement</h3>
-        <p>Suspended accounts may be reinstated if:</p>
-        <ul>
-          <li>Violations are resolved</li>
-          <li>Outstanding payments are made</li>
-          <li>You agree to comply with Terms going forward</li>
-        </ul>
-        <p>Reinstatement is at our sole discretion and not guaranteed.</p>
-      `
-    },
-    {
-      id: 9,
-      icon: <Scale className="w-6 h-6" />,
-      title: "Dispute Resolution and Governing Law",
-      content: `
-        <h3>Governing Law</h3>
-        <p>These Terms are governed by the laws of South Africa, without regard to conflict of law principles.</p>
-
-        <h3>Informal Resolution</h3>
-        <p>Before filing any legal claim, you agree to:</p>
-        <ul>
-          <li>Contact us at legal@solidflo.com to describe the issue</li>
-          <li>Allow 60 days for good-faith negotiation</li>
-          <li>Provide all relevant information to facilitate resolution</li>
-        </ul>
-        <p>Most disputes can be resolved through informal discussion.</p>
-
-        <h3>Arbitration Agreement</h3>
-        <p>If informal resolution fails, disputes will be resolved through binding arbitration rather than court, except for:</p>
-        <ul>
-          <li>Small claims court actions (under $10,000)</li>
-          <li>Intellectual property disputes</li>
-          <li>Injunctive relief for urgent matters</li>
-        </ul>
-
-        <h3>Arbitration Rules</h3>
-        <ul>
-          <li>Conducted under rules of recognized arbitration body</li>
-          <li>Single arbitrator mutually agreed upon or appointed</li>
-          <li>Location: Pretoria, Gauteng, South Africa (or virtual)</li>
-          <li>Language: English</li>
-          <li>Each party bears own costs unless otherwise awarded</li>
-        </ul>
-
-        <h3>Class Action Waiver</h3>
-        <p>You agree that disputes must be brought individually, not as a class action, class arbitration, or representative action. You waive the right to participate in class actions.</p>
-
-        <h3>Jurisdiction and Venue</h3>
-        <p>For matters not subject to arbitration, you agree to jurisdiction in the courts of Pretoria, Gauteng, South Africa.</p>
-
-        <h3>Time Limitation</h3>
-        <p>Any claim must be filed within one year after the claim arises. Claims filed later are permanently barred.</p>
-
-        <h3>Severability</h3>
-        <p>If any provision of these Terms is found unenforceable, the remaining provisions continue in full effect.</p>
-      `
-    },
-    {
-      id: 10,
-      icon: <FileText className="w-6 h-6" />,
-      title: "General Provisions",
-      content: `
-        <h3>Entire Agreement</h3>
-        <p>These Terms, together with our Privacy Policy and other referenced policies, constitute the entire agreement between you and SolidFlo.</p>
-
-        <h3>Assignment</h3>
-        <p>You may not assign or transfer your rights under these Terms without our written consent. We may assign our rights to any affiliate or successor without restriction.</p>
-
-        <h3>No Waiver</h3>
-        <p>Our failure to enforce any provision does not waive our right to enforce it later. Any waiver must be in writing.</p>
-
-        <h3>Severability</h3>
-        <p>If any provision is held invalid or unenforceable, the remaining provisions remain in full force and effect, and the invalid provision will be modified to be enforceable.</p>
-
-        <h3>Force Majeure</h3>
-        <p>Neither party is liable for delays or failures caused by circumstances beyond reasonable control, including natural disasters, wars, strikes, or government actions.</p>
-
-        <h3>Independent Contractors</h3>
-        <p>Nothing in these Terms creates a partnership, joint venture, employment, or agency relationship between you and SolidFlo.</p>
-
-        <h3>Third-Party Beneficiaries</h3>
-        <p>These Terms do not confer any third-party beneficiary rights. Only you and SolidFlo may enforce these Terms.</p>
-
-        <h3>Notices</h3>
-        <p>Legal notices must be sent to:</p>
-        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
-          <p><strong>SolidFlo Legal Department</strong><br/>
-          123 Business Avenue<br/>
-          Pretoria, Gauteng<br/>
-          South Africa<br/>
-          Email: legal@solidflo.com</p>
-        </div>
-
-        <h3>Electronic Communications</h3>
-        <p>You consent to receive communications electronically. We may communicate with you by email or by posting notices on the Service. Electronic communications satisfy legal requirements for written communications.</p>
-
-        <h3>Export Compliance</h3>
-        <p>You agree not to export or re-export the Service or any data in violation of applicable export laws and regulations.</p>
-
-        <h3>Language</h3>
-        <p>These Terms are provided in English. Any translations are for convenience only. In case of conflict, the English version prevails.</p>
-
-        <h3>Feedback</h3>
-        <p>If you provide suggestions, ideas, or feedback about SolidFlo, we may use them without obligation to you and without compensation.</p>
-
-        <h3>Contact Information</h3>
-        <p>For questions about these Terms:</p>
-        <ul>
-          <li><strong>Email:</strong> legal@solidflo.com</li>
-          <li><strong>Support:</strong> support@solidflo.com</li>
-          <li><strong>Address:</strong> 123 Business Avenue, Pretoria, Gauteng, South Africa</li>
-        </ul>
-      `
-    }
+    { id: 'acceptance', title: 'Acceptance of Terms', icon: <CheckCircle className="w-5 h-5" /> },
+    { id: 'definitions', title: 'Definitions', icon: <FileText className="w-5 h-5" /> },
+    { id: 'accounts', title: 'User Accounts', icon: <User className="w-5 h-5" /> },
+    { id: 'service-use', title: 'Use of Service', icon: <Settings className="w-5 h-5" /> },
+    { id: 'payment', title: 'Payment Terms', icon: <CreditCard className="w-5 h-5" /> },
+    { id: 'intellectual-property', title: 'Intellectual Property', icon: <Shield className="w-5 h-5" /> },
+    { id: 'prohibited', title: 'Prohibited Activities', icon: <XCircle className="w-5 h-5" /> },
+    { id: 'liability', title: 'Limitation of Liability', icon: <AlertTriangle className="w-5 h-5" /> },
+    { id: 'termination', title: 'Termination', icon: <XCircle className="w-5 h-5" /> },
+    { id: 'governing-law', title: 'Governing Law', icon: <Scale className="w-5 h-5" /> },
+    { id: 'changes', title: 'Changes to Terms', icon: <Calendar className="w-5 h-5" /> },
+    { id: 'contact', title: 'Contact Us', icon: <Mail className="w-5 h-5" /> }
   ];
 
+  const lastUpdated = "February 14, 2026";
+
   return (
-    <div style={{ minHeight: '100vh', background: '#f8f9fa' }}>
-      <style>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
+    <>
+      <Helmet>
+        <title>Terms of Service - SolidFlo</title>
+        <meta name="description" content="Read SolidFlo's Terms of Service to understand your rights and responsibilities when using our invoicing platform." />
+      </Helmet>
 
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-          line-height: 1.6;
-          color: #333;
-        }
-
-        .terms-header {
-          background: linear-gradient(135deg, #2f3444 0%, #1a1d28 100%);
-          color: white;
-          padding: 4rem 2rem;
-          text-align: center;
-        }
-
-        .terms-header-icon {
-          background: rgba(255, 157, 0, 0.2);
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 1.5rem;
-        }
-
-        .terms-header h1 {
-          font-size: 2.5rem;
-          margin-bottom: 1rem;
-          font-weight: 700;
-        }
-
-        .terms-header p {
-          font-size: 1.1rem;
-          opacity: 0.9;
-          max-width: 700px;
-          margin: 0 auto;
-        }
-
-        .terms-meta {
-          display: flex;
-          justify-content: center;
-          gap: 2rem;
-          margin-top: 2rem;
-          font-size: 0.95rem;
-          opacity: 0.8;
-        }
-
-        .terms-container {
-          max-width: 900px;
-          margin: 0 auto;
-          padding: 3rem 2rem;
-        }
-
-        .important-notice {
-          background: linear-gradient(135deg, #ff9d00 0%, #ff8800 100%);
-          color: white;
-          border-radius: 12px;
-          padding: 2rem;
-          margin-bottom: 2rem;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .important-notice h2 {
-          font-size: 1.3rem;
-          margin-bottom: 1rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .important-notice p {
-          font-size: 1rem;
-          line-height: 1.7;
-          opacity: 0.95;
-        }
-
-        .quick-links {
-          background: white;
-          border-radius: 12px;
-          padding: 2rem;
-          margin-bottom: 2rem;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .quick-links h2 {
-          font-size: 1.3rem;
-          margin-bottom: 1rem;
-          color: #2f3444;
-        }
-
-        .quick-links-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1rem;
-        }
-
-        .quick-link {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.75rem;
-          border-radius: 8px;
-          background: #f8f9fa;
-          cursor: pointer;
-          transition: all 0.3s;
-          font-size: 0.95rem;
-          color: #666;
-        }
-
-        .quick-link:hover {
-          background: #ffe5cc;
-          color: #ff9d00;
-          transform: translateX(5px);
-        }
-
-        .section {
-          background: white;
-          border-radius: 12px;
-          margin-bottom: 1.5rem;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          overflow: hidden;
-          transition: all 0.3s;
-        }
-
-        .section:hover {
-          box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-
-        .section-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 1.5rem 2rem;
-          cursor: pointer;
-          background: white;
-          transition: background 0.3s;
-        }
-
-        .section-header:hover {
-          background: #f8f9fa;
-        }
-
-        .section-header-left {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          flex: 1;
-        }
-
-        .section-icon {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          width: 50px;
-          height: 50px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-
-        .section-title {
-          font-size: 1.3rem;
-          font-weight: 600;
-          color: #2f3444;
-        }
-
-        .section-toggle {
-          color: #ff9d00;
-          transition: transform 0.3s;
-        }
-
-        .section-toggle.expanded {
-          transform: rotate(180deg);
-        }
-
-        .section-content {
-          padding: 0 2rem 2rem;
-          display: none;
-        }
-
-        .section-content.expanded {
-          display: block;
-          animation: slideDown 0.3s ease-out;
-        }
-
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .section-content h3 {
-          font-size: 1.2rem;
-          margin: 1.5rem 0 1rem;
-          color: #2f3444;
-          font-weight: 600;
-        }
-
-        .section-content p {
-          margin-bottom: 1rem;
-          line-height: 1.8;
-          color: #555;
-        }
-
-        .section-content ul {
-          margin: 1rem 0 1.5rem 1.5rem;
-          line-height: 1.9;
-        }
-
-        .section-content li {
-          margin-bottom: 0.5rem;
-          color: #555;
-        }
-
-        .section-content strong {
-          color: #2f3444;
-          font-weight: 600;
-        }
-
-        .highlight-box {
-          background: #fff8e1;
-          border-left: 4px solid #ff9d00;
-          padding: 1.5rem;
-          margin: 1.5rem 0;
-          border-radius: 4px;
-        }
-
-        .highlight-box p {
-          margin: 0;
-          color: #666;
-        }
-
-        .footer-cta {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          padding: 3rem;
-          border-radius: 12px;
-          text-align: center;
-          margin-top: 3rem;
-        }
-
-        .footer-cta h2 {
-          font-size: 1.8rem;
-          margin-bottom: 1rem;
-        }
-
-        .footer-cta p {
-          font-size: 1.1rem;
-          margin-bottom: 2rem;
-          opacity: 0.95;
-        }
-
-        .cta-button {
-          display: inline-block;
-          background: white;
-          color: #667eea;
-          padding: 1rem 2rem;
-          border-radius: 8px;
-          font-weight: 600;
-          text-decoration: none;
-          transition: all 0.3s;
-          border: none;
-          font-size: 1rem;
-          cursor: pointer;
-        }
-
-        .cta-button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        @media (max-width: 768px) {
-          .terms-header h1 {
-            font-size: 2rem;
+      <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+        <style jsx>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+          
+          * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           }
 
-          .terms-container {
-            padding: 2rem 1rem;
+          .gradient-text {
+            background: linear-gradient(135deg, #ff9d00 0%, #e68a00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
           }
 
-          .section-header {
-            padding: 1.25rem 1.5rem;
+          .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
           }
 
-          .section-content {
-            padding: 0 1.5rem 1.5rem;
+          @keyframes slideInUp {
+            from {
+              opacity: 0;
+              transform: translateY(30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
 
-          .quick-links-grid {
-            grid-template-columns: 1fr;
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
           }
 
-          .terms-meta {
-            flex-direction: column;
-            gap: 0.5rem;
+          .animate-slide-up {
+            animation: slideInUp 0.6s ease-out forwards;
           }
-        }
-      `}</style>
 
-      <div className="terms-header">
-        <div className="terms-header-icon">
-          <FileText size={40} />
-        </div>
-        <h1>Terms of Service</h1>
-        <p>
-          Please read these terms carefully before using SolidFlo. By using our service, you agree to be bound by these terms.
-        </p>
-        <div className="terms-meta">
-          <span>Last Updated: January 3, 2026</span>
-          <span>•</span>
-          <span>Effective Date: January 1, 2026</span>
-        </div>
-      </div>
+          .animate-fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+          }
 
-      <div className="terms-container">
-        <div className="important-notice">
-          <h2>
-            <AlertCircle size={24} />
-            Important Information
-          </h2>
-          <p>
-            These Terms include an arbitration clause and class action waiver that affect your rights. By using SolidFlo, you agree to resolve disputes through individual arbitration rather than court proceedings or class actions. Please review Section 9 carefully.
-          </p>
-        </div>
+          .toc-link {
+            transition: all 0.3s ease;
+          }
 
-        <div className="quick-links">
-          <h2>Quick Navigation</h2>
-          <div className="quick-links-grid">
-            {sections.map(section => (
-              <div
-                key={section.id}
-                className="quick-link"
-                onClick={() => {
-                  setExpandedSection(section.id);
-                  document.getElementById(`section-${section.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
+          .toc-link.active {
+            background: linear-gradient(135deg, #ff9d00 0%, #e68a00 100%);
+            color: white;
+            transform: translateX(4px);
+          }
+
+          @media (max-width: 768px) {
+            .hero-title {
+              font-size: 2.5rem !important;
+            }
+          }
+
+          .toc-sidebar::-webkit-scrollbar {
+            width: 4px;
+          }
+
+          .toc-sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+          }
+
+          .toc-sidebar::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #ff9d00, #e68a00);
+            border-radius: 4px;
+          }
+        `}</style>
+
+        {/* Mobile Menu Overlay */}
+        {mobileMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            onClick={closeMobileMenu}
+          />
+        )}
+
+        {/* Mobile Navigation */}
+        <div 
+          className={`fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 lg:hidden ${
+            mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          <div className="p-6">
+            <button 
+              onClick={closeMobileMenu}
+              className="absolute top-6 right-6 text-gray-600 hover:text-gray-900"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            
+            <div className="mt-12 space-y-6">
+              <button 
+                onClick={() => { closeMobileMenu(); navigate('/'); }}
+                className="flex items-center gap-2 text-lg font-medium text-gray-700 hover:text-orange-500 transition-colors"
               >
-                {section.icon}
-                <span>{section.title}</span>
+                <ArrowLeft className="w-5 h-5" />
+                Back to Home
+              </button>
+              
+              <div className="pt-4 border-t border-gray-200">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                  Jump to Section
+                </h3>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {sections.map((section) => (
+                    <button
+                      key={section.id}
+                      onClick={() => scrollToSection(section.id)}
+                      className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      {section.icon}
+                      {section.title}
+                    </button>
+                  ))}
+                </div>
               </div>
-            ))}
+              
+              <div className="pt-6 space-y-3">
+                <button 
+                  onClick={() => { closeMobileMenu(); navigate('/login'); }}
+                  className="w-full py-3 px-6 border-2 border-orange-500 text-orange-500 rounded-lg font-semibold hover:bg-orange-50 transition-all"
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={() => { closeMobileMenu(); navigate('/register'); }}
+                  className="w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+                >
+                  Start Free Trial
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="highlight-box">
-          <p>
-            <strong>In Plain English:</strong> You're agreeing to use SolidFlo responsibly for legitimate business purposes. We'll provide invoicing services, you'll pay for your plan, and we'll all play nice. Read on for the legal details.
-          </p>
-        </div>
+        {/* Header */}
+        <header className={`fixed top-0 left-0 right-0 z-30 transition-all duration-300 ${
+          scrollY > 50 ? 'glass shadow-lg' : 'bg-transparent'
+        }`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-20">
+              {/* Logo */}
+              <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+                <img src={logo} alt="SolidFlo" className="h-16 w-auto" />
+              </div>
 
-        {sections.map(section => (
-          <div key={section.id} className="section" id={`section-${section.id}`}>
-            <div className="section-header" onClick={() => toggleSection(section.id)}>
-              <div className="section-header-left">
-                <div className="section-icon">{section.icon}</div>
-                <h2 className="section-title">{section.title}</h2>
+              {/* Desktop Navigation */}
+              <nav className="hidden lg:flex items-center space-x-8">
+                <button 
+                  onClick={() => navigate('/')}
+                  className="flex items-center gap-2 text-gray-700 hover:text-orange-500 font-medium transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Home
+                </button>
+              </nav>
+
+              {/* CTA Buttons */}
+              <div className="hidden lg:flex items-center space-x-4">
+                <button 
+                  onClick={() => navigate('/login')}
+                  className="px-6 py-2.5 text-gray-700 font-semibold hover:text-orange-500 transition-colors"
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={() => navigate('/register')}
+                  className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+                >
+                  Start Free Trial
+                </button>
               </div>
-              <div className={`section-toggle ${expandedSection === section.id ? 'expanded' : ''}`}>
-                <ChevronDown size={24} />
-              </div>
-            </div>
-            <div className={`section-content ${expandedSection === section.id ? 'expanded' : ''}`}>
-              <div dangerouslySetInnerHTML={{ __html: section.content }} />
+
+              {/* Mobile Menu Button */}
+              <button 
+                onClick={toggleMobileMenu}
+                className="lg:hidden text-gray-700 hover:text-orange-500"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
             </div>
           </div>
-        ))}
+        </header>
 
-        <div className="footer-cta">
-          <h2>Questions About Our Terms?</h2>
-          <p>Our legal team is here to help clarify any questions you may have about these Terms of Service.</p>
-          <button className="cta-button">Contact Legal Team</button>
-        </div>
+        {/* Hero Section */}
+        <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute top-20 right-0 w-96 h-96 bg-orange-200 rounded-full filter blur-3xl opacity-20 animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-orange-300 rounded-full filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }} />
+          
+          <div className="max-w-7xl mx-auto relative z-10">
+            <div className="text-center max-w-3xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 rounded-full mb-6 animate-slide-up">
+                <Scale className="w-4 h-4 text-orange-600" />
+                <span className="text-sm font-semibold text-orange-600">Legal Agreement</span>
+              </div>
+
+              <h1 className="hero-title text-5xl md:text-6xl font-bold mb-6 text-gray-900 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                Terms of <span className="gradient-text">Service</span>
+              </h1>
+              
+              <p className="text-xl text-gray-600 leading-relaxed mb-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                Please read these terms carefully before using SolidFlo
+              </p>
+
+              <p className="text-sm text-gray-500 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                Last updated: {lastUpdated}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Main Content */}
+        <section className="py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid lg:grid-cols-4 gap-8">
+              {/* Table of Contents Sidebar - Desktop */}
+              <div className="hidden lg:block">
+                <div className="sticky top-24 toc-sidebar max-h-[calc(100vh-120px)] overflow-y-auto">
+                  <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
+                      On This Page
+                    </h3>
+                    <nav className="space-y-2">
+                      {sections.map((section) => (
+                        <button
+                          key={section.id}
+                          onClick={() => scrollToSection(section.id)}
+                          className={`toc-link w-full text-left px-3 py-2 text-sm rounded-lg flex items-center gap-2 ${
+                            activeSection === section.id
+                              ? 'active'
+                              : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600'
+                          }`}
+                        >
+                          {section.icon}
+                          <span className="truncate">{section.title}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Content */}
+              <div className="lg:col-span-3">
+                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100">
+                  {/* Introduction */}
+                  <div className="mb-12 pb-8 border-b border-gray-200">
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-lg mb-6">
+                      <div className="flex items-start gap-3">
+                        <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h3 className="font-semibold text-blue-900 mb-2">Important Notice</h3>
+                          <p className="text-sm text-blue-800">
+                            These Terms of Service constitute a legally binding agreement between you and SolidFlo. By accessing or using our service, you agree to be bound by these terms.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-lg text-gray-700 leading-relaxed">
+                      Welcome to SolidFlo. These Terms of Service ("Terms") govern your access to and use of the SolidFlo platform, including our website, applications, and services. Please read these Terms carefully.
+                    </p>
+                  </div>
+
+                  {/* Section 1: Acceptance */}
+                  <div id="acceptance" data-section className="mb-12 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white">
+                        <CheckCircle className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">Acceptance of Terms</h2>
+                    </div>
+                    
+                    <div className="space-y-4 pl-15">
+                      <p className="text-gray-700 leading-relaxed">
+                        By creating an account, accessing, or using SolidFlo, you acknowledge that you have read, understood, and agree to be bound by these Terms and our Privacy Policy.
+                      </p>
+                      <p className="text-gray-700 leading-relaxed">
+                        If you do not agree to these Terms, you may not access or use our services. If you are using SolidFlo on behalf of an organization, you represent and warrant that you have the authority to bind that organization to these Terms.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Section 2: Definitions */}
+                  <div id="definitions" data-section className="mb-12 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">Definitions</h2>
+                    </div>
+                    
+                    <div className="space-y-4 pl-15">
+                      <div className="grid gap-4">
+                        {[
+                          { term: 'Service', definition: 'Refers to the SolidFlo platform, including all features, tools, and functionalities.' },
+                          { term: 'User/You', definition: 'Refers to the individual or entity accessing or using the Service.' },
+                          { term: 'Account', definition: 'Your registered user profile on the SolidFlo platform.' },
+                          { term: 'Content', definition: 'All data, information, invoices, and materials you submit or create using the Service.' },
+                          { term: 'Subscription', definition: 'Your paid plan for accessing premium features of the Service.' }
+                        ].map((item, index) => (
+                          <div key={index} className="p-4 bg-gray-50 rounded-lg border-l-4 border-orange-500">
+                            <h3 className="font-semibold text-gray-900 mb-1">"{item.term}"</h3>
+                            <p className="text-sm text-gray-600">{item.definition}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 3: User Accounts */}
+                  <div id="accounts" data-section className="mb-12 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-white">
+                        <User className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">User Accounts</h2>
+                    </div>
+                    
+                    <div className="space-y-6 pl-15">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Account Creation</h3>
+                        <p className="text-gray-700 leading-relaxed mb-3">
+                          To use SolidFlo, you must create an account by providing accurate and complete information. You agree to:
+                        </p>
+                        <ul className="space-y-2">
+                          {[
+                            'Provide truthful, accurate, and complete registration information',
+                            'Maintain and update your information to keep it current',
+                            'Maintain the security of your password and account',
+                            'Notify us immediately of any unauthorized use of your account',
+                            'Accept responsibility for all activities that occur under your account'
+                          ].map((item, index) => (
+                            <li key={index} className="flex items-start gap-3">
+                              <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Account Eligibility</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          You must be at least 18 years old or the age of majority in your jurisdiction to create an account. By creating an account, you represent that you meet these age requirements.
+                        </p>
+                      </div>
+
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p className="text-sm text-yellow-800">
+                          <strong>Warning:</strong> You are responsible for maintaining the confidentiality of your account credentials. We are not liable for any loss or damage arising from your failure to comply with this security obligation.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 4: Use of Service */}
+                  <div id="service-use" data-section className="mb-12 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center text-white">
+                        <Settings className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">Use of Service</h2>
+                    </div>
+                    
+                    <div className="space-y-6 pl-15">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">License Grant</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          Subject to these Terms, we grant you a limited, non-exclusive, non-transferable, revocable license to access and use the Service for your business purposes in accordance with these Terms.
+                        </p>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Acceptable Use</h3>
+                        <p className="text-gray-700 leading-relaxed mb-3">
+                          You agree to use the Service only for lawful purposes and in accordance with these Terms. You agree not to:
+                        </p>
+                        <div className="space-y-3">
+                          {[
+                            'Violate any applicable laws or regulations',
+                            'Infringe upon the rights of others',
+                            'Transmit any malicious code, viruses, or harmful content',
+                            'Attempt to gain unauthorized access to the Service',
+                            'Use the Service to send spam or unsolicited communications',
+                            'Reverse engineer or attempt to extract the source code',
+                            'Use automated systems to access the Service without authorization'
+                          ].map((item, index) => (
+                            <div key={index} className="flex items-start gap-3">
+                              <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 5: Payment Terms */}
+                  <div id="payment" data-section className="mb-12 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center text-white">
+                        <CreditCard className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">Payment Terms</h2>
+                    </div>
+                    
+                    <div className="space-y-6 pl-15">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Subscription Plans</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          SolidFlo offers both free and paid subscription plans. Paid subscriptions provide access to additional features and functionality. Subscription fees are billed in advance on a monthly or annual basis.
+                        </p>
+                      </div>
+
+                      <div className="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-r-lg">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Billing and Renewal</h3>
+                        <ul className="space-y-2 text-gray-700">
+                          <li>• Subscriptions automatically renew unless cancelled before the renewal date</li>
+                          <li>• You authorize us to charge your payment method for all fees incurred</li>
+                          <li>• Prices are subject to change with 30 days' notice</li>
+                          <li>• All fees are non-refundable except as required by law</li>
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Free Trial</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          We may offer a free trial period. At the end of the trial, your subscription will automatically convert to a paid subscription unless you cancel before the trial ends. No refunds are provided for any unused portion of a subscription.
+                        </p>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Cancellation</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          You may cancel your subscription at any time from your account settings. Cancellation will take effect at the end of your current billing period, and you will retain access until that date.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 6: Intellectual Property */}
+                  <div id="intellectual-property" data-section className="mb-12 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
+                        <Shield className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">Intellectual Property Rights</h2>
+                    </div>
+                    
+                    <div className="space-y-6 pl-15">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Our Intellectual Property</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          The Service and all its original content, features, and functionality are owned by SolidFlo and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
+                        </p>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Your Content</h3>
+                        <p className="text-gray-700 leading-relaxed mb-3">
+                          You retain all rights to the content you create and upload to the Service. By using the Service, you grant us a limited license to:
+                        </p>
+                        <ul className="space-y-2">
+                          {[
+                            'Store and process your content to provide the Service',
+                            'Display your content as necessary to provide invoicing services',
+                            'Create backups of your content',
+                            'Use your content to improve and develop the Service'
+                          ].map((item, index) => (
+                            <li key={index} className="flex items-start gap-3">
+                              <div className="flex-shrink-0 w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
+                              <span className="text-gray-700">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-sm text-blue-800">
+                          <strong>Note:</strong> We do not claim ownership of your content. You can delete your content at any time by removing it from your account.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 7: Prohibited Activities */}
+                  <div id="prohibited" data-section className="mb-12 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-rose-600 rounded-lg flex items-center justify-center text-white">
+                        <XCircle className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">Prohibited Activities</h2>
+                    </div>
+                    
+                    <div className="space-y-4 pl-15">
+                      <p className="text-gray-700 leading-relaxed mb-4">
+                        You may not access or use the Service for any purpose other than that for which we make it available. Prohibited activities include, but are not limited to:
+                      </p>
+                      
+                      <div className="grid gap-4">
+                        {[
+                          'Using the Service for any illegal purpose or in violation of any laws',
+                          'Impersonating another person or entity',
+                          'Interfering with or disrupting the Service or servers',
+                          'Attempting to bypass any security features',
+                          'Using the Service to transmit malware or harmful code',
+                          'Scraping or harvesting data from the Service',
+                          'Creating multiple accounts to abuse promotions',
+                          'Reselling or redistributing the Service without authorization',
+                          'Using the Service to compete with SolidFlo'
+                        ].map((item, index) => (
+                          <div key={index} className="flex items-start gap-3 p-4 bg-red-50 rounded-lg border-l-4 border-red-500">
+                            <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-gray-700">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-6">
+                        <p className="text-sm text-red-800">
+                          <strong>Warning:</strong> Violation of these prohibited activities may result in immediate termination of your account and potential legal action.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 8: Limitation of Liability */}
+                  <div id="liability" data-section className="mb-12 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center text-white">
+                        <AlertTriangle className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">Limitation of Liability</h2>
+                    </div>
+                    
+                    <div className="space-y-6 pl-15">
+                      <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Disclaimer of Warranties</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, OR FREE OF VIRUSES OR OTHER HARMFUL COMPONENTS.
+                        </p>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Limitation of Damages</h3>
+                        <p className="text-gray-700 leading-relaxed mb-4">
+                          TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL SOLIDFLO BE LIABLE FOR:
+                        </p>
+                        <ul className="space-y-2">
+                          {[
+                            'Any indirect, incidental, special, consequential, or punitive damages',
+                            'Loss of profits, revenue, data, or business opportunities',
+                            'Damages resulting from unauthorized access to your account',
+                            'Damages exceeding the amount you paid us in the past 12 months'
+                          ].map((item, index) => (
+                            <li key={index} className="flex items-start gap-3">
+                              <div className="flex-shrink-0 w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                              <span className="text-gray-700">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="bg-gray-100 border border-gray-300 rounded-lg p-4">
+                        <p className="text-sm text-gray-700">
+                          Some jurisdictions do not allow the exclusion of certain warranties or limitations of liability, so some of the above limitations may not apply to you.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 9: Termination */}
+                  <div id="termination" data-section className="mb-12 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-gray-500 to-gray-700 rounded-lg flex items-center justify-center text-white">
+                        <XCircle className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">Termination</h2>
+                    </div>
+                    
+                    <div className="space-y-6 pl-15">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Termination by You</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          You may terminate your account at any time by accessing your account settings and following the cancellation process. Upon termination, your right to use the Service will immediately cease.
+                        </p>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Termination by Us</h3>
+                        <p className="text-gray-700 leading-relaxed mb-3">
+                          We may suspend or terminate your account immediately, without prior notice, if:
+                        </p>
+                        <ul className="space-y-2">
+                          {[
+                            'You breach these Terms',
+                            'Your use of the Service is fraudulent or illegal',
+                            'You fail to pay subscription fees',
+                            'We are required to do so by law',
+                            'Continuing to provide the Service would be unlawful or harmful'
+                          ].map((item, index) => (
+                            <li key={index} className="flex items-start gap-3">
+                              <AlertTriangle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Effect of Termination</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          Upon termination, all licenses and rights granted to you will immediately cease. You will lose access to your account and all associated data. We may delete your content after termination. It is your responsibility to export any data you wish to retain before terminating your account.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 10: Governing Law */}
+                  <div id="governing-law" data-section className="mb-12 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center text-white">
+                        <Scale className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">Governing Law & Dispute Resolution</h2>
+                    </div>
+                    
+                    <div className="space-y-6 pl-15">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Governing Law</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          These Terms shall be governed by and construed in accordance with the laws of the State of Delaware, United States, without regard to its conflict of law provisions.
+                        </p>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3">Dispute Resolution</h3>
+                        <p className="text-gray-700 leading-relaxed mb-3">
+                          In the event of any dispute, claim, or controversy arising out of or relating to these Terms or the Service:
+                        </p>
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                              <span className="text-sm font-bold text-orange-600">1</span>
+                            </div>
+                            <div>
+                              <strong className="text-gray-900">Informal Resolution:</strong>
+                              <p className="text-gray-700">Contact us first to attempt to resolve the dispute informally.</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                              <span className="text-sm font-bold text-orange-600">2</span>
+                            </div>
+                            <div>
+                              <strong className="text-gray-900">Arbitration:</strong>
+                              <p className="text-gray-700">If informal resolution fails, disputes will be resolved through binding arbitration.</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                              <span className="text-sm font-bold text-orange-600">3</span>
+                            </div>
+                            <div>
+                              <strong className="text-gray-900">Class Action Waiver:</strong>
+                              <p className="text-gray-700">You agree to resolve disputes on an individual basis and waive any right to participate in class actions.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 11: Changes to Terms */}
+                  <div id="changes" data-section className="mb-12 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white">
+                        <Calendar className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">Changes to These Terms</h2>
+                    </div>
+                    
+                    <div className="space-y-4 pl-15">
+                      <p className="text-gray-700 leading-relaxed">
+                        We reserve the right to modify these Terms at any time. If we make material changes, we will notify you by email or through a prominent notice on the Service at least 30 days before the changes take effect.
+                      </p>
+                      <p className="text-gray-700 leading-relaxed">
+                        Your continued use of the Service after the effective date of the revised Terms constitutes your acceptance of the changes. If you do not agree to the revised Terms, you must stop using the Service and cancel your account.
+                      </p>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-sm text-blue-800">
+                          <strong>Tip:</strong> We recommend checking this page periodically for updates. The "Last updated" date at the top indicates when the Terms were last modified.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 12: Contact */}
+                  <div id="contact" data-section className="scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center text-white">
+                        <Mail className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900">Contact Us</h2>
+                    </div>
+                    
+                    <div className="pl-15">
+                      <p className="text-gray-700 leading-relaxed mb-6">
+                        If you have any questions about these Terms, please contact us:
+                      </p>
+
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Mail className="w-5 h-5 text-orange-600" />
+                            <h3 className="font-semibold text-gray-900">Email</h3>
+                          </div>
+                          <a href="mailto:legal@solidflo.co.za" className="text-orange-600 font-semibold hover:underline">
+                            legal@solidflo.co.za
+                          </a>
+                        </div>
+
+                        <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
+                          <div className="flex items-center gap-3 mb-3">
+                            <FileText className="w-5 h-5 text-orange-600" />
+                            <h3 className="font-semibold text-gray-900">Mailing Address</h3>
+                          </div>
+                          <p className="text-gray-700 text-sm">
+                            SolidFlo Legal Department<br />
+                            Mandela Square<br />
+                            Sandton<br />
+                            South Africa
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-8 p-6 bg-gray-50 rounded-xl">
+                        <p className="text-sm text-gray-600 text-center">
+                          For general support inquiries, visit our{' '}
+                          <button 
+                            onClick={() => navigate('/contact')}
+                            className="text-orange-600 font-semibold hover:underline"
+                          >
+                            Contact Page
+                          </button>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-orange-500 to-orange-600 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full filter blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full filter blur-3xl" />
+          </div>
+          
+          <div className="max-w-4xl mx-auto text-center relative z-10">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+              Ready to get started?
+            </h2>
+            <p className="text-xl text-white/90 mb-10">
+              Join 10,000+ businesses using SolidFlo. Start your free trial today.
+            </p>
+            
+            <button 
+              onClick={() => navigate('/register')}
+              className="px-8 py-4 bg-white text-orange-600 rounded-xl font-semibold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all"
+            >
+              Start Free Trial
+            </button>
+
+            <p className="mt-6 text-white/80 text-sm">
+              ✓ No credit card required  ✓ 14-day free trial  ✓ Cancel anytime
+            </p>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+              {/* Company Info */}
+              <div>
+                <img src={logo1} alt="SolidFlo" className="h-10 mb-4" />
+                <p className="text-gray-400 mb-6 leading-relaxed">
+                  Free online invoicing for small businesses. Create and send invoices, track time and expenses, and accept online payments.
+                </p>
+                <div className="flex gap-4">
+                  {[
+                    { icon: facebook, alt: 'Facebook' },
+                    { icon: twitter, alt: 'Twitter' },
+                    { icon: linkedin, alt: 'LinkedIn' },
+                    { icon: instagram, alt: 'Instagram' }
+                  ].map((social, index) => (
+                    <a 
+                      key={index}
+                      href="#" 
+                      className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-orange-500 transition-colors"
+                    >
+                      <img src={social.icon} alt={social.alt} className="w-5 h-5" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* Product */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-orange-400">Product</h3>
+                <ul className="space-y-3">
+                  {['Features', 'Pricing', 'Integrations', 'API Docs', 'Updates'].map((item) => (
+                    <li key={item}>
+                      <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                        {item}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Company */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-orange-400">Company</h3>
+                <ul className="space-y-3">
+                  {['About', 'Careers', 'Press Kit', 'Contact', 'Partners'].map((item) => (
+                    <li key={item}>
+                      <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                        {item}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Legal */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-orange-400">Legal</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <button 
+                      onClick={() => navigate('/privacy')}
+                      className="text-gray-400 hover:text-white transition-colors"
+                    >
+                      Privacy Policy
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigate('/terms')}
+                      className="text-gray-400 hover:text-white transition-colors"
+                    >
+                      Terms of Service
+                    </button>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                      Cookie Policy
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                      GDPR
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom Bar */}
+            <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
+              <p>&copy; {new Date().getFullYear()} SolidFlo. All rights reserved.</p>
+            </div>
+          </div>
+        </footer>
       </div>
-    </div>
+    </>
   );
 };
 

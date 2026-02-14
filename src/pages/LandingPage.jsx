@@ -53,15 +53,7 @@ const [scrollProgress, setScrollProgress] = useState(0);
   script.src = 'https://assets.calendly.com/assets/external/widget.js';
   script.async = true;
   
-  script.onload = () => {
-    window.Calendly.initBadgeWidget({
-      url: 'https://calendly.com/gabriel-solidflo/30min?background_color=2c448c&text_color=ffffff&primary_color=9effbe',
-      text: 'Book A Demo',
-      color: '#ff711f',
-      textColor: '#ffffff',
-      branding: false
-    });
-  };
+  
   
   document.body.appendChild(script);
 
@@ -1154,10 +1146,19 @@ const interpolateGradient = (grad1, grad2, factor) => {
             <div>
               <h3 className="text-lg font-semibold mb-4 text-orange-400">Company</h3>
               <ul className="space-y-3">
-                {['About', 'Careers', 'Press Kit', 'Contact', 'Partners'].map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                      {item}
+                {[
+                  { label: 'About', path: '/about' },
+                  { label: 'Careers', path: '/careers' },
+                  { label: 'Press Kit', path: '/press-kit' },
+                  { label: 'Contact', path: '/contact' },
+                  { label: 'Partners', path: '/partners' }
+                ].map((item) => (
+                  <li key={item.label}>
+                    <a 
+                      onClick={() => navigate(item.path)}
+                      className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+                    >
+                      {item.label}
                     </a>
                   </li>
                 ))}
@@ -1167,15 +1168,26 @@ const interpolateGradient = (grad1, grad2, factor) => {
             {/* Resources */}
             <div>
               <h3 className="text-lg font-semibold mb-4 text-orange-400">Resources</h3>
-              <ul className="space-y-3">
-                {['Help Center', 'Blog', 'Tutorials', 'Community', 'Privacy', 'Terms'].map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                      {item}
+               <ul className="space-y-3">
+                {[
+                  { label: 'Help Center', path: '/help-center' },
+                  { label: 'Blog', path: '/blog' },
+                  { label: 'Tutorials', path: '/tutorials' },
+                  { label: 'Community', path: '/community' },
+                  { label: 'Privacy Policy', path: '/privacy' },
+                  { label: 'Terms of Service', path: '/terms' }
+                ].map((item) => (
+                  <li key={item.label}>
+                    <a 
+                      onClick={() => navigate(item.path)}
+                      className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+                    >
+                      {item.label}
                     </a>
                   </li>
                 ))}
               </ul>
+             
             </div>
           </div>
 
