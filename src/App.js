@@ -51,8 +51,7 @@ import WindowrepairDashboard from './pages/window-repair/WindowrepairDashboard';
 import HVACDashboard from './pages/hvac/HVACDashboard';
 import CarpentryDashboard from './pages/carpentry/CarpentryDashboard';
 import AccountingDashboard from './pages/accounting/AccountingDashboard';
-import VerifyEmail from './pages/VerifyEmail';
-// Healthcare specific
+import AuthAction from './pages/AuthAction';
 import PracticeOverview from './pages/health/PracticeOverview';
 import PendingPayments from './pages/health/PendingPayments';
 import AppointmentsCalendar from './pages/health/AppointmentsCalendar';
@@ -83,8 +82,7 @@ function App() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+           <Route path="/auth-action" element={<AuthAction />} />
 
             {/* Admin Route */}
             <Route 
@@ -161,7 +159,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route path="/verify-email" element={<VerifyEmail />} /> 
+            <Route path="/auth-action" element={<AuthAction />} /> 
             <Route 
               path="/notes-view" 
               element={
