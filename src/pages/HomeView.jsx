@@ -1,6 +1,3 @@
-// Updated Home.js without sidebar - to be called from dashboard like FinancialOverview
-// Updated Home.js without sidebar - to be called from dashboard like FinancialOverview
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getDashboardRoute } from '../utils/dashboardRoutes';

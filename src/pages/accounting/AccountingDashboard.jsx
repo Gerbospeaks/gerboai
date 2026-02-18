@@ -1269,135 +1269,7 @@ Your Construction Quote System
       >
         <div className="flex flex-col h-screen">
           {/* Header */}
-          <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-300 lg:hidden flex-shrink-0"
-                >
-                  <Menu className="w-5 h-5" />
-                </button>
-
-                <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl shadow-lg flex-shrink-0">
-                    <img
-                      src={businessInfo.logoUrl}
-                      className="w-4 h-4 md:w-5 md:h-5 text-white"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent truncate">
-                      {documentType === "estimate" ? "Estimate" : "Invoice"} #
-                      {invoiceNumber || "—"}
-                    </h1>
-                    <p className="text-xs text-slate-500 hidden md:block truncate">
-                      Create and manage your{" "}
-                      {documentType === "estimate" ? "estimates" : "invoices"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop Action Buttons */}
-              <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
-                {documentType === "estimate" && invoiceId && (
-                  <button
-                    onClick={handleConvertToInvoice}
-                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap"
-                  >
-                    <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-                    Convert to Invoice
-                  </button>
-                )}
-
-                <button
-                  onClick={handlePrint}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"
-                >
-                  <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                  Print
-                </button>
-
-                <button
-                  onClick={
-                    documentType === "estimate"
-                      ? handleNewEstimate
-                      : handleNewInvoiceDoc
-                  }
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                  New
-                </button>
-
-                <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-blue-500/50 hover:scale-105 whitespace-nowrap">
-                  <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  <span>Send</span>
-                </button>
-
-                <button
-                  onClick={handleSavePDF}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                  Save PDF
-                </button>
-
-                <button
-                  onClick={handleSaveInvoice}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                  Save
-                </button>
-
-                <button
-                  onClick={handleLogout}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                  Logout
-                </button>
-              </div>
-
-              {/* Mobile Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
-              >
-                <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Action Bar */}
-          <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
-            <div className="flex gap-2 min-w-max pb-1 pr-3">
-              {documentType === "quote" && invoiceId && (
-                <button onClick={handleConvertToInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                  <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
-                  <span>To Invoice</span>
-                </button>
-              )}
-              <button onClick={handleSaveInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                Save
-              </button>
-              <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                <span>Send</span>
-              </button>
-              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                <span>PDF</span>
-              </button>
-              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95">
-                <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                <span>Print</span>
-              </button>
-            </div>
-          </div>
+         
           
                     {/* ── Scrollable Main Content ──────────────────────────────── */}
                    <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
@@ -2082,6 +1954,136 @@ Your Construction Quote System
             {activeView === "templates" && <Templates user={user} />}
             {activeView === "home" && <HomeView user={user} />}
             {activeView === "invoice" && (
+              <>
+               <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-300 lg:hidden flex-shrink-0"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+
+                <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl shadow-lg flex-shrink-0">
+                    <img
+                      src={businessInfo.logoUrl}
+                      className="w-4 h-4 md:w-5 md:h-5 text-white"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent truncate">
+                      {documentType === "estimate" ? "Estimate" : "Invoice"} #
+                      {invoiceNumber || "—"}
+                    </h1>
+                    <p className="text-xs text-slate-500 hidden md:block truncate">
+                      Create and manage your{" "}
+                      {documentType === "estimate" ? "estimates" : "invoices"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Action Buttons */}
+              <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
+                {documentType === "estimate" && invoiceId && (
+                  <button
+                    onClick={handleConvertToInvoice}
+                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap"
+                  >
+                    <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+                    Convert to Invoice
+                  </button>
+                )}
+
+                <button
+                  onClick={handlePrint}
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"
+                >
+                  <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                  Print
+                </button>
+
+                <button
+                  onClick={
+                    documentType === "estimate"
+                      ? handleNewEstimate
+                      : handleNewInvoiceDoc
+                  }
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
+                >
+                  <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
+                  New
+                </button>
+
+                <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-blue-500/50 hover:scale-105 whitespace-nowrap">
+                  <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  <span>Send</span>
+                </button>
+
+                <button
+                  onClick={handleSavePDF}
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap"
+                >
+                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                  Save PDF
+                </button>
+
+                <button
+                  onClick={handleSaveInvoice}
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap"
+                >
+                  <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                  Save
+                </button>
+
+                <button
+                  onClick={handleLogout}
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
+                >
+                  <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                  Logout
+                </button>
+              </div>
+
+              {/* Mobile Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
+              >
+                <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Action Bar */}
+          <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
+            <div className="flex gap-2 min-w-max pb-1 pr-3">
+              {documentType === "quote" && invoiceId && (
+                <button onClick={handleConvertToInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                  <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
+                  <span>To Invoice</span>
+                </button>
+              )}
+              <button onClick={handleSaveInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                Save
+              </button>
+              <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                <span>Send</span>
+              </button>
+              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                <span>PDF</span>
+              </button>
+              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95">
+                <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                <span>Print</span>
+              </button>
+            </div>
+          </div>
               <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
                 <div className="space-y-6">
                   {/* Tab Navigation */}
@@ -2970,6 +2972,7 @@ Your Construction Quote System
                   />
                 </div>
               </div>
+              </>
             )}
           </div>
         </div>
