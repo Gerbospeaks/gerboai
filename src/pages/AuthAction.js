@@ -1,14 +1,3 @@
-// src/pages/AuthAction.js
-//
-// Single page that handles all Firebase email action flows:
-//   • No mode / default  → Forgot Password (send reset link)
-//   • mode=resetPassword → Reset Password (set new password)
-//   • mode=verifyEmail   → Verify Email (auto-applies code)
-//   • mode=recoverEmail  → Recover Email (auto-applies code)
-//
-// Set your Firebase "Action URL" to: https://solidflo.co.za/auth-action
-// Firebase will append ?mode=...&oobCode=... automatically.
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -23,9 +12,7 @@ import slide1 from '../assets/img/slide1.avif';
 import slide2 from '../assets/img/slide2.avif';
 import slide3 from '../assets/img/slide3.jpg';
 
-// ---------------------------------------------------------------------------
-// Carousel config per mode
-// ---------------------------------------------------------------------------
+
 const SLIDES = {
   default: [
     { image: slide1, title: 'Reset your password', description: "We'll send you a link to reset your password" },
@@ -49,9 +36,7 @@ const SLIDES = {
   ],
 };
 
-// ---------------------------------------------------------------------------
-// Small shared UI helpers
-// ---------------------------------------------------------------------------
+
 const SuccessBox = ({ children }) => (
   <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
     <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -85,9 +70,7 @@ const StatusIcon = ({ success }) => (
   </div>
 );
 
-// ---------------------------------------------------------------------------
-// Carousel (shared right-panel)
-// ---------------------------------------------------------------------------
+
 function Carousel({ slides }) {
   const [current, setCurrent] = useState(0);
 
@@ -202,9 +185,7 @@ function ForgotPasswordView() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// View 2 – Reset Password (mode=resetPassword)
-// ---------------------------------------------------------------------------
+
 function ResetPasswordView({ oobCode }) {
   const navigate                     = useNavigate();
   const [password, setPassword]      = useState('');
@@ -437,7 +418,7 @@ function AuthAction() {
   // Pick carousel slides for the current mode
   const slides = SLIDES[mode] ?? SLIDES.default;
 
-  // Pick which form/view to render
+
   const renderContent = () => {
     switch (mode) {
       case 'resetPassword': return <ResetPasswordView oobCode={oobCode} />;

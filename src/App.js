@@ -4,8 +4,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { AdminProvider } from './contexts/AdminContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
-import ResetPassword from './pages/ResetPassword'; // or wherever you place it
-import ForgotPassword from './pages/ForgotPassword';
 import LandingPage from './pages/LandingPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
@@ -80,9 +78,10 @@ function App() {
             <Route path="/blogs" element={<BlogPostPage />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/auth-action" element={<AuthAction />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-           <Route path="/auth-action" element={<AuthAction />} />
+            
 
             {/* Admin Route */}
             <Route 
@@ -159,7 +158,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route path="/auth-action" element={<AuthAction />} /> 
+           
             <Route 
               path="/notes-view" 
               element={
