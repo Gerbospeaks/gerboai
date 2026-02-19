@@ -239,10 +239,10 @@ const Templates = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-800 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-300 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-lg p-8 text-gray-800">
+        <div className="bg-gradient-to-r bg-gray-400 rounded-lg p-8 text-gray-800">
           <div className="flex items-center gap-3 mb-3">
             <FileText className="w-8 h-8" />
             <h1 className="text-3xl font-bold">Invoice Templates</h1>
@@ -250,20 +250,7 @@ const Templates = () => {
           <p className="text-orange-50 text-lg">
             Professional invoice designs crafted specifically for auto repair shops and mechanics
           </p>
-          <div className="mt-4 flex flex-wrap items-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              <span>One-time purchase</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              <span>Lifetime access</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              <span>Print ready</span>
-            </div>
-          </div>
+         
         </div>
 
         {/* Stats */}
@@ -334,7 +321,7 @@ const Templates = () => {
 
                   {/* Badges */}
                   {template.isPremium && !isPurchased && (
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-500 text-gray-800 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
+                    <div className="absolute top-4 right-4 bg-gradient-to-r bg-gray-400 text-gray-800 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
                       <Sparkles className="w-4 h-4" />
                       Premium
                     </div>
@@ -509,7 +496,7 @@ const Templates = () => {
         {showPayment && (
           <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
             <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
-              <div className="p-6 border-b bg-gradient-to-r from-orange-500 to-red-500">
+              <div className="p-6 border-b bg-gradient-to-r bg-gray-400">
                 <div className="flex items-center justify-between text-gray-800">
                   <div className="flex items-center gap-3">
                     <ShoppingCart className="w-6 h-6" />

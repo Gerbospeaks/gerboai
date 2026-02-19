@@ -221,7 +221,7 @@ const Templates = ({ user }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-gray-300 p-4 md:p-8">
       {/* Header */}
       <div className="bg-gradient-to-r from-cyan-600 to-blue-500 rounded-lg p-8 text-gray-800">
         <div className="flex items-center gap-3 mb-3">

@@ -1968,7 +1968,7 @@ Your Construction Quote System
                     Convert to Invoice
                   </button>
                 )}
-
+               
                 <button
                   onClick={handlePrint}
                   className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"

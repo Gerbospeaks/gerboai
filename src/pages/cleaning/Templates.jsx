@@ -239,7 +239,7 @@ const Templates = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-800 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-300 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg p-8 text-gray-800">
@@ -250,20 +250,7 @@ const Templates = () => {
           <p className="text-blue-50 text-lg">
             Professional invoice designs crafted specifically for cleaning services and janitorial companies
           </p>
-          <div className="mt-4 flex flex-wrap items-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              <span>One-time purchase</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              <span>Lifetime access</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              <span>Print ready</span>
-            </div>
-          </div>
+         
         </div>
 
         {/* Stats */}

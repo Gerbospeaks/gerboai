@@ -223,9 +223,9 @@ const Templates = ({ user }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-gray-300">
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-lg p-8 text-gray-800">
+      <div className="bg-gradient-to-r bg-gray-400 rounded-lg p-8 text-gray-800">
         <div className="flex items-center gap-3 mb-3">
           <FileText className="w-8 h-8" />
           <h1 className="text-3xl font-bold">Invoice Templates</h1>
@@ -317,7 +317,7 @@ const Templates = ({ user }) => {
 
                 {/* Badges */}
                 {template.isPremium && !isPurchased && (
-                  <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-500 text-gray-800 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
+                  <div className="absolute top-4 right-4 bg-gradient-to-r bg-gray-400 text-gray-800 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
                     <Sparkles className="w-4 h-4" />
                     Premium
                   </div>

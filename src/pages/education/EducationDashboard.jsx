@@ -1150,102 +1150,7 @@ const printStyles = `
 
       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : "ml-0 md:ml-16"}`}>
       <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
-         <div className="sticky top-0 z-40 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 lg:space-x-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
-              <h1 className="text-base lg:text-xl font-semibold">
-                Report Card #{reportNumber || "— not saved yet —"}
-              </h1>
-              <TemplateSelector
-                              user={user}
-                              selectedTemplate={activeTemplate}
-                              onTemplateChange={setActiveTemplate}
-                            />
-            </div>
-
-            <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button
-                onClick={handleSaveReport}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700"
-              >
-                Save Report
-              </button>
-
-              <button
-                onClick={handleNewReport}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
-              >
-                <Plus className="w-4 h-4" />
-                New
-              </button>
-
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700">
-                <Send className="w-4 h-4" />
-                <span>Send</span>
-              </button>
-              <button
-                onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700"
-              >
-                Save as PDF
-              </button>
-
-              <button
-                onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                <Printer className="w-4 h-4" />
-                Print
-              </button>
-             <button
-                               onClick={handleLogout}
-                               className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
-                             >
-                               <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                               Logout
-                             </button>
-                           </div>
-             
-                           {/* Mobile Logout Button */}
-                           <button
-                             onClick={handleLogout}
-                             className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
-                           >
-                             <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-                           </button>
-          </div>
-        </div>
-</div>
-        <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 whitespace-nowrap text-sm">
-              <Send className="w-4 h-4" />
-              <span>Send</span>
-            </button>
-            <button
-              onClick={handleSavePDF}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Download className="w-4 h-4" />
-              <span>Save PDF</span>
-            </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Print</span>
-            </button>
-          </div>
-        </div>
+        
 
        
         
@@ -1769,6 +1674,102 @@ const printStyles = `
             {activeView === "home" && <HomeView user={user} />}
                     {activeView === "reportCard" && (
           <>
+           <div className="sticky top-0 z-40 flex flex-col">
+        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 lg:space-x-4">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+              <h1 className="text-base lg:text-xl font-semibold">
+                Report Card #{reportNumber || "— not saved yet —"}
+              </h1>
+              <TemplateSelector
+                              user={user}
+                              selectedTemplate={activeTemplate}
+                              onTemplateChange={setActiveTemplate}
+                            />
+            </div>
+
+            <div className="hidden lg:flex items-center space-x-3 print:hidden">
+              <button
+                onClick={handleSaveReport}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700"
+              >
+                Save Report
+              </button>
+
+              <button
+                onClick={handleNewReport}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
+              >
+                <Plus className="w-4 h-4" />
+                New
+              </button>
+
+              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700">
+                <Send className="w-4 h-4" />
+                <span>Send</span>
+              </button>
+              <button
+                onClick={handleSavePDF}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700"
+              >
+                Save as PDF
+              </button>
+
+              <button
+                onClick={handlePrint}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <Printer className="w-4 h-4" />
+                Print
+              </button>
+             <button
+                               onClick={handleLogout}
+                               className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
+                             >
+                               <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                               Logout
+                             </button>
+                           </div>
+             
+                           {/* Mobile Logout Button */}
+                           <button
+                             onClick={handleLogout}
+                             className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
+                           >
+                             <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+                           </button>
+          </div>
+        </div>
+</div>
+        <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            <button className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 whitespace-nowrap text-sm">
+              <Send className="w-4 h-4" />
+              <span>Send</span>
+            </button>
+            <button
+              onClick={handleSavePDF}
+              className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap text-sm"
+            >
+              <Download className="w-4 h-4" />
+              <span>Save PDF</span>
+            </button>
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Print</span>
+            </button>
+          </div>
+        </div>
           <button
             onClick={() => setShowReportCard(!showReportCard)}
             className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 transition-colors"
