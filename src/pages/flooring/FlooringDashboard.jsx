@@ -897,21 +897,21 @@ Your Construction Quote System
           {/* nav */}
           <nav className="space-y-1.5 md:space-y-2">
            <div
-  onClick={() => setActiveView("home")}  // ADD THIS
+  onClick={() => {setActiveView("home"); setSidebarOpen(false);}}
   className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
 >
   <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
   <span className="text-xs md:text-sm font-semibold">Home</span>
 </div>
 
-            <div onClick={() => setShowSettings(true)} className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30">
+            <div onClick={() => {setShowSettings(true); setSidebarOpen(false);}} className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30">
               <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
               <span className="text-xs md:text-sm font-semibold">Settings</span>
             </div>
 
             <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-stone-700/50">
               {/* Financial Dashboard */}
-              <div onClick={() => setActiveView("financial-overview")} className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30">
+              <div onClick={() => {setActiveView("financial-overview"); setSidebarOpen(false);}} className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30">
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                 <span className="text-xs md:text-sm font-semibold truncate">Financial Dashboard</span>
               </div>
@@ -919,7 +919,7 @@ Your Construction Quote System
               {/* Quotes & Invoices dropdown */}
              <div className="mt-2 md:mt-3">
   <div 
-    onClick={() => setIsQuotesInvoicesOpen2(!isQuotesInvoicesOpen2)}
+    onClick={() => {setIsQuotesInvoicesOpen2(!isQuotesInvoicesOpen2); setSidebarOpen(false);}}
     className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-amber-600/20 hover:to-amber-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-amber-500/30"
   >
     <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
@@ -1684,7 +1684,7 @@ Your Construction Quote System
                   {inputMode === "manual" && (
                     <>
                       {/* Summary Cards */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
                         <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-3 rounded-xl border border-amber-200 shadow-sm">
                           <div className="flex items-center justify-between mb-2">
                             <div className="text-sm font-medium text-amber-700">Total Amount</div>

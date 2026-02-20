@@ -14,7 +14,7 @@ import {
   BarChart3
 } from "lucide-react";
 
-const PracticeOverview = ({ user, savedInvoices, patients }) => {
+const PracticeOverview = ({ user, savedInvoices, patients, onAddNewPatient }) => {
   const [stats, setStats] = useState({
     totalRevenue: 0,
     monthlyRevenue: 0,
@@ -99,7 +99,7 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-gray-800">
+      <div className="bg-gray-400 rounded-lg p-6 text-gray-800">
         <h1 className="text-3xl font-bold mb-2">Practice Overview</h1>
         <p className="text-blue-100">Real-time insights into your healthcare practice</p>
       </div>
@@ -229,19 +229,19 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             <span>Revenue Overview</span>
           </h3>
           <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-gray-800 rounded">
+            <div className="flex justify-between items-center p-3 bg-gray-400 rounded">
               <span className="text-sm text-gray-600">This Month</span>
               <span className="text-lg font-semibold text-green-600">
                 {formatCurrency(stats.monthlyRevenue)}
               </span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-gray-800 rounded">
+            <div className="flex justify-between items-center p-3 bg-gray-400 rounded">
               <span className="text-sm text-gray-600">Total Revenue</span>
               <span className="text-lg font-semibold text-blue-600">
                 {formatCurrency(stats.totalRevenue)}
               </span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-gray-800 rounded">
+            <div className="flex justify-between items-center p-3 bg-gray-400 rounded">
               <span className="text-sm text-gray-600">Average Invoice</span>
               <span className="text-lg font-semibold text-purple-600">
                 {formatCurrency(stats.averageInvoiceValue)}
@@ -342,7 +342,9 @@ const PracticeOverview = ({ user, savedInvoices, patients }) => {
             <FileText className="w-5 h-5" />
             <span>Create Invoice</span>
           </button>
-          <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 transition-colors">
+          <button 
+          onClick={onAddNewPatient}
+          className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 transition-colors">
             <Users className="w-5 h-5" />
             <span>Add Patient</span>
           </button>

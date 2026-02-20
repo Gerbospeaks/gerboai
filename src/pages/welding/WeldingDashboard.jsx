@@ -995,7 +995,7 @@ const handleTemplateChange = (templateId) => {
           {/* nav */}
           <nav className="space-y-1.5 md:space-y-2">
             <div
-              onClick={() => setActiveView("home")}
+              onClick={() => {setActiveView("home"); setSidebarOpen(false);}}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
             >
               <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1003,7 +1003,7 @@ const handleTemplateChange = (templateId) => {
             </div>
 
             <div
-              onClick={() => setShowSettings(true)}
+              onClick={() => {setShowSettings(true); setSidebarOpen(false);}}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-red-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
             >
               <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
@@ -1013,7 +1013,7 @@ const handleTemplateChange = (templateId) => {
             <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-stone-700/50">
               {/* Financial Dashboard */}
               <div
-                onClick={() => setActiveView("financial-overview")}
+                onClick={() => {setActiveView("financial-overview"); setSidebarOpen(false);}}
                 className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
               >
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1138,7 +1138,7 @@ const handleTemplateChange = (templateId) => {
               {!isMobile && (
                 <>
                   <div
-                    onClick={() => setActiveView("schedule")}
+                    onClick={() => {setActiveView("schedule"); setSidebarOpen(false);}}
                     className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
                   >
                     <Calendar className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1147,7 +1147,7 @@ const handleTemplateChange = (templateId) => {
                     </span>
                   </div>
                   <div
-                    onClick={() => setActiveView("reports")}
+                    onClick={() => {setActiveView("reports"); setSidebarOpen(false);}}
                     className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-red-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
                   >
                     <BarChart3 className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -2038,7 +2038,7 @@ const handleTemplateChange = (templateId) => {
                   {inputMode === "manual" && (
                     <>
                       {/* Summary Cards */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
                         <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
                           <div className="flex items-center justify-between mb-2">
                             <div className="text-sm font-medium text-orange-700">

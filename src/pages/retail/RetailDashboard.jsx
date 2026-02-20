@@ -482,7 +482,7 @@ const handleProcessPayment = async () => {
 
           <nav className="space-y-1">
             <div
-              onClick={() => setActiveTab('Overview')}
+              onClick={() => {setActiveTab('Overview'); setSidebarOpen(false);}}
               className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
                 activeTab === 'Overview' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
               }`}
@@ -492,7 +492,7 @@ const handleProcessPayment = async () => {
             </div>
 
             <div
-              onClick={() => setShowSettings(true)}
+              onClick={() => {setShowSettings(true); setSidebarOpen(false);}}
               className="flex items-center space-x-3 px-3 py-2 text-gray-300 hover:bg-gray-500 rounded-lg cursor-pointer"
             >
               <Settings className="w-5 h-5" />
@@ -501,7 +501,7 @@ const handleProcessPayment = async () => {
 
             <div className="pt-4 space-y-2">
               <div
-                onClick={() => setActiveTab('Products')}
+                onClick={() => {setActiveTab('Products'); setSidebarOpen(false);}}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
                   activeTab === 'Products' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
                 }`}
@@ -511,7 +511,7 @@ const handleProcessPayment = async () => {
               </div>
 
               <div
-                onClick={() => setActiveTab('Orders')}
+                onClick={() => {setActiveTab('Orders'); setSidebarOpen(false);}}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
                   activeTab === 'Orders' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
                 }`}
@@ -521,7 +521,7 @@ const handleProcessPayment = async () => {
               </div>
 
               <div
-                onClick={() => setActiveTab('Customers')}
+                onClick={() => {setActiveTab('Customers'); setSidebarOpen(false);}}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer ${
                   activeTab === 'Customers' ? 'bg-gray-500 text-gray-800' : 'text-gray-300 hover:bg-gray-500'
                 }`}

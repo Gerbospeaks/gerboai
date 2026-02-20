@@ -981,7 +981,7 @@ Your Construction Quote System
           {/* nav */}
           <nav className="space-y-1.5 md:space-y-2">
             <div
-  onClick={() => setActiveView("home")}  // ADD THIS
+  onClick={() => {setActiveView("home"); setSidebarOpen(false);}}
   className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
 >
   <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -989,7 +989,7 @@ Your Construction Quote System
 </div>
 
             <div
-              onClick={() => setShowSettings(true)}
+              onClick={() => {setShowSettings(true); setSidebarOpen(false);}}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
             >
               <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
@@ -999,7 +999,7 @@ Your Construction Quote System
             <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-stone-700/50">
               {/* Financial Dashboard */}
               <div
-                onClick={() => setActiveView("financial-overview")}
+                onClick={() => {setActiveView("financial-overview"); setSidebarOpen(false);}}
                 className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
               >
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1887,7 +1887,7 @@ Your Construction Quote System
                   {inputMode === "manual" && (
                     <>
                       {/* Summary Cards */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
                         <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-3 rounded-xl border border-cyan-200 shadow-sm">
                           <div className="flex items-center justify-between mb-2">
                             <div className="text-sm font-medium text-cyan-700">

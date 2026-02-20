@@ -991,14 +991,14 @@ const printStyles = `
 
     <nav className="space-y-1">
       <div
-  onClick={() => setActiveView("home")}  // ADD THIS
+  onClick={() => {setActiveView("home"); setSidebarOpen(false);}}
   className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
 >
   <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
   <span className="text-xs md:text-sm font-semibold">Home</span>
 </div>
       <div
-        onClick={() => setShowSettings(true)}
+        onClick={() => {setShowSettings(true); setSidebarOpen(false);}}
         className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
       >
         <Settings className="w-5 h-5" />
@@ -1028,7 +1028,7 @@ const printStyles = `
               Create Invoice
             </div>
             <div
-              onClick={() => setShowInvoicesList(!showInvoicesList)}
+              onClick={() => {setShowInvoicesList(!showInvoicesList); setSidebarOpen(false);}}
               className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
               <div className="flex items-center justify-between">
@@ -1064,7 +1064,7 @@ const printStyles = `
               Add Client
             </div>
             <div
-              onClick={() => setShowCustomersListModal(true)}
+              onClick={() => {setShowCustomersListModal(true); setSidebarOpen(false);}}
               className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
             >
               <div className="flex items-center justify-between">
@@ -1083,7 +1083,7 @@ const printStyles = `
         </div>
 
         <div
-          onClick={() => setActiveView("templates")}
+          onClick={() => {setActiveView("templates"); setSidebarOpen(false);}}
           className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
         >
           <FileText className="w-5 h-5" />
@@ -1935,7 +1935,7 @@ const printStyles = `
                 <span className="text-blue-600">Issued Today</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
                   <div className="text-sm text-gray-500 mb-1">Total Amount</div>
                   <div className="text-2xl font-semibold text-blue-600">

@@ -28,6 +28,7 @@ import {
   orderBy, 
   getDocs, 
   addDoc, 
+  onSnapshot, 
   updateDoc, 
   deleteDoc, 
   doc,
@@ -49,6 +50,9 @@ const AppointmentsCalendar = ({ user }) => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [aiReceptionistData, setAiReceptionistData] = useState([]);
   const [showAiPanel, setShowAiPanel] = useState(false);
+  const [newBookingsCount, setNewBookingsCount] = useState(0);
+  const [lastSeenCount, setLastSeenCount] = useState(0);
+  const unseenBookings = aiReceptionistData.length - lastSeenCount;
 
   // New appointment form state
   const [newAppointment, setNewAppointment] = useState({
@@ -65,11 +69,34 @@ const AppointmentsCalendar = ({ user }) => {
   });
 
   useEffect(() => {
-    if (user?.uid) {
-      loadAppointments();
-      loadAiReceptionistData();
-    }
-  }, [user]);
+  if (!user?.uid) return;
+
+  // Real-time listener for main appointments
+  const appointmentsRef = collection(db, "users", user.uid, "appointments");
+  const q = query(appointmentsRef, orderBy("date", "asc"));
+  
+  const unsubscribeAppointments = onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setAppointments(data);
+  });
+
+  // Real-time listener for incoming website bookings
+  const aiRef = collection(db, "users", user.uid, "aiAppointments");
+  const aiQ = query(aiRef, orderBy("createdAt", "desc"));
+
+  const unsubscribeAi = onSnapshot(aiQ, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setAiReceptionistData(data);
+    // Optional: auto-open AI panel when new booking arrives
+    if (data.length > 0) setShowAiPanel(true);
+  });
+
+  // Cleanup listeners when component unmounts
+  return () => {
+    unsubscribeAppointments();
+    unsubscribeAi();
+  };
+}, [user]);
 
   useEffect(() => {
     filterAppointments();
@@ -372,7 +399,7 @@ const AppointmentsCalendar = ({ user }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-6 text-gray-800">
+      <div className="bg-gray-400 rounded-lg p-6 text-gray-800">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2 flex items-center space-x-3">
@@ -385,7 +412,7 @@ const AppointmentsCalendar = ({ user }) => {
           </div>
           <div className="text-right">
             <div className="text-4xl font-bold">{todayAppointments.length}</div>
-            <div className="text-sm text-purple-100">Today's Appointments</div>
+            <div className="text-sm text-blue-100">Today's Appointments</div>
           </div>
         </div>
       </div>
@@ -402,13 +429,24 @@ const AppointmentsCalendar = ({ user }) => {
               <span>New Appointment</span>
             </button>
 
-            <button
-              onClick={() => setShowAiPanel(!showAiPanel)}
-              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-gray-800 rounded-lg hover:bg-purple-700"
-            >
-              <Bot className="w-4 h-4" />
-              <span>AI Receptionist ({aiReceptionistData.length})</span>
-            </button>
+           <button
+  onClick={() => {
+    setShowAiPanel(!showAiPanel);
+    setLastSeenCount(aiReceptionistData.length); // mark as seen
+  }}
+  className="relative flex items-center space-x-2 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-purple-700"
+>
+  <Bot className="w-4 h-4" />
+  <span>Website Bookings ({aiReceptionistData.length})</span>
+  
+  {/* Red badge for new unseen bookings */}
+  {unseenBookings > 0 && (
+    <span className="absolute -top-2 -right-2 bg-red-500 text-white 
+                     text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+      {unseenBookings}
+    </span>
+  )}
+</button>
 
             <button
               onClick={loadAppointments}

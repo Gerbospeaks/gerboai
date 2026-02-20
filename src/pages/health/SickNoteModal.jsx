@@ -13,34 +13,34 @@ const SickNoteDocument = ({
   additionalNotes 
 }) => {
   return (
-    <div className="bg-white p-8 max-w-3xl mx-auto">
+    <div className="bg-white p-5 max-w-3xl mx-auto">
       {/* Header */}
-      <div className="border-b-2 border-gray-800 pb-4 mb-6">
+      <div className="border-b-2 border-gray-800 pb-3 mb-4">
         <div className="flex justify-between items-start">
           <div>
             {facilityInfo?.logoUrl && (
               <img 
                 src={facilityInfo.logoUrl} 
                 alt="Facility Logo" 
-                className="h-16 mb-2"
+                className="h-12 mb-1"
               />
             )}
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-lg font-bold text-gray-800">
               {facilityInfo?.facilityName || 'Medical Facility'}
             </h1>
-            <p className="text-sm text-gray-600">{facilityInfo?.addressLine1}</p>
-            <p className="text-sm text-gray-600">{facilityInfo?.addressLine2}</p>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs text-gray-600">{facilityInfo?.addressLine1}</p>
+            <p className="text-xs text-gray-600">{facilityInfo?.addressLine2}</p>
+            <p className="text-xs text-gray-600">
               {facilityInfo?.city} {facilityInfo?.postalCode}
             </p>
-            <p className="text-sm text-gray-600">Tel: {facilityInfo?.primaryPhone}</p>
+            <p className="text-xs text-gray-600">Tel: {facilityInfo?.primaryPhone}</p>
           </div>
           <div className="text-right">
-            <h2 className="text-xl font-bold text-blue-600">MEDICAL CERTIFICATE</h2>
-            <p className="text-sm text-gray-600 mt-2">
+            <h2 className="text-base font-bold text-blue-600">MEDICAL CERTIFICATE</h2>
+            <p className="text-xs text-gray-600 mt-1">
               Practice No: {practiceNumber}
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs text-gray-600">
               Date Issued: {new Date().toLocaleDateString('en-ZA')}
             </p>
           </div>
@@ -48,20 +48,20 @@ const SickNoteDocument = ({
       </div>
 
       {/* Patient Information */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-3 text-gray-800">Patient Information</h3>
-        <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded">
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold mb-2 text-gray-800">Patient Information</h3>
+        <div className="grid grid-cols-2 gap-3 bg-gray-50 p-3 rounded">
           <div>
-            <span className="text-sm font-medium text-gray-600">Name:</span>
-            <p className="text-base font-semibold">{patientName}</p>
+            <span className="text-xs font-medium text-gray-600">Name:</span>
+            <p className="text-sm font-semibold">{patientName}</p>
           </div>
           <div>
-            <span className="text-sm font-medium text-gray-600">Patient ID:</span>
-            <p className="text-base font-semibold">{patientId}</p>
+            <span className="text-xs font-medium text-gray-600">Patient ID:</span>
+            <p className="text-sm font-semibold">{patientId}</p>
           </div>
           <div>
-            <span className="text-sm font-medium text-gray-600">Date of Birth:</span>
-            <p className="text-base font-semibold">
+            <span className="text-xs font-medium text-gray-600">Date of Birth:</span>
+            <p className="text-sm font-semibold">
               {patientDOB ? new Date(patientDOB).toLocaleDateString('en-ZA') : 'N/A'}
             </p>
           </div>
@@ -69,56 +69,56 @@ const SickNoteDocument = ({
       </div>
 
       {/* Medical Certificate Content */}
-      <div className="mb-6 border border-gray-300 rounded p-6 bg-yellow-50">
-        <p className="text-base leading-relaxed mb-4">
+      <div className="mb-4 border border-gray-300 rounded p-4 bg-yellow-50">
+        <p className="text-sm leading-relaxed mb-3">
           This is to certify that <strong>{patientName}</strong> was examined by me on{' '}
           <strong>{new Date().toLocaleDateString('en-ZA')}</strong> and found to be suffering from:
         </p>
         
-        <div className="bg-white p-4 rounded border-l-4 border-blue-600 mb-4">
-          <p className="font-semibold text-gray-800">{diagnosis || 'Medical condition requiring rest'}</p>
+        <div className="bg-white p-3 rounded border-l-4 border-blue-600 mb-3">
+          <p className="text-sm font-semibold text-gray-800">{diagnosis || 'Medical condition requiring rest'}</p>
         </div>
 
-        <p className="text-base leading-relaxed mb-4">
+        <p className="text-sm leading-relaxed mb-3">
           The patient is advised to be absent from work/school for the period:
         </p>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="bg-white p-3 rounded border border-gray-300">
-            <span className="text-sm font-medium text-gray-600">From:</span>
-            <p className="text-lg font-bold text-blue-600">
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="bg-white p-2 rounded border border-gray-300">
+            <span className="text-xs font-medium text-gray-600">From:</span>
+            <p className="text-base font-bold text-blue-600">
               {dateFrom ? new Date(dateFrom).toLocaleDateString('en-ZA') : 'N/A'}
             </p>
           </div>
-          <div className="bg-white p-3 rounded border border-gray-300">
-            <span className="text-sm font-medium text-gray-600">To:</span>
-            <p className="text-lg font-bold text-blue-600">
+          <div className="bg-white p-2 rounded border border-gray-300">
+            <span className="text-xs font-medium text-gray-600">To:</span>
+            <p className="text-base font-bold text-blue-600">
               {dateTo ? new Date(dateTo).toLocaleDateString('en-ZA') : 'N/A'}
             </p>
           </div>
         </div>
 
         {additionalNotes && (
-          <div className="bg-white p-4 rounded border border-gray-300 mb-4">
-            <p className="text-sm font-medium text-gray-600 mb-2">Additional Notes:</p>
-            <p className="text-base">{additionalNotes}</p>
+          <div className="bg-white p-3 rounded border border-gray-300 mb-3">
+            <p className="text-xs font-medium text-gray-600 mb-1">Additional Notes:</p>
+            <p className="text-sm">{additionalNotes}</p>
           </div>
         )}
       </div>
 
       {/* Doctor Signature Section */}
-      <div className="border-t-2 border-gray-300 pt-6">
+      <div className="border-t-2 border-gray-300 pt-4">
         <div className="flex justify-between items-end">
           <div>
-            <p className="text-sm text-gray-600 mb-1">Signed by:</p>
-            <p className="text-lg font-bold">{doctorName}</p>
-            <p className="text-sm text-gray-600">Medical Practitioner</p>
-            <p className="text-sm text-gray-600">Practice Number: {practiceNumber}</p>
+            <p className="text-xs text-gray-600 mb-1">Signed by:</p>
+            <p className="text-base font-bold">{doctorName}</p>
+            <p className="text-xs text-gray-600">Medical Practitioner</p>
+            <p className="text-xs text-gray-600">Practice Number: {practiceNumber}</p>
           </div>
           <div className="text-right">
-            <div className="border-t-2 border-gray-800 w-48 mb-2"></div>
-            <p className="text-sm text-gray-600">Signature</p>
-            <p className="text-sm text-gray-600 mt-2">
+            <div className="border-t-2 border-gray-800 w-40 mb-1"></div>
+            <p className="text-xs text-gray-600">Signature</p>
+            <p className="text-xs text-gray-600 mt-1">
               Date: {new Date().toLocaleDateString('en-ZA')}
             </p>
           </div>
@@ -126,7 +126,7 @@ const SickNoteDocument = ({
       </div>
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t border-gray-300 text-center">
+      <div className="mt-4 pt-3 border-t border-gray-300 text-center">
         <p className="text-xs text-gray-500">
           This medical certificate is issued in good faith based on examination findings.
         </p>
@@ -156,40 +156,95 @@ const SickNoteModal = ({
   const [additionalNotes, setAdditionalNotes] = useState('');
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    const sickNoteHTML = document.getElementById('sick-note-preview').innerHTML;
-    
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Medical Certificate - ${patientName}</title>
-          <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              margin: 0; 
-              padding: 20px; 
-            }
-            @media print {
-              body { margin: 0; }
-              @page { 
-                size: A4;
-                margin: 20mm; 
-              }
-            }
-          </style>
-          <script src="https://cdn.tailwindcss.com"></script>
-        </head>
-        <body>
-          ${sickNoteHTML}
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
-    setTimeout(() => {
-      printWindow.print();
-    }, 250);
-  };
+  const printWindow = window.open('', '_blank');
+  const sickNoteHTML = document.getElementById('sick-note-preview').innerHTML;
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Medical Certificate - ${patientName}</title>
+        <style>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          html, body {
+            width: 148mm;
+            height: 210mm;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            overflow: hidden;
+          }
+          body { padding: 8mm; }
+          @page { size: A5 portrait; margin: 0; }
+          @media print {
+            html, body { width: 148mm; height: 210mm; }
+          }
+          .bg-white { background-color: #ffffff; }
+          .bg-gray-50 { background-color: #f9fafb; }
+          .bg-yellow-50 { background-color: #fefce8; }
+          .border { border-width: 1px; border-style: solid; border-color: #d1d5db; }
+          .border-b-2 { border-bottom-width: 2px; border-bottom-style: solid; }
+          .border-t-2 { border-top-width: 2px; border-top-style: solid; }
+          .border-t { border-top-width: 1px; border-top-style: solid; }
+          .border-gray-300 { border-color: #d1d5db; }
+          .border-gray-800 { border-color: #1f2937; }
+          .border-l-4 { border-left-width: 4px; border-left-style: solid; }
+          .border-blue-600 { border-color: #2563eb; }
+          .rounded { border-radius: 4px; }
+          .p-5 { padding: 8mm; }
+          .p-4 { padding: 6mm; }
+          .p-3 { padding: 4mm; }
+          .p-2 { padding: 3mm; }
+          .mb-4 { margin-bottom: 4mm; }
+          .mb-3 { margin-bottom: 3mm; }
+          .mb-2 { margin-bottom: 2mm; }
+          .mb-1 { margin-bottom: 1mm; }
+          .mt-4 { margin-top: 4mm; }
+          .mt-1 { margin-top: 1mm; }
+          .pb-3 { padding-bottom: 3mm; }
+          .pt-4 { padding-top: 4mm; }
+          .pt-3 { padding-top: 3mm; }
+          .w-40 { width: 40mm; }
+          .flex { display: flex; }
+          .grid { display: grid; }
+          .grid-cols-2 { grid-template-columns: 1fr 1fr; }
+          .gap-3 { gap: 3mm; }
+          .justify-between { justify-content: space-between; }
+          .items-start { align-items: flex-start; }
+          .items-end { align-items: flex-end; }
+          .text-right { text-align: right; }
+          .text-center { text-align: center; }
+          .font-bold { font-weight: 700; }
+          .font-semibold { font-weight: 600; }
+          .font-medium { font-weight: 500; }
+          .text-xs { font-size: 9px; line-height: 1.4; }
+          .text-sm { font-size: 10px; line-height: 1.5; }
+          .text-base { font-size: 12px; line-height: 1.5; }
+          .text-lg { font-size: 14px; font-weight: bold; }
+          .text-gray-800 { color: #1f2937; }
+          .text-gray-600 { color: #4b5563; }
+          .text-gray-500 { color: #6b7280; }
+          .text-blue-600 { color: #2563eb; }
+          .leading-relaxed { line-height: 1.6; }
+          .max-w-3xl { max-width: 100%; }
+          .mx-auto { margin-left: auto; margin-right: auto; }
+          .h-12 { height: 12mm; }
+        </style>
+      </head>
+      <body>
+        ${sickNoteHTML}
+        <script>
+          window.onload = () => {
+            window.print();
+          };
+          window.onafterprint = () => {
+            window.close();
+          };
+        </script>
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+};
 
   if (!isOpen) return null;
 
@@ -297,7 +352,7 @@ const SickNoteModal = ({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                Preview
+                Preview <span className="text-sm font-normal text-gray-500 ml-1">(A5)</span>
               </h3>
               <button
                 onClick={handlePrint}
