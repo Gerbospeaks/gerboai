@@ -1,27 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, Check } from 'lucide-react';
-import SignatureStamp from '../SignatureStamp';
+import React, { useState, useEffect } from "react";
+import { FileText, Check } from "lucide-react";
+import SignatureStamp from "../SignatureStamp";
 import {
   getFirestore,
   doc,
   getDoc,
   updateDoc,
-  serverTimestamp
-} from 'firebase/firestore';
+  serverTimestamp,
+} from "firebase/firestore";
 
 // Template Selector Dropdown Component
-export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) => {
-  const [purchasedTemplates, setPurchasedTemplates] = useState(['classic']);
+export const TemplateSelector = ({
+  user,
+  selectedTemplate,
+  onTemplateChange,
+}) => {
+  const [purchasedTemplates, setPurchasedTemplates] = useState(["classic"]);
   const [isOpen, setIsOpen] = useState(false);
 
   const templateNames = {
-    default: 'Default (Professional)',
-    classic: 'Classic Legal',
-    modern: 'Modern Law Firm',
-    elegant: 'Elegant Chambers',
-    corporate: 'Corporate Legal',
-    traditional: 'Traditional Practice',
-    boutique: 'Boutique Firm'
+    default: "Default (Professional)",
+    classic: "Classic Legal",
+    modern: "Modern Law Firm",
+    elegant: "Elegant Chambers",
+    corporate: "Corporate Legal",
+    traditional: "Traditional Practice",
+    boutique: "Boutique Firm",
   };
 
   const handleSelectTemplate = (templateId) => {
@@ -36,17 +40,29 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
       >
         <FileText className="w-4 h-4" />
-        <span className="hidden sm:inline">{templateNames[selectedTemplate] || 'Select Template'}</span>
+        <span className="hidden sm:inline">
+          {templateNames[selectedTemplate] || "Select Template"}
+        </span>
         <span className="sm:hidden">Template</span>
-        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <svg
+          className="w-4 h-4 ml-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-10" 
+          <div
+            className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-80 overflow-auto">
@@ -54,12 +70,14 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
               <div className="text-xs font-semibold text-gray-500 px-3 py-2">
                 Your Templates
               </div>
-              {purchasedTemplates.map(templateId => (
+              {purchasedTemplates.map((templateId) => (
                 <button
                   key={templateId}
                   onClick={() => handleSelectTemplate(templateId)}
                   className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center justify-between ${
-                    selectedTemplate === templateId ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                    selectedTemplate === templateId
+                      ? "bg-blue-50 text-blue-700"
+                      : "text-gray-700"
                   }`}
                 >
                   <span>{templateNames[templateId]}</span>
@@ -77,8 +95,8 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 };
 
 // Default Legal Template
-export const DefaultTemplate = ({ 
-  businessInfo, 
+export const DefaultTemplate = ({
+  businessInfo,
   loading,
   jobCardNumber,
   invoiceNumber,
@@ -101,7 +119,7 @@ export const DefaultTemplate = ({
   showStamp = false,
   stampText = "APPROVED",
   stampColor = "#1e40af",
-  showStampDate = true
+  showStampDate = true,
 }) => {
   const finalInvoiceNumber = invoiceNumber || jobCardNumber;
   const finalClientName = clientName || customerName;
@@ -131,23 +149,30 @@ export const DefaultTemplate = ({
                 <div className="text-xl font-bold text-blue-900">
                   {businessInfo?.businessName || ""}
                 </div>
-                <div className="text-xs text-gray-600 italic">Attorneys & Conveyancers</div>
+                <div className="text-xs text-gray-600 italic">
+                  Attorneys & Conveyancers
+                </div>
               </div>
             </div>
             <div className="text-xs leading-relaxed text-gray-700">
               <div>{businessInfo.addressLine1}</div>
               <div>{businessInfo.addressLine2}</div>
-              <div>{businessInfo.city} {businessInfo.postalCode}</div>
+              <div>
+                {businessInfo.city} {businessInfo.postalCode}
+              </div>
               <div className="mt-1">
                 T: {businessInfo.primaryPhone}
-                {businessInfo.secondaryPhone && ` | F: ${businessInfo.secondaryPhone}`}
+                {businessInfo.secondaryPhone &&
+                  ` | F: ${businessInfo.secondaryPhone}`}
               </div>
               {businessInfo.email && <div>E: {businessInfo.email}</div>}
             </div>
           </div>
 
           <div className="text-right">
-            <div className="text-3xl font-bold mb-4 text-blue-900">TAX INVOICE</div>
+            <div className="text-3xl font-bold mb-4 text-blue-900">
+              TAX INVOICE
+            </div>
             <div className="text-xs space-y-1">
               <div className="flex justify-between gap-8">
                 <span className="font-semibold">INVOICE NO.</span>
@@ -173,27 +198,37 @@ export const DefaultTemplate = ({
       {/* Three Column Section */}
       <div className="grid grid-cols-3 gap-4 mb-4">
         <div className="bg-blue-50 p-3 border border-blue-200">
-          <div className="font-bold text-xs mb-2 bg-blue-900 text-gray-800 px-2 py-1">BILL TO</div>
+          <div className="font-bold text-xs mb-2 bg-blue-900 text-gray-800 px-2 py-1">
+            BILL TO
+          </div>
           <div className="text-xs space-y-1">
             <div className="font-semibold">{finalClientName}</div>
-            <div className="h-12 overflow-hidden text-xs leading-tight">{finalClientAddress}</div>
+            <div className="h-12 overflow-hidden text-xs leading-tight">
+              {finalClientAddress}
+            </div>
             <div>{finalClientEmail}</div>
             <div>{finalClientPhone}</div>
           </div>
         </div>
 
         <div className="bg-blue-50 p-3 border border-blue-200">
-          <div className="font-bold text-xs mb-2 bg-blue-900 text-gray-800 px-2 py-1">CLIENT DETAILS</div>
+          <div className="font-bold text-xs mb-2 bg-blue-900 text-gray-800 px-2 py-1">
+            CLIENT DETAILS
+          </div>
           <div className="text-xs space-y-1">
             <div className="font-semibold">{finalClientName}</div>
-            <div className="h-12 overflow-hidden text-xs leading-tight">{finalClientAddress}</div>
+            <div className="h-12 overflow-hidden text-xs leading-tight">
+              {finalClientAddress}
+            </div>
             <div>{finalClientEmail}</div>
             <div>{finalClientPhone}</div>
           </div>
         </div>
 
         <div className="bg-blue-50 p-3 border border-blue-200">
-          <div className="font-bold text-xs mb-2 bg-blue-900 text-gray-800 px-2 py-1">MATTER DETAILS</div>
+          <div className="font-bold text-xs mb-2 bg-blue-900 text-gray-800 px-2 py-1">
+            MATTER DETAILS
+          </div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between">
               <span className="font-semibold">Case No:</span>
@@ -205,7 +240,9 @@ export const DefaultTemplate = ({
             </div>
             <div className="mt-2">
               <span className="font-semibold">Description:</span>
-              <div className="text-[9px] mt-1 leading-tight">{matterDescription}</div>
+              <div className="text-[9px] mt-1 leading-tight">
+                {matterDescription}
+              </div>
             </div>
           </div>
         </div>
@@ -216,7 +253,9 @@ export const DefaultTemplate = ({
         <table className="w-full text-xs">
           <thead>
             <tr className="bg-blue-900 text-gray-800">
-              <th className="text-left px-2 py-1 font-bold">DESCRIPTION OF SERVICES</th>
+              <th className="text-left px-2 py-1 font-bold">
+                DESCRIPTION OF SERVICES
+              </th>
               <th className="text-center px-2 py-1 font-bold">HOURS/QTY</th>
               <th className="text-right px-2 py-1 font-bold">RATE</th>
               <th className="text-right px-2 py-1 font-bold">AMOUNT</th>
@@ -227,8 +266,12 @@ export const DefaultTemplate = ({
               <tr key={index} className="border-b">
                 <td className="px-2 py-2">{item.description}</td>
                 <td className="text-center px-2 py-2">{item.qty}</td>
-                <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-                <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
+                <td className="text-right px-2 py-2">
+                  R {item.rate.toFixed(2)}
+                </td>
+                <td className="text-right px-2 py-2">
+                  R {item.amount.toFixed(2)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -255,12 +298,26 @@ export const DefaultTemplate = ({
 
       {/* Banking Details */}
       <div className="bg-blue-50 border border-blue-200 p-3 mb-4">
-        <div className="text-blue-900 font-bold text-xs mb-2">TRUST ACCOUNT DETAILS</div>
+        <div className="text-blue-900 font-bold text-xs mb-2">
+          TRUST ACCOUNT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Bank Name:</span> {businessInfo.bankName || 'FNB'}</div>
-          <div><span className="font-semibold">Account Holder:</span> {businessInfo.businessName}</div>
-          <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber || '62146991441'}</div>
-          <div><span className="font-semibold">Branch Code:</span> {businessInfo.branchCode || '250655'}</div>
+          <div>
+            <span className="font-semibold">Bank Name:</span>{" "}
+            {businessInfo.bankName || "FNB"}
+          </div>
+          <div>
+            <span className="font-semibold">Account Holder:</span>{" "}
+            {businessInfo.businessName}
+          </div>
+          <div>
+            <span className="font-semibold">Account Number:</span>{" "}
+            {businessInfo.accountNumber || "62146991441"}
+          </div>
+          <div>
+            <span className="font-semibold">Branch Code:</span>{" "}
+            {businessInfo.branchCode || "250655"}
+          </div>
         </div>
       </div>
 
@@ -272,7 +329,7 @@ export const DefaultTemplate = ({
         </div>
         {showStamp && (
           <div className="flex justify-end">
-            <SignatureStamp 
+            <SignatureStamp
               text={stampText}
               color={stampColor}
               showDate={showStampDate}
@@ -285,7 +342,8 @@ export const DefaultTemplate = ({
 
       {/* Footer Note */}
       <div className="text-center text-xs text-blue-900 italic border-t border-blue-900 pt-2">
-        Payment is due within 30 days of invoice date. Interest may be charged on overdue accounts.
+        Payment is due within 30 days of invoice date. Interest may be charged
+        on overdue accounts.
       </div>
     </div>
   );
@@ -306,21 +364,33 @@ export const ClassicTemplate = (props) => {
           <div>
             <div className="flex items-center gap-3 mb-2">
               {props.businessInfo.logoUrl && (
-                <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+                <img
+                  src={props.businessInfo.logoUrl}
+                  alt="Logo"
+                  className="w-16 h-16 object-contain"
+                />
               )}
               <div>
-                <div className="text-xl font-serif font-bold text-gray-900">{props.businessInfo.businessName}</div>
-                <div className="text-xs text-gray-600">Attorneys & Conveyancers</div>
+                <div className="text-xl font-serif font-bold text-gray-900">
+                  {props.businessInfo.businessName}
+                </div>
+                <div className="text-xs text-gray-600">
+                  Attorneys & Conveyancers
+                </div>
               </div>
             </div>
             <div className="text-xs leading-relaxed">
               <div>{props.businessInfo.addressLine1}</div>
-              <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+              <div>
+                {props.businessInfo.city}, {props.businessInfo.postalCode}
+              </div>
               <div>T: {props.businessInfo.primaryPhone}</div>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-serif font-bold mb-4 text-gray-900">TAX INVOICE</div>
+            <div className="text-3xl font-serif font-bold mb-4 text-gray-900">
+              TAX INVOICE
+            </div>
             <div className="text-xs space-y-1">
               <div className="flex justify-between gap-8">
                 <span className="font-semibold">INVOICE NO.</span>
@@ -341,7 +411,9 @@ export const ClassicTemplate = (props) => {
 
       <div className="grid grid-cols-3 gap-4 mb-4">
         <div className="bg-gray-50 p-3 border border-gray-300">
-          <div className="font-bold text-xs mb-2 bg-gray-700 text-gray-800 px-2 py-1">CLIENT</div>
+          <div className="font-bold text-xs mb-2 bg-gray-700 text-gray-800 px-2 py-1">
+            CLIENT
+          </div>
           <div className="text-xs space-y-1">
             <div className="font-semibold">{finalClientName}</div>
             <div>{finalClientAddress}</div>
@@ -350,7 +422,9 @@ export const ClassicTemplate = (props) => {
           </div>
         </div>
         <div className="bg-gray-50 p-3 border border-gray-300">
-          <div className="font-bold text-xs mb-2 bg-gray-700 text-gray-800 px-2 py-1">MATTER</div>
+          <div className="font-bold text-xs mb-2 bg-gray-700 text-gray-800 px-2 py-1">
+            MATTER
+          </div>
           <div className="text-xs space-y-1">
             <div>Case: {props.caseNumber}</div>
             <div>Type: {props.caseType}</div>
@@ -358,7 +432,9 @@ export const ClassicTemplate = (props) => {
           </div>
         </div>
         <div className="bg-gray-50 p-3 border border-gray-300">
-          <div className="font-bold text-xs mb-2 bg-gray-700 text-gray-800 px-2 py-1">INVOICE INFO</div>
+          <div className="font-bold text-xs mb-2 bg-gray-700 text-gray-800 px-2 py-1">
+            INVOICE INFO
+          </div>
           <div className="text-xs space-y-1">
             <div>Date: {new Date().toLocaleDateString()}</div>
             <div>Terms: 30 Days</div>
@@ -381,7 +457,9 @@ export const ClassicTemplate = (props) => {
               <td className="px-2 py-2">{item.description}</td>
               <td className="text-center px-2 py-2">{item.qty}</td>
               <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -405,17 +483,28 @@ export const ClassicTemplate = (props) => {
       </div>
 
       <div className="bg-gray-50 border border-gray-300 p-4 mb-4">
-        <div className="text-gray-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-gray-800 font-bold text-sm mb-2">
+          PAYMENT INFORMATION
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+          <div>
+            <span className="font-semibold">Bank Name:</span>{" "}
+            {props.businessInfo.bankName || "First National Bank"}
+          </div>
+          <div>
+            <span className="font-semibold">Account Holder:</span>{" "}
+            {props.businessInfo.businessName}
+          </div>
+          <div>
+            <span className="font-semibold">Account Number:</span>{" "}
+            {props.businessInfo.accountNumber || "62146991441"}
+          </div>
         </div>
       </div>
 
       {props.showStamp && (
         <div className="flex justify-center mb-4">
-          <SignatureStamp 
+          <SignatureStamp
             text={props.stampText}
             color={props.stampColor}
             showDate={props.showStampDate}
@@ -444,19 +533,33 @@ export const CorporateTemplate = (props) => {
         <div className="flex justify-between items-start">
           <div>
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-20 h-20 object-contain mb-3"
+              />
             )}
-            <div className="text-2xl font-bold text-indigo-900 mb-2">{props.businessInfo.businessName}</div>
+            <div className="text-2xl font-bold text-indigo-900 mb-2">
+              {props.businessInfo.businessName}
+            </div>
             <div className="text-xs text-gray-600">
               <div>{props.businessInfo.addressLine1}</div>
               <div>{props.businessInfo.city}</div>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-bold text-indigo-900 mb-4">FEE NOTE</div>
+            <div className="text-4xl font-bold text-indigo-900 mb-4">
+              FEE NOTE
+            </div>
             <div className="bg-indigo-50 border-2 border-indigo-900 p-3 rounded">
-              <div className="text-sm"><span className="font-bold">Reference:</span> {finalInvoiceNumber}</div>
-              <div className="text-sm"><span className="font-bold">Date:</span> {new Date().toLocaleDateString()}</div>
+              <div className="text-sm">
+                <span className="font-bold">Reference:</span>{" "}
+                {finalInvoiceNumber}
+              </div>
+              <div className="text-sm">
+                <span className="font-bold">Date:</span>{" "}
+                {new Date().toLocaleDateString()}
+              </div>
             </div>
           </div>
         </div>
@@ -464,25 +567,41 @@ export const CorporateTemplate = (props) => {
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div className="border-2 border-indigo-900 p-4">
-          <div className="text-sm font-bold text-indigo-900 mb-3">CLIENT INFORMATION</div>
+          <div className="text-sm font-bold text-indigo-900 mb-3">
+            CLIENT INFORMATION
+          </div>
           <div className="text-sm space-y-1">
-            <div><span className="font-semibold">Name:</span> {finalClientName}</div>
-            <div><span className="font-semibold">Email:</span> {finalClientEmail}</div>
-            <div><span className="font-semibold">Phone:</span> {finalClientPhone}</div>
+            <div>
+              <span className="font-semibold">Name:</span> {finalClientName}
+            </div>
+            <div>
+              <span className="font-semibold">Email:</span> {finalClientEmail}
+            </div>
+            <div>
+              <span className="font-semibold">Phone:</span> {finalClientPhone}
+            </div>
           </div>
         </div>
         <div className="border-2 border-indigo-900 p-4">
-          <div className="text-sm font-bold text-indigo-900 mb-3">MATTER DETAILS</div>
+          <div className="text-sm font-bold text-indigo-900 mb-3">
+            MATTER DETAILS
+          </div>
           <div className="text-sm space-y-1">
-            <div><span className="font-semibold">File:</span> {props.caseNumber}</div>
-            <div><span className="font-semibold">Type:</span> {props.caseType}</div>
+            <div>
+              <span className="font-semibold">File:</span> {props.caseNumber}
+            </div>
+            <div>
+              <span className="font-semibold">Type:</span> {props.caseType}
+            </div>
             <div className="text-xs">{props.matterDescription}</div>
           </div>
         </div>
       </div>
 
       <div className="mb-6">
-        <div className="bg-indigo-900 text-gray-800 px-4 py-2 font-bold">PROFESSIONAL SERVICES RENDERED</div>
+        <div className="bg-indigo-900 text-gray-800 px-4 py-2 font-bold">
+          PROFESSIONAL SERVICES RENDERED
+        </div>
         <table className="w-full">
           <thead>
             <tr className="bg-indigo-50 border-b-2 border-indigo-900">
@@ -497,8 +616,12 @@ export const CorporateTemplate = (props) => {
               <tr key={i} className="border-b">
                 <td className="px-4 py-3">{item.description}</td>
                 <td className="text-center px-4 py-3">{item.qty}</td>
-                <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-                <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+                <td className="text-right px-4 py-3">
+                  R {item.rate.toFixed(2)}
+                </td>
+                <td className="text-right px-4 py-3 font-semibold">
+                  R {item.amount.toFixed(2)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -523,16 +646,24 @@ export const CorporateTemplate = (props) => {
       </div>
 
       <div className="bg-indigo-50 border border-indigo-200 p-4 mb-4">
-        <div className="text-indigo-900 font-bold text-sm mb-2">BANKING DETAILS</div>
+        <div className="text-indigo-900 font-bold text-sm mb-2">
+          BANKING DETAILS
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank:</span> {props.businessInfo.bankName || 'FNB'}</div>
-          <div><span className="font-semibold">Account:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+          <div>
+            <span className="font-semibold">Bank:</span>{" "}
+            {props.businessInfo.bankName || "FNB"}
+          </div>
+          <div>
+            <span className="font-semibold">Account:</span>{" "}
+            {props.businessInfo.accountNumber || "62146991441"}
+          </div>
         </div>
       </div>
 
       {props.showStamp && (
         <div className="flex justify-center mb-4">
-          <SignatureStamp 
+          <SignatureStamp
             text={props.stampText}
             color={props.stampColor}
             showDate={props.showStampDate}
@@ -563,21 +694,35 @@ export const ModernTemplate = (props) => {
         <div className="flex justify-between items-start">
           <div>
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-20 h-20 object-contain mb-3"
+              />
             )}
-            
+
             <div className="text-sm text-gray-600 space-y-1">
               <div>{props.businessInfo.addressLine1}</div>
-              <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+              <div>
+                {props.businessInfo.city}, {props.businessInfo.postalCode}
+              </div>
               <div>{props.businessInfo.primaryPhone}</div>
             </div>
           </div>
           <div className="text-right">
             <div className="text-5xl font-bold text-blue-600 mb-4">INVOICE</div>
             <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-              <div className="text-sm"><span className="font-semibold">Invoice #:</span> {finalInvoiceNumber}</div>
-              <div className="text-sm"><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</div>
-              <div className="text-sm"><span className="font-semibold">Case:</span> {props.caseNumber}</div>
+              <div className="text-sm">
+                <span className="font-semibold">Invoice #:</span>{" "}
+                {finalInvoiceNumber}
+              </div>
+              <div className="text-sm">
+                <span className="font-semibold">Date:</span>{" "}
+                {new Date().toLocaleDateString()}
+              </div>
+              <div className="text-sm">
+                <span className="font-semibold">Case:</span> {props.caseNumber}
+              </div>
             </div>
           </div>
         </div>
@@ -594,10 +739,18 @@ export const ModernTemplate = (props) => {
           </div>
         </div>
         <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-600">
-          <div className="text-sm font-bold text-blue-700 mb-3">MATTER INFORMATION</div>
+          <div className="text-sm font-bold text-blue-700 mb-3">
+            MATTER INFORMATION
+          </div>
           <div className="text-sm space-y-1">
-            <div><span className="font-semibold">Case Number:</span> {props.caseNumber}</div>
-            <div><span className="font-semibold">Matter Type:</span> {props.caseType}</div>
+            <div>
+              <span className="font-semibold">Case Number:</span>{" "}
+              {props.caseNumber}
+            </div>
+            <div>
+              <span className="font-semibold">Matter Type:</span>{" "}
+              {props.caseType}
+            </div>
             <div className="text-xs mt-2">{props.matterDescription}</div>
           </div>
         </div>
@@ -606,7 +759,9 @@ export const ModernTemplate = (props) => {
       <table className="w-full mb-6">
         <thead>
           <tr className="bg-blue-600 text-gray-800">
-            <th className="text-left px-4 py-3 rounded-l-lg">Service Description</th>
+            <th className="text-left px-4 py-3 rounded-l-lg">
+              Service Description
+            </th>
             <th className="text-center px-4 py-3">Hours</th>
             <th className="text-right px-4 py-3">Rate</th>
             <th className="text-right px-4 py-3 rounded-r-lg">Amount</th>
@@ -618,7 +773,9 @@ export const ModernTemplate = (props) => {
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
               <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+              <td className="text-right px-4 py-3 font-semibold">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -642,16 +799,24 @@ export const ModernTemplate = (props) => {
       </div>
 
       <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-        <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT DETAILS</div>
+        <div className="text-blue-800 font-bold text-sm mb-2">
+          PAYMENT DETAILS
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank:</span> {props.businessInfo.bankName || 'FNB'}</div>
-          <div><span className="font-semibold">Account:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
+          <div>
+            <span className="font-semibold">Bank:</span>{" "}
+            {props.businessInfo.bankName || "FNB"}
+          </div>
+          <div>
+            <span className="font-semibold">Account:</span>{" "}
+            {props.businessInfo.accountNumber || "62146991441"}
+          </div>
         </div>
       </div>
 
       {props.showStamp && (
         <div className="flex justify-center mb-4">
-          <SignatureStamp 
+          <SignatureStamp
             text={props.stampText}
             color={props.stampColor}
             showDate={props.showStampDate}
@@ -669,31 +834,32 @@ export const ModernTemplate = (props) => {
 };
 
 // Template Renderer
-export const TemplateRenderer = ({  templateId, 
-  documentType = 'invoice',
+export const TemplateRenderer = ({
+  templateId,
+  documentType = "invoice",
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true,
   showStamp = false,
-  ...props 
+  ...props
 }) => {
-   const templateProps = { 
-    ...props, 
+  const templateProps = {
+    ...props,
     documentType,
     stampText,
     stampColor,
     showStampDate,
-    showStamp
-   };
-switch (templateId) {
-case 'default':
-return <DefaultTemplate {...templateProps} />;
-case 'classic':
-return <ClassicTemplate {...templateProps} />;
-case 'modern':
-return <ModernTemplate {...templateProps} />;
-default:
-return <DefaultTemplate {...templateProps} />;
-}
+    showStamp,
+  };
+  switch (templateId) {
+    case "default":
+      return <DefaultTemplate {...templateProps} />;
+    case "classic":
+      return <ClassicTemplate {...templateProps} />;
+    case "modern":
+      return <ModernTemplate {...templateProps} />;
+    default:
+      return <DefaultTemplate {...templateProps} />;
+  }
 };
-export default TemplateSelector
+export default TemplateSelector;

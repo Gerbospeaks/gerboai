@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Shield, AlertTriangle } from 'lucide-react';
+import React, { useEffect } from "react";
+import { Shield, AlertTriangle } from "lucide-react";
 
 const WebsiteProtection = ({ children }) => {
   useEffect(() => {
@@ -47,8 +47,9 @@ const WebsiteProtection = ({ children }) => {
     const detectDevTools = () => {
       const threshold = 160;
       const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-      const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-      
+      const heightThreshold =
+        window.outerHeight - window.innerHeight > threshold;
+
       if (widthThreshold || heightThreshold) {
         document.body.innerHTML = `
           <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a1a; color: white; font-family: system-ui;">
@@ -69,10 +70,10 @@ const WebsiteProtection = ({ children }) => {
 
     // Disable text selection (optional - can hurt UX)
     const disableSelection = () => {
-      document.body.style.userSelect = 'none';
-      document.body.style.webkitUserSelect = 'none';
-      document.body.style.msUserSelect = 'none';
-      document.body.style.mozUserSelect = 'none';
+      document.body.style.userSelect = "none";
+      document.body.style.webkitUserSelect = "none";
+      document.body.style.msUserSelect = "none";
+      document.body.style.mozUserSelect = "none";
     };
 
     // Disable copy
@@ -94,12 +95,12 @@ const WebsiteProtection = ({ children }) => {
     };
 
     // Add event listeners
-    document.addEventListener('contextmenu', disableRightClick);
-    document.addEventListener('keydown', disableDevTools);
-    document.addEventListener('copy', disableCopy);
-    document.addEventListener('cut', disableCut);
-    document.addEventListener('dragstart', disableDrag);
-    
+    document.addEventListener("contextmenu", disableRightClick);
+    document.addEventListener("keydown", disableDevTools);
+    document.addEventListener("copy", disableCopy);
+    document.addEventListener("cut", disableCut);
+    document.addEventListener("dragstart", disableDrag);
+
     // Check for DevTools periodically
     const devToolsInterval = setInterval(detectDevTools, 1000);
 
@@ -108,15 +109,15 @@ const WebsiteProtection = ({ children }) => {
 
     // Cleanup
     return () => {
-      document.removeEventListener('contextmenu', disableRightClick);
-      document.removeEventListener('keydown', disableDevTools);
-      document.removeEventListener('copy', disableCopy);
-      document.removeEventListener('cut', disableCut);
-      document.removeEventListener('dragstart', disableDrag);
+      document.removeEventListener("contextmenu", disableRightClick);
+      document.removeEventListener("keydown", disableDevTools);
+      document.removeEventListener("copy", disableCopy);
+      document.removeEventListener("cut", disableCut);
+      document.removeEventListener("dragstart", disableDrag);
       clearInterval(devToolsInterval);
-      
+
       // Re-enable text selection
-      document.body.style.userSelect = 'auto';
+      document.body.style.userSelect = "auto";
     };
   }, []);
 
@@ -138,9 +139,10 @@ const ProtectedApp = () => {
                   Important Security Notice
                 </h3>
                 <p className="text-sm text-yellow-700">
-                  These protections are <strong>easily bypassed</strong> by determined users. 
-                  Never rely on client-side protection for actual security. Use server-side 
-                  authentication and authorization instead.
+                  These protections are <strong>easily bypassed</strong> by
+                  determined users. Never rely on client-side protection for
+                  actual security. Use server-side authentication and
+                  authorization instead.
                 </p>
               </div>
             </div>
@@ -156,7 +158,9 @@ const ProtectedApp = () => {
                 <h1 className="text-3xl font-bold text-gray-900">
                   Protected Website Demo
                 </h1>
-                <p className="text-gray-600">Basic client-side protection enabled</p>
+                <p className="text-gray-600">
+                  Basic client-side protection enabled
+                </p>
               </div>
             </div>
 
@@ -193,9 +197,13 @@ const ProtectedApp = () => {
                   ⚠️ Limitations:
                 </h3>
                 <ul className="text-sm text-red-800 space-y-1">
-                  <li>• Users can still access DevTools before the page loads</li>
+                  <li>
+                    • Users can still access DevTools before the page loads
+                  </li>
                   <li>• Browser extensions can bypass these protections</li>
-                  <li>• Users can view the page source from the browser menu</li>
+                  <li>
+                    • Users can view the page source from the browser menu
+                  </li>
                   <li>• JavaScript can be disabled entirely</li>
                   <li>• Network tab still shows all API calls</li>
                   <li>• Code can be viewed in the browser cache</li>
@@ -212,15 +220,24 @@ const ProtectedApp = () => {
             <div className="space-y-3 text-sm text-green-800">
               <div>
                 <strong>1. Server-Side Security:</strong>
-                <p>Always validate and authenticate on the server. Never trust client-side data.</p>
+                <p>
+                  Always validate and authenticate on the server. Never trust
+                  client-side data.
+                </p>
               </div>
               <div>
                 <strong>2. API Keys:</strong>
-                <p>Never expose API keys or secrets in client code. Use environment variables and backend proxies.</p>
+                <p>
+                  Never expose API keys or secrets in client code. Use
+                  environment variables and backend proxies.
+                </p>
               </div>
               <div>
                 <strong>3. Code Obfuscation:</strong>
-                <p>Use tools like Webpack/Terser to minify and obfuscate your production code.</p>
+                <p>
+                  Use tools like Webpack/Terser to minify and obfuscate your
+                  production code.
+                </p>
               </div>
               <div>
                 <strong>4. HTTPS Only:</strong>
@@ -240,8 +257,8 @@ const ProtectedApp = () => {
           {/* Footer Note */}
           <div className="mt-6 text-center text-sm text-gray-600">
             <p>
-              Remember: If something is displayed in a browser, it can be inspected. 
-              Focus on protecting your backend and sensitive data.
+              Remember: If something is displayed in a browser, it can be
+              inspected. Focus on protecting your backend and sensitive data.
             </p>
           </div>
         </div>

@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  FileText, 
-  ShoppingCart, 
-  Check, 
+import React, { useState, useEffect } from "react";
+import {
+  FileText,
+  ShoppingCart,
+  Check,
   Eye,
   Sparkles,
   HardHat,
   Building2,
   Hammer,
   Crown,
-  Home
-} from 'lucide-react';
+  Home,
+} from "lucide-react";
 import {
   getFirestore,
   doc,
@@ -18,116 +18,131 @@ import {
   setDoc,
   updateDoc,
   arrayUnion,
-  serverTimestamp
-} from 'firebase/firestore';
+  serverTimestamp,
+} from "firebase/firestore";
 
 // Template definitions - 5 Construction Industry Specific Templates
 const TEMPLATES = {
   professional: {
-    id: 'professional',
-    name: 'Professional Builder',
-    description: 'Classic construction invoice with organized 3-column layout',
+    id: "professional",
+    name: "Professional Builder",
+    description: "Classic construction invoice with organized 3-column layout",
     price: 0,
     isPremium: false,
-    category: 'free',
+    category: "free",
     icon: HardHat,
-    color: 'orange',
-    image: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=500&fit=crop',
+    color: "orange",
+    image:
+      "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=500&fit=crop",
     features: [
-      'Professional 3-column layout',
-      'Project details section',
-      'Materials and labor breakdown',
-      'Print optimized for A4'
+      "Professional 3-column layout",
+      "Project details section",
+      "Materials and labor breakdown",
+      "Print optimized for A4",
     ],
-    preview: 'Three neat columns showing client info, project details, and billing information with a comprehensive items table.'
+    preview:
+      "Three neat columns showing client info, project details, and billing information with a comprehensive items table.",
   },
   premium: {
-    id: 'premium',
-    name: 'Premium Construction Pro',
-    description: 'Elegant design with strong branding for established contractors',
+    id: "premium",
+    name: "Premium Construction Pro",
+    description:
+      "Elegant design with strong branding for established contractors",
     price: 299,
     isPremium: true,
-    category: 'premium',
+    category: "premium",
     icon: Crown,
-    color: 'slate',
-    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=500&fit=crop',
+    color: "slate",
+    image:
+      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=500&fit=crop",
     features: [
-      'Premium design aesthetic',
-      'Large branding area',
-      'Professional color scheme',
-      'High-quality presentation'
+      "Premium design aesthetic",
+      "Large branding area",
+      "Professional color scheme",
+      "High-quality presentation",
     ],
-    preview: 'Elegant bordered design with professional fonts and slate accents. Perfect for established construction companies and general contractors.'
+    preview:
+      "Elegant bordered design with professional fonts and slate accents. Perfect for established construction companies and general contractors.",
   },
   commercial: {
-    id: 'commercial',
-    name: 'Commercial Builder Pro',
-    description: 'Bold and professional design for commercial construction projects',
+    id: "commercial",
+    name: "Commercial Builder Pro",
+    description:
+      "Bold and professional design for commercial construction projects",
     price: 349,
     isPremium: true,
-    category: 'commercial',
+    category: "commercial",
     icon: Building2,
-    color: 'steel',
-    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=500&fit=crop',
+    color: "steel",
+    image:
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=500&fit=crop",
     features: [
-      'Corporate steel blue design',
-      'Commercial project layout',
-      'Bold typography',
-      'Professional styling'
+      "Corporate steel blue design",
+      "Commercial project layout",
+      "Bold typography",
+      "Professional styling",
     ],
-    preview: 'Dynamic steel blue design with corporate styling. Ideal for commercial buildings and large-scale construction projects.'
+    preview:
+      "Dynamic steel blue design with corporate styling. Ideal for commercial buildings and large-scale construction projects.",
   },
   modern: {
-    id: 'modern',
-    name: 'Modern Contractor',
-    description: 'Clean, contemporary design with professional yellow accents',
+    id: "modern",
+    name: "Modern Contractor",
+    description: "Clean, contemporary design with professional yellow accents",
     price: 249,
     isPremium: true,
-    category: 'modern',
+    category: "modern",
     icon: Hammer,
-    color: 'yellow',
-    image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=400&h=500&fit=crop',
+    color: "yellow",
+    image:
+      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=400&h=500&fit=crop",
     features: [
-      'Modern yellow design',
-      'Spacious layout',
-      'Contemporary typography',
-      'Clean and professional'
+      "Modern yellow design",
+      "Spacious layout",
+      "Contemporary typography",
+      "Clean and professional",
     ],
-    preview: 'Contemporary design with construction yellow accents and generous white space. Perfect for modern contractors and builders.'
+    preview:
+      "Contemporary design with construction yellow accents and generous white space. Perfect for modern contractors and builders.",
   },
   residential: {
-    id: 'residential',
-    name: 'Residential Specialist',
-    description: 'Warm layout perfect for home builders and remodeling contractors',
+    id: "residential",
+    name: "Residential Specialist",
+    description:
+      "Warm layout perfect for home builders and remodeling contractors",
     price: 279,
     isPremium: true,
-    category: 'residential',
+    category: "residential",
     icon: Home,
-    color: 'brown',
-    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=500&fit=crop',
+    color: "brown",
+    image:
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=500&fit=crop",
     features: [
-      'Warm residential theme',
-      'Home building focus',
-      'Remodeling section',
-      'Client-friendly layout'
+      "Warm residential theme",
+      "Home building focus",
+      "Remodeling section",
+      "Client-friendly layout",
     ],
-    preview: 'Warm design with earthy accents. Optimized for residential builders, home remodelers, and renovation specialists.'
-  }
+    preview:
+      "Warm design with earthy accents. Optimized for residential builders, home remodelers, and renovation specialists.",
+  },
 };
 
 // Templates Component
 const Templates = ({ user }) => {
-  const [purchasedTemplates, setPurchasedTemplates] = useState(['professional']);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [purchasedTemplates, setPurchasedTemplates] = useState([
+    "professional",
+  ]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [showPreview, setShowPreview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showPayment, setShowPayment] = useState(null);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [cardDetails, setCardDetails] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardName: ''
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    cardName: "",
   });
 
   useEffect(() => {
@@ -139,21 +154,21 @@ const Templates = ({ user }) => {
 
     try {
       const db = getFirestore();
-      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
+      const docRef = doc(db, "users", user.uid, "settings", "templates");
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setPurchasedTemplates(docSnap.data().purchased || ['professional']);
+        setPurchasedTemplates(docSnap.data().purchased || ["professional"]);
       } else {
         // Initialize with professional template
         await setDoc(docRef, {
-          purchased: ['professional'],
-          active: 'professional',
-          updatedAt: serverTimestamp()
+          purchased: ["professional"],
+          active: "professional",
+          updatedAt: serverTimestamp(),
         });
       }
     } catch (error) {
-      console.error('Error loading templates:', error);
+      console.error("Error loading templates:", error);
     } finally {
       setLoading(false);
     }
@@ -163,37 +178,39 @@ const Templates = ({ user }) => {
     if (!user?.uid) return;
 
     const template = TEMPLATES[templateId];
-    
+
     // For free templates, just add them directly
     if (!template.isPremium) {
       try {
         const db = getFirestore();
-        const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
-        
+        const docRef = doc(db, "users", user.uid, "settings", "templates");
+
         const docSnap = await getDoc(docRef);
-        
+
         if (docSnap.exists()) {
           await updateDoc(docRef, {
             purchased: arrayUnion(templateId),
-            updatedAt: serverTimestamp()
+            updatedAt: serverTimestamp(),
           });
         } else {
           await setDoc(docRef, {
-            purchased: ['professional', templateId],
-            active: 'professional',
-            updatedAt: serverTimestamp()
+            purchased: ["professional", templateId],
+            active: "professional",
+            updatedAt: serverTimestamp(),
           });
         }
 
-        setPurchasedTemplates(prev => [...prev, templateId]);
-        alert('✅ Template added successfully!\n\nYou can now select it from the template dropdown when creating invoices.');
+        setPurchasedTemplates((prev) => [...prev, templateId]);
+        alert(
+          "✅ Template added successfully!\n\nYou can now select it from the template dropdown when creating invoices.",
+        );
       } catch (error) {
-        console.error('Error adding template:', error);
-        alert('❌ Failed to add template. Please try again.');
+        console.error("Error adding template:", error);
+        alert("❌ Failed to add template. Please try again.");
       }
       return;
     }
-    
+
     // For premium templates, show payment modal
     setShowPayment(templateId);
   };
@@ -203,27 +220,32 @@ const Templates = ({ user }) => {
     if (!user?.uid || !showPayment) return;
 
     // Basic validation
-    if (!cardDetails.cardNumber || !cardDetails.expiryDate || !cardDetails.cvv || !cardDetails.cardName) {
-      alert('Please fill in all card details');
+    if (
+      !cardDetails.cardNumber ||
+      !cardDetails.expiryDate ||
+      !cardDetails.cvv ||
+      !cardDetails.cardName
+    ) {
+      alert("Please fill in all card details");
       return;
     }
 
     // Validate card number (simple check)
-    const cleanCardNumber = cardDetails.cardNumber.replace(/\s/g, '');
+    const cleanCardNumber = cardDetails.cardNumber.replace(/\s/g, "");
     if (cleanCardNumber.length !== 16 || !/^\d+$/.test(cleanCardNumber)) {
-      alert('Please enter a valid 16-digit card number');
+      alert("Please enter a valid 16-digit card number");
       return;
     }
 
     // Validate expiry date
     if (!/^\d{2}\/\d{2}$/.test(cardDetails.expiryDate)) {
-      alert('Please enter expiry date in MM/YY format');
+      alert("Please enter expiry date in MM/YY format");
       return;
     }
 
     // Validate CVV
     if (cardDetails.cvv.length !== 3 || !/^\d+$/.test(cardDetails.cvv)) {
-      alert('Please enter a valid 3-digit CVV');
+      alert("Please enter a valid 3-digit CVV");
       return;
     }
 
@@ -231,88 +253,96 @@ const Templates = ({ user }) => {
 
     try {
       // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Process purchase
       const db = getFirestore();
-      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
-      
+      const docRef = doc(db, "users", user.uid, "settings", "templates");
+
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         await updateDoc(docRef, {
           purchased: arrayUnion(showPayment),
-          updatedAt: serverTimestamp()
+          updatedAt: serverTimestamp(),
         });
       } else {
         await setDoc(docRef, {
-          purchased: ['professional', showPayment],
-          active: 'professional',
-          updatedAt: serverTimestamp()
+          purchased: ["professional", showPayment],
+          active: "professional",
+          updatedAt: serverTimestamp(),
         });
       }
 
       // Record payment transaction (optional)
-      const paymentRef = doc(db, 'users', user.uid, 'payments', Date.now().toString());
+      const paymentRef = doc(
+        db,
+        "users",
+        user.uid,
+        "payments",
+        Date.now().toString(),
+      );
       await setDoc(paymentRef, {
         templateId: showPayment,
         templateName: TEMPLATES[showPayment].name,
         amount: TEMPLATES[showPayment].price,
-        currency: 'ZAR',
+        currency: "ZAR",
         timestamp: serverTimestamp(),
-        status: 'completed'
+        status: "completed",
       });
 
-      setPurchasedTemplates(prev => [...prev, showPayment]);
-      
+      setPurchasedTemplates((prev) => [...prev, showPayment]);
+
       // Reset form and close modal
-      setCardDetails({ cardNumber: '', expiryDate: '', cvv: '', cardName: '' });
+      setCardDetails({ cardNumber: "", expiryDate: "", cvv: "", cardName: "" });
       setShowPayment(null);
-      
-      alert('✅ Payment successful!\n\nYour template has been purchased and is now available.');
+
+      alert(
+        "✅ Payment successful!\n\nYour template has been purchased and is now available.",
+      );
     } catch (error) {
-      console.error('Error processing payment:', error);
-      alert('❌ Payment failed. Please try again.');
+      console.error("Error processing payment:", error);
+      alert("❌ Payment failed. Please try again.");
     } finally {
       setPaymentProcessing(false);
     }
   };
 
   const formatCardNumber = (value) => {
-    const cleaned = value.replace(/\s/g, '');
+    const cleaned = value.replace(/\s/g, "");
     const chunks = cleaned.match(/.{1,4}/g);
-    return chunks ? chunks.join(' ') : cleaned;
+    return chunks ? chunks.join(" ") : cleaned;
   };
 
   const formatExpiryDate = (value) => {
-    const cleaned = value.replace(/\D/g, '');
+    const cleaned = value.replace(/\D/g, "");
     if (cleaned.length >= 2) {
-      return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
+      return cleaned.slice(0, 2) + "/" + cleaned.slice(2, 4);
     }
     return cleaned;
   };
 
   const categories = [
-    { id: 'all', name: 'All Templates' },
-    { id: 'free', name: 'Free' },
-    { id: 'premium', name: 'Premium' },
-    { id: 'commercial', name: 'Commercial' },
-    { id: 'modern', name: 'Modern' },
-    { id: 'residential', name: 'Residential' }
+    { id: "all", name: "All Templates" },
+    { id: "free", name: "Free" },
+    { id: "premium", name: "Premium" },
+    { id: "commercial", name: "Commercial" },
+    { id: "modern", name: "Modern" },
+    { id: "residential", name: "Residential" },
   ];
 
-  const filteredTemplates = Object.values(TEMPLATES).filter(template => {
-    if (selectedCategory === 'all') return true;
+  const filteredTemplates = Object.values(TEMPLATES).filter((template) => {
+    if (selectedCategory === "all") return true;
     return template.category === selectedCategory;
   });
 
   const getColorClasses = (color) => {
     const colors = {
-      orange: 'from-orange-500 to-orange-600',
-      slate: 'from-slate-600 to-slate-700',
-      steel: 'from-blue-600 to-slate-600',
-      yellow: 'from-yellow-500 to-amber-600',
-      brown: 'from-amber-700 to-orange-800'
+      orange: "from-orange-500 to-orange-600",
+      slate: "from-slate-600 to-slate-700",
+      steel: "from-blue-600 to-slate-600",
+      yellow: "from-yellow-500 to-amber-600",
+      brown: "from-amber-700 to-orange-800",
     };
     return colors[color] || colors.orange;
   };
@@ -337,7 +367,8 @@ const Templates = ({ user }) => {
           <h1 className="text-3xl font-bold">Invoice Templates</h1>
         </div>
         <p className="text-orange-50 text-lg">
-          Professional invoice designs crafted specifically for contractors, builders, and construction companies
+          Professional invoice designs crafted specifically for contractors,
+          builders, and construction companies
         </p>
         <div className="mt-4 flex items-center gap-6 text-sm">
           <div className="flex items-center gap-2">
@@ -371,8 +402,9 @@ const Templates = ({ user }) => {
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="text-2xl font-bold text-green-600">
-            R{Object.values(TEMPLATES)
-              .filter(t => purchasedTemplates.includes(t.id))
+            R
+            {Object.values(TEMPLATES)
+              .filter((t) => purchasedTemplates.includes(t.id))
               .reduce((sum, t) => sum + t.price, 0)}
           </div>
           <div className="text-sm text-gray-600">Total Value</div>
@@ -381,14 +413,14 @@ const Templates = ({ user }) => {
 
       {/* Category Filter */}
       <div className="flex flex-wrap gap-2">
-        {categories.map(category => (
+        {categories.map((category) => (
           <button
             key={category.id}
             onClick={() => setSelectedCategory(category.id)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               selectedCategory === category.id
-                ? 'bg-gray-600 text-gray-800 shadow-lg scale-105'
-                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                ? "bg-gray-600 text-gray-800 shadow-lg scale-105"
+                : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
             }`}
           >
             {category.name}
@@ -398,10 +430,10 @@ const Templates = ({ user }) => {
 
       {/* Templates Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTemplates.map(template => {
+        {filteredTemplates.map((template) => {
           const isPurchased = purchasedTemplates.includes(template.id);
           const Icon = template.icon;
-          
+
           return (
             <div
               key={template.id}
@@ -414,8 +446,10 @@ const Templates = ({ user }) => {
                   alt={template.name}
                   className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300"
                 />
-                <div className={`absolute inset-0 bg-gradient-to-br ${getColorClasses(template.color)} opacity-40`}></div>
-                
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${getColorClasses(template.color)} opacity-40`}
+                ></div>
+
                 {/* Icon Overlay */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                   <Icon className="w-24 h-24 text-gray-800 opacity-20" />
@@ -446,14 +480,21 @@ const Templates = ({ user }) => {
 
               {/* Template Info */}
               <div className="p-5">
-                <p className="text-sm text-gray-600 mb-4 min-h-[40px]">{template.description}</p>
+                <p className="text-sm text-gray-600 mb-4 min-h-[40px]">
+                  {template.description}
+                </p>
 
                 {/* Features */}
                 <div className="mb-4">
-                  <div className="text-xs font-semibold text-gray-500 mb-2">FEATURES</div>
+                  <div className="text-xs font-semibold text-gray-500 mb-2">
+                    FEATURES
+                  </div>
                   <ul className="space-y-2">
                     {template.features.map((feature, index) => (
-                      <li key={index} className="text-sm text-gray-700 flex items-start gap-2">
+                      <li
+                        key={index}
+                        className="text-sm text-gray-700 flex items-start gap-2"
+                      >
                         <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                         <span>{feature}</span>
                       </li>
@@ -463,8 +504,12 @@ const Templates = ({ user }) => {
 
                 {/* Preview Description */}
                 <div className="mb-4 p-3 bg-gray-800 rounded-lg">
-                  <div className="text-xs font-semibold text-gray-500 mb-1">PREVIEW</div>
-                  <p className="text-xs text-gray-600 leading-relaxed">{template.preview}</p>
+                  <div className="text-xs font-semibold text-gray-500 mb-1">
+                    PREVIEW
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    {template.preview}
+                  </p>
                 </div>
 
                 {/* Price and Actions */}
@@ -534,9 +579,13 @@ const Templates = ({ user }) => {
           How to use your templates
         </h3>
         <ol className="text-sm text-amber-800 space-y-2 list-decimal list-inside">
-          <li>Purchase a template that matches your construction business style</li>
+          <li>
+            Purchase a template that matches your construction business style
+          </li>
           <li>Go to "Create Invoice" from the sidebar menu</li>
-          <li>Look for the template selector dropdown at the top of the page</li>
+          <li>
+            Look for the template selector dropdown at the top of the page
+          </li>
           <li>Select your purchased template from the dropdown</li>
           <li>Your invoice will automatically use the selected design</li>
         </ol>
@@ -582,7 +631,9 @@ const Templates = ({ user }) => {
           <div className="bg-white rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
             <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100">
               <div className="flex items-center gap-3">
-                {React.createElement(TEMPLATES[showPreview].icon, { className: "w-6 h-6 text-orange-600" })}
+                {React.createElement(TEMPLATES[showPreview].icon, {
+                  className: "w-6 h-6 text-orange-600",
+                })}
                 <h2 className="text-2xl font-bold text-gray-900">
                   {TEMPLATES[showPreview].name}
                 </h2>
@@ -597,9 +648,15 @@ const Templates = ({ user }) => {
             <div className="overflow-auto p-8 bg-gray-800">
               <div className="bg-white rounded-lg shadow-lg p-8 max-w-3xl mx-auto">
                 <div className="text-center mb-6">
-                  {React.createElement(TEMPLATES[showPreview].icon, { className: "w-16 h-16 text-orange-600 mx-auto mb-4" })}
-                  <h3 className="text-2xl font-bold mb-2">{TEMPLATES[showPreview].name}</h3>
-                  <p className="text-gray-600 mb-4">{TEMPLATES[showPreview].description}</p>
+                  {React.createElement(TEMPLATES[showPreview].icon, {
+                    className: "w-16 h-16 text-orange-600 mx-auto mb-4",
+                  })}
+                  <h3 className="text-2xl font-bold mb-2">
+                    {TEMPLATES[showPreview].name}
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    {TEMPLATES[showPreview].description}
+                  </p>
                   <img
                     src={TEMPLATES[showPreview].image}
                     alt={TEMPLATES[showPreview].name}
@@ -610,7 +667,10 @@ const Templates = ({ user }) => {
                   <h4 className="font-semibold mb-3">Template Features:</h4>
                   <ul className="grid grid-cols-2 gap-3">
                     {TEMPLATES[showPreview].features.map((feature, index) => (
-                      <li key={index} className="flex items-center gap-2 text-sm">
+                      <li
+                        key={index}
+                        className="flex items-center gap-2 text-sm"
+                      >
                         <Check className="w-4 h-4 text-green-500" />
                         {feature}
                       </li>
@@ -619,7 +679,8 @@ const Templates = ({ user }) => {
                 </div>
                 <div className="mt-6 p-4 bg-amber-50 rounded-lg">
                   <p className="text-sm text-amber-900">
-                    <strong>Design Preview:</strong> {TEMPLATES[showPreview].preview}
+                    <strong>Design Preview:</strong>{" "}
+                    {TEMPLATES[showPreview].preview}
                   </p>
                 </div>
                 <div className="mt-4 flex justify-center">
@@ -666,7 +727,12 @@ const Templates = ({ user }) => {
                 <button
                   onClick={() => {
                     setShowPayment(null);
-                    setCardDetails({ cardNumber: '', expiryDate: '', cvv: '', cardName: '' });
+                    setCardDetails({
+                      cardNumber: "",
+                      expiryDate: "",
+                      cvv: "",
+                      cardName: "",
+                    });
                   }}
                   className="text-gray-800 hover:text-gray-200 text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors"
                   disabled={paymentProcessing}
@@ -675,8 +741,12 @@ const Templates = ({ user }) => {
                 </button>
               </div>
               <div className="flex items-center gap-2 text-orange-50">
-                {React.createElement(TEMPLATES[showPayment].icon, { className: "w-5 h-5" })}
-                <span className="text-sm font-medium">{TEMPLATES[showPayment].name}</span>
+                {React.createElement(TEMPLATES[showPayment].icon, {
+                  className: "w-5 h-5",
+                })}
+                <span className="text-sm font-medium">
+                  {TEMPLATES[showPayment].name}
+                </span>
               </div>
             </div>
 
@@ -687,7 +757,9 @@ const Templates = ({ user }) => {
                 <div className="text-4xl font-bold text-orange-600">
                   R{TEMPLATES[showPayment].price}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">One-time payment • Lifetime access</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  One-time payment • Lifetime access
+                </div>
               </div>
 
               {/* Card Name */}
@@ -698,7 +770,12 @@ const Templates = ({ user }) => {
                 <input
                   type="text"
                   value={cardDetails.cardName}
-                  onChange={(e) => setCardDetails(prev => ({ ...prev, cardName: e.target.value }))}
+                  onChange={(e) =>
+                    setCardDetails((prev) => ({
+                      ...prev,
+                      cardName: e.target.value,
+                    }))
+                  }
                   placeholder="John Smith"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   disabled={paymentProcessing}
@@ -715,9 +792,12 @@ const Templates = ({ user }) => {
                   type="text"
                   value={cardDetails.cardNumber}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/\s/g, '');
+                    const value = e.target.value.replace(/\s/g, "");
                     if (value.length <= 16 && /^\d*$/.test(value)) {
-                      setCardDetails(prev => ({ ...prev, cardNumber: formatCardNumber(value) }));
+                      setCardDetails((prev) => ({
+                        ...prev,
+                        cardNumber: formatCardNumber(value),
+                      }));
                     }
                   }}
                   placeholder="1234 5678 9012 3456"
@@ -737,9 +817,12 @@ const Templates = ({ user }) => {
                     type="text"
                     value={cardDetails.expiryDate}
                     onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '');
+                      const value = e.target.value.replace(/\D/g, "");
                       if (value.length <= 4) {
-                        setCardDetails(prev => ({ ...prev, expiryDate: formatExpiryDate(value) }));
+                        setCardDetails((prev) => ({
+                          ...prev,
+                          expiryDate: formatExpiryDate(value),
+                        }));
                       }
                     }}
                     placeholder="MM/YY"
@@ -756,9 +839,9 @@ const Templates = ({ user }) => {
                     type="text"
                     value={cardDetails.cvv}
                     onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '');
+                      const value = e.target.value.replace(/\D/g, "");
                       if (value.length <= 3) {
-                        setCardDetails(prev => ({ ...prev, cvv: value }));
+                        setCardDetails((prev) => ({ ...prev, cvv: value }));
                       }
                     }}
                     placeholder="123"
@@ -774,7 +857,9 @@ const Templates = ({ user }) => {
                 <div className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <strong>Secure Payment:</strong> Your payment information is encrypted and secure. We never store your complete card details.
+                    <strong>Secure Payment:</strong> Your payment information is
+                    encrypted and secure. We never store your complete card
+                    details.
                   </div>
                 </div>
               </div>
@@ -799,7 +884,8 @@ const Templates = ({ user }) => {
               </button>
 
               <p className="text-xs text-center text-gray-500">
-                By completing this purchase, you agree to our terms and conditions
+                By completing this purchase, you agree to our terms and
+                conditions
               </p>
             </form>
           </div>

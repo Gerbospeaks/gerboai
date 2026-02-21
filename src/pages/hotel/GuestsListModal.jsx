@@ -1,39 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
-import { 
-  getFirestore, 
-  collection, 
-  query, 
-  orderBy, 
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
   getDocs,
   deleteDoc,
-  doc 
+  doc,
 } from "firebase/firestore";
-import { 
-  X, 
-  Search, 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
+import {
+  X,
+  Search,
+  User,
+  Mail,
+  Phone,
+  MapPin,
   Calendar,
-  Edit, 
+  Edit,
   Trash2,
   UserPlus,
   Filter,
-  Download
+  Download,
 } from "lucide-react";
 
-const GuestsListModal = ({ 
-  showModal, 
-  setShowModal, 
-  guests, 
-  onLoadGuest, 
-  onEditGuest, 
-  onAddNewGuest 
+const GuestsListModal = ({
+  showModal,
+  setShowModal,
+  guests,
+  onLoadGuest,
+  onEditGuest,
+  onAddNewGuest,
 }) => {
-  const {user, authUser} = useAuth();
+  const { user, authUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredGuests, setFilteredGuests] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -41,7 +41,7 @@ const GuestsListModal = ({
   useEffect(() => {
     if (guests) {
       // Filter guests based on search term
-      const filtered = guests.filter(guest => {
+      const filtered = guests.filter((guest) => {
         const searchLower = searchTerm.toLowerCase();
         return (
           guest.name?.toLowerCase().includes(searchLower) ||
@@ -59,7 +59,7 @@ const GuestsListModal = ({
     if (!user?.uid) return;
 
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete guest "${guestName}"? This action cannot be undone.`
+      `Are you sure you want to delete guest "${guestName}"? This action cannot be undone.`,
     );
 
     if (!confirmDelete) return;
@@ -69,9 +69,9 @@ const GuestsListModal = ({
       const db = getFirestore();
       await deleteDoc(doc(db, "users", user.uid, "guests", guestId));
       alert("Guest deleted successfully!");
-      
+
       // Refresh the guest list by filtering out the deleted guest
-      setFilteredGuests(prev => prev.filter(g => g.id !== guestId));
+      setFilteredGuests((prev) => prev.filter((g) => g.id !== guestId));
     } catch (error) {
       console.error("Error deleting guest:", error);
       alert("Failed to delete guest. Please try again.");
@@ -98,8 +98,18 @@ const GuestsListModal = ({
       return;
     }
 
-    const headers = ["Name", "Guest ID", "Email", "Phone", "Address", "Date of Birth", "Nationality", "ID Type", "ID Number"];
-    const rows = filteredGuests.map(guest => [
+    const headers = [
+      "Name",
+      "Guest ID",
+      "Email",
+      "Phone",
+      "Address",
+      "Date of Birth",
+      "Nationality",
+      "ID Type",
+      "ID Number",
+    ];
+    const rows = filteredGuests.map((guest) => [
       guest.name || "",
       guest.guestId || "",
       guest.email || "",
@@ -108,19 +118,19 @@ const GuestsListModal = ({
       guest.dateOfBirth || "",
       guest.nationality || "",
       guest.idType || "",
-      guest.idNumber || ""
+      guest.idNumber || "",
     ]);
 
     const csvContent = [
       headers.join(","),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `guests_export_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `guests_export_${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -186,7 +196,8 @@ const GuestsListModal = ({
             </button>
           </div>
           <div className="text-sm text-gray-600">
-            {filteredGuests.length} {filteredGuests.length === 1 ? "guest" : "guests"} found
+            {filteredGuests.length}{" "}
+            {filteredGuests.length === 1 ? "guest" : "guests"} found
           </div>
         </div>
 
@@ -205,8 +216,8 @@ const GuestsListModal = ({
                 {searchTerm ? "No guests found" : "No guests yet"}
               </h3>
               <p className="text-gray-600 mb-4">
-                {searchTerm 
-                  ? "Try adjusting your search terms" 
+                {searchTerm
+                  ? "Try adjusting your search terms"
                   : "Add your first guest to get started"}
               </p>
               {!searchTerm && (
@@ -226,7 +237,7 @@ const GuestsListModal = ({
                   key={guest.id}
                   className="border border-gray-200 rounded-lg hover:shadow-md transition-shadow bg-white overflow-hidden"
                 >
-                  <div 
+                  <div
                     onClick={() => handleLoadGuest(guest)}
                     className="p-5 cursor-pointer hover:bg-gray-800 transition-colors"
                   >
@@ -271,14 +282,19 @@ const GuestsListModal = ({
                           <span>{guest.nationality}</span>
                           {guest.dateOfBirth && (
                             <span className="text-gray-400">
-                              • Born {new Date(guest.dateOfBirth).toLocaleDateString("en-ZA")}
+                              • Born{" "}
+                              {new Date(guest.dateOfBirth).toLocaleDateString(
+                                "en-ZA",
+                              )}
                             </span>
                           )}
                         </div>
                       )}
                       {guest.idType && guest.idNumber && (
                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <span className="text-sm font-medium">{guest.idType}:</span>
+                          <span className="text-sm font-medium">
+                            {guest.idType}:
+                          </span>
                           <span>{guest.idNumber}</span>
                         </div>
                       )}
@@ -316,7 +332,8 @@ const GuestsListModal = ({
 
         {/* Footer */}
         <div className="p-4 border-t bg-gray-800 text-center text-sm text-gray-600">
-          Tip: Click on any guest card to load their details into the invoice form
+          Tip: Click on any guest card to load their details into the invoice
+          form
         </div>
       </div>
     </div>

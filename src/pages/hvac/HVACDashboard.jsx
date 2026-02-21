@@ -10,7 +10,7 @@ import HvacAIExtractor from "./HvacAIExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import HVACMultiStepForm from "./HVACMultiStepForm";
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
   collection,
@@ -130,7 +130,8 @@ const HvacDashboard = () => {
   const [serviceId, setServiceId] = useState(null);
   const [quoteId, setQuoteId] = useState(null);
   const [savedServices, setSavedServices] = useState([]);
-  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
+    useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [showServicesList, setShowServicesList] = useState(false);
   const [showQuotesList, setShowQuotesList] = useState(false);
@@ -337,22 +338,22 @@ const HvacDashboard = () => {
   };
   const handleTestEmail = async () => {
     if (!businessInfo.emailPassword) {
-      alert('⚠️ Please enter your email app password first.');
+      alert("⚠️ Please enter your email app password first.");
       return;
     }
-  
+
     const userEmail = user?.email || authUser?.email;
-    
+
     if (!userEmail) {
-      alert('⚠️ Could not find your email address. Please log in again.');
+      alert("⚠️ Could not find your email address. Please log in again.");
       return;
     }
-  
+
     try {
       const testEmailData = {
         userId: user.uid,
         to: userEmail, // Send test to self
-        subject: '✅ Test Email - Email Configuration Successful',
+        subject: "✅ Test Email - Email Configuration Successful",
         message: `
   Hello,
   
@@ -364,7 +365,7 @@ const HvacDashboard = () => {
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Business: ${businessInfo.businessName}
   Email: ${userEmail}
-  Provider: ${businessInfo.emailProvider || 'Gmail'}
+  Provider: ${businessInfo.emailProvider || "Gmail"}
   Date: ${new Date().toLocaleString()}
   
   You can now send quotes and invoices to your clients from this email address.
@@ -372,24 +373,27 @@ const HvacDashboard = () => {
   Best regards,
   Your Construction Quote System
         `.trim(),
-        documentType: 'test',
-        documentNumber: 'TEST-001',
+        documentType: "test",
+        documentNumber: "TEST-001",
       };
-  
-      const sendEmail = httpsCallable(functions, 'sendQuoteEmail');
+
+      const sendEmail = httpsCallable(functions, "sendQuoteEmail");
       await sendEmail(testEmailData);
-      
-      alert(`✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`);
+
+      alert(
+        `✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`,
+      );
     } catch (error) {
-      console.error('Test email error:', error);
-      
-      let errorMsg = '❌ Test email failed!\n\n';
-      if (error.message.includes('Invalid login')) {
-        errorMsg += 'Your app password is incorrect. Please check and try again.\n\nMake sure you\'re using an APP PASSWORD, not your regular password.';
+      console.error("Test email error:", error);
+
+      let errorMsg = "❌ Test email failed!\n\n";
+      if (error.message.includes("Invalid login")) {
+        errorMsg +=
+          "Your app password is incorrect. Please check and try again.\n\nMake sure you're using an APP PASSWORD, not your regular password.";
       } else {
         errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
       }
-      
+
       alert(errorMsg);
     }
   };
@@ -855,7 +859,7 @@ const HvacDashboard = () => {
 
     loadSavedQuotes();
   };
-const handleProcessPayment = async () => {
+  const handleProcessPayment = async () => {
     if (!serviceId || !user?.uid) {
       alert("Please save the invoice before processing payment");
       return;
@@ -1090,13 +1094,13 @@ const handleProcessPayment = async () => {
           {/* Icon Navigation */}
           <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
             <button
-  onClick={() => setActiveView("home")}  // ADD THIS
-  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-  title="Home"
->
-  <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-  <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-</button>
+              onClick={() => setActiveView("home")} // ADD THIS
+              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+              title="Home"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+            </button>
 
             <button
               onClick={() => setShowSettings(true)}
@@ -1167,7 +1171,7 @@ const handleProcessPayment = async () => {
         </div>
 
         {/* User Icon at Bottom */}
-         <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
+        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
           <div className="relative group">
             <div className="absolute inset-0 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
             <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
@@ -1204,14 +1208,20 @@ const handleProcessPayment = async () => {
 
           <nav className="space-y-1">
             <div
-  onClick={() => {setActiveView("home"); setSidebarOpen(false);}}
-  className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
->
-  <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-  <span className="text-xs md:text-sm font-semibold">Home</span>
-</div>
+              onClick={() => {
+                setActiveView("home");
+                setSidebarOpen(false);
+              }}
+              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
+            >
+              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-xs md:text-sm font-semibold">Home</span>
+            </div>
             <div
-              onClick={() => {setShowSettings(true); setSidebarOpen(false);}}
+              onClick={() => {
+                setShowSettings(true);
+                setSidebarOpen(false);
+              }}
               className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
             >
               <Settings className="w-5 h-5" />
@@ -1220,7 +1230,10 @@ const handleProcessPayment = async () => {
 
             <div className="pt-4 mt-4 border-t border-slate-700/50">
               <div
-                onClick={() => {setActiveView("financial-overview"); setSidebarOpen(false);}}
+                onClick={() => {
+                  setActiveView("financial-overview");
+                  setSidebarOpen(false);
+                }}
                 className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200"
               >
                 <TrendingUp className="w-5 h-5" />
@@ -1252,7 +1265,8 @@ const handleProcessPayment = async () => {
                 >
                   <div
                     onClick={() => {
-                      handleNewQuote(); setSidebarOpen(false);
+                      handleNewQuote();
+                      setSidebarOpen(false);
                       setActiveView("invoice");
                     }}
                     className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
@@ -1260,7 +1274,10 @@ const handleProcessPayment = async () => {
                     Create Quote
                   </div>
                   <div
-                    onClick={() => {setShowQuotesList(!showQuotesList); setSidebarOpen(false);}}
+                    onClick={() => {
+                      setShowQuotesList(!showQuotesList);
+                      setSidebarOpen(false);
+                    }}
                     className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
                   >
                     <div className="flex items-center justify-between">
@@ -1300,7 +1317,8 @@ const handleProcessPayment = async () => {
                 >
                   <div
                     onClick={() => {
-                      handleNewService(); setSidebarOpen(false);
+                      handleNewService();
+                      setSidebarOpen(false);
                       setActiveView("invoice");
                     }}
                     className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
@@ -1308,7 +1326,10 @@ const handleProcessPayment = async () => {
                     Create Invoice
                   </div>
                   <div
-                    onClick={() => {setShowServicesList(!showServicesList); setSidebarOpen(false);}}
+                    onClick={() => {
+                      setShowServicesList(!showServicesList);
+                      setSidebarOpen(false);
+                    }}
                     className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
                   >
                     <div className="flex items-center justify-between">
@@ -1404,35 +1425,34 @@ const handleProcessPayment = async () => {
           </nav>
         </div>
 
-         <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
-                  <div className="flex items-center space-x-2 md:space-x-3">
-                    <div className="relative group flex-shrink-0">
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-                     <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
-          <img
-            src={businessInfo.logoUrl}
-            alt="Business Logo"
-            className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-          />
+        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
+          <div className="flex items-center space-x-2 md:space-x-3">
+            <div className="relative group flex-shrink-0">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
+              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
+                <img
+                  src={businessInfo.logoUrl}
+                  alt="Business Logo"
+                  className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
+                />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
+                {user?.name || "User"}
+              </div>
+              <div className="text-xs text-slate-400 truncate">
+                {user?.email || "email@example.com"}
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
+            >
+              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+            </button>
+          </div>
         </div>
-        
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
-                        {user?.name || "User"}
-                      </div>
-                      <div className="text-xs text-slate-400 truncate">
-                        {user?.email || "email@example.com"}
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleLogout}
-                      className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-                    >
-                      <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                    </button>
-                  </div>
-                </div>
       </div>
       <div
         className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
@@ -1501,54 +1521,66 @@ const handleProcessPayment = async () => {
                     <Printer className="w-4 h-4" />
                     Print
                   </button>
-                   <button
-                                    onClick={handleLogout}
-                                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
-                                  >
-                                    <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                                    Logout
-                                  </button>
-                                </div>
-                  
-                                {/* Mobile logout */}
-                                <button
-                                  onClick={handleLogout}
-                                  className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
-                                >
-                                  <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-                                </button>
-              </div>
-            </div>
-            </div>
-            <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
-              <div className="flex gap-2 min-w-max pb-1 pr-3">
-                {documentType === "quote" && quoteId && (
-                  <button onClick={handleConvertToInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                    <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
-                    <span>To Invoice</span>
+                  <button
+                    onClick={handleLogout}
+                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
+                  >
+                    <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                    Logout
                   </button>
-                )}
-                <button onClick={handleSaveQuote} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                  <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                  Save
-                </button>
-                <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                  <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  <span>Send</span>
-                </button>
-                <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                  <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                  <span>PDF</span>
-                </button>
-                <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95">
-                  <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                  <span>Print</span>
+                </div>
+
+                {/* Mobile logout */}
+                <button
+                  onClick={handleLogout}
+                  className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
+                >
+                  <LogOut className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
               </div>
             </div>
-            
-                      {/* ── Scrollable Main Content ──────────────────────────────── */}
-                     <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
+          </div>
+          <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
+            <div className="flex gap-2 min-w-max pb-1 pr-3">
+              {documentType === "quote" && quoteId && (
+                <button
+                  onClick={handleConvertToInvoice}
+                  className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                >
+                  <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
+                  <span>To Invoice</span>
+                </button>
+              )}
+              <button
+                onClick={handleSaveQuote}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+              >
+                <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                Save
+              </button>
+              <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                <span>Send</span>
+              </button>
+              <button
+                onClick={handlePrint}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+              >
+                <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                <span>PDF</span>
+              </button>
+              <button
+                onClick={handlePrint}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95"
+              >
+                <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                <span>Print</span>
+              </button>
+            </div>
+          </div>
+
+          {/* ── Scrollable Main Content ──────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {showSettings && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
                 <div className="bg-white rounded-xl md:rounded-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
@@ -1889,7 +1921,6 @@ const handleProcessPayment = async () => {
                                 </p>
                               </div>
 
-
                               <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                                 <label className="block text-sm font-bold text-slate-700 mb-3">
                                   Stamp Color
@@ -2173,7 +2204,7 @@ const handleProcessPayment = async () => {
               </div>
             )}
 
-             {activeView === "templates" && <Templates user={user} />}
+            {activeView === "templates" && <Templates user={user} />}
             {activeView === "home" && <HomeView user={user} />}
             {activeView === "financial-overview" && (
               <FinancialOverview user={user} />
@@ -2243,7 +2274,7 @@ const handleProcessPayment = async () => {
                                 <DollarSign className="w-5 h-5 text-orange-600" />
                               </div>
                             </div>
-                            <div className="text-2xl font-bold text-orange-900">
+                            <div className="text-base sm:text-lg md:text-2xl font-bold text-orange-900">
                               R{total.toFixed(2)}
                             </div>
                           </div>

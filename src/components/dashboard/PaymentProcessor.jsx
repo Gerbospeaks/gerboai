@@ -41,7 +41,7 @@ const PaymentProcessor = ({
   const [paymentReference, setPaymentReference] = useState("");
   const [paymentNotes, setPaymentNotes] = useState("");
   const [paymentDate, setPaymentDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -71,7 +71,7 @@ const PaymentProcessor = ({
         user.uid,
         collectionName,
         invoice.id,
-        "payments"
+        "payments",
       );
       const q = query(paymentsRef, orderBy("paymentDate", "desc"));
       const snapshot = await getDocs(q);
@@ -98,7 +98,7 @@ const PaymentProcessor = ({
     if (amount > balanceDue) {
       if (
         !window.confirm(
-          `Payment amount (R${amount.toFixed(2)}) exceeds balance due (R${balanceDue.toFixed(2)}). Continue with overpayment?`
+          `Payment amount (R${amount.toFixed(2)}) exceeds balance due (R${balanceDue.toFixed(2)}). Continue with overpayment?`,
         )
       ) {
         return;
@@ -127,7 +127,7 @@ const PaymentProcessor = ({
         user.uid,
         collectionName,
         invoice.id,
-        "payments"
+        "payments",
       );
       const paymentDoc = await addDoc(paymentsRef, paymentData);
 
@@ -183,7 +183,7 @@ const PaymentProcessor = ({
   const handleDeletePayment = async (paymentId, amount) => {
     if (
       !window.confirm(
-        `Delete payment of R${amount.toFixed(2)}? This cannot be undone.`
+        `Delete payment of R${amount.toFixed(2)}? This cannot be undone.`,
       )
     ) {
       return;
@@ -202,12 +202,12 @@ const PaymentProcessor = ({
           collectionName,
           invoice.id,
           "payments",
-          paymentId
+          paymentId,
         ),
         {
           deleted: true,
           deletedAt: serverTimestamp(),
-        }
+        },
       );
 
       // Update invoice totals
@@ -310,9 +310,7 @@ const PaymentProcessor = ({
                     </span>
                     <span
                       className={`text-2xl font-bold ${
-                        balanceDue <= 0
-                          ? "text-emerald-600"
-                          : "text-rose-600"
+                        balanceDue <= 0 ? "text-emerald-600" : "text-rose-600"
                       }`}
                     >
                       R{balanceDue.toFixed(2)}
@@ -389,7 +387,8 @@ const PaymentProcessor = ({
                     {payments.map((payment) => {
                       const Icon =
                         paymentMethodIcons[payment.method] || CreditCard;
-                      const color = paymentMethodColors[payment.method] || "blue";
+                      const color =
+                        paymentMethodColors[payment.method] || "blue";
 
                       return (
                         <div
@@ -409,7 +408,7 @@ const PaymentProcessor = ({
                               <div className="text-xs text-slate-600">
                                 {payment.method.toUpperCase()} •{" "}
                                 {new Date(
-                                  payment.paymentDate
+                                  payment.paymentDate,
                                 ).toLocaleDateString()}
                               </div>
                               {payment.reference && (
@@ -634,7 +633,6 @@ const PaymentProcessor = ({
           </div>
         </div>
       </div>
-      
     </div>
   );
 };

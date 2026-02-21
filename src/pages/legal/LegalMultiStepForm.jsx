@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { Users, Briefcase, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Users,
+  Briefcase,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 const LegalMultiStepForm = ({
   // Client Info Props
@@ -174,7 +180,9 @@ const LegalMultiStepForm = ({
               />
             </div>
             <div className="col-span-1 sm:col-span-2">
-              <div className="text-sm text-gray-500 mb-1">Matter Description</div>
+              <div className="text-sm text-gray-500 mb-1">
+                Matter Description
+              </div>
               <textarea
                 value={matterDescription}
                 onChange={(e) => setMatterDescription(e.target.value)}
@@ -191,11 +199,15 @@ const LegalMultiStepForm = ({
       {currentStep === 3 && (
         <div className="space-y-4">
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h2 className="text-lg font-semibold mb-4">Add Time Entry/Expense</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              Add Time Entry/Expense
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
               <select
                 value={newItem.type}
-                onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, type: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="Legal Services">Legal Services</option>
@@ -215,14 +227,18 @@ const LegalMultiStepForm = ({
                 type="number"
                 placeholder="Rate/Hour"
                 value={newItem.rate}
-                onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, rate: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <input
                 type="number"
                 placeholder="Hours"
                 value={newItem.hours}
-                onChange={(e) => setNewItem({ ...newItem, hours: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, hours: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
@@ -274,7 +290,7 @@ const LegalMultiStepForm = ({
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous
+          <span className="hidden sm:inline">Previous</span>
         </button>
 
         <div className="text-sm text-gray-600">
@@ -290,7 +306,7 @@ const LegalMultiStepForm = ({
               : "bg-blue-600 text-white hover:bg-blue-700"
           }`}
         >
-          Next
+          <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

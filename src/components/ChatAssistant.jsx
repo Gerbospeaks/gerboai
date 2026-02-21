@@ -1,17 +1,21 @@
-import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { useState, useRef, useEffect } from "react";
+import { MessageCircle, X, Send } from "lucide-react";
 
 function ChatAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hi! I\'m here to answer questions about SolidFlo. What would you like to know?' }
+    {
+      role: "assistant",
+      content:
+        "Hi! I'm here to answer questions about SolidFlo. What would you like to know?",
+    },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -21,41 +25,47 @@ function ChatAssistant() {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    const userMessage = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
     setIsLoading(true);
 
     try {
       // Call your backend API instead of OpenAI directly
-      const response = await fetch('https://r2-upload-worker.v8-auto.workers.dev/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        "https://r2-upload-worker.v8-auto.workers.dev/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: [...messages, userMessage],
+          }),
         },
-        body: JSON.stringify({
-          messages: [...messages, userMessage]
-        })
-      });
+      );
 
       const data = await response.json();
-      
+
       if (data.error) {
         throw new Error(data.error);
       }
 
       const assistantMessage = {
-        role: 'assistant',
-        content: data.message
+        role: "assistant",
+        content: data.message,
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Error:', error);
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.'
-      }]);
+      console.error("Error:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Sorry, I encountered an error. Please try again.",
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +86,10 @@ function ChatAssistant() {
 
       {/* Chat Widget */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 bg-white rounded-2xl shadow-2xl flex flex-col z-50" style={{ height: '600px' }}>
+        <div
+          className="fixed bottom-6 right-6 w-96 bg-white rounded-2xl shadow-2xl flex flex-col z-50"
+          style={{ height: "600px" }}
+        >
           {/* Header */}
           <div className="bg-orange-500 text-white p-4 rounded-t-2xl flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -85,7 +98,9 @@ function ChatAssistant() {
               </div>
               <div>
                 <h3 className="font-semibold">SolidFlo Assistant</h3>
-                <p className="text-xs opacity-90">Typically replies instantly</p>
+                <p className="text-xs opacity-90">
+                  Typically replies instantly
+                </p>
               </div>
             </div>
             <button
@@ -102,13 +117,13 @@ function ChatAssistant() {
             {messages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                    msg.role === 'user'
-                      ? 'bg-orange-500 text-white rounded-br-none'
-                      : 'bg-white text-gray-800 shadow-sm rounded-bl-none'
+                    msg.role === "user"
+                      ? "bg-orange-500 text-white rounded-br-none"
+                      : "bg-white text-gray-800 shadow-sm rounded-bl-none"
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
@@ -120,8 +135,14 @@ function ChatAssistant() {
                 <div className="bg-white rounded-2xl px-4 py-3 shadow-sm rounded-bl-none">
                   <div className="flex gap-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -136,7 +157,9 @@ function ChatAssistant() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                onKeyPress={(e) =>
+                  e.key === "Enter" && !e.shiftKey && sendMessage()
+                }
                 placeholder="Type your question..."
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                 disabled={isLoading}

@@ -86,8 +86,18 @@ const AccountingMultiStepForm = ({
                 `}
               >
                 {done ? (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 ) : (
                   step
@@ -139,24 +149,54 @@ const AccountingMultiStepForm = ({
       <AccentSection color="bg-blue-600" title="INVOICE TO">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <Field label="Customer Name" required>
-            <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className={INPUT} placeholder="Enter customer name" />
+            <input
+              type="text"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              className={INPUT}
+              placeholder="Enter customer name"
+            />
           </Field>
 
           <Field label="Customer ID">
-            <input type="text" value={customerId} onChange={(e) => setCustomerId(e.target.value)} className={INPUT} placeholder="e.g. CUST-2026-1234" />
+            <input
+              type="text"
+              value={customerId}
+              onChange={(e) => setCustomerId(e.target.value)}
+              className={INPUT}
+              placeholder="e.g. CUST-2026-1234"
+            />
           </Field>
 
           <Field label="Email" required>
-            <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className={INPUT} placeholder="email@example.com" />
+            <input
+              type="email"
+              value={customerEmail}
+              onChange={(e) => setCustomerEmail(e.target.value)}
+              className={INPUT}
+              placeholder="email@example.com"
+            />
           </Field>
 
           <Field label="Phone" required>
-            <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className={INPUT} placeholder="082 123 4567" />
+            <input
+              type="tel"
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+              className={INPUT}
+              placeholder="082 123 4567"
+            />
           </Field>
 
           <div className="col-span-1 sm:col-span-2">
             <Field label="Address" required>
-              <input type="text" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} className={INPUT} placeholder="Street address, City, Postal Code" />
+              <input
+                type="text"
+                value={customerAddress}
+                onChange={(e) => setCustomerAddress(e.target.value)}
+                className={INPUT}
+                placeholder="Street address, City, Postal Code"
+              />
             </Field>
           </div>
         </div>
@@ -177,22 +217,44 @@ const AccountingMultiStepForm = ({
           </div>
           {documentType === "quote" ? "Quote" : "Invoice"} Details
         </h2>
-        <p className="text-slate-500 mt-2 text-sm">Set dates and payment terms</p>
+        <p className="text-slate-500 mt-2 text-sm">
+          Set dates and payment terms
+        </p>
       </div>
 
       <AccentSection color="bg-emerald-600" title="DATES & TERMS">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <Field label={documentType === "quote" ? "Quote Date" : "Invoice Date"} required>
-            <input type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} className={INPUT} />
+          <Field
+            label={documentType === "quote" ? "Quote Date" : "Invoice Date"}
+            required
+          >
+            <input
+              type="date"
+              value={invoiceDate}
+              onChange={(e) => setInvoiceDate(e.target.value)}
+              className={INPUT}
+            />
           </Field>
 
-          <Field label={documentType === "quote" ? "Valid Until" : "Due Date"} required>
-            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={INPUT} />
+          <Field
+            label={documentType === "quote" ? "Valid Until" : "Due Date"}
+            required
+          >
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className={INPUT}
+            />
           </Field>
 
           <div className="col-span-1 sm:col-span-2">
             <Field label="Payment Terms" required>
-              <select value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} className={INPUT}>
+              <select
+                value={paymentTerms}
+                onChange={(e) => setPaymentTerms(e.target.value)}
+                className={INPUT}
+              >
                 <option value="Due on Receipt">Due on Receipt</option>
                 <option value="Net 15">Net 15</option>
                 <option value="Net 30">Net 30</option>
@@ -205,10 +267,17 @@ const AccountingMultiStepForm = ({
 
         {/* info card */}
         <div className="mt-5 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-xs text-blue-700 font-semibold mb-1">💡 Payment Terms Guide</p>
+          <p className="text-xs text-blue-700 font-semibold mb-1">
+            💡 Payment Terms Guide
+          </p>
           <ul className="text-xs text-blue-600 list-disc ml-5 space-y-0.5">
-            <li><strong>Due on Receipt</strong> – Payment expected immediately</li>
-            <li><strong>Net 15 / 30 / 60 / 90</strong> – Payment due within the specified number of days</li>
+            <li>
+              <strong>Due on Receipt</strong> – Payment expected immediately
+            </li>
+            <li>
+              <strong>Net 15 / 30 / 60 / 90</strong> – Payment due within the
+              specified number of days
+            </li>
           </ul>
         </div>
       </AccentSection>
@@ -228,7 +297,9 @@ const AccountingMultiStepForm = ({
           </div>
           Description
         </h2>
-        <p className="text-slate-500 mt-2 text-sm">Add services and parts to the {documentType}</p>
+        <p className="text-slate-500 mt-2 text-sm">
+          Add services and parts to the {documentType}
+        </p>
       </div>
 
       {/* ── ADD ITEM FORM ── */}
@@ -255,7 +326,9 @@ const AccountingMultiStepForm = ({
             type="text"
             placeholder="Description"
             value={newItem.description}
-            onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+            onChange={(e) =>
+              setNewItem({ ...newItem, description: e.target.value })
+            }
             className={INPUT}
           />
 
@@ -287,26 +360,37 @@ const AccountingMultiStepForm = ({
       {/* ── ITEMS TABLE or EMPTY STATE ── */}
       {items.length > 0 ? (
         <>
-          <h3 className="text-base font-bold text-slate-900 mb-3">Items Added</h3>
+          <h3 className="text-base font-bold text-slate-900 mb-3">
+            Items Added
+          </h3>
           <div className="overflow-x-auto rounded-xl border border-slate-200 mb-6">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                  {["Type", "Description", "Rate", "Qty", "Amount", ""].map((h, i) => (
-                    <th
-                      key={i}
-                      className={`px-4 py-4 text-xs font-bold text-slate-700 ${
-                        i >= 2 && i <= 4 ? "text-right" : i === 5 ? "text-center w-16" : "text-left"
-                      }`}
-                    >
-                      {h}
-                    </th>
-                  ))}
+                  {["Type", "Description", "Rate", "Qty", "Amount", ""].map(
+                    (h, i) => (
+                      <th
+                        key={i}
+                        className={`px-4 py-4 text-xs font-bold text-slate-700 ${
+                          i >= 2 && i <= 4
+                            ? "text-right"
+                            : i === 5
+                              ? "text-center w-16"
+                              : "text-left"
+                        }`}
+                      >
+                        {h}
+                      </th>
+                    ),
+                  )}
                 </tr>
               </thead>
               <tbody className="bg-white">
                 {items.map((item, idx) => (
-                  <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <tr
+                    key={idx}
+                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                  >
                     <td className="px-4 py-3.5">
                       <span
                         className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
@@ -318,10 +402,18 @@ const AccountingMultiStepForm = ({
                         {item.type}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-slate-700 font-medium">{item.description}</td>
-                    <td className="px-4 py-3.5 text-right text-slate-700">R{Number(item.rate).toFixed(2)}</td>
-                    <td className="px-4 py-3.5 text-right text-slate-700">{item.qty}</td>
-                    <td className="px-4 py-3.5 text-right font-bold text-slate-900">R{item.amount.toFixed(2)}</td>
+                    <td className="px-4 py-3.5 text-slate-700 font-medium">
+                      {item.description}
+                    </td>
+                    <td className="px-4 py-3.5 text-right text-slate-700">
+                      R{Number(item.rate).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3.5 text-right text-slate-700">
+                      {item.qty}
+                    </td>
+                    <td className="px-4 py-3.5 text-right font-bold text-slate-900">
+                      R{item.amount.toFixed(2)}
+                    </td>
                     <td className="px-4 py-3.5 text-center">
                       <button
                         onClick={() => removeItem(idx)}
@@ -344,7 +436,9 @@ const AccountingMultiStepForm = ({
               <Row label="VAT (15%):" value={`R${vat.toFixed(2)}`} />
               <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-blue-300">
                 <span className="text-slate-900">Total:</span>
-                <span className="text-blue-700 text-2xl">R{total.toFixed(2)}</span>
+                <span className="text-blue-700 text-2xl">
+                  R{total.toFixed(2)}
+                </span>
               </div>
             </div>
           </div>
@@ -355,8 +449,12 @@ const AccountingMultiStepForm = ({
           <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
             <FileText className="w-8 h-8 text-slate-400" />
           </div>
-          <p className="text-slate-700 font-semibold text-lg">No items added yet</p>
-          <p className="text-sm text-slate-500 mt-1">Add services or parts using the form above</p>
+          <p className="text-slate-700 font-semibold text-lg">
+            No items added yet
+          </p>
+          <p className="text-sm text-slate-500 mt-1">
+            Add services or parts using the form above
+          </p>
         </div>
       )}
     </div>
@@ -380,7 +478,11 @@ const AccountingMultiStepForm = ({
       <AccentSection color="bg-purple-600" title="PAYMENT DETAILS">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <Field label="Payment Method" required>
-            <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className={INPUT}>
+            <select
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className={INPUT}
+            >
               <option value="Cash">Cash</option>
               <option value="Card">Card</option>
               <option value="EFT">EFT</option>
@@ -391,12 +493,22 @@ const AccountingMultiStepForm = ({
           </Field>
 
           <Field label="Payment Terms" required>
-            <select value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} className={INPUT}>
+            <select
+              value={paymentTerms}
+              onChange={(e) => setPaymentTerms(e.target.value)}
+              className={INPUT}
+            >
               {isQuoteMode || documentType === "quote" ? (
                 <>
-                  <option value="Quote Valid 30 Days">Quote Valid 30 Days</option>
-                  <option value="Quote Valid 60 Days">Quote Valid 60 Days</option>
-                  <option value="Quote Valid 90 Days">Quote Valid 90 Days</option>
+                  <option value="Quote Valid 30 Days">
+                    Quote Valid 30 Days
+                  </option>
+                  <option value="Quote Valid 60 Days">
+                    Quote Valid 60 Days
+                  </option>
+                  <option value="Quote Valid 90 Days">
+                    Quote Valid 90 Days
+                  </option>
                 </>
               ) : (
                 <>
@@ -405,7 +517,9 @@ const AccountingMultiStepForm = ({
                   <option value="Net 15 Days">Net 15 Days</option>
                   <option value="Net 30 Days">Net 30 Days</option>
                   <option value="Net 60 Days">Net 60 Days</option>
-                  <option value="50% Deposit, Balance on Completion">50% Deposit, Balance on Completion</option>
+                  <option value="50% Deposit, Balance on Completion">
+                    50% Deposit, Balance on Completion
+                  </option>
                 </>
               )}
             </select>
@@ -413,12 +527,26 @@ const AccountingMultiStepForm = ({
 
           <div className="col-span-1 sm:col-span-2">
             <Field label="Service Guarantee">
-              <select value={serviceGuarantee} onChange={(e) => setServiceGuarantee(e.target.value)} className={INPUT}>
-                <option value="7 Day Satisfaction Guarantee">7 Day Satisfaction Guarantee</option>
-                <option value="14 Day Satisfaction Guarantee">14 Day Satisfaction Guarantee</option>
-                <option value="30 Day Satisfaction Guarantee">30 Day Satisfaction Guarantee</option>
-                <option value="100% Satisfaction Guaranteed">100% Satisfaction Guaranteed</option>
-                <option value="Money Back Guarantee">Money Back Guarantee</option>
+              <select
+                value={serviceGuarantee}
+                onChange={(e) => setServiceGuarantee(e.target.value)}
+                className={INPUT}
+              >
+                <option value="7 Day Satisfaction Guarantee">
+                  7 Day Satisfaction Guarantee
+                </option>
+                <option value="14 Day Satisfaction Guarantee">
+                  14 Day Satisfaction Guarantee
+                </option>
+                <option value="30 Day Satisfaction Guarantee">
+                  30 Day Satisfaction Guarantee
+                </option>
+                <option value="100% Satisfaction Guaranteed">
+                  100% Satisfaction Guaranteed
+                </option>
+                <option value="Money Back Guarantee">
+                  Money Back Guarantee
+                </option>
                 <option value="No Guarantee">No Guarantee</option>
               </select>
             </Field>
@@ -465,7 +593,7 @@ const AccountingMultiStepForm = ({
               : "bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-sm"
           }`}
         >
-          <ChevronLeft className="w-4 h-4" /> Previous
+          <ChevronLeft className="w-4 h-4" /> <span className="hidden sm:inline">Previous</span>
         </button>
 
         {/* step counter badge */}
@@ -482,7 +610,7 @@ const AccountingMultiStepForm = ({
               : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow-lg"
           }`}
         >
-          Next <ChevronRight className="w-4 h-4" />
+          <span className="hidden sm:inline">Next</span> <ChevronRight className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -519,7 +647,9 @@ function AccentSection({ color, title, children }) {
 /** Preview / totals row */
 function Row({ label, value, noBorder }) {
   return (
-    <div className={`flex justify-between items-center py-2.5 text-sm ${noBorder ? "" : "border-b border-slate-200"}`}>
+    <div
+      className={`flex justify-between items-center py-2.5 text-sm ${noBorder ? "" : "border-b border-slate-200"}`}
+    >
       <span className="text-slate-600 font-medium">{label}</span>
       <span className="font-bold text-slate-900">{value}</span>
     </div>

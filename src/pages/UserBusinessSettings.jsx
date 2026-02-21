@@ -4,9 +4,9 @@ import { useAuth } from "../contexts/AuthContext";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Upload } from "lucide-react";
-import SignatureStamp from './mechanics/SignatureStamp';
+import SignatureStamp from "./mechanics/SignatureStamp";
 const UserBusinessSettings = () => {
-  const {user, authUser} = useAuth();
+  const { user, authUser } = useAuth();
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "",
     addressLine1: "",
@@ -19,12 +19,12 @@ const UserBusinessSettings = () => {
   });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-const [stampSettings, setStampSettings] = useState({
-  text: "APPROVED",
-  color: "#d32f2f",
-  showDate: true,
-  enabled: true
-});
+  const [stampSettings, setStampSettings] = useState({
+    text: "APPROVED",
+    color: "#d32f2f",
+    showDate: true,
+    enabled: true,
+  });
   useEffect(() => {
     if (user?.uid) {
       loadBusinessInfo();
@@ -36,7 +36,7 @@ const [stampSettings, setStampSettings] = useState({
       const db = getFirestore();
       const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         setBusinessInfo(docSnap.data());
       }
@@ -50,14 +50,14 @@ const [stampSettings, setStampSettings] = useState({
     if (!file || !user?.uid) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file');
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image size should be less than 5MB');
+      alert("Image size should be less than 5MB");
       return;
     }
 
@@ -65,12 +65,12 @@ const [stampSettings, setStampSettings] = useState({
     try {
       const storage = getStorage();
       const storageRef = ref(storage, `users/${user.uid}/logo/${file.name}`);
-      
+
       await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(storageRef);
-      
-      setBusinessInfo({...businessInfo, logoUrl: downloadURL});
-      alert('Logo uploaded successfully!');
+
+      setBusinessInfo({ ...businessInfo, logoUrl: downloadURL });
+      alert("Logo uploaded successfully!");
     } catch (error) {
       console.error("Error uploading logo:", error);
       alert("Failed to upload logo");
@@ -81,7 +81,7 @@ const [stampSettings, setStampSettings] = useState({
 
   const handleSave = async () => {
     if (!user?.uid) return;
-    
+
     setLoading(true);
     try {
       const db = getFirestore();
@@ -99,16 +99,18 @@ const [stampSettings, setStampSettings] = useState({
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-6">Business Information</h2>
-      
+
       <div className="space-y-4">
         {/* Logo Upload Section */}
         <div>
-          <label className="block text-sm font-medium mb-2">Business Logo</label>
+          <label className="block text-sm font-medium mb-2">
+            Business Logo
+          </label>
           <div className="flex items-center gap-4">
             {businessInfo.logoUrl ? (
-              <img 
-                src={businessInfo.logoUrl} 
-                alt="Business Logo" 
+              <img
+                src={businessInfo.logoUrl}
+                alt="Business Logo"
                 className="w-24 h-24 object-contain border rounded-lg"
               />
             ) : (
@@ -116,7 +118,7 @@ const [stampSettings, setStampSettings] = useState({
                 <Upload className="w-8 h-8 text-gray-400" />
               </div>
             )}
-            
+
             <div className="flex-1">
               <input
                 type="file"
@@ -130,7 +132,11 @@ const [stampSettings, setStampSettings] = useState({
                 htmlFor="logo-upload"
                 className="inline-block px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer disabled:opacity-50"
               >
-                {uploading ? 'Uploading...' : businessInfo.logoUrl ? 'Change Logo' : 'Upload Logo'}
+                {uploading
+                  ? "Uploading..."
+                  : businessInfo.logoUrl
+                    ? "Change Logo"
+                    : "Upload Logo"}
               </label>
               <p className="text-xs text-gray-500 mt-2">
                 Recommended: Square image, max 5MB
@@ -140,33 +146,45 @@ const [stampSettings, setStampSettings] = useState({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Business Name</label>
+          <label className="block text-sm font-medium mb-2">
+            Business Name
+          </label>
           <input
             type="text"
             value={businessInfo.businessName}
-            onChange={(e) => setBusinessInfo({...businessInfo, businessName: e.target.value})}
+            onChange={(e) =>
+              setBusinessInfo({ ...businessInfo, businessName: e.target.value })
+            }
             className="w-full px-4 py-2 border rounded-lg"
             placeholder="Solidflo Invoicing Saas"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Address Line 1</label>
+          <label className="block text-sm font-medium mb-2">
+            Address Line 1
+          </label>
           <input
             type="text"
             value={businessInfo.addressLine1}
-            onChange={(e) => setBusinessInfo({...businessInfo, addressLine1: e.target.value})}
+            onChange={(e) =>
+              setBusinessInfo({ ...businessInfo, addressLine1: e.target.value })
+            }
             className="w-full px-4 py-2 border rounded-lg"
             placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Address Line 2</label>
+          <label className="block text-sm font-medium mb-2">
+            Address Line 2
+          </label>
           <input
             type="text"
             value={businessInfo.addressLine2}
-            onChange={(e) => setBusinessInfo({...businessInfo, addressLine2: e.target.value})}
+            onChange={(e) =>
+              setBusinessInfo({ ...businessInfo, addressLine2: e.target.value })
+            }
             className="w-full px-4 py-2 border rounded-lg"
             placeholder="WYNBERG"
           />
@@ -178,18 +196,24 @@ const [stampSettings, setStampSettings] = useState({
             <input
               type="text"
               value={businessInfo.city}
-              onChange={(e) => setBusinessInfo({...businessInfo, city: e.target.value})}
+              onChange={(e) =>
+                setBusinessInfo({ ...businessInfo, city: e.target.value })
+              }
               className="w-full px-4 py-2 border rounded-lg"
               placeholder="SANDTON"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Postal Code</label>
+            <label className="block text-sm font-medium mb-2">
+              Postal Code
+            </label>
             <input
               type="text"
               value={businessInfo.postalCode}
-              onChange={(e) => setBusinessInfo({...businessInfo, postalCode: e.target.value})}
+              onChange={(e) =>
+                setBusinessInfo({ ...businessInfo, postalCode: e.target.value })
+              }
               className="w-full px-4 py-2 border rounded-lg"
               placeholder="2090"
             />
@@ -197,11 +221,15 @@ const [stampSettings, setStampSettings] = useState({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Primary Phone *</label>
+          <label className="block text-sm font-medium mb-2">
+            Primary Phone *
+          </label>
           <input
             type="tel"
             value={businessInfo.primaryPhone}
-            onChange={(e) => setBusinessInfo({...businessInfo, primaryPhone: e.target.value})}
+            onChange={(e) =>
+              setBusinessInfo({ ...businessInfo, primaryPhone: e.target.value })
+            }
             className="w-full px-4 py-2 border rounded-lg"
             placeholder="082 514 4509"
             required
@@ -209,16 +237,23 @@ const [stampSettings, setStampSettings] = useState({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Secondary Phone (Optional)</label>
+          <label className="block text-sm font-medium mb-2">
+            Secondary Phone (Optional)
+          </label>
           <input
             type="tel"
             value={businessInfo.secondaryPhone}
-            onChange={(e) => setBusinessInfo({...businessInfo, secondaryPhone: e.target.value})}
+            onChange={(e) =>
+              setBusinessInfo({
+                ...businessInfo,
+                secondaryPhone: e.target.value,
+              })
+            }
             className="w-full px-4 py-2 border rounded-lg"
             placeholder="084 583 9929"
           />
         </div>
-        
+
         <button
           onClick={handleSave}
           disabled={loading}

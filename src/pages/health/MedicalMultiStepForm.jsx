@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { Users, CreditCard, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Users,
+  CreditCard,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 const MedicalMultiStepForm = ({
   // Patient Info Props
@@ -190,7 +196,9 @@ const MedicalMultiStepForm = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <div className="text-sm text-gray-500 mb-1">Insurance Provider</div>
+              <div className="text-sm text-gray-500 mb-1">
+                Insurance Provider
+              </div>
               <input
                 type="text"
                 value={insuranceProvider}
@@ -214,7 +222,8 @@ const MedicalMultiStepForm = ({
           {/* Insurance Info Helper */}
           <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
             <div className="text-xs text-green-700">
-              <strong>💡 Tip:</strong> Verify insurance details before billing to ensure smooth claim processing and avoid payment delays.
+              <strong>💡 Tip:</strong> Verify insurance details before billing
+              to ensure smooth claim processing and avoid payment delays.
             </div>
           </div>
         </div>
@@ -297,7 +306,9 @@ const MedicalMultiStepForm = ({
           {/* Medical Info Helper */}
           <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
             <div className="text-xs text-green-700">
-              <strong>💡 Tip:</strong> Document all medical findings thoroughly for accurate records and future reference. This helps with continuity of care.
+              <strong>💡 Tip:</strong> Document all medical findings thoroughly
+              for accurate records and future reference. This helps with
+              continuity of care.
             </div>
           </div>
         </div>
@@ -307,7 +318,9 @@ const MedicalMultiStepForm = ({
       {currentStep === 4 && (
         <div className="space-y-4">
           <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-            <h2 className="text-lg font-semibold mb-4">Add Service/Procedure</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              Add Service/Procedure
+            </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
               <select
@@ -369,7 +382,9 @@ const MedicalMultiStepForm = ({
           {/* Display Added Items */}
           {items.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Added Services/Procedures</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                Added Services/Procedures
+              </h3>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -403,10 +418,10 @@ const MedicalMultiStepForm = ({
                               item.type === "Service"
                                 ? "bg-blue-100 text-blue-800"
                                 : item.type === "Procedure"
-                                ? "bg-purple-100 text-purple-800"
-                                : item.type === "Medication"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-orange-100 text-orange-800"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : item.type === "Medication"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-orange-100 text-orange-800"
                             }`}
                           >
                             {item.type}
@@ -462,7 +477,7 @@ const MedicalMultiStepForm = ({
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous
+          <span className="hidden sm:inline">Previous</span>
         </button>
 
         <div className="text-sm text-gray-600 font-medium">
@@ -478,7 +493,7 @@ const MedicalMultiStepForm = ({
               : "bg-green-600 text-white hover:bg-green-700"
           }`}
         >
-          Next
+          <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

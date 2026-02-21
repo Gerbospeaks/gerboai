@@ -22,8 +22,8 @@ import {
   collection,
   query,
   addDoc,
-  updateDoc,  // Make sure this is imported
-  doc,        // Make sure this is imported
+  updateDoc, // Make sure this is imported
+  doc, // Make sure this is imported
   getDoc,
   setDoc,
   orderBy,
@@ -59,7 +59,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
         (inv) =>
           inv.invoiceNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           inv.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          inv.patient?.phone?.includes(searchTerm)
+          inv.patient?.phone?.includes(searchTerm),
       );
     }
 
@@ -86,7 +86,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
     if (!user?.uid || !invoice.id) return;
 
     const confirmPay = window.confirm(
-      `Mark invoice ${invoice.invoiceNumber} as paid?`
+      `Mark invoice ${invoice.invoiceNumber} as paid?`,
     );
     if (!confirmPay) return;
 
@@ -119,7 +119,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
 
   const handleSendReminder = (invoice) => {
     alert(
-      `Payment reminder would be sent to ${invoice.patient?.email || "patient"}`
+      `Payment reminder would be sent to ${invoice.patient?.email || "patient"}`,
     );
   };
 
@@ -144,7 +144,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
 
   const totalPending = filteredInvoices.reduce(
     (sum, inv) => sum + (inv.totals?.total || 0),
-    0
+    0,
   );
 
   return (
@@ -192,7 +192,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
           <div className="text-2xl font-bold text-gray-900 mb-1">
             {
               filteredInvoices.filter(
-                (inv) => getDaysOverdue(inv.createdAt) > 30
+                (inv) => getDaysOverdue(inv.createdAt) > 30,
               ).length
             }
           </div>
@@ -208,7 +208,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
           <div className="text-2xl font-bold text-gray-900 mb-1">
             {
               filteredInvoices.filter(
-                (inv) => getDaysOverdue(inv.createdAt) <= 7
+                (inv) => getDaysOverdue(inv.createdAt) <= 7,
               ).length
             }
           </div>
@@ -371,7 +371,9 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
                             <CheckCircle className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => onLoadInvoice && onLoadInvoice(invoice)}
+                            onClick={() =>
+                              onLoadInvoice && onLoadInvoice(invoice)
+                            }
                             className="text-gray-600 hover:text-gray-900"
                             title="Edit Invoice"
                           >
@@ -461,7 +463,8 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
                   <div className="flex items-center space-x-2">
                     <CreditCard className="w-4 h-4 text-gray-400" />
                     <span>
-                      {selectedInvoice.patient?.insuranceProvider || "No insurance"}
+                      {selectedInvoice.patient?.insuranceProvider ||
+                        "No insurance"}
                     </span>
                   </div>
                 </div>

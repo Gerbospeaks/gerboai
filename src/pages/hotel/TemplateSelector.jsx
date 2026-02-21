@@ -1,27 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, Check } from 'lucide-react';
-import SignatureStamp from '../SignatureStamp';
+import React, { useState, useEffect } from "react";
+import { FileText, Check } from "lucide-react";
+import SignatureStamp from "../SignatureStamp";
 import {
   getFirestore,
   doc,
   getDoc,
   updateDoc,
-  serverTimestamp
-} from 'firebase/firestore';
+  serverTimestamp,
+} from "firebase/firestore";
 
 // Template Selector Dropdown Component
-export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) => {
-  const [purchasedTemplates, setPurchasedTemplates] = useState(['classic']);
+export const TemplateSelector = ({
+  user,
+  selectedTemplate,
+  onTemplateChange,
+}) => {
+  const [purchasedTemplates, setPurchasedTemplates] = useState(["classic"]);
   const [isOpen, setIsOpen] = useState(false);
 
   const templateNames = {
-    default: 'Default Hotel',
-    classic: 'Classic Hospitality',
-    modern: 'Modern Boutique',
-    elegant: 'Elegant Resort',
-    premium: 'Premium Hotel',
-    luxury: 'Luxury Suite',
-    business: 'Business Hotel'
+    default: "Default Hotel",
+    classic: "Classic Hospitality",
+    modern: "Modern Boutique",
+    elegant: "Elegant Resort",
+    premium: "Premium Hotel",
+    luxury: "Luxury Suite",
+    business: "Business Hotel",
   };
 
   useEffect(() => {
@@ -33,16 +37,19 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 
     try {
       const db = getFirestore();
-      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
+      const docRef = doc(db, "users", user.uid, "settings", "templates");
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setPurchasedTemplates(['default', ...(docSnap.data().purchased || ['classic'])]);
+        setPurchasedTemplates([
+          "default",
+          ...(docSnap.data().purchased || ["classic"]),
+        ]);
       } else {
-        setPurchasedTemplates(['default', 'classic']);
+        setPurchasedTemplates(["default", "classic"]);
       }
     } catch (error) {
-      console.error('Error loading templates:', error);
+      console.error("Error loading templates:", error);
     }
   };
 
@@ -51,17 +58,17 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 
     try {
       const db = getFirestore();
-      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
-      
+      const docRef = doc(db, "users", user.uid, "settings", "templates");
+
       await updateDoc(docRef, {
         active: templateId,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
       onTemplateChange(templateId);
       setIsOpen(false);
     } catch (error) {
-      console.error('Error updating template:', error);
+      console.error("Error updating template:", error);
     }
   };
 
@@ -72,17 +79,29 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
       >
         <FileText className="w-4 h-4" />
-        <span className="hidden sm:inline">{templateNames[selectedTemplate] || 'Select Template'}</span>
+        <span className="hidden sm:inline">
+          {templateNames[selectedTemplate] || "Select Template"}
+        </span>
         <span className="sm:hidden">Template</span>
-        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <svg
+          className="w-4 h-4 ml-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-10" 
+          <div
+            className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-80 overflow-auto">
@@ -90,12 +109,14 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
               <div className="text-xs font-semibold text-gray-500 px-3 py-2">
                 Your Templates
               </div>
-              {purchasedTemplates.map(templateId => (
+              {purchasedTemplates.map((templateId) => (
                 <button
                   key={templateId}
                   onClick={() => handleSelectTemplate(templateId)}
                   className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center justify-between ${
-                    selectedTemplate === templateId ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                    selectedTemplate === templateId
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-700"
                   }`}
                 >
                   <span>{templateNames[templateId]}</span>
@@ -113,13 +134,13 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 };
 
 // Default Hotel Template
-export const DefaultHotelTemplate = ({ 
-  businessInfo, 
+export const DefaultHotelTemplate = ({
+  businessInfo,
   loading,
-  jobCardNumber, 
-  customerName, 
-  customerEmail, 
-  customerPhone, 
+  jobCardNumber,
+  customerName,
+  customerEmail,
+  customerPhone,
   customerAddress,
   guestId,
   guestDOB,
@@ -139,7 +160,7 @@ export const DefaultHotelTemplate = ({
   showStamp = false,
   stampText = "PAID",
   stampColor = "#2e7d32",
-  showStampDate = true
+  showStampDate = true,
 }) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     {/* Header Section */}
@@ -159,17 +180,24 @@ export const DefaultHotelTemplate = ({
               <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center"></div>
             )}
             <div>
-              <div className="text-2xl font-bold">{businessInfo.businessName}</div>
-              <div className="text-sm text-gray-600">{businessInfo.tagline || 'Hospitality & Comfort'}</div>
+              <div className="text-2xl font-bold">
+                {businessInfo.businessName}
+              </div>
+              <div className="text-sm text-gray-600">
+                {businessInfo.tagline || "Hospitality & Comfort"}
+              </div>
             </div>
           </div>
           <div className="text-xs leading-relaxed text-gray-600">
             <div>{businessInfo.addressLine1}</div>
             <div>{businessInfo.addressLine2}</div>
-            <div>{businessInfo.city} {businessInfo.postalCode}</div>
+            <div>
+              {businessInfo.city} {businessInfo.postalCode}
+            </div>
             <div className="mt-1">
               T: {businessInfo.primaryPhone}
-              {businessInfo.secondaryPhone && `, ${businessInfo.secondaryPhone}`}
+              {businessInfo.secondaryPhone &&
+                `, ${businessInfo.secondaryPhone}`}
             </div>
             {businessInfo.email && <div>E: {businessInfo.email}</div>}
           </div>
@@ -202,7 +230,9 @@ export const DefaultHotelTemplate = ({
     {/* Guest and Room Information */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-gray-100 p-3 rounded">
-        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1 rounded">GUEST DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1 rounded">
+          GUEST DETAILS
+        </div>
         <div className="text-xs space-y-1">
           <div className="font-semibold">{customerName}</div>
           <div className="text-gray-600">{customerAddress}</div>
@@ -213,7 +243,9 @@ export const DefaultHotelTemplate = ({
       </div>
 
       <div className="bg-gray-100 p-3 rounded">
-        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1 rounded">IDENTIFICATION</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1 rounded">
+          IDENTIFICATION
+        </div>
         <div className="text-xs space-y-1">
           {guestId && <div>Guest ID: {guestId}</div>}
           {idType && <div>ID Type: {idType}</div>}
@@ -223,11 +255,15 @@ export const DefaultHotelTemplate = ({
       </div>
 
       <div className="bg-blue-50 p-3 rounded border border-blue-200">
-        <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1 rounded">ROOM DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1 rounded">
+          ROOM DETAILS
+        </div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Room Number:</span>
-            <span className="text-lg font-bold text-blue-600">{roomNumber}</span>
+            <span className="text-lg font-bold text-blue-600">
+              {roomNumber}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Room Type:</span>
@@ -262,7 +298,9 @@ export const DefaultHotelTemplate = ({
               <td className="px-2 py-2">{item.description}</td>
               <td className="text-center px-2 py-2">{item.qty}</td>
               <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -289,19 +327,33 @@ export const DefaultHotelTemplate = ({
 
     {/* Payment Information */}
     <div className="bg-blue-50 border border-blue-200 p-3 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-xs mb-2">PAYMENT INFORMATION</div>
+      <div className="text-blue-800 font-bold text-xs mb-2">
+        PAYMENT INFORMATION
+      </div>
       <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber || 'N/A'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {businessInfo.branchCode || 'N/A'}</div>
+        <div>
+          <span className="font-semibold">Bank Name:</span>{" "}
+          {businessInfo.bankName || "First National Bank"}
+        </div>
+        <div>
+          <span className="font-semibold">Account Holder:</span>{" "}
+          {businessInfo.businessName}
+        </div>
+        <div>
+          <span className="font-semibold">Account Number:</span>{" "}
+          {businessInfo.accountNumber || "N/A"}
+        </div>
+        <div>
+          <span className="font-semibold">Branch Code:</span>{" "}
+          {businessInfo.branchCode || "N/A"}
+        </div>
       </div>
     </div>
 
     {/* Stamp and Signature */}
     {showStamp && (
       <div className="flex justify-end mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={stampText}
           color={stampColor}
           showDate={showStampDate}
@@ -325,10 +377,18 @@ export const ClassicHotelTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+            <img
+              src={props.businessInfo.logoUrl}
+              alt="Logo"
+              className="w-20 h-20 object-contain mb-3"
+            />
           )}
-          <div className="text-2xl font-serif font-bold text-amber-800">{props.businessInfo.businessName}</div>
-          <div className="text-sm text-gray-600 italic">Est. {props.businessInfo.established || '1995'}</div>
+          <div className="text-2xl font-serif font-bold text-amber-800">
+            {props.businessInfo.businessName}
+          </div>
+          <div className="text-sm text-gray-600 italic">
+            Est. {props.businessInfo.established || "1995"}
+          </div>
           <div className="text-xs text-gray-600 mt-2">
             {props.businessInfo.addressLine1}, {props.businessInfo.city}
           </div>
@@ -337,8 +397,14 @@ export const ClassicHotelTemplate = (props) => (
           <div className="text-4xl font-serif text-amber-700 mb-4">INVOICE</div>
           <div className="bg-amber-50 p-3 rounded border border-amber-200">
             <div className="text-sm space-y-1">
-              <div><span className="font-semibold">Invoice #:</span> {props.jobCardNumber}</div>
-              <div><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</div>
+              <div>
+                <span className="font-semibold">Invoice #:</span>{" "}
+                {props.jobCardNumber}
+              </div>
+              <div>
+                <span className="font-semibold">Date:</span>{" "}
+                {new Date().toLocaleDateString()}
+              </div>
             </div>
           </div>
         </div>
@@ -347,7 +413,9 @@ export const ClassicHotelTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div className="border-2 border-amber-200 p-4 rounded">
-        <div className="font-serif font-bold text-amber-800 mb-3">GUEST INFORMATION</div>
+        <div className="font-serif font-bold text-amber-800 mb-3">
+          GUEST INFORMATION
+        </div>
         <div className="text-sm space-y-1">
           <div className="font-semibold text-lg">{props.customerName}</div>
           <div>{props.customerAddress}</div>
@@ -356,13 +424,29 @@ export const ClassicHotelTemplate = (props) => (
         </div>
       </div>
       <div className="bg-amber-50 p-4 rounded border border-amber-200">
-        <div className="font-serif font-bold text-amber-800 mb-3">RESERVATION DETAILS</div>
+        <div className="font-serif font-bold text-amber-800 mb-3">
+          RESERVATION DETAILS
+        </div>
         <div className="text-sm space-y-1">
-          <div><span className="font-semibold">Room:</span> {props.roomNumber} - {props.roomType}</div>
-          <div><span className="font-semibold">Check-in:</span> {props.checkInDate}</div>
-          <div><span className="font-semibold">Check-out:</span> {props.checkOutDate}</div>
-          <div><span className="font-semibold">Nights:</span> {props.numberOfNights}</div>
-          <div><span className="font-semibold">Guests:</span> {props.numberOfGuests}</div>
+          <div>
+            <span className="font-semibold">Room:</span> {props.roomNumber} -{" "}
+            {props.roomType}
+          </div>
+          <div>
+            <span className="font-semibold">Check-in:</span> {props.checkInDate}
+          </div>
+          <div>
+            <span className="font-semibold">Check-out:</span>{" "}
+            {props.checkOutDate}
+          </div>
+          <div>
+            <span className="font-semibold">Nights:</span>{" "}
+            {props.numberOfNights}
+          </div>
+          <div>
+            <span className="font-semibold">Guests:</span>{" "}
+            {props.numberOfGuests}
+          </div>
         </div>
       </div>
     </div>
@@ -406,16 +490,24 @@ export const ClassicHotelTemplate = (props) => (
     </div>
 
     <div className="bg-amber-50 border border-amber-200 p-4 mb-4 rounded">
-      <div className="text-amber-800 font-bold text-sm mb-2">PAYMENT DETAILS</div>
+      <div className="text-amber-800 font-bold text-sm mb-2">
+        PAYMENT DETAILS
+      </div>
       <div className="text-xs space-y-1">
-        <div><span className="font-semibold">Bank:</span> {props.businessInfo.bankName || 'N/A'}</div>
-        <div><span className="font-semibold">Account:</span> {props.businessInfo.accountNumber || 'N/A'}</div>
+        <div>
+          <span className="font-semibold">Bank:</span>{" "}
+          {props.businessInfo.bankName || "N/A"}
+        </div>
+        <div>
+          <span className="font-semibold">Account:</span>{" "}
+          {props.businessInfo.accountNumber || "N/A"}
+        </div>
       </div>
     </div>
 
     {props.showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -426,7 +518,8 @@ export const ClassicHotelTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-600 italic border-t border-amber-200 pt-4">
-      "Your comfort is our priority. Thank you for choosing {props.businessInfo.businessName}"
+      "Your comfort is our priority. Thank you for choosing{" "}
+      {props.businessInfo.businessName}"
     </div>
   </div>
 );
@@ -438,10 +531,18 @@ export const ModernHotelTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-24 h-24 object-contain mb-3" />
+            <img
+              src={props.businessInfo.logoUrl}
+              alt="Logo"
+              className="w-24 h-24 object-contain mb-3"
+            />
           )}
-          <div className="text-3xl font-bold text-gray-900">{props.businessInfo.businessName}</div>
-          <div className="text-sm text-gray-600 mt-1">{props.businessInfo.addressLine1}</div>
+          <div className="text-3xl font-bold text-gray-900">
+            {props.businessInfo.businessName}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">
+            {props.businessInfo.addressLine1}
+          </div>
         </div>
         <div className="text-right">
           <div className="text-5xl font-bold text-purple-500 mb-4">INVOICE</div>
@@ -502,7 +603,9 @@ export const ModernHotelTemplate = (props) => (
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
             <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+            <td className="text-right px-4 py-3 font-semibold">
+              R {item.amount.toFixed(2)}
+            </td>
           </tr>
         ))}
       </tbody>
@@ -527,7 +630,7 @@ export const ModernHotelTemplate = (props) => (
 
     {props.showStamp && (
       <div className="flex justify-end mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -545,21 +648,34 @@ export const ModernHotelTemplate = (props) => (
 
 // Luxury Resort Template
 export const LuxuryHotelTemplate = (props) => (
-  <div className="bg-gradient-to-br from-amber-50 to-white" style={{ padding: "15mm 20mm" }}>
+  <div
+    className="bg-gradient-to-br from-amber-50 to-white"
+    style={{ padding: "15mm 20mm" }}
+  >
     <div className="border-4 border-double border-amber-600 p-8">
       <div className="text-center border-b-2 border-amber-600 pb-6 mb-6">
         {props.businessInfo.logoUrl && (
-          <img src={props.businessInfo.logoUrl} alt="Logo" className="w-32 h-32 object-contain mx-auto mb-4" />
+          <img
+            src={props.businessInfo.logoUrl}
+            alt="Logo"
+            className="w-32 h-32 object-contain mx-auto mb-4"
+          />
         )}
-        <div className="text-4xl font-serif font-bold text-amber-800 mb-2">{props.businessInfo.businessName}</div>
-        <div className="text-sm text-gray-600 italic">Luxury Hospitality Since {props.businessInfo.established || '1990'}</div>
+        <div className="text-4xl font-serif font-bold text-amber-800 mb-2">
+          {props.businessInfo.businessName}
+        </div>
+        <div className="text-sm text-gray-600 italic">
+          Luxury Hospitality Since {props.businessInfo.established || "1990"}
+        </div>
         <div className="text-3xl font-serif text-amber-700 mt-6">INVOICE</div>
         <div className="text-sm text-gray-600 mt-2">#{props.jobCardNumber}</div>
       </div>
 
       <div className="grid grid-cols-2 gap-8 mb-6">
         <div className="border-2 border-amber-300 p-5 rounded bg-white">
-          <div className="font-serif font-bold text-amber-800 mb-3 text-lg">ESTEEMED GUEST</div>
+          <div className="font-serif font-bold text-amber-800 mb-3 text-lg">
+            ESTEEMED GUEST
+          </div>
           <div className="space-y-2">
             <div className="font-semibold text-xl">{props.customerName}</div>
             <div className="text-sm text-gray-600">{props.customerAddress}</div>
@@ -567,11 +683,15 @@ export const LuxuryHotelTemplate = (props) => (
           </div>
         </div>
         <div className="border-2 border-amber-300 p-5 rounded bg-white">
-          <div className="font-serif font-bold text-amber-800 mb-3 text-lg">ACCOMMODATION</div>
+          <div className="font-serif font-bold text-amber-800 mb-3 text-lg">
+            ACCOMMODATION
+          </div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Suite:</span>
-              <span className="font-bold text-lg text-amber-700">{props.roomNumber}</span>
+              <span className="font-bold text-lg text-amber-700">
+                {props.roomNumber}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Type:</span>
@@ -583,7 +703,9 @@ export const LuxuryHotelTemplate = (props) => (
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Period:</span>
-              <span>{props.checkInDate} - {props.checkOutDate}</span>
+              <span>
+                {props.checkInDate} - {props.checkOutDate}
+              </span>
             </div>
           </div>
         </div>
@@ -592,10 +714,18 @@ export const LuxuryHotelTemplate = (props) => (
       <table className="w-full mb-6 bg-white">
         <thead>
           <tr className="border-b-2 border-amber-600">
-            <th className="text-left py-3 px-4 font-serif text-amber-800">Service Description</th>
-            <th className="text-center py-3 px-4 font-serif text-amber-800">Qty</th>
-            <th className="text-right py-3 px-4 font-serif text-amber-800">Rate</th>
-            <th className="text-right py-3 px-4 font-serif text-amber-800">Amount</th>
+            <th className="text-left py-3 px-4 font-serif text-amber-800">
+              Service Description
+            </th>
+            <th className="text-center py-3 px-4 font-serif text-amber-800">
+              Qty
+            </th>
+            <th className="text-right py-3 px-4 font-serif text-amber-800">
+              Rate
+            </th>
+            <th className="text-right py-3 px-4 font-serif text-amber-800">
+              Amount
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -604,7 +734,9 @@ export const LuxuryHotelTemplate = (props) => (
               <td className="py-3 px-4">{item.description}</td>
               <td className="text-center py-3 px-4">{item.qty}</td>
               <td className="text-right py-3 px-4">R {item.rate.toFixed(2)}</td>
-              <td className="text-right py-3 px-4 font-semibold">R {item.amount.toFixed(2)}</td>
+              <td className="text-right py-3 px-4 font-semibold">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -629,7 +761,7 @@ export const LuxuryHotelTemplate = (props) => (
 
       {props.showStamp && (
         <div className="flex justify-center mb-6">
-          <SignatureStamp 
+          <SignatureStamp
             text={props.stampText}
             color={props.stampColor}
             showDate={props.showStampDate}
@@ -653,20 +785,34 @@ export const BusinessHotelTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+            <img
+              src={props.businessInfo.logoUrl}
+              alt="Logo"
+              className="w-20 h-20 object-contain mb-3"
+            />
           )}
-          <div className="text-2xl font-bold text-gray-900">{props.businessInfo.businessName}</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {props.businessInfo.businessName}
+          </div>
           <div className="text-sm text-gray-600 mt-1">
             {props.businessInfo.addressLine1}, {props.businessInfo.city}
           </div>
-          <div className="text-sm text-gray-600">{props.businessInfo.primaryPhone}</div>
+          <div className="text-sm text-gray-600">
+            {props.businessInfo.primaryPhone}
+          </div>
         </div>
         <div className="text-right">
           <div className="text-4xl font-bold text-gray-800 mb-3">INVOICE</div>
           <div className="bg-gray-100 p-3 rounded border-2 border-gray-800">
             <div className="text-sm space-y-1">
-              <div><span className="font-semibold">Invoice:</span> {props.jobCardNumber}</div>
-              <div><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</div>
+              <div>
+                <span className="font-semibold">Invoice:</span>{" "}
+                {props.jobCardNumber}
+              </div>
+              <div>
+                <span className="font-semibold">Date:</span>{" "}
+                {new Date().toLocaleDateString()}
+              </div>
             </div>
           </div>
         </div>
@@ -675,7 +821,9 @@ export const BusinessHotelTemplate = (props) => (
 
     <div className="grid grid-cols-3 gap-4 mb-6">
       <div className="border border-gray-300 p-4 rounded">
-        <div className="text-xs font-bold text-gray-600 mb-2 uppercase">Guest Information</div>
+        <div className="text-xs font-bold text-gray-600 mb-2 uppercase">
+          Guest Information
+        </div>
         <div className="text-sm space-y-1">
           <div className="font-semibold">{props.customerName}</div>
           <div className="text-gray-600 text-xs">{props.customerEmail}</div>
@@ -684,7 +832,9 @@ export const BusinessHotelTemplate = (props) => (
         </div>
       </div>
       <div className="border border-gray-300 p-4 rounded">
-        <div className="text-xs font-bold text-gray-600 mb-2 uppercase">Accommodation</div>
+        <div className="text-xs font-bold text-gray-600 mb-2 uppercase">
+          Accommodation
+        </div>
         <div className="text-sm space-y-1">
           <div className="flex justify-between">
             <span className="text-gray-600 text-xs">Room:</span>
@@ -701,7 +851,9 @@ export const BusinessHotelTemplate = (props) => (
         </div>
       </div>
       <div className="border border-gray-300 p-4 rounded bg-gray-50">
-        <div className="text-xs font-bold text-gray-600 mb-2 uppercase">Stay Period</div>
+        <div className="text-xs font-bold text-gray-600 mb-2 uppercase">
+          Stay Period
+        </div>
         <div className="text-sm space-y-1">
           <div className="text-xs">
             <span className="text-gray-600">Check-in:</span>
@@ -712,7 +864,8 @@ export const BusinessHotelTemplate = (props) => (
             <div className="font-semibold">{props.checkOutDate}</div>
           </div>
           <div className="text-xs">
-            <span className="text-gray-600">Duration:</span> {props.numberOfNights} nights
+            <span className="text-gray-600">Duration:</span>{" "}
+            {props.numberOfNights} nights
           </div>
         </div>
       </div>
@@ -733,7 +886,9 @@ export const BusinessHotelTemplate = (props) => (
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
             <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+            <td className="text-right px-4 py-3 font-semibold">
+              R {item.amount.toFixed(2)}
+            </td>
           </tr>
         ))}
       </tbody>
@@ -757,17 +912,28 @@ export const BusinessHotelTemplate = (props) => (
     </div>
 
     <div className="bg-gray-100 border border-gray-300 p-4 mb-4 rounded">
-      <div className="text-gray-800 font-bold text-sm mb-2">PAYMENT DETAILS</div>
+      <div className="text-gray-800 font-bold text-sm mb-2">
+        PAYMENT DETAILS
+      </div>
       <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank:</span> {props.businessInfo.bankName || 'N/A'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || 'N/A'}</div>
+        <div>
+          <span className="font-semibold">Bank:</span>{" "}
+          {props.businessInfo.bankName || "N/A"}
+        </div>
+        <div>
+          <span className="font-semibold">Account Holder:</span>{" "}
+          {props.businessInfo.businessName}
+        </div>
+        <div>
+          <span className="font-semibold">Account Number:</span>{" "}
+          {props.businessInfo.accountNumber || "N/A"}
+        </div>
       </div>
     </div>
 
     {props.showStamp && (
       <div className="flex justify-end mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -778,7 +944,8 @@ export const BusinessHotelTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-600 border-t border-gray-300 pt-3">
-      Thank you for choosing {props.businessInfo.businessName} for your business travel needs
+      Thank you for choosing {props.businessInfo.businessName} for your business
+      travel needs
     </div>
   </div>
 );
@@ -789,17 +956,29 @@ export const ElegantHotelTemplate = (props) => (
     <div className="border-4 border-teal-700 p-8">
       <div className="text-center border-b-2 border-teal-700 pb-6 mb-6">
         {props.businessInfo.logoUrl && (
-          <img src={props.businessInfo.logoUrl} alt="Logo" className="w-24 h-24 object-contain mx-auto mb-4" />
+          <img
+            src={props.businessInfo.logoUrl}
+            alt="Logo"
+            className="w-24 h-24 object-contain mx-auto mb-4"
+          />
         )}
-        <div className="text-4xl font-serif font-bold text-teal-800 mb-2">{props.businessInfo.businessName}</div>
-        <div className="text-sm text-gray-600">{props.businessInfo.addressLine1} • {props.businessInfo.city}</div>
-        <div className="text-2xl font-serif text-teal-700 mt-4">GUEST INVOICE</div>
+        <div className="text-4xl font-serif font-bold text-teal-800 mb-2">
+          {props.businessInfo.businessName}
+        </div>
+        <div className="text-sm text-gray-600">
+          {props.businessInfo.addressLine1} • {props.businessInfo.city}
+        </div>
+        <div className="text-2xl font-serif text-teal-700 mt-4">
+          GUEST INVOICE
+        </div>
         <div className="text-sm text-gray-500 mt-1">#{props.jobCardNumber}</div>
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
-          <div className="font-serif font-bold text-teal-800 mb-2">HONORED GUEST</div>
+          <div className="font-serif font-bold text-teal-800 mb-2">
+            HONORED GUEST
+          </div>
           <div className="text-sm space-y-1">
             <div className="font-semibold text-lg">{props.customerName}</div>
             <div className="text-gray-600">{props.customerAddress}</div>
@@ -808,11 +987,15 @@ export const ElegantHotelTemplate = (props) => (
           </div>
         </div>
         <div>
-          <div className="font-serif font-bold text-teal-800 mb-2">RESERVATION</div>
+          <div className="font-serif font-bold text-teal-800 mb-2">
+            RESERVATION
+          </div>
           <div className="text-sm space-y-1">
             <div className="flex justify-between">
               <span className="text-gray-600">Room:</span>
-              <span className="font-bold text-teal-700">{props.roomNumber} - {props.roomType}</span>
+              <span className="font-bold text-teal-700">
+                {props.roomNumber} - {props.roomType}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Check-in:</span>
@@ -824,7 +1007,9 @@ export const ElegantHotelTemplate = (props) => (
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Duration:</span>
-              <span>{props.numberOfNights} nights • {props.numberOfGuests} guests</span>
+              <span>
+                {props.numberOfNights} nights • {props.numberOfGuests} guests
+              </span>
             </div>
           </div>
         </div>
@@ -845,7 +1030,9 @@ export const ElegantHotelTemplate = (props) => (
               <td className="py-3">{item.description}</td>
               <td className="text-center py-3">{item.qty}</td>
               <td className="text-right py-3">R {item.rate.toFixed(2)}</td>
-              <td className="text-right py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+              <td className="text-right py-3 font-semibold">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -869,16 +1056,24 @@ export const ElegantHotelTemplate = (props) => (
       </div>
 
       <div className="bg-teal-50 border border-teal-200 p-4 mb-4 rounded">
-        <div className="text-teal-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-teal-800 font-bold text-sm mb-2">
+          PAYMENT INFORMATION
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank:</span> {props.businessInfo.bankName || 'N/A'}</div>
-          <div><span className="font-semibold">Account:</span> {props.businessInfo.accountNumber || 'N/A'}</div>
+          <div>
+            <span className="font-semibold">Bank:</span>{" "}
+            {props.businessInfo.bankName || "N/A"}
+          </div>
+          <div>
+            <span className="font-semibold">Account:</span>{" "}
+            {props.businessInfo.accountNumber || "N/A"}
+          </div>
         </div>
       </div>
 
       {props.showStamp && (
         <div className="flex justify-center mb-4">
-          <SignatureStamp 
+          <SignatureStamp
             text={props.stampText}
             color={props.stampColor}
             showDate={props.showStampDate}
@@ -897,15 +1092,24 @@ export const ElegantHotelTemplate = (props) => (
 
 // Premium Hotel Template
 export const PremiumHotelTemplate = (props) => (
-  <div className="bg-gradient-to-b from-slate-50 to-white" style={{ padding: "15mm 20mm" }}>
+  <div
+    className="bg-gradient-to-b from-slate-50 to-white"
+    style={{ padding: "15mm 20mm" }}
+  >
     <div className="border-l-8 border-r-8 border-slate-800 p-6">
       <div className="border-b-4 border-slate-800 pb-6 mb-6">
         <div className="flex justify-between items-start">
           <div>
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-24 h-24 object-contain mb-3" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-24 h-24 object-contain mb-3"
+              />
             )}
-            <div className="text-3xl font-bold text-slate-900">{props.businessInfo.businessName}</div>
+            <div className="text-3xl font-bold text-slate-900">
+              {props.businessInfo.businessName}
+            </div>
             <div className="text-sm text-slate-600 mt-2">
               {props.businessInfo.addressLine1}
             </div>
@@ -914,7 +1118,9 @@ export const PremiumHotelTemplate = (props) => (
             </div>
           </div>
           <div className="text-right">
-            <div className="text-5xl font-black text-slate-800 mb-4">INVOICE</div>
+            <div className="text-5xl font-black text-slate-800 mb-4">
+              INVOICE
+            </div>
             <div className="bg-slate-800 text-gray-800 p-4 rounded">
               <div className="text-sm space-y-1">
                 <div className="font-bold">#{props.jobCardNumber}</div>
@@ -927,16 +1133,24 @@ export const PremiumHotelTemplate = (props) => (
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div className="bg-white border-2 border-slate-800 p-5 rounded-lg shadow-sm">
-          <div className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide">Guest Details</div>
+          <div className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide">
+            Guest Details
+          </div>
           <div className="space-y-2">
-            <div className="font-bold text-xl text-slate-900">{props.customerName}</div>
-            <div className="text-sm text-slate-600">{props.customerAddress}</div>
+            <div className="font-bold text-xl text-slate-900">
+              {props.customerName}
+            </div>
+            <div className="text-sm text-slate-600">
+              {props.customerAddress}
+            </div>
             <div className="text-sm text-slate-700">{props.customerEmail}</div>
             <div className="text-sm text-slate-700">{props.customerPhone}</div>
           </div>
         </div>
         <div className="bg-slate-800 text-gray-800 p-5 rounded-lg shadow-sm">
-          <div className="text-sm font-bold mb-3 uppercase tracking-wide">Accommodation Details</div>
+          <div className="text-sm font-bold mb-3 uppercase tracking-wide">
+            Accommodation Details
+          </div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-slate-300">Room Number:</span>
@@ -977,7 +1191,9 @@ export const PremiumHotelTemplate = (props) => (
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
               <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+              <td className="text-right px-4 py-3 font-semibold">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -987,7 +1203,9 @@ export const PremiumHotelTemplate = (props) => (
         <div className="w-96">
           <div className="flex justify-between py-2 px-4 bg-slate-100">
             <span className="text-slate-700">Subtotal:</span>
-            <span className="text-slate-900">R {props.subtotal.toFixed(2)}</span>
+            <span className="text-slate-900">
+              R {props.subtotal.toFixed(2)}
+            </span>
           </div>
           <div className="flex justify-between py-2 px-4 bg-slate-100">
             <span className="text-slate-700">VAT (15%):</span>
@@ -1001,17 +1219,28 @@ export const PremiumHotelTemplate = (props) => (
       </div>
 
       <div className="bg-slate-100 border-2 border-slate-800 p-4 mb-4 rounded">
-        <div className="text-slate-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-slate-800 font-bold text-sm mb-2">
+          PAYMENT INFORMATION
+        </div>
         <div className="text-xs space-y-1 text-slate-700">
-          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'N/A'}</div>
-          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || 'N/A'}</div>
+          <div>
+            <span className="font-semibold">Bank Name:</span>{" "}
+            {props.businessInfo.bankName || "N/A"}
+          </div>
+          <div>
+            <span className="font-semibold">Account Holder:</span>{" "}
+            {props.businessInfo.businessName}
+          </div>
+          <div>
+            <span className="font-semibold">Account Number:</span>{" "}
+            {props.businessInfo.accountNumber || "N/A"}
+          </div>
         </div>
       </div>
 
       {props.showStamp && (
         <div className="flex justify-end mb-4">
-          <SignatureStamp 
+          <SignatureStamp
             text={props.stampText}
             color={props.stampColor}
             showDate={props.showStampDate}
@@ -1022,49 +1251,50 @@ export const PremiumHotelTemplate = (props) => (
       )}
 
       <div className="text-center text-sm text-slate-600 border-t-2 border-slate-800 pt-4">
-        Thank you for choosing {props.businessInfo.businessName}. Your satisfaction is our priority.
+        Thank you for choosing {props.businessInfo.businessName}. Your
+        satisfaction is our priority.
       </div>
     </div>
   </div>
 );
 
 // Template Renderer
-export const TemplateRenderer = ({ 
-  templateId, 
-  documentType = 'hospitality',
+export const TemplateRenderer = ({
+  templateId,
+  documentType = "hospitality",
   stampText = "PAID",
   stampColor = "#2e7d32",
   showStampDate = true,
   showStamp = false,
-  ...props 
+  ...props
 }) => {
-  const templateProps = { 
-    ...props, 
+  const templateProps = {
+    ...props,
     documentType,
     stampText,
     stampColor,
     showStampDate,
-    showStamp
+    showStamp,
   };
 
   switch (templateId) {
-    case 'default':
+    case "default":
       return <DefaultHotelTemplate {...templateProps} />;
-    case 'classic':
+    case "classic":
       return <ClassicHotelTemplate {...templateProps} />;
-    case 'modern':
+    case "modern":
       return <ModernHotelTemplate {...templateProps} />;
-    case 'elegant':
+    case "elegant":
       return <ElegantHotelTemplate {...templateProps} />;
-    case 'premium':
+    case "premium":
       return <PremiumHotelTemplate {...templateProps} />;
-    case 'luxury':
+    case "luxury":
       return <LuxuryHotelTemplate {...templateProps} />;
-    case 'business':
+    case "business":
       return <BusinessHotelTemplate {...templateProps} />;
     default:
       return <DefaultHotelTemplate {...templateProps} />;
   }
 };
 
-export default TemplateSelector
+export default TemplateSelector;

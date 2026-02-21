@@ -1,38 +1,38 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { getFirestore, doc, deleteDoc } from 'firebase/firestore';
-import { 
-  X, 
-  Search, 
-  Edit, 
-  Trash2, 
-  GraduationCap, 
-  Phone, 
-  Mail, 
+import React, { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { getFirestore, doc, deleteDoc } from "firebase/firestore";
+import {
+  X,
+  Search,
+  Edit,
+  Trash2,
+  GraduationCap,
+  Phone,
+  Mail,
   Calendar,
   User,
   Plus,
-  AlertCircle
-} from 'lucide-react';
+  AlertCircle,
+} from "lucide-react";
 
-const StudentsListModal = ({ 
-  showModal, 
-  setShowModal, 
-  students, 
-  onLoadStudent, 
-  onEditStudent, 
-  onAddNewStudent 
+const StudentsListModal = ({
+  showModal,
+  setShowModal,
+  students,
+  onLoadStudent,
+  onEditStudent,
+  onAddNewStudent,
 }) => {
-  const {user, authUser} = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGrade, setSelectedGrade] = useState('');
+  const { user, authUser } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedGrade, setSelectedGrade] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState(null);
 
   const handleClose = () => {
     setShowModal(false);
-    setSearchTerm('');
-    setSelectedGrade('');
+    setSearchTerm("");
+    setSelectedGrade("");
   };
 
   const handleLoadStudent = (student) => {
@@ -56,15 +56,17 @@ const StudentsListModal = ({
 
     try {
       const db = getFirestore();
-      await deleteDoc(doc(db, 'users', user.uid, 'students', studentToDelete.id));
-      alert('Student deleted successfully!');
+      await deleteDoc(
+        doc(db, "users", user.uid, "students", studentToDelete.id),
+      );
+      alert("Student deleted successfully!");
       setShowDeleteConfirm(false);
       setStudentToDelete(null);
       // Reload students list
       window.location.reload();
     } catch (error) {
-      console.error('Error deleting student:', error);
-      alert('Failed to delete student. Please try again.');
+      console.error("Error deleting student:", error);
+      alert("Failed to delete student. Please try again.");
     }
   };
 
@@ -74,27 +76,32 @@ const StudentsListModal = ({
   };
 
   // Filter students based on search term and grade
-  const filteredStudents = students.filter(student => {
-    const matchesSearch = 
+  const filteredStudents = students.filter((student) => {
+    const matchesSearch =
       student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.parentName?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesGrade = !selectedGrade || student.gradeLevel === selectedGrade;
-    
+
     return matchesSearch && matchesGrade;
   });
 
   // Get unique grade levels from students
-  const uniqueGrades = [...new Set(students.map(s => s.gradeLevel).filter(Boolean))].sort();
+  const uniqueGrades = [
+    ...new Set(students.map((s) => s.gradeLevel).filter(Boolean)),
+  ].sort();
 
   const calculateAge = (dateOfBirth) => {
-    if (!dateOfBirth) return 'N/A';
+    if (!dateOfBirth) return "N/A";
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
     return age;
@@ -133,15 +140,17 @@ const StudentsListModal = ({
                   className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-300 text-gray-900"
                 />
               </div>
-              
+
               <select
                 value={selectedGrade}
                 onChange={(e) => setSelectedGrade(e.target.value)}
                 className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-300 text-gray-900"
               >
                 <option value="">All Grades</option>
-                {uniqueGrades.map(grade => (
-                  <option key={grade} value={grade}>{grade}</option>
+                {uniqueGrades.map((grade) => (
+                  <option key={grade} value={grade}>
+                    {grade}
+                  </option>
                 ))}
               </select>
 
@@ -164,7 +173,9 @@ const StudentsListModal = ({
               <div className="text-center py-12">
                 <GraduationCap className="w-16 h-16 mx-auto text-gray-300 mb-4" />
                 <p className="text-gray-500 text-lg">
-                  {searchTerm || selectedGrade ? 'No students found matching your search' : 'No students added yet'}
+                  {searchTerm || selectedGrade
+                    ? "No students found matching your search"
+                    : "No students added yet"}
                 </p>
                 {!searchTerm && !selectedGrade && (
                   <button
@@ -194,12 +205,14 @@ const StudentsListModal = ({
                         </div>
                         <div>
                           <h3 className="font-semibold text-lg text-gray-900">
-                            {student.name || 'No Name'}
+                            {student.name || "No Name"}
                           </h3>
-                          <p className="text-xs text-gray-500">{student.studentId || 'N/A'}</p>
+                          <p className="text-xs text-gray-500">
+                            {student.studentId || "N/A"}
+                          </p>
                         </div>
                       </div>
-                      
+
                       {/* Action Buttons */}
                       <div className="flex gap-1">
                         <button
@@ -223,34 +236,46 @@ const StudentsListModal = ({
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2 text-gray-700">
                         <GraduationCap className="w-4 h-4 text-indigo-500" />
-                        <span className="text-sm font-medium">{student.gradeLevel || 'No Grade'}</span>
+                        <span className="text-sm font-medium">
+                          {student.gradeLevel || "No Grade"}
+                        </span>
                       </div>
-                      
+
                       {student.dateOfBirth && (
                         <div className="flex items-center gap-2 text-gray-600">
                           <Calendar className="w-4 h-4 text-gray-400" />
-                          <span>Age: {calculateAge(student.dateOfBirth)} years</span>
+                          <span>
+                            Age: {calculateAge(student.dateOfBirth)} years
+                          </span>
                         </div>
                       )}
 
                       <div className="border-t pt-2 mt-2">
-                        <p className="text-xs text-gray-500 mb-1">Parent/Guardian:</p>
+                        <p className="text-xs text-gray-500 mb-1">
+                          Parent/Guardian:
+                        </p>
                         <div className="flex items-center gap-2 text-gray-700">
                           <User className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm font-medium">{student.parentName || 'N/A'}</span>
+                          <span className="text-sm font-medium">
+                            {student.parentName || "N/A"}
+                          </span>
                         </div>
-                        
+
                         {student.parentPhone && (
                           <div className="flex items-center gap-2 text-gray-600 mt-1">
                             <Phone className="w-4 h-4 text-gray-400" />
-                            <span className="text-xs">{student.parentPhone}</span>
+                            <span className="text-xs">
+                              {student.parentPhone}
+                            </span>
                           </div>
                         )}
-                        
+
                         {student.parentEmail && (
                           <div className="flex items-center gap-2 text-gray-600 mt-1">
                             <Mail className="w-4 h-4 text-gray-400" />
-                            <span className="text-xs truncate">{student.parentEmail}</span>
+                            <span className="text-xs truncate">
+                              {student.parentEmail}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -260,7 +285,9 @@ const StudentsListModal = ({
                         <div className="border-t pt-2 mt-2">
                           <div className="flex items-center gap-2 text-orange-600 bg-orange-50 px-2 py-1 rounded">
                             <AlertCircle className="w-4 h-4" />
-                            <span className="text-xs text-sm font-medium">Medical Alert</span>
+                            <span className="text-xs text-sm font-medium">
+                              Medical Alert
+                            </span>
                           </div>
                         </div>
                       )}
@@ -304,8 +331,12 @@ const StudentsListModal = ({
                 <AlertCircle className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Delete Student</h3>
-                <p className="text-sm text-gray-500">This action cannot be undone</p>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Delete Student
+                </h3>
+                <p className="text-sm text-gray-500">
+                  This action cannot be undone
+                </p>
               </div>
             </div>
 

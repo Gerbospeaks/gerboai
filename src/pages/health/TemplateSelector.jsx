@@ -1,26 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, Check } from 'lucide-react';
-import SignatureStamp from '../SignatureStamp';
+import React, { useState, useEffect } from "react";
+import { FileText, Check } from "lucide-react";
+import SignatureStamp from "../SignatureStamp";
 import {
   getFirestore,
   doc,
   getDoc,
   updateDoc,
-  serverTimestamp
-} from 'firebase/firestore';
+  serverTimestamp,
+} from "firebase/firestore";
 
-export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) => {
-  const [purchasedTemplates, setPurchasedTemplates] = useState(['clinical']);
+export const TemplateSelector = ({
+  user,
+  selectedTemplate,
+  onTemplateChange,
+}) => {
+  const [purchasedTemplates, setPurchasedTemplates] = useState(["clinical"]);
   const [isOpen, setIsOpen] = useState(false);
 
   const templateNames = {
-    default: 'Default (Original)',
-    clinical: 'Clinical Standard',
-    modern: 'Modern Medical',
-    wellness: 'Wellness Center',
-    premium: 'Premium Healthcare',
-    specialist: 'Specialist Practice',
-    hospital: 'Hospital Services'
+    default: "Default (Original)",
+    clinical: "Clinical Standard",
+    modern: "Modern Medical",
+    wellness: "Wellness Center",
+    premium: "Premium Healthcare",
+    specialist: "Specialist Practice",
+    hospital: "Hospital Services",
   };
 
   const handleSelectTemplate = (templateId) => {
@@ -35,17 +39,29 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
       >
         <FileText className="w-4 h-4" />
-        <span className="hidden sm:inline">{templateNames[selectedTemplate] || 'Select Template'}</span>
+        <span className="hidden sm:inline">
+          {templateNames[selectedTemplate] || "Select Template"}
+        </span>
         <span className="sm:hidden">Template</span>
-        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <svg
+          className="w-4 h-4 ml-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-10" 
+          <div
+            className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-80 overflow-auto">
@@ -53,12 +69,14 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
               <div className="text-xs font-semibold text-gray-500 px-3 py-2">
                 Your Templates
               </div>
-              {purchasedTemplates.map(templateId => (
+              {purchasedTemplates.map((templateId) => (
                 <button
                   key={templateId}
                   onClick={() => handleSelectTemplate(templateId)}
                   className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center justify-between ${
-                    selectedTemplate === templateId ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                    selectedTemplate === templateId
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-700"
                   }`}
                 >
                   <span>{templateNames[templateId]}</span>
@@ -76,13 +94,13 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 };
 
 // Default Healthcare Template
-export const DefaultTemplate = ({ 
-  businessInfo, 
+export const DefaultTemplate = ({
+  businessInfo,
   loading,
-  jobCardNumber, 
-  customerName, 
-  customerEmail, 
-  customerPhone, 
+  jobCardNumber,
+  customerName,
+  customerEmail,
+  customerPhone,
   customerAddress,
   patientId,
   patientDOB,
@@ -99,7 +117,7 @@ export const DefaultTemplate = ({
   stampText = "PAID",
   stampColor = "#2e7d32",
   showStampDate = true,
-  serviceType = "MEDICAL"
+  serviceType = "MEDICAL",
 }) => (
   <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     {/* Header Section */}
@@ -129,17 +147,22 @@ export const DefaultTemplate = ({
           <div className="text-xs leading-relaxed text-gray-700">
             <div>{businessInfo.addressLine1}</div>
             <div>{businessInfo.addressLine2}</div>
-            <div>{businessInfo.city} {businessInfo.postalCode}</div>
+            <div>
+              {businessInfo.city} {businessInfo.postalCode}
+            </div>
             <div className="mt-1">
               Tel: {businessInfo.primaryPhone}
-              {businessInfo.secondaryPhone && ` | ${businessInfo.secondaryPhone}`}
+              {businessInfo.secondaryPhone &&
+                ` | ${businessInfo.secondaryPhone}`}
             </div>
             {businessInfo.email && <div>Email: {businessInfo.email}</div>}
           </div>
         </div>
 
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4 text-blue-900">MEDICAL INVOICE</div>
+          <div className="text-3xl font-bold mb-4 text-blue-900">
+            MEDICAL INVOICE
+          </div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
@@ -161,18 +184,24 @@ export const DefaultTemplate = ({
     {/* Three Column Section */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-blue-50 border border-blue-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">PATIENT INFORMATION</div>
+        <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">
+          PATIENT INFORMATION
+        </div>
         <div className="text-xs space-y-1">
           <div className="font-semibold">{customerName}</div>
           <div className="text-gray-600">Patient ID: {patientId}</div>
-          <div className="h-12 overflow-hidden text-xs leading-tight">{customerAddress}</div>
+          <div className="h-12 overflow-hidden text-xs leading-tight">
+            {customerAddress}
+          </div>
           <div>{customerEmail}</div>
           <div>{customerPhone}</div>
         </div>
       </div>
 
       <div className="bg-blue-50 border border-blue-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">PATIENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">
+          PATIENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Date of Birth:</span>
@@ -190,15 +219,17 @@ export const DefaultTemplate = ({
       </div>
 
       <div className="bg-blue-50 border border-blue-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">INSURANCE INFORMATION</div>
+        <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">
+          INSURANCE INFORMATION
+        </div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Provider:</span>
-            <span>{insuranceProvider || 'Self Pay'}</span>
+            <span>{insuranceProvider || "Self Pay"}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Policy No:</span>
-            <span>{insuranceNumber || 'N/A'}</span>
+            <span>{insuranceNumber || "N/A"}</span>
           </div>
         </div>
       </div>
@@ -207,7 +238,9 @@ export const DefaultTemplate = ({
     {/* Clinical Information */}
     {(diagnosis || prescription) && (
       <div className="mb-4 bg-yellow-50 border border-yellow-200 p-3">
-        <div className="font-bold text-xs mb-2 text-yellow-800">CLINICAL NOTES</div>
+        <div className="font-bold text-xs mb-2 text-yellow-800">
+          CLINICAL NOTES
+        </div>
         <div className="text-xs space-y-2">
           {diagnosis && (
             <div>
@@ -230,7 +263,9 @@ export const DefaultTemplate = ({
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-gray-50 text-gray-800">
-            <th className="text-left px-2 py-1 font-bold">SERVICE DESCRIPTION</th>
+            <th className="text-left px-2 py-1 font-bold">
+              SERVICE DESCRIPTION
+            </th>
             <th className="text-center px-2 py-1 font-bold">QUANTITY</th>
             <th className="text-right px-2 py-1 font-bold">UNIT PRICE</th>
             <th className="text-right px-2 py-1 font-bold">AMOUNT</th>
@@ -242,7 +277,9 @@ export const DefaultTemplate = ({
               <td className="px-2 py-2">{item.description}</td>
               <td className="text-center px-2 py-2">{item.qty}</td>
               <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -269,19 +306,33 @@ export const DefaultTemplate = ({
 
     {/* Payment Information */}
     <div className="bg-green-50 border border-green-200 p-3 mb-4">
-      <div className="text-green-800 font-bold text-xs mb-2">PAYMENT INFORMATION</div>
+      <div className="text-green-800 font-bold text-xs mb-2">
+        PAYMENT INFORMATION
+      </div>
       <div className="text-xs space-y-1">
-        <div><span className="font-semibold">Bank Name:</span> {businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber || 'XXX-XXX-XXXX'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {businessInfo.branchCode || '250655'}</div>
+        <div>
+          <span className="font-semibold">Bank Name:</span>{" "}
+          {businessInfo.bankName || "First National Bank"}
+        </div>
+        <div>
+          <span className="font-semibold">Account Holder:</span>{" "}
+          {businessInfo.businessName}
+        </div>
+        <div>
+          <span className="font-semibold">Account Number:</span>{" "}
+          {businessInfo.accountNumber || "XXX-XXX-XXXX"}
+        </div>
+        <div>
+          <span className="font-semibold">Branch Code:</span>{" "}
+          {businessInfo.branchCode || "250655"}
+        </div>
       </div>
     </div>
 
     {/* Stamp and Signature */}
     {showStamp && (
       <div className="flex justify-end mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={stampText}
           color={stampColor}
           showDate={showStampDate}
@@ -306,16 +357,24 @@ export const ClinicalTemplate = (props) => (
         <div>
           <div className="flex items-center gap-3 mb-2">
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 object-contain"
+              />
             )}
             <div>
-              <div className="text-xl font-bold text-teal-900">{props.businessInfo.businessName}</div>
+              <div className="text-xl font-bold text-teal-900">
+                {props.businessInfo.businessName}
+              </div>
               <div className="text-sm text-gray-600">Medical Services</div>
             </div>
           </div>
           <div className="text-xs leading-relaxed text-gray-700">
             <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+            <div>
+              {props.businessInfo.city}, {props.businessInfo.postalCode}
+            </div>
             <div>Tel: {props.businessInfo.primaryPhone}</div>
           </div>
         </div>
@@ -337,7 +396,9 @@ export const ClinicalTemplate = (props) => (
 
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-teal-50 border border-teal-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">PATIENT</div>
+        <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">
+          PATIENT
+        </div>
         <div className="text-xs space-y-1">
           <div className="font-semibold">{props.customerName}</div>
           <div>DOB: {props.patientDOB}</div>
@@ -346,14 +407,18 @@ export const ClinicalTemplate = (props) => (
         </div>
       </div>
       <div className="bg-teal-50 border border-teal-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">INSURANCE</div>
+        <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">
+          INSURANCE
+        </div>
         <div className="text-xs space-y-1">
-          <div>{props.insuranceProvider || 'Self Pay'}</div>
-          <div>Policy: {props.insuranceNumber || 'N/A'}</div>
+          <div>{props.insuranceProvider || "Self Pay"}</div>
+          <div>Policy: {props.insuranceNumber || "N/A"}</div>
         </div>
       </div>
       <div className="bg-teal-50 border border-teal-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">VISIT INFO</div>
+        <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">
+          VISIT INFO
+        </div>
         <div className="text-xs space-y-1">
           <div>Date: {new Date().toLocaleDateString()}</div>
           <div>Type: {props.serviceType}</div>
@@ -400,16 +465,24 @@ export const ClinicalTemplate = (props) => (
     </div>
 
     <div className="bg-green-50 border border-green-200 p-3 mb-4">
-      <div className="text-green-800 font-bold text-xs mb-2">PAYMENT DETAILS</div>
+      <div className="text-green-800 font-bold text-xs mb-2">
+        PAYMENT DETAILS
+      </div>
       <div className="text-xs space-y-1">
-        <div><span className="font-semibold">Bank:</span> {props.businessInfo.bankName || 'FNB'}</div>
-        <div><span className="font-semibold">Account:</span> {props.businessInfo.accountNumber}</div>
+        <div>
+          <span className="font-semibold">Bank:</span>{" "}
+          {props.businessInfo.bankName || "FNB"}
+        </div>
+        <div>
+          <span className="font-semibold">Account:</span>{" "}
+          {props.businessInfo.accountNumber}
+        </div>
       </div>
     </div>
 
     {props.showStamp && (
       <div className="flex justify-end mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -420,7 +493,8 @@ export const ClinicalTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-600 italic border-t pt-3">
-      Payment due within 30 days. Thank you for choosing our healthcare services.
+      Payment due within 30 days. Thank you for choosing our healthcare
+      services.
     </div>
   </div>
 );
@@ -432,20 +506,32 @@ export const ModernTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+            <img
+              src={props.businessInfo.logoUrl}
+              alt="Logo"
+              className="w-20 h-20 object-contain mb-3"
+            />
           )}
-          
+
           <div className="text-sm text-gray-600 space-y-1">
             <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+            <div>
+              {props.businessInfo.city}, {props.businessInfo.postalCode}
+            </div>
             <div>{props.businessInfo.primaryPhone}</div>
           </div>
         </div>
         <div className="text-right">
           <div className="text-5xl font-bold text-indigo-500 mb-4">INVOICE</div>
           <div className="bg-indigo-50 p-4 rounded-lg space-y-2">
-            <div className="text-sm"><span className="font-semibold">Invoice #:</span> {props.jobCardNumber}</div>
-            <div className="text-sm"><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</div>
+            <div className="text-sm">
+              <span className="font-semibold">Invoice #:</span>{" "}
+              {props.jobCardNumber}
+            </div>
+            <div className="text-sm">
+              <span className="font-semibold">Date:</span>{" "}
+              {new Date().toLocaleDateString()}
+            </div>
           </div>
         </div>
       </div>
@@ -453,7 +539,9 @@ export const ModernTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div className="bg-gray-100 p-4 rounded-lg">
-        <div className="text-sm font-bold text-gray-700 mb-3">PATIENT INFORMATION</div>
+        <div className="text-sm font-bold text-gray-700 mb-3">
+          PATIENT INFORMATION
+        </div>
         <div className="space-y-1 text-sm">
           <div className="font-semibold text-lg">{props.customerName}</div>
           <div>Patient ID: {props.patientId}</div>
@@ -464,8 +552,14 @@ export const ModernTemplate = (props) => (
       <div className="bg-indigo-50 p-4 rounded-lg">
         <div className="text-sm font-bold text-indigo-700 mb-3">INSURANCE</div>
         <div className="space-y-1 text-sm">
-          <div><span className="font-semibold">Provider:</span> {props.insuranceProvider || 'Self Pay'}</div>
-          <div><span className="font-semibold">Policy:</span> {props.insuranceNumber || 'N/A'}</div>
+          <div>
+            <span className="font-semibold">Provider:</span>{" "}
+            {props.insuranceProvider || "Self Pay"}
+          </div>
+          <div>
+            <span className="font-semibold">Policy:</span>{" "}
+            {props.insuranceNumber || "N/A"}
+          </div>
         </div>
       </div>
     </div>
@@ -485,7 +579,9 @@ export const ModernTemplate = (props) => (
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
             <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+            <td className="text-right px-4 py-3 font-semibold">
+              R {item.amount.toFixed(2)}
+            </td>
           </tr>
         ))}
       </tbody>
@@ -510,7 +606,7 @@ export const ModernTemplate = (props) => (
 
     {props.showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -527,38 +623,39 @@ export const ModernTemplate = (props) => (
 );
 
 // Template Renderer
-export const TemplateRenderer = ({ 
-  templateId, 
-  documentType = 'medical',
+export const TemplateRenderer = ({
+  templateId,
+  documentType = "medical",
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true,
   showStamp = false,
-  ...props }) => {
-  const templateProps = { 
-     ...props, 
+  ...props
+}) => {
+  const templateProps = {
+    ...props,
     documentType,
     stampText,
     stampColor,
     showStampDate,
-    showStamp
+    showStamp,
   };
-  
+
   switch (templateId) {
-    case 'default':
+    case "default":
       return <DefaultTemplate {...templateProps} />;
-    case 'clinical':
+    case "clinical":
       return <ClinicalTemplate {...templateProps} />;
-    case 'modern':
+    case "modern":
       return <ModernTemplate {...templateProps} />;
     default:
       return <DefaultTemplate {...templateProps} />;
   }
 };
 // Sick Note Component
-const SickNoteDocument = ({ 
-  facilityInfo, 
-  patientName, 
+const SickNoteDocument = ({
+  facilityInfo,
+  patientName,
   patientId,
   patientDOB,
   diagnosis,
@@ -566,29 +663,36 @@ const SickNoteDocument = ({
   dateTo,
   doctorName,
   practiceNumber,
-  additionalNotes 
+  additionalNotes,
 }) => (
   <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     <div className="border-4 border-blue-600 p-6">
       {/* Header */}
       <div className="text-center border-b-2 border-blue-600 pb-4 mb-6">
-        <div className="text-3xl font-bold text-blue-900 mb-2">MEDICAL CERTIFICATE</div>
-        <div className="text-sm text-gray-600">Sick Note / Certificate of Illness</div>
+        <div className="text-3xl font-bold text-blue-900 mb-2">
+          MEDICAL CERTIFICATE
+        </div>
+        <div className="text-sm text-gray-600">
+          Sick Note / Certificate of Illness
+        </div>
       </div>
 
       {/* Facility Info */}
       <div className="mb-6 text-center">
         <div className="text-xl font-bold">{facilityInfo.businessName}</div>
         <div className="text-sm text-gray-600">
-          {facilityInfo.addressLine1}, {facilityInfo.city}, {facilityInfo.postalCode}
+          {facilityInfo.addressLine1}, {facilityInfo.city},{" "}
+          {facilityInfo.postalCode}
         </div>
-        <div className="text-sm text-gray-600">Tel: {facilityInfo.primaryPhone}</div>
+        <div className="text-sm text-gray-600">
+          Tel: {facilityInfo.primaryPhone}
+        </div>
       </div>
 
       {/* Certificate Body */}
       <div className="space-y-4 mb-6">
         <p className="text-sm">This is to certify that:</p>
-        
+
         <div className="bg-gray-50 p-4 rounded border border-gray-200">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
@@ -601,21 +705,31 @@ const SickNoteDocument = ({
               <span className="font-semibold">Date of Birth:</span> {patientDOB}
             </div>
             <div>
-              <span className="font-semibold">Date Issued:</span> {new Date().toLocaleDateString()}
+              <span className="font-semibold">Date Issued:</span>{" "}
+              {new Date().toLocaleDateString()}
             </div>
           </div>
         </div>
 
         <div className="text-sm leading-relaxed">
-          <p className="mb-3">was examined and treated at this facility on <span className="font-semibold">{new Date().toLocaleDateString()}</span>.</p>
-          
+          <p className="mb-3">
+            was examined and treated at this facility on{" "}
+            <span className="font-semibold">
+              {new Date().toLocaleDateString()}
+            </span>
+            .
+          </p>
+
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded mb-3">
             <div className="font-semibold mb-2">Diagnosis:</div>
-            <div>{diagnosis || 'Medical condition requiring rest'}</div>
+            <div>{diagnosis || "Medical condition requiring rest"}</div>
           </div>
 
-          <p className="mb-3">The patient is advised to refrain from work/school for the following period:</p>
-          
+          <p className="mb-3">
+            The patient is advised to refrain from work/school for the following
+            period:
+          </p>
+
           <div className="bg-red-50 border-2 border-red-500 p-4 rounded mb-3">
             <div className="grid grid-cols-2 gap-4 text-base font-bold">
               <div>
@@ -654,7 +768,9 @@ const SickNoteDocument = ({
             <div className="text-sm text-right">
               <div className="font-semibold mb-2">Signature:</div>
               <div className="border-b-2 border-gray-400 h-16 mb-2"></div>
-              <div className="text-gray-600">Date: {new Date().toLocaleDateString()}</div>
+              <div className="text-gray-600">
+                Date: {new Date().toLocaleDateString()}
+              </div>
             </div>
           </div>
         </div>
@@ -662,10 +778,13 @@ const SickNoteDocument = ({
 
       {/* Footer */}
       <div className="text-center text-xs text-gray-500 mt-6 pt-4 border-t">
-        This certificate is issued in accordance with medical examination conducted on the date mentioned above.
-        <div className="mt-1">For verification, please contact: {facilityInfo.primaryPhone}</div>
+        This certificate is issued in accordance with medical examination
+        conducted on the date mentioned above.
+        <div className="mt-1">
+          For verification, please contact: {facilityInfo.primaryPhone}
+        </div>
       </div>
     </div>
   </div>
 );
-export default TemplateSelector
+export default TemplateSelector;

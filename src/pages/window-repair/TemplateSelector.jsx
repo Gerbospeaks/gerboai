@@ -1,24 +1,27 @@
-
-import React, { useState, useEffect } from 'react';
-import { FileText, Check } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { FileText, Check } from "lucide-react";
 
 // Mock SignatureStamp component for this artifact
 const SignatureStamp = ({ text, color, showDate, rotation, size }) => (
-  <div 
-    style={{ 
+  <div
+    style={{
       transform: `rotate(${rotation}deg)`,
-      display: 'inline-block',
+      display: "inline-block",
       border: `3px solid ${color}`,
-      borderRadius: '8px',
-      padding: size === 'small' ? '8px 16px' : '12px 24px',
+      borderRadius: "8px",
+      padding: size === "small" ? "8px 16px" : "12px 24px",
       color: color,
-      fontWeight: 'bold',
-      fontSize: size === 'small' ? '14px' : '18px',
-      opacity: 0.7
+      fontWeight: "bold",
+      fontSize: size === "small" ? "14px" : "18px",
+      opacity: 0.7,
     }}
   >
     {text}
-    {showDate && <div style={{ fontSize: '10px', marginTop: '4px' }}>{new Date().toLocaleDateString()}</div>}
+    {showDate && (
+      <div style={{ fontSize: "10px", marginTop: "4px" }}>
+        {new Date().toLocaleDateString()}
+      </div>
+    )}
   </div>
 );
 
@@ -27,15 +30,22 @@ export const TemplateSelector = ({ selectedTemplate, onTemplateChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const templateNames = {
-    default: 'Default Professional',
-    classic: 'Classic Clean',
-    modern: 'Modern Minimalist',
-    elegant: 'Elegant Premium',
-    residential: 'Residential Service',
-    commercial: 'Commercial Pro'
+    default: "Default Professional",
+    classic: "Classic Clean",
+    modern: "Modern Minimalist",
+    elegant: "Elegant Premium",
+    residential: "Residential Service",
+    commercial: "Commercial Pro",
   };
 
-  const availableTemplates = ['default', 'classic', 'modern', 'elegant', 'residential', 'commercial'];
+  const availableTemplates = [
+    "default",
+    "classic",
+    "modern",
+    "elegant",
+    "residential",
+    "commercial",
+  ];
 
   const handleSelectTemplate = (templateId) => {
     onTemplateChange(templateId);
@@ -49,26 +59,38 @@ export const TemplateSelector = ({ selectedTemplate, onTemplateChange }) => {
         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
       >
         <FileText className="w-4 h-4" />
-        <span>{templateNames[selectedTemplate] || 'Select Template'}</span>
-        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <span>{templateNames[selectedTemplate] || "Select Template"}</span>
+        <svg
+          className="w-4 h-4 ml-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-10" 
+          <div
+            className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-80 overflow-auto">
             <div className="p-2">
-              {availableTemplates.map(templateId => (
+              {availableTemplates.map((templateId) => (
                 <button
                   key={templateId}
                   onClick={() => handleSelectTemplate(templateId)}
                   className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center justify-between ${
-                    selectedTemplate === templateId ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                    selectedTemplate === templateId
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-700"
                   }`}
                 >
                   <span>{templateNames[templateId]}</span>
@@ -86,13 +108,13 @@ export const TemplateSelector = ({ selectedTemplate, onTemplateChange }) => {
 };
 
 // Default Template
-export const DefaultTemplate = ({ 
-  businessInfo, 
+export const DefaultTemplate = ({
+  businessInfo,
   loading,
-  invoiceNumber, 
-  customerName, 
-  customerEmail, 
-  customerPhone, 
+  invoiceNumber,
+  customerName,
+  customerEmail,
+  customerPhone,
   customerAddress,
   windowType,
   windowCount,
@@ -100,13 +122,13 @@ export const DefaultTemplate = ({
   frameCondition,
   items,
   subtotal,
-  documentType = 'invoice',
+  documentType = "invoice",
   totalTax,
   total,
   showStamp = false,
   stampText = "APPROVED",
   stampColor = "#2563eb",
-  showStampDate = true
+  showStampDate = true,
 }) => (
   <div className="bg-white print:p-0" style={{ padding: "15mm 20mm" }}>
     {/* Header Section */}
@@ -126,7 +148,9 @@ export const DefaultTemplate = ({
               <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
             )}
             <div>
-              <div className="text-xl font-bold text-gray-900">{businessInfo.businessName}</div>
+              <div className="text-xl font-bold text-gray-900">
+                {businessInfo.businessName}
+              </div>
               <div className="text-sm font-semibold text-gray-600">
                 Professional Window Repair Services
               </div>
@@ -135,19 +159,26 @@ export const DefaultTemplate = ({
           <div className="text-xs leading-relaxed">
             <div>{businessInfo.addressLine1}</div>
             <div>{businessInfo.addressLine2}</div>
-            <div>{businessInfo.city} {businessInfo.postalCode}</div>
+            <div>
+              {businessInfo.city} {businessInfo.postalCode}
+            </div>
             <div className="mt-1">
               T: {businessInfo.primaryPhone}
-              {businessInfo.secondaryPhone && `, ${businessInfo.secondaryPhone}`}
+              {businessInfo.secondaryPhone &&
+                `, ${businessInfo.secondaryPhone}`}
             </div>
           </div>
         </div>
 
         <div className="text-right">
-          <div className="text-5xl font-black text-green-500 mb-4 italic">{documentType === 'invoice' ? 'INVOICE' : 'QUOTE'}</div>
+          <div className="text-5xl font-black text-green-500 mb-4 italic">
+            {documentType === "invoice" ? "INVOICE" : "QUOTE"}
+          </div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">{documentType === 'quote' ? 'QUOTE NO.' : 'INVOICE NO.'}</span>
+              <span className="font-semibold">
+                {documentType === "quote" ? "QUOTE NO." : "INVOICE NO."}
+              </span>
               <span>{invoiceNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -166,39 +197,47 @@ export const DefaultTemplate = ({
     {/* Three Column Section */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-blue-50 p-3 border border-blue-200">
-        <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1">CLIENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1">
+          CLIENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
           <div className="font-semibold">{customerName}</div>
-          <div className="h-12 overflow-hidden text-xs leading-tight">{customerAddress}</div>
+          <div className="h-12 overflow-hidden text-xs leading-tight">
+            {customerAddress}
+          </div>
           <div>{customerEmail}</div>
           <div>{customerPhone}</div>
         </div>
       </div>
 
       <div className="bg-blue-50 p-3 border border-blue-200">
-        <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1">WINDOW DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1">
+          WINDOW DETAILS
+        </div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Window Type:</span>
-            <span>{windowType || 'Standard'}</span>
+            <span>{windowType || "Standard"}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Count:</span>
-            <span>{windowCount || 'N/A'}</span>
+            <span>{windowCount || "N/A"}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Screen Type:</span>
-            <span>{screenType || 'N/A'}</span>
+            <span>{screenType || "N/A"}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Frame:</span>
-            <span>{frameCondition || 'N/A'}</span>
+            <span>{frameCondition || "N/A"}</span>
           </div>
         </div>
       </div>
 
       <div className="bg-blue-50 p-3 border border-blue-200">
-        <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1">SERVICE INFO</div>
+        <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1">
+          SERVICE INFO
+        </div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Quote Date:</span>
@@ -206,7 +245,11 @@ export const DefaultTemplate = ({
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Valid Until:</span>
-            <span>{new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString("en-ZA")}</span>
+            <span>
+              {new Date(
+                Date.now() + 30 * 24 * 60 * 60 * 1000,
+              ).toLocaleDateString("en-ZA")}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Status:</span>
@@ -221,7 +264,9 @@ export const DefaultTemplate = ({
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-blue-200">
-            <th className="text-left px-2 py-1 font-bold">SERVICE DESCRIPTION</th>
+            <th className="text-left px-2 py-1 font-bold">
+              SERVICE DESCRIPTION
+            </th>
             <th className="text-center px-2 py-1 font-bold">QUANTITY</th>
             <th className="text-right px-2 py-1 font-bold">UNIT PRICE</th>
             <th className="text-right px-2 py-1 font-bold">AMOUNT</th>
@@ -233,7 +278,9 @@ export const DefaultTemplate = ({
               <td className="px-2 py-2">{item.description}</td>
               <td className="text-center px-2 py-2">{item.qty}</td>
               <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -266,7 +313,7 @@ export const DefaultTemplate = ({
       </div>
       {showStamp && (
         <div className="flex justify-end">
-          <SignatureStamp 
+          <SignatureStamp
             text={stampText}
             color={stampColor}
             showDate={showStampDate}
@@ -279,18 +326,33 @@ export const DefaultTemplate = ({
 
     {/* Banking Details */}
     <div className="bg-blue-50 border border-blue-200 p-3 mb-4">
-      <div className="text-blue-600 font-bold text-xs mb-2">PAYMENT INFORMATION</div>
+      <div className="text-blue-600 font-bold text-xs mb-2">
+        PAYMENT INFORMATION
+      </div>
       <div className="text-xs space-y-1">
-        <div><span className="font-semibold">Bank Name:</span> {businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {businessInfo.branchCode || '250655'}</div>
+        <div>
+          <span className="font-semibold">Bank Name:</span>{" "}
+          {businessInfo.bankName || "First National Bank"}
+        </div>
+        <div>
+          <span className="font-semibold">Account Holder:</span>{" "}
+          {businessInfo.businessName}
+        </div>
+        <div>
+          <span className="font-semibold">Account Number:</span>{" "}
+          {businessInfo.accountNumber || "62146991441"}
+        </div>
+        <div>
+          <span className="font-semibold">Branch Code:</span>{" "}
+          {businessInfo.branchCode || "250655"}
+        </div>
       </div>
     </div>
 
     {/* Footer Note */}
     <div className="text-center text-xs text-blue-600 italic">
-      Thank you for choosing our window repair services. We guarantee 100% satisfaction!
+      Thank you for choosing our window repair services. We guarantee 100%
+      satisfaction!
     </div>
   </div>
 );
@@ -303,24 +365,38 @@ export const ClassicTemplate = (props) => (
         <div>
           <div className="flex items-center gap-3 mb-2">
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 object-contain"
+              />
             )}
             <div>
-              <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
-              <div className="text-sm text-gray-600">Professional Window Repair</div>
+              <div className="text-xl font-bold">
+                {props.businessInfo.businessName}
+              </div>
+              <div className="text-sm text-gray-600">
+                Professional Window Repair
+              </div>
             </div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+            <div>
+              {props.businessInfo.city}, {props.businessInfo.postalCode}
+            </div>
             <div>T: {props.businessInfo.primaryPhone}</div>
           </div>
         </div>
         <div className="text-right">
-         <div className="text-5xl font-black text-green-500 mb-4 italic">{props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}</div>
+          <div className="text-5xl font-black text-green-500 mb-4 italic">
+            {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
+          </div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">{props.documentType === 'quote' ? 'QUOTE NO.' : 'INVOICE NO.'}</span>
+              <span className="font-semibold">
+                {props.documentType === "quote" ? "QUOTE NO." : "INVOICE NO."}
+              </span>
               <span>{props.invoiceNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -334,7 +410,9 @@ export const ClassicTemplate = (props) => (
 
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-gray-100 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">CUSTOMER</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">
+          CUSTOMER
+        </div>
         <div className="text-xs space-y-1">
           <div>{props.customerName}</div>
           <div>{props.customerAddress}</div>
@@ -343,19 +421,23 @@ export const ClassicTemplate = (props) => (
         </div>
       </div>
       <div className="bg-gray-100 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">WINDOW INFO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">
+          WINDOW INFO
+        </div>
         <div className="text-xs space-y-1">
-          <div>Type: {props.windowType || 'Standard'}</div>
-          <div>Count: {props.windowCount || 'N/A'}</div>
-          <div>Screen: {props.screenType || 'N/A'}</div>
+          <div>Type: {props.windowType || "Standard"}</div>
+          <div>Count: {props.windowCount || "N/A"}</div>
+          <div>Screen: {props.screenType || "N/A"}</div>
         </div>
       </div>
       <div className="bg-gray-100 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">SERVICE INFO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">
+          SERVICE INFO
+        </div>
         <div className="text-xs space-y-1">
           <div>Date: {new Date().toLocaleDateString()}</div>
           <div>Status: Pending</div>
-          <div>Frame: {props.frameCondition || 'N/A'}</div>
+          <div>Frame: {props.frameCondition || "N/A"}</div>
         </div>
       </div>
     </div>
@@ -399,18 +481,32 @@ export const ClassicTemplate = (props) => (
     </div>
 
     <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-blue-800 font-bold text-sm mb-2">
+        PAYMENT INFORMATION
+      </div>
       <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+        <div>
+          <span className="font-semibold">Bank Name:</span>{" "}
+          {props.businessInfo.bankName || "First National Bank"}
+        </div>
+        <div>
+          <span className="font-semibold">Account Holder:</span>{" "}
+          {props.businessInfo.businessName}
+        </div>
+        <div>
+          <span className="font-semibold">Account Number:</span>{" "}
+          {props.businessInfo.accountNumber || "62146991441"}
+        </div>
+        <div>
+          <span className="font-semibold">Branch Code:</span>{" "}
+          {props.businessInfo.branchCode || "250655"}
+        </div>
       </div>
     </div>
 
     {props.showStamp && (
       <div className="text-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -421,7 +517,8 @@ export const ClassicTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. We guarantee satisfaction with all our services!
+      Thank you for your business. We guarantee satisfaction with all our
+      services!
     </div>
   </div>
 );
@@ -433,20 +530,38 @@ export const ModernTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+            <img
+              src={props.businessInfo.logoUrl}
+              alt="Logo"
+              className="w-20 h-20 object-contain mb-3"
+            />
           )}
-          <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
+          <div className="text-xl font-bold">
+            {props.businessInfo.businessName}
+          </div>
           <div className="text-sm text-gray-600 space-y-1">
             <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+            <div>
+              {props.businessInfo.city}, {props.businessInfo.postalCode}
+            </div>
             <div>{props.businessInfo.primaryPhone}</div>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-5xl font-black text-green-500 mb-4 italic">{props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}</div>
+          <div className="text-5xl font-black text-green-500 mb-4 italic">
+            {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
+          </div>
           <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-            <div className="text-sm"><span className="font-semibold">{props.documentType === 'quote' ? 'QUOTE NO.' : 'INVOICE NO.'}</span> {props.invoiceNumber}</div>
-            <div className="text-sm"><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</div>
+            <div className="text-sm">
+              <span className="font-semibold">
+                {props.documentType === "quote" ? "QUOTE NO." : "INVOICE NO."}
+              </span>{" "}
+              {props.invoiceNumber}
+            </div>
+            <div className="text-sm">
+              <span className="font-semibold">Date:</span>{" "}
+              {new Date().toLocaleDateString()}
+            </div>
           </div>
         </div>
       </div>
@@ -463,12 +578,26 @@ export const ModernTemplate = (props) => (
         </div>
       </div>
       <div className="bg-blue-50 p-4 rounded-lg">
-        <div className="text-sm font-bold text-blue-700 mb-3">WINDOW DETAILS</div>
+        <div className="text-sm font-bold text-blue-700 mb-3">
+          WINDOW DETAILS
+        </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div><span className="font-semibold">Type:</span> {props.windowType || 'Standard'}</div>
-          <div><span className="font-semibold">Count:</span> {props.windowCount || 'N/A'}</div>
-          <div><span className="font-semibold">Screen:</span> {props.screenType || 'N/A'}</div>
-          <div><span className="font-semibold">Frame:</span> {props.frameCondition || 'Good'}</div>
+          <div>
+            <span className="font-semibold">Type:</span>{" "}
+            {props.windowType || "Standard"}
+          </div>
+          <div>
+            <span className="font-semibold">Count:</span>{" "}
+            {props.windowCount || "N/A"}
+          </div>
+          <div>
+            <span className="font-semibold">Screen:</span>{" "}
+            {props.screenType || "N/A"}
+          </div>
+          <div>
+            <span className="font-semibold">Frame:</span>{" "}
+            {props.frameCondition || "Good"}
+          </div>
         </div>
       </div>
     </div>
@@ -476,7 +605,9 @@ export const ModernTemplate = (props) => (
     <table className="w-full mb-6">
       <thead>
         <tr className="bg-blue-500 text-white">
-          <th className="text-left px-4 py-3 rounded-l-lg">Service Description</th>
+          <th className="text-left px-4 py-3 rounded-l-lg">
+            Service Description
+          </th>
           <th className="text-center px-4 py-3">Qty</th>
           <th className="text-right px-4 py-3">Unit Price</th>
           <th className="text-right px-4 py-3 rounded-r-lg">Amount</th>
@@ -488,7 +619,9 @@ export const ModernTemplate = (props) => (
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
             <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+            <td className="text-right px-4 py-3 font-semibold">
+              R {item.amount.toFixed(2)}
+            </td>
           </tr>
         ))}
       </tbody>
@@ -512,18 +645,32 @@ export const ModernTemplate = (props) => (
     </div>
 
     <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-blue-800 font-bold text-sm mb-2">
+        PAYMENT INFORMATION
+      </div>
       <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+        <div>
+          <span className="font-semibold">Bank Name:</span>{" "}
+          {props.businessInfo.bankName || "First National Bank"}
+        </div>
+        <div>
+          <span className="font-semibold">Account Holder:</span>{" "}
+          {props.businessInfo.businessName}
+        </div>
+        <div>
+          <span className="font-semibold">Account Number:</span>{" "}
+          {props.businessInfo.accountNumber || "62146991441"}
+        </div>
+        <div>
+          <span className="font-semibold">Branch Code:</span>{" "}
+          {props.businessInfo.branchCode || "250655"}
+        </div>
       </div>
     </div>
 
     {props.showStamp && (
       <div className="text-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -534,7 +681,8 @@ export const ModernTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for choosing our professional window repair services. Payment is due within 30 days.
+      Thank you for choosing our professional window repair services. Payment is
+      due within 30 days.
     </div>
   </div>
 );
@@ -545,18 +693,32 @@ export const ElegantTemplate = (props) => (
     <div className="border-4 border-purple-900 p-8">
       <div className="text-center border-b-2 border-purple-900 pb-6 mb-6">
         {props.businessInfo.logoUrl && (
-          <img src={props.businessInfo.logoUrl} alt="Logo" className="w-24 h-24 object-contain mx-auto mb-4" />
+          <img
+            src={props.businessInfo.logoUrl}
+            alt="Logo"
+            className="w-24 h-24 object-contain mx-auto mb-4"
+          />
         )}
-        <div className="text-2xl font-bold">{props.businessInfo.businessName}</div>
-        <div className="text-sm text-gray-600">Premium Window Repair Services</div>
-        <div className="text-sm text-gray-600">{props.businessInfo.addressLine1} • {props.businessInfo.city}</div>
-        <div className="text-2xl font-serif text-purple-700 mt-4">SERVICE {props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}</div>
+        <div className="text-2xl font-bold">
+          {props.businessInfo.businessName}
+        </div>
+        <div className="text-sm text-gray-600">
+          Premium Window Repair Services
+        </div>
+        <div className="text-sm text-gray-600">
+          {props.businessInfo.addressLine1} • {props.businessInfo.city}
+        </div>
+        <div className="text-2xl font-serif text-purple-700 mt-4">
+          SERVICE {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
+        </div>
         <div className="text-sm text-gray-500 mt-1">#{props.invoiceNumber}</div>
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
-          <div className="font-serif font-bold text-purple-900 mb-2">BILLED TO</div>
+          <div className="font-serif font-bold text-purple-900 mb-2">
+            BILLED TO
+          </div>
           <div className="text-sm space-y-1">
             <div className="font-semibold">{props.customerName}</div>
             <div>{props.customerAddress}</div>
@@ -565,12 +727,14 @@ export const ElegantTemplate = (props) => (
           </div>
         </div>
         <div>
-          <div className="font-serif font-bold text-purple-900 mb-2">WINDOW DETAILS</div>
+          <div className="font-serif font-bold text-purple-900 mb-2">
+            WINDOW DETAILS
+          </div>
           <div className="text-sm space-y-1">
-            <div>Type: {props.windowType || 'Standard Window'}</div>
-            <div>Count: {props.windowCount || 'N/A'}</div>
-            <div>Screen: {props.screenType || 'N/A'}</div>
-            <div>Frame: {props.frameCondition || 'Good'}</div>
+            <div>Type: {props.windowType || "Standard Window"}</div>
+            <div>Count: {props.windowCount || "N/A"}</div>
+            <div>Screen: {props.screenType || "N/A"}</div>
+            <div>Frame: {props.frameCondition || "Good"}</div>
           </div>
         </div>
       </div>
@@ -614,19 +778,33 @@ export const ElegantTemplate = (props) => (
       </div>
 
       <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-        <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-blue-800 font-bold text-sm mb-2">
+          PAYMENT INFORMATION
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+          <div>
+            <span className="font-semibold">Bank Name:</span>{" "}
+            {props.businessInfo.bankName || "First National Bank"}
+          </div>
+          <div>
+            <span className="font-semibold">Account Holder:</span>{" "}
+            {props.businessInfo.businessName}
+          </div>
+          <div>
+            <span className="font-semibold">Account Number:</span>{" "}
+            {props.businessInfo.accountNumber || "62146991441"}
+          </div>
+          <div>
+            <span className="font-semibold">Branch Code:</span>{" "}
+            {props.businessInfo.branchCode || "250655"}
+          </div>
         </div>
       </div>
 
       {props.showStamp && (
         <div className="text-center mb-4">
           <div className="mb-4">
-            <SignatureStamp 
+            <SignatureStamp
               text={props.stampText}
               color={props.stampColor}
               showDate={props.showStampDate}
@@ -634,15 +812,21 @@ export const ElegantTemplate = (props) => (
               size="medium"
             />
           </div>
-          <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
+          <div
+            className="border-t-2 border-gray-800 pt-2"
+            style={{ minWidth: "200px" }}
+          >
             <p className="text-sm font-semibold">Authorized Signature</p>
-            <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+            <p className="text-xs text-gray-600">
+              {props.businessInfo.businessName}
+            </p>
           </div>
         </div>
       )}
 
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-        Thank you for your business. Payment is due within 30 days of invoice date.
+        Thank you for your business. Payment is due within 30 days of invoice
+        date.
       </div>
     </div>
   </div>
@@ -650,19 +834,32 @@ export const ElegantTemplate = (props) => (
 
 // Residential Template
 export const ResidentialTemplate = (props) => (
-  <div className="bg-gradient-to-br from-green-50 to-blue-50" style={{ padding: "15mm 20mm" }}>
+  <div
+    className="bg-gradient-to-br from-green-50 to-blue-50"
+    style={{ padding: "15mm 20mm" }}
+  >
     <div className="bg-white rounded-lg shadow-lg p-8">
       <div className="border-b-4 border-green-500 pb-6 mb-6">
         <div className="flex justify-between items-start">
           <div>
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-20 h-20 object-contain mb-3"
+              />
             )}
-            <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
-            <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
+            <div className="text-xl font-bold">
+              {props.businessInfo.businessName}
+            </div>
+            <div className="text-sm text-gray-600">
+              {props.businessInfo.addressLine1}
+            </div>
           </div>
           <div className="text-right">
-            <div className="text-5xl font-black text-green-500 mb-4 italic">{props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}</div>
+            <div className="text-5xl font-black text-green-500 mb-4 italic">
+              {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
+            </div>
             <div className="bg-green-500 text-white px-4 py-3 rounded space-y-1">
               <div className="text-sm font-bold">#{props.invoiceNumber}</div>
               <div className="text-sm">{new Date().toLocaleDateString()}</div>
@@ -673,7 +870,9 @@ export const ResidentialTemplate = (props) => (
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200">
-          <div className="text-sm font-bold text-green-700 mb-3">CLIENT INFORMATION</div>
+          <div className="text-sm font-bold text-green-700 mb-3">
+            CLIENT INFORMATION
+          </div>
           <div className="text-sm space-y-1">
             <div className="font-bold text-gray-900">{props.customerName}</div>
             <div className="text-gray-600">{props.customerAddress}</div>
@@ -682,12 +881,22 @@ export const ResidentialTemplate = (props) => (
           </div>
         </div>
         <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
-          <div className="text-sm font-bold text-blue-700 mb-3">WINDOW INFORMATION</div>
+          <div className="text-sm font-bold text-blue-700 mb-3">
+            WINDOW INFORMATION
+          </div>
           <div className="text-sm space-y-1">
-            <div className="text-gray-600">Type: {props.windowType || 'Standard Window'}</div>
-            <div className="text-gray-600">Count: {props.windowCount || 'N/A'} windows</div>
-            <div className="text-gray-600">Screen: {props.screenType || 'N/A'}</div>
-            <div className="text-gray-600">Frame: {props.frameCondition || 'Good'}</div>
+            <div className="text-gray-600">
+              Type: {props.windowType || "Standard Window"}
+            </div>
+            <div className="text-gray-600">
+              Count: {props.windowCount || "N/A"} windows
+            </div>
+            <div className="text-gray-600">
+              Screen: {props.screenType || "N/A"}
+            </div>
+            <div className="text-gray-600">
+              Frame: {props.frameCondition || "Good"}
+            </div>
           </div>
         </div>
       </div>
@@ -707,7 +916,9 @@ export const ResidentialTemplate = (props) => (
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
               <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-4 py-3 font-bold">R {item.amount.toFixed(2)}</td>
+              <td className="text-right px-4 py-3 font-bold">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -731,19 +942,33 @@ export const ResidentialTemplate = (props) => (
       </div>
 
       <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 p-4 mb-4 rounded-lg">
-        <div className="text-green-700 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-green-700 font-bold text-sm mb-2">
+          PAYMENT INFORMATION
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+          <div>
+            <span className="font-semibold">Bank Name:</span>{" "}
+            {props.businessInfo.bankName || "First National Bank"}
+          </div>
+          <div>
+            <span className="font-semibold">Account Holder:</span>{" "}
+            {props.businessInfo.businessName}
+          </div>
+          <div>
+            <span className="font-semibold">Account Number:</span>{" "}
+            {props.businessInfo.accountNumber || "62146991441"}
+          </div>
+          <div>
+            <span className="font-semibold">Branch Code:</span>{" "}
+            {props.businessInfo.branchCode || "250655"}
+          </div>
         </div>
       </div>
 
       {props.showStamp && (
         <div className="text-center mb-4">
           <div className="mb-4">
-            <SignatureStamp 
+            <SignatureStamp
               text={props.stampText}
               color={props.stampColor}
               showDate={props.showStampDate}
@@ -751,15 +976,21 @@ export const ResidentialTemplate = (props) => (
               size="medium"
             />
           </div>
-          <div className="border-t-2 border-gray-300 pt-2" style={{ minWidth: '200px' }}>
+          <div
+            className="border-t-2 border-gray-300 pt-2"
+            style={{ minWidth: "200px" }}
+          >
             <p className="text-sm font-semibold">Authorized Signature</p>
-            <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+            <p className="text-xs text-gray-600">
+              {props.businessInfo.businessName}
+            </p>
           </div>
         </div>
       )}
 
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-        Thank you for trusting us with your window repairs! We appreciate your business.
+        Thank you for trusting us with your window repairs! We appreciate your
+        business.
       </div>
     </div>
   </div>
@@ -772,18 +1003,38 @@ export const CommercialTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+            <img
+              src={props.businessInfo.logoUrl}
+              alt="Logo"
+              className="w-20 h-20 object-contain mb-3"
+            />
           )}
-          <div className="text-xl font-bold">{props.businessInfo.businessName}</div>
-          <div className="text-sm font-semibold text-indigo-600 mb-2">Commercial Window Repair Specialists</div>
-          <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
+          <div className="text-xl font-bold">
+            {props.businessInfo.businessName}
+          </div>
+          <div className="text-sm font-semibold text-indigo-600 mb-2">
+            Commercial Window Repair Specialists
+          </div>
+          <div className="text-sm text-gray-600">
+            {props.businessInfo.addressLine1}
+          </div>
           <div className="text-sm text-gray-600">{props.businessInfo.city}</div>
         </div>
         <div className="text-right">
-          <div className="text-4xl font-bold text-indigo-600 mb-4">SERVICE {props.documentType === 'quote' ? 'QUOTE' : 'INVOICE'}</div>
+          <div className="text-4xl font-bold text-indigo-600 mb-4">
+            SERVICE {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
+          </div>
           <div className="bg-indigo-50 border-2 border-indigo-600 p-3 rounded">
-            <div className="text-sm"><span className="font-bold">{props.documentType === 'quote' ? 'Quote' : 'Invoice'} #:</span> {props.invoiceNumber}</div>
-            <div className="text-sm"><span className="font-bold">Date:</span> {new Date().toLocaleDateString()}</div>
+            <div className="text-sm">
+              <span className="font-bold">
+                {props.documentType === "quote" ? "Quote" : "Invoice"} #:
+              </span>{" "}
+              {props.invoiceNumber}
+            </div>
+            <div className="text-sm">
+              <span className="font-bold">Date:</span>{" "}
+              {new Date().toLocaleDateString()}
+            </div>
           </div>
         </div>
       </div>
@@ -791,27 +1042,54 @@ export const CommercialTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div className="border-2 border-indigo-600 p-4 rounded">
-        <div className="text-sm font-bold text-indigo-600 mb-3">CLIENT DETAILS</div>
+        <div className="text-sm font-bold text-indigo-600 mb-3">
+          CLIENT DETAILS
+        </div>
         <div className="text-sm space-y-1">
-          <div><span className="font-semibold">Company:</span> {props.customerName}</div>
-          <div><span className="font-semibold">Email:</span> {props.customerEmail}</div>
-          <div><span className="font-semibold">Phone:</span> {props.customerPhone}</div>
-          <div><span className="font-semibold">Address:</span> {props.customerAddress}</div>
+          <div>
+            <span className="font-semibold">Company:</span> {props.customerName}
+          </div>
+          <div>
+            <span className="font-semibold">Email:</span> {props.customerEmail}
+          </div>
+          <div>
+            <span className="font-semibold">Phone:</span> {props.customerPhone}
+          </div>
+          <div>
+            <span className="font-semibold">Address:</span>{" "}
+            {props.customerAddress}
+          </div>
         </div>
       </div>
       <div className="border-2 border-indigo-600 p-4 rounded">
-        <div className="text-sm font-bold text-indigo-600 mb-3">WINDOW DETAILS</div>
+        <div className="text-sm font-bold text-indigo-600 mb-3">
+          WINDOW DETAILS
+        </div>
         <div className="text-sm space-y-1">
-          <div><span className="font-semibold">Window Type:</span> {props.windowType || 'Commercial Grade'}</div>
-          <div><span className="font-semibold">Total Units:</span> {props.windowCount || 'N/A'}</div>
-          <div><span className="font-semibold">Screen Type:</span> {props.screenType || 'N/A'}</div>
-          <div><span className="font-semibold">Frame Condition:</span> {props.frameCondition || 'N/A'}</div>
+          <div>
+            <span className="font-semibold">Window Type:</span>{" "}
+            {props.windowType || "Commercial Grade"}
+          </div>
+          <div>
+            <span className="font-semibold">Total Units:</span>{" "}
+            {props.windowCount || "N/A"}
+          </div>
+          <div>
+            <span className="font-semibold">Screen Type:</span>{" "}
+            {props.screenType || "N/A"}
+          </div>
+          <div>
+            <span className="font-semibold">Frame Condition:</span>{" "}
+            {props.frameCondition || "N/A"}
+          </div>
         </div>
       </div>
     </div>
 
     <div className="mb-6">
-      <div className="bg-indigo-600 text-white px-4 py-2 font-bold">SERVICES PROVIDED</div>
+      <div className="bg-indigo-600 text-white px-4 py-2 font-bold">
+        SERVICES PROVIDED
+      </div>
       <table className="w-full">
         <thead>
           <tr className="bg-indigo-50 border-b-2 border-indigo-600">
@@ -827,7 +1105,9 @@ export const CommercialTemplate = (props) => (
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
               <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+              <td className="text-right px-4 py-3 font-semibold">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -852,19 +1132,33 @@ export const CommercialTemplate = (props) => (
     </div>
 
     <div className="bg-indigo-50 border border-indigo-200 p-4 mb-4 rounded">
-      <div className="text-indigo-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-indigo-800 font-bold text-sm mb-2">
+        PAYMENT INFORMATION
+      </div>
       <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+        <div>
+          <span className="font-semibold">Bank Name:</span>{" "}
+          {props.businessInfo.bankName || "First National Bank"}
+        </div>
+        <div>
+          <span className="font-semibold">Account Holder:</span>{" "}
+          {props.businessInfo.businessName}
+        </div>
+        <div>
+          <span className="font-semibold">Account Number:</span>{" "}
+          {props.businessInfo.accountNumber || "62146991441"}
+        </div>
+        <div>
+          <span className="font-semibold">Branch Code:</span>{" "}
+          {props.businessInfo.branchCode || "250655"}
+        </div>
       </div>
     </div>
 
     {props.showStamp && (
       <div className="text-center mb-4">
         <div className="mb-4">
-          <SignatureStamp 
+          <SignatureStamp
             text={props.stampText}
             color={props.stampColor}
             showDate={props.showStampDate}
@@ -872,50 +1166,56 @@ export const CommercialTemplate = (props) => (
             size="medium"
           />
         </div>
-        <div className="border-t-2 border-gray-800 pt-2" style={{ minWidth: '200px' }}>
+        <div
+          className="border-t-2 border-gray-800 pt-2"
+          style={{ minWidth: "200px" }}
+        >
           <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">{props.businessInfo.businessName}</p>
+          <p className="text-xs text-gray-600">
+            {props.businessInfo.businessName}
+          </p>
         </div>
       </div>
     )}
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Professional commercial window repair services. Payment terms: Net 30 days.
+      Professional commercial window repair services. Payment terms: Net 30
+      days.
     </div>
   </div>
 );
 
 // Template Renderer
-export const TemplateRenderer = ({ 
-  templateId, 
-  documentType = 'invoice',
+export const TemplateRenderer = ({
+  templateId,
+  documentType = "invoice",
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true,
   showStamp = false,
-  ...props 
+  ...props
 }) => {
-  const templateProps = { 
-    ...props, 
+  const templateProps = {
+    ...props,
     documentType,
     stampText,
     stampColor,
     showStampDate,
-    showStamp
+    showStamp,
   };
 
   switch (templateId) {
-    case 'default':
+    case "default":
       return <DefaultTemplate {...templateProps} />;
-    case 'classic':
+    case "classic":
       return <ClassicTemplate {...templateProps} />;
-    case 'modern':
+    case "modern":
       return <ModernTemplate {...templateProps} />;
-    case 'elegant':
+    case "elegant":
       return <ElegantTemplate {...templateProps} />;
-    case 'residential':
+    case "residential":
       return <ResidentialTemplate {...templateProps} />;
-    case 'commercial':
+    case "commercial":
       return <CommercialTemplate {...templateProps} />;
     default:
       return <DefaultTemplate {...templateProps} />;

@@ -10,8 +10,12 @@ const TemplatePreviewModal = ({ template, onClose, onSelect, isSelected }) => {
         <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-purple-50">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-2xl font-bold text-slate-900">{template.name}</h3>
-              <p className="text-sm text-slate-600 mt-1">{template.description}</p>
+              <h3 className="text-2xl font-bold text-slate-900">
+                {template.name}
+              </h3>
+              <p className="text-sm text-slate-600 mt-1">
+                {template.description}
+              </p>
             </div>
             <button
               onClick={onClose}
@@ -21,7 +25,7 @@ const TemplatePreviewModal = ({ template, onClose, onSelect, isSelected }) => {
             </button>
           </div>
         </div>
-        
+
         <div className="p-6 overflow-y-auto max-h-[60vh]">
           <div className="aspect-[8.5/11] bg-white border border-slate-200 rounded-lg overflow-hidden">
             <img
@@ -31,7 +35,7 @@ const TemplatePreviewModal = ({ template, onClose, onSelect, isSelected }) => {
             />
           </div>
         </div>
-        
+
         <div className="p-6 border-t border-slate-200 bg-slate-50">
           <div className="flex gap-3">
             <button
@@ -138,13 +142,13 @@ const TemplateSelector = ({ selectedTemplate, onSelectTemplate }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {templates.map((template) => {
           const isSelected = selectedTemplate === template.id;
-          
+
           return (
             <div
               key={template.id}
               className={`relative group rounded-xl border-2 overflow-hidden transition-all duration-300 ${getColorClasses(
                 template.color,
-                isSelected
+                isSelected,
               )} ${isSelected ? "shadow-lg scale-105" : "shadow-sm hover:shadow-md"}`}
             >
               {/* Template Preview Image */}
@@ -154,7 +158,7 @@ const TemplateSelector = ({ selectedTemplate, onSelectTemplate }) => {
                   alt={template.name}
                   className="w-full h-full object-cover"
                 />
-                
+
                 {/* Overlay on Hover */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
                   <button
@@ -293,7 +297,7 @@ export const TemplateRenderer = ({
             <p>{businessInfo?.primaryPhone}</p>
           </div>
         </div>
-        
+
         <div className="text-right">
           <h2 className="text-4xl font-bold text-blue-600 mb-4">
             {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
@@ -312,7 +316,9 @@ export const TemplateRenderer = ({
             <div className="flex justify-end gap-2">
               <span className="font-semibold text-slate-700">Due Date:</span>
               <span className="text-slate-900">
-                {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                {new Date(
+                  Date.now() + 30 * 24 * 60 * 60 * 1000,
+                ).toLocaleDateString()}
               </span>
             </div>
           </div>
@@ -333,7 +339,7 @@ export const TemplateRenderer = ({
             <p className="text-slate-600">{customerAddress}</p>
           </div>
         </div>
-        
+
         <div>
           <h3 className="text-sm font-bold text-slate-700 uppercase mb-3 pb-2 border-b-2 border-blue-600">
             Payment To
@@ -354,8 +360,12 @@ export const TemplateRenderer = ({
         <table className="w-full">
           <thead>
             <tr className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-              <th className="text-left py-4 px-4 font-bold text-sm">Description</th>
-              <th className="text-left py-4 px-4 font-bold text-sm">Category</th>
+              <th className="text-left py-4 px-4 font-bold text-sm">
+                Description
+              </th>
+              <th className="text-left py-4 px-4 font-bold text-sm">
+                Category
+              </th>
               <th className="text-right py-4 px-4 font-bold text-sm">Rate</th>
               <th className="text-right py-4 px-4 font-bold text-sm">Qty</th>
               <th className="text-right py-4 px-4 font-bold text-sm">Tax</th>
@@ -364,7 +374,10 @@ export const TemplateRenderer = ({
           </thead>
           <tbody>
             {items.map((item, index) => (
-              <tr key={index} className="border-b border-slate-200 hover:bg-slate-50">
+              <tr
+                key={index}
+                className="border-b border-slate-200 hover:bg-slate-50"
+              >
                 <td className="py-4 px-4 text-sm text-slate-900">
                   {item.description}
                 </td>
@@ -397,11 +410,15 @@ export const TemplateRenderer = ({
           <div className="space-y-3">
             <div className="flex justify-between py-2 border-b border-slate-200">
               <span className="text-slate-700 font-medium">Subtotal:</span>
-              <span className="font-bold text-slate-900">R{subtotal.toFixed(2)}</span>
+              <span className="font-bold text-slate-900">
+                R{subtotal.toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between py-2 border-b border-slate-200">
               <span className="text-slate-700 font-medium">VAT (15%):</span>
-              <span className="font-bold text-slate-900">R{totalTax.toFixed(2)}</span>
+              <span className="font-bold text-slate-900">
+                R{totalTax.toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between py-4 bg-blue-50 px-4 rounded-lg">
               <span className="text-lg font-bold text-slate-900">Total:</span>
@@ -434,14 +451,18 @@ export const TemplateRenderer = ({
             >
               <div
                 className={`text-xs font-semibold mb-1 ${
-                  paymentStatus.totalPaid > 0 ? "text-emerald-700" : "text-slate-600"
+                  paymentStatus.totalPaid > 0
+                    ? "text-emerald-700"
+                    : "text-slate-600"
                 }`}
               >
                 Amount Paid
               </div>
               <div
                 className={`text-xl font-bold ${
-                  paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"
+                  paymentStatus.totalPaid > 0
+                    ? "text-emerald-900"
+                    : "text-slate-900"
                 }`}
               >
                 R{paymentStatus.totalPaid.toFixed(2)}
@@ -498,12 +519,11 @@ export const TemplateRenderer = ({
 
       {/* Footer */}
       <div className="mt-12 pt-8 border-t-2 border-slate-200 text-center">
-        <p className="text-sm text-slate-600">
-          Thank you for your business!
-        </p>
+        <p className="text-sm text-slate-600">Thank you for your business!</p>
         {businessInfo?.registrationNumber && (
           <p className="text-xs text-slate-500 mt-2">
-            Registration: {businessInfo.registrationNumber} | VAT: {businessInfo.vatNumber}
+            Registration: {businessInfo.registrationNumber} | VAT:{" "}
+            {businessInfo.vatNumber}
           </p>
         )}
       </div>
@@ -542,18 +562,20 @@ export const TemplateRenderer = ({
               <p>{businessInfo?.primaryPhone}</p>
             </div>
           </div>
-          
+
           <div className="text-right">
             <h2 className="text-5xl font-light text-slate-900 mb-6">
               {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
             </h2>
             <div className="text-sm space-y-1">
               <p className="text-slate-600">{invoiceNumber}</p>
-              <p className="text-slate-600">{new Date().toLocaleDateString()}</p>
+              <p className="text-slate-600">
+                {new Date().toLocaleDateString()}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="h-px bg-slate-900"></div>
       </div>
 
@@ -591,8 +613,12 @@ export const TemplateRenderer = ({
           <tbody>
             {items.map((item, index) => (
               <tr key={index} className="border-b border-slate-200">
-                <td className="py-4 text-sm text-slate-900">{item.description}</td>
-                <td className="py-4 text-sm text-right text-slate-700">{item.qty}</td>
+                <td className="py-4 text-sm text-slate-900">
+                  {item.description}
+                </td>
+                <td className="py-4 text-sm text-right text-slate-700">
+                  {item.qty}
+                </td>
                 <td className="py-4 text-sm text-right text-slate-700">
                   R{item.rate.toFixed(2)}
                 </td>
@@ -620,7 +646,9 @@ export const TemplateRenderer = ({
           </div>
           <div className="flex justify-between pt-4 border-t-2 border-slate-900">
             <span className="font-bold text-slate-900">Total</span>
-            <span className="font-bold text-slate-900 text-xl">R{total.toFixed(2)}</span>
+            <span className="font-bold text-slate-900 text-xl">
+              R{total.toFixed(2)}
+            </span>
           </div>
         </div>
       </div>
@@ -659,7 +687,7 @@ export const TemplateRenderer = ({
               <p>{businessInfo?.primaryPhone}</p>
             </div>
           </div>
-          
+
           <div className="text-right">
             <h2 className="text-4xl font-bold mb-4">
               {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
@@ -895,14 +923,16 @@ export const TemplateRenderer = ({
               <p className="text-sm text-slate-600">{businessInfo?.email}</p>
             </div>
           </div>
-          
+
           <div className="text-right bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent mb-3">
               {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
             </h2>
             <div className="text-sm space-y-1">
               <p className="font-bold text-slate-900">{invoiceNumber}</p>
-              <p className="text-slate-600">{new Date().toLocaleDateString()}</p>
+              <p className="text-slate-600">
+                {new Date().toLocaleDateString()}
+              </p>
             </div>
           </div>
         </div>
@@ -1008,10 +1038,12 @@ export const TemplateRenderer = ({
               <p>
                 {businessInfo?.city}, {businessInfo?.postalCode}
               </p>
-              <p>{businessInfo?.email} | {businessInfo?.primaryPhone}</p>
+              <p>
+                {businessInfo?.email} | {businessInfo?.primaryPhone}
+              </p>
             </div>
           </div>
-          
+
           <div className="text-right">
             <h2 className="text-3xl font-bold mb-4">
               {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
@@ -1032,7 +1064,7 @@ export const TemplateRenderer = ({
                   <span className="opacity-75">Due:</span>{" "}
                   <span className="font-bold">
                     {new Date(
-                      Date.now() + 30 * 24 * 60 * 60 * 1000
+                      Date.now() + 30 * 24 * 60 * 60 * 1000,
                     ).toLocaleDateString()}
                   </span>
                 </p>
@@ -1056,7 +1088,7 @@ export const TemplateRenderer = ({
             <p className="text-slate-600">{customerAddress}</p>
           </div>
         </div>
-        
+
         <div className="border-l-4 border-blue-600 pl-4">
           <div className="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">
             Company Details
@@ -1163,7 +1195,9 @@ export const TemplateRenderer = ({
         <div className="grid grid-cols-2 gap-6 text-xs text-slate-600">
           <div>
             <p className="mb-2">
-              <span className="font-semibold text-slate-700">Payment Terms:</span>{" "}
+              <span className="font-semibold text-slate-700">
+                Payment Terms:
+              </span>{" "}
               Net 30 days from invoice date
             </p>
             <p>
@@ -1173,12 +1207,14 @@ export const TemplateRenderer = ({
           </div>
           <div>
             <p className="mb-2">
-              <span className="font-semibold text-slate-700">Payment Methods:</span>{" "}
+              <span className="font-semibold text-slate-700">
+                Payment Methods:
+              </span>{" "}
               Bank Transfer, Credit Card, Cash
             </p>
             <p>
-              <span className="font-semibold text-slate-700">Currency:</span> All
-              amounts in ZAR
+              <span className="font-semibold text-slate-700">Currency:</span>{" "}
+              All amounts in ZAR
             </p>
           </div>
         </div>

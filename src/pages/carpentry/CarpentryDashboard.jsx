@@ -9,7 +9,7 @@ import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
   collection,
@@ -23,7 +23,14 @@ import {
   limit,
   getDocs,
 } from "firebase/firestore";
-import { Printer, Download, Sparkles, Trash2, Home as HomeIcon, Hammer } from "lucide-react";
+import {
+  Printer,
+  Download,
+  Sparkles,
+  Trash2,
+  Home as HomeIcon,
+  Hammer,
+} from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
@@ -69,10 +76,6 @@ import {
   Wrench,
   Layers,
 } from "lucide-react";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 const generateQuoteNumber = async (userId, documentType) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
@@ -101,19 +104,12 @@ const generateQuoteNumber = async (userId, documentType) => {
 const functions = getFunctions();
 
 const CarpentryDashboard = () => {
-  // ── step navigation ──────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
-
-  // ── layout / sidebar ─────────────────────────────────────────────────────
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-
-  // ── auth ─────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
-
-  // ── quote / invoice state ────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState("Quote");
   const [quoteNumber, setQuoteNumber] = useState("");
   const [quoteId, setQuoteId] = useState(null);
@@ -236,8 +232,12 @@ const CarpentryDashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => { loadCustomers(); }, []);
-  useEffect(() => { loadPaymentStatus(); }, [quoteId, user?.uid, documentType]);
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+  useEffect(() => {
+    loadPaymentStatus();
+  }, [quoteId, user?.uid, documentType]);
 
   useEffect(() => {
     if (user?.uid) loadBusinessInfo();
@@ -328,7 +328,9 @@ const CarpentryDashboard = () => {
     }
     try {
       const collectionName = documentType === "quote" ? "quotes" : "invoices";
-      const quoteDoc = await getDoc(doc(db, "users", user.uid, collectionName, quoteId));
+      const quoteDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, quoteId),
+      );
       if (quoteDoc.exists()) {
         const data = quoteDoc.data();
         setPaymentStatus({
@@ -337,7 +339,11 @@ const CarpentryDashboard = () => {
           status: data.status || "pending",
         });
       } else {
-        setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
+        setPaymentStatus({
+          totalPaid: 0,
+          balanceDue: total,
+          status: "pending",
+        });
       }
     } catch (error) {
       console.error("Error loading payment status:", error);
@@ -349,7 +355,9 @@ const CarpentryDashboard = () => {
     if (!user?.uid || !quoteId) return null;
     const db = getFirestore();
     const collectionName = documentType === "quote" ? "quotes" : "invoices";
-    const snap = await getDoc(doc(db, "users", user.uid, collectionName, quoteId));
+    const snap = await getDoc(
+      doc(db, "users", user.uid, collectionName, quoteId),
+    );
     return snap.exists() ? snap.data() : null;
   };
 
@@ -373,7 +381,9 @@ const CarpentryDashboard = () => {
     setPropertyAddress(customer.address || "");
   };
 
-  const handleCustomerSaved = () => { loadCustomers(); };
+  const handleCustomerSaved = () => {
+    loadCustomers();
+  };
 
   // ============================================================================
   // Handlers – quote / invoice CRUD
@@ -463,7 +473,9 @@ const CarpentryDashboard = () => {
       setQuoteId(ref.id);
     }
 
-    alert(`${documentType === "quote" ? "Quote" : "Invoice"} saved successfully`);
+    alert(
+      `${documentType === "quote" ? "Quote" : "Invoice"} saved successfully`,
+    );
     loadSavedQuotes();
   };
 
@@ -473,7 +485,12 @@ const CarpentryDashboard = () => {
       alert("Please save the quote first before converting to invoice");
       return;
     }
-    if (!window.confirm("Convert this quote to an invoice? This will create a new invoice with the same details.")) return;
+    if (
+      !window.confirm(
+        "Convert this quote to an invoice? This will create a new invoice with the same details.",
+      )
+    )
+      return;
 
     try {
       const db = getFirestore();
@@ -597,7 +614,9 @@ const CarpentryDashboard = () => {
     }
     try {
       const collectionName = documentType === "quote" ? "quotes" : "invoices";
-      const quoteDoc = await getDoc(doc(db, "users", user.uid, collectionName, quoteId));
+      const quoteDoc = await getDoc(
+        doc(db, "users", user.uid, collectionName, quoteId),
+      );
       if (quoteDoc.exists()) {
         setSelectedQuoteForPayment({ id: quoteId, ...quoteDoc.data() });
         setShowPaymentModal(true);
@@ -622,8 +641,14 @@ const CarpentryDashboard = () => {
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || !user?.uid || !authUser) return;
-    if (!file.type.startsWith("image/")) { alert("Please upload an image file"); return; }
-    if (file.size > 5 * 1024 * 1024) { alert("Image size should be less than 5MB"); return; }
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
+    }
 
     try {
       setBusinessInfo((prev) => ({ ...prev, uploading: true }));
@@ -648,10 +673,10 @@ const CarpentryDashboard = () => {
     if (!user?.uid) return;
     try {
       const db = getFirestore();
-      await setDoc(
-        doc(db, "users", user.uid, "settings", "businessInfo"),
-        { ...businessInfo, stampSettings },
-      );
+      await setDoc(doc(db, "users", user.uid, "settings", "businessInfo"), {
+        ...businessInfo,
+        stampSettings,
+      });
       alert("Business information saved successfully!");
       setShowSettings(false);
     } catch (error) {
@@ -719,24 +744,28 @@ const CarpentryDashboard = () => {
 
   // ── AI extraction ────────────────────────────────────────────────────────
   const handleAIDataExtracted = (extractedData) => {
-    if (extractedData.customer?.name) setCustomerName(extractedData.customer.name);
-    if (extractedData.customer?.email) setCustomerEmail(extractedData.customer.email);
-    if (extractedData.customer?.phone) setCustomerPhone(extractedData.customer.phone);
-    if (extractedData.customer?.address) setPropertyAddress(extractedData.customer.address);
+    if (extractedData.customer?.name)
+      setCustomerName(extractedData.customer.name);
+    if (extractedData.customer?.email)
+      setCustomerEmail(extractedData.customer.email);
+    if (extractedData.customer?.phone)
+      setCustomerPhone(extractedData.customer.phone);
+    if (extractedData.customer?.address)
+      setPropertyAddress(extractedData.customer.address);
     if (extractedData.items?.length > 0) setItems(extractedData.items);
     alert("✨ Data extracted and populated successfully!");
   };
 
   const handleTestEmail = async () => {
     if (!businessInfo.emailPassword) {
-      alert('⚠️ Please enter your email app password first.');
+      alert("⚠️ Please enter your email app password first.");
       return;
     }
 
     const userEmail = user?.email || authUser?.email;
-    
+
     if (!userEmail) {
-      alert('⚠️ Could not find your email address. Please log in again.');
+      alert("⚠️ Could not find your email address. Please log in again.");
       return;
     }
 
@@ -744,7 +773,7 @@ const CarpentryDashboard = () => {
       const testEmailData = {
         userId: user.uid,
         to: userEmail,
-        subject: '✅ Test Email - Email Configuration Successful',
+        subject: "✅ Test Email - Email Configuration Successful",
         message: `
 Hello,
 
@@ -756,7 +785,7 @@ Account Details:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Business: ${businessInfo.businessName}
 Email: ${userEmail}
-Provider: ${businessInfo.emailProvider || 'Gmail'}
+Provider: ${businessInfo.emailProvider || "Gmail"}
 Date: ${new Date().toLocaleString()}
 
 You can now send quotes and invoices to your clients from this email address.
@@ -764,35 +793,46 @@ You can now send quotes and invoices to your clients from this email address.
 Best regards,
 Your Carpentry Quote System
         `.trim(),
-        documentType: 'test',
-        documentNumber: 'TEST-001',
+        documentType: "test",
+        documentNumber: "TEST-001",
       };
 
-      const sendEmail = httpsCallable(functions, 'sendQuoteEmail');
+      const sendEmail = httpsCallable(functions, "sendQuoteEmail");
       await sendEmail(testEmailData);
-      
-      alert(`✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`);
+
+      alert(
+        `✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`,
+      );
     } catch (error) {
-      console.error('Test email error:', error);
-      
-      let errorMsg = '❌ Test email failed!\n\n';
-      if (error.message.includes('Invalid login')) {
-        errorMsg += 'Your app password is incorrect. Please check and try again.\n\nMake sure you\'re using an APP PASSWORD, not your regular password.';
+      console.error("Test email error:", error);
+
+      let errorMsg = "❌ Test email failed!\n\n";
+      if (error.message.includes("Invalid login")) {
+        errorMsg +=
+          "Your app password is incorrect. Please check and try again.\n\nMake sure you're using an APP PASSWORD, not your regular password.";
       } else {
         errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
       }
-      
+
       alert(errorMsg);
     }
   };
 
   // ── navigation ───────────────────────────────────────────────────────────
-  const handleNext = () => { if (currentStep < totalSteps) setCurrentStep(currentStep + 1); };
-  const handlePrevious = () => { if (currentStep > 1) setCurrentStep(currentStep - 1); };
+  const handleNext = () => {
+    if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
+  };
+  const handlePrevious = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
 
   // ── logout ───────────────────────────────────────────────────────────────
   const handleLogout = async () => {
-    try { await signOut(getAuth()); } catch (error) { console.error("Error logging out:", error); }
+    try {
+      await signOut(getAuth());
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
   // ============================================================================
@@ -821,7 +861,7 @@ Your Carpentry Quote System
             <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
           </button>
 
-         <div className="relative group">
+          <div className="relative group">
             <div className="absolute inset-0  rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
             <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 rounded-xl p-1 shadow-lg">
               <img src={logo} className="w-full h-full text-white p-1.5" />
@@ -838,24 +878,43 @@ Your Carpentry Quote System
               <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
             </button>
 
-            <button onClick={() => setShowSettings(true)} className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden" title="Settings">
+            <button
+              onClick={() => setShowSettings(true)}
+              className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+              title="Settings"
+            >
               <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <Settings className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:rotate-90 transition-transform duration-500" />
             </button>
 
             {!isMobile && (
               <>
-                <button onClick={() => setActiveView("financial-overview")} className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden" title="Financial Dashboard">
+                <button
+                  onClick={() => setActiveView("financial-overview")}
+                  className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  title="Financial Dashboard"
+                >
                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <TrendingUp className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
                 </button>
 
-                <button onClick={() => { handleNewInvoice(); setActiveView("quote"); }} className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden" title="Quotes & Invoices">
+                <button
+                  onClick={() => {
+                    handleNewInvoice();
+                    setActiveView("quote");
+                  }}
+                  className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  title="Quotes & Invoices"
+                >
                   <div className="absolute inset-0 bg-gradient-to-r from-amber-600 to-amber-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <Receipt className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
                 </button>
 
-                <button onClick={() => setShowCustomersListModal(true)} className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden" title="Clients">
+                <button
+                  onClick={() => setShowCustomersListModal(true)}
+                  className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  title="Clients"
+                >
                   <div className="absolute inset-0 bg-gradient-to-r from-sky-600 to-sky-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <Users className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
                 </button>
@@ -880,7 +939,7 @@ Your Carpentry Quote System
       >
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-6 md:mb-8">
-             <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="flex items-center space-x-3 md:space-x-4">
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300" />
                 <div className="relative p-1 rounded-xl shadow-lg">
@@ -888,85 +947,118 @@ Your Carpentry Quote System
                 </div>
               </div>
             </div>
-            <button onClick={() => setSidebarOpen(false)} className="group p-2 text-amber-400 hover:text-white hover:bg-amber-700/50 rounded-xl transition-all duration-300 hover:rotate-90" title="Collapse Sidebar">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="group p-2 text-amber-400 hover:text-white hover:bg-amber-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
+              title="Collapse Sidebar"
+            >
               <ChevronLeft className="w-5 h-5" />
             </button>
           </div>
 
           <nav className="space-y-1.5 md:space-y-2">
             <div
-              onClick={() => { setActiveView("home"); setSidebarOpen(false);}}
+              onClick={() => {
+                setActiveView("home");
+                setSidebarOpen(false);
+              }}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-amber-600/20 hover:to-amber-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
             >
               <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
               <span className="text-xs md:text-sm font-semibold">Home</span>
             </div>
 
-            <div onClick={() => { setShowSettings(true); setSidebarOpen(false); }} className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30">
+            <div
+              onClick={() => {
+                setShowSettings(true);
+                setSidebarOpen(false);
+              }}
+              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
+            >
               <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
               <span className="text-xs md:text-sm font-semibold">Settings</span>
             </div>
 
             <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-amber-700/50">
-              <div onClick={() => { setActiveView("financial-overview"); setSidebarOpen(false); }} className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30">
+              <div
+                onClick={() => {
+                  setActiveView("financial-overview");
+                  setSidebarOpen(false);
+                }}
+                className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
+              >
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-xs md:text-sm font-semibold truncate">Financial Dashboard</span>
+                <span className="text-xs md:text-sm font-semibold truncate">
+                  Financial Dashboard
+                </span>
               </div>
 
               <div className="mt-2 md:mt-3">
-                <div 
-                  onClick={() => { setIsQuotesInvoicesOpen2(!isQuotesInvoicesOpen2); setSidebarOpen(false); }}
+                <div
+                  onClick={() => {
+                    setIsQuotesInvoicesOpen2(!isQuotesInvoicesOpen2);
+                    setSidebarOpen(false);
+                  }}
                   className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-amber-600/20 hover:to-amber-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-amber-500/30"
                 >
                   <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                     <Receipt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Quotes & Invoices</span>
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Quotes & Invoices
+                    </span>
                   </div>
-                  <ChevronDown 
+                  <ChevronDown
                     className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
-                      isQuotesInvoicesOpen2 ? 'rotate-180' : ''
-                    }`} 
+                      isQuotesInvoicesOpen2 ? "rotate-180" : ""
+                    }`}
                   />
                 </div>
 
-                <div 
+                <div
                   className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-amber-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
-                    isQuotesInvoicesOpen2 ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    isQuotesInvoicesOpen2
+                      ? "max-h-96 opacity-100"
+                      : "max-h-0 opacity-0"
                   }`}
                 >
-                  <div 
-                    onClick={() => { 
-                      handleNewQuote(); 
-                      setActiveView("quote"); ; setSidebarOpen(false);
-                      if (isMobile) setSidebarOpen(false); 
-                    }} 
+                  <div
+                    onClick={() => {
+                      handleNewQuote();
+                      setActiveView("quote");
+                      setSidebarOpen(false);
+                      if (isMobile) setSidebarOpen(false);
+                    }}
                     className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-amber-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
                     <span className="truncate">Create Quote</span>
                   </div>
-                  <div 
-                    onClick={() => { 
-                      handleNewInvoice(); 
-                      setActiveView("quote"); ; setSidebarOpen(false);
-                      if (isMobile) setSidebarOpen(false); 
-                    }} 
+                  <div
+                    onClick={() => {
+                      handleNewInvoice();
+                      setActiveView("quote");
+                      setSidebarOpen(false);
+                      if (isMobile) setSidebarOpen(false);
+                    }}
                     className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-amber-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
                     <span className="truncate">Create Invoice</span>
                   </div>
-                  <div 
-                    onClick={() => { 
-                      setShowQuotesList(!showQuotesList); ; setSidebarOpen(false);
-                      if (isMobile) setSidebarOpen(false); 
-                    }} 
+                  <div
+                    onClick={() => {
+                      setShowQuotesList(!showQuotesList);
+                      setSidebarOpen(false);
+                      if (isMobile) setSidebarOpen(false);
+                    }}
                     className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-amber-700/30 rounded-lg cursor-pointer transition-all duration-300"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 min-w-0">
                         <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                        <span className="truncate">All {documentType === "quote" ? "Quotes" : "Invoices"}</span>
+                        <span className="truncate">
+                          All {documentType === "quote" ? "Quotes" : "Invoices"}
+                        </span>
                       </div>
                       <span className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
                         {savedQuotes.length}
@@ -977,24 +1069,26 @@ Your Carpentry Quote System
               </div>
 
               <div className="mt-2 md:mt-3">
-                <div 
+                <div
                   onClick={() => setIsClientsOpen(!isClientsOpen)}
                   className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30"
                 >
                   <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                     <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Clients</span>
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Clients
+                    </span>
                   </div>
-                  <ChevronDown 
+                  <ChevronDown
                     className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
-                      isClientsOpen ? 'rotate-180' : ''
-                    }`} 
+                      isClientsOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </div>
 
-                <div 
+                <div
                   className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
-                    isClientsOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    isClientsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                   }`}
                 >
                   <div
@@ -1029,13 +1123,23 @@ Your Carpentry Quote System
 
               {!isMobile && (
                 <>
-                  <div onClick={() => setActiveView("schedule")} className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30">
+                  <div
+                    onClick={() => setActiveView("schedule")}
+                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
+                  >
                     <Calendar className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Schedule</span>
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Schedule
+                    </span>
                   </div>
-                  <div onClick={() => setActiveView("reports")} className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30">
+                  <div
+                    onClick={() => setActiveView("reports")}
+                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
+                  >
                     <BarChart3 className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Reports</span>
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Reports
+                    </span>
                   </div>
                 </>
               )}
@@ -1048,18 +1152,25 @@ Your Carpentry Quote System
             <div className="relative group flex-shrink-0">
               <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
               <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
-  <img
-    src={businessInfo.logoUrl}
-    alt="Business Logo"
-    className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-  />
-</div>
+                <img
+                  src={businessInfo.logoUrl}
+                  alt="Business Logo"
+                  className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
+                />
+              </div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent truncate">{user?.name || "User"}</div>
-              <div className="text-xs text-amber-400 truncate">{user?.email || "email@example.com"}</div>
+              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent truncate">
+                {user?.name || "User"}
+              </div>
+              <div className="text-xs text-amber-400 truncate">
+                {user?.email || "email@example.com"}
+              </div>
             </div>
-            <button onClick={handleLogout} className="group text-amber-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0">
+            <button
+              onClick={handleLogout}
+              className="group text-amber-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
+            >
               <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
             </button>
           </div>
@@ -1067,580 +1178,642 @@ Your Carpentry Quote System
       </div>
 
       {/* Main Content Area */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}>
+      <div
+        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
+      >
         <div className="flex flex-col h-screen">
-         
-
           {/* Continue with the rest of the component... Due to length, I'll note that the remaining sections follow the same pattern with carpentry-specific terminology */}
-          
+
           {/* ── Scrollable Main Content ──────────────────────────────── */}
-         <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
+          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {/* ── Settings Modal ──────────────────────────────────────── */}
             {showSettings && (
-                         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
-                           <div className="bg-gray-300 max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
-                             <div className="p-4 md:p-6 border-b border-slate-300 bg-gradient-to-r from-gray0 to-purple-50 flex-shrink-0">
-                               <div className="flex items-center justify-between">
-                                 <div className="flex items-center space-x-2 md:space-x-3">
-                                   <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                                     <Settings className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                                   </div>
-                                   <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                                     Business Settings
-                                   </h2>
-                                 </div>
-                                 <button
-                                   onClick={() => setShowSettings(false)}
-                                   className="group p-1.5 md:p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300"
-                                 >
-                                   <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                                 </button>
-                               </div>
-                             </div>
-           
-                             <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-300 to-slate-400 flex-1">
-                               <div className="space-y-4 md:space-y-6">
-                                 {/* Logo Upload */}
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-3">
-                                     Business Logo
-                                   </label>
-                                   <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
-                                     {businessInfo.logoUrl ? (
-                                       <div className="relative group">
-                                         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
-                                         <img
-                                           src={businessInfo.logoUrl}
-                                           alt="Business Logo"
-                                           className="relative w-20 h-20 md:w-24 md:h-24 object-contain border-2 border-slate-200 rounded-xl shadow-lg"
-                                         />
-                                       </div>
-                                     ) : (
-                                       <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-blue-400 transition-all duration-300">
-                                         <Upload className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />
-                                       </div>
-                                     )}
-           
-                                     <div className="flex-1 text-center sm:text-left ">
-                                       <input
-                                         type="file"
-                                         accept="image/*"
-                                         onChange={handleLogoUpload}
-                                         className="hidden"
-                                         id="logo-upload"
-                                       />
-                                       <label
-                                         htmlFor="logo-upload"
-                                         className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg md:rounded-xl hover:from-blue-700 hover:to-purple-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
-                                       >
-                                         {businessInfo.logoUrl
-                                           ? "Change Logo"
-                                           : "Upload Logo"}
-                                       </label>
-                                       <p className="text-xs text-slate-500 mt-2 md:mt-3 flex items-center justify-center sm:justify-start space-x-1">
-                                         <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
-                                         <span>Recommended: Square image, max 5MB</span>
-                                       </p>
-                                     </div>
-                                   </div>
-                                 </div>
-           
-                                 {/* Business Name */}
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                     Business Name
-                                   </label>
-                                   <input
-                                     type="text"
-                                     value={businessInfo.businessName}
-                                     onChange={(e) =>
-                                       setBusinessInfo({
-                                         ...businessInfo,
-                                         businessName: e.target.value,
-                                       })
-                                     }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-black-500 transition-all duration-300 font-medium text-sm md:text-base"
-                                     placeholder="Solidflo Invoicing Saas"
-                                   />
-                                 </div>
-           
-                                 {/* Address Fields */}
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                     Address Line 1
-                                   </label>
-                                   <input
-                                     type="text"
-                                     value={businessInfo.addressLine1}
-                                     onChange={(e) =>
-                                       setBusinessInfo({
-                                         ...businessInfo,
-                                         addressLine1: e.target.value,
-                                       })
-                                     }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                     placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
-                                   />
-                                 </div>
-           
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                     Address Line 2
-                                   </label>
-                                   <input
-                                     type="text"
-                                     value={businessInfo.addressLine2}
-                                     onChange={(e) =>
-                                       setBusinessInfo({
-                                         ...businessInfo,
-                                         addressLine2: e.target.value,
-                                       })
-                                     }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                     placeholder="WYNBERG"
-                                   />
-                                 </div>
-           
-                                 {/* City and Postal Code */}
-                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                                   <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                     <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                       City
-                                     </label>
-                                     <input
-                                       type="text"
-                                       value={businessInfo.city}
-                                       onChange={(e) =>
-                                         setBusinessInfo({
-                                           ...businessInfo,
-                                           city: e.target.value,
-                                         })
-                                       }
-                                       className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       placeholder="SANDTON"
-                                     />
-                                   </div>
-           
-                                   <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                     <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                       Postal Code
-                                     </label>
-                                     <input
-                                       type="text"
-                                       value={businessInfo.postalCode}
-                                       onChange={(e) =>
-                                         setBusinessInfo({
-                                           ...businessInfo,
-                                           postalCode: e.target.value,
-                                         })
-                                       }
-                                       className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       placeholder="2090"
-                                     />
-                                   </div>
-                                 </div>
-           
-                                 {/* Phone Numbers */}
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                     Primary Phone <span className="text-red-500">*</span>
-                                   </label>
-                                   <input
-                                     type="tel"
-                                     value={businessInfo.primaryPhone}
-                                     onChange={(e) =>
-                                       setBusinessInfo({
-                                         ...businessInfo,
-                                         primaryPhone: e.target.value,
-                                       })
-                                     }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                     placeholder="082 514 4509"
-                                     required
-                                   />
-                                 </div>
-           
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                     Secondary Phone (Optional)
-                                   </label>
-                                   <input
-                                     type="tel"
-                                     value={businessInfo.secondaryPhone}
-                                     onChange={(e) =>
-                                       setBusinessInfo({
-                                         ...businessInfo,
-                                         secondaryPhone: e.target.value,
-                                       })
-                                     }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                     placeholder="084 583 9929"
-                                   />
-                                 </div>
-           
-                                 {/* Bank Details Section */}
-                                 <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
-                                   <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                                     <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
-                                       <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                                     </div>
-                                     <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                                       Bank Details
-                                     </h3>
-                                   </div>
-           
-                                   <div className="space-y-3 md:space-y-4">
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                       <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                         Bank Name
-                                       </label>
-                                       <input
-                                         type="text"
-                                         value={businessInfo.bankName}
-                                         onChange={(e) =>
-                                           setBusinessInfo({
-                                             ...businessInfo,
-                                             bankName: e.target.value,
-                                           })
-                                         }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       />
-                                     </div>
-           
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                       <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                         Account Holder
-                                       </label>
-                                       <input
-                                         type="text"
-                                         value={businessInfo.accountHolder}
-                                         onChange={(e) =>
-                                           setBusinessInfo({
-                                             ...businessInfo,
-                                             accountHolder: e.target.value,
-                                           })
-                                         }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       />
-                                     </div>
-           
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                       <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                         Account Number
-                                       </label>
-                                       <input
-                                         type="text"
-                                         value={businessInfo.accountNumber}
-                                         onChange={(e) =>
-                                           setBusinessInfo({
-                                             ...businessInfo,
-                                             accountNumber: e.target.value,
-                                           })
-                                         }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       />
-                                     </div>
-           
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                       <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                         Branch Code
-                                       </label>
-                                       <input
-                                         type="text"
-                                         value={businessInfo.branchCode}
-                                         onChange={(e) =>
-                                           setBusinessInfo({
-                                             ...businessInfo,
-                                             branchCode: e.target.value,
-                                           })
-                                         }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       />
-                                     </div>
-                                   </div>
-                                 </div>
-           
-                                 {/* Stamp Settings */}
-                                 <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
-                                   <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                                     <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
-                                       <CheckSquare className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                                     </div>
-                                     <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                                       📋 Invoice Stamp Settings
-                                     </h3>
-                                   </div>
-           
-                                   <div className="space-y-3 md:space-y-4">
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                                       <label className="flex items-center space-x-2 md:space-x-3 cursor-pointer group">
-                                         <input
-                                           type="checkbox"
-                                           checked={stampSettings.enabled}
-                                           onChange={(e) =>
-                                             setStampSettings({
-                                               ...stampSettings,
-                                               enabled: e.target.checked,
-                                             })
-                                           }
-                                           className="w-4 h-4 md:w-5 md:h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
-                                         />
-                                         <span className="text-xs md:text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
-                                           Show approval stamp on invoices and quotes
-                                         </span>
-                                       </label>
-                                     </div>
-           
-                                     {stampSettings.enabled && (
-                                       <>
-                                         <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                                           <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                             Stamp Text
-                                           </label>
-                                           <input
-                                             type="text"
-                                             value={stampSettings.text}
-                                             onChange={(e) =>
-                                               setStampSettings({
-                                                 ...stampSettings,
-                                                 text: e.target.value.toUpperCase(),
-                                               })
-                                             }
-                                             className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-bold text-sm md:text-base"
-                                             placeholder="APPROVED"
-                                             maxLength={15}
-                                           />
-                                           <p className="text-xs text-slate-500 mt-2 flex items-center space-x-1">
-                                             <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
-                                             <span>Max 15 characters</span>
-                                           </p>
-                                         </div>
-           
-           
-                                         <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                           <label className="block text-sm font-bold text-slate-700 mb-3">
-                                             Stamp Color
-                                           </label>
-                                           <select
-                                             value={stampSettings.color}
-                                             onChange={(e) =>
-                                               setStampSettings({
-                                                 ...stampSettings,
-                                                 color: e.target.value,
-                                               })
-                                             }
-                                             className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-semibold cursor-pointer"
-                                           >
-                                             <option value="#d32f2f">
-                                               🔴 Red (Traditional)
-                                             </option>
-                                             <option value="#1976d2">
-                                               🔵 Blue (Professional)
-                                             </option>
-                                             <option value="#388e3c">
-                                               🟢 Green (Approved)
-                                             </option>
-                                             <option value="#7b1fa2">
-                                               🟣 Purple (Premium)
-                                             </option>
-                                             <option value="#000000">
-                                               ⚫ Black (Formal)
-                                             </option>
-                                             <option value="#f57c00">
-                                               🟠 Orange (Attention)
-                                             </option>
-                                           </select>
-                                         </div>
-           
-                                         <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                           <label className="flex items-center space-x-3 cursor-pointer group">
-                                             <input
-                                               type="checkbox"
-                                               checked={stampSettings.showDate}
-                                               onChange={(e) =>
-                                                 setStampSettings({
-                                                   ...stampSettings,
-                                                   showDate: e.target.checked,
-                                                 })
-                                               }
-                                               className="w-5 h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
-                                             />
-                                             <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
-                                               Include date on stamp
-                                             </span>
-                                           </label>
-                                         </div>
-           
-                                         {/* Preview */}
-                                         <div className="mt-6 p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-2 border-dashed border-slate-300">
-                                           <p className="text-sm font-bold mb-6 text-center text-slate-600">
-                                             Stamp Preview:
-                                           </p>
-                                           <div className="flex justify-center">
-                                             <SignatureStamp
-                                               text={stampSettings.text}
-                                               color={stampSettings.color}
-                                               showDate={stampSettings.showDate}
-                                               rotation={-5}
-                                               size="medium"
-                                             />
-                                           </div>
-                                         </div>
-                                       </>
-                                     )}
-                                   </div>
-                                 </div>
-                                   {/* Email Configuration Section */}
-                                   <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
-                                     <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                                       <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                                         <Send className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                                       </div>
-                                       <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                                         Email Configuration
-                                       </h3>
-                                     </div>
-                                   
-                                     <div className="space-y-3 md:space-y-4">
-                                       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                                         <p className="text-sm text-blue-800">
-                                           <strong>📧 Your Sending Email:</strong> {user?.email || authUser?.email}
-                                         </p>
-                                         <p className="text-xs text-blue-600 mt-2">
-                                           Quotes and invoices will be sent from this email address.
-                                         </p>
-                                       </div>
-                                   
-                                       <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                                         <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                           Email Provider
-                                         </label>
-                                         <select
-                                           value={businessInfo.emailProvider || 'gmail'}
-                                           onChange={(e) =>
-                                             setBusinessInfo({
-                                               ...businessInfo,
-                                               emailProvider: e.target.value,
-                                             })
-                                           }
-                                           className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                         >
-                                           <option value="gmail">Gmail</option>
-                                           <option value="outlook">Outlook/Hotmail</option>
-                                           <option value="yahoo">Yahoo Mail</option>
-                                           <option value="other">Other SMTP</option>
-                                         </select>
-                                       </div>
-                                   
-                                       <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                                         <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                           Email App Password <span className="text-red-500">*</span>
-                                         </label>
-                                         <input
-                                           type="password"
-                                           value={businessInfo.emailPassword || ''}
-                                           onChange={(e) =>
-                                             setBusinessInfo({
-                                               ...businessInfo,
-                                               emailPassword: e.target.value,
-                                             })
-                                           }
-                                           className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base font-mono"
-                                           placeholder="••••••••••••••••"
-                                         />
-                                         <p className="text-xs text-slate-500 mt-2">
-                                           <strong>⚠️ Security Note:</strong> Use an App Password, not your regular login password
-                                         </p>
-                                       </div>
-                                   
-                                       {/* Gmail Setup Instructions */}
-                                       {(businessInfo.emailProvider === 'gmail' || !businessInfo.emailProvider) && (
-                                         <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4">
-                                           <h4 className="font-bold text-red-900 mb-2 flex items-center gap-2">
-                                             <span>📖</span> How to Get Gmail App Password:
-                                           </h4>
-                                           <ol className="text-xs md:text-sm text-red-800 space-y-1 ml-4 list-decimal">
-                                             <li>Go to <strong>myaccount.google.com</strong></li>
-                                             <li>Click <strong>Security</strong> in the left menu</li>
-                                             <li>Enable <strong>2-Step Verification</strong> (if not already enabled)</li>
-                                             <li>Search for <strong>"App passwords"</strong> in the search bar</li>
-                                             <li>Click <strong>App passwords</strong></li>
-                                             <li>Enter your Google password if prompted</li>
-                                             <li>In the "App name" field, type <strong>"Construction Quotes"</strong></li>
-                                             <li>Click <strong>Create</strong></li>
-                                             <li>Copy the 16-character password (shown in yellow box)</li>
-                                             <li>Paste it in the field above</li>
-                                           </ol>
-                                           
-                                            <a href="https://support.google.com/accounts/answer/185833"
-                                             target="_blank"
-                                             rel="noopener noreferrer"
-                                             className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline">
-                                           
-                                             📺 View Video Tutorial →
-                                           </a>
-                                         </div>
-                                       )}
-                                   
-                                       {/* Outlook Setup Instructions */}
-                                       {businessInfo.emailProvider === 'outlook' && (
-                                         <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
-                                           <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
-                                             <span>📖</span> How to Get Outlook App Password:
-                                           </h4>
-                                           <ol className="text-xs md:text-sm text-blue-800 space-y-1 ml-4 list-decimal">
-                                             <li>Go to <strong>account.microsoft.com/security</strong></li>
-                                             <li>Sign in with your Outlook account</li>
-                                             <li>Click <strong>Advanced security options</strong></li>
-                                             <li>Under "Additional security", click <strong>App passwords</strong></li>
-                                             <li>Click <strong>Create a new app password</strong></li>
-                                             <li>Copy the generated password</li>
-                                             <li>Paste it in the field above</li>
-                                           </ol>
-                                           
-                                            <a href="https://support.microsoft.com/en-us/account-billing/manage-app-passwords-for-two-step-verification-d6dc8c6d-4bf7-4851-ad95-6d07799387e9"
-                                             target="_blank"
-                                             rel="noopener noreferrer"
-                                             className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
-                                           >
-                                             📺 View Microsoft Instructions →
-                                           </a>
-                                         </div>
-                                       )}
-                                   
-                                       {/* Test Email Button */}
-                                       <button
-                                         onClick={handleTestEmail}
-                                         disabled={!businessInfo.emailPassword}
-                                         className={`w-full px-4 py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${
-                                           !businessInfo.emailPassword
-                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                             : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800'
-                                         }`}
-                                       >
-                                         <Send className="w-4 h-4" />
-                                         {businessInfo.emailPassword ? 'Send Test Email' : 'Enter App Password First'}
-                                       </button>
-                                     </div>
-                                   </div>
-                                 <button
-                                   onClick={handleSaveBusinessInfo}
-                                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
-                                 >
-                                   💾 Save Business Information
-                                 </button>
-                               </div>
-                             </div>
-                           </div>
-                         </div>
-                       )}
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
+                <div className="bg-gray-300 max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
+                  <div className="p-4 md:p-6 border-b border-slate-300 bg-gradient-to-r from-gray0 to-purple-50 flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 md:space-x-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <Settings className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                        </div>
+                        <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                          Business Settings
+                        </h2>
+                      </div>
+                      <button
+                        onClick={() => setShowSettings(false)}
+                        className="group p-1.5 md:p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300"
+                      >
+                        <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-300 to-slate-400 flex-1">
+                    <div className="space-y-4 md:space-y-6">
+                      {/* Logo Upload */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-3">
+                          Business Logo
+                        </label>
+                        <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
+                          {businessInfo.logoUrl ? (
+                            <div className="relative group">
+                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
+                              <img
+                                src={businessInfo.logoUrl}
+                                alt="Business Logo"
+                                className="relative w-20 h-20 md:w-24 md:h-24 object-contain border-2 border-slate-200 rounded-xl shadow-lg"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-blue-400 transition-all duration-300">
+                              <Upload className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />
+                            </div>
+                          )}
+
+                          <div className="flex-1 text-center sm:text-left ">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleLogoUpload}
+                              className="hidden"
+                              id="logo-upload"
+                            />
+                            <label
+                              htmlFor="logo-upload"
+                              className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg md:rounded-xl hover:from-blue-700 hover:to-purple-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
+                            >
+                              {businessInfo.logoUrl
+                                ? "Change Logo"
+                                : "Upload Logo"}
+                            </label>
+                            <p className="text-xs text-slate-500 mt-2 md:mt-3 flex items-center justify-center sm:justify-start space-x-1">
+                              <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                              <span>Recommended: Square image, max 5MB</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Business Name */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Business Name
+                        </label>
+                        <input
+                          type="text"
+                          value={businessInfo.businessName}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              businessName: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-black-500 transition-all duration-300 font-medium text-sm md:text-base"
+                          placeholder="Solidflo Invoicing Saas"
+                        />
+                      </div>
+
+                      {/* Address Fields */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Address Line 1
+                        </label>
+                        <input
+                          type="text"
+                          value={businessInfo.addressLine1}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              addressLine1: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
+                        />
+                      </div>
+
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Address Line 2
+                        </label>
+                        <input
+                          type="text"
+                          value={businessInfo.addressLine2}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              addressLine2: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="WYNBERG"
+                        />
+                      </div>
+
+                      {/* City and Postal Code */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                            City
+                          </label>
+                          <input
+                            type="text"
+                            value={businessInfo.city}
+                            onChange={(e) =>
+                              setBusinessInfo({
+                                ...businessInfo,
+                                city: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            placeholder="SANDTON"
+                          />
+                        </div>
+
+                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                            Postal Code
+                          </label>
+                          <input
+                            type="text"
+                            value={businessInfo.postalCode}
+                            onChange={(e) =>
+                              setBusinessInfo({
+                                ...businessInfo,
+                                postalCode: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            placeholder="2090"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Phone Numbers */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Primary Phone <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          value={businessInfo.primaryPhone}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              primaryPhone: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="082 514 4509"
+                          required
+                        />
+                      </div>
+
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Secondary Phone (Optional)
+                        </label>
+                        <input
+                          type="tel"
+                          value={businessInfo.secondaryPhone}
+                          onChange={(e) =>
+                            setBusinessInfo({
+                              ...businessInfo,
+                              secondaryPhone: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="084 583 9929"
+                        />
+                      </div>
+
+                      {/* Bank Details Section */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            Bank Details
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Bank Name
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.bankName}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  bankName: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Account Holder
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.accountHolder}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  accountHolder: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Account Number
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.accountNumber}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  accountNumber: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Branch Code
+                            </label>
+                            <input
+                              type="text"
+                              value={businessInfo.branchCode}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  branchCode: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stamp Settings */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <CheckSquare className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            📋 Invoice Stamp Settings
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="flex items-center space-x-2 md:space-x-3 cursor-pointer group">
+                              <input
+                                type="checkbox"
+                                checked={stampSettings.enabled}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    enabled: e.target.checked,
+                                  })
+                                }
+                                className="w-4 h-4 md:w-5 md:h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
+                              />
+                              <span className="text-xs md:text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
+                                Show approval stamp on invoices and quotes
+                              </span>
+                            </label>
+                          </div>
+
+                          {stampSettings.enabled && (
+                            <>
+                              <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                                  Stamp Text
+                                </label>
+                                <input
+                                  type="text"
+                                  value={stampSettings.text}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      text: e.target.value.toUpperCase(),
+                                    })
+                                  }
+                                  className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-bold text-sm md:text-base"
+                                  placeholder="APPROVED"
+                                  maxLength={15}
+                                />
+                                <p className="text-xs text-slate-500 mt-2 flex items-center space-x-1">
+                                  <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                                  <span>Max 15 characters</span>
+                                </p>
+                              </div>
+
+                              <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="block text-sm font-bold text-slate-700 mb-3">
+                                  Stamp Color
+                                </label>
+                                <select
+                                  value={stampSettings.color}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      color: e.target.value,
+                                    })
+                                  }
+                                  className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-semibold cursor-pointer"
+                                >
+                                  <option value="#d32f2f">
+                                    🔴 Red (Traditional)
+                                  </option>
+                                  <option value="#1976d2">
+                                    🔵 Blue (Professional)
+                                  </option>
+                                  <option value="#388e3c">
+                                    🟢 Green (Approved)
+                                  </option>
+                                  <option value="#7b1fa2">
+                                    🟣 Purple (Premium)
+                                  </option>
+                                  <option value="#000000">
+                                    ⚫ Black (Formal)
+                                  </option>
+                                  <option value="#f57c00">
+                                    🟠 Orange (Attention)
+                                  </option>
+                                </select>
+                              </div>
+
+                              <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="flex items-center space-x-3 cursor-pointer group">
+                                  <input
+                                    type="checkbox"
+                                    checked={stampSettings.showDate}
+                                    onChange={(e) =>
+                                      setStampSettings({
+                                        ...stampSettings,
+                                        showDate: e.target.checked,
+                                      })
+                                    }
+                                    className="w-5 h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
+                                  />
+                                  <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
+                                    Include date on stamp
+                                  </span>
+                                </label>
+                              </div>
+
+                              {/* Preview */}
+                              <div className="mt-6 p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-2 border-dashed border-slate-300">
+                                <p className="text-sm font-bold mb-6 text-center text-slate-600">
+                                  Stamp Preview:
+                                </p>
+                                <div className="flex justify-center">
+                                  <SignatureStamp
+                                    text={stampSettings.text}
+                                    color={stampSettings.color}
+                                    showDate={stampSettings.showDate}
+                                    rotation={-5}
+                                    size="medium"
+                                  />
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {/* Email Configuration Section */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <Send className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            Email Configuration
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <p className="text-sm text-blue-800">
+                              <strong>📧 Your Sending Email:</strong>{" "}
+                              {user?.email || authUser?.email}
+                            </p>
+                            <p className="text-xs text-blue-600 mt-2">
+                              Quotes and invoices will be sent from this email
+                              address.
+                            </p>
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Email Provider
+                            </label>
+                            <select
+                              value={businessInfo.emailProvider || "gmail"}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  emailProvider: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            >
+                              <option value="gmail">Gmail</option>
+                              <option value="outlook">Outlook/Hotmail</option>
+                              <option value="yahoo">Yahoo Mail</option>
+                              <option value="other">Other SMTP</option>
+                            </select>
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Email App Password{" "}
+                              <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="password"
+                              value={businessInfo.emailPassword || ""}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  emailPassword: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base font-mono"
+                              placeholder="••••••••••••••••"
+                            />
+                            <p className="text-xs text-slate-500 mt-2">
+                              <strong>⚠️ Security Note:</strong> Use an App
+                              Password, not your regular login password
+                            </p>
+                          </div>
+
+                          {/* Gmail Setup Instructions */}
+                          {(businessInfo.emailProvider === "gmail" ||
+                            !businessInfo.emailProvider) && (
+                            <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4">
+                              <h4 className="font-bold text-red-900 mb-2 flex items-center gap-2">
+                                <span>📖</span> How to Get Gmail App Password:
+                              </h4>
+                              <ol className="text-xs md:text-sm text-red-800 space-y-1 ml-4 list-decimal">
+                                <li>
+                                  Go to <strong>myaccount.google.com</strong>
+                                </li>
+                                <li>
+                                  Click <strong>Security</strong> in the left
+                                  menu
+                                </li>
+                                <li>
+                                  Enable <strong>2-Step Verification</strong>{" "}
+                                  (if not already enabled)
+                                </li>
+                                <li>
+                                  Search for <strong>"App passwords"</strong> in
+                                  the search bar
+                                </li>
+                                <li>
+                                  Click <strong>App passwords</strong>
+                                </li>
+                                <li>Enter your Google password if prompted</li>
+                                <li>
+                                  In the "App name" field, type{" "}
+                                  <strong>"Construction Quotes"</strong>
+                                </li>
+                                <li>
+                                  Click <strong>Create</strong>
+                                </li>
+                                <li>
+                                  Copy the 16-character password (shown in
+                                  yellow box)
+                                </li>
+                                <li>Paste it in the field above</li>
+                              </ol>
+
+                              <a
+                                href="https://support.google.com/accounts/answer/185833"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
+                              >
+                                📺 View Video Tutorial →
+                              </a>
+                            </div>
+                          )}
+
+                          {/* Outlook Setup Instructions */}
+                          {businessInfo.emailProvider === "outlook" && (
+                            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
+                              <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                                <span>📖</span> How to Get Outlook App Password:
+                              </h4>
+                              <ol className="text-xs md:text-sm text-blue-800 space-y-1 ml-4 list-decimal">
+                                <li>
+                                  Go to{" "}
+                                  <strong>
+                                    account.microsoft.com/security
+                                  </strong>
+                                </li>
+                                <li>Sign in with your Outlook account</li>
+                                <li>
+                                  Click{" "}
+                                  <strong>Advanced security options</strong>
+                                </li>
+                                <li>
+                                  Under "Additional security", click{" "}
+                                  <strong>App passwords</strong>
+                                </li>
+                                <li>
+                                  Click{" "}
+                                  <strong>Create a new app password</strong>
+                                </li>
+                                <li>Copy the generated password</li>
+                                <li>Paste it in the field above</li>
+                              </ol>
+
+                              <a
+                                href="https://support.microsoft.com/en-us/account-billing/manage-app-passwords-for-two-step-verification-d6dc8c6d-4bf7-4851-ad95-6d07799387e9"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
+                              >
+                                📺 View Microsoft Instructions →
+                              </a>
+                            </div>
+                          )}
+
+                          {/* Test Email Button */}
+                          <button
+                            onClick={handleTestEmail}
+                            disabled={!businessInfo.emailPassword}
+                            className={`w-full px-4 py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${
+                              !businessInfo.emailPassword
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800"
+                            }`}
+                          >
+                            <Send className="w-4 h-4" />
+                            {businessInfo.emailPassword
+                              ? "Send Test Email"
+                              : "Enter App Password First"}
+                          </button>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleSaveBusinessInfo}
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
+                      >
+                        💾 Save Business Information
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* ── Shared Modals ────────────────────────────────────────── */}
-            <CustomersListModal showModal={showCustomersListModal} setShowModal={setShowCustomersListModal} customers={customers} onLoadCustomer={loadCustomer} onEditCustomer={handleEditCustomer} onAddNewCustomer={handleAddNewCustomer} />
-            <CustomerModal showModal={showCustomerModal} setShowModal={setShowCustomerModal} existingCustomer={selectedCustomer} onCustomerSaved={handleCustomerSaved} />
+            <CustomersListModal
+              showModal={showCustomersListModal}
+              setShowModal={setShowCustomersListModal}
+              customers={customers}
+              onLoadCustomer={loadCustomer}
+              onEditCustomer={handleEditCustomer}
+              onAddNewCustomer={handleAddNewCustomer}
+            />
+            <CustomerModal
+              showModal={showCustomerModal}
+              setShowModal={setShowCustomerModal}
+              existingCustomer={selectedCustomer}
+              onCustomerSaved={handleCustomerSaved}
+            />
 
             {showPaymentModal && selectedQuoteForPayment && (
-              <PaymentProcessor showModal={showPaymentModal} setShowModal={setShowPaymentModal} invoice={selectedQuoteForPayment} onPaymentComplete={handlePaymentComplete} user={user} businessInfo={businessInfo} />
+              <PaymentProcessor
+                showModal={showPaymentModal}
+                setShowModal={setShowPaymentModal}
+                invoice={selectedQuoteForPayment}
+                onPaymentComplete={handlePaymentComplete}
+                user={user}
+                businessInfo={businessInfo}
+              />
             )}
 
             {/* ── Saved Quotes / Invoices List Modal ──────────────────── */}
@@ -1648,28 +1821,64 @@ Your Carpentry Quote System
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
                   <div className="p-4 border-b flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">Saved {documentType === "quote" ? "Quotes" : "Invoices"}</h2>
-                    <button onClick={() => setShowQuotesList(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+                    <h2 className="text-xl font-semibold">
+                      Saved {documentType === "quote" ? "Quotes" : "Invoices"}
+                    </h2>
+                    <button
+                      onClick={() => setShowQuotesList(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      ✕
+                    </button>
                   </div>
                   <div className="overflow-auto p-4">
                     {savedQuotes.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">No saved {documentType === "quote" ? "quotes" : "invoices"} yet</div>
+                      <div className="text-center py-8 text-gray-500">
+                        No saved{" "}
+                        {documentType === "quote" ? "quotes" : "invoices"} yet
+                      </div>
                     ) : (
                       <div className="space-y-2">
                         {savedQuotes.map((quote) => (
-                          <div key={quote.id} onClick={() => loadQuote(quote)} className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors">
+                          <div
+                            key={quote.id}
+                            onClick={() => loadQuote(quote)}
+                            className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                          >
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
-                                <div className="font-semibold text-lg">{quote.quoteNumber || "N/A"}</div>
-                                <div className="text-sm text-gray-600 mt-1">Client: {quote.customer?.name || "N/A"}</div>
-                                <div className="text-sm text-gray-600">Email: {quote.customer?.email || "N/A"}</div>
+                                <div className="font-semibold text-lg">
+                                  {quote.quoteNumber || "N/A"}
+                                </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  Client: {quote.customer?.name || "N/A"}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  Email: {quote.customer?.email || "N/A"}
+                                </div>
                               </div>
                               <div className="text-right">
-                                <div className="text-lg font-semibold text-amber-600">R{quote.totals?.total?.toFixed(2) || "0.00"}</div>
-                                {quote.totals?.paid > 0 && <div className="text-sm text-emerald-600 font-semibold">Paid: R{quote.totals.paid.toFixed(2)}</div>}
-                                {quote.totals?.due > 0 && <div className="text-sm text-rose-600 font-semibold">Due: R{quote.totals.due.toFixed(2)}</div>}
-                                <div className={`text-xs mt-1 px-2 py-1 rounded ${quote.status === "paid" ? "bg-emerald-100 text-emerald-700" : quote.status === "partially_paid" ? "bg-amber-100 text-amber-700" : quote.status === "pending" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}>
-                                  {quote.status === "paid" ? "Paid" : quote.status === "partially_paid" ? "Partial" : "Pending"}
+                                <div className="text-lg font-semibold text-amber-600">
+                                  R{quote.totals?.total?.toFixed(2) || "0.00"}
+                                </div>
+                                {quote.totals?.paid > 0 && (
+                                  <div className="text-sm text-emerald-600 font-semibold">
+                                    Paid: R{quote.totals.paid.toFixed(2)}
+                                  </div>
+                                )}
+                                {quote.totals?.due > 0 && (
+                                  <div className="text-sm text-rose-600 font-semibold">
+                                    Due: R{quote.totals.due.toFixed(2)}
+                                  </div>
+                                )}
+                                <div
+                                  className={`text-xs mt-1 px-2 py-1 rounded ${quote.status === "paid" ? "bg-emerald-100 text-emerald-700" : quote.status === "partially_paid" ? "bg-amber-100 text-amber-700" : quote.status === "pending" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}
+                                >
+                                  {quote.status === "paid"
+                                    ? "Paid"
+                                    : quote.status === "partially_paid"
+                                      ? "Partial"
+                                      : "Pending"}
                                 </div>
                               </div>
                             </div>
@@ -1683,604 +1892,1082 @@ Your Carpentry Quote System
             )}
 
             {/* ── Alternate Views ──────────────────────────────────────── */}
-            {activeView === "financial-overview" && <FinancialOverview user={user} />}
+            {activeView === "financial-overview" && (
+              <FinancialOverview user={user} />
+            )}
             {activeView === "history-view" && <HistoryView user={user} />}
             {activeView === "notes-view" && <NotesView user={user} />}
-             {activeView === "templates" && <Templates user={user} />}
+            {activeView === "templates" && <Templates user={user} />}
             {activeView === "home" && <HomeView user={user} />}
 
             {/* ── Quote / Invoice Builder ──────────────────────────────── */}
             {activeView === "quote" && (
               <>
-               {/* Header */}
-          <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
-                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-300 lg:hidden flex-shrink-0">
-                  <Menu className="w-5 h-5" />
-                </button>
-                <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0">
-                    <Hammer className="w-8 h-10 md:w-10 md:h-10 text-amber-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-amber-800 to-orange-600 bg-clip-text text-transparent truncate">
-                      {documentType === "quote" ? "Quote" : "Invoice"} #{quoteNumber || "—"}
-                    </h1>
-                    <p className="text-xs text-slate-500 hidden md:block truncate">
-                      Create and manage carpentry {documentType === "quote" ? "quotes" : "invoices"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop action buttons */}
-              <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
-                {documentType === "quote" && quoteId && (
-                  <button onClick={handleConvertToInvoice} className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap">
-                    <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-                    Convert to Invoice
-                  </button>
-                )}
-                <button onClick={handlePrint} className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap">
-                  <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                  Print
-                </button>
-                <button onClick={documentType === "quote" ? handleNewQuote : handleNewInvoice} className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap">
-                  <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                  New
-                </button>
-                <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap">
-                  <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  <span>Send</span>
-                </button>
-                <button onClick={handleSavePDF} className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap">
-                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                  Save PDF
-                </button>
-                <button onClick={handleSaveQuote} className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap">
-                  <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                  Save
-                </button>
-                <button onClick={handleLogout} className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap">
-                  <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                  Logout
-                </button>
-              </div>
-
-              {/* Mobile logout */}
-              <button onClick={handleLogout} className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0">
-                <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Action Bar */}
-          <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
-            <div className="flex gap-2 min-w-max pb-1 pr-3">
-              {documentType === "quote" && quoteId && (
-                <button onClick={handleConvertToInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                  <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
-                  <span>To Invoice</span>
-                </button>
-              )}
-              <button onClick={handleSaveQuote} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-amber-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                Save
-              </button>
-              <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                <span>Send</span>
-              </button>
-              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                <span>PDF</span>
-              </button>
-              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95">
-                <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                <span>Print</span>
-              </button>
-            </div>
-          </div>
-              <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
-                <div className="space-y-6">
-                  {/* Tab: Manual / AI */}
-                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
-                    <div className="flex border-b border-slate-200">
-                      <button onClick={() => setInputMode("manual")} className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "manual" ? "bg-white text-amber-600 border-b-2 border-amber-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
-                        <span className="flex items-center justify-center gap-2">
-                          <Edit className="w-5 h-5" />
-                          Manual Entry
-                        </span>
+                {/* Header */}
+                <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
+                      <button
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-300 lg:hidden flex-shrink-0"
+                      >
+                        <Menu className="w-5 h-5" />
                       </button>
-                      <button onClick={() => setInputMode("ai")} className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
-                        <span className="flex items-center justify-center gap-2">
-                          <Sparkles className="w-5 h-5" />
-                          AI Assistant
-                        </span>
-                      </button>
-                    </div>
-                    <div className="p-6">
-                      {inputMode === "ai" && <AIInvoiceExtractor onDataExtracted={handleAIDataExtracted} documentType={documentType} />}
-                    </div>
-                  </div>
-
-                  {inputMode === "manual" && (
-                    <>
-                      {/* Summary Cards */}
-                      <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
-                        <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-3 rounded-xl border border-amber-200 shadow-sm">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="text-sm font-medium text-amber-700">Total Amount</div>
-                            <div className="w-8 h-8 bg-amber-200 rounded-lg flex items-center justify-center">
-                              <DollarSign className="w-5 h-5 text-amber-600" />
-                            </div>
-                          </div>
-                          <div className="text-2xl font-bold text-amber-900">R{total.toFixed(2)}</div>
+                      <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+                        <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0">
+                          <Hammer className="w-8 h-10 md:w-10 md:h-10 text-amber-600" />
                         </div>
-
-                        <div className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.totalPaid > 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : "from-slate-100 to-slate-300 border-slate-300"}`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className={`text-sm font-medium ${paymentStatus.totalPaid > 0 ? "text-emerald-700" : "text-slate-600"}`}>Paid</div>
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.totalPaid > 0 ? "bg-emerald-200" : "bg-slate-200"}`}>
-                              <CheckSquare className={`w-5 h-5 ${paymentStatus.totalPaid > 0 ? "text-emerald-600" : "text-slate-400"}`} />
-                            </div>
-                          </div>
-                          <div className={`text-2xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}>R{paymentStatus.totalPaid.toFixed(2)}</div>
-                        </div>
-
-                        <div className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.balanceDue <= 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : paymentStatus.totalPaid > 0 ? "from-amber-50 to-amber-100 border-amber-200" : "from-rose-50 to-rose-100 border-rose-200"}`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className={`text-sm font-medium ${paymentStatus.balanceDue <= 0 ? "text-emerald-700" : paymentStatus.totalPaid > 0 ? "text-amber-700" : "text-rose-700"}`}>Balance Due</div>
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.balanceDue <= 0 ? "bg-emerald-200" : paymentStatus.totalPaid > 0 ? "bg-amber-200" : "bg-rose-200"}`}>
-                              <Wallet className={`w-5 h-5 ${paymentStatus.balanceDue <= 0 ? "text-emerald-600" : paymentStatus.totalPaid > 0 ? "text-amber-600" : "text-rose-600"}`} />
-                            </div>
-                          </div>
-                          <div className={`text-2xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-amber-900" : "text-rose-900"}`}>R{paymentStatus.balanceDue.toFixed(2)}</div>
+                        <div className="min-w-0">
+                          <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-amber-800 to-orange-600 bg-clip-text text-transparent truncate">
+                            {documentType === "quote" ? "Quote" : "Invoice"} #
+                            {quoteNumber || "—"}
+                          </h1>
+                          <p className="text-xs text-slate-500 hidden md:block truncate">
+                            Create and manage carpentry{" "}
+                            {documentType === "quote" ? "quotes" : "invoices"}
+                          </p>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Payment Status Banner */}
-                      {quoteId && (
-                        <div className={`p-4 rounded-xl border-2 flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-emerald-50 border-emerald-300" : paymentStatus.status === "partially_paid" ? "bg-amber-50 border-amber-300" : "bg-rose-50 border-rose-300"}`}>
-                          <div className="flex items-center gap-3">
-                            {paymentStatus.status === "paid" ? (
-                              <>
-                                <div className="w-10 h-10 bg-emerald-200 rounded-full flex items-center justify-center"><CheckSquare className="w-6 h-6 text-emerald-600" /></div>
-                                <div>
-                                  <div className="font-bold text-emerald-900">{documentType === "quote" ? "Quote" : "Invoice"} Fully Paid</div>
-                                  <div className="text-sm text-emerald-700">Payment complete – Thank you!</div>
-                                </div>
-                              </>
-                            ) : paymentStatus.status === "partially_paid" ? (
-                              <>
-                                <div className="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center"><CreditCard className="w-6 h-6 text-amber-600" /></div>
-                                <div>
-                                  <div className="font-bold text-amber-900">Partial Payment Received</div>
-                                  <div className="text-sm text-amber-700">R{paymentStatus.totalPaid.toFixed(2)} paid • R{paymentStatus.balanceDue.toFixed(2)} remaining</div>
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center"><Wallet className="w-6 h-6 text-rose-600" /></div>
-                                <div>
-                                  <div className="font-bold text-rose-900">Payment Pending</div>
-                                  <div className="text-sm text-rose-700">Full amount due: R{paymentStatus.balanceDue.toFixed(2)}</div>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                          {paymentStatus.status !== "paid" && (
-                            <button onClick={handleProcessPayment} className="px-4 py-2 bg-white border-2 border-current rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2">
-                              <CreditCard className="w-4 h-4" />
-                              Record Payment
-                            </button>
-                          )}
-                        </div>
+                    {/* Desktop action buttons */}
+                    <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
+                      {documentType === "quote" && quoteId && (
+                        <button
+                          onClick={handleConvertToInvoice}
+                          className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap"
+                        >
+                          <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+                          Convert to Invoice
+                        </button>
                       )}
+                      <button
+                        onClick={handlePrint}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"
+                      >
+                        <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                        Print
+                      </button>
+                      <button
+                        onClick={
+                          documentType === "quote"
+                            ? handleNewQuote
+                            : handleNewInvoice
+                        }
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
+                        New
+                      </button>
+                      <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap">
+                        <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                        <span>Send</span>
+                      </button>
+                      <button
+                        onClick={handleSavePDF}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                        Save PDF
+                      </button>
+                      <button
+                        onClick={handleSaveQuote}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                        Save
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                        Logout
+                      </button>
+                    </div>
 
-                      {/* ── Stepped Form ──────────────────────────────────── */}
-                      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                        {/* Step 1 – Client Information */}
-                        {currentStep === 1 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center"><Users className="w-6 h-6 text-amber-600" /></div>
-                                Client Information
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">Enter client / contractor details</p>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Client / Company Name <span className="text-rose-500">*</span></label>
-                                <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400" placeholder="Meridian Developments" />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Email <span className="text-rose-500">*</span></label>
-                                <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400" placeholder="projects@company.co.za" />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Phone <span className="text-rose-500">*</span></label>
-                                <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400" placeholder="+27 11 234 5678" />
-                              </div>
-                              <div className="col-span-1 sm:col-span-2">
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Site Address <span className="text-rose-500">*</span></label>
-                                <input type="text" value={propertyAddress} onChange={(e) => setPropertyAddress(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400" placeholder="45 Corporate Boulevard, Sandton, Johannesburg, 2196" />
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                    {/* Mobile logout */}
+                    <button
+                      onClick={handleLogout}
+                      className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
+                    >
+                      <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+                    </button>
+                  </div>
+                </div>
 
-                        {/* Step 2 – Site Details */}
-                        {currentStep === 2 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center"><Building className="w-6 h-6 text-orange-600" /></div>
-                                Site Details
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">Provide site specifications for an accurate quote</p>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Site / Project Type</label>
-                                <select value={projectType} onChange={(e) => setProjectType(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400">
-                                   <option value="Kitchen Cabinetry">Kitchen Cabinetry</option>
-    <option value="Bedroom Furniture">Bedroom Furniture</option>
-    <option value="Built-in Wardrobes">Built-in Wardrobes</option>
-    <option value="Custom Shelving">Custom Shelving</option>
-    <option value="Decking">Decking</option>
-    <option value="Doors & Frames">Doors & Frames</option>
-    <option value="Flooring">Flooring</option>
-    <option value="Ceilings">Ceilings</option>
-    <option value="Custom Furniture">Custom Furniture</option>
-                                </select>
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Site Area (sqm)</label>
-                                <input type="number" value={projectSize} onChange={(e) => setProjectSize(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400" placeholder="1200" />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Number of woodType / Storeys</label>
-                                <input type="number" value={woodType} onChange={(e) => setWoodType(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400" placeholder="3" />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Number of finishType</label>
-                                <input type="number" value={finishType} onChange={(e) => setFinishType(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400" placeholder="2" />
-                              </div>
-                            </div>
-
-                            {/* Site Summary Card */}
-                            <div className="mt-6 p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
-                              <h3 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
-                                <MapPin className="w-4 h-4" />
-                                Site Summary
-                              </h3>
-                              <div className="text-sm text-amber-800 space-y-1">
-                                <p><span className="font-medium">Type:</span> {projectType}</p>
-                                <p><span className="font-medium">Area:</span> {projectSize} sqm</p>
-                                <p><span className="font-medium">woodType:</span> {woodType} | finishType: {finishType}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 3 – Scope of Work */}
-                        {currentStep === 3 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-stone-100 rounded-lg flex items-center justify-center"><Wrench className="w-6 h-6 text-stone-600" /></div>
-                                Scope of Work
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">Add work items and materials to the quote</p>
-                            </div>
-
-                            {/* Add Work-Item Form */}
-                            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 mb-6 border border-slate-200">
-                              <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
-                                <Plus className="w-5 h-5 text-amber-600" />
-                                Add Work Item
-                              </h3>
-                              <div className="grid grid-cols-1 gap-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">Wood Type</label>
-                                    <select value={woodType} onChange={(e) => setWoodType(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white text-sm font-medium hover:border-slate-400">
-                                      <option value="Oak">Oak</option>
-    <option value="Pine">Pine</option>
-    <option value="Meranti">Meranti</option>
-    <option value="Sapele">Sapele</option>
-    <option value="MDF">MDF</option>
-    <option value="Plywood">Plywood</option>
-    <option value="Melamine">Melamine</option>
-                                    </select>
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">Phase</label>
-                                    <select value={finishType} onChange={(e) => setFinishType(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white text-sm font-medium hover:border-slate-400">
-                                      <option value="Varnish">Varnish</option>
-    <option value="Stain">Stain & Varnish</option>
-    <option value="Paint">Paint</option>
-    <option value="Oil">Oil Finish</option>
-    <option value="Lacquer">Lacquer</option>
-    <option value="Natural">Natural/Unfinished</option>
-                                    </select>
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <label className="block text-xs font-semibold text-slate-700 mb-1">Description</label>
-                                  <input type="text" placeholder="Work item / material description" value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400" />
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">Unit Rate (R)</label>
-                                    <input type="number" placeholder="Rate" value={newItem.rate} onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">Quantity / Units</label>
-                                    <input type="number" placeholder="Qty" value={newItem.qty} onChange={(e) => setNewItem({ ...newItem, qty: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">VAT (%)</label>
-                                    <input type="number" placeholder="15" value={newItem.taxRate} onChange={(e) => setNewItem({ ...newItem, taxRate: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400" />
-                                  </div>
-                                  <div className="flex items-end">
-                                    <button onClick={handleAddItem} className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg px-4 py-2 hover:from-amber-700 hover:to-orange-700 flex items-center justify-center gap-2 transition-all font-semibold shadow-md hover:shadow-lg">
-                                      <Plus className="w-4 h-4" />
-                                      Add Item
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Work Items Table */}
-                            {items.length > 0 ? (
-                              <div className="mb-6">
-                                <h3 className="text-lg font-bold text-slate-900 mb-4">Work Items ({items.length})</h3>
-                                <div className="overflow-x-auto rounded-xl border border-slate-200">
-                                  <table className="w-full">
-                                    <thead>
-                                      <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">Description</th>
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">Category</th>
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">Phase</th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">Unit Rate</th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">Qty</th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">VAT</th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">Total</th>
-                                        <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">Action</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody className="bg-white">
-                                      {items.map((item, index) => (
-                                        <tr key={index} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                                          <td className="px-4 py-4 text-sm font-medium text-slate-700">{item.description}</td>
-                                          <td className="px-4 py-4 text-sm">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">{item.workCategory || "General"}</span>
-                                          </td>
-                                          <td className="px-4 py-4 text-sm">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700">{item.phase || "Phase 1"}</span>
-                                          </td>
-                                          <td className="px-4 py-4 text-sm text-right text-slate-700">R{item.rate.toFixed(2)}</td>
-                                          <td className="px-4 py-4 text-sm text-right text-slate-700">{item.qty}</td>
-                                          <td className="px-4 py-4 text-sm text-right text-slate-700">R{item.taxAmount.toFixed(2)}</td>
-                                          <td className="px-4 py-4 text-sm text-right font-bold text-slate-900">R{item.totalAmount.toFixed(2)}</td>
-                                          <td className="px-4 py-4 text-center">
-                                            <button onClick={() => handleRemoveItem(index)} className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all flex items-center gap-1 mx-auto">
-                                              <Trash2 className="w-3 h-3" />
-                                              Remove
-                                            </button>
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-dashed border-slate-300">
-                                <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                  <Wrench className="w-8 h-8 text-slate-400" />
-                                </div>
-                                <p className="text-slate-700 font-semibold text-lg">No work items added yet</p>
-                                <p className="text-sm text-slate-500 mt-2">Add items using the form above</p>
-                              </div>
-                            )}
-
-                            {/* Totals */}
-                            {items.length > 0 && (
-                              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-200">
-                                <div className="space-y-3">
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-slate-700 font-medium">Subtotal:</span>
-                                    <span className="font-bold text-slate-900 text-lg">R{subtotal.toFixed(2)}</span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-slate-700 font-medium">VAT (15%):</span>
-                                    <span className="font-bold text-slate-900 text-lg">R{totalTax.toFixed(2)}</span>
-                                  </div>
-                                  <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-amber-300">
-                                    <span className="text-slate-900">Total:</span>
-                                    <span className="text-amber-700 text-2xl">R{total.toFixed(2)}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Step 4 – Schedule & Payment */}
-                        {currentStep === 4 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center"><Calendar className="w-6 h-6 text-emerald-600" /></div>
-                                Schedule & Payment Terms
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">Review quote details, milestones, and payment terms</p>
-                            </div>
-
-                            {/* Summary Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                              <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl border border-amber-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-amber-700">Project Total</span>
-                                  <DollarSign className="w-5 h-5 text-amber-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-amber-900">R{total.toFixed(2)}</div>
-                              </div>
-                              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-emerald-700">Work Items</span>
-                                  <ClipboardList className="w-5 h-5 text-emerald-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-emerald-900">{items.length}</div>
-                              </div>
-                              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-purple-700">VAT Amount</span>
-                                  <Receipt className="w-5 h-5 text-purple-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-purple-900">R{totalTax.toFixed(2)}</div>
-                              </div>
-                            </div>
-
-                            {/* Payment Terms */}
-                            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-6">
-                              <div className="flex items-center gap-3 mb-5">
-                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center"><CreditCard className="w-5 h-5 text-purple-600" /></div>
-                                <h3 className="text-xl font-bold text-slate-900">Payment Information</h3>
-                              </div>
-                              <div className="space-y-3">
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">Payment Schedule:</span>
-                                  <span className="font-bold text-slate-900">Milestone-Based</span>
-                                </div>
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">Payment Methods:</span>
-                                  <span className="font-bold text-slate-900">Bank Transfer, Card, EFT</span>
-                                </div>
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">Quote Valid For:</span>
-                                  <span className="font-bold text-slate-900">30 Days</span>
-                                </div>
-                                <div className="flex justify-between items-center py-3">
-                                  <span className="text-slate-600 font-medium">Currency:</span>
-                                  <span className="font-bold text-slate-900">ZAR (South African Rand)</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Client & Site Summary */}
-                            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
-                              <h3 className="text-lg font-bold text-slate-900 mb-4">Quote Summary</h3>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                  <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2"><Users className="w-4 h-4" />Client Details:</h4>
-                                  <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">{customerName}</p>
-                                    <p>{customerEmail}</p>
-                                    <p>{customerPhone}</p>
-                                  </div>
-                                </div>
-                                <div>
-                                  <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2"><Building className="w-4 h-4" />Site Details:</h4>
-                                  <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">{propertyAddress}</p>
-                                    <p><span className="font-semibold">Type:</span> {projectType}</p>
-                                    <p><span className="font-semibold">Area:</span> {projectSize} sqm</p>
-                                    <p><span className="font-semibold">woodType:</span> {woodType} | finishType: {finishType}</p>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="mt-6 pt-6 border-t border-slate-300">
-                                <h4 className="text-sm font-semibold text-slate-700 mb-2">Quote Details:</h4>
-                                <div className="text-sm text-slate-600 space-y-1">
-                                  <p><span className="font-semibold">Number:</span> {quoteNumber}</p>
-                                  <p><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</p>
-                                  <p><span className="font-semibold">Type:</span> {documentType === "quote" ? "Quote" : "Invoice"}</p>
-                                  <p><span className="font-semibold">Status:</span> <span className="text-amber-600 font-bold">Pending</span></p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Process Payment button */}
-                            {quoteId && (
-                              <div className="mt-6 flex gap-3">
-                                <button onClick={handleProcessPayment} className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105">
-                                  <CreditCard className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                                  Process Payment
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* ── Step Navigation Bar ──────────────────────────── */}
-                        <div className="px-8 py-5 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-                          <button onClick={handlePrevious} disabled={currentStep === 1} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${currentStep === 1 ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 shadow-sm"}`}>
-                            <ChevronLeft className="w-5 h-5" />
-                            Previous
-                          </button>
-
-                          <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">{currentStep} of {totalSteps}</div>
-
-                          {currentStep < totalSteps ? (
-                            <button onClick={handleNext} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-orange-700 transition-all shadow-md hover:shadow-lg">
-                              Next
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                          ) : (
-                            <button onClick={handleSaveQuote} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg">
-                              <Save className="w-5 h-5" />
-                              Save {documentType === "quote" ? "Quote" : "Invoice"}
-                            </button>
-                          )}
-                        </div>
+                {/* Mobile Action Bar */}
+                <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
+                  <div className="flex gap-2 min-w-max pb-1 pr-3">
+                    {documentType === "quote" && quoteId && (
+                      <button
+                        onClick={handleConvertToInvoice}
+                        className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                      >
+                        <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
+                        <span>To Invoice</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={handleSaveQuote}
+                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-amber-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                    >
+                      <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                      Save
+                    </button>
+                    <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                      <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                      <span>Send</span>
+                    </button>
+                    <button
+                      onClick={handlePrint}
+                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                    >
+                      <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                      <span>PDF</span>
+                    </button>
+                    <button
+                      onClick={handlePrint}
+                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95"
+                    >
+                      <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                      <span>Print</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
+                  <div className="space-y-6">
+                    {/* Tab: Manual / AI */}
+                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
+                      <div className="flex border-b border-slate-200">
+                        <button
+                          onClick={() => setInputMode("manual")}
+                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "manual" ? "bg-white text-amber-600 border-b-2 border-amber-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            <Edit className="w-5 h-5" />
+                            Manual Entry
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setInputMode("ai")}
+                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            <Sparkles className="w-5 h-5" />
+                            AI Assistant
+                          </span>
+                        </button>
                       </div>
-                    </>
-                  )}
-                </div>
+                      <div className="p-6">
+                        {inputMode === "ai" && (
+                          <AIInvoiceExtractor
+                            onDataExtracted={handleAIDataExtracted}
+                            documentType={documentType}
+                          />
+                        )}
+                      </div>
+                    </div>
 
-                {/* ── Print / PDF Preview (hidden on-screen) ────────────── */}
-                <div
-                  id="print-area"
-                  className="hidden print:block bg-white shadow-2xl origin-top"
-                  style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.75)", transformOrigin: "top center" }}
-                >
-                  <TemplateRenderer
-                    templateId={selectedTemplate}
-                    businessInfo={businessInfo}
-                    loading={loading}
-                    invoiceNumber={quoteNumber}
-                    customerName={customerName}
-                    billName={customerName}
-                    billEmail={customerEmail}
-                    billPhone={customerPhone}
-                    billAddress={propertyAddress}
-                    customerEmail={customerEmail}
-                    customerPhone={customerPhone}
-                    customerAddress={propertyAddress}
-                    taxId=""
-                    items={items}
-                    subtotal={subtotal}
-                    totalTax={totalTax}
-                    total={total}
-                    documentType={documentType}
-                    stampText={stampSettings.text}
-                    stampColor={stampSettings.color}
-                    showStampDate={stampSettings.showDate}
-                    showStamp={stampSettings.enabled}
-                    paymentStatus={paymentStatus}
-                  />
+                    {inputMode === "manual" && (
+                      <>
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
+                          <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-3 rounded-xl border border-amber-200 shadow-sm">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="text-sm font-medium text-amber-700">
+                                Total Amount
+                              </div>
+                              <div className="w-8 h-8 bg-amber-200 rounded-lg flex items-center justify-center">
+                                <DollarSign className="w-5 h-5 text-amber-600" />
+                              </div>
+                            </div>
+                            <div className="text-base sm:text-lg md:text-2xl font-bold text-amber-900">
+                              R{total.toFixed(2)}
+                            </div>
+                          </div>
+
+                          <div
+                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.totalPaid > 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : "from-slate-100 to-slate-300 border-slate-300"}`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div
+                                className={`text-sm font-medium ${paymentStatus.totalPaid > 0 ? "text-emerald-700" : "text-slate-600"}`}
+                              >
+                                Paid
+                              </div>
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.totalPaid > 0 ? "bg-emerald-200" : "bg-slate-200"}`}
+                              >
+                                <CheckSquare
+                                  className={`w-5 h-5 ${paymentStatus.totalPaid > 0 ? "text-emerald-600" : "text-slate-400"}`}
+                                />
+                              </div>
+                            </div>
+                            <div
+                              className={`text-2xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}
+                            >
+                              R{paymentStatus.totalPaid.toFixed(2)}
+                            </div>
+                          </div>
+
+                          <div
+                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.balanceDue <= 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : paymentStatus.totalPaid > 0 ? "from-amber-50 to-amber-100 border-amber-200" : "from-rose-50 to-rose-100 border-rose-200"}`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div
+                                className={`text-sm font-medium ${paymentStatus.balanceDue <= 0 ? "text-emerald-700" : paymentStatus.totalPaid > 0 ? "text-amber-700" : "text-rose-700"}`}
+                              >
+                                Balance Due
+                              </div>
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.balanceDue <= 0 ? "bg-emerald-200" : paymentStatus.totalPaid > 0 ? "bg-amber-200" : "bg-rose-200"}`}
+                              >
+                                <Wallet
+                                  className={`w-5 h-5 ${paymentStatus.balanceDue <= 0 ? "text-emerald-600" : paymentStatus.totalPaid > 0 ? "text-amber-600" : "text-rose-600"}`}
+                                />
+                              </div>
+                            </div>
+                            <div
+                              className={`text-2xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-amber-900" : "text-rose-900"}`}
+                            >
+                              R{paymentStatus.balanceDue.toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Payment Status Banner */}
+                        {quoteId && (
+                          <div
+                            className={`p-4 rounded-xl border-2 flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-emerald-50 border-emerald-300" : paymentStatus.status === "partially_paid" ? "bg-amber-50 border-amber-300" : "bg-rose-50 border-rose-300"}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              {paymentStatus.status === "paid" ? (
+                                <>
+                                  <div className="w-10 h-10 bg-emerald-200 rounded-full flex items-center justify-center">
+                                    <CheckSquare className="w-6 h-6 text-emerald-600" />
+                                  </div>
+                                  <div>
+                                    <div className="font-bold text-emerald-900">
+                                      {documentType === "quote"
+                                        ? "Quote"
+                                        : "Invoice"}{" "}
+                                      Fully Paid
+                                    </div>
+                                    <div className="text-sm text-emerald-700">
+                                      Payment complete – Thank you!
+                                    </div>
+                                  </div>
+                                </>
+                              ) : paymentStatus.status === "partially_paid" ? (
+                                <>
+                                  <div className="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center">
+                                    <CreditCard className="w-6 h-6 text-amber-600" />
+                                  </div>
+                                  <div>
+                                    <div className="font-bold text-amber-900">
+                                      Partial Payment Received
+                                    </div>
+                                    <div className="text-sm text-amber-700">
+                                      R{paymentStatus.totalPaid.toFixed(2)} paid
+                                      • R{paymentStatus.balanceDue.toFixed(2)}{" "}
+                                      remaining
+                                    </div>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center">
+                                    <Wallet className="w-6 h-6 text-rose-600" />
+                                  </div>
+                                  <div>
+                                    <div className="font-bold text-rose-900">
+                                      Payment Pending
+                                    </div>
+                                    <div className="text-sm text-rose-700">
+                                      Full amount due: R
+                                      {paymentStatus.balanceDue.toFixed(2)}
+                                    </div>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                            {paymentStatus.status !== "paid" && (
+                              <button
+                                onClick={handleProcessPayment}
+                                className="px-4 py-2 bg-white border-2 border-current rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2"
+                              >
+                                <CreditCard className="w-4 h-4" />
+                                Record Payment
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {/* ── Stepped Form ──────────────────────────────────── */}
+                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                          {/* Step 1 – Client Information */}
+                          {currentStep === 1 && (
+                            <div className="p-8">
+                              <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                                    <Users className="w-6 h-6 text-amber-600" />
+                                  </div>
+                                  Client Information
+                                </h2>
+                                <p className="text-slate-600 mt-2 ml-13">
+                                  Enter client / contractor details
+                                </p>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Client / Company Name{" "}
+                                    <span className="text-rose-500">*</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={customerName}
+                                    onChange={(e) =>
+                                      setCustomerName(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="Meridian Developments"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Email{" "}
+                                    <span className="text-rose-500">*</span>
+                                  </label>
+                                  <input
+                                    type="email"
+                                    value={customerEmail}
+                                    onChange={(e) =>
+                                      setCustomerEmail(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="projects@company.co.za"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Phone{" "}
+                                    <span className="text-rose-500">*</span>
+                                  </label>
+                                  <input
+                                    type="tel"
+                                    value={customerPhone}
+                                    onChange={(e) =>
+                                      setCustomerPhone(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="+27 11 234 5678"
+                                  />
+                                </div>
+                                <div className="col-span-1 sm:col-span-2">
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Site Address{" "}
+                                    <span className="text-rose-500">*</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={propertyAddress}
+                                    onChange={(e) =>
+                                      setPropertyAddress(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="45 Corporate Boulevard, Sandton, Johannesburg, 2196"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Step 2 – Site Details */}
+                          {currentStep === 2 && (
+                            <div className="p-8">
+                              <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <Building className="w-6 h-6 text-orange-600" />
+                                  </div>
+                                  Site Details
+                                </h2>
+                                <p className="text-slate-600 mt-2 ml-13">
+                                  Provide site specifications for an accurate
+                                  quote
+                                </p>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Site / Project Type
+                                  </label>
+                                  <select
+                                    value={projectType}
+                                    onChange={(e) =>
+                                      setProjectType(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                  >
+                                    <option value="Kitchen Cabinetry">
+                                      Kitchen Cabinetry
+                                    </option>
+                                    <option value="Bedroom Furniture">
+                                      Bedroom Furniture
+                                    </option>
+                                    <option value="Built-in Wardrobes">
+                                      Built-in Wardrobes
+                                    </option>
+                                    <option value="Custom Shelving">
+                                      Custom Shelving
+                                    </option>
+                                    <option value="Decking">Decking</option>
+                                    <option value="Doors & Frames">
+                                      Doors & Frames
+                                    </option>
+                                    <option value="Flooring">Flooring</option>
+                                    <option value="Ceilings">Ceilings</option>
+                                    <option value="Custom Furniture">
+                                      Custom Furniture
+                                    </option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Site Area (sqm)
+                                  </label>
+                                  <input
+                                    type="number"
+                                    value={projectSize}
+                                    onChange={(e) =>
+                                      setProjectSize(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="1200"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Number of woodType / Storeys
+                                  </label>
+                                  <input
+                                    type="number"
+                                    value={woodType}
+                                    onChange={(e) =>
+                                      setWoodType(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="3"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Number of finishType
+                                  </label>
+                                  <input
+                                    type="number"
+                                    value={finishType}
+                                    onChange={(e) =>
+                                      setFinishType(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="2"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Site Summary Card */}
+                              <div className="mt-6 p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
+                                <h3 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
+                                  <MapPin className="w-4 h-4" />
+                                  Site Summary
+                                </h3>
+                                <div className="text-sm text-amber-800 space-y-1">
+                                  <p>
+                                    <span className="font-medium">Type:</span>{" "}
+                                    {projectType}
+                                  </p>
+                                  <p>
+                                    <span className="font-medium">Area:</span>{" "}
+                                    {projectSize} sqm
+                                  </p>
+                                  <p>
+                                    <span className="font-medium">
+                                      woodType:
+                                    </span>{" "}
+                                    {woodType} | finishType: {finishType}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Step 3 – Scope of Work */}
+                          {currentStep === 3 && (
+                            <div className="p-8">
+                              <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-stone-100 rounded-lg flex items-center justify-center">
+                                    <Wrench className="w-6 h-6 text-stone-600" />
+                                  </div>
+                                  Scope of Work
+                                </h2>
+                                <p className="text-slate-600 mt-2 ml-13">
+                                  Add work items and materials to the quote
+                                </p>
+                              </div>
+
+                              {/* Add Work-Item Form */}
+                              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 mb-6 border border-slate-200">
+                                <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
+                                  <Plus className="w-5 h-5 text-amber-600" />
+                                  Add Work Item
+                                </h3>
+                                <div className="grid grid-cols-1 gap-4">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Wood Type
+                                      </label>
+                                      <select
+                                        value={woodType}
+                                        onChange={(e) =>
+                                          setWoodType(e.target.value)
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
+                                      >
+                                        <option value="Oak">Oak</option>
+                                        <option value="Pine">Pine</option>
+                                        <option value="Meranti">Meranti</option>
+                                        <option value="Sapele">Sapele</option>
+                                        <option value="MDF">MDF</option>
+                                        <option value="Plywood">Plywood</option>
+                                        <option value="Melamine">
+                                          Melamine
+                                        </option>
+                                      </select>
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Phase
+                                      </label>
+                                      <select
+                                        value={finishType}
+                                        onChange={(e) =>
+                                          setFinishType(e.target.value)
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
+                                      >
+                                        <option value="Varnish">Varnish</option>
+                                        <option value="Stain">
+                                          Stain & Varnish
+                                        </option>
+                                        <option value="Paint">Paint</option>
+                                        <option value="Oil">Oil Finish</option>
+                                        <option value="Lacquer">Lacquer</option>
+                                        <option value="Natural">
+                                          Natural/Unfinished
+                                        </option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                      Description
+                                    </label>
+                                    <input
+                                      type="text"
+                                      placeholder="Work item / material description"
+                                      value={newItem.description}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          description: e.target.value,
+                                        })
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                    />
+                                  </div>
+
+                                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                    <div>
+                                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Unit Rate (R)
+                                      </label>
+                                      <input
+                                        type="number"
+                                        placeholder="Rate"
+                                        value={newItem.rate}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            rate: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Quantity / Units
+                                      </label>
+                                      <input
+                                        type="number"
+                                        placeholder="Qty"
+                                        value={newItem.qty}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            qty: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        VAT (%)
+                                      </label>
+                                      <input
+                                        type="number"
+                                        placeholder="15"
+                                        value={newItem.taxRate}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            taxRate: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
+                                      />
+                                    </div>
+                                    <div className="flex items-end">
+                                      <button
+                                        onClick={handleAddItem}
+                                        className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg px-4 py-2 hover:from-amber-700 hover:to-orange-700 flex items-center justify-center gap-2 transition-all font-semibold shadow-md hover:shadow-lg"
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                        Add Item
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Work Items Table */}
+                              {items.length > 0 ? (
+                                <div className="mb-6">
+                                  <h3 className="text-lg font-bold text-slate-900 mb-4">
+                                    Work Items ({items.length})
+                                  </h3>
+                                  <div className="overflow-x-auto rounded-xl border border-slate-200">
+                                    <table className="w-full">
+                                      <thead>
+                                        <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                                          <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                            Description
+                                          </th>
+                                          <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                            Category
+                                          </th>
+                                          <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                            Phase
+                                          </th>
+                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                            Unit Rate
+                                          </th>
+                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                            Qty
+                                          </th>
+                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                            VAT
+                                          </th>
+                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                            Total
+                                          </th>
+                                          <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">
+                                            Action
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="bg-white">
+                                        {items.map((item, index) => (
+                                          <tr
+                                            key={index}
+                                            className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                                          >
+                                            <td className="px-4 py-4 text-sm font-medium text-slate-700">
+                                              {item.description}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm">
+                                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
+                                                {item.workCategory || "General"}
+                                              </span>
+                                            </td>
+                                            <td className="px-4 py-4 text-sm">
+                                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700">
+                                                {item.phase || "Phase 1"}
+                                              </span>
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                              R{item.rate.toFixed(2)}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                              {item.qty}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                              R{item.taxAmount.toFixed(2)}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-right font-bold text-slate-900">
+                                              R{item.totalAmount.toFixed(2)}
+                                            </td>
+                                            <td className="px-4 py-4 text-center">
+                                              <button
+                                                onClick={() =>
+                                                  handleRemoveItem(index)
+                                                }
+                                                className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all flex items-center gap-1 mx-auto"
+                                              >
+                                                <Trash2 className="w-3 h-3" />
+                                                Remove
+                                              </button>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-dashed border-slate-300">
+                                  <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Wrench className="w-8 h-8 text-slate-400" />
+                                  </div>
+                                  <p className="text-slate-700 font-semibold text-lg">
+                                    No work items added yet
+                                  </p>
+                                  <p className="text-sm text-slate-500 mt-2">
+                                    Add items using the form above
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Totals */}
+                              {items.length > 0 && (
+                                <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-200">
+                                  <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-slate-700 font-medium">
+                                        Subtotal:
+                                      </span>
+                                      <span className="font-bold text-slate-900 text-lg">
+                                        R{subtotal.toFixed(2)}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-slate-700 font-medium">
+                                        VAT (15%):
+                                      </span>
+                                      <span className="font-bold text-slate-900 text-lg">
+                                        R{totalTax.toFixed(2)}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-amber-300">
+                                      <span className="text-slate-900">
+                                        Total:
+                                      </span>
+                                      <span className="text-amber-700 text-2xl">
+                                        R{total.toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Step 4 – Schedule & Payment */}
+                          {currentStep === 4 && (
+                            <div className="p-8">
+                              <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                    <Calendar className="w-6 h-6 text-emerald-600" />
+                                  </div>
+                                  Schedule & Payment Terms
+                                </h2>
+                                <p className="text-slate-600 mt-2 ml-13">
+                                  Review quote details, milestones, and payment
+                                  terms
+                                </p>
+                              </div>
+
+                              {/* Summary Cards */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl border border-amber-200">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <span className="text-sm font-semibold text-amber-700">
+                                      Project Total
+                                    </span>
+                                    <DollarSign className="w-5 h-5 text-amber-600" />
+                                  </div>
+                                  <div className="text-3xl font-bold text-amber-900">
+                                    R{total.toFixed(2)}
+                                  </div>
+                                </div>
+                                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <span className="text-sm font-semibold text-emerald-700">
+                                      Work Items
+                                    </span>
+                                    <ClipboardList className="w-5 h-5 text-emerald-600" />
+                                  </div>
+                                  <div className="text-3xl font-bold text-emerald-900">
+                                    {items.length}
+                                  </div>
+                                </div>
+                                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <span className="text-sm font-semibold text-purple-700">
+                                      VAT Amount
+                                    </span>
+                                    <Receipt className="w-5 h-5 text-purple-600" />
+                                  </div>
+                                  <div className="text-3xl font-bold text-purple-900">
+                                    R{totalTax.toFixed(2)}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Payment Terms */}
+                              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-6">
+                                <div className="flex items-center gap-3 mb-5">
+                                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <CreditCard className="w-5 h-5 text-purple-600" />
+                                  </div>
+                                  <h3 className="text-xl font-bold text-slate-900">
+                                    Payment Information
+                                  </h3>
+                                </div>
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                    <span className="text-slate-600 font-medium">
+                                      Payment Schedule:
+                                    </span>
+                                    <span className="font-bold text-slate-900">
+                                      Milestone-Based
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                    <span className="text-slate-600 font-medium">
+                                      Payment Methods:
+                                    </span>
+                                    <span className="font-bold text-slate-900">
+                                      Bank Transfer, Card, EFT
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                    <span className="text-slate-600 font-medium">
+                                      Quote Valid For:
+                                    </span>
+                                    <span className="font-bold text-slate-900">
+                                      30 Days
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center py-3">
+                                    <span className="text-slate-600 font-medium">
+                                      Currency:
+                                    </span>
+                                    <span className="font-bold text-slate-900">
+                                      ZAR (South African Rand)
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Client & Site Summary */}
+                              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
+                                <h3 className="text-lg font-bold text-slate-900 mb-4">
+                                  Quote Summary
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                      <Users className="w-4 h-4" />
+                                      Client Details:
+                                    </h4>
+                                    <div className="text-sm text-slate-600 space-y-1">
+                                      <p className="font-semibold text-slate-900">
+                                        {customerName}
+                                      </p>
+                                      <p>{customerEmail}</p>
+                                      <p>{customerPhone}</p>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                      <Building className="w-4 h-4" />
+                                      Site Details:
+                                    </h4>
+                                    <div className="text-sm text-slate-600 space-y-1">
+                                      <p className="font-semibold text-slate-900">
+                                        {propertyAddress}
+                                      </p>
+                                      <p>
+                                        <span className="font-semibold">
+                                          Type:
+                                        </span>{" "}
+                                        {projectType}
+                                      </p>
+                                      <p>
+                                        <span className="font-semibold">
+                                          Area:
+                                        </span>{" "}
+                                        {projectSize} sqm
+                                      </p>
+                                      <p>
+                                        <span className="font-semibold">
+                                          woodType:
+                                        </span>{" "}
+                                        {woodType} | finishType: {finishType}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="mt-6 pt-6 border-t border-slate-300">
+                                  <h4 className="text-sm font-semibold text-slate-700 mb-2">
+                                    Quote Details:
+                                  </h4>
+                                  <div className="text-sm text-slate-600 space-y-1">
+                                    <p>
+                                      <span className="font-semibold">
+                                        Number:
+                                      </span>{" "}
+                                      {quoteNumber}
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        Date:
+                                      </span>{" "}
+                                      {new Date().toLocaleDateString()}
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        Type:
+                                      </span>{" "}
+                                      {documentType === "quote"
+                                        ? "Quote"
+                                        : "Invoice"}
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        Status:
+                                      </span>{" "}
+                                      <span className="text-amber-600 font-bold">
+                                        Pending
+                                      </span>
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Process Payment button */}
+                              {quoteId && (
+                                <div className="mt-6 flex gap-3">
+                                  <button
+                                    onClick={handleProcessPayment}
+                                    className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105"
+                                  >
+                                    <CreditCard className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                                    Process Payment
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* ── Step Navigation Bar ──────────────────────────── */}
+                          <div className="px-8 py-5 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+                            <button
+                              onClick={handlePrevious}
+                              disabled={currentStep === 1}
+                              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${currentStep === 1 ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 shadow-sm"}`}
+                            >
+                              <ChevronLeft className="w-5 h-5" />
+                              <span className="hidden sm:inline">Previous</span>
+                            </button>
+
+                            <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">
+                              {currentStep} of {totalSteps}
+                            </div>
+
+                            {currentStep < totalSteps ? (
+                              <button
+                                onClick={handleNext}
+                                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-orange-700 transition-all shadow-md hover:shadow-lg"
+                              >
+                                <span className="hidden sm:inline">Next</span>
+                                <ChevronRight className="w-5 h-5" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={handleSaveQuote}
+                                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
+                              >
+                                <Save className="w-5 h-5" />
+                                Save{" "}
+                                {documentType === "quote" ? "Quote" : "Invoice"}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* ── Print / PDF Preview (hidden on-screen) ────────────── */}
+                  <div
+                    id="print-area"
+                    className="hidden print:block bg-white shadow-2xl origin-top"
+                    style={{
+                      width: "210mm",
+                      minHeight: "297mm",
+                      transform: "scale(0.75)",
+                      transformOrigin: "top center",
+                    }}
+                  >
+                    <TemplateRenderer
+                      templateId={selectedTemplate}
+                      businessInfo={businessInfo}
+                      loading={loading}
+                      invoiceNumber={quoteNumber}
+                      customerName={customerName}
+                      billName={customerName}
+                      billEmail={customerEmail}
+                      billPhone={customerPhone}
+                      billAddress={propertyAddress}
+                      customerEmail={customerEmail}
+                      customerPhone={customerPhone}
+                      customerAddress={propertyAddress}
+                      taxId=""
+                      items={items}
+                      subtotal={subtotal}
+                      totalTax={totalTax}
+                      total={total}
+                      documentType={documentType}
+                      stampText={stampSettings.text}
+                      stampColor={stampSettings.color}
+                      showStampDate={stampSettings.showDate}
+                      showStamp={stampSettings.enabled}
+                      paymentStatus={paymentStatus}
+                    />
+                  </div>
                 </div>
-              </div>
               </>
             )}
           </div>

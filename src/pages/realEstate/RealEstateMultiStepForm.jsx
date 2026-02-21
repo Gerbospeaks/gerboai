@@ -1,5 +1,15 @@
-import React, { useState } from 'react';
-import { Users, Edit, Plus, ArrowRight, ArrowLeft, Check, Building2, Home, Trash2 } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Users,
+  Edit,
+  Plus,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  Building2,
+  Home,
+  Trash2,
+} from "lucide-react";
 
 const RealEstateMultiStepForm = ({
   // Client Info Props
@@ -67,24 +77,24 @@ const RealEstateMultiStepForm = ({
                   onClick={() => goToStep(step)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
                     currentStep === step
-                      ? 'bg-blue-600 text-white'
+                      ? "bg-blue-600 text-white"
                       : currentStep > step
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-200 text-gray-600'
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-200 text-gray-600"
                   }`}
                 >
                   {currentStep > step ? <Check className="w-5 h-5" /> : step}
                 </button>
                 <span className="mt-2 text-xs font-medium text-gray-700">
-                  {step === 1 && 'Client Info'}
-                  {step === 2 && 'Property Details'}
-                  {step === 3 && 'Line Items'}
+                  {step === 1 && "Client Info"}
+                  {step === 2 && "Property Details"}
+                  {step === 3 && "Line Items"}
                 </span>
               </div>
               {step < totalSteps && (
                 <div
                   className={`flex-1 h-1 mx-2 ${
-                    currentStep > step ? 'bg-green-500' : 'bg-gray-200'
+                    currentStep > step ? "bg-green-500" : "bg-gray-200"
                   }`}
                 />
               )}
@@ -197,7 +207,7 @@ const RealEstateMultiStepForm = ({
                   <option value="Commercial Rental">Commercial Rental</option>
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Property Size
@@ -256,30 +266,32 @@ const RealEstateMultiStepForm = ({
               <div className="flex items-start space-x-3">
                 <Home className="w-5 h-5 text-blue-600 mt-0.5" />
                 <div className="flex-1">
-                  <h4 className="font-semibold text-blue-900 mb-2">Property Summary</h4>
+                  <h4 className="font-semibold text-blue-900 mb-2">
+                    Property Summary
+                  </h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
                       <span className="text-blue-600">Type:</span>
                       <span className="ml-2 text-blue-900 font-medium">
-                        {propertyType || 'Not specified'}
+                        {propertyType || "Not specified"}
                       </span>
                     </div>
                     <div>
                       <span className="text-blue-600">Size:</span>
                       <span className="ml-2 text-blue-900 font-medium">
-                        {propertySize || 'Not specified'}
+                        {propertySize || "Not specified"}
                       </span>
                     </div>
                     <div>
                       <span className="text-blue-600">Bedrooms:</span>
                       <span className="ml-2 text-blue-900 font-medium">
-                        {propertyBedrooms || 'Not specified'}
+                        {propertyBedrooms || "Not specified"}
                       </span>
                     </div>
                     <div>
                       <span className="text-blue-600">Bathrooms:</span>
                       <span className="ml-2 text-blue-900 font-medium">
-                        {propertyBathrooms || 'Not specified'}
+                        {propertyBathrooms || "Not specified"}
                       </span>
                     </div>
                   </div>
@@ -294,8 +306,18 @@ const RealEstateMultiStepForm = ({
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold flex items-center space-x-2">
-                <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                <svg
+                  className="w-6 h-6 text-blue-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                  />
                 </svg>
                 <span>Line Items</span>
               </h2>
@@ -358,36 +380,61 @@ const RealEstateMultiStepForm = ({
               <div className="mt-6">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg font-semibold">Added Items</h3>
-                  <span className="text-sm text-gray-500">{items.length} item{items.length !== 1 ? 's' : ''}</span>
+                  <span className="text-sm text-gray-500">
+                    {items.length} item{items.length !== 1 ? "s" : ""}
+                  </span>
                 </div>
                 <div className="border border-gray-200 rounded-lg overflow-hidden">
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Type</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Description</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Rate</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Qty</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Total</th>
-                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Action</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                          Type
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                          Description
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                          Rate
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                          Qty
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                          Total
+                        </th>
+                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                          Action
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {items.map((item, index) => (
-                        <tr key={index} className="border-t border-gray-200 hover:bg-gray-50 transition-colors">
+                        <tr
+                          key={index}
+                          className="border-t border-gray-200 hover:bg-gray-50 transition-colors"
+                        >
                           <td className="px-4 py-3 text-sm">
-                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                              item.type === 'Service' ? 'bg-blue-100 text-blue-700' :
-                              item.type === 'Commission' ? 'bg-green-100 text-green-700' :
-                              'bg-purple-100 text-purple-700'
-                            }`}>
+                            <span
+                              className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                                item.type === "Service"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : item.type === "Commission"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-purple-100 text-purple-700"
+                              }`}
+                            >
                               {item.type}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-sm">{item.description}</td>
+                          <td className="px-4 py-3 text-sm">
+                            {item.description}
+                          </td>
                           <td className="px-4 py-3 text-sm">${item.rate}</td>
                           <td className="px-4 py-3 text-sm">{item.qty}</td>
-                          <td className="px-4 py-3 text-sm font-medium">${(item.rate * item.qty).toFixed(2)}</td>
+                          <td className="px-4 py-3 text-sm font-medium">
+                            ${(item.rate * item.qty).toFixed(2)}
+                          </td>
                           <td className="px-4 py-3 text-center">
                             <button
                               onClick={() => handleDeleteItem(index)}
@@ -408,15 +455,36 @@ const RealEstateMultiStepForm = ({
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Subtotal:</span>
-                      <span className="font-medium">${items.reduce((sum, item) => sum + (item.rate * item.qty), 0).toFixed(2)}</span>
+                      <span className="font-medium">
+                        $
+                        {items
+                          .reduce((sum, item) => sum + item.rate * item.qty, 0)
+                          .toFixed(2)}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Tax (10%):</span>
-                      <span className="font-medium">${(items.reduce((sum, item) => sum + (item.rate * item.qty), 0) * 0.10).toFixed(2)}</span>
+                      <span className="font-medium">
+                        $
+                        {(
+                          items.reduce(
+                            (sum, item) => sum + item.rate * item.qty,
+                            0,
+                          ) * 0.1
+                        ).toFixed(2)}
+                      </span>
                     </div>
                     <div className="flex justify-between text-lg font-semibold pt-2 border-t border-gray-300">
                       <span>Total:</span>
-                      <span className="text-blue-600">${(items.reduce((sum, item) => sum + (item.rate * item.qty), 0) * 1.10).toFixed(2)}</span>
+                      <span className="text-blue-600">
+                        $
+                        {(
+                          items.reduce(
+                            (sum, item) => sum + item.rate * item.qty,
+                            0,
+                          ) * 1.1
+                        ).toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -424,8 +492,12 @@ const RealEstateMultiStepForm = ({
             ) : (
               <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                 <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600 font-medium">No line items added yet</p>
-                <p className="text-sm text-gray-500 mt-1">Add services, commissions, or fees using the form above</p>
+                <p className="text-gray-600 font-medium">
+                  No line items added yet
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Add services, commissions, or fees using the form above
+                </p>
               </div>
             )}
           </div>
@@ -438,12 +510,12 @@ const RealEstateMultiStepForm = ({
             disabled={currentStep === 1}
             className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${
               currentStep === 1
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
             }`}
           >
             <ArrowLeft className="w-4 h-4" />
-            Previous
+            <span className="hidden sm:inline">Previous</span>
           </button>
 
           <div className="text-sm text-gray-500">
@@ -455,11 +527,11 @@ const RealEstateMultiStepForm = ({
             disabled={currentStep === totalSteps}
             className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${
               currentStep === totalSteps
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
             }`}
           >
-            Next
+            <span className="hidden sm:inline">Next</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

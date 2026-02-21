@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getDashboardRoute } from '../utils/dashboardRoutes';
-import { useAuth } from '../contexts/AuthContext';
-import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { 
-  TrendingUp, 
-  FileText, 
-  Users, 
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getDashboardRoute } from "../utils/dashboardRoutes";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+} from "firebase/firestore";
+import {
+  TrendingUp,
+  FileText,
+  Users,
   Receipt,
   TrendingDown,
   ArrowRight,
   LogOut,
-  ChevronDown
-} from 'lucide-react';
+  ChevronDown,
+} from "lucide-react";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -20,42 +26,42 @@ export default function Home() {
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [invoices, setInvoices] = useState([]);
-  
+
   const [stats, setStats] = useState({
     totalInvoices: 0,
     totalQuotes: 0,
     totalInvoiced: 0,
     totalClients: 0,
     pendingPayments: 0,
-    loading: true
+    loading: true,
   });
 
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      navigate("/login");
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
 
   const handleCreateInvoice = () => {
     const dashboardRoute = getDashboardRoute(user?.dashboardId);
-    navigate(dashboardRoute, { 
-      state: { 
-        action: 'createInvoice',
-        activeView: 'invoice' 
-      } 
+    navigate(dashboardRoute, {
+      state: {
+        action: "createInvoice",
+        activeView: "invoice",
+      },
     });
   };
 
   const handleCreateQuote = () => {
     const dashboardRoute = getDashboardRoute(user?.dashboardId);
-    navigate(dashboardRoute, { 
-      state: { 
-        action: 'createQuote',
-        activeView: 'invoice' 
-      } 
+    navigate(dashboardRoute, {
+      state: {
+        action: "createQuote",
+        activeView: "invoice",
+      },
     });
   };
 
@@ -68,54 +74,74 @@ export default function Home() {
   // Close user menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (!e.target.closest('#user-menu-container')) {
+      if (!e.target.closest("#user-menu-container")) {
         setShowUserMenu(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const fetchBusinessStats = async () => {
     if (!user?.uid) return;
-    
+
     try {
       const db = getFirestore();
-      
+
       // Fetch invoices
       const invoicesRef = collection(db, "users", user.uid, "invoices");
       const invoicesSnapshot = await getDocs(invoicesRef);
-      
+
       let totalInvoiced = 0;
       let pendingPayments = 0;
       let invoiceCount = 0;
       const invoicesList = [];
 
-      invoicesSnapshot.forEach(doc => {
+      invoicesSnapshot.forEach((doc) => {
         const data = doc.data();
         invoiceCount++;
-        
+
         const amount = parseFloat(data.totals?.total || data.total || 0);
         totalInvoiced += amount;
-        
-        if (data.status === 'pending' || data.status === 'unpaid' || data.status === 'partially_paid') {
-          const due = parseFloat(data.totals?.due || data.totals?.total || data.total || 0);
+
+        if (
+          data.status === "pending" ||
+          data.status === "unpaid" ||
+          data.status === "partially_paid"
+        ) {
+          const due = parseFloat(
+            data.totals?.due || data.totals?.total || data.total || 0,
+          );
           pendingPayments += due;
         }
 
         invoicesList.push({
           id: doc.id,
-          ...data
+          ...data,
         });
       });
 
       invoicesList.sort((a, b) => {
-        const dateA = a.dates?.invoiceDate || a.dates?.quoteDate || a.createdAt?.toDate?.() || new Date(0);
-        const dateB = b.dates?.invoiceDate || b.dates?.quoteDate || b.createdAt?.toDate?.() || new Date(0);
-        
-        const timeA = typeof dateA === 'string' ? new Date(dateA).getTime() : dateA.getTime?.() || 0;
-        const timeB = typeof dateB === 'string' ? new Date(dateB).getTime() : dateB.getTime?.() || 0;
-        
+        const dateA =
+          a.dates?.invoiceDate ||
+          a.dates?.quoteDate ||
+          a.createdAt?.toDate?.() ||
+          new Date(0);
+        const dateB =
+          b.dates?.invoiceDate ||
+          b.dates?.quoteDate ||
+          b.createdAt?.toDate?.() ||
+          new Date(0);
+
+        const timeA =
+          typeof dateA === "string"
+            ? new Date(dateA).getTime()
+            : dateA.getTime?.() || 0;
+        const timeB =
+          typeof dateB === "string"
+            ? new Date(dateB).getTime()
+            : dateB.getTime?.() || 0;
+
         return timeB - timeA;
       });
 
@@ -126,16 +152,16 @@ export default function Home() {
         const quotesRef = collection(db, "users", user.uid, "quotes");
         const quotesSnapshot = await getDocs(quotesRef);
         quoteCount = quotesSnapshot.docs.length;
-        
-        quotesSnapshot.forEach(doc => {
+
+        quotesSnapshot.forEach((doc) => {
           const data = doc.data();
-          if (data.status === 'paid') {
+          if (data.status === "paid") {
             const amount = parseFloat(data.totals?.total || data.total || 0);
             totalInvoiced += amount;
           }
         });
       } catch (error) {
-        console.log('No quotes collection or error fetching quotes:', error);
+        console.log("No quotes collection or error fetching quotes:", error);
       }
 
       let clientCount = 0;
@@ -144,7 +170,7 @@ export default function Home() {
         const clientsSnapshot = await getDocs(clientsRef);
         clientCount = clientsSnapshot.docs.length;
       } catch (error) {
-        console.log('No clients collection or error fetching clients:', error);
+        console.log("No clients collection or error fetching clients:", error);
       }
 
       setStats({
@@ -153,18 +179,18 @@ export default function Home() {
         totalInvoiced: totalInvoiced,
         totalClients: clientCount,
         pendingPayments: pendingPayments,
-        loading: false
+        loading: false,
       });
     } catch (error) {
-      console.error('Error fetching stats:', error);
-      setStats(prev => ({ ...prev, loading: false }));
+      console.error("Error fetching stats:", error);
+      setStats((prev) => ({ ...prev, loading: false }));
     }
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-ZA', {
-      style: 'currency',
-      currency: 'ZAR'
+    return new Intl.NumberFormat("en-ZA", {
+      style: "currency",
+      currency: "ZAR",
     }).format(amount);
   };
 
@@ -172,29 +198,46 @@ export default function Home() {
   const getUserInitials = () => {
     if (user?.name) {
       return user.name
-        .split(' ')
-        .map(n => n[0])
-        .join('')
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
         .toUpperCase()
         .slice(0, 2);
     }
     if (user?.email) {
       return user.email[0].toUpperCase();
     }
-    return 'U';
+    return "U";
   };
 
-  const getUserDisplayName = () => user?.name || user?.email?.split('@')[0] || 'User';
+  const getUserDisplayName = () =>
+    user?.name || user?.email?.split("@")[0] || "User";
 
-  const StatCard = ({ title, value, icon: Icon, gradient, subtitle, loading, trend }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    gradient,
+    subtitle,
+    loading,
+    trend,
+  }) => (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
       <div className="flex items-center justify-between mb-4">
-        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${gradient}`}>
+        <div
+          className={`w-12 h-12 rounded-lg flex items-center justify-center ${gradient}`}
+        >
           <Icon className="w-6 h-6 text-white" />
         </div>
         {trend && (
-          <div className={`flex items-center gap-1 text-sm font-medium ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {trend > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+          <div
+            className={`flex items-center gap-1 text-sm font-medium ${trend > 0 ? "text-green-600" : "text-red-600"}`}
+          >
+            {trend > 0 ? (
+              <TrendingUp className="w-4 h-4" />
+            ) : (
+              <TrendingDown className="w-4 h-4" />
+            )}
             <span>{Math.abs(trend)}%</span>
           </div>
         )}
@@ -213,15 +256,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-300">
-
       {/* ── Top Header Bar ── */}
       <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-
           {/* Left: User avatar + name + dropdown */}
           <div id="user-menu-container" className="relative">
             <button
-              onClick={() => setShowUserMenu(prev => !prev)}
+              onClick={() => setShowUserMenu((prev) => !prev)}
               className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 transition-colors duration-200 group"
             >
               {/* Avatar circle */}
@@ -249,7 +290,7 @@ export default function Home() {
 
               <ChevronDown
                 className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                  showUserMenu ? 'rotate-180' : ''
+                  showUserMenu ? "rotate-180" : ""
                 }`}
               />
             </button>
@@ -259,21 +300,31 @@ export default function Home() {
               <div className="absolute left-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                 {/* User info header */}
                 <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{getUserDisplayName()}</p>
-                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                  <p className="text-sm font-semibold text-gray-900 truncate">
+                    {getUserDisplayName()}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {user?.email}
+                  </p>
                 </div>
 
                 {/* Menu items */}
                 <div className="py-1">
                   <button
-                    onClick={() => { setShowUserMenu(false); navigate('/dashboard'); }}
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      navigate("/dashboard");
+                    }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     <FileText className="w-4 h-4 text-gray-400" />
                     Dashboard
                   </button>
                   <button
-                    onClick={() => { setShowUserMenu(false); handleLogout(); }}
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      handleLogout();
+                    }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
@@ -302,8 +353,6 @@ export default function Home() {
 
       {/* ── Main Content ── */}
       <div className="p-4 md:p-6">
-      
-
         {/* Statistics Grid */}
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard
@@ -347,7 +396,9 @@ export default function Home() {
           {/* Pending Payments */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Pending Payments</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Pending Payments
+              </h3>
               <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
                 <Receipt className="w-5 h-5 text-orange-600" />
               </div>
@@ -359,14 +410,18 @@ export default function Home() {
                 <p className="text-4xl font-bold text-orange-600 mb-2">
                   {formatCurrency(stats.pendingPayments)}
                 </p>
-                <p className="text-sm text-gray-600">Outstanding invoices awaiting payment</p>
+                <p className="text-sm text-gray-600">
+                  Outstanding invoices awaiting payment
+                </p>
               </div>
             )}
           </div>
 
           {/* Quick Actions */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Quick Actions
+            </h3>
             <div className="space-y-3">
               <button
                 onClick={handleCreateInvoice}
@@ -376,7 +431,9 @@ export default function Home() {
                   <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                     <FileText className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-sm font-semibold text-purple-900">Create New Invoice</span>
+                  <span className="text-sm font-semibold text-purple-900">
+                    Create New Invoice
+                  </span>
                 </div>
                 <ArrowRight className="w-5 h-5 text-purple-600 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
@@ -389,19 +446,21 @@ export default function Home() {
                   <div className="w-8 h-8 bg-cyan-600 rounded-lg flex items-center justify-center">
                     <FileText className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-sm font-semibold text-cyan-900">Create New Quote</span>
+                  <span className="text-sm font-semibold text-cyan-900">
+                    Create New Quote
+                  </span>
                 </div>
                 <ArrowRight className="w-5 h-5 text-cyan-600 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
 
-              <button
-                className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 border border-emerald-200 rounded-lg transition-all duration-300 group"
-              >
+              <button className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 border border-emerald-200 rounded-lg transition-all duration-300 group">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
                     <Users className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-sm font-semibold text-emerald-900">Manage Clients</span>
+                  <span className="text-sm font-semibold text-emerald-900">
+                    Manage Clients
+                  </span>
                 </div>
                 <ArrowRight className="w-5 h-5 text-emerald-600 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
@@ -412,7 +471,9 @@ export default function Home() {
         {/* Recent Activity */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Invoices</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Recent Invoices
+            </h3>
             <button
               onClick={() => setShowInvoicesList(true)}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
@@ -424,7 +485,10 @@ export default function Home() {
           {stats.loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 bg-gray-100 rounded animate-pulse"></div>
+                <div
+                  key={i}
+                  className="h-16 bg-gray-100 rounded animate-pulse"
+                ></div>
               ))}
             </div>
           ) : invoices.length === 0 ? (
@@ -432,10 +496,14 @@ export default function Home() {
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                 <FileText className="w-8 h-8 text-gray-400" />
               </div>
-              <h4 className="text-gray-900 font-semibold mb-2">No invoices yet</h4>
-              <p className="text-gray-600 text-sm mb-4">Create your first invoice to get started</p>
+              <h4 className="text-gray-900 font-semibold mb-2">
+                No invoices yet
+              </h4>
+              <p className="text-gray-600 text-sm mb-4">
+                Create your first invoice to get started
+              </p>
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate("/dashboard")}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Create Invoice
@@ -451,39 +519,50 @@ export default function Home() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
                       <h4 className="text-sm font-semibold text-gray-900 truncate">
-                        {invoice.quoteNumber || invoice.invoiceNumber || invoice.id}
+                        {invoice.quoteNumber ||
+                          invoice.invoiceNumber ||
+                          invoice.id}
                       </h4>
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${
-                          invoice.status === 'paid'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : invoice.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-red-100 text-red-700'
+                          invoice.status === "paid"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : invoice.status === "pending"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-red-100 text-red-700"
                         }`}
                       >
-                        {invoice.status || 'Draft'}
+                        {invoice.status || "Draft"}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-gray-600">
                       <span className="flex items-center gap-1">
                         <Users className="w-3 h-3" />
-                        {invoice.customer?.name || invoice.customerName || 'No customer'}
+                        {invoice.customer?.name ||
+                          invoice.customerName ||
+                          "No customer"}
                       </span>
                       {(invoice.dates?.invoiceDate || invoice.date) && (
                         <span>
-                          {new Date(invoice.dates?.invoiceDate || invoice.date).toLocaleDateString()}
+                          {new Date(
+                            invoice.dates?.invoiceDate || invoice.date,
+                          ).toLocaleDateString()}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="text-right ml-4">
                     <div className="text-base font-bold text-gray-900">
-                      {formatCurrency(invoice.totals?.total || invoice.total || 0)}
+                      {formatCurrency(
+                        invoice.totals?.total || invoice.total || 0,
+                      )}
                     </div>
                     {(invoice.totals?.subtotal || invoice.subtotal) && (
                       <div className="text-xs text-gray-500">
-                        Subtotal: {formatCurrency(invoice.totals?.subtotal || invoice.subtotal)}
+                        Subtotal:{" "}
+                        {formatCurrency(
+                          invoice.totals?.subtotal || invoice.subtotal,
+                        )}
                       </div>
                     )}
                   </div>
@@ -499,10 +578,11 @@ export default function Home() {
             Ready to manage your business?
           </h3>
           <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-            Access your full dashboard to create invoices, manage clients, and track payments
+            Access your full dashboard to create invoices, manage clients, and
+            track payments
           </p>
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate("/dashboard")}
             className="px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl inline-flex items-center gap-2"
           >
             Go to Dashboard
@@ -522,9 +602,12 @@ export default function Home() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">All Invoices</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  All Invoices
+                </h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  {stats.totalInvoices} {stats.totalInvoices === 1 ? 'invoice' : 'invoices'} found
+                  {stats.totalInvoices}{" "}
+                  {stats.totalInvoices === 1 ? "invoice" : "invoices"} found
                 </p>
               </div>
               <button
@@ -541,12 +624,16 @@ export default function Home() {
                   <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                     <Receipt className="w-10 h-10 text-white" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No invoices yet</h3>
-                  <p className="text-gray-600 mb-6">Create your first invoice to get started</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No invoices yet
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Create your first invoice to get started
+                  </p>
                   <button
                     onClick={() => {
                       setShowInvoicesList(false);
-                      navigate('/dashboard');
+                      navigate("/dashboard");
                     }}
                     className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
                   >
@@ -564,28 +651,35 @@ export default function Home() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-3 mb-2">
                             <h3 className="text-gray-900 font-semibold truncate">
-                              {invoice.quoteNumber || invoice.invoiceNumber || invoice.id}
+                              {invoice.quoteNumber ||
+                                invoice.invoiceNumber ||
+                                invoice.id}
                             </h3>
                             <span
                               className={`px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0 ${
-                                invoice.status === 'paid'
-                                  ? 'bg-emerald-100 text-emerald-700'
-                                  : invoice.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-700'
-                                  : 'bg-red-100 text-red-700'
+                                invoice.status === "paid"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : invoice.status === "pending"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-red-100 text-red-700"
                               }`}
                             >
-                              {invoice.status || 'Draft'}
+                              {invoice.status || "Draft"}
                             </span>
                           </div>
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
                             <span className="flex items-center">
                               <Users className="w-4 h-4 mr-1.5" />
-                              {invoice.customer?.name || invoice.customerName || 'No customer'}
+                              {invoice.customer?.name ||
+                                invoice.customerName ||
+                                "No customer"}
                             </span>
                             {(invoice.dates?.invoiceDate || invoice.date) && (
                               <span className="flex items-center">
-                                📅 {new Date(invoice.dates?.invoiceDate || invoice.date).toLocaleDateString()}
+                                📅{" "}
+                                {new Date(
+                                  invoice.dates?.invoiceDate || invoice.date,
+                                ).toLocaleDateString()}
                               </span>
                             )}
                           </div>
@@ -593,18 +687,23 @@ export default function Home() {
                         <div className="flex items-center space-x-4 ml-4">
                           <div className="text-right">
                             <div className="text-lg font-bold text-gray-900">
-                              {formatCurrency(invoice.totals?.total || invoice.total || 0)}
+                              {formatCurrency(
+                                invoice.totals?.total || invoice.total || 0,
+                              )}
                             </div>
                             {(invoice.totals?.subtotal || invoice.subtotal) && (
                               <div className="text-xs text-gray-600">
-                                Subtotal: {formatCurrency(invoice.totals?.subtotal || invoice.subtotal)}
+                                Subtotal:{" "}
+                                {formatCurrency(
+                                  invoice.totals?.subtotal || invoice.subtotal,
+                                )}
                               </div>
                             )}
                           </div>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log('View invoice:', invoice.id);
+                              console.log("View invoice:", invoice.id);
                             }}
                             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-lg transition-all duration-300 opacity-0 group-hover:opacity-100"
                           >

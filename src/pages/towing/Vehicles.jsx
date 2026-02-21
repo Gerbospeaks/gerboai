@@ -1,56 +1,56 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Car, 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
+import React, { useState, useEffect } from "react";
+import {
+  Car,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
   X,
   Calendar,
   Gauge,
   FileText,
   AlertCircle,
-  CheckCircle
-} from 'lucide-react';
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  updateDoc, 
+  CheckCircle,
+} from "lucide-react";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
   deleteDoc,
-  doc, 
-  getDocs, 
-  query, 
+  doc,
+  getDocs,
+  query,
   orderBy,
-  serverTimestamp 
-} from 'firebase/firestore';
+  serverTimestamp,
+} from "firebase/firestore";
 
 const Vehicles = ({ user }) => {
   const [vehicles, setVehicles] = useState([]);
   const [filteredVehicles, setFilteredVehicles] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
-    registration: '',
-    make: '',
-    model: '',
-    year: '',
-    vin: '',
-    mileage: '',
-    color: '',
-    engineSize: '',
-    fuelType: 'Petrol',
-    transmission: 'Manual',
-    ownerName: '',
-    ownerPhone: '',
-    ownerEmail: '',
-    notes: '',
-    lastServiceDate: '',
-    nextServiceDue: '',
-    status: 'Active'
+    registration: "",
+    make: "",
+    model: "",
+    year: "",
+    vin: "",
+    mileage: "",
+    color: "",
+    engineSize: "",
+    fuelType: "Petrol",
+    transmission: "Manual",
+    ownerName: "",
+    ownerPhone: "",
+    ownerEmail: "",
+    notes: "",
+    lastServiceDate: "",
+    nextServiceDue: "",
+    status: "Active",
   });
 
   useEffect(() => {
@@ -63,24 +63,24 @@ const Vehicles = ({ user }) => {
 
   const loadVehicles = async () => {
     if (!user?.uid) return;
-    
+
     setLoading(true);
     try {
       const db = getFirestore();
-      const vehiclesRef = collection(db, 'users', user.uid, 'vehicles');
-      const q = query(vehiclesRef, orderBy('createdAt', 'desc'));
+      const vehiclesRef = collection(db, "users", user.uid, "vehicles");
+      const q = query(vehiclesRef, orderBy("createdAt", "desc"));
       const snapshot = await getDocs(q);
-      
-      const vehiclesData = snapshot.docs.map(doc => ({
+
+      const vehiclesData = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
-      
+
       setVehicles(vehiclesData);
       setFilteredVehicles(vehiclesData);
     } catch (error) {
-      console.error('Error loading vehicles:', error);
-      alert('Failed to load vehicles');
+      console.error("Error loading vehicles:", error);
+      alert("Failed to load vehicles");
     } finally {
       setLoading(false);
     }
@@ -93,44 +93,45 @@ const Vehicles = ({ user }) => {
     }
 
     const term = searchTerm.toLowerCase();
-    const filtered = vehicles.filter(vehicle => 
-      vehicle.registration?.toLowerCase().includes(term) ||
-      vehicle.make?.toLowerCase().includes(term) ||
-      vehicle.model?.toLowerCase().includes(term) ||
-      vehicle.vin?.toLowerCase().includes(term) ||
-      vehicle.ownerName?.toLowerCase().includes(term)
+    const filtered = vehicles.filter(
+      (vehicle) =>
+        vehicle.registration?.toLowerCase().includes(term) ||
+        vehicle.make?.toLowerCase().includes(term) ||
+        vehicle.model?.toLowerCase().includes(term) ||
+        vehicle.vin?.toLowerCase().includes(term) ||
+        vehicle.ownerName?.toLowerCase().includes(term),
     );
-    
+
     setFilteredVehicles(filtered);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const resetForm = () => {
     setFormData({
-      registration: '',
-      make: '',
-      model: '',
-      year: '',
-      vin: '',
-      mileage: '',
-      color: '',
-      engineSize: '',
-      fuelType: 'Petrol',
-      transmission: 'Manual',
-      ownerName: '',
-      ownerPhone: '',
-      ownerEmail: '',
-      notes: '',
-      lastServiceDate: '',
-      nextServiceDue: '',
-      status: 'Active'
+      registration: "",
+      make: "",
+      model: "",
+      year: "",
+      vin: "",
+      mileage: "",
+      color: "",
+      engineSize: "",
+      fuelType: "Petrol",
+      transmission: "Manual",
+      ownerName: "",
+      ownerPhone: "",
+      ownerEmail: "",
+      notes: "",
+      lastServiceDate: "",
+      nextServiceDue: "",
+      status: "Active",
     });
     setEditingVehicle(null);
   };
@@ -143,78 +144,81 @@ const Vehicles = ({ user }) => {
   const handleEdit = (vehicle) => {
     setEditingVehicle(vehicle);
     setFormData({
-      registration: vehicle.registration || '',
-      make: vehicle.make || '',
-      model: vehicle.model || '',
-      year: vehicle.year || '',
-      vin: vehicle.vin || '',
-      mileage: vehicle.mileage || '',
-      color: vehicle.color || '',
-      engineSize: vehicle.engineSize || '',
-      fuelType: vehicle.fuelType || 'Petrol',
-      transmission: vehicle.transmission || 'Manual',
-      ownerName: vehicle.ownerName || '',
-      ownerPhone: vehicle.ownerPhone || '',
-      ownerEmail: vehicle.ownerEmail || '',
-      notes: vehicle.notes || '',
-      lastServiceDate: vehicle.lastServiceDate || '',
-      nextServiceDue: vehicle.nextServiceDue || '',
-      status: vehicle.status || 'Active'
+      registration: vehicle.registration || "",
+      make: vehicle.make || "",
+      model: vehicle.model || "",
+      year: vehicle.year || "",
+      vin: vehicle.vin || "",
+      mileage: vehicle.mileage || "",
+      color: vehicle.color || "",
+      engineSize: vehicle.engineSize || "",
+      fuelType: vehicle.fuelType || "Petrol",
+      transmission: vehicle.transmission || "Manual",
+      ownerName: vehicle.ownerName || "",
+      ownerPhone: vehicle.ownerPhone || "",
+      ownerEmail: vehicle.ownerEmail || "",
+      notes: vehicle.notes || "",
+      lastServiceDate: vehicle.lastServiceDate || "",
+      nextServiceDue: vehicle.nextServiceDue || "",
+      status: vehicle.status || "Active",
     });
     setShowModal(true);
   };
 
   const handleSubmit = async () => {
     if (!user?.uid) {
-      alert('User not authenticated');
+      alert("User not authenticated");
       return;
     }
 
     if (!formData.registration || !formData.make || !formData.model) {
-      alert('Please fill in Registration, Make, and Model');
+      alert("Please fill in Registration, Make, and Model");
       return;
     }
 
     try {
       const db = getFirestore();
-      const vehiclesRef = collection(db, 'users', user.uid, 'vehicles');
-      
+      const vehiclesRef = collection(db, "users", user.uid, "vehicles");
+
       const vehicleData = {
         ...formData,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       if (editingVehicle) {
-        await updateDoc(doc(db, 'users', user.uid, 'vehicles', editingVehicle.id), vehicleData);
-        alert('Vehicle updated successfully!');
+        await updateDoc(
+          doc(db, "users", user.uid, "vehicles", editingVehicle.id),
+          vehicleData,
+        );
+        alert("Vehicle updated successfully!");
       } else {
         vehicleData.createdAt = serverTimestamp();
         await addDoc(vehiclesRef, vehicleData);
-        alert('Vehicle added successfully!');
+        alert("Vehicle added successfully!");
       }
 
       setShowModal(false);
       resetForm();
       loadVehicles();
     } catch (error) {
-      console.error('Error saving vehicle:', error);
-      alert('Failed to save vehicle');
+      console.error("Error saving vehicle:", error);
+      alert("Failed to save vehicle");
     }
   };
 
   const handleDelete = async (vehicleId) => {
-    if (!window.confirm('Are you sure you want to delete this vehicle?')) {
+    if (!window.confirm("Are you sure you want to delete this vehicle?")) {
       return;
     }
 
     try {
       const db = getFirestore();
-      await deleteDoc(doc(db, 'users', user.uid, 'vehicles', vehicleId));
-      alert('Vehicle deleted successfully!');
+      await deleteDoc(doc(db, "users", user.uid, "vehicles", vehicleId));
+      alert("Vehicle deleted successfully!");
       loadVehicles();
     } catch (error) {
-      console.error('Error deleting vehicle:', error);
-      alert('Failed to delete vehicle');
+      console.error("Error deleting vehicle:", error);
+      alert("Failed to delete vehicle");
     }
   };
 
@@ -223,7 +227,9 @@ const Vehicles = ({ user }) => {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Vehicles</h1>
-        <p className="text-gray-600">Manage your vehicle inventory and records</p>
+        <p className="text-gray-600">
+          Manage your vehicle inventory and records
+        </p>
       </div>
 
       {/* Search and Add Bar */}
@@ -255,7 +261,9 @@ const Vehicles = ({ user }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Vehicles</p>
-              <p className="text-2xl font-bold text-gray-900">{vehicles.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {vehicles.length}
+              </p>
             </div>
             <Car className="w-10 h-10 text-orange-600" />
           </div>
@@ -265,7 +273,7 @@ const Vehicles = ({ user }) => {
             <div>
               <p className="text-sm text-gray-600">Active</p>
               <p className="text-2xl font-bold text-green-600">
-                {vehicles.filter(v => v.status === 'Active').length}
+                {vehicles.filter((v) => v.status === "Active").length}
               </p>
             </div>
             <CheckCircle className="w-10 h-10 text-green-600" />
@@ -276,7 +284,7 @@ const Vehicles = ({ user }) => {
             <div>
               <p className="text-sm text-gray-600">In Service</p>
               <p className="text-2xl font-bold text-blue-600">
-                {vehicles.filter(v => v.status === 'In Service').length}
+                {vehicles.filter((v) => v.status === "In Service").length}
               </p>
             </div>
             <Gauge className="w-10 h-10 text-blue-600" />
@@ -287,7 +295,7 @@ const Vehicles = ({ user }) => {
             <div>
               <p className="text-sm text-gray-600">Inactive</p>
               <p className="text-2xl font-bold text-gray-600">
-                {vehicles.filter(v => v.status === 'Inactive').length}
+                {vehicles.filter((v) => v.status === "Inactive").length}
               </p>
             </div>
             <AlertCircle className="w-10 h-10 text-gray-600" />
@@ -304,12 +312,12 @@ const Vehicles = ({ user }) => {
         <div className="bg-white rounded-lg shadow-sm p-12 text-center">
           <Car className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            {searchTerm ? 'No vehicles found' : 'No vehicles yet'}
+            {searchTerm ? "No vehicles found" : "No vehicles yet"}
           </h3>
           <p className="text-gray-600 mb-4">
-            {searchTerm 
-              ? 'Try adjusting your search terms' 
-              : 'Get started by adding your first vehicle'}
+            {searchTerm
+              ? "Try adjusting your search terms"
+              : "Get started by adding your first vehicle"}
           </p>
           {!searchTerm && (
             <button
@@ -323,8 +331,11 @@ const Vehicles = ({ user }) => {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filteredVehicles.map(vehicle => (
-            <div key={vehicle.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+          {filteredVehicles.map((vehicle) => (
+            <div
+              key={vehicle.id}
+              className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            >
               <div className="p-6">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
@@ -341,11 +352,15 @@ const Vehicles = ({ user }) => {
                       </p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs text-sm font-medium ${
-                    vehicle.status === 'Active' ? 'bg-green-100 text-green-700' :
-                    vehicle.status === 'In Service' ? 'bg-blue-100 text-blue-700' :
-                    'bg-gray-100 text-gray-700'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs text-sm font-medium ${
+                      vehicle.status === "Active"
+                        ? "bg-green-100 text-green-700"
+                        : vehicle.status === "In Service"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
                     {vehicle.status}
                   </span>
                 </div>
@@ -356,19 +371,26 @@ const Vehicles = ({ user }) => {
                     <div className="flex items-center gap-2 text-sm">
                       <FileText className="w-4 h-4 text-gray-400" />
                       <span className="text-gray-600">VIN:</span>
-                      <span className="text-gray-900 font-mono text-xs">{vehicle.vin}</span>
+                      <span className="text-gray-900 font-mono text-xs">
+                        {vehicle.vin}
+                      </span>
                     </div>
                   )}
                   {vehicle.mileage && (
                     <div className="flex items-center gap-2 text-sm">
                       <Gauge className="w-4 h-4 text-gray-400" />
                       <span className="text-gray-600">Mileage:</span>
-                      <span className="text-gray-900">{vehicle.mileage} km</span>
+                      <span className="text-gray-900">
+                        {vehicle.mileage} km
+                      </span>
                     </div>
                   )}
                   {vehicle.color && (
                     <div className="flex items-center gap-2 text-sm">
-                      <div className="w-4 h-4 rounded-full border border-gray-300" style={{backgroundColor: vehicle.color.toLowerCase()}}></div>
+                      <div
+                        className="w-4 h-4 rounded-full border border-gray-300"
+                        style={{ backgroundColor: vehicle.color.toLowerCase() }}
+                      ></div>
                       <span className="text-gray-600">Color:</span>
                       <span className="text-gray-900">{vehicle.color}</span>
                     </div>
@@ -376,7 +398,9 @@ const Vehicles = ({ user }) => {
                   {vehicle.ownerName && (
                     <div className="text-sm">
                       <span className="text-gray-600">Owner:</span>
-                      <span className="text-gray-900 ml-2">{vehicle.ownerName}</span>
+                      <span className="text-gray-900 ml-2">
+                        {vehicle.ownerName}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -388,13 +412,23 @@ const Vehicles = ({ user }) => {
                       {vehicle.lastServiceDate && (
                         <div className="flex items-center gap-2">
                           <Calendar className="w-3 h-3" />
-                          <span>Last Service: {new Date(vehicle.lastServiceDate).toLocaleDateString()}</span>
+                          <span>
+                            Last Service:{" "}
+                            {new Date(
+                              vehicle.lastServiceDate,
+                            ).toLocaleDateString()}
+                          </span>
                         </div>
                       )}
                       {vehicle.nextServiceDue && (
                         <div className="flex items-center gap-2">
                           <Calendar className="w-3 h-3" />
-                          <span>Next Service: {new Date(vehicle.nextServiceDue).toLocaleDateString()}</span>
+                          <span>
+                            Next Service:{" "}
+                            {new Date(
+                              vehicle.nextServiceDue,
+                            ).toLocaleDateString()}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -429,7 +463,7 @@ const Vehicles = ({ user }) => {
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-2xl font-bold">
-                {editingVehicle ? 'Edit Vehicle' : 'Add New Vehicle'}
+                {editingVehicle ? "Edit Vehicle" : "Add New Vehicle"}
               </h2>
               <button
                 onClick={() => {
@@ -446,7 +480,9 @@ const Vehicles = ({ user }) => {
               <div className="space-y-6">
                 {/* Vehicle Information */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Vehicle Information</h3>
+                  <h3 className="text-lg font-semibold mb-4">
+                    Vehicle Information
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -588,7 +624,9 @@ const Vehicles = ({ user }) => {
 
                 {/* Owner Information */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Owner Information</h3>
+                  <h3 className="text-lg font-semibold mb-4">
+                    Owner Information
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -634,7 +672,9 @@ const Vehicles = ({ user }) => {
 
                 {/* Service Information */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Service Information</h3>
+                  <h3 className="text-lg font-semibold mb-4">
+                    Service Information
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -708,7 +748,7 @@ const Vehicles = ({ user }) => {
                     onClick={handleSubmit}
                     className="flex-1 px-6 py-3 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-700 transition-colors"
                   >
-                    {editingVehicle ? 'Update Vehicle' : 'Add Vehicle'}
+                    {editingVehicle ? "Update Vehicle" : "Add Vehicle"}
                   </button>
                 </div>
               </div>

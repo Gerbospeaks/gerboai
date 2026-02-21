@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { 
-  TrendingUp, 
-  Users, 
-  Calendar, 
+import {
+  TrendingUp,
+  Users,
+  Calendar,
   DollarSign,
   Activity,
   Clock,
@@ -11,10 +11,15 @@ import {
   FileText,
   CreditCard,
   Heart,
-  BarChart3
+  BarChart3,
 } from "lucide-react";
 
-const PracticeOverview = ({ user, savedInvoices, patients, onAddNewPatient }) => {
+const PracticeOverview = ({
+  user,
+  savedInvoices,
+  patients,
+  onAddNewPatient,
+}) => {
   const [stats, setStats] = useState({
     totalRevenue: 0,
     monthlyRevenue: 0,
@@ -43,27 +48,40 @@ const PracticeOverview = ({ user, savedInvoices, patients, onAddNewPatient }) =>
     const currentYear = now.getFullYear();
 
     // Calculate revenue with safety check
-    const totalRev = (savedInvoices || []).reduce((sum, inv) => sum + (inv.totals?.total || 0), 0);
+    const totalRev = (savedInvoices || []).reduce(
+      (sum, inv) => sum + (inv.totals?.total || 0),
+      0,
+    );
     const monthlyRev = (savedInvoices || [])
-      .filter(inv => {
+      .filter((inv) => {
         if (!inv.createdAt) return false;
-        const invDate = inv.createdAt?.toDate ? inv.createdAt.toDate() : new Date(inv.createdAt);
-        return invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear;
+        const invDate = inv.createdAt?.toDate
+          ? inv.createdAt.toDate()
+          : new Date(inv.createdAt);
+        return (
+          invDate.getMonth() === currentMonth &&
+          invDate.getFullYear() === currentYear
+        );
       })
       .reduce((sum, inv) => sum + (inv.totals?.total || 0), 0);
 
     // Count invoices by status
-    const pending = (savedInvoices || []).filter(inv => inv.status === 'pending').length;
-    const completed = (savedInvoices || []).filter(inv => inv.status === 'completed').length;
+    const pending = (savedInvoices || []).filter(
+      (inv) => inv.status === "pending",
+    ).length;
+    const completed = (savedInvoices || []).filter(
+      (inv) => inv.status === "completed",
+    ).length;
 
     // Calculate average invoice value
-    const avgValue = savedInvoices.length > 0 ? totalRev / savedInvoices.length : 0;
+    const avgValue =
+      savedInvoices.length > 0 ? totalRev / savedInvoices.length : 0;
 
     setStats({
       totalRevenue: totalRev,
       monthlyRevenue: monthlyRev,
       totalPatients: (patients || []).length,
-      activePatients: (patients || []).filter(p => !p.inactive).length,
+      activePatients: (patients || []).filter((p) => !p.inactive).length,
       totalInvoices: (savedInvoices || []).length,
       pendingPayments: pending,
       completedInvoices: completed,
@@ -71,17 +89,15 @@ const PracticeOverview = ({ user, savedInvoices, patients, onAddNewPatient }) =>
     });
 
     // Get recent activity (last 5 invoices)
-    const recent = (savedInvoices || [])
-      .slice(0, 5)
-      .map(inv => ({
-        id: inv.id,
-        type: 'invoice',
-        title: `Invoice ${inv.invoiceNumber}`,
-        patient: inv.patient?.name,
-        amount: inv.totals?.total,
-        status: inv.status,
-        date: inv.createdAt,
-      }));
+    const recent = (savedInvoices || []).slice(0, 5).map((inv) => ({
+      id: inv.id,
+      type: "invoice",
+      title: `Invoice ${inv.invoiceNumber}`,
+      patient: inv.patient?.name,
+      amount: inv.totals?.total,
+      status: inv.status,
+      date: inv.createdAt,
+    }));
 
     setRecentActivity(recent);
   };
@@ -91,9 +107,9 @@ const PracticeOverview = ({ user, savedInvoices, patients, onAddNewPatient }) =>
   };
 
   const formatDate = (date) => {
-    if (!date) return 'N/A';
+    if (!date) return "N/A";
     const d = date.toDate ? date.toDate() : new Date(date);
-    return d.toLocaleDateString('en-ZA');
+    return d.toLocaleDateString("en-ZA");
   };
 
   return (
@@ -101,7 +117,9 @@ const PracticeOverview = ({ user, savedInvoices, patients, onAddNewPatient }) =>
       {/* Header */}
       <div className="bg-gray-400 rounded-lg p-6 text-gray-800">
         <h1 className="text-3xl font-bold mb-2">Practice Overview</h1>
-        <p className="text-blue-100">Real-time insights into your healthcare practice</p>
+        <p className="text-blue-100">
+          Real-time insights into your healthcare practice
+        </p>
       </div>
 
       {/* Key Metrics */}
@@ -260,13 +278,15 @@ const PracticeOverview = ({ user, savedInvoices, patients, onAddNewPatient }) =>
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-600">Completed</span>
-                <span className="text-sm font-medium">{stats.completedInvoices}</span>
+                <span className="text-sm font-medium">
+                  {stats.completedInvoices}
+                </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
+                <div
                   className="bg-green-500 h-3 rounded-full transition-all"
-                  style={{ 
-                    width: `${stats.totalInvoices > 0 ? (stats.completedInvoices / stats.totalInvoices) * 100 : 0}%` 
+                  style={{
+                    width: `${stats.totalInvoices > 0 ? (stats.completedInvoices / stats.totalInvoices) * 100 : 0}%`,
                   }}
                 ></div>
               </div>
@@ -274,13 +294,15 @@ const PracticeOverview = ({ user, savedInvoices, patients, onAddNewPatient }) =>
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-600">Pending</span>
-                <span className="text-sm font-medium">{stats.pendingPayments}</span>
+                <span className="text-sm font-medium">
+                  {stats.pendingPayments}
+                </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
+                <div
                   className="bg-orange-500 h-3 rounded-full transition-all"
-                  style={{ 
-                    width: `${stats.totalInvoices > 0 ? (stats.pendingPayments / stats.totalInvoices) * 100 : 0}%` 
+                  style={{
+                    width: `${stats.totalInvoices > 0 ? (stats.pendingPayments / stats.totalInvoices) * 100 : 0}%`,
                   }}
                 ></div>
               </div>
@@ -295,7 +317,7 @@ const PracticeOverview = ({ user, savedInvoices, patients, onAddNewPatient }) =>
           <Activity className="w-5 h-5 text-blue-600" />
           <span>Recent Activity</span>
         </h3>
-        
+
         {recentActivity.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             No recent activity
@@ -303,21 +325,33 @@ const PracticeOverview = ({ user, savedInvoices, patients, onAddNewPatient }) =>
         ) : (
           <div className="space-y-3">
             {recentActivity.map((activity) => (
-              <div 
+              <div
                 key={activity.id}
                 className="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div className="flex items-center space-x-4">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                    activity.status === 'completed' ? 'bg-green-100' : 'bg-orange-100'
-                  }`}>
-                    <FileText className={`w-5 h-5 ${
-                      activity.status === 'completed' ? 'text-green-600' : 'text-orange-600'
-                    }`} />
+                  <div
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      activity.status === "completed"
+                        ? "bg-green-100"
+                        : "bg-orange-100"
+                    }`}
+                  >
+                    <FileText
+                      className={`w-5 h-5 ${
+                        activity.status === "completed"
+                          ? "text-green-600"
+                          : "text-orange-600"
+                      }`}
+                    />
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-gray-900">{activity.title}</div>
-                    <div className="text-sm text-gray-500">{activity.patient}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {activity.title}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {activity.patient}
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -342,9 +376,10 @@ const PracticeOverview = ({ user, savedInvoices, patients, onAddNewPatient }) =>
             <FileText className="w-5 h-5" />
             <span>Create Invoice</span>
           </button>
-          <button 
-          onClick={onAddNewPatient}
-          className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 transition-colors">
+          <button
+            onClick={onAddNewPatient}
+            className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 transition-colors"
+          >
             <Users className="w-5 h-5" />
             <span>Add Patient</span>
           </button>

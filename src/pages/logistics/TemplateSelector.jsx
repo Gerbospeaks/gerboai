@@ -1,27 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, Check } from 'lucide-react';
-import SignatureStamp from '../SignatureStamp';
+import React, { useState, useEffect } from "react";
+import { FileText, Check } from "lucide-react";
+import SignatureStamp from "../SignatureStamp";
 import {
   getFirestore,
   doc,
   getDoc,
   updateDoc,
-  serverTimestamp
-} from 'firebase/firestore';
+  serverTimestamp,
+} from "firebase/firestore";
 
 // Template Selector Dropdown Component
-export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) => {
-  const [purchasedTemplates, setPurchasedTemplates] = useState(['classic']);
+export const TemplateSelector = ({
+  user,
+  selectedTemplate,
+  onTemplateChange,
+}) => {
+  const [purchasedTemplates, setPurchasedTemplates] = useState(["classic"]);
   const [isOpen, setIsOpen] = useState(false);
 
   const templateNames = {
-    default: 'Default Freight Bill',
-    classic: 'Classic Logistics',
-    modern: 'Modern Express',
-    elegant: 'Professional Courier',
-    premium: 'Premium Freight',
-    speed: 'Fast Track Delivery',
-    diagnostic: 'Detailed Shipping'
+    default: "Default Freight Bill",
+    classic: "Classic Logistics",
+    modern: "Modern Express",
+    elegant: "Professional Courier",
+    premium: "Premium Freight",
+    speed: "Fast Track Delivery",
+    diagnostic: "Detailed Shipping",
   };
 
   useEffect(() => {
@@ -33,16 +37,19 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 
     try {
       const db = getFirestore();
-      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
+      const docRef = doc(db, "users", user.uid, "settings", "templates");
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setPurchasedTemplates(['default', ...(docSnap.data().purchased || ['classic'])]);
+        setPurchasedTemplates([
+          "default",
+          ...(docSnap.data().purchased || ["classic"]),
+        ]);
       } else {
-        setPurchasedTemplates(['default', 'classic']);
+        setPurchasedTemplates(["default", "classic"]);
       }
     } catch (error) {
-      console.error('Error loading templates:', error);
+      console.error("Error loading templates:", error);
     }
   };
 
@@ -51,17 +58,17 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 
     try {
       const db = getFirestore();
-      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
-      
+      const docRef = doc(db, "users", user.uid, "settings", "templates");
+
       await updateDoc(docRef, {
         active: templateId,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
       onTemplateChange(templateId);
       setIsOpen(false);
     } catch (error) {
-      console.error('Error updating template:', error);
+      console.error("Error updating template:", error);
     }
   };
 
@@ -72,17 +79,29 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-800"
       >
         <FileText className="w-4 h-4" />
-        <span className="hidden sm:inline">{templateNames[selectedTemplate] || 'Select Template'}</span>
+        <span className="hidden sm:inline">
+          {templateNames[selectedTemplate] || "Select Template"}
+        </span>
         <span className="sm:hidden">Template</span>
-        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <svg
+          className="w-4 h-4 ml-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-10" 
+          <div
+            className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-80 overflow-auto">
@@ -90,12 +109,14 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
               <div className="text-xs font-semibold text-gray-500 px-3 py-2">
                 Your Templates
               </div>
-              {purchasedTemplates.map(templateId => (
+              {purchasedTemplates.map((templateId) => (
                 <button
                   key={templateId}
                   onClick={() => handleSelectTemplate(templateId)}
                   className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-between ${
-                    selectedTemplate === templateId ? 'bg-orange-50 text-orange-600' : 'text-gray-700'
+                    selectedTemplate === templateId
+                      ? "bg-orange-50 text-orange-600"
+                      : "text-gray-700"
                   }`}
                 >
                   <span>{templateNames[templateId]}</span>
@@ -113,8 +134,8 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 };
 
 // Default Freight Bill Template
-export const DefaultTemplate = ({ 
-  businessInfo, 
+export const DefaultTemplate = ({
+  businessInfo,
   loading,
   jobCardNumber,
   trackingNumber,
@@ -139,7 +160,7 @@ export const DefaultTemplate = ({
   stampText = "DISPATCHED",
   stampColor = "#2196f3",
   showStampDate = true,
-  serviceType = "FREIGHT"
+  serviceType = "FREIGHT",
 }) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     {/* Header Section */}
@@ -159,16 +180,21 @@ export const DefaultTemplate = ({
               <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
             )}
             <div>
-              <div className="text-xl font-bold">{businessInfo?.businessName || ""}</div>
+              <div className="text-xl font-bold">
+                {businessInfo?.businessName || ""}
+              </div>
             </div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{businessInfo.addressLine1}</div>
             <div>{businessInfo.addressLine2}</div>
-            <div>{businessInfo.city} {businessInfo.postalCode}</div>
+            <div>
+              {businessInfo.city} {businessInfo.postalCode}
+            </div>
             <div className="mt-1">
               T: {businessInfo.primaryPhone}
-              {businessInfo.secondaryPhone && `, ${businessInfo.secondaryPhone}`}
+              {businessInfo.secondaryPhone &&
+                `, ${businessInfo.secondaryPhone}`}
             </div>
           </div>
         </div>
@@ -200,29 +226,43 @@ export const DefaultTemplate = ({
     {/* Three Column Section */}
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SENDER</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          SENDER
+        </div>
         <div className="text-xs space-y-1">
           <div className="font-semibold">{senderName}</div>
-          <div className="h-12 overflow-hidden text-xs leading-tight">{senderAddress}</div>
+          <div className="h-12 overflow-hidden text-xs leading-tight">
+            {senderAddress}
+          </div>
           <div>{senderEmail}</div>
           <div>{senderPhone}</div>
-          <div className="mt-2"><span className="font-semibold">Origin:</span> {origin}</div>
+          <div className="mt-2">
+            <span className="font-semibold">Origin:</span> {origin}
+          </div>
         </div>
       </div>
 
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">RECEIVER</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          RECEIVER
+        </div>
         <div className="text-xs space-y-1">
           <div className="font-semibold">{receiverName}</div>
-          <div className="h-12 overflow-hidden text-xs leading-tight">{receiverAddress}</div>
+          <div className="h-12 overflow-hidden text-xs leading-tight">
+            {receiverAddress}
+          </div>
           <div>{receiverEmail}</div>
           <div>{receiverPhone}</div>
-          <div className="mt-2"><span className="font-semibold">Destination:</span> {destination}</div>
+          <div className="mt-2">
+            <span className="font-semibold">Destination:</span> {destination}
+          </div>
         </div>
       </div>
 
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SHIPMENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          SHIPMENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-semibold">Cargo Type:</span>
@@ -265,7 +305,9 @@ export const DefaultTemplate = ({
               <td className="px-2 py-2">{item.description}</td>
               <td className="text-center px-2 py-2">{item.qty}</td>
               <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -292,12 +334,26 @@ export const DefaultTemplate = ({
 
     {/* Payment Details */}
     <div className="bg-blue-50 border border-blue-200 p-3 mb-4">
-      <div className="text-blue-600 font-bold text-xs mb-2">PAYMENT DETAILS</div>
+      <div className="text-blue-600 font-bold text-xs mb-2">
+        PAYMENT DETAILS
+      </div>
       <div className="text-xs space-y-1">
-        <div><span className="font-semibold">Bank Name:</span> {businessInfo.bankName || 'FNB'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {businessInfo.branchCode || '250655'}</div>
+        <div>
+          <span className="font-semibold">Bank Name:</span>{" "}
+          {businessInfo.bankName || "FNB"}
+        </div>
+        <div>
+          <span className="font-semibold">Account Holder:</span>{" "}
+          {businessInfo.businessName}
+        </div>
+        <div>
+          <span className="font-semibold">Account Number:</span>{" "}
+          {businessInfo.accountNumber || "62146991441"}
+        </div>
+        <div>
+          <span className="font-semibold">Branch Code:</span>{" "}
+          {businessInfo.branchCode || "250655"}
+        </div>
       </div>
     </div>
 
@@ -309,7 +365,7 @@ export const DefaultTemplate = ({
       </div>
       {showStamp && (
         <div className="flex justify-end">
-          <SignatureStamp 
+          <SignatureStamp
             text={stampText}
             color={stampColor}
             showDate={showStampDate}
@@ -335,15 +391,19 @@ export const ClassicTemplate = (props) => (
         <div>
           <div className="flex items-center gap-3 mb-2">
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 object-contain"
+              />
             )}
-            <div>
-              
-            </div>
+            <div></div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+            <div>
+              {props.businessInfo.city}, {props.businessInfo.postalCode}
+            </div>
             <div>T: {props.businessInfo.primaryPhone}</div>
           </div>
         </div>
@@ -387,7 +447,9 @@ export const ClassicTemplate = (props) => (
         </div>
       </div>
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CARGO</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          CARGO
+        </div>
         <div className="text-xs space-y-1">
           <div>Type: {props.cargoType}</div>
           <div>Weight: {props.weight} kg</div>
@@ -438,7 +500,7 @@ export const ClassicTemplate = (props) => (
 
     {props.showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -461,20 +523,35 @@ export const ModernTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+            <img
+              src={props.businessInfo.logoUrl}
+              alt="Logo"
+              className="w-20 h-20 object-contain mb-3"
+            />
           )}
-          
+
           <div className="text-sm text-gray-600 space-y-1">
             <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+            <div>
+              {props.businessInfo.city}, {props.businessInfo.postalCode}
+            </div>
           </div>
         </div>
         <div className="text-right">
           <div className="text-5xl font-bold text-blue-500 mb-4">FREIGHT</div>
           <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-            <div className="text-sm"><span className="font-semibold">Waybill:</span> {props.jobCardNumber}</div>
-            <div className="text-sm"><span className="font-semibold">Tracking:</span> {props.trackingNumber}</div>
-            <div className="text-sm"><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</div>
+            <div className="text-sm">
+              <span className="font-semibold">Waybill:</span>{" "}
+              {props.jobCardNumber}
+            </div>
+            <div className="text-sm">
+              <span className="font-semibold">Tracking:</span>{" "}
+              {props.trackingNumber}
+            </div>
+            <div className="text-sm">
+              <span className="font-semibold">Date:</span>{" "}
+              {new Date().toLocaleDateString()}
+            </div>
           </div>
         </div>
       </div>
@@ -496,7 +573,9 @@ export const ModernTemplate = (props) => (
           <div className="font-semibold text-lg">{props.receiverName}</div>
           <div>{props.receiverAddress}</div>
           <div>{props.receiverPhone}</div>
-          <div className="mt-2 text-blue-600">Destination: {props.destination}</div>
+          <div className="mt-2 text-blue-600">
+            Destination: {props.destination}
+          </div>
         </div>
       </div>
     </div>
@@ -504,9 +583,15 @@ export const ModernTemplate = (props) => (
     <div className="bg-gray-100 p-4 rounded-lg mb-6">
       <div className="text-sm font-bold text-gray-700 mb-2">CARGO DETAILS</div>
       <div className="grid grid-cols-3 gap-4 text-sm">
-        <div><span className="font-semibold">Type:</span> {props.cargoType}</div>
-        <div><span className="font-semibold">Weight:</span> {props.weight} kg</div>
-        <div><span className="font-semibold">Dimensions:</span> {props.dimensions}</div>
+        <div>
+          <span className="font-semibold">Type:</span> {props.cargoType}
+        </div>
+        <div>
+          <span className="font-semibold">Weight:</span> {props.weight} kg
+        </div>
+        <div>
+          <span className="font-semibold">Dimensions:</span> {props.dimensions}
+        </div>
       </div>
     </div>
 
@@ -525,7 +610,9 @@ export const ModernTemplate = (props) => (
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
             <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+            <td className="text-right px-4 py-3 font-semibold">
+              R {item.amount.toFixed(2)}
+            </td>
           </tr>
         ))}
       </tbody>
@@ -550,7 +637,7 @@ export const ModernTemplate = (props) => (
 
     {props.showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -572,17 +659,29 @@ export const ElegantTemplate = (props) => (
     <div className="border-4 border-purple-900 p-8">
       <div className="text-center border-b-2 border-purple-900 pb-6 mb-6">
         {props.businessInfo.logoUrl && (
-          <img src={props.businessInfo.logoUrl} alt="Logo" className="w-24 h-24 object-contain mx-auto mb-4" />
+          <img
+            src={props.businessInfo.logoUrl}
+            alt="Logo"
+            className="w-24 h-24 object-contain mx-auto mb-4"
+          />
         )}
-        
-        <div className="text-sm text-gray-600">{props.businessInfo.addressLine1} • {props.businessInfo.city}</div>
-        <div className="text-2xl font-serif text-purple-700 mt-4">BILL OF LADING</div>
-        <div className="text-sm text-gray-500 mt-1">Waybill #{props.jobCardNumber}</div>
+
+        <div className="text-sm text-gray-600">
+          {props.businessInfo.addressLine1} • {props.businessInfo.city}
+        </div>
+        <div className="text-2xl font-serif text-purple-700 mt-4">
+          BILL OF LADING
+        </div>
+        <div className="text-sm text-gray-500 mt-1">
+          Waybill #{props.jobCardNumber}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
-          <div className="font-serif font-bold text-purple-900 mb-2">CONSIGNOR</div>
+          <div className="font-serif font-bold text-purple-900 mb-2">
+            CONSIGNOR
+          </div>
           <div className="text-sm space-y-1">
             <div className="font-semibold">{props.senderName}</div>
             <div>{props.senderAddress}</div>
@@ -590,7 +689,9 @@ export const ElegantTemplate = (props) => (
           </div>
         </div>
         <div>
-          <div className="font-serif font-bold text-purple-900 mb-2">CONSIGNEE</div>
+          <div className="font-serif font-bold text-purple-900 mb-2">
+            CONSIGNEE
+          </div>
           <div className="text-sm space-y-1">
             <div className="font-semibold">{props.receiverName}</div>
             <div>{props.receiverAddress}</div>
@@ -600,11 +701,20 @@ export const ElegantTemplate = (props) => (
       </div>
 
       <div className="border-2 border-purple-900 p-4 rounded mb-6">
-        <div className="font-serif font-bold text-purple-900 mb-2">SHIPMENT INFORMATION</div>
+        <div className="font-serif font-bold text-purple-900 mb-2">
+          SHIPMENT INFORMATION
+        </div>
         <div className="grid grid-cols-3 gap-4 text-sm">
-          <div><span className="font-semibold">Route:</span> {props.origin} → {props.destination}</div>
-          <div><span className="font-semibold">Cargo:</span> {props.cargoType}</div>
-          <div><span className="font-semibold">Weight:</span> {props.weight} kg</div>
+          <div>
+            <span className="font-semibold">Route:</span> {props.origin} →{" "}
+            {props.destination}
+          </div>
+          <div>
+            <span className="font-semibold">Cargo:</span> {props.cargoType}
+          </div>
+          <div>
+            <span className="font-semibold">Weight:</span> {props.weight} kg
+          </div>
         </div>
       </div>
 
@@ -648,7 +758,7 @@ export const ElegantTemplate = (props) => (
 
       {props.showStamp && (
         <div className="flex justify-center mb-4">
-          <SignatureStamp 
+          <SignatureStamp
             text={props.stampText}
             color={props.stampColor}
             showDate={props.showStampDate}
@@ -667,23 +777,42 @@ export const ElegantTemplate = (props) => (
 
 // Premium Freight Template
 export const PremiumTemplate = (props) => (
-  <div className="bg-gradient-to-br from-gray-50 to-gray-100" style={{ padding: "15mm 20mm" }}>
+  <div
+    className="bg-gradient-to-br from-gray-50 to-gray-100"
+    style={{ padding: "15mm 20mm" }}
+  >
     <div className="bg-white rounded-lg shadow-lg p-8">
       <div className="border-b-4 border-amber-500 pb-6 mb-6">
         <div className="flex justify-between items-start">
           <div>
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-24 h-24 object-contain mb-3" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-24 h-24 object-contain mb-3"
+              />
             )}
-            
-            <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
+
+            <div className="text-sm text-gray-600">
+              {props.businessInfo.addressLine1}
+            </div>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-bold text-amber-600 mb-3">PREMIUM</div>
-            <div className="text-2xl font-bold text-gray-700">FREIGHT SERVICE</div>
+            <div className="text-4xl font-bold text-amber-600 mb-3">
+              PREMIUM
+            </div>
+            <div className="text-2xl font-bold text-gray-700">
+              FREIGHT SERVICE
+            </div>
             <div className="mt-4 bg-amber-50 p-3 rounded">
-              <div className="text-xs"><span className="font-bold">Waybill:</span> {props.jobCardNumber}</div>
-              <div className="text-xs"><span className="font-bold">Tracking:</span> {props.trackingNumber}</div>
+              <div className="text-xs">
+                <span className="font-bold">Waybill:</span>{" "}
+                {props.jobCardNumber}
+              </div>
+              <div className="text-xs">
+                <span className="font-bold">Tracking:</span>{" "}
+                {props.trackingNumber}
+              </div>
             </div>
           </div>
         </div>
@@ -696,26 +825,41 @@ export const PremiumTemplate = (props) => (
             <div className="font-semibold text-lg">{props.senderName}</div>
             <div className="text-gray-600">{props.senderAddress}</div>
             <div className="text-gray-600">{props.senderPhone}</div>
-            <div className="mt-2 font-semibold text-amber-600">{props.origin}</div>
+            <div className="mt-2 font-semibold text-amber-600">
+              {props.origin}
+            </div>
           </div>
         </div>
         <div className="border-l-4 border-amber-500 pl-4">
-          <div className="text-sm font-bold text-amber-600 mb-2">DESTINATION</div>
+          <div className="text-sm font-bold text-amber-600 mb-2">
+            DESTINATION
+          </div>
           <div className="text-sm space-y-1">
             <div className="font-semibold text-lg">{props.receiverName}</div>
             <div className="text-gray-600">{props.receiverAddress}</div>
             <div className="text-gray-600">{props.receiverPhone}</div>
-            <div className="mt-2 font-semibold text-amber-600">{props.destination}</div>
+            <div className="mt-2 font-semibold text-amber-600">
+              {props.destination}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="bg-amber-50 border border-amber-200 p-4 rounded mb-6">
-        <div className="font-bold text-amber-700 mb-3">CARGO SPECIFICATIONS</div>
+        <div className="font-bold text-amber-700 mb-3">
+          CARGO SPECIFICATIONS
+        </div>
         <div className="grid grid-cols-3 gap-4 text-sm">
-          <div><span className="font-semibold">Type:</span> {props.cargoType}</div>
-          <div><span className="font-semibold">Weight:</span> {props.weight} kg</div>
-          <div><span className="font-semibold">Dimensions:</span> {props.dimensions}</div>
+          <div>
+            <span className="font-semibold">Type:</span> {props.cargoType}
+          </div>
+          <div>
+            <span className="font-semibold">Weight:</span> {props.weight} kg
+          </div>
+          <div>
+            <span className="font-semibold">Dimensions:</span>{" "}
+            {props.dimensions}
+          </div>
         </div>
       </div>
 
@@ -734,7 +878,9 @@ export const PremiumTemplate = (props) => (
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
               <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+              <td className="text-right px-4 py-3 font-semibold">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -759,7 +905,7 @@ export const PremiumTemplate = (props) => (
 
       {props.showStamp && (
         <div className="flex justify-center mb-4">
-          <SignatureStamp 
+          <SignatureStamp
             text={props.stampText}
             color={props.stampColor}
             showDate={props.showStampDate}
@@ -783,15 +929,27 @@ export const SpeedTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3 brightness-0 invert" />
+            <img
+              src={props.businessInfo.logoUrl}
+              alt="Logo"
+              className="w-20 h-20 object-contain mb-3 brightness-0 invert"
+            />
           )}
-          <div className="text-3xl font-black text-red-600 mb-2">{props.businessInfo.businessName}</div>
-          <div className="text-sm text-gray-400">{props.businessInfo.addressLine1}</div>
+          <div className="text-3xl font-black text-red-600 mb-2">
+            {props.businessInfo.businessName}
+          </div>
+          <div className="text-sm text-gray-400">
+            {props.businessInfo.addressLine1}
+          </div>
         </div>
         <div className="text-right">
-          <div className="text-5xl font-black text-red-600 mb-4 italic">EXPRESS</div>
+          <div className="text-5xl font-black text-red-600 mb-4 italic">
+            EXPRESS
+          </div>
           <div className="bg-red-600 p-4 rounded space-y-1">
-            <div className="text-sm font-bold">WAYBILL #{props.jobCardNumber}</div>
+            <div className="text-sm font-bold">
+              WAYBILL #{props.jobCardNumber}
+            </div>
             <div className="text-sm">TRACKING: {props.trackingNumber}</div>
             <div className="text-sm">{new Date().toLocaleDateString()}</div>
           </div>
@@ -823,9 +981,15 @@ export const SpeedTemplate = (props) => (
     <div className="bg-red-900 p-4 rounded mb-6">
       <div className="font-black text-red-200 mb-2">PACKAGE INFO</div>
       <div className="grid grid-cols-3 gap-4 text-sm">
-        <div><span className="font-bold">Type:</span> {props.cargoType}</div>
-        <div><span className="font-bold">Weight:</span> {props.weight} kg</div>
-        <div><span className="font-bold">Size:</span> {props.dimensions}</div>
+        <div>
+          <span className="font-bold">Type:</span> {props.cargoType}
+        </div>
+        <div>
+          <span className="font-bold">Weight:</span> {props.weight} kg
+        </div>
+        <div>
+          <span className="font-bold">Size:</span> {props.dimensions}
+        </div>
       </div>
     </div>
 
@@ -844,7 +1008,9 @@ export const SpeedTemplate = (props) => (
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
             <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-4 py-3 font-bold">R {item.amount.toFixed(2)}</td>
+            <td className="text-right px-4 py-3 font-bold">
+              R {item.amount.toFixed(2)}
+            </td>
           </tr>
         ))}
       </tbody>
@@ -869,7 +1035,7 @@ export const SpeedTemplate = (props) => (
 
     {props.showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -892,18 +1058,34 @@ export const DiagnosticTemplate = (props) => (
       <div className="flex justify-between items-start">
         <div>
           {props.businessInfo.logoUrl && (
-            <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
+            <img
+              src={props.businessInfo.logoUrl}
+              alt="Logo"
+              className="w-20 h-20 object-contain mb-3"
+            />
           )}
-          
-          <div className="text-sm text-gray-600">{props.businessInfo.addressLine1}</div>
+
+          <div className="text-sm text-gray-600">
+            {props.businessInfo.addressLine1}
+          </div>
           <div className="text-sm text-gray-600">{props.businessInfo.city}</div>
         </div>
         <div className="text-right">
-          <div className="text-4xl font-bold text-green-600 mb-4">SHIPPING MANIFEST</div>
+          <div className="text-4xl font-bold text-green-600 mb-4">
+            SHIPPING MANIFEST
+          </div>
           <div className="bg-green-50 border-2 border-green-600 p-3 rounded">
-            <div className="text-sm"><span className="font-bold">Waybill:</span> {props.jobCardNumber}</div>
-            <div className="text-sm"><span className="font-bold">Tracking:</span> {props.trackingNumber}</div>
-            <div className="text-sm"><span className="font-bold">Date:</span> {new Date().toLocaleDateString()}</div>
+            <div className="text-sm">
+              <span className="font-bold">Waybill:</span> {props.jobCardNumber}
+            </div>
+            <div className="text-sm">
+              <span className="font-bold">Tracking:</span>{" "}
+              {props.trackingNumber}
+            </div>
+            <div className="text-sm">
+              <span className="font-bold">Date:</span>{" "}
+              {new Date().toLocaleDateString()}
+            </div>
           </div>
         </div>
       </div>
@@ -911,45 +1093,86 @@ export const DiagnosticTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div className="border-2 border-green-600 p-4 rounded">
-        <div className="text-sm font-bold text-green-600 mb-3">SHIPPER DETAILS</div>
+        <div className="text-sm font-bold text-green-600 mb-3">
+          SHIPPER DETAILS
+        </div>
         <div className="text-sm space-y-1">
-          <div><span className="font-semibold">Name:</span> {props.senderName}</div>
-          <div><span className="font-semibold">Address:</span> {props.senderAddress}</div>
-          <div><span className="font-semibold">Email:</span> {props.senderEmail}</div>
-          <div><span className="font-semibold">Phone:</span> {props.senderPhone}</div>
+          <div>
+            <span className="font-semibold">Name:</span> {props.senderName}
+          </div>
+          <div>
+            <span className="font-semibold">Address:</span>{" "}
+            {props.senderAddress}
+          </div>
+          <div>
+            <span className="font-semibold">Email:</span> {props.senderEmail}
+          </div>
+          <div>
+            <span className="font-semibold">Phone:</span> {props.senderPhone}
+          </div>
           <div className="mt-2 pt-2 border-t border-green-300">
             <span className="font-semibold">Origin Port:</span> {props.origin}
           </div>
         </div>
       </div>
       <div className="border-2 border-green-600 p-4 rounded">
-        <div className="text-sm font-bold text-green-600 mb-3">CONSIGNEE DETAILS</div>
+        <div className="text-sm font-bold text-green-600 mb-3">
+          CONSIGNEE DETAILS
+        </div>
         <div className="text-sm space-y-1">
-          <div><span className="font-semibold">Name:</span> {props.receiverName}</div>
-          <div><span className="font-semibold">Address:</span> {props.receiverAddress}</div>
-          <div><span className="font-semibold">Email:</span> {props.receiverEmail}</div>
-          <div><span className="font-semibold">Phone:</span> {props.receiverPhone}</div>
+          <div>
+            <span className="font-semibold">Name:</span> {props.receiverName}
+          </div>
+          <div>
+            <span className="font-semibold">Address:</span>{" "}
+            {props.receiverAddress}
+          </div>
+          <div>
+            <span className="font-semibold">Email:</span> {props.receiverEmail}
+          </div>
+          <div>
+            <span className="font-semibold">Phone:</span> {props.receiverPhone}
+          </div>
           <div className="mt-2 pt-2 border-t border-green-300">
-            <span className="font-semibold">Destination Port:</span> {props.destination}
+            <span className="font-semibold">Destination Port:</span>{" "}
+            {props.destination}
           </div>
         </div>
       </div>
     </div>
 
     <div className="bg-green-50 border-2 border-green-600 p-4 rounded mb-6">
-      <div className="text-sm font-bold text-green-600 mb-3">CARGO INFORMATION</div>
+      <div className="text-sm font-bold text-green-600 mb-3">
+        CARGO INFORMATION
+      </div>
       <div className="grid grid-cols-3 gap-4 text-sm">
-        <div><span className="font-semibold">Cargo Type:</span> {props.cargoType}</div>
-        <div><span className="font-semibold">Total Weight:</span> {props.weight} kg</div>
-        <div><span className="font-semibold">Dimensions:</span> {props.dimensions}</div>
-        <div><span className="font-semibold">Number of Pieces:</span> {props.items.length}</div>
-        <div><span className="font-semibold">Declared Value:</span> R {props.total.toFixed(2)}</div>
-        <div><span className="font-semibold">Insurance:</span> Comprehensive</div>
+        <div>
+          <span className="font-semibold">Cargo Type:</span> {props.cargoType}
+        </div>
+        <div>
+          <span className="font-semibold">Total Weight:</span> {props.weight} kg
+        </div>
+        <div>
+          <span className="font-semibold">Dimensions:</span> {props.dimensions}
+        </div>
+        <div>
+          <span className="font-semibold">Number of Pieces:</span>{" "}
+          {props.items.length}
+        </div>
+        <div>
+          <span className="font-semibold">Declared Value:</span> R{" "}
+          {props.total.toFixed(2)}
+        </div>
+        <div>
+          <span className="font-semibold">Insurance:</span> Comprehensive
+        </div>
       </div>
     </div>
 
     <div className="mb-6">
-      <div className="bg-green-600 text-gray-800 px-4 py-2 font-bold">ITEMIZED SERVICES</div>
+      <div className="bg-green-600 text-gray-800 px-4 py-2 font-bold">
+        ITEMIZED SERVICES
+      </div>
       <table className="w-full">
         <thead>
           <tr className="bg-green-50 border-b-2 border-green-600">
@@ -965,7 +1188,9 @@ export const DiagnosticTemplate = (props) => (
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
               <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-4 py-3 font-semibold">R {item.amount.toFixed(2)}</td>
+              <td className="text-right px-4 py-3 font-semibold">
+                R {item.amount.toFixed(2)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -990,18 +1215,32 @@ export const DiagnosticTemplate = (props) => (
     </div>
 
     <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+      <div className="text-blue-800 font-bold text-sm mb-2">
+        PAYMENT INFORMATION
+      </div>
       <div className="text-xs space-y-1 text-gray-700">
-        <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName || 'First National Bank'}</div>
-        <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.businessName}</div>
-        <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber || '62146991441'}</div>
-        <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode || '250655'}</div>
+        <div>
+          <span className="font-semibold">Bank Name:</span>{" "}
+          {props.businessInfo.bankName || "First National Bank"}
+        </div>
+        <div>
+          <span className="font-semibold">Account Holder:</span>{" "}
+          {props.businessInfo.businessName}
+        </div>
+        <div>
+          <span className="font-semibold">Account Number:</span>{" "}
+          {props.businessInfo.accountNumber || "62146991441"}
+        </div>
+        <div>
+          <span className="font-semibold">Branch Code:</span>{" "}
+          {props.businessInfo.branchCode || "250655"}
+        </div>
       </div>
     </div>
 
     {props.showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -1020,7 +1259,7 @@ export const DiagnosticTemplate = (props) => (
 // Template Renderer
 export const TemplateRenderer = ({
   templateId,
-  documentType = 'freight',
+  documentType = "freight",
   stampText = "DISPATCHED",
   stampColor = "#2196f3",
   showStampDate = true,
@@ -1033,23 +1272,23 @@ export const TemplateRenderer = ({
     stampText,
     stampColor,
     showStampDate,
-    showStamp
+    showStamp,
   };
 
   switch (templateId) {
-    case 'default':
+    case "default":
       return <DefaultTemplate {...templateProps} />;
-    case 'classic':
+    case "classic":
       return <ClassicTemplate {...templateProps} />;
-    case 'modern':
+    case "modern":
       return <ModernTemplate {...templateProps} />;
-    case 'elegant':
+    case "elegant":
       return <ElegantTemplate {...templateProps} />;
-    case 'premium':
+    case "premium":
       return <PremiumTemplate {...templateProps} />;
-    case 'speed':
+    case "speed":
       return <SpeedTemplate {...templateProps} />;
-    case 'diagnostic':
+    case "diagnostic":
       return <DiagnosticTemplate {...templateProps} />;
     default:
       return <DefaultTemplate {...templateProps} />;

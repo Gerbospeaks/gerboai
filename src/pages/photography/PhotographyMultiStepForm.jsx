@@ -198,7 +198,9 @@ const PhotographyMultiStepForm = ({
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
               <select
                 value={newItem.type}
-                onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, type: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="Photography">Photography</option>
@@ -219,14 +221,18 @@ const PhotographyMultiStepForm = ({
                 type="number"
                 placeholder="Rate"
                 value={newItem.rate}
-                onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, rate: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               <input
                 type="number"
                 placeholder="Qty"
                 value={newItem.qty}
-                onChange={(e) => setNewItem({ ...newItem, qty: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, qty: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               <button
@@ -278,7 +284,7 @@ const PhotographyMultiStepForm = ({
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous
+          <span className="hidden sm:inline">Previous</span>
         </button>
 
         <div className="text-sm text-gray-600">
@@ -294,7 +300,7 @@ const PhotographyMultiStepForm = ({
               : "bg-purple-600 text-white hover:bg-purple-700"
           }`}
         >
-          Next
+          <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

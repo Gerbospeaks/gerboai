@@ -1,4 +1,3 @@
-// src/contexts/AdminContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -18,7 +17,6 @@ export const AdminProvider = ({ children }) => {
       setCurrentUser(user);
       
       if (user) {
-        // Check if user is admin
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         setIsAdmin(userDoc.data()?.isAdmin || false);
       } else {

@@ -1,6 +1,17 @@
-import { useState, useEffect } from 'react';
-import { db, auth } from '../../firebase';
-import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { useState, useEffect } from "react";
+import { db, auth } from "../../firebase";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp,
+} from "firebase/firestore";
 
 // Notes View Component with Firebase
 const NotesView = ({ jobCardId }) => {
@@ -15,28 +26,40 @@ const NotesView = ({ jobCardId }) => {
     if (!userId || !jobCardId) return;
 
     // Reference to notes subcollection: users/{userId}/jobcards/{jobCardId}/notes
-    const notesRef = collection(db, 'users', userId, 'jobcards', jobCardId, 'notes');
-    const q = query(notesRef, orderBy('timestamp', 'desc'));
+    const notesRef = collection(
+      db,
+      "users",
+      userId,
+      "jobcards",
+      jobCardId,
+      "notes",
+    );
+    const q = query(notesRef, orderBy("timestamp", "desc"));
 
     // Real-time listener
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const notesData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        timestamp: doc.data().timestamp?.toDate().toLocaleString('en-US', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        }) || 'N/A'
-      }));
-      setNotes(notesData);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching notes:", error);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const notesData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          timestamp:
+            doc.data().timestamp?.toDate().toLocaleString("en-US", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            }) || "N/A",
+        }));
+        setNotes(notesData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error fetching notes:", error);
+        setLoading(false);
+      },
+    );
 
     return () => unsubscribe();
   }, [userId, jobCardId]);
@@ -45,12 +68,22 @@ const NotesView = ({ jobCardId }) => {
     if (!newNote.trim() || !userId || !jobCardId) return;
 
     try {
-      const notesRef = collection(db, 'users', userId, 'jobcards', jobCardId, 'notes');
+      const notesRef = collection(
+        db,
+        "users",
+        userId,
+        "jobcards",
+        jobCardId,
+        "notes",
+      );
       await addDoc(notesRef, {
         timestamp: serverTimestamp(),
-        user: auth.currentUser?.displayName || auth.currentUser?.email || 'Current User',
+        user:
+          auth.currentUser?.displayName ||
+          auth.currentUser?.email ||
+          "Current User",
         content: newNote,
-        pinned: false
+        pinned: false,
       });
       setNewNote("");
     } catch (error) {
@@ -63,7 +96,15 @@ const NotesView = ({ jobCardId }) => {
     if (!userId || !jobCardId) return;
 
     try {
-      const noteRef = doc(db, 'users', userId, 'jobcards', jobCardId, 'notes', noteId);
+      const noteRef = doc(
+        db,
+        "users",
+        userId,
+        "jobcards",
+        jobCardId,
+        "notes",
+        noteId,
+      );
       await deleteDoc(noteRef);
     } catch (error) {
       console.error("Error deleting note:", error);
@@ -75,9 +116,17 @@ const NotesView = ({ jobCardId }) => {
     if (!userId || !jobCardId) return;
 
     try {
-      const noteRef = doc(db, 'users', userId, 'jobcards', jobCardId, 'notes', noteId);
+      const noteRef = doc(
+        db,
+        "users",
+        userId,
+        "jobcards",
+        jobCardId,
+        "notes",
+        noteId,
+      );
       await updateDoc(noteRef, {
-        pinned: !currentPinned
+        pinned: !currentPinned,
       });
     } catch (error) {
       console.error("Error pinning note:", error);
@@ -94,10 +143,18 @@ const NotesView = ({ jobCardId }) => {
     if (!userId || !jobCardId || !editContent.trim()) return;
 
     try {
-      const noteRef = doc(db, 'users', userId, 'jobcards', jobCardId, 'notes', noteId);
+      const noteRef = doc(
+        db,
+        "users",
+        userId,
+        "jobcards",
+        jobCardId,
+        "notes",
+        noteId,
+      );
       await updateDoc(noteRef, {
         content: editContent,
-        editedAt: serverTimestamp()
+        editedAt: serverTimestamp(),
       });
       setEditingId(null);
       setEditContent("");
@@ -125,7 +182,9 @@ const NotesView = ({ jobCardId }) => {
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Notes</h2>
-        <p className="text-gray-600 mt-1">Add important observations and reminders</p>
+        <p className="text-gray-600 mt-1">
+          Add important observations and reminders
+        </p>
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
@@ -151,20 +210,27 @@ const NotesView = ({ jobCardId }) => {
           <div
             key={note.id}
             className={`bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow ${
-              note.pinned ? 'border-l-4 border-orange-400' : ''
+              note.pinned ? "border-l-4 border-orange-400" : ""
             }`}
           >
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
                 {note.pinned && (
-                  <span className="text-orange-400 text-xl" title="Pinned">📌</span>
+                  <span className="text-orange-400 text-xl" title="Pinned">
+                    📌
+                  </span>
                 )}
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-xs text-sm font-medium">
-                      {note.user.split(' ').map(n => n[0]).join('')}
+                      {note.user
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </span>
-                    <span className="font-semibold text-gray-800">{note.user}</span>
+                    <span className="font-semibold text-gray-800">
+                      {note.user}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -195,14 +261,16 @@ const NotesView = ({ jobCardId }) => {
               </div>
             ) : (
               <>
-                <p className="text-gray-700 mb-3 whitespace-pre-wrap">{note.content}</p>
-                
+                <p className="text-gray-700 mb-3 whitespace-pre-wrap">
+                  {note.content}
+                </p>
+
                 <div className="flex gap-2">
                   <button
                     onClick={() => handlePinNote(note.id, note.pinned)}
                     className="text-sm text-gray-600 hover:text-orange-400 transition-colors"
                   >
-                    {note.pinned ? '📌 Unpin' : '📌 Pin'}
+                    {note.pinned ? "📌 Unpin" : "📌 Pin"}
                   </button>
                   <button
                     onClick={() => handleEditNote(note.id, note.content)}
@@ -226,7 +294,9 @@ const NotesView = ({ jobCardId }) => {
       {notes.length === 0 && (
         <div className="text-center py-12 text-gray-500 bg-white rounded-lg shadow-md">
           <p className="text-lg">No notes yet</p>
-          <p className="text-sm mt-2">Add your first note above to get started</p>
+          <p className="text-sm mt-2">
+            Add your first note above to get started
+          </p>
         </div>
       )}
     </div>

@@ -3,7 +3,6 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
-import v8logo from "../../assets/img/v8-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Vehicles from "./Vehicles";
@@ -13,7 +12,7 @@ import Templates from "./Templates";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import PaymentReceipt from "../../components/dashboard/PaymentReceipt";
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
   collection,
@@ -126,7 +125,8 @@ const MechanicsDashboard = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
-  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
+    useState(null);
   const [useAI, setUseAI] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -200,26 +200,26 @@ const MechanicsDashboard = () => {
 
     alert("✅ Data extracted and populated successfully!");
   };
-// Test email configuration
-const handleTestEmail = async () => {
-  if (!businessInfo.emailPassword) {
-    alert('⚠️ Please enter your email app password first.');
-    return;
-  }
+  // Test email configuration
+  const handleTestEmail = async () => {
+    if (!businessInfo.emailPassword) {
+      alert("⚠️ Please enter your email app password first.");
+      return;
+    }
 
-  const userEmail = user?.email || authUser?.email;
-  
-  if (!userEmail) {
-    alert('⚠️ Could not find your email address. Please log in again.');
-    return;
-  }
+    const userEmail = user?.email || authUser?.email;
 
-  try {
-    const testEmailData = {
-      userId: user.uid,
-      to: userEmail, // Send test to self
-      subject: '✅ Test Email - Email Configuration Successful',
-      message: `
+    if (!userEmail) {
+      alert("⚠️ Could not find your email address. Please log in again.");
+      return;
+    }
+
+    try {
+      const testEmailData = {
+        userId: user.uid,
+        to: userEmail, // Send test to self
+        subject: "✅ Test Email - Email Configuration Successful",
+        message: `
 Hello,
 
 This is a test email from your construction quote/invoice system.
@@ -230,7 +230,7 @@ Account Details:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Business: ${businessInfo.businessName}
 Email: ${userEmail}
-Provider: ${businessInfo.emailProvider || 'Gmail'}
+Provider: ${businessInfo.emailProvider || "Gmail"}
 Date: ${new Date().toLocaleString()}
 
 You can now send quotes and invoices to your clients from this email address.
@@ -238,27 +238,30 @@ You can now send quotes and invoices to your clients from this email address.
 Best regards,
 Your Construction Quote System
       `.trim(),
-      documentType: 'test',
-      documentNumber: 'TEST-001',
-    };
+        documentType: "test",
+        documentNumber: "TEST-001",
+      };
 
-    const sendEmail = httpsCallable(functions, 'sendQuoteEmail');
-    await sendEmail(testEmailData);
-    
-    alert(`✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`);
-  } catch (error) {
-    console.error('Test email error:', error);
-    
-    let errorMsg = '❌ Test email failed!\n\n';
-    if (error.message.includes('Invalid login')) {
-      errorMsg += 'Your app password is incorrect. Please check and try again.\n\nMake sure you\'re using an APP PASSWORD, not your regular password.';
-    } else {
-      errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+      const sendEmail = httpsCallable(functions, "sendQuoteEmail");
+      await sendEmail(testEmailData);
+
+      alert(
+        `✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`,
+      );
+    } catch (error) {
+      console.error("Test email error:", error);
+
+      let errorMsg = "❌ Test email failed!\n\n";
+      if (error.message.includes("Invalid login")) {
+        errorMsg +=
+          "Your app password is incorrect. Please check and try again.\n\nMake sure you're using an APP PASSWORD, not your regular password.";
+      } else {
+        errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+      }
+
+      alert(errorMsg);
     }
-    
-    alert(errorMsg);
-  }
-};
+  };
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -277,7 +280,7 @@ Your Construction Quote System
       const width = window.innerWidth;
       setIsMobile(width < 768);
       setIsTablet(width >= 768 && width < 1024);
-      
+
       // Auto-open sidebar on desktop
       if (width >= 1024) {
         setSidebarOpen(true);
@@ -737,7 +740,7 @@ Your Construction Quote System
     }, 1000);
   };
 
-const printStyles = `
+  const printStyles = `
   @media print {
     /* Reset and base setup */
     * {
@@ -1185,13 +1188,13 @@ const printStyles = `
           {/* Icon Navigation - Simplified for mobile */}
           <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
             <button
-  onClick={() => setActiveView("home")}  // ADD THIS
-  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-  title="Home"
->
-  <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-  <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-</button>
+              onClick={() => setActiveView("home")} // ADD THIS
+              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+              title="Home"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+            </button>
 
             <button
               onClick={() => setShowSettings(true)}
@@ -1282,16 +1285,22 @@ const printStyles = `
           <nav className="space-y-1.5 md:space-y-2">
             {/* Home */}
             <div
-  onClick={() => {setActiveView("home"); setSidebarOpen(false);}}
-  className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
->
-  <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-  <span className="text-xs md:text-sm font-semibold">Home</span>
-</div>
+              onClick={() => {
+                setActiveView("home");
+                setSidebarOpen(false);
+              }}
+              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
+            >
+              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-xs md:text-sm font-semibold">Home</span>
+            </div>
 
             {/* Settings */}
             <div
-              onClick={() => {setShowSettings(true); setSidebarOpen(false);}}
+              onClick={() => {
+                setShowSettings(true);
+                setSidebarOpen(false);
+              }}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-purple-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-purple-500/30"
             >
               <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
@@ -1301,11 +1310,16 @@ const printStyles = `
             {/* Business Overview */}
             <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-slate-700/50">
               <div
-                onClick={() => {setActiveView("financial-overview"); setSidebarOpen(false);}}
+                onClick={() => {
+                  setActiveView("financial-overview");
+                  setSidebarOpen(false);
+                }}
                 className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
               >
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-xs md:text-sm font-semibold truncate">Business Overview</span>
+                <span className="text-xs md:text-sm font-semibold truncate">
+                  Business Overview
+                </span>
               </div>
 
               {/* Job Cards Section */}
@@ -1313,7 +1327,9 @@ const printStyles = `
                 <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30">
                   <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                     <ClipboardList className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Job Cards</span>
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Job Cards
+                    </span>
                   </div>
                   <ChevronDown className="w-4 h-4 flex-shrink-0 group-hover:translate-y-0.5 transition-transform duration-300" />
                 </div>
@@ -1323,7 +1339,7 @@ const printStyles = `
                   <div
                     onClick={() => {
                       handleNewQuote();
-                      setActiveView("invoice")
+                      setActiveView("invoice");
                       if (isMobile) setSidebarOpen(false);
                     }}
                     className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
@@ -1369,7 +1385,9 @@ const printStyles = `
                 <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30">
                   <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                     <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Customers</span>
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Customers
+                    </span>
                   </div>
                   <ChevronDown className="w-4 h-4 flex-shrink-0 group-hover:translate-y-0.5 transition-transform duration-300" />
                 </div>
@@ -1409,27 +1427,42 @@ const printStyles = `
               {!isMobile && (
                 <>
                   <div
-                    onClick={() => {setActiveView("templates"); setSidebarOpen(false);}}
+                    onClick={() => {
+                      setActiveView("templates");
+                      setSidebarOpen(false);
+                    }}
                     className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
                   >
                     <FileText className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Invoice Templates</span>
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Invoice Templates
+                    </span>
                   </div>
 
                   <div
-                    onClick={() => {setActiveView("vehicles"); setSidebarOpen(false);}}
+                    onClick={() => {
+                      setActiveView("vehicles");
+                      setSidebarOpen(false);
+                    }}
                     className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-cyan-600/20 hover:to-cyan-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
                   >
                     <Car className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Vehicles</span>
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Vehicles
+                    </span>
                   </div>
 
                   <div
-                    onClick={() => {setActiveView("parts-inventory"); setSidebarOpen(false);}}
+                    onClick={() => {
+                      setActiveView("parts-inventory");
+                      setSidebarOpen(false);
+                    }}
                     className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-teal-600/20 hover:to-teal-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-teal-500/30"
                   >
                     <Package className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">Parts Inventory</span>
+                    <span className="text-xs md:text-sm font-semibold truncate">
+                      Parts Inventory
+                    </span>
                   </div>
                 </>
               )}
@@ -1439,34 +1472,33 @@ const printStyles = `
 
         {/* User Profile at Bottom - Compact on mobile */}
         <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
-                 <div className="flex items-center space-x-2 md:space-x-3">
-                   <div className="relative group flex-shrink-0">
-                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-                    <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
-         <img
-           src={businessInfo.logoUrl}
-           alt="Business Logo"
-           className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-         />
-       </div>
-       
-                   </div>
-                   <div className="flex-1 min-w-0">
-                     <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
-                       {user?.name || "User"}
-                     </div>
-                     <div className="text-xs text-slate-400 truncate">
-                       {user?.email || "email@example.com"}
-                     </div>
-                   </div>
-                   <button
-                     onClick={handleLogout}
-                     className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-                   >
-                     <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                   </button>
-                 </div>
-               </div>
+          <div className="flex items-center space-x-2 md:space-x-3">
+            <div className="relative group flex-shrink-0">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
+              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
+                <img
+                  src={businessInfo.logoUrl}
+                  alt="Business Logo"
+                  className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
+                />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
+                {user?.name || "User"}
+              </div>
+              <div className="text-xs text-slate-400 truncate">
+                {user?.email || "email@example.com"}
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
+            >
+              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -1475,10 +1507,9 @@ const printStyles = `
       >
         <div className="flex flex-col h-screen">
           {/* Enhanced Header - Mobile Optimized */}
-         
-         
-                   {/* ── Scrollable Main Content ──────────────────────────────── */}
-                  <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
+
+          {/* ── Scrollable Main Content ──────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {/* All your existing modals and content... */}
             {/* Settings Modal */}
             {showSettings && (
@@ -1821,7 +1852,6 @@ const printStyles = `
                                 </p>
                               </div>
 
-
                               <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                                 <label className="block text-sm font-bold text-slate-700 mb-3">
                                   Stamp Color
@@ -1895,139 +1925,183 @@ const printStyles = `
                           )}
                         </div>
                       </div>
-                       {/* Email Configuration Section */}
-<div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
-  <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-    <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-      <Send className="w-4 h-4 md:w-5 md:h-5 text-white" />
-    </div>
-    <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-      Email Configuration
-    </h3>
-  </div>
+                      {/* Email Configuration Section */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <Send className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            Email Configuration
+                          </h3>
+                        </div>
 
-  <div className="space-y-3 md:space-y-4">
-    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-      <p className="text-sm text-blue-800">
-        <strong>📧 Your Sending Email:</strong> {user?.email || authUser?.email}
-      </p>
-      <p className="text-xs text-blue-600 mt-2">
-        Quotes and invoices will be sent from this email address.
-      </p>
-    </div>
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <p className="text-sm text-blue-800">
+                              <strong>📧 Your Sending Email:</strong>{" "}
+                              {user?.email || authUser?.email}
+                            </p>
+                            <p className="text-xs text-blue-600 mt-2">
+                              Quotes and invoices will be sent from this email
+                              address.
+                            </p>
+                          </div>
 
-    <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-      <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-        Email Provider
-      </label>
-      <select
-        value={businessInfo.emailProvider || 'gmail'}
-        onChange={(e) =>
-          setBusinessInfo({
-            ...businessInfo,
-            emailProvider: e.target.value,
-          })
-        }
-        className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-      >
-        <option value="gmail">Gmail</option>
-        <option value="outlook">Outlook/Hotmail</option>
-        <option value="yahoo">Yahoo Mail</option>
-        <option value="other">Other SMTP</option>
-      </select>
-    </div>
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Email Provider
+                            </label>
+                            <select
+                              value={businessInfo.emailProvider || "gmail"}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  emailProvider: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            >
+                              <option value="gmail">Gmail</option>
+                              <option value="outlook">Outlook/Hotmail</option>
+                              <option value="yahoo">Yahoo Mail</option>
+                              <option value="other">Other SMTP</option>
+                            </select>
+                          </div>
 
-    <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-      <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-        Email App Password <span className="text-red-500">*</span>
-      </label>
-      <input
-        type="password"
-        value={businessInfo.emailPassword || ''}
-        onChange={(e) =>
-          setBusinessInfo({
-            ...businessInfo,
-            emailPassword: e.target.value,
-          })
-        }
-        className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base font-mono"
-        placeholder="••••••••••••••••"
-      />
-      <p className="text-xs text-slate-500 mt-2">
-        <strong>⚠️ Security Note:</strong> Use an App Password, not your regular login password
-      </p>
-    </div>
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Email App Password{" "}
+                              <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="password"
+                              value={businessInfo.emailPassword || ""}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  emailPassword: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base font-mono"
+                              placeholder="••••••••••••••••"
+                            />
+                            <p className="text-xs text-slate-500 mt-2">
+                              <strong>⚠️ Security Note:</strong> Use an App
+                              Password, not your regular login password
+                            </p>
+                          </div>
 
-    {/* Gmail Setup Instructions */}
-    {(businessInfo.emailProvider === 'gmail' || !businessInfo.emailProvider) && (
-      <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4">
-        <h4 className="font-bold text-red-900 mb-2 flex items-center gap-2">
-          <span>📖</span> How to Get Gmail App Password:
-        </h4>
-        <ol className="text-xs md:text-sm text-red-800 space-y-1 ml-4 list-decimal">
-          <li>Go to <strong>myaccount.google.com</strong></li>
-          <li>Click <strong>Security</strong> in the left menu</li>
-          <li>Enable <strong>2-Step Verification</strong> (if not already enabled)</li>
-          <li>Search for <strong>"App passwords"</strong> in the search bar</li>
-          <li>Click <strong>App passwords</strong></li>
-          <li>Enter your Google password if prompted</li>
-          <li>In the "App name" field, type <strong>"Construction Quotes"</strong></li>
-          <li>Click <strong>Create</strong></li>
-          <li>Copy the 16-character password (shown in yellow box)</li>
-          <li>Paste it in the field above</li>
-        </ol>
-        
-         <a href="https://support.google.com/accounts/answer/185833"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline">
-        
-          📺 View Video Tutorial →
-        </a>
-      </div>
-    )}
+                          {/* Gmail Setup Instructions */}
+                          {(businessInfo.emailProvider === "gmail" ||
+                            !businessInfo.emailProvider) && (
+                            <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4">
+                              <h4 className="font-bold text-red-900 mb-2 flex items-center gap-2">
+                                <span>📖</span> How to Get Gmail App Password:
+                              </h4>
+                              <ol className="text-xs md:text-sm text-red-800 space-y-1 ml-4 list-decimal">
+                                <li>
+                                  Go to <strong>myaccount.google.com</strong>
+                                </li>
+                                <li>
+                                  Click <strong>Security</strong> in the left
+                                  menu
+                                </li>
+                                <li>
+                                  Enable <strong>2-Step Verification</strong>{" "}
+                                  (if not already enabled)
+                                </li>
+                                <li>
+                                  Search for <strong>"App passwords"</strong> in
+                                  the search bar
+                                </li>
+                                <li>
+                                  Click <strong>App passwords</strong>
+                                </li>
+                                <li>Enter your Google password if prompted</li>
+                                <li>
+                                  In the "App name" field, type{" "}
+                                  <strong>"Construction Quotes"</strong>
+                                </li>
+                                <li>
+                                  Click <strong>Create</strong>
+                                </li>
+                                <li>
+                                  Copy the 16-character password (shown in
+                                  yellow box)
+                                </li>
+                                <li>Paste it in the field above</li>
+                              </ol>
 
-    {/* Outlook Setup Instructions */}
-    {businessInfo.emailProvider === 'outlook' && (
-      <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
-        <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
-          <span>📖</span> How to Get Outlook App Password:
-        </h4>
-        <ol className="text-xs md:text-sm text-blue-800 space-y-1 ml-4 list-decimal">
-          <li>Go to <strong>account.microsoft.com/security</strong></li>
-          <li>Sign in with your Outlook account</li>
-          <li>Click <strong>Advanced security options</strong></li>
-          <li>Under "Additional security", click <strong>App passwords</strong></li>
-          <li>Click <strong>Create a new app password</strong></li>
-          <li>Copy the generated password</li>
-          <li>Paste it in the field above</li>
-        </ol>
-        
-         <a href="https://support.microsoft.com/en-us/account-billing/manage-app-passwords-for-two-step-verification-d6dc8c6d-4bf7-4851-ad95-6d07799387e9"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
-        >
-          📺 View Microsoft Instructions →
-        </a>
-      </div>
-    )}
+                              <a
+                                href="https://support.google.com/accounts/answer/185833"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
+                              >
+                                📺 View Video Tutorial →
+                              </a>
+                            </div>
+                          )}
 
-    {/* Test Email Button */}
-    <button
-      onClick={handleTestEmail}
-      disabled={!businessInfo.emailPassword}
-      className={`w-full px-4 py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${
-        !businessInfo.emailPassword
-          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800'
-      }`}
-    >
-      <Send className="w-4 h-4" />
-      {businessInfo.emailPassword ? 'Send Test Email' : 'Enter App Password First'}
-    </button>
-  </div>
-</div>
+                          {/* Outlook Setup Instructions */}
+                          {businessInfo.emailProvider === "outlook" && (
+                            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
+                              <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                                <span>📖</span> How to Get Outlook App Password:
+                              </h4>
+                              <ol className="text-xs md:text-sm text-blue-800 space-y-1 ml-4 list-decimal">
+                                <li>
+                                  Go to{" "}
+                                  <strong>
+                                    account.microsoft.com/security
+                                  </strong>
+                                </li>
+                                <li>Sign in with your Outlook account</li>
+                                <li>
+                                  Click{" "}
+                                  <strong>Advanced security options</strong>
+                                </li>
+                                <li>
+                                  Under "Additional security", click{" "}
+                                  <strong>App passwords</strong>
+                                </li>
+                                <li>
+                                  Click{" "}
+                                  <strong>Create a new app password</strong>
+                                </li>
+                                <li>Copy the generated password</li>
+                                <li>Paste it in the field above</li>
+                              </ol>
+
+                              <a
+                                href="https://support.microsoft.com/en-us/account-billing/manage-app-passwords-for-two-step-verification-d6dc8c6d-4bf7-4851-ad95-6d07799387e9"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
+                              >
+                                📺 View Microsoft Instructions →
+                              </a>
+                            </div>
+                          )}
+
+                          {/* Test Email Button */}
+                          <button
+                            onClick={handleTestEmail}
+                            disabled={!businessInfo.emailPassword}
+                            className={`w-full px-4 py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${
+                              !businessInfo.emailPassword
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800"
+                            }`}
+                          >
+                            <Send className="w-4 h-4" />
+                            {businessInfo.emailPassword
+                              ? "Send Test Email"
+                              : "Enter App Password First"}
+                          </button>
+                        </div>
+                      </div>
                       <button
                         onClick={handleSaveBusinessInfo}
                         className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
@@ -2167,135 +2241,149 @@ const printStyles = `
             {activeView === "history-view" && <HistoryView user={user} />}
             {activeView === "notes-view" && <NotesView user={user} />}
             {activeView === "vehicles" && <Vehicles user={user} />}
-             {activeView === "templates" && <Templates user={user} />}
+            {activeView === "templates" && <Templates user={user} />}
             {activeView === "home" && <HomeView user={user} />}
 
             {activeView === "invoice" && (
               <>
-               <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-300 lg:hidden flex-shrink-0"
-                >
-                  <Menu className="w-5 h-5" />
-                </button>
+                <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
+                      <button
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-300 lg:hidden flex-shrink-0"
+                      >
+                        <Menu className="w-5 h-5" />
+                      </button>
 
-                <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg flex-shrink-0">
-                    <FileText className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                  </div>
-                  <div className="min-w-0">
-                    <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent truncate">
-                      {documentType === "quote" ? "Quote" : "Invoice"} #
-                      {jobCardNumber || "—"}
-                    </h1>
-                    <p className="text-xs text-slate-500 hidden md:block truncate">
-                      Create and manage your{" "}
-                      {documentType === "quote" ? "quotes" : "invoices"}
-                    </p>
+                      <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+                        <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg flex-shrink-0">
+                          <FileText className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent truncate">
+                            {documentType === "quote" ? "Quote" : "Invoice"} #
+                            {jobCardNumber || "—"}
+                          </h1>
+                          <p className="text-xs text-slate-500 hidden md:block truncate">
+                            Create and manage your{" "}
+                            {documentType === "quote" ? "quotes" : "invoices"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Desktop Action Buttons - Hidden on mobile */}
+                    <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
+                      {documentType === "quote" && jobCardId && (
+                        <button
+                          onClick={handleConvertToInvoice}
+                          className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap"
+                        >
+                          <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+                          Convert to Invoice
+                        </button>
+                      )}
+                      <TemplateSelector />
+                      <button
+                        onClick={handlePrint}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"
+                      >
+                        <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                        Print
+                      </button>
+
+                      <button
+                        onClick={
+                          documentType === "quote"
+                            ? handleNewQuote
+                            : handleNewInvoice
+                        }
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
+                        New
+                      </button>
+
+                      <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-blue-500/50 hover:scale-105 whitespace-nowrap">
+                        <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                        <span>Send</span>
+                      </button>
+
+                      <button
+                        onClick={handlePrint}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                        Save PDF
+                      </button>
+
+                      <button
+                        onClick={handleSaveJobCard}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                        Save
+                      </button>
+
+                      <button
+                        onClick={handleLogout}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                        Logout
+                      </button>
+                    </div>
+
+                    {/* Mobile Logout Button */}
+                    <button
+                      onClick={handleLogout}
+                      className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
+                    >
+                      <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              {/* Desktop Action Buttons - Hidden on mobile */}
-              <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
-                {documentType === "quote" && jobCardId && (
-                  <button
-                    onClick={handleConvertToInvoice}
-                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap"
-                  >
-                    <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-                    Convert to Invoice
-                  </button>
-                )}
-                <TemplateSelector/>
-                <button
-                  onClick={handlePrint}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"
-                >
-                  <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                  Print
-                </button>
-
-                <button
-                  onClick={
-                    documentType === "quote" ? handleNewQuote : handleNewInvoice
-                  }
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                  New
-                </button>
-
-                <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-blue-500/50 hover:scale-105 whitespace-nowrap">
-                  <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  <span>Send</span>
-                </button>
-
-                <button
-                  onClick={handlePrint}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                  Save PDF
-                </button>
-
-                <button
-                  onClick={handleSaveJobCard}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                  Save
-                </button>
-
-                <button
-                  onClick={handleLogout}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                  Logout
-                </button>
-              </div>
-
-              {/* Mobile Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
-              >
-                <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Enhanced Mobile Action Bar - Better touch targets */}
-         <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
-           <div className="flex gap-2 min-w-max pb-1 pr-3">
-             {documentType === "quote" && jobCardId && (
-               <button onClick={handleConvertToInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                 <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
-                 <span>To Invoice</span>
-               </button>
-             )}
-             <button onClick={handleSaveJobCard} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-               <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-               Save
-             </button>
-             <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-               <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
-               <span>Send</span>
-             </button>
-             <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-               <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-               <span>PDF</span>
-             </button>
-             <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95">
-               <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-               <span>Print</span>
-             </button>
-           </div>
-         </div>
+                {/* Enhanced Mobile Action Bar - Better touch targets */}
+                <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
+                  <div className="flex gap-2 min-w-max pb-1 pr-3">
+                    {documentType === "quote" && jobCardId && (
+                      <button
+                        onClick={handleConvertToInvoice}
+                        className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                      >
+                        <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
+                        <span>To Invoice</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={handleSaveJobCard}
+                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                    >
+                      <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                      Save
+                    </button>
+                    <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                      <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                      <span>Send</span>
+                    </button>
+                    <button
+                      onClick={handlePrint}
+                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                    >
+                      <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                      <span>PDF</span>
+                    </button>
+                    <button
+                      onClick={handlePrint}
+                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95"
+                    >
+                      <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                      <span>Print</span>
+                    </button>
+                  </div>
+                </div>
                 <button
                   onClick={() => setShowJobCard(!showJobCard)}
                   className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-gray-800 rounded-lg hover:bg-orange-100 transition-colors"
@@ -2390,40 +2478,109 @@ const printStyles = `
                                 </svg>
                               </div>
                             </div>
-                            <div className="text-2xl font-bold text-orange-900">
+                            <div className="text-base sm:text-lg md:text-2xl font-bold text-orange-900">
                               R{total.toFixed(2)}
                             </div>
                           </div>
-                             <div
-                              className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                          <div
+                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                              paymentStatus.totalPaid > 0
+                                ? "from-emerald-100 to-emerald-300 border-emerald-200"
+                                : "from-slate-100 to-slate-300 border-slate-200"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div
+                                className={`text-sm font-medium ${
+                                  paymentStatus.totalPaid > 0
+                                    ? "text-emerald-700"
+                                    : "text-slate-600"
+                                }`}
+                              >
+                                Paid
+                              </div>
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                  paymentStatus.totalPaid > 0
+                                    ? "bg-emerald-200"
+                                    : "bg-slate-200"
+                                }`}
+                              >
+                                <svg
+                                  className={`w-5 h-5 ${
+                                    paymentStatus.totalPaid > 0
+                                      ? "text-emerald-600"
+                                      : "text-slate-400"
+                                  }`}
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                            <div
+                              className={`text-2xl font-bold ${
                                 paymentStatus.totalPaid > 0
-                                  ? "from-emerald-100 to-emerald-300 border-emerald-200"
-                                  : "from-slate-100 to-slate-300 border-slate-200"
+                                  ? "text-emerald-900"
+                                  : "text-slate-900"
                               }`}
                             >
-                              <div className="flex items-center justify-between mb-2">
-                                <div
-                                  className={`text-sm font-medium ${
-                                    paymentStatus.totalPaid > 0
-                                      ? "text-emerald-700"
-                                      : "text-slate-600"
-                                  }`}
-                                >
-                                  Paid
+                              R{paymentStatus.totalPaid.toFixed(2)}
+                            </div>
+                            {paymentStatus.totalPaid > 0 &&
+                              paymentStatus.status === "partially_paid" && (
+                                <div className="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full inline-block">
+                                  Partial Payment
                                 </div>
-                                <div
-                                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                    paymentStatus.totalPaid > 0
-                                      ? "bg-emerald-200"
-                                      : "bg-slate-200"
-                                  }`}
-                                >
+                              )}
+                            {paymentStatus.status === "paid" && (
+                              <div className="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full inline-block">
+                                ✓ Fully Paid
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Balance Due Card - Dynamic */}
+                          <div
+                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                              paymentStatus.balanceDue <= 0
+                                ? "from-emerald-100 to-emerald-300 border-emerald-600"
+                                : paymentStatus.totalPaid > 0
+                                  ? "from-amber-50 to-amber-100 border-amber-200"
+                                  : "from-rose-50 to-rose-100 border-rose-200"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div
+                                className={`text-sm font-medium ${
+                                  paymentStatus.balanceDue <= 0
+                                    ? "text-emerald-700"
+                                    : paymentStatus.totalPaid > 0
+                                      ? "text-amber-700"
+                                      : "text-rose-700"
+                                }`}
+                              >
+                                Balance Due
+                              </div>
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                  paymentStatus.balanceDue <= 0
+                                    ? "bg-emerald-200"
+                                    : paymentStatus.totalPaid > 0
+                                      ? "bg-amber-200"
+                                      : "bg-rose-200"
+                                }`}
+                              >
+                                {paymentStatus.balanceDue <= 0 ? (
                                   <svg
-                                    className={`w-5 h-5 ${
-                                      paymentStatus.totalPaid > 0
-                                        ? "text-emerald-600"
-                                        : "text-slate-400"
-                                    }`}
+                                    className="w-5 h-5 text-emerald-600"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -2435,125 +2592,54 @@ const printStyles = `
                                       d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                     />
                                   </svg>
-                                </div>
-                              </div>
-                              <div
-                                className={`text-2xl font-bold ${
-                                  paymentStatus.totalPaid > 0
-                                    ? "text-emerald-900"
-                                    : "text-slate-900"
-                                }`}
-                              >
-                                R{paymentStatus.totalPaid.toFixed(2)}
-                              </div>
-                              {paymentStatus.totalPaid > 0 &&
-                                paymentStatus.status === "partially_paid" && (
-                                  <div className="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full inline-block">
-                                    Partial Payment
-                                  </div>
+                                ) : paymentStatus.totalPaid > 0 ? (
+                                  <svg
+                                    className="w-5 h-5 text-amber-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                ) : (
+                                  <svg
+                                    className="w-5 h-5 text-rose-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
                                 )}
-                              {paymentStatus.status === "paid" && (
-                                <div className="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full inline-block">
-                                  ✓ Fully Paid
-                                </div>
-                              )}
+                              </div>
                             </div>
-
-                            {/* Balance Due Card - Dynamic */}
                             <div
-                              className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                              className={`text-2xl font-bold ${
                                 paymentStatus.balanceDue <= 0
-                                  ? "from-emerald-100 to-emerald-300 border-emerald-600"
+                                  ? "text-emerald-900"
                                   : paymentStatus.totalPaid > 0
-                                    ? "from-amber-50 to-amber-100 border-amber-200"
-                                    : "from-rose-50 to-rose-100 border-rose-200"
+                                    ? "text-amber-900"
+                                    : "text-rose-900"
                               }`}
                             >
-                              <div className="flex items-center justify-between mb-2">
-                                <div
-                                  className={`text-sm font-medium ${
-                                    paymentStatus.balanceDue <= 0
-                                      ? "text-emerald-700"
-                                      : paymentStatus.totalPaid > 0
-                                        ? "text-amber-700"
-                                        : "text-rose-700"
-                                  }`}
-                                >
-                                  Balance Due
-                                </div>
-                                <div
-                                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                    paymentStatus.balanceDue <= 0
-                                      ? "bg-emerald-200"
-                                      : paymentStatus.totalPaid > 0
-                                        ? "bg-amber-200"
-                                        : "bg-rose-200"
-                                  }`}
-                                >
-                                  {paymentStatus.balanceDue <= 0 ? (
-                                    <svg
-                                      className="w-5 h-5 text-emerald-600"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                      />
-                                    </svg>
-                                  ) : paymentStatus.totalPaid > 0 ? (
-                                    <svg
-                                      className="w-5 h-5 text-amber-600"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                      />
-                                    </svg>
-                                  ) : (
-                                    <svg
-                                      className="w-5 h-5 text-rose-600"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                      />
-                                    </svg>
-                                  )}
-                                </div>
-                              </div>
-                              <div
-                                className={`text-2xl font-bold ${
-                                  paymentStatus.balanceDue <= 0
-                                    ? "text-emerald-900"
-                                    : paymentStatus.totalPaid > 0
-                                      ? "text-amber-900"
-                                      : "text-rose-900"
-                                }`}
-                              >
-                                R{paymentStatus.balanceDue.toFixed(2)}
-                              </div>
-                              {paymentStatus.balanceDue <= 0 && (
-                                <div className="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full inline-block">
-                                  No Balance Due
-                                </div>
-                              )}
+                              R{paymentStatus.balanceDue.toFixed(2)}
                             </div>
-                        
-                         
+                            {paymentStatus.balanceDue <= 0 && (
+                              <div className="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full inline-block">
+                                No Balance Due
+                              </div>
+                            )}
+                          </div>
                         </div>
                         {/* Payment Status Banner */}
                         {jobCardId && (
@@ -2837,20 +2923,20 @@ const printStyles = `
                                 </div>
                               </div>
                               {/* Quick Copy Option */}
-                                                          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                                            <button
-                                                              onClick={() => {
-                                                                setBillName(customerName);
-                                                                setBillEmail(customerEmail);
-                                                                setBillPhone(customerPhone);
-                                                                setBillAddress(customerAddress);
-                                                              }}
-                                                              className="flex items-center gap-2 text-blue-700 hover:text-blue-800 font-semibold transition-colors"
-                                                            >
-                                                              <Users className="w-4 h-4" />
-                                                              Copy from Client Information
-                                                            </button>
-                                                          </div>
+                              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <button
+                                  onClick={() => {
+                                    setBillName(customerName);
+                                    setBillEmail(customerEmail);
+                                    setBillPhone(customerPhone);
+                                    setBillAddress(customerAddress);
+                                  }}
+                                  className="flex items-center gap-2 text-blue-700 hover:text-blue-800 font-semibold transition-colors"
+                                >
+                                  <Users className="w-4 h-4" />
+                                  Copy from Client Information
+                                </button>
+                              </div>
                             </div>
                           )}
                           {/* Step 3: Vehicle Information */}
@@ -3263,7 +3349,7 @@ const printStyles = `
                               }`}
                             >
                               <ChevronLeft className="w-5 h-5" />
-                              Previous
+                              <span className="hidden sm:inline">Previous</span>
                             </button>
 
                             <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">
@@ -3275,7 +3361,7 @@ const printStyles = `
                                 onClick={handleNext}
                                 className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg"
                               >
-                                Next
+                                <span className="hidden sm:inline">Next</span>
                                 <ChevronRight className="w-5 h-5" />
                               </button>
                             ) : (

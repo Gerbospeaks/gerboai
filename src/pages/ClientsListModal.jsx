@@ -1,50 +1,77 @@
-import React, { useState } from 'react';
-import { X, Search, Edit, User, Phone, Mail, Building2, MapPin, Plus, Trash2 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { getFirestore, doc, deleteDoc } from 'firebase/firestore';
+import React, { useState } from "react";
+import {
+  X,
+  Search,
+  Edit,
+  User,
+  Phone,
+  Mail,
+  Building2,
+  MapPin,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { getFirestore, doc, deleteDoc } from "firebase/firestore";
 
-const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEditClient, onAddNewClient }) => {
-  const {user, authUser} = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('All');
+const ClientsListModal = ({
+  showModal,
+  setShowModal,
+  clients,
+  onLoadClient,
+  onEditClient,
+  onAddNewClient,
+}) => {
+  const { user, authUser } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("All");
 
   const handleClose = () => {
     setShowModal(false);
-    setSearchTerm('');
-    setFilterType('All');
+    setSearchTerm("");
+    setFilterType("All");
   };
 
   const handleDeleteClient = async (clientId, clientName) => {
     if (!user?.uid) return;
-    
-    const confirmed = window.confirm(`Are you sure you want to delete ${clientName}? This action cannot be undone.`);
-    
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${clientName}? This action cannot be undone.`,
+    );
+
     if (!confirmed) return;
 
     try {
       const db = getFirestore();
-      await deleteDoc(doc(db, 'users', user.uid, 'clients', clientId));
-      alert('Client deleted successfully!');
+      await deleteDoc(doc(db, "users", user.uid, "clients", clientId));
+      alert("Client deleted successfully!");
       window.location.reload();
     } catch (error) {
-      console.error('Error deleting client:', error);
-      alert('Failed to delete client. Please try again.');
+      console.error("Error deleting client:", error);
+      alert("Failed to delete client. Please try again.");
     }
   };
 
-  const filteredClients = clients.filter(client => {
-    const matchesSearch = 
+  const filteredClients = clients.filter((client) => {
+    const matchesSearch =
       client.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.phone?.includes(searchTerm) ||
       client.company?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesType = filterType === 'All' || client.clientType === filterType;
-    
+
+    const matchesType =
+      filterType === "All" || client.clientType === filterType;
+
     return matchesSearch && matchesType;
   });
 
-  const clientTypes = ['All', 'Residential', 'Commercial', 'Industrial', 'Government'];
+  const clientTypes = [
+    "All",
+    "Residential",
+    "Commercial",
+    "Industrial",
+    "Government",
+  ];
 
   if (!showModal) return null;
 
@@ -54,7 +81,9 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
         <div className="p-4 border-b flex items-center justify-between bg-gray-50 text-gray-800">
           <div className="flex items-center gap-3">
             <User className="w-6 h-6" />
-            <h2 className="text-xl font-semibold">Clients ({clients.length})</h2>
+            <h2 className="text-xl font-semibold">
+              Clients ({clients.length})
+            </h2>
           </div>
           <button
             onClick={handleClose}
@@ -92,8 +121,8 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
                 onClick={() => setFilterType(type)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
                   filterType === type
-                    ? 'bg-gray-600 text-gray-800'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-800'
+                    ? "bg-gray-600 text-gray-800"
+                    : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-800"
                 }`}
               >
                 {type}
@@ -107,12 +136,14 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
             <div className="text-center py-12">
               <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 text-lg mb-2">
-                {searchTerm || filterType !== 'All' ? 'No clients found' : 'No clients yet'}
+                {searchTerm || filterType !== "All"
+                  ? "No clients found"
+                  : "No clients yet"}
               </p>
               <p className="text-gray-400 text-sm">
-                {searchTerm || filterType !== 'All'
-                  ? 'Try adjusting your search or filter'
-                  : 'Start by adding your first client'}
+                {searchTerm || filterType !== "All"
+                  ? "Try adjusting your search or filter"
+                  : "Start by adding your first client"}
               </p>
             </div>
           ) : (
@@ -128,13 +159,20 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
                         <User className="w-5 h-5 text-orange-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{client.name}</h3>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          client.clientType === 'Commercial' ? 'bg-blue-100 text-blue-700' :
-                          client.clientType === 'Residential' ? 'bg-green-100 text-green-700' :
-                          client.clientType === 'Industrial' ? 'bg-purple-100 text-purple-700' :
-                          'bg-gray-100 text-gray-700'
-                        }`}>
+                        <h3 className="font-semibold text-gray-900">
+                          {client.name}
+                        </h3>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            client.clientType === "Commercial"
+                              ? "bg-blue-100 text-blue-700"
+                              : client.clientType === "Residential"
+                                ? "bg-green-100 text-green-700"
+                                : client.clientType === "Industrial"
+                                  ? "bg-purple-100 text-purple-700"
+                                  : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
                           {client.clientType}
                         </span>
                       </div>
@@ -163,7 +201,9 @@ const ClientsListModal = ({ showModal, setShowModal, clients, onLoadClient, onEd
                     {client.address && (
                       <div className="flex items-start gap-2 text-gray-600">
                         <MapPin className="w-4 h-4 flex-shrink-0 text-gray-400 mt-0.5" />
-                        <span className="text-xs line-clamp-2">{client.address}</span>
+                        <span className="text-xs line-clamp-2">
+                          {client.address}
+                        </span>
                       </div>
                     )}
                   </div>

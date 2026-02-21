@@ -200,79 +200,85 @@ const LandscapingMultiStepForm = ({
       )}
 
       {/* Step 3: Add Services/Materials */}
-{currentStep === 3 && (
-  <div className="space-y-4">
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 className="text-lg font-semibold mb-4">Add Service/Material</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-        <select
-          value={newItem.type}
-          onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
-          className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-        >
-          <option value="Labor">Labor</option>
-          <option value="Materials">Materials</option>
-          <option value="Plants">Plants</option>
-        </select>
-        <input
-          type="text"
-          placeholder="Description"
-          value={newItem.description}
-          onChange={(e) =>
-            setNewItem({ ...newItem, description: e.target.value })
-          }
-          className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
-        <input
-          type="number"
-          placeholder="Rate"
-          value={newItem.rate}
-          onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })}
-          className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
-        <input
-          type="number"
-          placeholder="Qty"
-          value={newItem.qty}
-          onChange={(e) => setNewItem({ ...newItem, qty: e.target.value })}
-          className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
-        <button
-          onClick={handleAddItem}
-          className="bg-green-600 text-white rounded-lg px-4 py-2 hover:bg-green-700 flex items-center justify-center gap-2 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add
-        </button>
-      </div>
-    </div>
+      {currentStep === 3 && (
+        <div className="space-y-4">
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Add Service/Material</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+              <select
+                value={newItem.type}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, type: e.target.value })
+                }
+                className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                <option value="Labor">Labor</option>
+                <option value="Materials">Materials</option>
+                <option value="Plants">Plants</option>
+              </select>
+              <input
+                type="text"
+                placeholder="Description"
+                value={newItem.description}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, description: e.target.value })
+                }
+                className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <input
+                type="number"
+                placeholder="Rate"
+                value={newItem.rate}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, rate: e.target.value })
+                }
+                className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <input
+                type="number"
+                placeholder="Qty"
+                value={newItem.qty}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, qty: e.target.value })
+                }
+                className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <button
+                onClick={handleAddItem}
+                className="bg-green-600 text-white rounded-lg px-4 py-2 hover:bg-green-700 flex items-center justify-center gap-2 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add
+              </button>
+            </div>
+          </div>
 
-    {/* Display Added Items - ADD SAFETY CHECK HERE */}
-    {items && items.length > 0 && (
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Added Items</h3>
-        <div className="space-y-2">
-          {items.map((item, index) => (
-            <div
-              key={index}
-              className="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-200"
-            >
-              <div className="flex-1">
-                <div className="font-medium">{item.description}</div>
-                <div className="text-sm text-gray-500">
-                  {item.type} - Qty: {item.qty} × R{item.rate}
-                </div>
-              </div>
-              <div className="font-semibold text-green-600">
-                R{item.amount.toFixed(2)}
+          {/* Display Added Items - ADD SAFETY CHECK HERE */}
+          {items && items.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4">Added Items</h3>
+              <div className="space-y-2">
+                {items.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-200"
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium">{item.description}</div>
+                      <div className="text-sm text-gray-500">
+                        {item.type} - Qty: {item.qty} × R{item.rate}
+                      </div>
+                    </div>
+                    <div className="font-semibold text-green-600">
+                      R{item.amount.toFixed(2)}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
+          )}
         </div>
-      </div>
-    )}
-  </div>
-)}
+      )}
       {/* Navigation Buttons */}
       <div className="flex justify-between items-center pt-4 border-t">
         <button
@@ -285,7 +291,7 @@ const LandscapingMultiStepForm = ({
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous
+          <span className="hidden sm:inline">Previous</span>
         </button>
 
         <div className="text-sm text-gray-600">
@@ -301,7 +307,7 @@ const LandscapingMultiStepForm = ({
               : "bg-green-600 text-white hover:bg-green-700"
           }`}
         >
-          Next
+          <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

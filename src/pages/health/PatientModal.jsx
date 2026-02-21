@@ -1,74 +1,96 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { X, Save, User, Mail, Phone, MapPin, Calendar, CreditCard, Stethoscope } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  serverTimestamp,
+} from "firebase/firestore";
+import {
+  X,
+  Save,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  CreditCard,
+  Stethoscope,
+} from "lucide-react";
 
-const PatientModal = ({ showModal, setShowModal, existingPatient, onPatientSaved }) => {
-  const {user, authUser} = useAuth();
+const PatientModal = ({
+  showModal,
+  setShowModal,
+  existingPatient,
+  onPatientSaved,
+}) => {
+  const { user, authUser } = useAuth();
   const [loading, setLoading] = useState(false);
-  
+
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    patientId: '',
-    dateOfBirth: '',
-    gender: 'Male',
-    insuranceProvider: '',
-    insuranceNumber: '',
-    bloodType: '',
-    allergies: '',
-    emergencyContactName: '',
-    emergencyContactPhone: '',
-    medicalHistory: ''
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    patientId: "",
+    dateOfBirth: "",
+    gender: "Male",
+    insuranceProvider: "",
+    insuranceNumber: "",
+    bloodType: "",
+    allergies: "",
+    emergencyContactName: "",
+    emergencyContactPhone: "",
+    medicalHistory: "",
   });
 
   useEffect(() => {
     if (existingPatient) {
       setFormData({
-        name: existingPatient.name || '',
-        email: existingPatient.email || '',
-        phone: existingPatient.phone || '',
-        address: existingPatient.address || '',
-        patientId: existingPatient.patientId || '',
-        dateOfBirth: existingPatient.dateOfBirth || '',
-        gender: existingPatient.gender || 'Male',
-        insuranceProvider: existingPatient.insuranceProvider || '',
-        insuranceNumber: existingPatient.insuranceNumber || '',
-        bloodType: existingPatient.bloodType || '',
-        allergies: existingPatient.allergies || '',
-        emergencyContactName: existingPatient.emergencyContactName || '',
-        emergencyContactPhone: existingPatient.emergencyContactPhone || '',
-        medicalHistory: existingPatient.medicalHistory || ''
+        name: existingPatient.name || "",
+        email: existingPatient.email || "",
+        phone: existingPatient.phone || "",
+        address: existingPatient.address || "",
+        patientId: existingPatient.patientId || "",
+        dateOfBirth: existingPatient.dateOfBirth || "",
+        gender: existingPatient.gender || "Male",
+        insuranceProvider: existingPatient.insuranceProvider || "",
+        insuranceNumber: existingPatient.insuranceNumber || "",
+        bloodType: existingPatient.bloodType || "",
+        allergies: existingPatient.allergies || "",
+        emergencyContactName: existingPatient.emergencyContactName || "",
+        emergencyContactPhone: existingPatient.emergencyContactPhone || "",
+        medicalHistory: existingPatient.medicalHistory || "",
       });
     } else {
       // Generate new patient ID for new patients
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        patientId: `PAT-${Date.now()}`
+        patientId: `PAT-${Date.now()}`,
       }));
     }
   }, [existingPatient]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.phone) {
-      alert('Please enter patient name and phone number');
+      alert("Please enter patient name and phone number");
       return;
     }
 
     if (!user?.uid) {
-      alert('User not authenticated');
+      alert("User not authenticated");
       return;
     }
 
@@ -76,49 +98,55 @@ const PatientModal = ({ showModal, setShowModal, existingPatient, onPatientSaved
 
     try {
       const db = getFirestore();
-      
+
       const patientData = {
         ...formData,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       if (existingPatient && existingPatient.id) {
         // Update existing patient
-        await updateDoc(doc(db, 'users', user.uid, 'patients', existingPatient.id), patientData);
-        alert('Patient updated successfully!');
+        await updateDoc(
+          doc(db, "users", user.uid, "patients", existingPatient.id),
+          patientData,
+        );
+        alert("Patient updated successfully!");
       } else {
         // Create new patient
         patientData.createdAt = serverTimestamp();
-        await addDoc(collection(db, 'users', user.uid, 'patients'), patientData);
-        alert('Patient created successfully!');
+        await addDoc(
+          collection(db, "users", user.uid, "patients"),
+          patientData,
+        );
+        alert("Patient created successfully!");
       }
 
       // Reset form
       setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
         patientId: `PAT-${Date.now()}`,
-        dateOfBirth: '',
-        gender: 'Male',
-        insuranceProvider: '',
-        insuranceNumber: '',
-        bloodType: '',
-        allergies: '',
-        emergencyContactName: '',
-        emergencyContactPhone: '',
-        medicalHistory: ''
+        dateOfBirth: "",
+        gender: "Male",
+        insuranceProvider: "",
+        insuranceNumber: "",
+        bloodType: "",
+        allergies: "",
+        emergencyContactName: "",
+        emergencyContactPhone: "",
+        medicalHistory: "",
       });
 
       setShowModal(false);
-      
+
       if (onPatientSaved) {
         onPatientSaved();
       }
     } catch (error) {
-      console.error('Error saving patient:', error);
-      alert('Failed to save patient. Please try again.');
+      console.error("Error saving patient:", error);
+      alert("Failed to save patient. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -133,7 +161,7 @@ const PatientModal = ({ showModal, setShowModal, existingPatient, onPatientSaved
         <div className="p-4 border-b flex items-center justify-between bg-gray-50 text-gray-800">
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <User className="w-6 h-6" />
-            {existingPatient ? 'Edit Patient' : 'Add New Patient'}
+            {existingPatient ? "Edit Patient" : "Add New Patient"}
           </h2>
           <button
             onClick={() => setShowModal(false)}
@@ -398,7 +426,7 @@ const PatientModal = ({ showModal, setShowModal, existingPatient, onPatientSaved
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     rows="4"
-                    placeholder="Previous conditions, surgeries, chronic illnesses, etc."
+                    placeholder="<span className="hidden sm:inline">Previous</span> conditions, surgeries, chronic illnesses, etc."
                   />
                 </div>
               </div>
@@ -421,7 +449,11 @@ const PatientModal = ({ showModal, setShowModal, existingPatient, onPatientSaved
               disabled={loading}
             >
               <Save className="w-4 h-4" />
-              {loading ? 'Saving...' : (existingPatient ? 'Update Patient' : 'Save Patient')}
+              {loading
+                ? "Saving..."
+                : existingPatient
+                  ? "Update Patient"
+                  : "Save Patient"}
             </button>
           </div>
         </form>

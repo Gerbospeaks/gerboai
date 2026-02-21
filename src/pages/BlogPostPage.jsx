@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
-import { 
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Helmet } from "react-helmet";
+import {
   Calendar,
   Clock,
   User,
@@ -20,14 +20,14 @@ import {
   ThumbsUp,
   Bookmark,
   TrendingUp,
-  CheckCircle
-} from 'lucide-react';
-import logo from '../assets/img/solidflo.png';
-import logo1 from '../assets/img/solidflo-logo.png';
-import instagram from '../assets/images/instagram.png';
-import facebook from '../assets/images/facebook.png';
-import twitter from '../assets/images/twitter.png';
-import linkedin from '../assets/images/linkedin.png';
+  CheckCircle,
+} from "lucide-react";
+import logo from "../assets/img/solidflo.png";
+import logo1 from "../assets/img/solidflo-logo.png";
+import instagram from "../assets/images/instagram.png";
+import facebook from "../assets/images/facebook.png";
+import twitter from "../assets/images/twitter.png";
+import linkedin from "../assets/images/linkedin.png";
 
 const BlogPostPage = () => {
   const navigate = useNavigate();
@@ -43,7 +43,8 @@ const BlogPostPage = () => {
   const blogPost = {
     title: "10 Invoicing Best Practices to Get Paid Faster in 2026",
     slug: "invoicing-best-practices-2026",
-    excerpt: "Learn the proven strategies that help businesses reduce payment delays and improve cash flow.",
+    excerpt:
+      "Learn the proven strategies that help businesses reduce payment delays and improve cash flow.",
     content: `
       <p class="lead">Getting paid on time is crucial for maintaining healthy cash flow in your business. Yet many businesses struggle with late payments and unpaid invoices. In this comprehensive guide, we'll share 10 proven best practices that will help you get paid faster and improve your business finances.</p>
 
@@ -127,47 +128,54 @@ const BlogPostPage = () => {
       <p>Implementing these invoicing best practices will help you get paid faster, improve your cash flow, and spend less time chasing payments. Modern invoicing software like SolidFlo can automate many of these processes, making it easier than ever to maintain healthy business finances.</p>
       <p>Remember, the key to getting paid faster is to make the payment process as simple and convenient as possible for your clients while maintaining clear, professional communication about payment expectations.</p>
     `,
-    featuredImage: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=600&fit=crop',
+    featuredImage:
+      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=600&fit=crop",
     author: {
       name: "Sarah Johnson",
       role: "Financial Expert",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-      bio: "Sarah is a certified financial advisor with over 10 years of experience helping small businesses optimize their invoicing and payment processes."
+      bio: "Sarah is a certified financial advisor with over 10 years of experience helping small businesses optimize their invoicing and payment processes.",
     },
     publishDate: "2026-02-10",
     readTime: "8 min read",
     category: "Best Practices",
     tags: ["Invoicing", "Cash Flow", "Business Tips", "Finance"],
     likes: 234,
-    comments: 18
+    comments: 18,
   };
 
   // Related posts
   const relatedPosts = [
     {
       title: "How to Handle Late-Paying Clients Professionally",
-      excerpt: "Learn diplomatic strategies for dealing with clients who consistently pay late.",
-      image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&h=300&fit=crop",
+      excerpt:
+        "Learn diplomatic strategies for dealing with clients who consistently pay late.",
+      image:
+        "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&h=300&fit=crop",
       slug: "handle-late-paying-clients",
       readTime: "6 min read",
-      category: "Client Management"
+      category: "Client Management",
     },
     {
       title: "Understanding Net 30, Net 60: Payment Terms Explained",
-      excerpt: "A comprehensive guide to common payment terms and when to use them.",
-      image: "https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=400&h=300&fit=crop",
+      excerpt:
+        "A comprehensive guide to common payment terms and when to use them.",
+      image:
+        "https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=400&h=300&fit=crop",
       slug: "payment-terms-explained",
       readTime: "5 min read",
-      category: "Finance"
+      category: "Finance",
     },
     {
       title: "Automating Your Invoicing: A Step-by-Step Guide",
-      excerpt: "Save time and reduce errors by automating your invoicing workflow.",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop",
+      excerpt:
+        "Save time and reduce errors by automating your invoicing workflow.",
+      image:
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop",
       slug: "automate-invoicing-guide",
       readTime: "7 min read",
-      category: "Automation"
-    }
+      category: "Automation",
+    },
   ];
 
   useEffect(() => {
@@ -181,46 +189,46 @@ const BlogPostPage = () => {
       const progress = (scrolled / (documentHeight - windowHeight)) * 100;
       setReadingProgress(Math.min(progress, 100));
     };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
-    document.body.style.overflow = !mobileMenuOpen ? 'hidden' : '';
+    document.body.style.overflow = !mobileMenuOpen ? "hidden" : "";
   };
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
-    document.body.style.overflow = '';
+    document.body.style.overflow = "";
   };
 
   const handleShare = (platform) => {
     const url = window.location.href;
     const text = blogPost.title;
-    
+
     const shareUrls = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       twitter: `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
       copy: () => {
         navigator.clipboard.writeText(url);
-        alert('Link copied to clipboard!');
-      }
+        alert("Link copied to clipboard!");
+      },
     };
 
-    if (platform === 'copy') {
+    if (platform === "copy") {
       shareUrls.copy();
     } else {
-      window.open(shareUrls[platform], '_blank', 'width=600,height=400');
+      window.open(shareUrls[platform], "_blank", "width=600,height=400");
     }
     setShowShareMenu(false);
   };
 
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   return (
@@ -236,10 +244,15 @@ const BlogPostPage = () => {
 
       <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
         <style jsx>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-          
+          @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+
           * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family:
+              "Inter",
+              -apple-system,
+              BlinkMacSystemFont,
+              "Segoe UI",
+              sans-serif;
           }
 
           .gradient-text {
@@ -268,8 +281,12 @@ const BlogPostPage = () => {
           }
 
           @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
           }
 
           .animate-slide-up {
@@ -281,7 +298,9 @@ const BlogPostPage = () => {
           }
 
           .hover-lift {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition:
+              transform 0.3s ease,
+              box-shadow 0.3s ease;
           }
 
           .hover-lift:hover {
@@ -340,7 +359,8 @@ const BlogPostPage = () => {
             margin-bottom: 1.5rem;
           }
 
-          .blog-content ul, .blog-content ol {
+          .blog-content ul,
+          .blog-content ol {
             margin-bottom: 1.5rem;
             padding-left: 1.5rem;
           }
@@ -370,11 +390,11 @@ const BlogPostPage = () => {
             .hero-title {
               font-size: 2rem !important;
             }
-            
+
             .blog-content {
               font-size: 1rem;
             }
-            
+
             .blog-content h2 {
               font-size: 1.5rem;
             }
@@ -383,58 +403,70 @@ const BlogPostPage = () => {
 
         {/* Reading Progress Bar */}
         <div className="reading-progress">
-          <div 
-            className="reading-progress-bar" 
+          <div
+            className="reading-progress-bar"
             style={{ width: `${readingProgress}%` }}
           />
         </div>
 
         {/* Mobile Menu Overlay */}
         {mobileMenuOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
             onClick={closeMobileMenu}
           />
         )}
 
         {/* Mobile Navigation */}
-        <div 
+        <div
           className={`fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 lg:hidden ${
-            mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+            mobileMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
           <div className="p-6">
-            <button 
+            <button
               onClick={closeMobileMenu}
               className="absolute top-6 right-6 text-gray-600 hover:text-gray-900"
             >
               <X className="w-6 h-6" />
             </button>
-            
+
             <div className="mt-12 space-y-6">
-              <button 
-                onClick={() => { closeMobileMenu(); navigate('/'); }}
+              <button
+                onClick={() => {
+                  closeMobileMenu();
+                  navigate("/");
+                }}
                 className="flex items-center gap-2 text-lg font-medium text-gray-700 hover:text-orange-500 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
                 Back to Home
               </button>
-              <button 
-                onClick={() => { closeMobileMenu(); navigate('/blog'); }}
+              <button
+                onClick={() => {
+                  closeMobileMenu();
+                  navigate("/blog");
+                }}
                 className="block text-lg font-medium text-gray-700 hover:text-orange-500 transition-colors"
               >
                 All Posts
               </button>
-              
+
               <div className="pt-6 space-y-3">
-                <button 
-                  onClick={() => { closeMobileMenu(); navigate('/login'); }}
+                <button
+                  onClick={() => {
+                    closeMobileMenu();
+                    navigate("/login");
+                  }}
                   className="w-full py-3 px-6 border-2 border-orange-500 text-orange-500 rounded-lg font-semibold hover:bg-orange-50 transition-all"
                 >
                   Login
                 </button>
-                <button 
-                  onClick={() => { closeMobileMenu(); navigate('/register'); }}
+                <button
+                  onClick={() => {
+                    closeMobileMenu();
+                    navigate("/register");
+                  }}
                   className="w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
                 >
                   Start Free Trial
@@ -445,27 +477,32 @@ const BlogPostPage = () => {
         </div>
 
         {/* Header */}
-        <header className={`fixed top-0 left-0 right-0 z-30 transition-all duration-300 ${
-          scrollY > 50 ? 'glass shadow-lg' : 'bg-transparent'
-        }`}>
+        <header
+          className={`fixed top-0 left-0 right-0 z-30 transition-all duration-300 ${
+            scrollY > 50 ? "glass shadow-lg" : "bg-transparent"
+          }`}
+        >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-20">
               {/* Logo */}
-              <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+              <div
+                className="flex items-center cursor-pointer"
+                onClick={() => navigate("/")}
+              >
                 <img src={logo} alt="SolidFlo" className="h-16 w-auto" />
               </div>
 
               {/* Desktop Navigation */}
               <nav className="hidden lg:flex items-center space-x-8">
-                <button 
-                  onClick={() => navigate('/')}
+                <button
+                  onClick={() => navigate("/")}
                   className="flex items-center gap-2 text-gray-700 hover:text-orange-500 font-medium transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Back to Home
                 </button>
-                <button 
-                  onClick={() => navigate('/blog')}
+                <button
+                  onClick={() => navigate("/blog")}
                   className="text-gray-700 hover:text-orange-500 font-medium transition-colors"
                 >
                   All Posts
@@ -474,14 +511,14 @@ const BlogPostPage = () => {
 
               {/* CTA Buttons */}
               <div className="hidden lg:flex items-center space-x-4">
-                <button 
-                  onClick={() => navigate('/login')}
+                <button
+                  onClick={() => navigate("/login")}
                   className="px-6 py-2.5 text-gray-700 font-semibold hover:text-orange-500 transition-colors"
                 >
                   Login
                 </button>
-                <button 
-                  onClick={() => navigate('/register')}
+                <button
+                  onClick={() => navigate("/register")}
                   className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
                 >
                   Start Free Trial
@@ -489,7 +526,7 @@ const BlogPostPage = () => {
               </div>
 
               {/* Mobile Menu Button */}
-              <button 
+              <button
                 onClick={toggleMobileMenu}
                 className="lg:hidden text-gray-700 hover:text-orange-500"
               >
@@ -504,11 +541,17 @@ const BlogPostPage = () => {
           <div className="max-w-4xl mx-auto">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-6 animate-fade-in">
-              <button onClick={() => navigate('/')} className="hover:text-orange-500 transition-colors">
+              <button
+                onClick={() => navigate("/")}
+                className="hover:text-orange-500 transition-colors"
+              >
                 Home
               </button>
               <span>/</span>
-              <button onClick={() => navigate('/blog')} className="hover:text-orange-500 transition-colors">
+              <button
+                onClick={() => navigate("/blog")}
+                className="hover:text-orange-500 transition-colors"
+              >
                 Blog
               </button>
               <span>/</span>
@@ -518,16 +561,24 @@ const BlogPostPage = () => {
             {/* Category Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 rounded-full mb-6 animate-slide-up">
               <Tag className="w-4 h-4 text-orange-600" />
-              <span className="text-sm font-semibold text-orange-600">{blogPost.category}</span>
+              <span className="text-sm font-semibold text-orange-600">
+                {blogPost.category}
+              </span>
             </div>
 
             {/* Title */}
-            <h1 className="hero-title text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 leading-tight animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <h1
+              className="hero-title text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 leading-tight animate-slide-up"
+              style={{ animationDelay: "0.1s" }}
+            >
               {blogPost.title}
             </h1>
 
             {/* Meta Info */}
-            <div className="flex flex-wrap items-center gap-6 text-gray-600 mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div
+              className="flex flex-wrap items-center gap-6 text-gray-600 mb-8 animate-fade-in"
+              style={{ animationDelay: "0.2s" }}
+            >
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-orange-500" />
                 <span>{formatDate(blogPost.publishDate)}</span>
@@ -547,9 +598,12 @@ const BlogPostPage = () => {
             </div>
 
             {/* Featured Image */}
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl mb-12 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-              <img 
-                src={blogPost.featuredImage} 
+            <div
+              className="relative rounded-2xl overflow-hidden shadow-2xl mb-12 animate-slide-up"
+              style={{ animationDelay: "0.3s" }}
+            >
+              <img
+                src={blogPost.featuredImage}
                 alt={blogPost.title}
                 className="w-full h-auto"
               />
@@ -568,21 +622,21 @@ const BlogPostPage = () => {
                   <button
                     onClick={() => setIsLiked(!isLiked)}
                     className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                      isLiked 
-                        ? 'bg-orange-500 text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-orange-100'
+                      isLiked
+                        ? "bg-orange-500 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-orange-100"
                     }`}
                     title="Like this post"
                   >
                     <ThumbsUp className="w-5 h-5" />
                   </button>
-                  
+
                   <button
                     onClick={() => setIsBookmarked(!isBookmarked)}
                     className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                      isBookmarked 
-                        ? 'bg-orange-500 text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-orange-100'
+                      isBookmarked
+                        ? "bg-orange-500 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-orange-100"
                     }`}
                     title="Bookmark this post"
                   >
@@ -601,28 +655,28 @@ const BlogPostPage = () => {
                     {showShareMenu && (
                       <div className="absolute left-16 top-0 bg-white rounded-lg shadow-xl p-2 space-y-2 z-10">
                         <button
-                          onClick={() => handleShare('facebook')}
+                          onClick={() => handleShare("facebook")}
                           className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded transition-colors w-full"
                         >
                           <Facebook className="w-4 h-4 text-blue-600" />
                           <span className="text-sm">Facebook</span>
                         </button>
                         <button
-                          onClick={() => handleShare('twitter')}
+                          onClick={() => handleShare("twitter")}
                           className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded transition-colors w-full"
                         >
                           <Twitter className="w-4 h-4 text-blue-400" />
                           <span className="text-sm">Twitter</span>
                         </button>
                         <button
-                          onClick={() => handleShare('linkedin')}
+                          onClick={() => handleShare("linkedin")}
                           className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded transition-colors w-full"
                         >
                           <Linkedin className="w-4 h-4 text-blue-700" />
                           <span className="text-sm">LinkedIn</span>
                         </button>
                         <button
-                          onClick={() => handleShare('copy')}
+                          onClick={() => handleShare("copy")}
                           className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded transition-colors w-full"
                         >
                           <LinkIcon className="w-4 h-4 text-gray-600" />
@@ -637,7 +691,7 @@ const BlogPostPage = () => {
               {/* Article Content */}
               <div className="lg:col-span-8">
                 <article className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100">
-                  <div 
+                  <div
                     className="blog-content"
                     dangerouslySetInnerHTML={{ __html: blogPost.content }}
                   />
@@ -665,25 +719,25 @@ const BlogPostPage = () => {
                       <button
                         onClick={() => setIsLiked(!isLiked)}
                         className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                          isLiked 
-                            ? 'bg-orange-500 text-white' 
-                            : 'bg-gray-100 text-gray-700 hover:bg-orange-100'
+                          isLiked
+                            ? "bg-orange-500 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-orange-100"
                         }`}
                       >
                         <ThumbsUp className="w-5 h-5" />
-                        <span>{isLiked ? 'Liked' : 'Like'}</span>
+                        <span>{isLiked ? "Liked" : "Like"}</span>
                       </button>
 
                       <button
                         onClick={() => setIsBookmarked(!isBookmarked)}
                         className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                          isBookmarked 
-                            ? 'bg-orange-500 text-white' 
-                            : 'bg-gray-100 text-gray-700 hover:bg-orange-100'
+                          isBookmarked
+                            ? "bg-orange-500 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-orange-100"
                         }`}
                       >
                         <Bookmark className="w-5 h-5" />
-                        <span>{isBookmarked ? 'Saved' : 'Save'}</span>
+                        <span>{isBookmarked ? "Saved" : "Save"}</span>
                       </button>
 
                       <button
@@ -700,8 +754,8 @@ const BlogPostPage = () => {
                 {/* Author Bio */}
                 <div className="mt-12 bg-gradient-to-r from-orange-50 to-orange-100 rounded-2xl p-8 border border-orange-200">
                   <div className="flex items-start gap-6">
-                    <img 
-                      src={blogPost.author.avatar} 
+                    <img
+                      src={blogPost.author.avatar}
                       alt={blogPost.author.name}
                       className="w-20 h-20 rounded-full border-4 border-white shadow-lg flex-shrink-0"
                     />
@@ -723,17 +777,19 @@ const BlogPostPage = () => {
               {/* Sidebar - Related Posts (Desktop) */}
               <div className="lg:col-span-3">
                 <div className="sticky top-32">
-                  <h3 className="text-xl font-bold text-gray-900 mb-6">Related Posts</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-6">
+                    Related Posts
+                  </h3>
                   <div className="space-y-6">
                     {relatedPosts.map((post, index) => (
-                      <div 
+                      <div
                         key={index}
                         className="group cursor-pointer"
                         onClick={() => navigate(`/blog/${post.slug}`)}
                       >
                         <div className="relative rounded-lg overflow-hidden mb-3">
-                          <img 
-                            src={post.image} 
+                          <img
+                            src={post.image}
                             alt={post.title}
                             className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300"
                           />
@@ -762,17 +818,19 @@ const BlogPostPage = () => {
         {/* Related Posts Section (Mobile) */}
         <section className="lg:hidden py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
           <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">Related Posts</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-8">
+              Related Posts
+            </h3>
             <div className="grid gap-6">
               {relatedPosts.map((post, index) => (
-                <div 
+                <div
                   key={index}
                   className="bg-white rounded-xl overflow-hidden shadow-lg hover-lift cursor-pointer"
                   onClick={() => navigate(`/blog/${post.slug}`)}
                 >
                   <div className="relative h-48">
-                    <img 
-                      src={post.image} 
+                    <img
+                      src={post.image}
                       alt={post.title}
                       className="w-full h-full object-cover"
                     />
@@ -806,16 +864,17 @@ const BlogPostPage = () => {
             <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full filter blur-3xl" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full filter blur-3xl" />
           </div>
-          
+
           <div className="max-w-4xl mx-auto text-center relative z-10">
             <Mail className="w-12 h-12 text-white mx-auto mb-6" />
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
               Stay Updated with Our Newsletter
             </h2>
             <p className="text-xl text-white/90 mb-10">
-              Get the latest invoicing tips, business insights, and SolidFlo updates delivered to your inbox.
+              Get the latest invoicing tips, business insights, and SolidFlo
+              updates delivered to your inbox.
             </p>
-            
+
             <div className="max-w-md mx-auto">
               <div className="flex gap-3">
                 <input
@@ -844,9 +903,9 @@ const BlogPostPage = () => {
             <p className="text-xl text-gray-600 mb-10">
               Join 10,000+ businesses using SolidFlo to get paid faster.
             </p>
-            
-            <button 
-              onClick={() => navigate('/register')}
+
+            <button
+              onClick={() => navigate("/register")}
               className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-semibold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all inline-flex items-center gap-2"
             >
               Start Free Trial
@@ -854,106 +913,129 @@ const BlogPostPage = () => {
             </button>
 
             <p className="mt-6 text-gray-500 text-sm">
-              ✓ No credit card required  ✓ 14-day free trial  ✓ Cancel anytime
+              ✓ No credit card required ✓ 14-day free trial ✓ Cancel anytime
             </p>
           </div>
         </section>
 
         {/* Footer */}
-       <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-            {/* Company Info */}
-            <div>
-              <img src={logo1} alt="SolidFlo" className="h-10 mb-4" />
-              <p className="text-gray-400 mb-6 leading-relaxed">
-                Free online invoicing for small businesses. Create and send invoices, track time and expenses, and accept online payments.
-              </p>
-              <div className="flex gap-4">
-                {[
-                  { icon: facebook, alt: 'Facebook' },
-                  { icon: twitter, alt: 'Twitter' },
-                  { icon: linkedin, alt: 'LinkedIn' },
-                  { icon: instagram, alt: 'Instagram' }
-                ].map((social, index) => (
-                  <a 
-                    key={index}
-                    href="#" 
-                    className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-orange-500 transition-colors"
-                  >
-                    <img src={social.icon} alt={social.alt} className="w-5 h-5" />
-                  </a>
-                ))}
+        <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+              {/* Company Info */}
+              <div>
+                <img src={logo1} alt="SolidFlo" className="h-10 mb-4" />
+                <p className="text-gray-400 mb-6 leading-relaxed">
+                  Free online invoicing for small businesses. Create and send
+                  invoices, track time and expenses, and accept online payments.
+                </p>
+                <div className="flex gap-4">
+                  {[
+                    { icon: facebook, alt: "Facebook" },
+                    { icon: twitter, alt: "Twitter" },
+                    { icon: linkedin, alt: "LinkedIn" },
+                    { icon: instagram, alt: "Instagram" },
+                  ].map((social, index) => (
+                    <a
+                      key={index}
+                      href="#"
+                      className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-orange-500 transition-colors"
+                    >
+                      <img
+                        src={social.icon}
+                        alt={social.alt}
+                        className="w-5 h-5"
+                      />
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* Product */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-orange-400">
+                  Product
+                </h3>
+                <ul className="space-y-3">
+                  {[
+                    "Features",
+                    "Pricing",
+                    "Integrations",
+                    "API Docs",
+                    "Updates",
+                  ].map((item) => (
+                    <li key={item}>
+                      <a
+                        href="#"
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        {item}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Company */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-orange-400">
+                  Company
+                </h3>
+                <ul className="space-y-3">
+                  {[
+                    { label: "About", path: "/about" },
+                    { label: "Careers", path: "/careers" },
+                    { label: "Press Kit", path: "/press-kit" },
+                    { label: "Contact", path: "/contact" },
+                    { label: "Partners", path: "/partners" },
+                  ].map((item) => (
+                    <li key={item.label}>
+                      <a
+                        onClick={() => navigate(item.path)}
+                        className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Resources */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-orange-400">
+                  Resources
+                </h3>
+                <ul className="space-y-3">
+                  {[
+                    { label: "Help Center", path: "/help-center" },
+                    { label: "Blogs", path: "/blogs" },
+                    { label: "Tutorials", path: "/tutorials" },
+                    { label: "Community", path: "/community" },
+                    { label: "Privacy Policy", path: "/privacy" },
+                    { label: "Terms of Service", path: "/terms" },
+                  ].map((item) => (
+                    <li key={item.label}>
+                      <a
+                        onClick={() => navigate(item.path)}
+                        className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
 
-            {/* Product */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-orange-400">Product</h3>
-              <ul className="space-y-3">
-                {['Features', 'Pricing', 'Integrations', 'API Docs', 'Updates'].map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-orange-400">Company</h3>
-              <ul className="space-y-3">
-                {[
-                  { label: 'About', path: '/about' },
-                  { label: 'Careers', path: '/careers' },
-                  { label: 'Press Kit', path: '/press-kit' },
-                  { label: 'Contact', path: '/contact' },
-                  { label: 'Partners', path: '/partners' }
-                ].map((item) => (
-                  <li key={item.label}>
-                    <a 
-                      onClick={() => navigate(item.path)}
-                      className="text-gray-400 hover:text-white transition-colors cursor-pointer">
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Resources */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-orange-400">Resources</h3>
-               <ul className="space-y-3">
-                {[
-                  { label: 'Help Center', path: '/help-center' },
-                  { label: 'Blogs', path: '/blogs' },
-                  { label: 'Tutorials', path: '/tutorials' },
-                  { label: 'Community', path: '/community' },
-                  { label: 'Privacy Policy', path: '/privacy' },
-                  { label: 'Terms of Service', path: '/terms' }
-                ].map((item) => (
-                  <li key={item.label}>
-                    <a 
-                      onClick={() => navigate(item.path)}
-                      className="text-gray-400 hover:text-white transition-colors cursor-pointer">
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-             
+            {/* Bottom Bar */}
+            <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
+              <p>
+                &copy; {new Date().getFullYear()} SolidFlo. All rights reserved.
+              </p>
             </div>
           </div>
-
-          {/* Bottom Bar */}
-          <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} SolidFlo. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+        </footer>
       </div>
     </>
   );

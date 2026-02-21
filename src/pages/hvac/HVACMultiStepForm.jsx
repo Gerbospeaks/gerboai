@@ -226,7 +226,9 @@ const HVACMultiStepForm = ({
           {/* HVAC System Info Helper */}
           <div className="mt-4 bg-cyan-50 border border-cyan-200 rounded-lg p-3">
             <div className="text-xs text-cyan-700">
-              <strong>💡 Tip:</strong> Record complete system details for accurate maintenance history and warranty tracking. This helps diagnose issues faster.
+              <strong>💡 Tip:</strong> Record complete system details for
+              accurate maintenance history and warranty tracking. This helps
+              diagnose issues faster.
             </div>
           </div>
         </div>
@@ -298,7 +300,9 @@ const HVACMultiStepForm = ({
           {/* Display Added Items */}
           {items.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Added Services/Parts</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                Added Services/Parts
+              </h3>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -332,10 +336,10 @@ const HVACMultiStepForm = ({
                               item.type === "Service"
                                 ? "bg-blue-100 text-blue-800"
                                 : item.type === "Parts"
-                                ? "bg-green-100 text-green-800"
-                                : item.type === "Refrigerant"
-                                ? "bg-cyan-100 text-cyan-800"
-                                : "bg-purple-100 text-purple-800"
+                                  ? "bg-green-100 text-green-800"
+                                  : item.type === "Refrigerant"
+                                    ? "bg-cyan-100 text-cyan-800"
+                                    : "bg-purple-100 text-purple-800"
                             }`}
                           >
                             {item.type}
@@ -391,7 +395,7 @@ const HVACMultiStepForm = ({
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous
+          <span className="hidden sm:inline">Previous</span>
         </button>
 
         <div className="text-sm text-gray-600 font-medium">
@@ -407,7 +411,7 @@ const HVACMultiStepForm = ({
               : "bg-cyan-600 text-white hover:bg-cyan-700"
           }`}
         >
-          Next
+          <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

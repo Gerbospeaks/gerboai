@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Package, 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
+import React, { useState, useEffect } from "react";
+import {
+  Package,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
   AlertTriangle,
   TrendingDown,
   DollarSign,
-  Box
-} from 'lucide-react';
+  Box,
+} from "lucide-react";
 import {
   getFirestore,
   collection,
@@ -20,39 +20,39 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-  serverTimestamp
-} from 'firebase/firestore';
+  serverTimestamp,
+} from "firebase/firestore";
 
 const PartsInventory = ({ user }) => {
   const [parts, setParts] = useState([]);
   const [filteredParts, setFilteredParts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingPart, setEditingPart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    partNumber: '',
-    name: '',
-    description: '',
-    category: 'Engine',
+    partNumber: "",
+    name: "",
+    description: "",
+    category: "Engine",
     quantity: 0,
     minQuantity: 5,
     unitPrice: 0,
-    supplier: '',
-    location: ''
+    supplier: "",
+    location: "",
   });
 
   const categories = [
-    'Engine',
-    'Transmission',
-    'Brakes',
-    'Suspension',
-    'Electrical',
-    'Body',
-    'Fluids',
-    'Filters',
-    'Tires',
-    'Other'
+    "Engine",
+    "Transmission",
+    "Brakes",
+    "Suspension",
+    "Electrical",
+    "Body",
+    "Fluids",
+    "Filters",
+    "Tires",
+    "Other",
   ];
 
   useEffect(() => {
@@ -69,19 +69,19 @@ const PartsInventory = ({ user }) => {
     try {
       setLoading(true);
       const db = getFirestore();
-      const partsRef = collection(db, 'users', user.uid, 'parts');
-      const q = query(partsRef, orderBy('createdAt', 'desc'));
+      const partsRef = collection(db, "users", user.uid, "parts");
+      const q = query(partsRef, orderBy("createdAt", "desc"));
       const snapshot = await getDocs(q);
 
-      const partsData = snapshot.docs.map(doc => ({
+      const partsData = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
 
       setParts(partsData);
       setFilteredParts(partsData);
     } catch (error) {
-      console.error('Error loading parts:', error);
+      console.error("Error loading parts:", error);
     } finally {
       setLoading(false);
     }
@@ -94,18 +94,19 @@ const PartsInventory = ({ user }) => {
     }
 
     const query = searchQuery.toLowerCase();
-    const filtered = parts.filter(part =>
-      part.name.toLowerCase().includes(query) ||
-      part.partNumber.toLowerCase().includes(query) ||
-      part.category.toLowerCase().includes(query) ||
-      part.supplier?.toLowerCase().includes(query)
+    const filtered = parts.filter(
+      (part) =>
+        part.name.toLowerCase().includes(query) ||
+        part.partNumber.toLowerCase().includes(query) ||
+        part.category.toLowerCase().includes(query) ||
+        part.supplier?.toLowerCase().includes(query),
     );
     setFilteredParts(filtered);
   };
 
   const handleAddPart = async () => {
     if (!user?.uid || !formData.name || !formData.partNumber) {
-      alert('Please fill in required fields (Part Number and Name)');
+      alert("Please fill in required fields (Part Number and Name)");
       return;
     }
 
@@ -117,84 +118,84 @@ const PartsInventory = ({ user }) => {
         minQuantity: Number(formData.minQuantity),
         unitPrice: Number(formData.unitPrice),
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       if (editingPart) {
-        await updateDoc(
-          doc(db, 'users', user.uid, 'parts', editingPart.id),
-          { ...partData, updatedAt: serverTimestamp() }
-        );
-        alert('Part updated successfully!');
+        await updateDoc(doc(db, "users", user.uid, "parts", editingPart.id), {
+          ...partData,
+          updatedAt: serverTimestamp(),
+        });
+        alert("Part updated successfully!");
       } else {
-        await addDoc(collection(db, 'users', user.uid, 'parts'), partData);
-        alert('Part added successfully!');
+        await addDoc(collection(db, "users", user.uid, "parts"), partData);
+        alert("Part added successfully!");
       }
 
       resetForm();
       loadParts();
     } catch (error) {
-      console.error('Error saving part:', error);
-      alert('Failed to save part');
+      console.error("Error saving part:", error);
+      alert("Failed to save part");
     }
   };
 
   const handleEditPart = (part) => {
     setEditingPart(part);
     setFormData({
-      partNumber: part.partNumber || '',
-      name: part.name || '',
-      description: part.description || '',
-      category: part.category || 'Engine',
+      partNumber: part.partNumber || "",
+      name: part.name || "",
+      description: part.description || "",
+      category: part.category || "Engine",
       quantity: part.quantity || 0,
       minQuantity: part.minQuantity || 5,
       unitPrice: part.unitPrice || 0,
-      supplier: part.supplier || '',
-      location: part.location || ''
+      supplier: part.supplier || "",
+      location: part.location || "",
     });
     setShowAddModal(true);
   };
 
   const handleDeletePart = async (partId) => {
-    if (!window.confirm('Are you sure you want to delete this part?')) return;
+    if (!window.confirm("Are you sure you want to delete this part?")) return;
 
     try {
       const db = getFirestore();
-      await deleteDoc(doc(db, 'users', user.uid, 'parts', partId));
-      alert('Part deleted successfully!');
+      await deleteDoc(doc(db, "users", user.uid, "parts", partId));
+      alert("Part deleted successfully!");
       loadParts();
     } catch (error) {
-      console.error('Error deleting part:', error);
-      alert('Failed to delete part');
+      console.error("Error deleting part:", error);
+      alert("Failed to delete part");
     }
   };
 
   const resetForm = () => {
     setFormData({
-      partNumber: '',
-      name: '',
-      description: '',
-      category: 'Engine',
+      partNumber: "",
+      name: "",
+      description: "",
+      category: "Engine",
       quantity: 0,
       minQuantity: 5,
       unitPrice: 0,
-      supplier: '',
-      location: ''
+      supplier: "",
+      location: "",
     });
     setEditingPart(null);
     setShowAddModal(false);
   };
 
   const getLowStockParts = () => {
-    return parts.filter(part => part.quantity <= part.minQuantity);
+    return parts.filter((part) => part.quantity <= part.minQuantity);
   };
 
   const getTotalInventoryValue = () => {
-    return parts.reduce((sum, part) => sum + (part.quantity * part.unitPrice), 0);
+    return parts.reduce((sum, part) => sum + part.quantity * part.unitPrice, 0);
   };
 
   const getOutOfStockParts = () => {
-    return parts.filter(part => part.quantity === 0);
+    return parts.filter((part) => part.quantity === 0);
   };
 
   return (
@@ -278,7 +279,9 @@ const PartsInventory = ({ user }) => {
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
             <div>
-              <div className="font-semibold text-orange-800">Low Stock Alert</div>
+              <div className="font-semibold text-orange-800">
+                Low Stock Alert
+              </div>
               <div className="text-sm text-orange-700 mt-1">
                 {getLowStockParts().length} part(s) are running low on stock
               </div>
@@ -296,7 +299,9 @@ const PartsInventory = ({ user }) => {
             <Box className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <div className="text-gray-500 mb-2">No parts found</div>
             <div className="text-sm text-gray-400">
-              {searchQuery ? 'Try adjusting your search' : 'Add your first part to get started'}
+              {searchQuery
+                ? "Try adjusting your search"
+                : "Add your first part to get started"}
             </div>
           </div>
         ) : (
@@ -348,10 +353,10 @@ const PartsInventory = ({ user }) => {
                       <span
                         className={`font-semibold ${
                           part.quantity === 0
-                            ? 'text-red-600'
+                            ? "text-red-600"
                             : part.quantity <= part.minQuantity
-                            ? 'text-orange-600'
-                            : 'text-green-600'
+                              ? "text-orange-600"
+                              : "text-green-600"
                         }`}
                       >
                         {part.quantity}
@@ -364,10 +369,10 @@ const PartsInventory = ({ user }) => {
                       R{part.unitPrice.toFixed(2)}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
-                      {part.supplier || '—'}
+                      {part.supplier || "—"}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
-                      {part.location || '—'}
+                      {part.location || "—"}
                     </td>
                     <td className="px-4 py-3 text-sm text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -399,7 +404,7 @@ const PartsInventory = ({ user }) => {
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-4 border-b flex items-center justify-between">
               <h2 className="text-xl font-semibold">
-                {editingPart ? 'Edit Part' : 'Add New Part'}
+                {editingPart ? "Edit Part" : "Add New Part"}
               </h2>
               <button
                 onClick={resetForm}
@@ -559,7 +564,7 @@ const PartsInventory = ({ user }) => {
                   onClick={handleAddPart}
                   className="flex-1 bg-gray-600 text-gray-800 py-3 rounded-lg hover:bg-orange-700"
                 >
-                  {editingPart ? 'Update Part' : 'Add Part'}
+                  {editingPart ? "Update Part" : "Add Part"}
                 </button>
                 <button
                   onClick={resetForm}

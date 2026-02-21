@@ -1,5 +1,3 @@
-
-
 // Component definition
 import React, { useState } from "react";
 import { Users, Cog, Plus, ChevronLeft, ChevronRight } from "lucide-react";
@@ -229,7 +227,8 @@ const ServiceOrderMultiStepForm = ({
           {/* Equipment Info Helper */}
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
             <div className="text-xs text-blue-700">
-              <strong>💡 Tip:</strong> Record equipment details for accurate service history tracking and warranty management.
+              <strong>💡 Tip:</strong> Record equipment details for accurate
+              service history tracking and warranty management.
             </div>
           </div>
         </div>
@@ -335,10 +334,10 @@ const ServiceOrderMultiStepForm = ({
                               item.type === "Labor"
                                 ? "bg-blue-100 text-blue-800"
                                 : item.type === "Parts"
-                                ? "bg-green-100 text-green-800"
-                                : item.type === "Materials"
-                                ? "bg-purple-100 text-purple-800"
-                                : "bg-orange-100 text-orange-800"
+                                  ? "bg-green-100 text-green-800"
+                                  : item.type === "Materials"
+                                    ? "bg-purple-100 text-purple-800"
+                                    : "bg-orange-100 text-orange-800"
                             }`}
                           >
                             {item.type}
@@ -394,7 +393,7 @@ const ServiceOrderMultiStepForm = ({
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous
+          <span className="hidden sm:inline">Previous</span>
         </button>
 
         <div className="text-sm text-gray-600 font-medium">
@@ -410,7 +409,7 @@ const ServiceOrderMultiStepForm = ({
               : "bg-blue-600 text-white hover:bg-blue-700"
           }`}
         >
-          Next
+          <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

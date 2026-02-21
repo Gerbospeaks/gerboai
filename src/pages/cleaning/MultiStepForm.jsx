@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Users, Building, Plus, ChevronLeft, ChevronRight, CreditCard } from "lucide-react";
+import {
+  Users,
+  Building,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  CreditCard,
+} from "lucide-react";
 
 const MultiStepForm = ({
   // Customer Info Props
@@ -222,7 +229,9 @@ const MultiStepForm = ({
               />
             </div>
             <div>
-              <div className="text-sm text-gray-500 mb-1">Service Frequency *</div>
+              <div className="text-sm text-gray-500 mb-1">
+                Service Frequency *
+              </div>
               <select
                 value={serviceFrequency}
                 onChange={(e) => setServiceFrequency(e.target.value)}
@@ -246,7 +255,9 @@ const MultiStepForm = ({
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
               <select
                 value={newItem.type}
-                onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, type: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="Service">Service</option>
@@ -265,14 +276,18 @@ const MultiStepForm = ({
                 type="number"
                 placeholder="Rate"
                 value={newItem.rate}
-                onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, rate: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <input
                 type="number"
                 placeholder="Qty"
                 value={newItem.qty}
-                onChange={(e) => setNewItem({ ...newItem, qty: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, qty: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
@@ -347,9 +362,15 @@ const MultiStepForm = ({
               >
                 {isQuoteMode ? (
                   <>
-                    <option value="Quote Valid 30 Days">Quote Valid 30 Days</option>
-                    <option value="Quote Valid 60 Days">Quote Valid 60 Days</option>
-                    <option value="Quote Valid 90 Days">Quote Valid 90 Days</option>
+                    <option value="Quote Valid 30 Days">
+                      Quote Valid 30 Days
+                    </option>
+                    <option value="Quote Valid 60 Days">
+                      Quote Valid 60 Days
+                    </option>
+                    <option value="Quote Valid 90 Days">
+                      Quote Valid 90 Days
+                    </option>
                   </>
                 ) : (
                   <>
@@ -358,24 +379,38 @@ const MultiStepForm = ({
                     <option value="Net 15 Days">Net 15 Days</option>
                     <option value="Net 30 Days">Net 30 Days</option>
                     <option value="Net 60 Days">Net 60 Days</option>
-                    <option value="50% Deposit, Balance on Completion">50% Deposit, Balance on Completion</option>
+                    <option value="50% Deposit, Balance on Completion">
+                      50% Deposit, Balance on Completion
+                    </option>
                   </>
                 )}
               </select>
             </div>
 
             <div className="col-span-1 sm:col-span-2">
-              <div className="text-sm text-gray-500 mb-2">Service Guarantee</div>
+              <div className="text-sm text-gray-500 mb-2">
+                Service Guarantee
+              </div>
               <select
                 value={serviceGuarantee}
                 onChange={(e) => setServiceGuarantee(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="7 Day Satisfaction Guarantee">7 Day Satisfaction Guarantee</option>
-                <option value="14 Day Satisfaction Guarantee">14 Day Satisfaction Guarantee</option>
-                <option value="30 Day Satisfaction Guarantee">30 Day Satisfaction Guarantee</option>
-                <option value="100% Satisfaction Guaranteed">100% Satisfaction Guaranteed</option>
-                <option value="Money Back Guarantee">Money Back Guarantee</option>
+                <option value="7 Day Satisfaction Guarantee">
+                  7 Day Satisfaction Guarantee
+                </option>
+                <option value="14 Day Satisfaction Guarantee">
+                  14 Day Satisfaction Guarantee
+                </option>
+                <option value="30 Day Satisfaction Guarantee">
+                  30 Day Satisfaction Guarantee
+                </option>
+                <option value="100% Satisfaction Guaranteed">
+                  100% Satisfaction Guaranteed
+                </option>
+                <option value="Money Back Guarantee">
+                  Money Back Guarantee
+                </option>
                 <option value="No Guarantee">No Guarantee</option>
               </select>
             </div>
@@ -383,19 +418,27 @@ const MultiStepForm = ({
 
           {/* Payment Terms Preview */}
           <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h3 className="text-sm font-semibold mb-3 text-gray-700">Preview</h3>
+            <h3 className="text-sm font-semibold mb-3 text-gray-700">
+              Preview
+            </h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between py-2 border-b border-gray-200">
                 <span className="text-gray-600">Payment Method:</span>
-                <span className="font-medium text-gray-800">{paymentMethod}</span>
+                <span className="font-medium text-gray-800">
+                  {paymentMethod}
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b border-gray-200">
                 <span className="text-gray-600">Payment Terms:</span>
-                <span className="font-medium text-gray-800">{paymentTerms}</span>
+                <span className="font-medium text-gray-800">
+                  {paymentTerms}
+                </span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-gray-600">Service Guarantee:</span>
-                <span className="font-medium text-gray-800">{serviceGuarantee}</span>
+                <span className="font-medium text-gray-800">
+                  {serviceGuarantee}
+                </span>
               </div>
             </div>
           </div>
@@ -414,7 +457,7 @@ const MultiStepForm = ({
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous
+          <span className="hidden sm:inline">Previous</span>
         </button>
 
         <div className="text-sm text-gray-600">
@@ -430,7 +473,7 @@ const MultiStepForm = ({
               : "bg-blue-600 text-white hover:bg-blue-700"
           }`}
         >
-          Next
+          <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

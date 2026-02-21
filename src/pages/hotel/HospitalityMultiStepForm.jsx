@@ -240,8 +240,12 @@ const HospitalityMultiStepForm = ({
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               >
                 <option value="">Select Room Type</option>
-                <option value="Standard Single Room">Standard Single Room</option>
-                <option value="Standard Double Room">Standard Double Room</option>
+                <option value="Standard Single Room">
+                  Standard Single Room
+                </option>
+                <option value="Standard Double Room">
+                  Standard Double Room
+                </option>
                 <option value="Deluxe Single Room">Deluxe Single Room</option>
                 <option value="Deluxe Double Room">Deluxe Double Room</option>
                 <option value="Executive Suite">Executive Suite</option>
@@ -302,7 +306,9 @@ const HospitalityMultiStepForm = ({
           {/* Booking Info Helper */}
           <div className="mt-4 bg-purple-50 border border-purple-200 rounded-lg p-3">
             <div className="text-xs text-purple-700">
-              <strong>💡 Tip:</strong> Confirm room availability and guest preferences before finalizing the booking to ensure a smooth check-in experience.
+              <strong>💡 Tip:</strong> Confirm room availability and guest
+              preferences before finalizing the booking to ensure a smooth
+              check-in experience.
             </div>
           </div>
         </div>
@@ -411,16 +417,16 @@ const HospitalityMultiStepForm = ({
                               item.type === "Room Charge"
                                 ? "bg-blue-100 text-blue-800"
                                 : item.type === "Food & Beverage"
-                                ? "bg-green-100 text-green-800"
-                                : item.type === "Laundry"
-                                ? "bg-purple-100 text-purple-800"
-                                : item.type === "Minibar"
-                                ? "bg-orange-100 text-orange-800"
-                                : item.type === "Spa & Wellness"
-                                ? "bg-pink-100 text-pink-800"
-                                : item.type === "Room Service"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-gray-100 text-gray-800"
+                                  ? "bg-green-100 text-green-800"
+                                  : item.type === "Laundry"
+                                    ? "bg-purple-100 text-purple-800"
+                                    : item.type === "Minibar"
+                                      ? "bg-orange-100 text-orange-800"
+                                      : item.type === "Spa & Wellness"
+                                        ? "bg-pink-100 text-pink-800"
+                                        : item.type === "Room Service"
+                                          ? "bg-yellow-100 text-yellow-800"
+                                          : "bg-gray-100 text-gray-800"
                             }`}
                           >
                             {item.type}
@@ -476,7 +482,7 @@ const HospitalityMultiStepForm = ({
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous
+          <span className="hidden sm:inline">Previous</span>
         </button>
 
         <div className="text-sm text-gray-600 font-medium">
@@ -492,7 +498,7 @@ const HospitalityMultiStepForm = ({
               : "bg-purple-600 text-white hover:bg-purple-700"
           }`}
         >
-          Next
+          <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

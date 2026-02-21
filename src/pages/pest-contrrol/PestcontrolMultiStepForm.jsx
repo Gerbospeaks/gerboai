@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Users, Building2, Plus, ChevronLeft, ChevronRight, Edit } from "lucide-react";
+import {
+  Users,
+  Building2,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+} from "lucide-react";
 
 const PestcontrolMultiStepForm = ({
   // Client Info Props
@@ -199,7 +206,9 @@ const PestcontrolMultiStepForm = ({
               />
             </div>
             <div className="col-span-1 sm:col-span-2">
-              <div className="text-sm text-gray-500 mb-1">Project Address *</div>
+              <div className="text-sm text-gray-500 mb-1">
+                Project Address *
+              </div>
               <input
                 type="text"
                 value={projectAddress}
@@ -257,7 +266,9 @@ const PestcontrolMultiStepForm = ({
           {/* Project Info Helper */}
           <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-3">
             <div className="text-xs text-orange-700">
-              <strong>💡 Tip:</strong> Provide detailed project information to generate accurate quotes and invoices. The project type helps categorize work for reporting.
+              <strong>💡 Tip:</strong> Provide detailed project information to
+              generate accurate quotes and invoices. The project type helps
+              categorize work for reporting.
             </div>
           </div>
         </div>
@@ -363,10 +374,10 @@ const PestcontrolMultiStepForm = ({
                               item.type === "Labor"
                                 ? "bg-blue-100 text-blue-800"
                                 : item.type === "Materials"
-                                ? "bg-green-100 text-green-800"
-                                : item.type === "Equipment"
-                                ? "bg-purple-100 text-purple-800"
-                                : "bg-orange-100 text-orange-800"
+                                  ? "bg-green-100 text-green-800"
+                                  : item.type === "Equipment"
+                                    ? "bg-purple-100 text-purple-800"
+                                    : "bg-orange-100 text-orange-800"
                             }`}
                           >
                             {item.type}
@@ -422,7 +433,7 @@ const PestcontrolMultiStepForm = ({
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous
+          <span className="hidden sm:inline">Previous</span>
         </button>
 
         <div className="text-sm text-gray-600 font-medium">
@@ -438,7 +449,7 @@ const PestcontrolMultiStepForm = ({
               : "bg-orange-600 text-white hover:bg-orange-700"
           }`}
         >
-          Next
+          <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

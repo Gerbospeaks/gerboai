@@ -1,21 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { Save, X, User, Mail, Phone, MapPin, Hash, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Save,
+  X,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Hash,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { db } from '../firebase';
-import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { db } from "../firebase";
+import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 
-const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCustomerSaved }) => {
+const CustomerModal = ({
+  showModal,
+  setShowModal,
+  existingCustomer = null,
+  onCustomerSaved,
+}) => {
   const [customerData, setCustomerData] = useState({
-    name: existingCustomer?.name || '',
-    email: existingCustomer?.email || '',
-    phone: existingCustomer?.phone || '',
-    address: existingCustomer?.address || '',
-    customerId: existingCustomer?.customerId || ''
+    name: existingCustomer?.name || "",
+    email: existingCustomer?.email || "",
+    phone: existingCustomer?.phone || "",
+    address: existingCustomer?.address || "",
+    customerId: existingCustomer?.customerId || "",
   });
-  
+
   const { user, authUser } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -25,19 +40,19 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
       setIsMobile(window.innerWidth < 768);
     };
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Update form when existingCustomer changes
   useEffect(() => {
     if (existingCustomer) {
       setCustomerData({
-        name: existingCustomer.name || '',
-        email: existingCustomer.email || '',
-        phone: existingCustomer.phone || '',
-        address: existingCustomer.address || '',
-        customerId: existingCustomer.customerId || ''
+        name: existingCustomer.name || "",
+        email: existingCustomer.email || "",
+        phone: existingCustomer.phone || "",
+        address: existingCustomer.address || "",
+        customerId: existingCustomer.customerId || "",
       });
     }
   }, [existingCustomer]);
@@ -45,52 +60,64 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
   const handleSaveCustomer = async () => {
     // Validation
     if (!customerData.name.trim()) {
-      setError('Customer name is required');
+      setError("Customer name is required");
       return;
     }
 
     if (!customerData.phone.trim()) {
-      setError('Phone number is required');
+      setError("Phone number is required");
       return;
     }
 
     // Email validation (if provided)
-    if (customerData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerData.email)) {
-      setError('Please enter a valid email address');
+    if (
+      customerData.email &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerData.email)
+    ) {
+      setError("Please enter a valid email address");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     setSuccess(false);
 
     try {
       if (existingCustomer && existingCustomer.id) {
         // Update existing customer
-        const customerRef = doc(db, 'users', user.uid, 'clients', existingCustomer.id);
+        const customerRef = doc(
+          db,
+          "users",
+          user.uid,
+          "clients",
+          existingCustomer.id,
+        );
         await updateDoc(customerRef, {
           name: customerData.name.trim(),
           email: customerData.email.trim(),
           phone: customerData.phone.trim(),
           address: customerData.address.trim(),
           customerId: customerData.customerId.trim() || `CUST-${Date.now()}`,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         });
-        
-        console.log('Customer updated successfully');
+
+        console.log("Customer updated successfully");
       } else {
         // Add new customer
-        const docRef = await addDoc(collection(db, 'users', user.uid, 'clients'), {
-          name: customerData.name.trim(),
-          email: customerData.email.trim(),
-          phone: customerData.phone.trim(),
-          address: customerData.address.trim(),
-          customerId: customerData.customerId.trim() || `CUST-${Date.now()}`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        });
-        
-        console.log('Customer added with ID:', docRef.id);
+        const docRef = await addDoc(
+          collection(db, "users", user.uid, "clients"),
+          {
+            name: customerData.name.trim(),
+            email: customerData.email.trim(),
+            phone: customerData.phone.trim(),
+            address: customerData.address.trim(),
+            customerId: customerData.customerId.trim() || `CUST-${Date.now()}`,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        );
+
+        console.log("Customer added with ID:", docRef.id);
       }
 
       // Show success state
@@ -106,10 +133,9 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
         setShowModal(false);
         resetForm();
       }, 1200);
-
     } catch (err) {
-      console.error('Error saving customer:', err);
-      setError('Failed to save customer. Please try again.');
+      console.error("Error saving customer:", err);
+      setError("Failed to save customer. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -117,13 +143,13 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
 
   const resetForm = () => {
     setCustomerData({
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-      customerId: ''
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      customerId: "",
     });
-    setError('');
+    setError("");
     setSuccess(false);
   };
 
@@ -137,19 +163,19 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && showModal) {
+      if (e.key === "Escape" && showModal) {
         handleClose();
       }
     };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
   }, [showModal]);
 
   if (!showModal) return null;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn">
-      <div 
+      <div
         className="bg-white rounded-xl md:rounded-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp"
         onClick={(e) => e.stopPropagation()}
       >
@@ -162,10 +188,12 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
               </div>
               <div>
                 <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                  {existingCustomer ? 'Edit Customer' : 'Add New Customer'}
+                  {existingCustomer ? "Edit Customer" : "Add New Customer"}
                 </h2>
                 <p className="text-xs md:text-sm text-slate-600 mt-0.5">
-                  {existingCustomer ? 'Update customer information' : 'Create a new customer profile'}
+                  {existingCustomer
+                    ? "Update customer information"
+                    : "Create a new customer profile"}
                 </p>
               </div>
             </div>
@@ -197,9 +225,12 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
               <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4 flex items-start space-x-3 animate-slideDown">
                 <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-emerald-900">Success!</p>
+                  <p className="text-sm font-semibold text-emerald-900">
+                    Success!
+                  </p>
                   <p className="text-sm text-emerald-700 mt-1">
-                    Customer {existingCustomer ? 'updated' : 'created'} successfully
+                    Customer {existingCustomer ? "updated" : "created"}{" "}
+                    successfully
                   </p>
                 </div>
               </div>
@@ -209,7 +240,9 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
             <div className="bg-white rounded-xl p-4 md:p-5 border-2 border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
               <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center space-x-2">
                 <User className="w-4 h-4 text-blue-600" />
-                <span>Customer Name <span className="text-red-500">*</span></span>
+                <span>
+                  Customer Name <span className="text-red-500">*</span>
+                </span>
               </label>
               <input
                 type="text"
@@ -256,7 +289,9 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
             <div className="bg-white rounded-xl p-4 md:p-5 border-2 border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
               <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-emerald-600" />
-                <span>Phone Number <span className="text-red-500">*</span></span>
+                <span>
+                  Phone Number <span className="text-red-500">*</span>
+                </span>
               </label>
               <input
                 type="tel"
@@ -336,7 +371,7 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
             >
               Cancel
             </button>
-            
+
             <button
               onClick={handleSaveCustomer}
               disabled={loading || success}
@@ -355,7 +390,9 @@ const CustomerModal = ({ showModal, setShowModal, existingCustomer = null, onCus
               ) : (
                 <>
                   <Save className="w-5 h-5" />
-                  <span>{existingCustomer ? 'Update Customer' : 'Save Customer'}</span>
+                  <span>
+                    {existingCustomer ? "Update Customer" : "Save Customer"}
+                  </span>
                 </>
               )}
             </button>

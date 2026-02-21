@@ -1,61 +1,82 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, User, Mail, Phone, MapPin, Building2, Tag } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
-import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import React, { useState, useEffect } from "react";
+import {
+  X,
+  Save,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Building2,
+  Tag,
+} from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  serverTimestamp,
+} from "firebase/firestore";
 
-const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved }) => {
-  const {user, authUser} = useAuth();
+const ClientModal = ({
+  showModal,
+  setShowModal,
+  existingClient,
+  onClientSaved,
+}) => {
+  const { user, authUser } = useAuth();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    company: '',
-    clientType: 'Residential',
-    clientId: ''
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    company: "",
+    clientType: "Residential",
+    clientId: "",
   });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (existingClient) {
       setFormData({
-        name: existingClient.name || '',
-        email: existingClient.email || '',
-        phone: existingClient.phone || '',
-        address: existingClient.address || '',
-        company: existingClient.company || '',
-        clientType: existingClient.clientType || 'Residential',
-        clientId: existingClient.clientId || ''
+        name: existingClient.name || "",
+        email: existingClient.email || "",
+        phone: existingClient.phone || "",
+        address: existingClient.address || "",
+        company: existingClient.company || "",
+        clientType: existingClient.clientType || "Residential",
+        clientId: existingClient.clientId || "",
       });
     } else {
       setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
-        company: '',
-        clientType: 'Residential',
-        clientId: `CLI-${Date.now()}`
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+        company: "",
+        clientType: "Residential",
+        clientId: `CLI-${Date.now()}`,
       });
     }
   }, [existingClient, showModal]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async () => {
     if (!user?.uid) {
-      alert('User not authenticated');
+      alert("User not authenticated");
       return;
     }
 
     if (!formData.name || !formData.phone) {
-      alert('Please enter client name and phone number');
+      alert("Please enter client name and phone number");
       return;
     }
 
@@ -65,35 +86,38 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
       const db = getFirestore();
       const clientData = {
         ...formData,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       if (existingClient?.id) {
-        await updateDoc(doc(db, 'users', user.uid, 'clients', existingClient.id), clientData);
-        alert('Client updated successfully!');
+        await updateDoc(
+          doc(db, "users", user.uid, "clients", existingClient.id),
+          clientData,
+        );
+        alert("Client updated successfully!");
       } else {
         clientData.createdAt = serverTimestamp();
-        await addDoc(collection(db, 'users', user.uid, 'clients'), clientData);
-        alert('Client added successfully!');
+        await addDoc(collection(db, "users", user.uid, "clients"), clientData);
+        alert("Client added successfully!");
       }
 
       if (onClientSaved) {
         onClientSaved();
       }
-      
+
       setShowModal(false);
       setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
-        company: '',
-        clientType: 'Residential',
-        clientId: ''
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+        company: "",
+        clientType: "Residential",
+        clientId: "",
       });
     } catch (error) {
-      console.error('Error saving client:', error);
-      alert('Failed to save client. Please try again.');
+      console.error("Error saving client:", error);
+      alert("Failed to save client. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -102,13 +126,13 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
   const handleClose = () => {
     setShowModal(false);
     setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-      company: '',
-      clientType: 'Residential',
-      clientId: ''
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      company: "",
+      clientType: "Residential",
+      clientId: "",
     });
   };
 
@@ -119,7 +143,7 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-4 border-b flex items-center justify-between bg-gray-600 text-gray-800">
           <h2 className="text-xl font-semibold">
-            {existingClient ? 'Edit Client' : 'Add New Client'}
+            {existingClient ? "Edit Client" : "Add New Client"}
           </h2>
           <button
             onClick={handleClose}
@@ -264,7 +288,11 @@ const ClientModal = ({ showModal, setShowModal, existingClient, onClientSaved })
                 disabled={saving}
               >
                 <Save className="w-4 h-4" />
-                {saving ? 'Saving...' : existingClient ? 'Update Client' : 'Add Client'}
+                {saving
+                  ? "Saving..."
+                  : existingClient
+                    ? "Update Client"
+                    : "Add Client"}
               </button>
             </div>
           </div>

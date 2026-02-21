@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  X, 
-  Search, 
-  Calendar, 
-  User, 
-  Bed, 
+import React, { useState, useEffect } from "react";
+import {
+  X,
+  Search,
+  Calendar,
+  User,
+  Bed,
   Clock,
   CheckCircle,
   XCircle,
@@ -16,8 +16,8 @@ import {
   Filter,
   Download,
   Upload,
-  AlertCircle
-} from 'lucide-react';
+  AlertCircle,
+} from "lucide-react";
 import {
   getFirestore,
   collection,
@@ -30,8 +30,8 @@ import {
   doc,
   serverTimestamp,
   where,
-  setDoc
-} from 'firebase/firestore';
+  setDoc,
+} from "firebase/firestore";
 
 // Helper function to create check-in from invoice
 export const createCheckInFromInvoice = async (userId, invoiceData) => {
@@ -40,82 +40,86 @@ export const createCheckInFromInvoice = async (userId, invoiceData) => {
   try {
     const db = getFirestore();
     const checkInData = {
-      guestName: invoiceData.guest?.name || '',
-      guestId: invoiceData.guest?.guestId || '',
-      guestEmail: invoiceData.guest?.email || '',
-      guestPhone: invoiceData.guest?.phone || '',
-      guestAddress: invoiceData.guest?.address || '',
-      guestDOB: invoiceData.guest?.dateOfBirth || '',
-      guestNationality: invoiceData.guest?.nationality || '',
-      idType: invoiceData.guest?.idType || '',
-      idNumber: invoiceData.guest?.idNumber || '',
-      roomNumber: invoiceData.booking?.roomNumber || '',
-      roomType: invoiceData.booking?.roomType || '',
-      checkInDate: invoiceData.booking?.checkInDate || '',
-      checkOutDate: invoiceData.booking?.checkOutDate || '',
-      numberOfGuests: invoiceData.booking?.numberOfGuests || '1',
-      notes: invoiceData.booking?.specialRequests || '',
-      status: 'pending',
-      invoiceNumber: invoiceData.invoiceNumber || '',
+      guestName: invoiceData.guest?.name || "",
+      guestId: invoiceData.guest?.guestId || "",
+      guestEmail: invoiceData.guest?.email || "",
+      guestPhone: invoiceData.guest?.phone || "",
+      guestAddress: invoiceData.guest?.address || "",
+      guestDOB: invoiceData.guest?.dateOfBirth || "",
+      guestNationality: invoiceData.guest?.nationality || "",
+      idType: invoiceData.guest?.idType || "",
+      idNumber: invoiceData.guest?.idNumber || "",
+      roomNumber: invoiceData.booking?.roomNumber || "",
+      roomType: invoiceData.booking?.roomType || "",
+      checkInDate: invoiceData.booking?.checkInDate || "",
+      checkOutDate: invoiceData.booking?.checkOutDate || "",
+      numberOfGuests: invoiceData.booking?.numberOfGuests || "1",
+      notes: invoiceData.booking?.specialRequests || "",
+      status: "pending",
+      invoiceNumber: invoiceData.invoiceNumber || "",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-      source: 'invoice'
+      source: "invoice",
     };
 
-    await addDoc(collection(db, 'users', userId, 'checkIns'), checkInData);
-    console.log('Check-in created from invoice successfully');
+    await addDoc(collection(db, "users", userId, "checkIns"), checkInData);
+    console.log("Check-in created from invoice successfully");
     return true;
   } catch (error) {
-    console.error('Error creating check-in from invoice:', error);
+    console.error("Error creating check-in from invoice:", error);
     return false;
   }
 };
 
 // Helper function to create check-in from guest
-export const createCheckInFromGuest = async (userId, guestData, bookingData = {}) => {
+export const createCheckInFromGuest = async (
+  userId,
+  guestData,
+  bookingData = {},
+) => {
   if (!userId || !guestData) return;
 
   try {
     const db = getFirestore();
     const checkInData = {
-      guestName: guestData.name || '',
-      guestId: guestData.guestId || '',
-      guestEmail: guestData.email || '',
-      guestPhone: guestData.phone || '',
-      guestAddress: guestData.address || '',
-      guestDOB: guestData.dateOfBirth || '',
-      guestNationality: guestData.nationality || '',
-      idType: guestData.idType || '',
-      idNumber: guestData.idNumber || '',
-      roomNumber: bookingData.roomNumber || '',
-      roomType: bookingData.roomType || 'Standard Double Room',
-      checkInDate: bookingData.checkInDate || '',
-      checkOutDate: bookingData.checkOutDate || '',
-      numberOfGuests: bookingData.numberOfGuests || '1',
-      notes: bookingData.notes || '',
-      status: 'pending',
+      guestName: guestData.name || "",
+      guestId: guestData.guestId || "",
+      guestEmail: guestData.email || "",
+      guestPhone: guestData.phone || "",
+      guestAddress: guestData.address || "",
+      guestDOB: guestData.dateOfBirth || "",
+      guestNationality: guestData.nationality || "",
+      idType: guestData.idType || "",
+      idNumber: guestData.idNumber || "",
+      roomNumber: bookingData.roomNumber || "",
+      roomType: bookingData.roomType || "Standard Double Room",
+      checkInDate: bookingData.checkInDate || "",
+      checkOutDate: bookingData.checkOutDate || "",
+      numberOfGuests: bookingData.numberOfGuests || "1",
+      notes: bookingData.notes || "",
+      status: "pending",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-      source: 'guest'
+      source: "guest",
     };
 
-    await addDoc(collection(db, 'users', userId, 'checkIns'), checkInData);
-    console.log('Check-in created from guest successfully');
+    await addDoc(collection(db, "users", userId, "checkIns"), checkInData);
+    console.log("Check-in created from guest successfully");
     return true;
   } catch (error) {
-    console.error('Error creating check-in from guest:', error);
+    console.error("Error creating check-in from guest:", error);
     return false;
   }
 };
 
 const CheckInOutModal = ({ showModal, setShowModal, user }) => {
-  const [activeTab, setActiveTab] = useState('pending'); // pending, checkedin, checkedout
-  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState("pending"); // pending, checkedin, checkedout
+  const [searchTerm, setSearchTerm] = useState("");
   const [checkIns, setCheckIns] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedCheckIn, setSelectedCheckIn] = useState(null);
-  const [filterDate, setFilterDate] = useState('');
+  const [filterDate, setFilterDate] = useState("");
 
   useEffect(() => {
     if (showModal && user?.uid) {
@@ -129,19 +133,19 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
     setLoading(true);
     try {
       const db = getFirestore();
-      const checkInsRef = collection(db, 'users', user.uid, 'checkIns');
-      
-      let q = query(checkInsRef, orderBy('createdAt', 'desc'));
-      
+      const checkInsRef = collection(db, "users", user.uid, "checkIns");
+
+      let q = query(checkInsRef, orderBy("createdAt", "desc"));
+
       const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({
+      const data = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
 
       setCheckIns(data);
     } catch (error) {
-      console.error('Error loading check-ins:', error);
+      console.error("Error loading check-ins:", error);
     } finally {
       setLoading(false);
     }
@@ -152,17 +156,17 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
 
     try {
       const db = getFirestore();
-      await updateDoc(doc(db, 'users', user.uid, 'checkIns', checkInData.id), {
-        status: 'checkedin',
+      await updateDoc(doc(db, "users", user.uid, "checkIns", checkInData.id), {
+        status: "checkedin",
         actualCheckInTime: new Date().toISOString(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
-      alert('Guest checked in successfully!');
+      alert("Guest checked in successfully!");
       loadCheckIns();
     } catch (error) {
-      console.error('Error checking in:', error);
-      alert('Failed to check in guest');
+      console.error("Error checking in:", error);
+      alert("Failed to check in guest");
     }
   };
 
@@ -171,74 +175,82 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
 
     try {
       const db = getFirestore();
-      await updateDoc(doc(db, 'users', user.uid, 'checkIns', checkInData.id), {
-        status: 'checkedout',
+      await updateDoc(doc(db, "users", user.uid, "checkIns", checkInData.id), {
+        status: "checkedout",
         actualCheckOutTime: new Date().toISOString(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
-      alert('Guest checked out successfully!');
+      alert("Guest checked out successfully!");
       loadCheckIns();
     } catch (error) {
-      console.error('Error checking out:', error);
-      alert('Failed to check out guest');
+      console.error("Error checking out:", error);
+      alert("Failed to check out guest");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this check-in record?')) return;
+    if (
+      !window.confirm("Are you sure you want to delete this check-in record?")
+    )
+      return;
     if (!user?.uid) return;
 
     try {
       const db = getFirestore();
-      await deleteDoc(doc(db, 'users', user.uid, 'checkIns', id));
-      alert('Check-in deleted successfully!');
+      await deleteDoc(doc(db, "users", user.uid, "checkIns", id));
+      alert("Check-in deleted successfully!");
       loadCheckIns();
     } catch (error) {
-      console.error('Error deleting check-in:', error);
-      alert('Failed to delete check-in');
+      console.error("Error deleting check-in:", error);
+      alert("Failed to delete check-in");
     }
   };
 
-  const filteredCheckIns = checkIns.filter(checkIn => {
-    const matchesSearch = 
+  const filteredCheckIns = checkIns.filter((checkIn) => {
+    const matchesSearch =
       checkIn.guestName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       checkIn.roomNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       checkIn.guestId?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesTab = 
-      activeTab === 'all' ? true :
-      activeTab === 'pending' ? checkIn.status === 'pending' :
-      activeTab === 'checkedin' ? checkIn.status === 'checkedin' :
-      activeTab === 'checkedout' ? checkIn.status === 'checkedout' :
-      true;
+    const matchesTab =
+      activeTab === "all"
+        ? true
+        : activeTab === "pending"
+          ? checkIn.status === "pending"
+          : activeTab === "checkedin"
+            ? checkIn.status === "checkedin"
+            : activeTab === "checkedout"
+              ? checkIn.status === "checkedout"
+              : true;
 
-    const matchesDate = filterDate ? 
-      checkIn.checkInDate?.startsWith(filterDate) : true;
+    const matchesDate = filterDate
+      ? checkIn.checkInDate?.startsWith(filterDate)
+      : true;
 
     return matchesSearch && matchesTab && matchesDate;
   });
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'checkedin':
-        return 'bg-green-100 text-green-800';
-      case 'checkedout':
-        return 'bg-gray-100 text-gray-800';
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "checkedin":
+        return "bg-green-100 text-green-800";
+      case "checkedout":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'pending':
+      case "pending":
         return <Clock className="w-4 h-4" />;
-      case 'checkedin':
+      case "checkedin":
         return <UserCheck className="w-4 h-4" />;
-      case 'checkedout':
+      case "checkedout":
         return <UserX className="w-4 h-4" />;
       default:
         return <Clock className="w-4 h-4" />;
@@ -246,10 +258,10 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
   };
 
   const stats = {
-    pending: checkIns.filter(c => c.status === 'pending').length,
-    checkedin: checkIns.filter(c => c.status === 'checkedin').length,
-    checkedout: checkIns.filter(c => c.status === 'checkedout').length,
-    total: checkIns.length
+    pending: checkIns.filter((c) => c.status === "pending").length,
+    checkedin: checkIns.filter((c) => c.status === "checkedin").length,
+    checkedout: checkIns.filter((c) => c.status === "checkedout").length,
+    total: checkIns.length,
   };
 
   if (!showModal) return null;
@@ -260,8 +272,12 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
         {/* Header */}
         <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 text-gray-800">
           <div>
-            <h2 className="text-2xl font-bold">Check-In / Check-Out Management</h2>
-            <p className="text-sm text-blue-100 mt-1">Manage guest arrivals and departures</p>
+            <h2 className="text-2xl font-bold">
+              Check-In / Check-Out Management
+            </h2>
+            <p className="text-sm text-blue-100 mt-1">
+              Manage guest arrivals and departures
+            </p>
           </div>
           <button
             onClick={() => setShowModal(false)}
@@ -277,7 +293,9 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-gray-600">Pending</div>
-                <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+                <div className="text-2xl font-bold text-yellow-600">
+                  {stats.pending}
+                </div>
               </div>
               <Clock className="w-8 h-8 text-yellow-600" />
             </div>
@@ -286,7 +304,9 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-gray-600">Checked In</div>
-                <div className="text-2xl font-bold text-green-600">{stats.checkedin}</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {stats.checkedin}
+                </div>
               </div>
               <UserCheck className="w-8 h-8 text-green-600" />
             </div>
@@ -295,7 +315,9 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-gray-600">Checked Out</div>
-                <div className="text-2xl font-bold text-gray-600">{stats.checkedout}</div>
+                <div className="text-2xl font-bold text-gray-600">
+                  {stats.checkedout}
+                </div>
               </div>
               <UserX className="w-8 h-8 text-gray-600" />
             </div>
@@ -304,7 +326,9 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-gray-600">Total</div>
-                <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {stats.total}
+                </div>
               </div>
               <Bed className="w-8 h-8 text-blue-600" />
             </div>
@@ -349,18 +373,22 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
           {/* Tabs */}
           <div className="flex gap-2 border-b">
             {[
-              { id: 'all', label: 'All', count: stats.total },
-              { id: 'pending', label: 'Pending', count: stats.pending },
-              { id: 'checkedin', label: 'Checked In', count: stats.checkedin },
-              { id: 'checkedout', label: 'Checked Out', count: stats.checkedout }
-            ].map(tab => (
+              { id: "all", label: "All", count: stats.total },
+              { id: "pending", label: "Pending", count: stats.pending },
+              { id: "checkedin", label: "Checked In", count: stats.checkedin },
+              {
+                id: "checkedout",
+                label: "Checked Out",
+                count: stats.checkedout,
+              },
+            ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
                 }`}
               >
                 {tab.label} ({tab.count})
@@ -399,38 +427,48 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                         <h3 className="text-lg font-semibold text-gray-900">
                           {checkIn.guestName}
                         </h3>
-                        <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs text-sm font-medium ${getStatusBadge(checkIn.status)}`}>
+                        <span
+                          className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs text-sm font-medium ${getStatusBadge(checkIn.status)}`}
+                        >
                           {getStatusIcon(checkIn.status)}
                           {checkIn.status?.toUpperCase()}
                         </span>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
                         <div>
                           <div className="flex items-center gap-1">
                             <User className="w-4 h-4" />
-                            <span className="text-sm font-medium">Guest ID:</span>
+                            <span className="text-sm font-medium">
+                              Guest ID:
+                            </span>
                           </div>
-                          <div className="ml-5">{checkIn.guestId || 'N/A'}</div>
+                          <div className="ml-5">{checkIn.guestId || "N/A"}</div>
                         </div>
                         <div>
                           <div className="flex items-center gap-1">
                             <Bed className="w-4 h-4" />
                             <span className="text-sm font-medium">Room:</span>
                           </div>
-                          <div className="ml-5">{checkIn.roomNumber} - {checkIn.roomType}</div>
+                          <div className="ml-5">
+                            {checkIn.roomNumber} - {checkIn.roomType}
+                          </div>
                         </div>
                         <div>
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            <span className="text-sm font-medium">Check-In:</span>
+                            <span className="text-sm font-medium">
+                              Check-In:
+                            </span>
                           </div>
                           <div className="ml-5">{checkIn.checkInDate}</div>
                         </div>
                         <div>
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            <span className="text-sm font-medium">Check-Out:</span>
+                            <span className="text-sm font-medium">
+                              Check-Out:
+                            </span>
                           </div>
                           <div className="ml-5">{checkIn.checkOutDate}</div>
                         </div>
@@ -438,13 +476,14 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
 
                       {checkIn.notes && (
                         <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                          <span className="text-sm font-medium">Notes:</span> {checkIn.notes}
+                          <span className="text-sm font-medium">Notes:</span>{" "}
+                          {checkIn.notes}
                         </div>
                       )}
                     </div>
 
                     <div className="flex flex-col gap-2 ml-4">
-                      {checkIn.status === 'pending' && (
+                      {checkIn.status === "pending" && (
                         <button
                           onClick={() => handleCheckIn(checkIn)}
                           className="flex items-center gap-2 px-3 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 text-sm transition-colors"
@@ -453,7 +492,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                           Check In
                         </button>
                       )}
-                      {checkIn.status === 'checkedin' && (
+                      {checkIn.status === "checkedin" && (
                         <button
                           onClick={() => handleCheckOut(checkIn)}
                           className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-gray-800 rounded-lg hover:bg-blue-700 text-sm transition-colors"
@@ -506,19 +545,25 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
 };
 
 // Add/Edit Check-In Modal Component
-const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSaved }) => {
+const AddCheckInModal = ({
+  showModal,
+  setShowModal,
+  user,
+  existingCheckIn,
+  onSaved,
+}) => {
   const [formData, setFormData] = useState({
-    guestName: '',
-    guestId: '',
-    guestEmail: '',
-    guestPhone: '',
-    roomNumber: '',
-    roomType: 'Standard Double Room',
-    checkInDate: '',
-    checkOutDate: '',
-    numberOfGuests: '1',
-    notes: '',
-    status: 'pending'
+    guestName: "",
+    guestId: "",
+    guestEmail: "",
+    guestPhone: "",
+    roomNumber: "",
+    roomType: "Standard Double Room",
+    checkInDate: "",
+    checkOutDate: "",
+    numberOfGuests: "1",
+    notes: "",
+    status: "pending",
   });
 
   useEffect(() => {
@@ -533,28 +578,31 @@ const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSav
 
     try {
       const db = getFirestore();
-      
+
       const dataToSave = {
         ...formData,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       if (existingCheckIn) {
-        await updateDoc(doc(db, 'users', user.uid, 'checkIns', existingCheckIn.id), dataToSave);
-        alert('Check-in updated successfully!');
+        await updateDoc(
+          doc(db, "users", user.uid, "checkIns", existingCheckIn.id),
+          dataToSave,
+        );
+        alert("Check-in updated successfully!");
       } else {
-        await addDoc(collection(db, 'users', user.uid, 'checkIns'), {
+        await addDoc(collection(db, "users", user.uid, "checkIns"), {
           ...dataToSave,
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
         });
-        alert('Check-in added successfully!');
+        alert("Check-in added successfully!");
       }
 
       onSaved();
       setShowModal(false);
     } catch (error) {
-      console.error('Error saving check-in:', error);
-      alert('Failed to save check-in');
+      console.error("Error saving check-in:", error);
+      alert("Failed to save check-in");
     }
   };
 
@@ -565,7 +613,7 @@ const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSav
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b flex items-center justify-between">
           <h2 className="text-xl font-semibold">
-            {existingCheckIn ? 'Edit Check-In' : 'Add New Check-In'}
+            {existingCheckIn ? "Edit Check-In" : "Add New Check-In"}
           </h2>
           <button
             onClick={() => setShowModal(false)}
@@ -579,21 +627,29 @@ const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSav
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Guest Name *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Guest Name *
+                </label>
                 <input
                   type="text"
                   required
                   value={formData.guestName}
-                  onChange={(e) => setFormData({...formData, guestName: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, guestName: e.target.value })
+                  }
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Guest ID</label>
+                <label className="block text-sm font-medium mb-2">
+                  Guest ID
+                </label>
                 <input
                   type="text"
                   value={formData.guestId}
-                  onChange={(e) => setFormData({...formData, guestId: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, guestId: e.target.value })
+                  }
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -605,7 +661,9 @@ const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSav
                 <input
                   type="email"
                   value={formData.guestEmail}
-                  onChange={(e) => setFormData({...formData, guestEmail: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, guestEmail: e.target.value })
+                  }
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -614,7 +672,9 @@ const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSav
                 <input
                   type="tel"
                   value={formData.guestPhone}
-                  onChange={(e) => setFormData({...formData, guestPhone: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, guestPhone: e.target.value })
+                  }
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -622,25 +682,37 @@ const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSav
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Room Number *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Room Number *
+                </label>
                 <input
                   type="text"
                   required
                   value={formData.roomNumber}
-                  onChange={(e) => setFormData({...formData, roomNumber: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, roomNumber: e.target.value })
+                  }
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Room Type *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Room Type *
+                </label>
                 <select
                   required
                   value={formData.roomType}
-                  onChange={(e) => setFormData({...formData, roomType: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, roomType: e.target.value })
+                  }
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="Standard Single Room">Standard Single Room</option>
-                  <option value="Standard Double Room">Standard Double Room</option>
+                  <option value="Standard Single Room">
+                    Standard Single Room
+                  </option>
+                  <option value="Standard Double Room">
+                    Standard Double Room
+                  </option>
                   <option value="Deluxe Single Room">Deluxe Single Room</option>
                   <option value="Deluxe Double Room">Deluxe Double Room</option>
                   <option value="Executive Suite">Executive Suite</option>
@@ -652,34 +724,46 @@ const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSav
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Check-In Date *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Check-In Date *
+                </label>
                 <input
                   type="date"
                   required
                   value={formData.checkInDate}
-                  onChange={(e) => setFormData({...formData, checkInDate: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, checkInDate: e.target.value })
+                  }
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Check-Out Date *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Check-Out Date *
+                </label>
                 <input
                   type="date"
                   required
                   value={formData.checkOutDate}
-                  onChange={(e) => setFormData({...formData, checkOutDate: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, checkOutDate: e.target.value })
+                  }
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Number of Guests</label>
+              <label className="block text-sm font-medium mb-2">
+                Number of Guests
+              </label>
               <input
                 type="number"
                 min="1"
                 value={formData.numberOfGuests}
-                onChange={(e) => setFormData({...formData, numberOfGuests: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, numberOfGuests: e.target.value })
+                }
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -688,7 +772,9 @@ const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSav
               <label className="block text-sm font-medium mb-2">Notes</label>
               <textarea
                 value={formData.notes}
-                onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
                 rows="3"
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Special requests, preferences, etc."
@@ -700,7 +786,7 @@ const AddCheckInModal = ({ showModal, setShowModal, user, existingCheckIn, onSav
                 type="submit"
                 className="flex-1 bg-blue-600 text-gray-800 py-3 rounded-lg hover:bg-blue-700 text-sm font-medium"
               >
-                {existingCheckIn ? 'Update Check-In' : 'Add Check-In'}
+                {existingCheckIn ? "Update Check-In" : "Add Check-In"}
               </button>
               <button
                 type="button"

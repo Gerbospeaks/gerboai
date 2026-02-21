@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import Vapi from '@vapi-ai/web';
-import { Mic, MicOff, Phone, PhoneOff } from 'lucide-react';
+import { useEffect, useRef, useState } from "react";
+import Vapi from "@vapi-ai/web";
+import { Mic, MicOff, Phone, PhoneOff } from "lucide-react";
 
 function VapiAssistant() {
   const [isCallActive, setIsCallActive] = useState(false);
@@ -9,33 +9,33 @@ function VapiAssistant() {
 
   useEffect(() => {
     // Initialize Vapi
-    const vapi = new Vapi('6fbcc6b2-c19e-4f0a-b3fb-dac4a5a4f377'); // Replace with your key
+    const vapi = new Vapi("6fbcc6b2-c19e-4f0a-b3fb-dac4a5a4f377"); // Replace with your key
     vapiRef.current = vapi;
 
     // Event listeners
-    vapi.on('call-start', () => {
-      console.log('Call started');
+    vapi.on("call-start", () => {
+      console.log("Call started");
       setIsCallActive(true);
     });
 
-    vapi.on('call-end', () => {
-      console.log('Call ended');
+    vapi.on("call-end", () => {
+      console.log("Call ended");
       setIsCallActive(false);
       setIsSpeaking(false);
     });
 
-    vapi.on('speech-start', () => {
-      console.log('Assistant started speaking');
+    vapi.on("speech-start", () => {
+      console.log("Assistant started speaking");
       setIsSpeaking(true);
     });
 
-    vapi.on('speech-end', () => {
-      console.log('Assistant stopped speaking');
+    vapi.on("speech-end", () => {
+      console.log("Assistant stopped speaking");
       setIsSpeaking(false);
     });
 
-    vapi.on('error', (error) => {
-      console.error('Vapi error:', error);
+    vapi.on("error", (error) => {
+      console.error("Vapi error:", error);
     });
 
     return () => {
@@ -47,8 +47,8 @@ function VapiAssistant() {
     try {
       await vapiRef.current.start({
         // Option 1: Use an existing assistant ID
-        assistantId: '7e49f9c1-b56a-4892-8c1f-28de1bb0428c',
-        
+        assistantId: "7e49f9c1-b56a-4892-8c1f-28de1bb0428c",
+
         // Option 2: OR create assistant inline
         // assistant: {
         //   name: 'SolidFlo Support Assistant',
@@ -70,7 +70,7 @@ function VapiAssistant() {
         // }
       });
     } catch (error) {
-      console.error('Failed to start call:', error);
+      console.error("Failed to start call:", error);
     }
   };
 
@@ -101,10 +101,10 @@ function VapiAssistant() {
               <Mic className="w-6 h-6 text-orange-500 animate-pulse" />
             )}
             <span className="font-semibold text-gray-700">
-              {isSpeaking ? 'Speaking...' : 'Listening...'}
+              {isSpeaking ? "Speaking..." : "Listening..."}
             </span>
           </div>
-          
+
           <button
             onClick={endCall}
             className="bg-red-500 hover:bg-red-600 text-white rounded-full p-3 transition-all hover:scale-110"

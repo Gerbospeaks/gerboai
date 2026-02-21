@@ -9,7 +9,7 @@ import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
   collection,
@@ -23,7 +23,14 @@ import {
   limit,
   getDocs,
 } from "firebase/firestore";
-import { Printer, Download, Sparkles, Trash2, Home as HomeIcon, Wrench } from "lucide-react";
+import {
+  Printer,
+  Download,
+  Sparkles,
+  Trash2,
+  Home as HomeIcon,
+  Wrench,
+} from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
@@ -170,25 +177,25 @@ const WindowrepairDashboard = () => {
 
     alert("✨ Data extracted and populated successfully!");
   };
-const handleTestEmail = async () => {
-  if (!businessInfo.emailPassword) {
-    alert('⚠️ Please enter your email app password first.');
-    return;
-  }
+  const handleTestEmail = async () => {
+    if (!businessInfo.emailPassword) {
+      alert("⚠️ Please enter your email app password first.");
+      return;
+    }
 
-  const userEmail = user?.email || authUser?.email;
-  
-  if (!userEmail) {
-    alert('⚠️ Could not find your email address. Please log in again.');
-    return;
-  }
+    const userEmail = user?.email || authUser?.email;
 
-  try {
-    const testEmailData = {
-      userId: user.uid,
-      to: userEmail, // Send test to self
-      subject: '✅ Test Email - Email Configuration Successful',
-      message: `
+    if (!userEmail) {
+      alert("⚠️ Could not find your email address. Please log in again.");
+      return;
+    }
+
+    try {
+      const testEmailData = {
+        userId: user.uid,
+        to: userEmail, // Send test to self
+        subject: "✅ Test Email - Email Configuration Successful",
+        message: `
 Hello,
 
 This is a test email from your construction quote/invoice system.
@@ -199,7 +206,7 @@ Account Details:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Business: ${businessInfo.businessName}
 Email: ${userEmail}
-Provider: ${businessInfo.emailProvider || 'Gmail'}
+Provider: ${businessInfo.emailProvider || "Gmail"}
 Date: ${new Date().toLocaleString()}
 
 You can now send quotes and invoices to your clients from this email address.
@@ -207,27 +214,30 @@ You can now send quotes and invoices to your clients from this email address.
 Best regards,
 Your Construction Quote System
       `.trim(),
-      documentType: 'test',
-      documentNumber: 'TEST-001',
-    };
+        documentType: "test",
+        documentNumber: "TEST-001",
+      };
 
-    const sendEmail = httpsCallable(functions, 'sendQuoteEmail');
-    await sendEmail(testEmailData);
-    
-    alert(`✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`);
-  } catch (error) {
-    console.error('Test email error:', error);
-    
-    let errorMsg = '❌ Test email failed!\n\n';
-    if (error.message.includes('Invalid login')) {
-      errorMsg += 'Your app password is incorrect. Please check and try again.\n\nMake sure you\'re using an APP PASSWORD, not your regular password.';
-    } else {
-      errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+      const sendEmail = httpsCallable(functions, "sendQuoteEmail");
+      await sendEmail(testEmailData);
+
+      alert(
+        `✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`,
+      );
+    } catch (error) {
+      console.error("Test email error:", error);
+
+      let errorMsg = "❌ Test email failed!\n\n";
+      if (error.message.includes("Invalid login")) {
+        errorMsg +=
+          "Your app password is incorrect. Please check and try again.\n\nMake sure you're using an APP PASSWORD, not your regular password.";
+      } else {
+        errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+      }
+
+      alert(errorMsg);
     }
-    
-    alert(errorMsg);
-  }
-};
+  };
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -1041,7 +1051,10 @@ Your Construction Quote System
 
           <nav className="space-y-1.5 md:space-y-2">
             <div
-              onClick={() => {setActiveView("home"); setSidebarOpen(false);}}
+              onClick={() => {
+                setActiveView("home");
+                setSidebarOpen(false);
+              }}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-slate-600/20 hover:to-slate-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
             >
               <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1049,7 +1062,10 @@ Your Construction Quote System
             </div>
 
             <div
-              onClick={() => {setShowSettings(true); setSidebarOpen(false);}}
+              onClick={() => {
+                setShowSettings(true);
+                setSidebarOpen(false);
+              }}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-indigo-500/30"
             >
               <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
@@ -1058,7 +1074,10 @@ Your Construction Quote System
 
             <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-blue-700/50">
               <div
-                onClick={() => {setActiveView("financial-overview"); setSidebarOpen(false);}}
+                onClick={() => {
+                  setActiveView("financial-overview");
+                  setSidebarOpen(false);
+                }}
                 className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
               >
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1068,7 +1087,7 @@ Your Construction Quote System
               </div>
 
               <div className="mt-2 md:mt-3">
-                <div 
+                <div
                   onClick={() => setIsQuotesInvoicesOpen(!isQuotesInvoicesOpen)}
                   className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
                 >
@@ -1078,16 +1097,18 @@ Your Construction Quote System
                       Quotes & Invoices
                     </span>
                   </div>
-                  <ChevronDown 
+                  <ChevronDown
                     className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
-                      isQuotesInvoicesOpen ? 'rotate-180' : ''
-                    }`} 
+                      isQuotesInvoicesOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </div>
 
-                <div 
+                <div
                   className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-blue-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
-                    isQuotesInvoicesOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    isQuotesInvoicesOpen
+                      ? "max-h-96 opacity-100"
+                      : "max-h-0 opacity-0"
                   }`}
                 >
                   <div
@@ -1135,7 +1156,7 @@ Your Construction Quote System
               </div>
 
               <div className="mt-2 md:mt-3">
-                <div 
+                <div
                   onClick={() => setIsClientsOpen(!isClientsOpen)}
                   className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30"
                 >
@@ -1145,16 +1166,16 @@ Your Construction Quote System
                       Clients
                     </span>
                   </div>
-                  <ChevronDown 
+                  <ChevronDown
                     className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
-                      isClientsOpen ? 'rotate-180' : ''
-                    }`} 
+                      isClientsOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </div>
 
-                <div 
+                <div
                   className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-blue-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
-                    isClientsOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    isClientsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                   }`}
                 >
                   <div
@@ -1190,7 +1211,10 @@ Your Construction Quote System
               {!isMobile && (
                 <>
                   <div
-                    onClick={() => {setActiveView("schedule"); setSidebarOpen(false);}}
+                    onClick={() => {
+                      setActiveView("schedule");
+                      setSidebarOpen(false);
+                    }}
                     className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
                   >
                     <Calendar className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1200,7 +1224,10 @@ Your Construction Quote System
                   </div>
 
                   <div
-                    onClick={() => {setActiveView("reports"); setSidebarOpen(false);}}
+                    onClick={() => {
+                      setActiveView("reports");
+                      setSidebarOpen(false);
+                    }}
                     className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-blue-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
                   >
                     <BarChart3 className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1266,10 +1293,12 @@ Your Construction Quote System
                   </div>
                   <div className="min-w-0">
                     <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-blue-800 to-indigo-600 bg-clip-text text-transparent truncate">
-                      {documentType === "quote" ? "Quote" : "Invoice"} #{quoteNumber || "—"}
+                      {documentType === "quote" ? "Quote" : "Invoice"} #
+                      {quoteNumber || "—"}
                     </h1>
                     <p className="text-xs text-slate-500 hidden md:block truncate">
-                      Window Screen Repair {documentType === "quote" ? "Quotes" : "Invoices"}
+                      Window Screen Repair{" "}
+                      {documentType === "quote" ? "Quotes" : "Invoices"}
                     </p>
                   </div>
                 </div>
@@ -1296,7 +1325,9 @@ Your Construction Quote System
                 </button>
 
                 <button
-                  onClick={documentType === "quote" ? handleNewQuote : handleNewInvoice}
+                  onClick={
+                    documentType === "quote" ? handleNewQuote : handleNewInvoice
+                  }
                   className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
                 >
                   <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
@@ -1347,12 +1378,18 @@ Your Construction Quote System
           <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
             <div className="flex gap-2 min-w-max pb-1 pr-3">
               {documentType === "quote" && quoteId && (
-                <button onClick={handleConvertToInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                <button
+                  onClick={handleConvertToInvoice}
+                  className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                >
                   <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
                   <span>To Invoice</span>
                 </button>
               )}
-              <button onClick={handleSaveQuote} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+              <button
+                onClick={handleSaveQuote}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+              >
                 <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
                 Save
               </button>
@@ -1360,19 +1397,25 @@ Your Construction Quote System
                 <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 <span>Send</span>
               </button>
-              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+              <button
+                onClick={handlePrint}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+              >
                 <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
                 <span>PDF</span>
               </button>
-              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95">
+              <button
+                onClick={handlePrint}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95"
+              >
                 <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
                 <span>Print</span>
               </button>
             </div>
           </div>
-          
-                    {/* ── Scrollable Main Content ──────────────────────────────── */}
-                   <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
+
+          {/* ── Scrollable Main Content ──────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {/* Settings Modal */}
             {showSettings && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
@@ -1714,7 +1757,6 @@ Your Construction Quote System
                                 </p>
                               </div>
 
-
                               <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                                 <label className="block text-sm font-bold text-slate-700 mb-3">
                                   Stamp Color
@@ -1846,7 +1888,8 @@ Your Construction Quote System
                   <div className="overflow-auto p-4">
                     {savedQuotes.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">
-                        No saved {documentType === "quote" ? "quotes" : "invoices"} yet
+                        No saved{" "}
+                        {documentType === "quote" ? "quotes" : "invoices"} yet
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -1911,7 +1954,9 @@ Your Construction Quote System
               </div>
             )}
 
-            {activeView === "financial-overview" && <FinancialOverview user={user} />}
+            {activeView === "financial-overview" && (
+              <FinancialOverview user={user} />
+            )}
             {activeView === "history-view" && <HistoryView user={user} />}
             {activeView === "notes-view" && <NotesView user={user} />}
             {activeView === "templates" && <Templates user={user} />}
@@ -1967,12 +2012,14 @@ Your Construction Quote System
                       <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
                         <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
                           <div className="flex items-center justify-between mb-2">
-                            <div className="text-sm font-medium text-orange-700">Total Amount</div>
+                            <div className="text-sm font-medium text-orange-700">
+                              Total Amount
+                            </div>
                             <div className="w-8 h-8 bg-orange-200 rounded-lg flex items-center justify-center">
                               <DollarSign className="w-5 h-5 text-orange-600" />
                             </div>
                           </div>
-                          <div className="text-2xl font-bold text-orange-900">
+                          <div className="text-base sm:text-lg md:text-2xl font-bold text-orange-900">
                             R{total.toFixed(2)}
                           </div>
                         </div>
@@ -1987,14 +2034,18 @@ Your Construction Quote System
                           <div className="flex items-center justify-between mb-2">
                             <div
                               className={`text-sm font-medium ${
-                                paymentStatus.totalPaid > 0 ? "text-emerald-700" : "text-slate-600"
+                                paymentStatus.totalPaid > 0
+                                  ? "text-emerald-700"
+                                  : "text-slate-600"
                               }`}
                             >
                               Paid
                             </div>
                             <div
                               className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                paymentStatus.totalPaid > 0 ? "bg-emerald-200" : "bg-slate-200"
+                                paymentStatus.totalPaid > 0
+                                  ? "bg-emerald-200"
+                                  : "bg-slate-200"
                               }`}
                             >
                               <CheckSquare
@@ -2008,7 +2059,9 @@ Your Construction Quote System
                           </div>
                           <div
                             className={`text-2xl font-bold ${
-                              paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"
+                              paymentStatus.totalPaid > 0
+                                ? "text-emerald-900"
+                                : "text-slate-900"
                             }`}
                           >
                             R{paymentStatus.totalPaid.toFixed(2)}
@@ -2089,7 +2142,10 @@ Your Construction Quote System
                                 </div>
                                 <div>
                                   <div className="font-bold text-emerald-900">
-                                    {documentType === "quote" ? "Quote" : "Invoice"} Fully Paid
+                                    {documentType === "quote"
+                                      ? "Quote"
+                                      : "Invoice"}{" "}
+                                    Fully Paid
                                   </div>
                                   <div className="text-sm text-emerald-700">
                                     Payment complete - Thank you!
@@ -2106,8 +2162,9 @@ Your Construction Quote System
                                     Partial Payment Received
                                   </div>
                                   <div className="text-sm text-amber-700">
-                                    R{paymentStatus.totalPaid.toFixed(2)} paid • R
-                                    {paymentStatus.balanceDue.toFixed(2)} remaining
+                                    R{paymentStatus.totalPaid.toFixed(2)} paid •
+                                    R{paymentStatus.balanceDue.toFixed(2)}{" "}
+                                    remaining
                                   </div>
                                 </div>
                               </>
@@ -2117,9 +2174,12 @@ Your Construction Quote System
                                   <Wallet className="w-6 h-6 text-rose-600" />
                                 </div>
                                 <div>
-                                  <div className="font-bold text-rose-900">Payment Pending</div>
+                                  <div className="font-bold text-rose-900">
+                                    Payment Pending
+                                  </div>
                                   <div className="text-sm text-rose-700">
-                                    Full amount due: R{paymentStatus.balanceDue.toFixed(2)}
+                                    Full amount due: R
+                                    {paymentStatus.balanceDue.toFixed(2)}
                                   </div>
                                 </div>
                               </>
@@ -2150,18 +2210,23 @@ Your Construction Quote System
                                 </div>
                                 Client Information
                               </h2>
-                              <p className="text-slate-600 mt-2 ml-13">Enter client details</p>
+                              <p className="text-slate-600 mt-2 ml-13">
+                                Enter client details
+                              </p>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                               <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Client Name <span className="text-rose-500">*</span>
+                                  Client Name{" "}
+                                  <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                   type="text"
                                   value={customerName}
-                                  onChange={(e) => setCustomerName(e.target.value)}
+                                  onChange={(e) =>
+                                    setCustomerName(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="Enter client name"
                                 />
@@ -2173,7 +2238,9 @@ Your Construction Quote System
                                 <input
                                   type="email"
                                   value={customerEmail}
-                                  onChange={(e) => setCustomerEmail(e.target.value)}
+                                  onChange={(e) =>
+                                    setCustomerEmail(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="contact@example.com"
                                 />
@@ -2185,19 +2252,24 @@ Your Construction Quote System
                                 <input
                                   type="tel"
                                   value={customerPhone}
-                                  onChange={(e) => setCustomerPhone(e.target.value)}
+                                  onChange={(e) =>
+                                    setCustomerPhone(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="+27 82 123 4567"
                                 />
                               </div>
                               <div className="col-span-1 sm:col-span-2">
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property Address <span className="text-rose-500">*</span>
+                                  Property Address{" "}
+                                  <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                   type="text"
                                   value={propertyAddress}
-                                  onChange={(e) => setPropertyAddress(e.target.value)}
+                                  onChange={(e) =>
+                                    setPropertyAddress(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="123 Sunset Avenue, Sandton, Johannesburg, 2196"
                                 />
@@ -2217,7 +2289,8 @@ Your Construction Quote System
                                 Window Details
                               </h2>
                               <p className="text-slate-600 mt-2 ml-13">
-                                Enter window and screen information for accurate quote
+                                Enter window and screen information for accurate
+                                quote
                               </p>
                             </div>
 
@@ -2228,16 +2301,30 @@ Your Construction Quote System
                                 </label>
                                 <select
                                   value={windowType}
-                                  onChange={(e) => setWindowType(e.target.value)}
+                                  onChange={(e) =>
+                                    setWindowType(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                 >
-                                  <option value="Standard Window">Standard Window</option>
-                                  <option value="Sliding Window">Sliding Window</option>
+                                  <option value="Standard Window">
+                                    Standard Window
+                                  </option>
+                                  <option value="Sliding Window">
+                                    Sliding Window
+                                  </option>
                                   <option value="Bay Window">Bay Window</option>
-                                  <option value="Picture Window">Picture Window</option>
-                                  <option value="Casement Window">Casement Window</option>
-                                  <option value="Double-Hung Window">Double-Hung Window</option>
-                                  <option value="Awning Window">Awning Window</option>
+                                  <option value="Picture Window">
+                                    Picture Window
+                                  </option>
+                                  <option value="Casement Window">
+                                    Casement Window
+                                  </option>
+                                  <option value="Double-Hung Window">
+                                    Double-Hung Window
+                                  </option>
+                                  <option value="Awning Window">
+                                    Awning Window
+                                  </option>
                                 </select>
                               </div>
                               <div>
@@ -2247,7 +2334,9 @@ Your Construction Quote System
                                 <input
                                   type="number"
                                   value={windowCount}
-                                  onChange={(e) => setWindowCount(e.target.value)}
+                                  onChange={(e) =>
+                                    setWindowCount(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="4"
                                 />
@@ -2258,15 +2347,23 @@ Your Construction Quote System
                                 </label>
                                 <select
                                   value={screenType}
-                                  onChange={(e) => setScreenType(e.target.value)}
+                                  onChange={(e) =>
+                                    setScreenType(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                 >
                                   <option value="Fiberglass">Fiberglass</option>
                                   <option value="Aluminum">Aluminum</option>
-                                  <option value="Pet-Resistant">Pet-Resistant</option>
+                                  <option value="Pet-Resistant">
+                                    Pet-Resistant
+                                  </option>
                                   <option value="Solar">Solar Screen</option>
-                                  <option value="Privacy">Privacy Screen</option>
-                                  <option value="Retractable">Retractable</option>
+                                  <option value="Privacy">
+                                    Privacy Screen
+                                  </option>
+                                  <option value="Retractable">
+                                    Retractable
+                                  </option>
                                 </select>
                               </div>
                               <div>
@@ -2275,13 +2372,19 @@ Your Construction Quote System
                                 </label>
                                 <select
                                   value={frameCondition}
-                                  onChange={(e) => setFrameCondition(e.target.value)}
+                                  onChange={(e) =>
+                                    setFrameCondition(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
                                 >
                                   <option value="Good">Good</option>
                                   <option value="Fair">Fair</option>
-                                  <option value="Needs Repair">Needs Repair</option>
-                                  <option value="Replacement Required">Replacement Required</option>
+                                  <option value="Needs Repair">
+                                    Needs Repair
+                                  </option>
+                                  <option value="Replacement Required">
+                                    Replacement Required
+                                  </option>
                                 </select>
                               </div>
                             </div>
@@ -2294,16 +2397,20 @@ Your Construction Quote System
                               </h3>
                               <div className="text-sm text-blue-800 space-y-1">
                                 <p>
-                                  <span className="font-medium">Type:</span> {windowType}
+                                  <span className="font-medium">Type:</span>{" "}
+                                  {windowType}
                                 </p>
                                 <p>
-                                  <span className="font-medium">Count:</span> {windowCount} windows
+                                  <span className="font-medium">Count:</span>{" "}
+                                  {windowCount} windows
                                 </p>
                                 <p>
-                                  <span className="font-medium">Screen:</span> {screenType}
+                                  <span className="font-medium">Screen:</span>{" "}
+                                  {screenType}
                                 </p>
                                 <p>
-                                  <span className="font-medium">Frame:</span> {frameCondition}
+                                  <span className="font-medium">Frame:</span>{" "}
+                                  {frameCondition}
                                 </p>
                               </div>
                             </div>
@@ -2347,14 +2454,30 @@ Your Construction Quote System
                                       }
                                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
                                     >
-                                      <option value="Screen Repair">Screen Repair</option>
-                                      <option value="Screen Replacement">Screen Replacement</option>
-                                      <option value="Frame Repair">Frame Repair</option>
-                                      <option value="Track Cleaning">Track Cleaning</option>
-                                      <option value="Custom Screens">Custom Screens</option>
-                                      <option value="Re-screening">Re-screening</option>
-                                      <option value="Emergency Repair">Emergency Repair</option>
-                                      <option value="Hardware Replacement">Hardware Replacement</option>
+                                      <option value="Screen Repair">
+                                        Screen Repair
+                                      </option>
+                                      <option value="Screen Replacement">
+                                        Screen Replacement
+                                      </option>
+                                      <option value="Frame Repair">
+                                        Frame Repair
+                                      </option>
+                                      <option value="Track Cleaning">
+                                        Track Cleaning
+                                      </option>
+                                      <option value="Custom Screens">
+                                        Custom Screens
+                                      </option>
+                                      <option value="Re-screening">
+                                        Re-screening
+                                      </option>
+                                      <option value="Emergency Repair">
+                                        Emergency Repair
+                                      </option>
+                                      <option value="Hardware Replacement">
+                                        Hardware Replacement
+                                      </option>
                                     </select>
                                   </div>
 
@@ -2373,9 +2496,15 @@ Your Construction Quote System
                                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
                                     >
                                       <option value="Standard">Standard</option>
-                                      <option value="Urgent">Urgent (24-48hrs)</option>
-                                      <option value="Emergency">Emergency (Same Day)</option>
-                                      <option value="Scheduled">Scheduled</option>
+                                      <option value="Urgent">
+                                        Urgent (24-48hrs)
+                                      </option>
+                                      <option value="Emergency">
+                                        Emergency (Same Day)
+                                      </option>
+                                      <option value="Scheduled">
+                                        Scheduled
+                                      </option>
                                     </select>
                                   </div>
                                 </div>
@@ -2513,17 +2642,20 @@ Your Construction Quote System
                                           </td>
                                           <td className="px-4 py-4 text-sm">
                                             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
-                                              {item.serviceType || "Screen Repair"}
+                                              {item.serviceType ||
+                                                "Screen Repair"}
                                             </span>
                                           </td>
                                           <td className="px-4 py-4 text-sm">
-                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                                              item.urgency === "Emergency" 
-                                                ? "bg-red-100 text-red-700" 
-                                                : item.urgency === "Urgent"
-                                                ? "bg-orange-100 text-orange-700"
-                                                : "bg-green-100 text-green-700"
-                                            }`}>
+                                            <span
+                                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                                                item.urgency === "Emergency"
+                                                  ? "bg-red-100 text-red-700"
+                                                  : item.urgency === "Urgent"
+                                                    ? "bg-orange-100 text-orange-700"
+                                                    : "bg-green-100 text-green-700"
+                                              }`}
+                                            >
                                               {item.urgency || "Standard"}
                                             </span>
                                           </td>
@@ -2541,7 +2673,9 @@ Your Construction Quote System
                                           </td>
                                           <td className="px-4 py-4 text-center">
                                             <button
-                                              onClick={() => handleRemoveItem(index)}
+                                              onClick={() =>
+                                                handleRemoveItem(index)
+                                              }
                                               className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all flex items-center gap-1 mx-auto"
                                             >
                                               <Trash2 className="w-3 h-3" />
@@ -2563,7 +2697,8 @@ Your Construction Quote System
                                   No services added yet
                                 </p>
                                 <p className="text-sm text-slate-500 mt-2">
-                                  Add window repair services using the form above
+                                  Add window repair services using the form
+                                  above
                                 </p>
                               </div>
                             )}
@@ -2573,19 +2708,25 @@ Your Construction Quote System
                               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                                 <div className="space-y-3">
                                   <div className="flex justify-between items-center">
-                                    <span className="text-slate-700 font-medium">Subtotal:</span>
+                                    <span className="text-slate-700 font-medium">
+                                      Subtotal:
+                                    </span>
                                     <span className="font-bold text-slate-900 text-lg">
                                       R{subtotal.toFixed(2)}
                                     </span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-slate-700 font-medium">VAT (15%):</span>
+                                    <span className="text-slate-700 font-medium">
+                                      VAT (15%):
+                                    </span>
                                     <span className="font-bold text-slate-900 text-lg">
                                       R{totalTax.toFixed(2)}
                                     </span>
                                   </div>
                                   <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-blue-300">
-                                    <span className="text-slate-900">Total:</span>
+                                    <span className="text-slate-900">
+                                      Total:
+                                    </span>
                                     <span className="text-blue-700 text-2xl">
                                       R{total.toFixed(2)}
                                     </span>
@@ -2663,7 +2804,9 @@ Your Construction Quote System
 
                               <div className="space-y-3">
                                 <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">Payment Due:</span>
+                                  <span className="text-slate-600 font-medium">
+                                    Payment Due:
+                                  </span>
                                   <span className="font-bold text-slate-900">
                                     Upon Completion
                                   </span>
@@ -2680,10 +2823,14 @@ Your Construction Quote System
                                   <span className="text-slate-600 font-medium">
                                     Quote Valid For:
                                   </span>
-                                  <span className="font-bold text-slate-900">30 Days</span>
+                                  <span className="font-bold text-slate-900">
+                                    30 Days
+                                  </span>
                                 </div>
                                 <div className="flex justify-between items-center py-3">
-                                  <span className="text-slate-600 font-medium">Currency:</span>
+                                  <span className="text-slate-600 font-medium">
+                                    Currency:
+                                  </span>
                                   <span className="font-bold text-slate-900">
                                     ZAR (South African Rand)
                                   </span>
@@ -2703,7 +2850,9 @@ Your Construction Quote System
                                     Client Details:
                                   </h4>
                                   <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">{customerName}</p>
+                                    <p className="font-semibold text-slate-900">
+                                      {customerName}
+                                    </p>
                                     <p>{customerEmail}</p>
                                     <p>{customerPhone}</p>
                                   </div>
@@ -2714,15 +2863,26 @@ Your Construction Quote System
                                     Window Details:
                                   </h4>
                                   <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">{propertyAddress}</p>
-                                    <p>
-                                      <span className="font-semibold">Type:</span> {windowType}
+                                    <p className="font-semibold text-slate-900">
+                                      {propertyAddress}
                                     </p>
                                     <p>
-                                      <span className="font-semibold">Count:</span> {windowCount} windows
+                                      <span className="font-semibold">
+                                        Type:
+                                      </span>{" "}
+                                      {windowType}
                                     </p>
                                     <p>
-                                      <span className="font-semibold">Screen:</span> {screenType} | Frame: {frameCondition}
+                                      <span className="font-semibold">
+                                        Count:
+                                      </span>{" "}
+                                      {windowCount} windows
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        Screen:
+                                      </span>{" "}
+                                      {screenType} | Frame: {frameCondition}
                                     </p>
                                   </div>
                                 </div>
@@ -2734,7 +2894,10 @@ Your Construction Quote System
                                 </h4>
                                 <div className="text-sm text-slate-600 space-y-1">
                                   <p>
-                                    <span className="font-semibold">Number:</span> {quoteNumber}
+                                    <span className="font-semibold">
+                                      Number:
+                                    </span>{" "}
+                                    {quoteNumber}
                                   </p>
                                   <p>
                                     <span className="font-semibold">Date:</span>{" "}
@@ -2742,11 +2905,17 @@ Your Construction Quote System
                                   </p>
                                   <p>
                                     <span className="font-semibold">Type:</span>{" "}
-                                    {documentType === "quote" ? "Quote" : "Invoice"}
+                                    {documentType === "quote"
+                                      ? "Quote"
+                                      : "Invoice"}
                                   </p>
                                   <p>
-                                    <span className="font-semibold">Status:</span>{" "}
-                                    <span className="text-amber-600 font-bold">Pending</span>
+                                    <span className="font-semibold">
+                                      Status:
+                                    </span>{" "}
+                                    <span className="text-amber-600 font-bold">
+                                      Pending
+                                    </span>
                                   </p>
                                 </div>
                               </div>
@@ -2779,7 +2948,7 @@ Your Construction Quote System
                             }`}
                           >
                             <ChevronLeft className="w-5 h-5" />
-                            Previous
+                            <span className="hidden sm:inline">Previous</span>
                           </button>
 
                           <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">
@@ -2791,7 +2960,7 @@ Your Construction Quote System
                               onClick={handleNext}
                               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
                             >
-                              Next
+                              <span className="hidden sm:inline">Next</span>
                               <ChevronRight className="w-5 h-5" />
                             </button>
                           ) : (
@@ -2800,7 +2969,8 @@ Your Construction Quote System
                               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
                             >
                               <Save className="w-5 h-5" />
-                              Save {documentType === "quote" ? "Quote" : "Invoice"}
+                              Save{" "}
+                              {documentType === "quote" ? "Quote" : "Invoice"}
                             </button>
                           )}
                         </div>

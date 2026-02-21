@@ -1,18 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { X, Users, Edit, Upload, Search, UserPlus, Mail, Phone, MapPin, Hash, Filter, SortAsc, SortDesc } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  X,
+  Users,
+  Edit,
+  Upload,
+  Search,
+  UserPlus,
+  Mail,
+  Phone,
+  MapPin,
+  Hash,
+  Filter,
+  SortAsc,
+  SortDesc,
+} from "lucide-react";
 
-const CustomersListModal = ({ 
-  showModal, 
-  setShowModal, 
-  customers, 
-  onLoadCustomer, 
+const CustomersListModal = ({
+  showModal,
+  setShowModal,
+  customers,
+  onLoadCustomer,
   onEditCustomer,
-  onAddNewCustomer 
+  onAddNewCustomer,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredCustomers, setFilteredCustomers] = useState(customers);
-  const [sortBy, setSortBy] = useState('name'); // 'name', 'date'
-  const [sortOrder, setSortOrder] = useState('asc'); // 'asc', 'desc'
+  const [sortBy, setSortBy] = useState("name"); // 'name', 'date'
+  const [sortOrder, setSortOrder] = useState("asc"); // 'asc', 'desc'
   const [isMobile, setIsMobile] = useState(false);
 
   // Responsive detection
@@ -21,13 +35,13 @@ const CustomersListModal = ({
       setIsMobile(window.innerWidth < 768);
     };
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Filter and sort customers
   useEffect(() => {
-    let result = customers.filter(customer => {
+    let result = customers.filter((customer) => {
       const searchLower = searchTerm.toLowerCase();
       return (
         customer.name?.toLowerCase().includes(searchLower) ||
@@ -41,16 +55,16 @@ const CustomersListModal = ({
     // Sort
     result.sort((a, b) => {
       let comparison = 0;
-      
-      if (sortBy === 'name') {
-        comparison = (a.name || '').localeCompare(b.name || '');
-      } else if (sortBy === 'date') {
+
+      if (sortBy === "name") {
+        comparison = (a.name || "").localeCompare(b.name || "");
+      } else if (sortBy === "date") {
         const dateA = new Date(a.createdAt || 0);
         const dateB = new Date(b.createdAt || 0);
         comparison = dateB - dateA; // Most recent first by default
       }
-      
-      return sortOrder === 'asc' ? comparison : -comparison;
+
+      return sortOrder === "asc" ? comparison : -comparison;
     });
 
     setFilteredCustomers(result);
@@ -59,23 +73,23 @@ const CustomersListModal = ({
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && showModal) {
+      if (e.key === "Escape" && showModal) {
         setShowModal(false);
       }
     };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
   }, [showModal, setShowModal]);
 
   const toggleSort = () => {
-    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
 
   if (!showModal) return null;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn">
-      <div 
+      <div
         className="bg-white rounded-xl md:rounded-2xl max-w-5xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp"
         onClick={(e) => e.stopPropagation()}
       >
@@ -91,7 +105,9 @@ const CustomersListModal = ({
                   Customers
                 </h2>
                 <p className="text-xs md:text-sm text-slate-600 mt-0.5">
-                  {filteredCustomers.length} {filteredCustomers.length === 1 ? 'customer' : 'customers'} found
+                  {filteredCustomers.length}{" "}
+                  {filteredCustomers.length === 1 ? "customer" : "customers"}{" "}
+                  found
                 </p>
               </div>
             </div>
@@ -115,7 +131,7 @@ const CustomersListModal = ({
                 className="w-full pl-10 pr-4 py-2.5 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
               />
             </div>
-            
+
             <div className="flex gap-2">
               <select
                 value={sortBy}
@@ -125,13 +141,13 @@ const CustomersListModal = ({
                 <option value="name">Sort by Name</option>
                 <option value="date">Sort by Date</option>
               </select>
-              
+
               <button
                 onClick={toggleSort}
                 className="p-2.5 md:p-3 border-2 border-slate-200 rounded-lg md:rounded-xl hover:bg-slate-50 transition-all duration-300 group"
-                title={`Sort ${sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
+                title={`Sort ${sortOrder === "asc" ? "Descending" : "Ascending"}`}
               >
-                {sortOrder === 'asc' ? (
+                {sortOrder === "asc" ? (
                   <SortAsc className="w-5 h-5 text-slate-600 group-hover:text-slate-900 transition-colors" />
                 ) : (
                   <SortDesc className="w-5 h-5 text-slate-600 group-hover:text-slate-900 transition-colors" />
@@ -162,20 +178,19 @@ const CustomersListModal = ({
                 <Users className="w-10 h-10 md:w-12 md:h-12 text-slate-400" />
               </div>
               <p className="text-lg md:text-xl font-bold text-slate-700 mb-2">
-                {searchTerm ? 'No customers found' : 'No customers yet'}
+                {searchTerm ? "No customers found" : "No customers yet"}
               </p>
               <p className="text-sm md:text-base text-slate-500">
-                {searchTerm 
-                  ? 'Try adjusting your search terms' 
-                  : 'Click the button above to add your first customer'
-                }
+                {searchTerm
+                  ? "Try adjusting your search terms"
+                  : "Click the button above to add your first customer"}
               </p>
             </div>
           ) : (
             <div className="space-y-3 md:space-y-4">
               {filteredCustomers.map((customer, index) => (
-                <div 
-                  key={customer.id} 
+                <div
+                  key={customer.id}
                   className="bg-white border-2 border-slate-100 p-4 md:p-5 rounded-xl hover:shadow-lg hover:border-blue-200 transition-all duration-300 group animate-slideIn"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
@@ -218,12 +233,14 @@ const CustomersListModal = ({
                         {customer.address && (
                           <div className="flex items-start gap-2 text-sm text-slate-700">
                             <MapPin className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
-                            <span className="line-clamp-2">{customer.address}</span>
+                            <span className="line-clamp-2">
+                              {customer.address}
+                            </span>
                           </div>
                         )}
                       </div>
                     </div>
-                    
+
                     {/* Action Buttons */}
                     <div className="flex sm:flex-col gap-2 sm:ml-4">
                       <button
@@ -261,7 +278,9 @@ const CustomersListModal = ({
               <div className="flex items-center gap-4 text-sm text-slate-600">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="font-semibold">{filteredCustomers.length} Customers</span>
+                  <span className="font-semibold">
+                    {filteredCustomers.length} Customers
+                  </span>
                 </div>
                 {searchTerm && (
                   <div className="flex items-center gap-2">
@@ -270,7 +289,7 @@ const CustomersListModal = ({
                   </div>
                 )}
               </div>
-              
+
               <button
                 onClick={() => setShowModal(false)}
                 className="px-4 md:px-6 py-2 md:py-2.5 border-2 border-slate-300 text-slate-700 rounded-lg md:rounded-xl hover:bg-white hover:border-slate-400 transition-all duration-300 font-semibold shadow-sm hover:shadow-md active:scale-95 text-sm md:text-base"

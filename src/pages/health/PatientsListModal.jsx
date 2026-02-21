@@ -1,56 +1,75 @@
-import React, { useState } from 'react';
-import { X, Search, Edit, UserCheck, Phone, Mail, Calendar, CreditCard, Plus, Trash2 } from 'lucide-react';
-import { getFirestore, doc, deleteDoc } from 'firebase/firestore';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState } from "react";
+import {
+  X,
+  Search,
+  Edit,
+  UserCheck,
+  Phone,
+  Mail,
+  Calendar,
+  CreditCard,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { getFirestore, doc, deleteDoc } from "firebase/firestore";
+import { useAuth } from "../../contexts/AuthContext";
 
-const PatientsListModal = ({ 
-  showModal, 
-  setShowModal, 
-  patients, 
-  onLoadPatient, 
-  onEditPatient, 
-  onAddNewPatient 
+const PatientsListModal = ({
+  showModal,
+  setShowModal,
+  patients,
+  onLoadPatient,
+  onEditPatient,
+  onAddNewPatient,
 }) => {
-  const {user, authUser} = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterGender, setFilterGender] = useState('All');
+  const { user, authUser } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterGender, setFilterGender] = useState("All");
 
   const handleDeletePatient = async (patientId, patientName) => {
-    if (!window.confirm(`Are you sure you want to delete patient "${patientName}"? This action cannot be undone.`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete patient "${patientName}"? This action cannot be undone.`,
+      )
+    ) {
       return;
     }
 
     try {
       const db = getFirestore();
-      await deleteDoc(doc(db, 'users', user.uid, 'patients', patientId));
-      alert('Patient deleted successfully');
+      await deleteDoc(doc(db, "users", user.uid, "patients", patientId));
+      alert("Patient deleted successfully");
       // Trigger a reload of patients
       window.location.reload();
     } catch (error) {
-      console.error('Error deleting patient:', error);
-      alert('Failed to delete patient');
+      console.error("Error deleting patient:", error);
+      alert("Failed to delete patient");
     }
   };
 
-  const filteredPatients = patients.filter(patient => {
-    const matchesSearch = 
+  const filteredPatients = patients.filter((patient) => {
+    const matchesSearch =
       patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.patientId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.phone?.includes(searchTerm);
-    
-    const matchesGender = filterGender === 'All' || patient.gender === filterGender;
-    
+
+    const matchesGender =
+      filterGender === "All" || patient.gender === filterGender;
+
     return matchesSearch && matchesGender;
   });
 
   const calculateAge = (dateOfBirth) => {
-    if (!dateOfBirth) return 'N/A';
+    if (!dateOfBirth) return "N/A";
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
     return age;
@@ -68,7 +87,8 @@ const PatientsListModal = ({
             <div>
               <h2 className="text-xl font-semibold">All Patients</h2>
               <p className="text-sm text-blue-100">
-                {filteredPatients.length} patient{filteredPatients.length !== 1 ? 's' : ''} found
+                {filteredPatients.length} patient
+                {filteredPatients.length !== 1 ? "s" : ""} found
               </p>
             </div>
           </div>
@@ -93,7 +113,7 @@ const PatientsListModal = ({
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            
+
             <select
               value={filterGender}
               onChange={(e) => setFilterGender(e.target.value)}
@@ -122,9 +142,9 @@ const PatientsListModal = ({
               <UserCheck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 text-lg">No patients found</p>
               <p className="text-gray-400 text-sm mt-2">
-                {searchTerm || filterGender !== 'All' 
-                  ? 'Try adjusting your search or filters' 
-                  : 'Add your first patient to get started'}
+                {searchTerm || filterGender !== "All"
+                  ? "Try adjusting your search or filters"
+                  : "Add your first patient to get started"}
               </p>
             </div>
           ) : (
@@ -138,18 +158,22 @@ const PatientsListModal = ({
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg text-gray-800 flex items-center gap-2">
-                        {patient.name || 'Unknown Patient'}
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          patient.gender === 'Male' 
-                            ? 'bg-blue-100 text-blue-700' 
-                            : patient.gender === 'Female'
-                            ? 'bg-pink-100 text-pink-700'
-                            : 'bg-gray-100 text-gray-700'
-                        }`}>
-                          {patient.gender || 'N/A'}
+                        {patient.name || "Unknown Patient"}
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            patient.gender === "Male"
+                              ? "bg-blue-100 text-blue-700"
+                              : patient.gender === "Female"
+                                ? "bg-pink-100 text-pink-700"
+                                : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {patient.gender || "N/A"}
                         </span>
                       </h3>
-                      <p className="text-sm text-gray-500">ID: {patient.patientId || 'N/A'}</p>
+                      <p className="text-sm text-gray-500">
+                        ID: {patient.patientId || "N/A"}
+                      </p>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -160,7 +184,9 @@ const PatientsListModal = ({
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDeletePatient(patient.id, patient.name)}
+                        onClick={() =>
+                          handleDeletePatient(patient.id, patient.name)
+                        }
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete Patient"
                       >
@@ -185,7 +211,9 @@ const PatientsListModal = ({
                       <Phone className="w-4 h-4 text-gray-400" />
                       <div>
                         <div className="text-xs text-gray-500">Phone</div>
-                        <div className="text-sm font-medium">{patient.phone || 'N/A'}</div>
+                        <div className="text-sm font-medium">
+                          {patient.phone || "N/A"}
+                        </div>
                       </div>
                     </div>
 
@@ -194,7 +222,9 @@ const PatientsListModal = ({
                         <Mail className="w-4 h-4 text-gray-400" />
                         <div>
                           <div className="text-xs text-gray-500">Email</div>
-                          <div className="text-sm font-medium text-xs">{patient.email}</div>
+                          <div className="text-sm font-medium text-xs">
+                            {patient.email}
+                          </div>
                         </div>
                       </div>
                     )}
@@ -206,7 +236,8 @@ const PatientsListModal = ({
                           <div className="text-xs text-gray-500">Insurance</div>
                           <div className="text-sm font-medium">
                             {patient.insuranceProvider}
-                            {patient.insuranceNumber && ` - ${patient.insuranceNumber}`}
+                            {patient.insuranceNumber &&
+                              ` - ${patient.insuranceNumber}`}
                           </div>
                         </div>
                       </div>
@@ -223,7 +254,9 @@ const PatientsListModal = ({
 
                     {patient.allergies && (
                       <div className="col-span-2">
-                        <div className="text-xs text-gray-500 mb-1">Allergies</div>
+                        <div className="text-xs text-gray-500 mb-1">
+                          Allergies
+                        </div>
                         <div className="text-xs bg-yellow-50 border border-yellow-200 text-yellow-800 p-2 rounded">
                           {patient.allergies}
                         </div>
@@ -253,7 +286,10 @@ const PatientsListModal = ({
                   {/* Last Updated */}
                   {patient.updatedAt && (
                     <div className="mt-2 text-xs text-gray-400 text-center">
-                      Last updated: {new Date(patient.updatedAt.toDate()).toLocaleDateString('en-ZA')}
+                      Last updated:{" "}
+                      {new Date(patient.updatedAt.toDate()).toLocaleDateString(
+                        "en-ZA",
+                      )}
                     </div>
                   )}
                 </div>
@@ -265,7 +301,8 @@ const PatientsListModal = ({
         {/* Footer */}
         <div className="p-4 border-t bg-gray-800 flex justify-between items-center">
           <div className="text-sm text-gray-600">
-            Showing {filteredPatients.length} of {patients.length} total patients
+            Showing {filteredPatients.length} of {patients.length} total
+            patients
           </div>
           <button
             onClick={() => setShowModal(false)}

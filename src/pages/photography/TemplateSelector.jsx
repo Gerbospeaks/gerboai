@@ -1,27 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, Check } from 'lucide-react';
-import SignatureStamp from '../SignatureStamp';
+import React, { useState, useEffect } from "react";
+import { FileText, Check } from "lucide-react";
+import SignatureStamp from "../SignatureStamp";
 import {
   getFirestore,
   doc,
   getDoc,
   updateDoc,
-  serverTimestamp
-} from 'firebase/firestore';
+  serverTimestamp,
+} from "firebase/firestore";
 
 // Template Selector Dropdown Component
-export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) => {
-  const [purchasedTemplates, setPurchasedTemplates] = useState(['classic']);
+export const TemplateSelector = ({
+  user,
+  selectedTemplate,
+  onTemplateChange,
+}) => {
+  const [purchasedTemplates, setPurchasedTemplates] = useState(["classic"]);
   const [isOpen, setIsOpen] = useState(false);
 
   const templateNames = {
-    default: 'Default (Original)',
-    classic: 'Classic Workshop',
-    modern: 'Modern Minimalist',
-    elegant: 'Elegant Business',
-    premium: 'Premium Auto Service',
-    speed: 'Speed Shop Pro',
-    diagnostic: 'Diagnostic Specialist'
+    default: "Default (Original)",
+    classic: "Classic Workshop",
+    modern: "Modern Minimalist",
+    elegant: "Elegant Business",
+    premium: "Premium Auto Service",
+    speed: "Speed Shop Pro",
+    diagnostic: "Diagnostic Specialist",
   };
 
   useEffect(() => {
@@ -33,16 +37,19 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 
     try {
       const db = getFirestore();
-      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
+      const docRef = doc(db, "users", user.uid, "settings", "templates");
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setPurchasedTemplates(['default', ...(docSnap.data().purchased || ['classic'])]);
+        setPurchasedTemplates([
+          "default",
+          ...(docSnap.data().purchased || ["classic"]),
+        ]);
       } else {
-        setPurchasedTemplates(['default', 'classic']);
+        setPurchasedTemplates(["default", "classic"]);
       }
     } catch (error) {
-      console.error('Error loading templates:', error);
+      console.error("Error loading templates:", error);
     }
   };
 
@@ -51,17 +58,17 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 
     try {
       const db = getFirestore();
-      const docRef = doc(db, 'users', user.uid, 'settings', 'templates');
-      
+      const docRef = doc(db, "users", user.uid, "settings", "templates");
+
       await updateDoc(docRef, {
         active: templateId,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
       onTemplateChange(templateId);
       setIsOpen(false);
     } catch (error) {
-      console.error('Error updating template:', error);
+      console.error("Error updating template:", error);
     }
   };
 
@@ -72,17 +79,29 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-800"
       >
         <FileText className="w-4 h-4" />
-        <span className="hidden sm:inline">{templateNames[selectedTemplate] || 'Select Template'}</span>
+        <span className="hidden sm:inline">
+          {templateNames[selectedTemplate] || "Select Template"}
+        </span>
         <span className="sm:hidden">Template</span>
-        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <svg
+          className="w-4 h-4 ml-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-10" 
+          <div
+            className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-80 overflow-auto">
@@ -90,12 +109,14 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
               <div className="text-xs font-semibold text-gray-500 px-3 py-2">
                 Your Templates
               </div>
-              {purchasedTemplates.map(templateId => (
+              {purchasedTemplates.map((templateId) => (
                 <button
                   key={templateId}
                   onClick={() => handleSelectTemplate(templateId)}
                   className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-between ${
-                    selectedTemplate === templateId ? 'bg-orange-50 text-orange-600' : 'text-gray-700'
+                    selectedTemplate === templateId
+                      ? "bg-orange-50 text-orange-600"
+                      : "text-gray-700"
                   }`}
                 >
                   <span>{templateNames[templateId]}</span>
@@ -113,13 +134,13 @@ export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) =
 };
 
 // Default Template (Your Original)
-export const DefaultTemplate = ({ 
-  businessInfo, 
+export const DefaultTemplate = ({
+  businessInfo,
   loading,
-  jobCardNumber, 
-  customerName, 
-  customerEmail, 
-  customerPhone, 
+  jobCardNumber,
+  customerName,
+  customerEmail,
+  customerPhone,
   customerAddress,
   eventType,
   eventDate,
@@ -131,23 +152,31 @@ export const DefaultTemplate = ({
   showStamp = false,
   stampText = "APPROVED",
   stampColor = "#d32f2f",
-  showStampDate = true
+  showStampDate = true,
 }) => (
-   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
+  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     <div className="border-b-2 border-black pb-4 mb-4">
       <div className="flex justify-between items-start">
         <div>
           <div className="flex items-center gap-3 mb-2">
             {businessInfo.logoUrl && (
-              <img src={businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+              <img
+                src={businessInfo.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 object-contain"
+              />
             )}
             <div>
-              <div className="text-xl font-bold">{businessInfo.businessName}</div>
+              <div className="text-xl font-bold">
+                {businessInfo.businessName}
+              </div>
             </div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{businessInfo.addressLine1}</div>
-            <div>{businessInfo.city}, {businessInfo.postalCode}</div>
+            <div>
+              {businessInfo.city}, {businessInfo.postalCode}
+            </div>
             <div>T: {businessInfo.primaryPhone}</div>
           </div>
         </div>
@@ -169,20 +198,38 @@ export const DefaultTemplate = ({
 
     <div className="grid grid-cols-2 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CLIENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          CLIENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Name:</span> {customerName}</div>
-          <div><span className="font-semibold">Email:</span> {customerEmail}</div>
-          <div><span className="font-semibold">Phone:</span> {customerPhone}</div>
-          <div><span className="font-semibold">Address:</span> {customerAddress}</div>
+          <div>
+            <span className="font-semibold">Name:</span> {customerName}
+          </div>
+          <div>
+            <span className="font-semibold">Email:</span> {customerEmail}
+          </div>
+          <div>
+            <span className="font-semibold">Phone:</span> {customerPhone}
+          </div>
+          <div>
+            <span className="font-semibold">Address:</span> {customerAddress}
+          </div>
         </div>
       </div>
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">EVENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          EVENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Type:</span> {eventType}</div>
-          <div><span className="font-semibold">Date:</span> {eventDate}</div>
-          <div><span className="font-semibold">Location:</span> {eventLocation}</div>
+          <div>
+            <span className="font-semibold">Type:</span> {eventType}
+          </div>
+          <div>
+            <span className="font-semibold">Date:</span> {eventDate}
+          </div>
+          <div>
+            <span className="font-semibold">Location:</span> {eventLocation}
+          </div>
         </div>
       </div>
     </div>
@@ -197,14 +244,17 @@ export const DefaultTemplate = ({
         </tr>
       </thead>
       <tbody>
-        {items && items.map((item, i) => (
-          <tr key={i} className="border-b">
-            <td className="px-2 py-2">{item.description}</td>
-            <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
-          </tr>
-        ))}
+        {items &&
+          items.map((item, i) => (
+            <tr key={i} className="border-b">
+              <td className="px-2 py-2">{item.description}</td>
+              <td className="text-center px-2 py-2">{item.qty}</td>
+              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">
+                R {item.amount.toFixed(2)}
+              </td>
+            </tr>
+          ))}
       </tbody>
     </table>
 
@@ -228,12 +278,26 @@ export const DefaultTemplate = ({
     {/* Banking Details */}
     {businessInfo.bankName && (
       <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-        <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-blue-800 font-bold text-sm mb-2">
+          PAYMENT INFORMATION
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank Name:</span> {businessInfo.bankName}</div>
-          <div><span className="font-semibold">Account Holder:</span> {businessInfo.accountHolder}</div>
-          <div><span className="font-semibold">Account Number:</span> {businessInfo.accountNumber}</div>
-          <div><span className="font-semibold">Branch Code:</span> {businessInfo.branchCode}</div>
+          <div>
+            <span className="font-semibold">Bank Name:</span>{" "}
+            {businessInfo.bankName}
+          </div>
+          <div>
+            <span className="font-semibold">Account Holder:</span>{" "}
+            {businessInfo.accountHolder}
+          </div>
+          <div>
+            <span className="font-semibold">Account Number:</span>{" "}
+            {businessInfo.accountNumber}
+          </div>
+          <div>
+            <span className="font-semibold">Branch Code:</span>{" "}
+            {businessInfo.branchCode}
+          </div>
         </div>
       </div>
     )}
@@ -241,7 +305,7 @@ export const DefaultTemplate = ({
     {/* Stamp */}
     {showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={stampText}
           color={stampColor}
           showDate={showStampDate}
@@ -265,15 +329,19 @@ export const ClassicTemplate = (props) => (
         <div>
           <div className="flex items-center gap-3 mb-2">
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 object-contain"
+              />
             )}
-            <div>
-              
-            </div>
+            <div></div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+            <div>
+              {props.businessInfo.city}, {props.businessInfo.postalCode}
+            </div>
             <div>T: {props.businessInfo.primaryPhone}</div>
           </div>
         </div>
@@ -295,20 +363,40 @@ export const ClassicTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CLIENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          CLIENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Name:</span> {props.customerName}</div>
-          <div><span className="font-semibold">Email:</span> {props.customerEmail}</div>
-          <div><span className="font-semibold">Phone:</span> {props.customerPhone}</div>
-          <div><span className="font-semibold">Address:</span> {props.customerAddress}</div>
+          <div>
+            <span className="font-semibold">Name:</span> {props.customerName}
+          </div>
+          <div>
+            <span className="font-semibold">Email:</span> {props.customerEmail}
+          </div>
+          <div>
+            <span className="font-semibold">Phone:</span> {props.customerPhone}
+          </div>
+          <div>
+            <span className="font-semibold">Address:</span>{" "}
+            {props.customerAddress}
+          </div>
         </div>
       </div>
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">EVENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          EVENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Type:</span> {props.eventType}</div>
-          <div><span className="font-semibold">Date:</span> {props.eventDate}</div>
-          <div><span className="font-semibold">Location:</span> {props.eventLocation}</div>
+          <div>
+            <span className="font-semibold">Type:</span> {props.eventType}
+          </div>
+          <div>
+            <span className="font-semibold">Date:</span> {props.eventDate}
+          </div>
+          <div>
+            <span className="font-semibold">Location:</span>{" "}
+            {props.eventLocation}
+          </div>
         </div>
       </div>
     </div>
@@ -323,14 +411,17 @@ export const ClassicTemplate = (props) => (
         </tr>
       </thead>
       <tbody>
-        {props.items && props.items.map((item, i) => (
-          <tr key={i} className="border-b">
-            <td className="px-2 py-2">{item.description}</td>
-            <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
-          </tr>
-        ))}
+        {props.items &&
+          props.items.map((item, i) => (
+            <tr key={i} className="border-b">
+              <td className="px-2 py-2">{item.description}</td>
+              <td className="text-center px-2 py-2">{item.qty}</td>
+              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">
+                R {item.amount.toFixed(2)}
+              </td>
+            </tr>
+          ))}
       </tbody>
     </table>
 
@@ -354,12 +445,26 @@ export const ClassicTemplate = (props) => (
     {/* Banking Details */}
     {props.businessInfo.bankName && (
       <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-        <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-blue-800 font-bold text-sm mb-2">
+          PAYMENT INFORMATION
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName}</div>
-          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.accountHolder}</div>
-          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber}</div>
-          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode}</div>
+          <div>
+            <span className="font-semibold">Bank Name:</span>{" "}
+            {props.businessInfo.bankName}
+          </div>
+          <div>
+            <span className="font-semibold">Account Holder:</span>{" "}
+            {props.businessInfo.accountHolder}
+          </div>
+          <div>
+            <span className="font-semibold">Account Number:</span>{" "}
+            {props.businessInfo.accountNumber}
+          </div>
+          <div>
+            <span className="font-semibold">Branch Code:</span>{" "}
+            {props.businessInfo.branchCode}
+          </div>
         </div>
       </div>
     )}
@@ -367,7 +472,7 @@ export const ClassicTemplate = (props) => (
     {/* Stamp */}
     {props.showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -391,15 +496,19 @@ export const ModernTemplate = (props) => (
         <div>
           <div className="flex items-center gap-3 mb-2">
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 object-contain"
+              />
             )}
-            <div>
-              
-            </div>
+            <div></div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+            <div>
+              {props.businessInfo.city}, {props.businessInfo.postalCode}
+            </div>
             <div>T: {props.businessInfo.primaryPhone}</div>
           </div>
         </div>
@@ -421,20 +530,40 @@ export const ModernTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CLIENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          CLIENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Name:</span> {props.customerName}</div>
-          <div><span className="font-semibold">Email:</span> {props.customerEmail}</div>
-          <div><span className="font-semibold">Phone:</span> {props.customerPhone}</div>
-          <div><span className="font-semibold">Address:</span> {props.customerAddress}</div>
+          <div>
+            <span className="font-semibold">Name:</span> {props.customerName}
+          </div>
+          <div>
+            <span className="font-semibold">Email:</span> {props.customerEmail}
+          </div>
+          <div>
+            <span className="font-semibold">Phone:</span> {props.customerPhone}
+          </div>
+          <div>
+            <span className="font-semibold">Address:</span>{" "}
+            {props.customerAddress}
+          </div>
         </div>
       </div>
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">EVENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          EVENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Type:</span> {props.eventType}</div>
-          <div><span className="font-semibold">Date:</span> {props.eventDate}</div>
-          <div><span className="font-semibold">Location:</span> {props.eventLocation}</div>
+          <div>
+            <span className="font-semibold">Type:</span> {props.eventType}
+          </div>
+          <div>
+            <span className="font-semibold">Date:</span> {props.eventDate}
+          </div>
+          <div>
+            <span className="font-semibold">Location:</span>{" "}
+            {props.eventLocation}
+          </div>
         </div>
       </div>
     </div>
@@ -449,14 +578,17 @@ export const ModernTemplate = (props) => (
         </tr>
       </thead>
       <tbody>
-        {props.items && props.items.map((item, i) => (
-          <tr key={i} className="border-b">
-            <td className="px-2 py-2">{item.description}</td>
-            <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
-          </tr>
-        ))}
+        {props.items &&
+          props.items.map((item, i) => (
+            <tr key={i} className="border-b">
+              <td className="px-2 py-2">{item.description}</td>
+              <td className="text-center px-2 py-2">{item.qty}</td>
+              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">
+                R {item.amount.toFixed(2)}
+              </td>
+            </tr>
+          ))}
       </tbody>
     </table>
 
@@ -480,12 +612,26 @@ export const ModernTemplate = (props) => (
     {/* Banking Details */}
     {props.businessInfo.bankName && (
       <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-        <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-blue-800 font-bold text-sm mb-2">
+          PAYMENT INFORMATION
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName}</div>
-          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.accountHolder}</div>
-          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber}</div>
-          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode}</div>
+          <div>
+            <span className="font-semibold">Bank Name:</span>{" "}
+            {props.businessInfo.bankName}
+          </div>
+          <div>
+            <span className="font-semibold">Account Holder:</span>{" "}
+            {props.businessInfo.accountHolder}
+          </div>
+          <div>
+            <span className="font-semibold">Account Number:</span>{" "}
+            {props.businessInfo.accountNumber}
+          </div>
+          <div>
+            <span className="font-semibold">Branch Code:</span>{" "}
+            {props.businessInfo.branchCode}
+          </div>
         </div>
       </div>
     )}
@@ -493,7 +639,7 @@ export const ModernTemplate = (props) => (
     {/* Stamp */}
     {props.showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -517,15 +663,19 @@ export const ElegantTemplate = (props) => (
         <div>
           <div className="flex items-center gap-3 mb-2">
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 object-contain"
+              />
             )}
-            <div>
-              
-            </div>
+            <div></div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+            <div>
+              {props.businessInfo.city}, {props.businessInfo.postalCode}
+            </div>
             <div>T: {props.businessInfo.primaryPhone}</div>
           </div>
         </div>
@@ -547,20 +697,40 @@ export const ElegantTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CLIENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          CLIENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Name:</span> {props.customerName}</div>
-          <div><span className="font-semibold">Email:</span> {props.customerEmail}</div>
-          <div><span className="font-semibold">Phone:</span> {props.customerPhone}</div>
-          <div><span className="font-semibold">Address:</span> {props.customerAddress}</div>
+          <div>
+            <span className="font-semibold">Name:</span> {props.customerName}
+          </div>
+          <div>
+            <span className="font-semibold">Email:</span> {props.customerEmail}
+          </div>
+          <div>
+            <span className="font-semibold">Phone:</span> {props.customerPhone}
+          </div>
+          <div>
+            <span className="font-semibold">Address:</span>{" "}
+            {props.customerAddress}
+          </div>
         </div>
       </div>
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">EVENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          EVENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Type:</span> {props.eventType}</div>
-          <div><span className="font-semibold">Date:</span> {props.eventDate}</div>
-          <div><span className="font-semibold">Location:</span> {props.eventLocation}</div>
+          <div>
+            <span className="font-semibold">Type:</span> {props.eventType}
+          </div>
+          <div>
+            <span className="font-semibold">Date:</span> {props.eventDate}
+          </div>
+          <div>
+            <span className="font-semibold">Location:</span>{" "}
+            {props.eventLocation}
+          </div>
         </div>
       </div>
     </div>
@@ -575,14 +745,17 @@ export const ElegantTemplate = (props) => (
         </tr>
       </thead>
       <tbody>
-        {props.items && props.items.map((item, i) => (
-          <tr key={i} className="border-b">
-            <td className="px-2 py-2">{item.description}</td>
-            <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
-          </tr>
-        ))}
+        {props.items &&
+          props.items.map((item, i) => (
+            <tr key={i} className="border-b">
+              <td className="px-2 py-2">{item.description}</td>
+              <td className="text-center px-2 py-2">{item.qty}</td>
+              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">
+                R {item.amount.toFixed(2)}
+              </td>
+            </tr>
+          ))}
       </tbody>
     </table>
 
@@ -606,12 +779,26 @@ export const ElegantTemplate = (props) => (
     {/* Banking Details */}
     {props.businessInfo.bankName && (
       <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-        <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-blue-800 font-bold text-sm mb-2">
+          PAYMENT INFORMATION
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName}</div>
-          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.accountHolder}</div>
-          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber}</div>
-          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode}</div>
+          <div>
+            <span className="font-semibold">Bank Name:</span>{" "}
+            {props.businessInfo.bankName}
+          </div>
+          <div>
+            <span className="font-semibold">Account Holder:</span>{" "}
+            {props.businessInfo.accountHolder}
+          </div>
+          <div>
+            <span className="font-semibold">Account Number:</span>{" "}
+            {props.businessInfo.accountNumber}
+          </div>
+          <div>
+            <span className="font-semibold">Branch Code:</span>{" "}
+            {props.businessInfo.branchCode}
+          </div>
         </div>
       </div>
     )}
@@ -619,7 +806,7 @@ export const ElegantTemplate = (props) => (
     {/* Stamp */}
     {props.showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -643,15 +830,19 @@ export const SpeedTemplate = (props) => (
         <div>
           <div className="flex items-center gap-3 mb-2">
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 object-contain"
+              />
             )}
-            <div>
-              
-            </div>
+            <div></div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+            <div>
+              {props.businessInfo.city}, {props.businessInfo.postalCode}
+            </div>
             <div>T: {props.businessInfo.primaryPhone}</div>
           </div>
         </div>
@@ -673,20 +864,40 @@ export const SpeedTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CLIENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          CLIENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Name:</span> {props.customerName}</div>
-          <div><span className="font-semibold">Email:</span> {props.customerEmail}</div>
-          <div><span className="font-semibold">Phone:</span> {props.customerPhone}</div>
-          <div><span className="font-semibold">Address:</span> {props.customerAddress}</div>
+          <div>
+            <span className="font-semibold">Name:</span> {props.customerName}
+          </div>
+          <div>
+            <span className="font-semibold">Email:</span> {props.customerEmail}
+          </div>
+          <div>
+            <span className="font-semibold">Phone:</span> {props.customerPhone}
+          </div>
+          <div>
+            <span className="font-semibold">Address:</span>{" "}
+            {props.customerAddress}
+          </div>
         </div>
       </div>
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">EVENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          EVENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Type:</span> {props.eventType}</div>
-          <div><span className="font-semibold">Date:</span> {props.eventDate}</div>
-          <div><span className="font-semibold">Location:</span> {props.eventLocation}</div>
+          <div>
+            <span className="font-semibold">Type:</span> {props.eventType}
+          </div>
+          <div>
+            <span className="font-semibold">Date:</span> {props.eventDate}
+          </div>
+          <div>
+            <span className="font-semibold">Location:</span>{" "}
+            {props.eventLocation}
+          </div>
         </div>
       </div>
     </div>
@@ -701,14 +912,17 @@ export const SpeedTemplate = (props) => (
         </tr>
       </thead>
       <tbody>
-        {props.items && props.items.map((item, i) => (
-          <tr key={i} className="border-b">
-            <td className="px-2 py-2">{item.description}</td>
-            <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
-          </tr>
-        ))}
+        {props.items &&
+          props.items.map((item, i) => (
+            <tr key={i} className="border-b">
+              <td className="px-2 py-2">{item.description}</td>
+              <td className="text-center px-2 py-2">{item.qty}</td>
+              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">
+                R {item.amount.toFixed(2)}
+              </td>
+            </tr>
+          ))}
       </tbody>
     </table>
 
@@ -732,12 +946,26 @@ export const SpeedTemplate = (props) => (
     {/* Banking Details */}
     {props.businessInfo.bankName && (
       <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-        <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-blue-800 font-bold text-sm mb-2">
+          PAYMENT INFORMATION
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName}</div>
-          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.accountHolder}</div>
-          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber}</div>
-          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode}</div>
+          <div>
+            <span className="font-semibold">Bank Name:</span>{" "}
+            {props.businessInfo.bankName}
+          </div>
+          <div>
+            <span className="font-semibold">Account Holder:</span>{" "}
+            {props.businessInfo.accountHolder}
+          </div>
+          <div>
+            <span className="font-semibold">Account Number:</span>{" "}
+            {props.businessInfo.accountNumber}
+          </div>
+          <div>
+            <span className="font-semibold">Branch Code:</span>{" "}
+            {props.businessInfo.branchCode}
+          </div>
         </div>
       </div>
     )}
@@ -745,7 +973,7 @@ export const SpeedTemplate = (props) => (
     {/* Stamp */}
     {props.showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -768,15 +996,19 @@ export const DiagnosticTemplate = (props) => (
         <div>
           <div className="flex items-center gap-3 mb-2">
             {props.businessInfo.logoUrl && (
-              <img src={props.businessInfo.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+              <img
+                src={props.businessInfo.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 object-contain"
+              />
             )}
-            <div>
-              
-            </div>
+            <div></div>
           </div>
           <div className="text-xs leading-relaxed">
             <div>{props.businessInfo.addressLine1}</div>
-            <div>{props.businessInfo.city}, {props.businessInfo.postalCode}</div>
+            <div>
+              {props.businessInfo.city}, {props.businessInfo.postalCode}
+            </div>
             <div>T: {props.businessInfo.primaryPhone}</div>
           </div>
         </div>
@@ -798,20 +1030,40 @@ export const DiagnosticTemplate = (props) => (
 
     <div className="grid grid-cols-2 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">CLIENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          CLIENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Name:</span> {props.customerName}</div>
-          <div><span className="font-semibold">Email:</span> {props.customerEmail}</div>
-          <div><span className="font-semibold">Phone:</span> {props.customerPhone}</div>
-          <div><span className="font-semibold">Address:</span> {props.customerAddress}</div>
+          <div>
+            <span className="font-semibold">Name:</span> {props.customerName}
+          </div>
+          <div>
+            <span className="font-semibold">Email:</span> {props.customerEmail}
+          </div>
+          <div>
+            <span className="font-semibold">Phone:</span> {props.customerPhone}
+          </div>
+          <div>
+            <span className="font-semibold">Address:</span>{" "}
+            {props.customerAddress}
+          </div>
         </div>
       </div>
       <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">EVENT DETAILS</div>
+        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
+          EVENT DETAILS
+        </div>
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold">Type:</span> {props.eventType}</div>
-          <div><span className="font-semibold">Date:</span> {props.eventDate}</div>
-          <div><span className="font-semibold">Location:</span> {props.eventLocation}</div>
+          <div>
+            <span className="font-semibold">Type:</span> {props.eventType}
+          </div>
+          <div>
+            <span className="font-semibold">Date:</span> {props.eventDate}
+          </div>
+          <div>
+            <span className="font-semibold">Location:</span>{" "}
+            {props.eventLocation}
+          </div>
         </div>
       </div>
     </div>
@@ -826,14 +1078,17 @@ export const DiagnosticTemplate = (props) => (
         </tr>
       </thead>
       <tbody>
-        {props.items && props.items.map((item, i) => (
-          <tr key={i} className="border-b">
-            <td className="px-2 py-2">{item.description}</td>
-            <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
-          </tr>
-        ))}
+        {props.items &&
+          props.items.map((item, i) => (
+            <tr key={i} className="border-b">
+              <td className="px-2 py-2">{item.description}</td>
+              <td className="text-center px-2 py-2">{item.qty}</td>
+              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">
+                R {item.amount.toFixed(2)}
+              </td>
+            </tr>
+          ))}
       </tbody>
     </table>
 
@@ -857,12 +1112,26 @@ export const DiagnosticTemplate = (props) => (
     {/* Banking Details */}
     {props.businessInfo.bankName && (
       <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-        <div className="text-blue-800 font-bold text-sm mb-2">PAYMENT INFORMATION</div>
+        <div className="text-blue-800 font-bold text-sm mb-2">
+          PAYMENT INFORMATION
+        </div>
         <div className="text-xs space-y-1 text-gray-700">
-          <div><span className="font-semibold">Bank Name:</span> {props.businessInfo.bankName}</div>
-          <div><span className="font-semibold">Account Holder:</span> {props.businessInfo.accountHolder}</div>
-          <div><span className="font-semibold">Account Number:</span> {props.businessInfo.accountNumber}</div>
-          <div><span className="font-semibold">Branch Code:</span> {props.businessInfo.branchCode}</div>
+          <div>
+            <span className="font-semibold">Bank Name:</span>{" "}
+            {props.businessInfo.bankName}
+          </div>
+          <div>
+            <span className="font-semibold">Account Holder:</span>{" "}
+            {props.businessInfo.accountHolder}
+          </div>
+          <div>
+            <span className="font-semibold">Account Number:</span>{" "}
+            {props.businessInfo.accountNumber}
+          </div>
+          <div>
+            <span className="font-semibold">Branch Code:</span>{" "}
+            {props.businessInfo.branchCode}
+          </div>
         </div>
       </div>
     )}
@@ -870,7 +1139,7 @@ export const DiagnosticTemplate = (props) => (
     {/* Stamp */}
     {props.showStamp && (
       <div className="flex justify-center mb-4">
-        <SignatureStamp 
+        <SignatureStamp
           text={props.stampText}
           color={props.stampColor}
           showDate={props.showStampDate}
@@ -886,39 +1155,39 @@ export const DiagnosticTemplate = (props) => (
   </div>
 );
 // Template Renderer
-export const TemplateRenderer = ({  
-  templateId, 
-  documentType = 'invoice',
+export const TemplateRenderer = ({
+  templateId,
+  documentType = "invoice",
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true,
   showStamp = false,
-  ...props 
+  ...props
 }) => {
-   const templateProps = { 
-    ...props, 
+  const templateProps = {
+    ...props,
     documentType,
     stampText,
     stampColor,
     showStampDate,
-    showStamp
-   };
-switch (templateId) {
-case 'default':
-return <DefaultTemplate {...templateProps} />;
-case 'classic':
-return <ClassicTemplate {...templateProps} />;
-case 'modern':
-return <ModernTemplate {...templateProps} />;
-case 'elegant':
-case 'premium':
-return <ElegantTemplate {...templateProps} />;
-case 'speed':
-return <SpeedTemplate {...templateProps} />;
-case 'diagnostic':
-return <DiagnosticTemplate {...templateProps} />;
-default:
-return <DefaultTemplate {...templateProps} />;
-}
+    showStamp,
+  };
+  switch (templateId) {
+    case "default":
+      return <DefaultTemplate {...templateProps} />;
+    case "classic":
+      return <ClassicTemplate {...templateProps} />;
+    case "modern":
+      return <ModernTemplate {...templateProps} />;
+    case "elegant":
+    case "premium":
+      return <ElegantTemplate {...templateProps} />;
+    case "speed":
+      return <SpeedTemplate {...templateProps} />;
+    case "diagnostic":
+      return <DiagnosticTemplate {...templateProps} />;
+    default:
+      return <DefaultTemplate {...templateProps} />;
+  }
 };
-export default TemplateSelector
+export default TemplateSelector;

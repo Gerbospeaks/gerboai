@@ -22,18 +22,18 @@ import {
   Bot,
   RefreshCw,
 } from "lucide-react";
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  getDocs, 
-  addDoc, 
-  onSnapshot, 
-  updateDoc, 
-  deleteDoc, 
+import {
+  collection,
+  query,
+  orderBy,
+  getDocs,
+  addDoc,
+  onSnapshot,
+  updateDoc,
+  deleteDoc,
   doc,
   where,
-  serverTimestamp 
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 
@@ -69,34 +69,34 @@ const AppointmentsCalendar = ({ user }) => {
   });
 
   useEffect(() => {
-  if (!user?.uid) return;
+    if (!user?.uid) return;
 
-  // Real-time listener for main appointments
-  const appointmentsRef = collection(db, "users", user.uid, "appointments");
-  const q = query(appointmentsRef, orderBy("date", "asc"));
-  
-  const unsubscribeAppointments = onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setAppointments(data);
-  });
+    // Real-time listener for main appointments
+    const appointmentsRef = collection(db, "users", user.uid, "appointments");
+    const q = query(appointmentsRef, orderBy("date", "asc"));
 
-  // Real-time listener for incoming website bookings
-  const aiRef = collection(db, "users", user.uid, "aiAppointments");
-  const aiQ = query(aiRef, orderBy("createdAt", "desc"));
+    const unsubscribeAppointments = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setAppointments(data);
+    });
 
-  const unsubscribeAi = onSnapshot(aiQ, (snapshot) => {
-    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setAiReceptionistData(data);
-    // Optional: auto-open AI panel when new booking arrives
-    if (data.length > 0) setShowAiPanel(true);
-  });
+    // Real-time listener for incoming website bookings
+    const aiRef = collection(db, "users", user.uid, "aiAppointments");
+    const aiQ = query(aiRef, orderBy("createdAt", "desc"));
 
-  // Cleanup listeners when component unmounts
-  return () => {
-    unsubscribeAppointments();
-    unsubscribeAi();
-  };
-}, [user]);
+    const unsubscribeAi = onSnapshot(aiQ, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setAiReceptionistData(data);
+      // Optional: auto-open AI panel when new booking arrives
+      if (data.length > 0) setShowAiPanel(true);
+    });
+
+    // Cleanup listeners when component unmounts
+    return () => {
+      unsubscribeAppointments();
+      unsubscribeAi();
+    };
+  }, [user]);
 
   useEffect(() => {
     filterAppointments();
@@ -150,7 +150,7 @@ const AppointmentsCalendar = ({ user }) => {
         (apt) =>
           apt.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           apt.patientPhone?.includes(searchTerm) ||
-          apt.patientEmail?.toLowerCase().includes(searchTerm.toLowerCase())
+          apt.patientEmail?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
@@ -190,7 +190,11 @@ const AppointmentsCalendar = ({ user }) => {
   const handleAddAppointment = async () => {
     if (!user?.uid) return;
 
-    if (!newAppointment.patientName || !newAppointment.date || !newAppointment.time) {
+    if (
+      !newAppointment.patientName ||
+      !newAppointment.date ||
+      !newAppointment.time
+    ) {
       alert("Please fill in patient name, date, and time");
       return;
     }
@@ -204,7 +208,7 @@ const AppointmentsCalendar = ({ user }) => {
 
       await addDoc(
         collection(db, "users", user.uid, "appointments"),
-        appointmentData
+        appointmentData,
       );
 
       alert("Appointment added successfully!");
@@ -226,7 +230,7 @@ const AppointmentsCalendar = ({ user }) => {
         {
           ...updates,
           updatedAt: serverTimestamp(),
-        }
+        },
       );
 
       alert("Appointment updated!");
@@ -245,7 +249,9 @@ const AppointmentsCalendar = ({ user }) => {
     if (!confirmDelete) return;
 
     try {
-      await deleteDoc(doc(db, "users", user.uid, "appointments", appointmentId));
+      await deleteDoc(
+        doc(db, "users", user.uid, "appointments", appointmentId),
+      );
       alert("Appointment deleted!");
       loadAppointments();
       setShowDetailsModal(false);
@@ -277,7 +283,7 @@ const AppointmentsCalendar = ({ user }) => {
 
       await addDoc(
         collection(db, "users", user.uid, "appointments"),
-        appointmentData
+        appointmentData,
       );
 
       alert("Appointment imported from AI receptionist!");
@@ -429,24 +435,26 @@ const AppointmentsCalendar = ({ user }) => {
               <span>New Appointment</span>
             </button>
 
-           <button
-  onClick={() => {
-    setShowAiPanel(!showAiPanel);
-    setLastSeenCount(aiReceptionistData.length); // mark as seen
-  }}
-  className="relative flex items-center space-x-2 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-purple-700"
->
-  <Bot className="w-4 h-4" />
-  <span>Website Bookings ({aiReceptionistData.length})</span>
-  
-  {/* Red badge for new unseen bookings */}
-  {unseenBookings > 0 && (
-    <span className="absolute -top-2 -right-2 bg-red-500 text-white 
-                     text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-      {unseenBookings}
-    </span>
-  )}
-</button>
+            <button
+              onClick={() => {
+                setShowAiPanel(!showAiPanel);
+                setLastSeenCount(aiReceptionistData.length); // mark as seen
+              }}
+              className="relative flex items-center space-x-2 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-purple-700"
+            >
+              <Bot className="w-4 h-4" />
+              <span>Website Bookings ({aiReceptionistData.length})</span>
+
+              {/* Red badge for new unseen bookings */}
+              {unseenBookings > 0 && (
+                <span
+                  className="absolute -top-2 -right-2 bg-red-500 text-white 
+                     text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse"
+                >
+                  {unseenBookings}
+                </span>
+              )}
+            </button>
 
             <button
               onClick={loadAppointments}
@@ -532,7 +540,9 @@ const AppointmentsCalendar = ({ user }) => {
                   className="flex items-center justify-between p-4 bg-purple-50 rounded-lg"
                 >
                   <div>
-                    <div className="text-sm font-medium">{booking.patientName}</div>
+                    <div className="text-sm font-medium">
+                      {booking.patientName}
+                    </div>
                     <div className="text-sm text-gray-600">
                       {booking.date} at {booking.time}
                     </div>
@@ -615,8 +625,8 @@ const AppointmentsCalendar = ({ user }) => {
                     isToday
                       ? "bg-blue-50 border-blue-500"
                       : isSelected
-                      ? "bg-blue-100 border-blue-400"
-                      : "hover:bg-gray-800 border-gray-200"
+                        ? "bg-blue-100 border-blue-400"
+                        : "hover:bg-gray-800 border-gray-200"
                   }`}
                 >
                   <div
@@ -719,7 +729,7 @@ const AppointmentsCalendar = ({ user }) => {
                   <div>
                     <span
                       className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs text-sm font-medium ${getStatusColor(
-                        apt.status
+                        apt.status,
                       )}`}
                     >
                       {getStatusIcon(apt.status)}
@@ -958,11 +968,13 @@ const AppointmentsCalendar = ({ user }) => {
                 </div>
                 <span
                   className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs text-sm font-medium ${getStatusColor(
-                    selectedAppointment.status
+                    selectedAppointment.status,
                   )}`}
                 >
                   {getStatusIcon(selectedAppointment.status)}
-                  <span className="capitalize">{selectedAppointment.status}</span>
+                  <span className="capitalize">
+                    {selectedAppointment.status}
+                  </span>
                 </span>
               </div>
 

@@ -1,19 +1,19 @@
-import { useState, useRef, useEffect } from 'react';
-import './TimelineNavigation.css';
+import { useState, useRef, useEffect } from "react";
+import "./TimelineNavigation.css";
 
-function TimelineNavigation({ variant = 'sticky' }) {
-  const [activeTab, setActiveTab] = useState('present');
+function TimelineNavigation({ variant = "sticky" }) {
+  const [activeTab, setActiveTab] = useState("present");
   const [targetTab, setTargetTab] = useState(null);
-  const [mode, setMode] = useState('idle');
+  const [mode, setMode] = useState("idle");
   const [activeBarStyle, setActiveBarStyle] = useState({});
   const [hoverBarStyle, setHoverBarStyle] = useState({});
-  
+
   const itemsRef = useRef([]);
 
   const tabs = [
-    { id: 'paid', label: 'Paid' },
-    { id: 'sent', label: 'Sent' },
-    { id: 'draft', label: 'Draft' }
+    { id: "paid", label: "Paid" },
+    { id: "sent", label: "Sent" },
+    { id: "draft", label: "Draft" },
   ];
 
   useEffect(() => {
@@ -21,14 +21,14 @@ function TimelineNavigation({ variant = 'sticky' }) {
   }, [activeTab, targetTab]);
 
   const updateBarPositions = () => {
-    const activeIndex = tabs.findIndex(tab => tab.id === activeTab);
-    const targetIndex = tabs.findIndex(tab => tab.id === targetTab);
+    const activeIndex = tabs.findIndex((tab) => tab.id === activeTab);
+    const targetIndex = tabs.findIndex((tab) => tab.id === targetTab);
 
     if (itemsRef.current[activeIndex]) {
       const activeEl = itemsRef.current[activeIndex];
       setActiveBarStyle({
         width: `${activeEl.offsetWidth}px`,
-        transform: `translateX(${activeEl.offsetLeft}px)`
+        transform: `translateX(${activeEl.offsetLeft}px)`,
       });
     }
 
@@ -36,7 +36,7 @@ function TimelineNavigation({ variant = 'sticky' }) {
       const targetEl = itemsRef.current[targetIndex];
       setHoverBarStyle({
         width: `${targetEl.offsetWidth}px`,
-        transform: `translateX(${targetEl.offsetLeft}px)`
+        transform: `translateX(${targetEl.offsetLeft}px)`,
       });
     }
   };
@@ -46,17 +46,19 @@ function TimelineNavigation({ variant = 'sticky' }) {
   };
 
   const handleMouseEnter = (tabId) => {
-    setMode('hover');
+    setMode("hover");
     setTargetTab(tabId);
   };
 
   const handleMouseLeave = () => {
-    setMode('idle');
+    setMode("idle");
     setTargetTab(null);
   };
 
   return (
-    <div className={`stickyWrapper ${variant === 'inline' ? 'inline-variant' : ''}`}>
+    <div
+      className={`stickyWrapper ${variant === "inline" ? "inline-variant" : ""}`}
+    >
       <nav
         className="container"
         data-center="true"
@@ -70,7 +72,7 @@ function TimelineNavigation({ variant = 'sticky' }) {
           {tabs.map((tab, index) => (
             <button
               key={tab.id}
-              ref={el => itemsRef.current[index] = el}
+              ref={(el) => (itemsRef.current[index] = el)}
               className="item"
               data-active={activeTab === tab.id}
               data-target={targetTab === tab.id}

@@ -1,92 +1,105 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  updateDoc, 
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
   doc,
-  serverTimestamp 
-} from 'firebase/firestore';
-import { X, User, Phone, Mail, MapPin, Calendar, GraduationCap } from 'lucide-react';
+  serverTimestamp,
+} from "firebase/firestore";
+import {
+  X,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  GraduationCap,
+} from "lucide-react";
 
-const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved }) => {
-  const {user, authUser} = useAuth();
+const StudentModal = ({
+  showModal,
+  setShowModal,
+  existingStudent,
+  onStudentSaved,
+}) => {
+  const { user, authUser } = useAuth();
   const [loading, setLoading] = useState(false);
-  
+
   const [formData, setFormData] = useState({
-    name: '',
-    studentId: '',
-    gradeLevel: '',
-    dateOfBirth: '',
-    parentName: '',
-    parentEmail: '',
-    parentPhone: '',
-    parentAddress: '',
-    emergencyContact: '',
-    emergencyPhone: '',
-    medicalInfo: '',
-    allergies: '',
+    name: "",
+    studentId: "",
+    gradeLevel: "",
+    dateOfBirth: "",
+    parentName: "",
+    parentEmail: "",
+    parentPhone: "",
+    parentAddress: "",
+    emergencyContact: "",
+    emergencyPhone: "",
+    medicalInfo: "",
+    allergies: "",
   });
 
   useEffect(() => {
     if (existingStudent) {
       setFormData({
-        name: existingStudent.name || '',
-        studentId: existingStudent.studentId || '',
-        gradeLevel: existingStudent.gradeLevel || '',
-        dateOfBirth: existingStudent.dateOfBirth || '',
-        parentName: existingStudent.parentName || '',
-        parentEmail: existingStudent.parentEmail || '',
-        parentPhone: existingStudent.parentPhone || '',
-        parentAddress: existingStudent.parentAddress || '',
-        emergencyContact: existingStudent.emergencyContact || '',
-        emergencyPhone: existingStudent.emergencyPhone || '',
-        medicalInfo: existingStudent.medicalInfo || '',
-        allergies: existingStudent.allergies || '',
+        name: existingStudent.name || "",
+        studentId: existingStudent.studentId || "",
+        gradeLevel: existingStudent.gradeLevel || "",
+        dateOfBirth: existingStudent.dateOfBirth || "",
+        parentName: existingStudent.parentName || "",
+        parentEmail: existingStudent.parentEmail || "",
+        parentPhone: existingStudent.parentPhone || "",
+        parentAddress: existingStudent.parentAddress || "",
+        emergencyContact: existingStudent.emergencyContact || "",
+        emergencyPhone: existingStudent.emergencyPhone || "",
+        medicalInfo: existingStudent.medicalInfo || "",
+        allergies: existingStudent.allergies || "",
       });
     } else {
       // Reset form for new student
       setFormData({
-        name: '',
+        name: "",
         studentId: `STU-${Date.now()}`,
-        gradeLevel: '',
-        dateOfBirth: '',
-        parentName: '',
-        parentEmail: '',
-        parentPhone: '',
-        parentAddress: '',
-        emergencyContact: '',
-        emergencyPhone: '',
-        medicalInfo: '',
-        allergies: '',
+        gradeLevel: "",
+        dateOfBirth: "",
+        parentName: "",
+        parentEmail: "",
+        parentPhone: "",
+        parentAddress: "",
+        emergencyContact: "",
+        emergencyPhone: "",
+        medicalInfo: "",
+        allergies: "",
       });
     }
   }, [existingStudent, showModal]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const validateForm = () => {
     if (!formData.name.trim()) {
-      alert('Please enter student name');
+      alert("Please enter student name");
       return false;
     }
     if (!formData.gradeLevel.trim()) {
-      alert('Please enter grade level');
+      alert("Please enter grade level");
       return false;
     }
     if (!formData.parentName.trim()) {
-      alert('Please enter parent/guardian name');
+      alert("Please enter parent/guardian name");
       return false;
     }
     if (!formData.parentPhone.trim()) {
-      alert('Please enter parent/guardian phone number');
+      alert("Please enter parent/guardian phone number");
       return false;
     }
     return true;
@@ -95,7 +108,7 @@ const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved
   const handleSave = async () => {
     if (!validateForm()) return;
     if (!user?.uid) {
-      alert('User not authenticated');
+      alert("User not authenticated");
       return;
     }
 
@@ -111,25 +124,25 @@ const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved
       if (existingStudent?.id) {
         // Update existing student
         await updateDoc(
-          doc(db, 'users', user.uid, 'students', existingStudent.id),
-          studentData
+          doc(db, "users", user.uid, "students", existingStudent.id),
+          studentData,
         );
-        alert('Student updated successfully!');
+        alert("Student updated successfully!");
       } else {
         // Create new student
         studentData.createdAt = serverTimestamp();
         await addDoc(
-          collection(db, 'users', user.uid, 'students'),
-          studentData
+          collection(db, "users", user.uid, "students"),
+          studentData,
         );
-        alert('Student added successfully!');
+        alert("Student added successfully!");
       }
 
       onStudentSaved();
       setShowModal(false);
     } catch (error) {
-      console.error('Error saving student:', error);
-      alert('Failed to save student. Please try again.');
+      console.error("Error saving student:", error);
+      alert("Failed to save student. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -148,7 +161,7 @@ const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved
         <div className="p-4 border-b flex items-center justify-between bg-gray-500 text-gray-800">
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <GraduationCap className="w-6 h-6" />
-            {existingStudent ? 'Edit Student' : 'Add New Student'}
+            {existingStudent ? "Edit Student" : "Add New Student"}
           </h2>
           <button
             onClick={handleClose}
@@ -167,7 +180,7 @@ const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved
                 <User className="w-5 h-5" />
                 Student Information
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
@@ -245,7 +258,7 @@ const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved
                 <User className="w-5 h-5" />
                 Parent/Guardian Information
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
@@ -316,7 +329,7 @@ const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved
                 <Phone className="w-5 h-5" />
                 Emergency Contact
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
@@ -353,7 +366,7 @@ const StudentModal = ({ showModal, setShowModal, existingStudent, onStudentSaved
               <h3 className="text-lg font-semibold mb-4 text-indigo-900">
                 Medical Information
               </h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">

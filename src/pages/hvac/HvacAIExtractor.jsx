@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
-import { Sparkles, Loader2, AlertCircle, CheckCircle, Image, X } from 'lucide-react';
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import React, { useState } from "react";
+import {
+  Sparkles,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  Image,
+  X,
+} from "lucide-react";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
-const HvacAIExtractor = ({ onDataExtracted, businessInfo, documentType = 'invoice' }) => {
-  const [input, setInput] = useState('');
+const HvacAIExtractor = ({
+  onDataExtracted,
+  businessInfo,
+  documentType = "invoice",
+}) => {
+  const [input, setInput] = useState("");
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState('');
+  const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const handleFileChange = (e) => {
@@ -15,53 +26,59 @@ const HvacAIExtractor = ({ onDataExtracted, businessInfo, documentType = 'invoic
     if (!selectedFile) return;
 
     // Validate file type
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+    const validTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ];
     if (!validTypes.includes(selectedFile.type)) {
-      setError('Please upload an image (JPG, PNG, WebP) or PDF file');
+      setError("Please upload an image (JPG, PNG, WebP) or PDF file");
       return;
     }
 
     // Validate file size (max 10MB)
     if (selectedFile.size > 10 * 1024 * 1024) {
-      setError('File size must be less than 10MB');
+      setError("File size must be less than 10MB");
       return;
     }
 
     setFile(selectedFile);
-    setError('');
+    setError("");
 
     // Create preview for images
-    if (selectedFile.type.startsWith('image/')) {
+    if (selectedFile.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result);
       };
       reader.readAsDataURL(selectedFile);
     } else {
-      setPreview('');
+      setPreview("");
     }
   };
 
   const clearFile = () => {
     setFile(null);
-    setPreview('');
+    setPreview("");
   };
 
   const extractFromImage = async () => {
     if (!file) {
-      setError('Please select a file first');
+      setError("Please select a file first");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     setSuccess(false);
 
     try {
       // Convert file to base64
       const base64Data = await new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onload = () => resolve(reader.result.split(",")[1]);
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
@@ -71,15 +88,15 @@ const HvacAIExtractor = ({ onDataExtracted, businessInfo, documentType = 'invoic
       // Prepare the message content
       const content = [
         {
-          type: file.type === 'application/pdf' ? 'document' : 'image',
+          type: file.type === "application/pdf" ? "document" : "image",
           source: {
-            type: 'base64',
+            type: "base64",
             media_type: mediaType,
-            data: base64Data
-          }
+            data: base64Data,
+          },
         },
         {
-          type: 'text',
+          type: "text",
           text: `Extract ${documentType} information from this document. Return ONLY a JSON object with this exact structure (no markdown, no explanation):
 
 {
@@ -117,26 +134,26 @@ For system.capacity, include both kW and BTU if available (e.g., "3.5kW / 12000 
 
 For system.location, specify where the unit is installed (e.g., "Main Office - Reception Area").
 
-For items, type should be one of: "Service", "Parts", "Refrigerant", or "Materials".`
-        }
+For items, type should be one of: "Service", "Parts", "Refrigerant", or "Materials".`,
+        },
       ];
 
       // Call Claude API
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: "claude-sonnet-4-20250514",
           max_tokens: 4000,
           messages: [
             {
-              role: 'user',
-              content: content
-            }
-          ]
-        })
+              role: "user",
+              content: content,
+            },
+          ],
+        }),
       });
 
       if (!response.ok) {
@@ -144,35 +161,42 @@ For items, type should be one of: "Service", "Parts", "Refrigerant", or "Materia
       }
 
       const data = await response.json();
-      
+
       // Extract text from response
       const textContent = data.content
-        .filter(block => block.type === 'text')
-        .map(block => block.text)
-        .join('\n');
+        .filter((block) => block.type === "text")
+        .map((block) => block.text)
+        .join("\n");
 
       // Clean and parse JSON
       let cleanedText = textContent.trim();
-      cleanedText = cleanedText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-      
+      cleanedText = cleanedText
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "");
+
       const extractedData = JSON.parse(cleanedText);
 
       // Validate the structure
-      if (!extractedData.customer || !extractedData.vehicle || !extractedData.items) {
-        throw new Error('Extracted data is missing required fields');
+      if (
+        !extractedData.customer ||
+        !extractedData.vehicle ||
+        !extractedData.items
+      ) {
+        throw new Error("Extracted data is missing required fields");
       }
 
       // Pass data to parent component
       onDataExtracted(extractedData);
       setSuccess(true);
       setFile(null);
-      setPreview('');
-      
+      setPreview("");
+
       setTimeout(() => setSuccess(false), 3000);
-      
     } catch (err) {
-      console.error('Extraction error:', err);
-      setError(err.message || 'Failed to extract data from image. Please try again.');
+      console.error("Extraction error:", err);
+      setError(
+        err.message || "Failed to extract data from image. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -180,53 +204,56 @@ For items, type should be one of: "Service", "Parts", "Refrigerant", or "Materia
 
   const extractInvoiceData = async () => {
     if (!input.trim()) {
-      setError('Please enter some information to extract');
+      setError("Please enter some information to extract");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     setSuccess(false);
 
     try {
       // ✅ CALL FIREBASE FUNCTION INSTEAD OF NETLIFY
       const functions = getFunctions();
-      const extractData = httpsCallable(functions, 'extractInvoiceDataGemini');
-      
-      console.log('Calling Firebase function...');
-      
+      const extractData = httpsCallable(functions, "extractInvoiceDataGemini");
+
+      console.log("Calling Firebase function...");
+
       const result = await extractData({
         input: input,
         businessInfo: businessInfo,
-        documentType: documentType
+        documentType: documentType,
       });
 
-      console.log('Function Response:', result.data);
-      
+      console.log("Function Response:", result.data);
+
       const extractedData = result.data;
-      
+
       // Validate the structure
-      if (!extractedData.customer || !extractedData.vehicle || !extractedData.items) {
-        console.error('Missing required fields in:', extractedData);
-        throw new Error('Extracted data is missing required fields');
+      if (
+        !extractedData.customer ||
+        !extractedData.vehicle ||
+        !extractedData.items
+      ) {
+        console.error("Missing required fields in:", extractedData);
+        throw new Error("Extracted data is missing required fields");
       }
-      
+
       // Pass data to parent component
       onDataExtracted(extractedData);
       setSuccess(true);
-      setInput('');
-      
+      setInput("");
+
       setTimeout(() => setSuccess(false), 3000);
-      
     } catch (err) {
-      console.error('Extraction error:', err);
-      
-      if (err.code === 'unauthenticated') {
-        setError('You must be logged in to use AI extraction.');
-      } else if (err.code === 'functions/internal') {
-        setError('AI service error. Please try again.');
+      console.error("Extraction error:", err);
+
+      if (err.code === "unauthenticated") {
+        setError("You must be logged in to use AI extraction.");
+      } else if (err.code === "functions/internal") {
+        setError("AI service error. Please try again.");
       } else {
-        setError(err.message || 'Failed to extract data. Please try again.');
+        setError(err.message || "Failed to extract data. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -268,9 +295,9 @@ For items, type should be one of: "Service", "Parts", "Refrigerant", or "Materia
               <label
                 htmlFor="invoice-file-upload"
                 className={`flex items-center justify-center w-8 h-8 rounded-lg cursor-pointer transition-colors ${
-                  loading 
-                    ? 'bg-gray-200 cursor-not-allowed' 
-                    : 'bg-gray-600 hover:bg-gray-700'
+                  loading
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "bg-gray-600 hover:bg-gray-700"
                 }`}
                 title="Upload invoice image or PDF"
               >
@@ -279,7 +306,8 @@ For items, type should be one of: "Service", "Parts", "Refrigerant", or "Materia
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            💡 Tip: Type your invoice details OR click the image icon to upload a document
+            💡 Tip: Type your invoice details OR click the image icon to upload
+            a document
           </p>
         </div>
 
@@ -289,7 +317,9 @@ For items, type should be one of: "Service", "Parts", "Refrigerant", or "Materia
               <div className="flex items-center gap-2">
                 <Image className="w-5 h-5 text-gray-600" />
                 <div>
-                  <p className="text-sm font-medium text-gray-800">{file.name}</p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {file.name}
+                  </p>
                   <p className="text-xs text-gray-500">
                     {(file.size / 1024).toFixed(1)} KB
                   </p>
@@ -345,7 +375,9 @@ For items, type should be one of: "Service", "Parts", "Refrigerant", or "Materia
         {success && (
           <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-3 rounded-lg">
             <CheckCircle className="w-4 h-4" />
-            <span className="text-sm font-medium">✅ Data extracted and populated successfully!</span>
+            <span className="text-sm font-medium">
+              ✅ Data extracted and populated successfully!
+            </span>
           </div>
         )}
 
@@ -370,9 +402,11 @@ For items, type should be one of: "Service", "Parts", "Refrigerant", or "Materia
 
       <div className="mt-4 pt-4 border-t border-gray-200">
         <p className="text-xs text-gray-600">
-          <strong>What the AI can extract:</strong> Customer name, email, phone, address, customer ID, 
-          vehicle make/model/year/registration/VIN/mileage, service items, parts, quantities, prices, 
-          labor hours, and more. Just describe it naturally or upload an image!
+          <strong>What the AI can extract:</strong> Customer name, email, phone,
+          address, customer ID, vehicle
+          make/model/year/registration/VIN/mileage, service items, parts,
+          quantities, prices, labor hours, and more. Just describe it naturally
+          or upload an image!
         </p>
       </div>
     </div>

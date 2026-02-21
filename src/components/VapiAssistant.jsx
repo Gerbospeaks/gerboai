@@ -32,8 +32,8 @@ function VapiAssistant() {
         justifyContent: "center",
         transition: "transform 0.2s ease",
       }}
-      onMouseEnter={(e) => e.target.style.transform = "scale(1.1)"}
-      onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
+      onMouseEnter={(e) => (e.target.style.transform = "scale(1.1)")}
+      onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
     >
       {isSessionActive ? "✕" : "🎤"}
     </button>

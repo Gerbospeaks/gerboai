@@ -9,7 +9,7 @@ import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
   collection,
@@ -102,7 +102,7 @@ const generateQuoteNumber = async (userId, documentType) => {
       lastNumber = Number(match[1]);
     }
   }
-const nextNumber = lastNumber + 1;
+  const nextNumber = lastNumber + 1;
   return `${prefix}-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
 const functions = getFunctions();
@@ -142,13 +142,13 @@ const WeldingDashboard = () => {
   const [materialType, setMaterialType] = useState("Mild Steel");
   const [materialThickness, setMaterialThickness] = useState("10");
   const [urgencyLevel, setUrgencyLevel] = useState("Standard");
-  
+
   // ── template & input mode ────────────────────────────────────────────────
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [inputMode, setInputMode] = useState("manual");
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
-  
+
   // ── payment ──────────────────────────────────────────────────────────────
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState({
@@ -167,7 +167,9 @@ const WeldingDashboard = () => {
 
   // ── client / project fields ─────────────────────────────────────────────
   const [customerName, setCustomerName] = useState("ABC Manufacturing Ltd");
-  const [customerEmail, setCustomerEmail] = useState("procurement@abcmfg.co.za");
+  const [customerEmail, setCustomerEmail] = useState(
+    "procurement@abcmfg.co.za",
+  );
   const [customerPhone, setCustomerPhone] = useState("+27 11 456 7890");
   const [projectAddress, setProjectAddress] = useState(
     "Industrial Park, 123 Factory Road, Germiston, 1401",
@@ -210,7 +212,7 @@ const WeldingDashboard = () => {
     urgency: "Standard",
     phase: "Phase 1",
   });
-  
+
   // ── derived totals ───────────────────────────────────────────────────────
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
   const totalTax = items.reduce((sum, item) => sum + item.taxAmount, 0);
@@ -238,7 +240,7 @@ const WeldingDashboard = () => {
   }, [user, documentType]);
 
   // responsive
- 
+
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
@@ -254,7 +256,7 @@ const WeldingDashboard = () => {
   useEffect(() => {
     loadCustomers();
   }, []);
-  
+
   useEffect(() => {
     loadPaymentStatus();
   }, [quoteId, user?.uid, documentType]);
@@ -281,7 +283,7 @@ const WeldingDashboard = () => {
     fetchBusinessInfo();
   }, [user]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (!quoteId) {
       setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
     }
@@ -304,8 +306,7 @@ const WeldingDashboard = () => {
     }
   };
 
-
-   const loadSavedQuotes = async () => {
+  const loadSavedQuotes = async () => {
     if (!user?.uid) return;
     const db = getFirestore();
     const collectionName = documentType === "quote" ? "quotes" : "invoices";
@@ -341,8 +342,7 @@ const WeldingDashboard = () => {
     }
   };
 
-
- const loadPaymentStatus = async () => {
+  const loadPaymentStatus = async () => {
     if (!user?.uid || !quoteId) {
       setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
       return;
@@ -621,7 +621,7 @@ const WeldingDashboard = () => {
     ]);
 
     setNewItem({
-     description: "",
+      description: "",
       rate: "",
       qty: "",
       workCategory: "Structural Welding",
@@ -786,25 +786,25 @@ const WeldingDashboard = () => {
     if (extractedData.items?.length > 0) setItems(extractedData.items);
     alert("✨ Data extracted and populated successfully!");
   };
-const handleTestEmail = async () => {
-  if (!businessInfo.emailPassword) {
-    alert('⚠️ Please enter your email app password first.');
-    return;
-  }
+  const handleTestEmail = async () => {
+    if (!businessInfo.emailPassword) {
+      alert("⚠️ Please enter your email app password first.");
+      return;
+    }
 
-  const userEmail = user?.email || authUser?.email;
-  
-  if (!userEmail) {
-    alert('⚠️ Could not find your email address. Please log in again.');
-    return;
-  }
+    const userEmail = user?.email || authUser?.email;
 
-  try {
-    const testEmailData = {
-      userId: user.uid,
-      to: userEmail, // Send test to self
-      subject: '✅ Test Email - Email Configuration Successful',
-      message: `
+    if (!userEmail) {
+      alert("⚠️ Could not find your email address. Please log in again.");
+      return;
+    }
+
+    try {
+      const testEmailData = {
+        userId: user.uid,
+        to: userEmail, // Send test to self
+        subject: "✅ Test Email - Email Configuration Successful",
+        message: `
 Hello,
 
 This is a test email from your construction quote/invoice system.
@@ -815,7 +815,7 @@ Account Details:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Business: ${businessInfo.businessName}
 Email: ${userEmail}
-Provider: ${businessInfo.emailProvider || 'Gmail'}
+Provider: ${businessInfo.emailProvider || "Gmail"}
 Date: ${new Date().toLocaleString()}
 
 You can now send quotes and invoices to your clients from this email address.
@@ -823,27 +823,30 @@ You can now send quotes and invoices to your clients from this email address.
 Best regards,
 Your Construction Quote System
       `.trim(),
-      documentType: 'test',
-      documentNumber: 'TEST-001',
-    };
+        documentType: "test",
+        documentNumber: "TEST-001",
+      };
 
-    const sendEmail = httpsCallable(functions, 'sendQuoteEmail');
-    await sendEmail(testEmailData);
-    
-    alert(`✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`);
-  } catch (error) {
-    console.error('Test email error:', error);
-    
-    let errorMsg = '❌ Test email failed!\n\n';
-    if (error.message.includes('Invalid login')) {
-      errorMsg += 'Your app password is incorrect. Please check and try again.\n\nMake sure you\'re using an APP PASSWORD, not your regular password.';
-    } else {
-      errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+      const sendEmail = httpsCallable(functions, "sendQuoteEmail");
+      await sendEmail(testEmailData);
+
+      alert(
+        `✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`,
+      );
+    } catch (error) {
+      console.error("Test email error:", error);
+
+      let errorMsg = "❌ Test email failed!\n\n";
+      if (error.message.includes("Invalid login")) {
+        errorMsg +=
+          "Your app password is incorrect. Please check and try again.\n\nMake sure you're using an APP PASSWORD, not your regular password.";
+      } else {
+        errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+      }
+
+      alert(errorMsg);
     }
-    
-    alert(errorMsg);
-  }
-};
+  };
   // ── navigation ───────────────────────────────────────────────────────────
   const handleNext = () => {
     if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
@@ -860,7 +863,7 @@ Your Construction Quote System
       console.error("Error logging out:", error);
     }
   };
-const handleTemplateChange = (templateId) => {
+  const handleTemplateChange = (templateId) => {
     setSelectedTemplate(templateId);
   };
   // ============================================================================
@@ -977,12 +980,12 @@ const handleTemplateChange = (templateId) => {
           {/* header */}
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <div className="flex items-center space-x-3 md:space-x-4">
-        <img
-          src={logo}
-          alt="Business Logo"
-          className="w-16 h-12 object-contain rounded-lg"
-        />
-      </div>
+              <img
+                src={logo}
+                alt="Business Logo"
+                className="w-16 h-12 object-contain rounded-lg"
+              />
+            </div>
             <button
               onClick={() => setSidebarOpen(false)}
               className="group p-2 text-orange-400 hover:text-white hover:bg-stone-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
@@ -995,7 +998,10 @@ const handleTemplateChange = (templateId) => {
           {/* nav */}
           <nav className="space-y-1.5 md:space-y-2">
             <div
-              onClick={() => {setActiveView("home"); setSidebarOpen(false);}}
+              onClick={() => {
+                setActiveView("home");
+                setSidebarOpen(false);
+              }}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
             >
               <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1003,7 +1009,10 @@ const handleTemplateChange = (templateId) => {
             </div>
 
             <div
-              onClick={() => {setShowSettings(true); setSidebarOpen(false);}}
+              onClick={() => {
+                setShowSettings(true);
+                setSidebarOpen(false);
+              }}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-red-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
             >
               <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
@@ -1013,7 +1022,10 @@ const handleTemplateChange = (templateId) => {
             <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-stone-700/50">
               {/* Financial Dashboard */}
               <div
-                onClick={() => {setActiveView("financial-overview"); setSidebarOpen(false);}}
+                onClick={() => {
+                  setActiveView("financial-overview");
+                  setSidebarOpen(false);
+                }}
                 className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
               >
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1138,7 +1150,10 @@ const handleTemplateChange = (templateId) => {
               {!isMobile && (
                 <>
                   <div
-                    onClick={() => {setActiveView("schedule"); setSidebarOpen(false);}}
+                    onClick={() => {
+                      setActiveView("schedule");
+                      setSidebarOpen(false);
+                    }}
                     className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
                   >
                     <Calendar className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1147,7 +1162,10 @@ const handleTemplateChange = (templateId) => {
                     </span>
                   </div>
                   <div
-                    onClick={() => {setActiveView("reports"); setSidebarOpen(false);}}
+                    onClick={() => {
+                      setActiveView("reports");
+                      setSidebarOpen(false);
+                    }}
                     className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-orange-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-red-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
                   >
                     <BarChart3 className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1292,12 +1310,18 @@ const handleTemplateChange = (templateId) => {
           <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
             <div className="flex gap-2 min-w-max pb-1 pr-3">
               {documentType === "quote" && quoteId && (
-                <button onClick={handleConvertToInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                <button
+                  onClick={handleConvertToInvoice}
+                  className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                >
                   <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
                   <span>To Invoice</span>
                 </button>
               )}
-              <button onClick={handleSaveQuote} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+              <button
+                onClick={handleSaveQuote}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+              >
                 <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
                 Save
               </button>
@@ -1305,19 +1329,25 @@ const handleTemplateChange = (templateId) => {
                 <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 <span>Send</span>
               </button>
-              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+              <button
+                onClick={handlePrint}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+              >
                 <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
                 <span>PDF</span>
               </button>
-              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95">
+              <button
+                onClick={handlePrint}
+                className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95"
+              >
                 <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
                 <span>Print</span>
               </button>
             </div>
           </div>
-          
-                    {/* ── Scrollable Main Content ──────────────────────────────── */}
-                   <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
+
+          {/* ── Scrollable Main Content ──────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {/* ── Settings Modal ──────────────────────────────────────── */}
             {showSettings && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
@@ -1659,7 +1689,6 @@ const handleTemplateChange = (templateId) => {
                                 </p>
                               </div>
 
-
                               <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                                 <label className="block text-sm font-bold text-slate-700 mb-3">
                                   Stamp Color
@@ -1733,139 +1762,183 @@ const handleTemplateChange = (templateId) => {
                           )}
                         </div>
                       </div>
-                       {/* Email Configuration Section */}
-                       <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
-                         <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                           <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                             <Send className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                           </div>
-                           <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                             Email Configuration
-                           </h3>
-                         </div>
-                       
-                         <div className="space-y-3 md:space-y-4">
-                           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                             <p className="text-sm text-blue-800">
-                               <strong>📧 Your Sending Email:</strong> {user?.email || authUser?.email}
-                             </p>
-                             <p className="text-xs text-blue-600 mt-2">
-                               Quotes and invoices will be sent from this email address.
-                             </p>
-                           </div>
-                       
-                           <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                             <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                               Email Provider
-                             </label>
-                             <select
-                               value={businessInfo.emailProvider || 'gmail'}
-                               onChange={(e) =>
-                                 setBusinessInfo({
-                                   ...businessInfo,
-                                   emailProvider: e.target.value,
-                                 })
-                               }
-                               className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                             >
-                               <option value="gmail">Gmail</option>
-                               <option value="outlook">Outlook/Hotmail</option>
-                               <option value="yahoo">Yahoo Mail</option>
-                               <option value="other">Other SMTP</option>
-                             </select>
-                           </div>
-                       
-                           <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                             <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                               Email App Password <span className="text-red-500">*</span>
-                             </label>
-                             <input
-                               type="password"
-                               value={businessInfo.emailPassword || ''}
-                               onChange={(e) =>
-                                 setBusinessInfo({
-                                   ...businessInfo,
-                                   emailPassword: e.target.value,
-                                 })
-                               }
-                               className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base font-mono"
-                               placeholder="••••••••••••••••"
-                             />
-                             <p className="text-xs text-slate-500 mt-2">
-                               <strong>⚠️ Security Note:</strong> Use an App Password, not your regular login password
-                             </p>
-                           </div>
-                       
-                           {/* Gmail Setup Instructions */}
-                           {(businessInfo.emailProvider === 'gmail' || !businessInfo.emailProvider) && (
-                             <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4">
-                               <h4 className="font-bold text-red-900 mb-2 flex items-center gap-2">
-                                 <span>📖</span> How to Get Gmail App Password:
-                               </h4>
-                               <ol className="text-xs md:text-sm text-red-800 space-y-1 ml-4 list-decimal">
-                                 <li>Go to <strong>myaccount.google.com</strong></li>
-                                 <li>Click <strong>Security</strong> in the left menu</li>
-                                 <li>Enable <strong>2-Step Verification</strong> (if not already enabled)</li>
-                                 <li>Search for <strong>"App passwords"</strong> in the search bar</li>
-                                 <li>Click <strong>App passwords</strong></li>
-                                 <li>Enter your Google password if prompted</li>
-                                 <li>In the "App name" field, type <strong>"Construction Quotes"</strong></li>
-                                 <li>Click <strong>Create</strong></li>
-                                 <li>Copy the 16-character password (shown in yellow box)</li>
-                                 <li>Paste it in the field above</li>
-                               </ol>
-                               
-                                <a href="https://support.google.com/accounts/answer/185833"
-                                 target="_blank"
-                                 rel="noopener noreferrer"
-                                 className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline">
-                               
-                                 📺 View Video Tutorial →
-                               </a>
-                             </div>
-                           )}
-                       
-                           {/* Outlook Setup Instructions */}
-                           {businessInfo.emailProvider === 'outlook' && (
-                             <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
-                               <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
-                                 <span>📖</span> How to Get Outlook App Password:
-                               </h4>
-                               <ol className="text-xs md:text-sm text-blue-800 space-y-1 ml-4 list-decimal">
-                                 <li>Go to <strong>account.microsoft.com/security</strong></li>
-                                 <li>Sign in with your Outlook account</li>
-                                 <li>Click <strong>Advanced security options</strong></li>
-                                 <li>Under "Additional security", click <strong>App passwords</strong></li>
-                                 <li>Click <strong>Create a new app password</strong></li>
-                                 <li>Copy the generated password</li>
-                                 <li>Paste it in the field above</li>
-                               </ol>
-                               
-                                <a href="https://support.microsoft.com/en-us/account-billing/manage-app-passwords-for-two-step-verification-d6dc8c6d-4bf7-4851-ad95-6d07799387e9"
-                                 target="_blank"
-                                 rel="noopener noreferrer"
-                                 className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
-                               >
-                                 📺 View Microsoft Instructions →
-                               </a>
-                             </div>
-                           )}
-                       
-                           {/* Test Email Button */}
-                           <button
-                             onClick={handleTestEmail}
-                             disabled={!businessInfo.emailPassword}
-                             className={`w-full px-4 py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${
-                               !businessInfo.emailPassword
-                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                 : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800'
-                             }`}
-                           >
-                             <Send className="w-4 h-4" />
-                             {businessInfo.emailPassword ? 'Send Test Email' : 'Enter App Password First'}
-                           </button>
-                         </div>
-                       </div>
+                      {/* Email Configuration Section */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <Send className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            Email Configuration
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <p className="text-sm text-blue-800">
+                              <strong>📧 Your Sending Email:</strong>{" "}
+                              {user?.email || authUser?.email}
+                            </p>
+                            <p className="text-xs text-blue-600 mt-2">
+                              Quotes and invoices will be sent from this email
+                              address.
+                            </p>
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Email Provider
+                            </label>
+                            <select
+                              value={businessInfo.emailProvider || "gmail"}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  emailProvider: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            >
+                              <option value="gmail">Gmail</option>
+                              <option value="outlook">Outlook/Hotmail</option>
+                              <option value="yahoo">Yahoo Mail</option>
+                              <option value="other">Other SMTP</option>
+                            </select>
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Email App Password{" "}
+                              <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="password"
+                              value={businessInfo.emailPassword || ""}
+                              onChange={(e) =>
+                                setBusinessInfo({
+                                  ...businessInfo,
+                                  emailPassword: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base font-mono"
+                              placeholder="••••••••••••••••"
+                            />
+                            <p className="text-xs text-slate-500 mt-2">
+                              <strong>⚠️ Security Note:</strong> Use an App
+                              Password, not your regular login password
+                            </p>
+                          </div>
+
+                          {/* Gmail Setup Instructions */}
+                          {(businessInfo.emailProvider === "gmail" ||
+                            !businessInfo.emailProvider) && (
+                            <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4">
+                              <h4 className="font-bold text-red-900 mb-2 flex items-center gap-2">
+                                <span>📖</span> How to Get Gmail App Password:
+                              </h4>
+                              <ol className="text-xs md:text-sm text-red-800 space-y-1 ml-4 list-decimal">
+                                <li>
+                                  Go to <strong>myaccount.google.com</strong>
+                                </li>
+                                <li>
+                                  Click <strong>Security</strong> in the left
+                                  menu
+                                </li>
+                                <li>
+                                  Enable <strong>2-Step Verification</strong>{" "}
+                                  (if not already enabled)
+                                </li>
+                                <li>
+                                  Search for <strong>"App passwords"</strong> in
+                                  the search bar
+                                </li>
+                                <li>
+                                  Click <strong>App passwords</strong>
+                                </li>
+                                <li>Enter your Google password if prompted</li>
+                                <li>
+                                  In the "App name" field, type{" "}
+                                  <strong>"Construction Quotes"</strong>
+                                </li>
+                                <li>
+                                  Click <strong>Create</strong>
+                                </li>
+                                <li>
+                                  Copy the 16-character password (shown in
+                                  yellow box)
+                                </li>
+                                <li>Paste it in the field above</li>
+                              </ol>
+
+                              <a
+                                href="https://support.google.com/accounts/answer/185833"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
+                              >
+                                📺 View Video Tutorial →
+                              </a>
+                            </div>
+                          )}
+
+                          {/* Outlook Setup Instructions */}
+                          {businessInfo.emailProvider === "outlook" && (
+                            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
+                              <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                                <span>📖</span> How to Get Outlook App Password:
+                              </h4>
+                              <ol className="text-xs md:text-sm text-blue-800 space-y-1 ml-4 list-decimal">
+                                <li>
+                                  Go to{" "}
+                                  <strong>
+                                    account.microsoft.com/security
+                                  </strong>
+                                </li>
+                                <li>Sign in with your Outlook account</li>
+                                <li>
+                                  Click{" "}
+                                  <strong>Advanced security options</strong>
+                                </li>
+                                <li>
+                                  Under "Additional security", click{" "}
+                                  <strong>App passwords</strong>
+                                </li>
+                                <li>
+                                  Click{" "}
+                                  <strong>Create a new app password</strong>
+                                </li>
+                                <li>Copy the generated password</li>
+                                <li>Paste it in the field above</li>
+                              </ol>
+
+                              <a
+                                href="https://support.microsoft.com/en-us/account-billing/manage-app-passwords-for-two-step-verification-d6dc8c6d-4bf7-4851-ad95-6d07799387e9"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
+                              >
+                                📺 View Microsoft Instructions →
+                              </a>
+                            </div>
+                          )}
+
+                          {/* Test Email Button */}
+                          <button
+                            onClick={handleTestEmail}
+                            disabled={!businessInfo.emailPassword}
+                            className={`w-full px-4 py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${
+                              !businessInfo.emailPassword
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800"
+                            }`}
+                          >
+                            <Send className="w-4 h-4" />
+                            {businessInfo.emailPassword
+                              ? "Send Test Email"
+                              : "Enter App Password First"}
+                          </button>
+                        </div>
+                      </div>
                       <button
                         onClick={handleSaveBusinessInfo}
                         className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
@@ -2048,7 +2121,7 @@ const handleTemplateChange = (templateId) => {
                               <DollarSign className="w-5 h-5 text-orange-600" />
                             </div>
                           </div>
-                          <div className="text-2xl font-bold text-orange-900">
+                          <div className="text-base sm:text-lg md:text-2xl font-bold text-orange-900">
                             R{total.toFixed(2)}
                           </div>
                         </div>
@@ -2271,7 +2344,9 @@ const handleTemplateChange = (templateId) => {
                                 </label>
                                 <select
                                   value={materialType}
-                                  onChange={(e) => setMaterialType(e.target.value)}
+                                  onChange={(e) =>
+                                    setMaterialType(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
                                 >
                                   <option value="Commercial">Commercial</option>
@@ -2288,11 +2363,14 @@ const handleTemplateChange = (templateId) => {
                               </div>
                               <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Material Type                                </label>
+                                  Material Type{" "}
+                                </label>
                                 <input
                                   type="number"
                                   value={materialType}
-                                  onChange={(e) => setMaterialType(e.target.value)}
+                                  onChange={(e) =>
+                                    setMaterialType(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="1200"
                                 />
@@ -2304,7 +2382,9 @@ const handleTemplateChange = (templateId) => {
                                 <input
                                   type="number"
                                   value={materialThickness}
-                                  onChange={(e) => setMaterialThickness(e.target.value)}
+                                  onChange={(e) =>
+                                    setMaterialThickness(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="3"
                                 />
@@ -2316,7 +2396,9 @@ const handleTemplateChange = (templateId) => {
                                 <input
                                   type="number"
                                   value={urgencyLevel}
-                                  onChange={(e) => setUrgencyLevel(e.target.value)}
+                                  onChange={(e) =>
+                                    setUrgencyLevel(e.target.value)
+                                  }
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
                                   placeholder="2"
                                 />
@@ -2339,8 +2421,11 @@ const handleTemplateChange = (templateId) => {
                                   {materialType} sqm
                                 </p>
                                 <p>
-                                  <span className="font-medium">Welding Process:</span>{" "}
-                                  {weldingProcess} | Project Scale: {projectScale}
+                                  <span className="font-medium">
+                                    Welding Process:
+                                  </span>{" "}
+                                  {weldingProcess} | Project Scale:{" "}
+                                  {projectScale}
                                 </p>
                               </div>
                             </div>
@@ -2396,8 +2481,12 @@ const handleTemplateChange = (templateId) => {
                                       <option value="MIG/GMAW Welding">
                                         MIG/GMAW Welding
                                       </option>
-                                      <option value="Stick/SMAW Welding">Stick/SMAW Welding</option>
-                                      <option value="Flux-Cored Arc Welding">Flux-Cored Arc Welding</option>
+                                      <option value="Stick/SMAW Welding">
+                                        Stick/SMAW Welding
+                                      </option>
+                                      <option value="Flux-Cored Arc Welding">
+                                        Flux-Cored Arc Welding
+                                      </option>
                                       <option value="Fabrication & Assembly">
                                         Fabrication & Assembly
                                       </option>
@@ -2410,11 +2499,15 @@ const handleTemplateChange = (templateId) => {
                                       <option value="Site Preparation">
                                         Site Preparation
                                       </option>
-                                      <option value="On-site Welding">On-site Welding</option>
+                                      <option value="On-site Welding">
+                                        On-site Welding
+                                      </option>
                                       <option value="Shop Welding">
                                         Shop Welding
                                       </option>
-                                      <option value="Inspection & Testing">Inspection & Testing</option>
+                                      <option value="Inspection & Testing">
+                                        Inspection & Testing
+                                      </option>
                                       <option value="Surface Preparation">
                                         Surface Preparation
                                       </option>
@@ -2807,7 +2900,8 @@ const handleTemplateChange = (templateId) => {
                                       <span className="font-semibold">
                                         Project Scale:
                                       </span>{" "}
-                                      {projectScale} | Welding Process: {weldingProcess}
+                                      {projectScale} | Welding Process:{" "}
+                                      {weldingProcess}
                                     </p>
                                   </div>
                                 </div>
@@ -2869,7 +2963,7 @@ const handleTemplateChange = (templateId) => {
                             className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${currentStep === 1 ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 shadow-sm"}`}
                           >
                             <ChevronLeft className="w-5 h-5" />
-                            Previous
+                            <span className="hidden sm:inline">Previous</span>
                           </button>
 
                           <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">
@@ -2881,7 +2975,7 @@ const handleTemplateChange = (templateId) => {
                               onClick={handleNext}
                               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold hover:from-cyan-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
                             >
-                              Next
+                              <span className="hidden sm:inline">Next</span>
                               <ChevronRight className="w-5 h-5" />
                             </button>
                           ) : (
@@ -2915,16 +3009,13 @@ const handleTemplateChange = (templateId) => {
                     templateId={selectedTemplate}
                     businessInfo={businessInfo}
                     loading={loading}
-                    
                     // Fixed: Map jobCardNumber to quoteNumber
                     jobCardNumber={quoteNumber}
-                    
                     // Customer fields
                     customerName={customerName}
                     customerEmail={customerEmail}
                     customerPhone={customerPhone}
                     customerAddress={projectAddress}
-                    
                     // Equipment fields (for welding, we'll map project details)
                     equipmentType={projectType}
                     equipmentManufacturer={materialType}
@@ -2932,26 +3023,23 @@ const handleTemplateChange = (templateId) => {
                     equipmentSerial={`W-${materialThickness}mm`}
                     equipmentId={`WLD-${projectScale}`}
                     equipmentLocation={projectAddress}
-                    
                     // Service details
                     serviceCode={quoteNumber}
                     serviceType="WELDING SERVICE"
-                    
                     // Items and totals
                     items={items}
                     subtotal={subtotal}
                     vat={totalTax}
                     total={total}
-                    
                     // Document type
                     documentType={documentType}
-                    
                     // Stamp settings
                     stampText={stampSettings.text}
                     stampColor={stampSettings.color}
                     showStampDate={stampSettings.showDate}
-                    showStamp={stampSettings.enabled && paymentStatus.status === "paid"}
-                    
+                    showStamp={
+                      stampSettings.enabled && paymentStatus.status === "paid"
+                    }
                     // Payment status
                     paymentStatus={paymentStatus}
                   />

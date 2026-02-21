@@ -3,12 +3,12 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
-import logo from '../../assets/img/solidflo-logo.png';
-import Templates from "./Templates"; 
+import logo from "../../assets/img/solidflo-logo.png";
+import Templates from "./Templates";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
-import TemplateSelector, { TemplateRenderer } from './TemplateSelector';
-import  uploadLogoToR2 from "../../utils/uploadLogoToR2";
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
+import uploadLogoToR2 from "../../utils/uploadLogoToR2";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
   collection,
@@ -25,9 +25,9 @@ import {
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
-import StudentModal from './StudentModal';
-import StudentsListModal from './StudentsListModal';
-import SignatureStamp from '../SignatureStamp';
+import StudentModal from "./StudentModal";
+import StudentsListModal from "./StudentsListModal";
+import SignatureStamp from "../SignatureStamp";
 import {
   ChevronDown,
   ChevronLeft,
@@ -46,7 +46,7 @@ import {
   CreditCard,
   X,
   Edit,
-   Sparkles,
+  Sparkles,
   LogOut,
   CheckSquare,
   TrendingUp,
@@ -85,12 +85,12 @@ const generateReportCardNumber = async (userId) => {
 const functions = getFunctions();
 const EducationDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-const [inputMode, setInputMode] = useState("manual");
-const [documentType, setDocumentType] = useState("invoice"); 
-const [useAI, setUseAI] = useState(false);
+  const [inputMode, setInputMode] = useState("manual");
+  const [documentType, setDocumentType] = useState("invoice");
+  const [useAI, setUseAI] = useState(false);
   const [activeTab, setActiveTab] = useState("ReportCard");
   const [showReportCard, setShowReportCard] = useState(false);
-  const {user, authUser} = useAuth();
+  const { user, authUser } = useAuth();
   const [reportNumber, setReportNumber] = useState("");
   const [reportId, setReportId] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -103,17 +103,18 @@ const [useAI, setUseAI] = useState(false);
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState("classic");
   const [students, setStudents] = useState([]);
-  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
-  const [selectedTemplate, setSelectedTemplate] = useState('professional');
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
+    useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [activeView, setActiveView] = useState("home");
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
-    const [isClientsOpen, setIsClientsOpen] = useState(false);
-const [stampSettings, setStampSettings] = useState({
+  const [isClientsOpen, setIsClientsOpen] = useState(false);
+  const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
-  color: "#d32f2f",
-  showDate: false,
-  enabled: false
+    color: "#d32f2f",
+    showDate: false,
+    enabled: false,
   });
   useEffect(() => {
     if (!user?.uid) return;
@@ -129,20 +130,23 @@ const [stampSettings, setStampSettings] = useState({
 
   const loadStudents = async () => {
     try {
-      const q = query(collection(db, "users", user.uid, "students"), orderBy('createdAt', 'desc'));
+      const q = query(
+        collection(db, "users", user.uid, "students"),
+        orderBy("createdAt", "desc"),
+      );
       const querySnapshot = await getDocs(q);
       const studentsData = [];
-      
+
       querySnapshot.forEach((doc) => {
         studentsData.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         });
       });
-      
+
       setStudents(studentsData);
     } catch (error) {
-      console.error('Error loading students:', error);
+      console.error("Error loading students:", error);
     }
   };
 
@@ -210,64 +214,74 @@ const [stampSettings, setStampSettings] = useState({
     setAttendancePresent(report.attendance?.present || "");
     setShowReportsList(false);
   };
-const handleAIDataExtracted = (extractedData) => {
-  // Student info
-  if (extractedData.student.name) setStudentName(extractedData.student.name);
-  if (extractedData.student.studentId) setStudentId(extractedData.student.studentId);
-  if (extractedData.student.gradeLevel) setGradeLevel(extractedData.student.gradeLevel);
-  if (extractedData.student.dateOfBirth) setDateOfBirth(extractedData.student.dateOfBirth);
+  const handleAIDataExtracted = (extractedData) => {
+    // Student info
+    if (extractedData.student.name) setStudentName(extractedData.student.name);
+    if (extractedData.student.studentId)
+      setStudentId(extractedData.student.studentId);
+    if (extractedData.student.gradeLevel)
+      setGradeLevel(extractedData.student.gradeLevel);
+    if (extractedData.student.dateOfBirth)
+      setDateOfBirth(extractedData.student.dateOfBirth);
 
-  // Parent/Guardian info
-  if (extractedData.parent) {
-    if (extractedData.parent.name) setParentName(extractedData.parent.name);
-    if (extractedData.parent.email) setParentEmail(extractedData.parent.email);
-    if (extractedData.parent.phone) setParentPhone(extractedData.parent.phone);
-    if (extractedData.parent.address) setParentAddress(extractedData.parent.address);
-  }
+    // Parent/Guardian info
+    if (extractedData.parent) {
+      if (extractedData.parent.name) setParentName(extractedData.parent.name);
+      if (extractedData.parent.email)
+        setParentEmail(extractedData.parent.email);
+      if (extractedData.parent.phone)
+        setParentPhone(extractedData.parent.phone);
+      if (extractedData.parent.address)
+        setParentAddress(extractedData.parent.address);
+    }
 
-  // Academic period info
-  if (extractedData.academicInfo) {
-    if (extractedData.academicInfo.term) setTerm(extractedData.academicInfo.term);
-    if (extractedData.academicInfo.year) setAcademicYear(extractedData.academicInfo.year);
-  }
+    // Academic period info
+    if (extractedData.academicInfo) {
+      if (extractedData.academicInfo.term)
+        setTerm(extractedData.academicInfo.term);
+      if (extractedData.academicInfo.year)
+        setAcademicYear(extractedData.academicInfo.year);
+    }
 
-  // Attendance info
-  if (extractedData.attendance) {
-    if (extractedData.attendance.days) setAttendanceDays(extractedData.attendance.days);
-    if (extractedData.attendance.present) setAttendancePresent(extractedData.attendance.present);
-  }
+    // Attendance info
+    if (extractedData.attendance) {
+      if (extractedData.attendance.days)
+        setAttendanceDays(extractedData.attendance.days);
+      if (extractedData.attendance.present)
+        setAttendancePresent(extractedData.attendance.present);
+    }
 
-  // Subjects/grades
-  if (extractedData.subjects && extractedData.subjects.length > 0) {
-    setSubjects(extractedData.subjects);
-  }
+    // Subjects/grades
+    if (extractedData.subjects && extractedData.subjects.length > 0) {
+      setSubjects(extractedData.subjects);
+    }
 
-  // Teacher comments
-  if (extractedData.teacherComments) {
-    setTeacherComments(extractedData.teacherComments);
-  }
+    // Teacher comments
+    if (extractedData.teacherComments) {
+      setTeacherComments(extractedData.teacherComments);
+    }
 
-  alert("✅ Data extracted and populated successfully!");
-};
-const handleTestEmail = async () => {
-  if (!schoolInfo.emailPassword) {
-    alert('⚠️ Please enter your email app password first.');
-    return;
-  }
+    alert("✅ Data extracted and populated successfully!");
+  };
+  const handleTestEmail = async () => {
+    if (!schoolInfo.emailPassword) {
+      alert("⚠️ Please enter your email app password first.");
+      return;
+    }
 
-  const userEmail = user?.email || authUser?.email;
-  
-  if (!userEmail) {
-    alert('⚠️ Could not find your email address. Please log in again.');
-    return;
-  }
+    const userEmail = user?.email || authUser?.email;
 
-  try {
-    const testEmailData = {
-      userId: user.uid,
-      to: userEmail, // Send test to self
-      subject: '✅ Test Email - Email Configuration Successful',
-      message: `
+    if (!userEmail) {
+      alert("⚠️ Could not find your email address. Please log in again.");
+      return;
+    }
+
+    try {
+      const testEmailData = {
+        userId: user.uid,
+        to: userEmail, // Send test to self
+        subject: "✅ Test Email - Email Configuration Successful",
+        message: `
 Hello,
 
 This is a test email from your construction quote/invoice system.
@@ -278,7 +292,7 @@ Account Details:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Business: ${schoolInfo.businessName}
 Email: ${userEmail}
-Provider: ${schoolInfo.emailProvider || 'Gmail'}
+Provider: ${schoolInfo.emailProvider || "Gmail"}
 Date: ${new Date().toLocaleString()}
 
 You can now send quotes and invoices to your clients from this email address.
@@ -286,27 +300,30 @@ You can now send quotes and invoices to your clients from this email address.
 Best regards,
 Your Construction Quote System
       `.trim(),
-      documentType: 'test',
-      documentNumber: 'TEST-001',
-    };
+        documentType: "test",
+        documentNumber: "TEST-001",
+      };
 
-    const sendEmail = httpsCallable(functions, 'sendQuoteEmail');
-    await sendEmail(testEmailData);
-    
-    alert(`✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`);
-  } catch (error) {
-    console.error('Test email error:', error);
-    
-    let errorMsg = '❌ Test email failed!\n\n';
-    if (error.message.includes('Invalid login')) {
-      errorMsg += 'Your app password is incorrect. Please check and try again.\n\nMake sure you\'re using an APP PASSWORD, not your regular password.';
-    } else {
-      errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+      const sendEmail = httpsCallable(functions, "sendQuoteEmail");
+      await sendEmail(testEmailData);
+
+      alert(
+        `✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`,
+      );
+    } catch (error) {
+      console.error("Test email error:", error);
+
+      let errorMsg = "❌ Test email failed!\n\n";
+      if (error.message.includes("Invalid login")) {
+        errorMsg +=
+          "Your app password is incorrect. Please check and try again.\n\nMake sure you're using an APP PASSWORD, not your regular password.";
+      } else {
+        errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+      }
+
+      alert(errorMsg);
     }
-    
-    alert(errorMsg);
-  }
-};
+  };
   const loadSavedStudents = async () => {
     if (!user?.uid) return;
 
@@ -320,12 +337,12 @@ Your Construction Quote System
       ...doc.data(),
     }));
 
-    setSavedStudents(students.filter(s => !s._placeholder));
+    setSavedStudents(students.filter((s) => !s._placeholder));
   };
 
   const handleSaveStudent = async () => {
     if (!user?.uid) return;
-    
+
     if (!studentName || !gradeLevel) {
       alert("Please enter student name and grade level");
       return;
@@ -343,7 +360,7 @@ Your Construction Quote System
         parentPhone: parentPhone,
         parentAddress: parentAddress,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       await addDoc(collection(db, "users", user.uid, "students"), studentData);
@@ -359,9 +376,7 @@ Your Construction Quote System
     if (!user?.uid || !reportId) return null;
 
     const db = getFirestore();
-    const snap = await getDoc(
-      doc(db, "users", user.uid, "reports", reportId)
-    );
+    const snap = await getDoc(doc(db, "users", user.uid, "reports", reportId));
 
     return snap.exists() ? snap.data() : null;
   };
@@ -433,10 +448,14 @@ Your Construction Quote System
   const [parentName, setParentName] = useState("Mary Smith");
   const [parentEmail, setParentEmail] = useState("mary.smith@email.com");
   const [parentPhone, setParentPhone] = useState("082 123 4567");
-  const [parentAddress, setParentAddress] = useState("123 Main Street, Johannesburg, 2001");
+  const [parentAddress, setParentAddress] = useState(
+    "123 Main Street, Johannesburg, 2001",
+  );
   const [term, setTerm] = useState("Term 1");
   const [academicYear, setAcademicYear] = useState("2026");
-  const [teacherComments, setTeacherComments] = useState("John is a hardworking student who shows great enthusiasm for learning.");
+  const [teacherComments, setTeacherComments] = useState(
+    "John is a hardworking student who shows great enthusiasm for learning.",
+  );
   const [attendanceDays, setAttendanceDays] = useState("65");
   const [attendancePresent, setAttendancePresent] = useState("63");
 
@@ -482,7 +501,7 @@ Your Construction Quote System
 
     fetchSchoolInfo();
   }, [user]);
-const [paymentStatus, setPaymentStatus] = useState({
+  const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
     balanceDue: 0,
     status: "pending",
@@ -502,7 +521,7 @@ const [paymentStatus, setPaymentStatus] = useState({
       console.error("Error loading school info:", error);
     }
   };
-const handleProcessPayment = async () => {
+  const handleProcessPayment = async () => {
     if (!reportId || !user?.uid) {
       alert("Please save the invoice before processing payment");
       return;
@@ -577,48 +596,52 @@ const handleProcessPayment = async () => {
     loadPaymentStatus();
     setShowPaymentModal(false);
   };
- const handleLogoUpload = async (e) => {
-   const file = e.target.files[0];
-   if (!file || !user?.uid || !authUser) return;
- 
-   if (!file.type.startsWith("image/")) {
-     alert("Please upload an image file");
-     return;
-   }
- 
-   if (file.size > 5 * 1024 * 1024) {
-     alert("Image size should be less than 5MB");
-     return;
-   }
- 
-   try {
-     setSchoolInfo(prev => ({ ...prev, uploading: true }));
- 
-     // ✅ Upload to Cloudflare R2 (Worker handles userId)
-     const logoUrl = await uploadLogoToR2(file, authUser);
- 
-     setSchoolInfo(prev => ({
-       ...prev,
-       logoUrl,
-       uploading: false,
-     }));
- 
-     // Save URL to Firestore
-     const db = getFirestore();
-     const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
- 
-     await setDoc(docRef, {
-   logoUrl,
-   updatedAt: new Date().toISOString(),
- }, { merge: true });
- 
-     alert("Logo uploaded successfully!");
-   } catch (error) {
-     console.error("Error uploading logo:", error);
-     alert("Failed to upload logo: " + error.message);
-     setSchoolInfo(prev => ({ ...prev, uploading: false }));
-   }
- };
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !user?.uid || !authUser) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
+    }
+
+    try {
+      setSchoolInfo((prev) => ({ ...prev, uploading: true }));
+
+      // ✅ Upload to Cloudflare R2 (Worker handles userId)
+      const logoUrl = await uploadLogoToR2(file, authUser);
+
+      setSchoolInfo((prev) => ({
+        ...prev,
+        logoUrl,
+        uploading: false,
+      }));
+
+      // Save URL to Firestore
+      const db = getFirestore();
+      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+
+      await setDoc(
+        docRef,
+        {
+          logoUrl,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true },
+      );
+
+      alert("Logo uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      alert("Failed to upload logo: " + error.message);
+      setSchoolInfo((prev) => ({ ...prev, uploading: false }));
+    }
+  };
 
   const handleSaveSchoolInfo = async () => {
     if (!user?.uid) return;
@@ -635,21 +658,21 @@ const handleProcessPayment = async () => {
     }
   };
 
- const handlePrint = () => {
-  // Add print styles to document
-  const styleSheet = document.createElement("style");
-  styleSheet.textContent = printStyles;
-  document.head.appendChild(styleSheet);
-  
-  // Trigger print
-  window.print();
-  
-  // Clean up (remove after print dialog closes)
-  setTimeout(() => {
-    document.head.removeChild(styleSheet);
-  }, 1000);
-};
-const printStyles = `
+  const handlePrint = () => {
+    // Add print styles to document
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = printStyles;
+    document.head.appendChild(styleSheet);
+
+    // Trigger print
+    window.print();
+
+    // Clean up (remove after print dialog closes)
+    setTimeout(() => {
+      document.head.removeChild(styleSheet);
+    }, 1000);
+  };
+  const printStyles = `
   @media print {
     /* Hide everything except the print area */
     body * {
@@ -764,7 +787,10 @@ const printStyles = `
     attendance: {
       days: Number(attendanceDays),
       present: Number(attendancePresent),
-      percentage: ((Number(attendancePresent) / Number(attendanceDays)) * 100).toFixed(1),
+      percentage: (
+        (Number(attendancePresent) / Number(attendanceDays)) *
+        100
+      ).toFixed(1),
     },
 
     teacherComments,
@@ -794,7 +820,7 @@ const printStyles = `
     } else {
       const ref = await addDoc(
         collection(db, "users", user.uid, "reports"),
-        reportData
+        reportData,
       );
       setReportId(ref.id);
     }
@@ -842,127 +868,127 @@ const printStyles = `
 
   return (
     <div className="flex h-screen bg-gray-300">
-   {/* Mobile Sidebar Backdrop */}
-{sidebarOpen && (
-  <div
-    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-    onClick={() => setSidebarOpen(false)}
-  ></div>
-)}
+      {/* Mobile Sidebar Backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
 
-{/* Collapsed Sidebar (Icon Only) */}
-<div
-  className={`${
-    sidebarOpen ? "hidden" : "hidden md:block"
-  } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
->
-  <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
-    {/* Toggle Button */}
-    <button
-      onClick={() => setSidebarOpen(true)}
-      className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:scale-110"
-      title="Expand Sidebar"
-    >
-      <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
-    </button>
+      {/* Collapsed Sidebar (Icon Only) */}
+      <div
+        className={`${
+          sidebarOpen ? "hidden" : "hidden md:block"
+        } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
+      >
+        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
+          {/* Toggle Button */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:scale-110"
+            title="Expand Sidebar"
+          >
+            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
+          </button>
 
-    {/* Logo */}
-    <div className="relative group">
+          {/* Logo */}
+          <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
             <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4  rounded-xl p-1 shadow-lg">
               <img src={logo} alt="" />
             </div>
           </div>
 
-    <div className="w-10 border-t border-slate-600"></div>
+          <div className="w-10 border-t border-slate-600"></div>
 
-    {/* Icon Navigation */}
-    <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
-      <button
-  onClick={() => setActiveView("home")}  // ADD THIS
-  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-  title="Home"
->
-  <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-  <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-</button>
-      
-      <button
-        onClick={() => setShowSettings(true)}
-        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-        title="Settings"
-      >
-        <Settings className="w-5 h-5" />
-      </button>
+          {/* Icon Navigation */}
+          <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
+            <button
+              onClick={() => setActiveView("home")} // ADD THIS
+              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+              title="Home"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+            </button>
 
-      <button
-        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-        title="School Overview"
-      >
-        <TrendingUp className="w-5 h-5" />
-      </button>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
+              title="Settings"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
 
-      <button
-        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-        title="Report Cards"
-      >
-        <ClipboardList className="w-5 h-5" />
-      </button>
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
+              title="School Overview"
+            >
+              <TrendingUp className="w-5 h-5" />
+            </button>
 
-      <button
-        onClick={() => setActiveView("templates")}
-        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-        title="Templates"
-      >
-        <FileText className="w-5 h-5" />
-      </button>
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
+              title="Report Cards"
+            >
+              <ClipboardList className="w-5 h-5" />
+            </button>
 
-      <button
-        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-        title="Students"
-      >
-        <Users className="w-5 h-5" />
-      </button>
+            <button
+              onClick={() => setActiveView("templates")}
+              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
+              title="Templates"
+            >
+              <FileText className="w-5 h-5" />
+            </button>
 
-      <button
-        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-        title="Attendance"
-      >
-        <Calendar className="w-5 h-5" />
-      </button>
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
+              title="Students"
+            >
+              <Users className="w-5 h-5" />
+            </button>
 
-      <button
-        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-        title="Curriculum"
-      >
-        <BookOpen className="w-5 h-5" />
-      </button>
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
+              title="Attendance"
+            >
+              <Calendar className="w-5 h-5" />
+            </button>
 
-      <button
-        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-        title="Assessments"
-      >
-        <Award className="w-5 h-5" />
-      </button>
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
+              title="Curriculum"
+            >
+              <BookOpen className="w-5 h-5" />
+            </button>
 
-      <button
-        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-        title="Analytics"
-      >
-        <BarChart3 className="w-5 h-5" />
-      </button>
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
+              title="Assessments"
+            >
+              <Award className="w-5 h-5" />
+            </button>
 
-      <button
-        className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-        title="Staff"
-      >
-        <UserCheck className="w-5 h-5" />
-      </button>
-    </div>
-  </div>
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
+              title="Analytics"
+            >
+              <BarChart3 className="w-5 h-5" />
+            </button>
 
-  {/* User Icon at Bottom */}
-   <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
+            <button
+              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
+              title="Staff"
+            >
+              <UserCheck className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* User Icon at Bottom */}
+        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
           <div className="relative group">
             <div className="absolute inset-0 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
             <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
@@ -970,1165 +996,1232 @@ const printStyles = `
             </div>
           </div>
         </div>
-</div>
-
-{/* Expanded Sidebar (Full Width) */}
-<div
-  className={`${
-    sidebarOpen ? "translate-x-0" : "-translate-x-full"
-  } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl`}
->
-  <div className="p-4 md:p-6">
-    <div className="flex items-center justify-between mb-6 md:mb-8">
-      <div className="flex items-center space-x-3 md:space-x-4">
-        <img
-          src={logo}
-          alt="School Logo"
-          className="w-16 h-12 object-contain rounded-lg"
-        />
       </div>
-      {/* Close Button */}
-      <button
-        onClick={() => setSidebarOpen(false)}
-        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
-        title="Collapse Sidebar"
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </button>
-    </div>
 
-    <nav className="space-y-1">
+      {/* Expanded Sidebar (Full Width) */}
       <div
-  onClick={() => {setActiveView("home"); setSidebarOpen(false);}}
-  className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
->
-  <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-  <span className="text-xs md:text-sm font-semibold">Home</span>
-</div>
-      <div
-        onClick={() => {setShowSettings(true); setSidebarOpen(false);}}
-        className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
+        className={`${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl`}
       >
-        <Settings className="w-5 h-5" />
-        <span className="text-sm font-medium">Settings</span>
-      </div>
-
-      <div className="pt-4 mt-4 border-t border-slate-700/50">
-        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200">
-          <TrendingUp className="w-5 h-5" />
-          <span className="text-sm font-medium">School Overview</span>
-        </div>
-
-        {/* Report Cards Section */}
-        <div className="mt-2">
-          <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+        <div className="p-4 md:p-6">
+          <div className="flex items-center justify-between mb-6 md:mb-8">
             <div className="flex items-center space-x-3 md:space-x-4">
-              <ClipboardList className="w-5 h-5" />
-              <span className="text-sm font-medium">Report Cards</span>
+              <img
+                src={logo}
+                alt="School Logo"
+                className="w-16 h-12 object-contain rounded-lg"
+              />
             </div>
-            <ChevronDown className="w-4 h-4" />
+            {/* Close Button */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
+              title="Collapse Sidebar"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
           </div>
 
-          <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+          <nav className="space-y-1">
             <div
-              onClick={() => {setActiveView("reportCard"); setSidebarOpen(false);}}
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+              onClick={() => {
+                setActiveView("home");
+                setSidebarOpen(false);
+              }}
+              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
             >
-              Create Report Card
+              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-xs md:text-sm font-semibold">Home</span>
             </div>
             <div
-              onClick={() => {setShowReportsList(!showReportsList); setSidebarOpen(false);}}
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+              onClick={() => {
+                setShowSettings(true);
+                setSidebarOpen(false);
+              }}
+              className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
             >
-              <div className="flex items-center justify-between">
-                <span>All Reports</span>
-                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                  {savedReports.length}
-                </span>
+              <Settings className="w-5 h-5" />
+              <span className="text-sm font-medium">Settings</span>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-slate-700/50">
+              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200">
+                <TrendingUp className="w-5 h-5" />
+                <span className="text-sm font-medium">School Overview</span>
               </div>
-            </div>
-          </div>
-        </div>
 
-        <div
-          onClick={() => {setActiveView("templates"); setSidebarOpen(false);}}
-          className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
-        >
-          <FileText className="w-5 h-5" />
-          <span className="text-sm font-medium">Templates</span>
-        </div>
-
-        {/* Students Section */}
-        <div className="mt-2">
-          <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-            <div className="flex items-center space-x-3 md:space-x-4">
-              <Users className="w-5 h-5" />
-              <span className="text-sm font-medium">Students</span>
-            </div>
-            <ChevronDown className="w-4 h-4" />
-          </div>
-
-          <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-            <div
-              onClick={() => {handleAddNewStudent(); setSidebarOpen(false);}}
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-            >
-              Add Student
-            </div>
-            <div
-              onClick={() => {setShowStudentsListModal(true); setSidebarOpen(false);}}
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-            >
-              <div className="flex items-center justify-between">
-                <span>All Students</span>
-                <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                  {savedStudents.length}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-          <Calendar className="w-5 h-5" />
-          <span className="text-sm font-medium">Attendance</span>
-        </div>
-
-        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-          <BookOpen className="w-5 h-5" />
-          <span className="text-sm font-medium">Curriculum</span>
-        </div>
-
-        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-          <Award className="w-5 h-5" />
-          <span className="text-sm font-medium">Assessments</span>
-        </div>
-
-        <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-          <div className="flex items-center space-x-3 md:space-x-4">
-            <BarChart3 className="w-5 h-5" />
-            <span className="text-sm font-medium">Analytics</span>
-          </div>
-          <ChevronDown className="w-4 h-4" />
-        </div>
-
-        <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-          <UserCheck className="w-5 h-5" />
-          <span className="text-sm font-medium">Staff</span>
-        </div>
-      </div>
-    </nav>
-  </div>
-
-  <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
-    <div className="flex items-center space-x-3 md:space-x-4">
-      <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
-  <img
-    src={schoolInfo.logoUrl}
-    alt="Business Logo"
-    className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-  />
-</div>
-      <div className="flex-1">
-        <div className="text-sm font-semibold text-white">
-          {user?.name || "Teacher"}
-        </div>
-        <div className="text-xs text-slate-400">
-          {user?.email || "teacher@school.com"}
-        </div>
-      </div>
-      <button
-        onClick={handleLogout}
-        className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 rounded-lg transition-all duration-200"
-        title="Logout"
-      >
-        <LogOut className="w-4 h-4" />
-      </button>
-    </div>
-  </div>
-</div>
-
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : "ml-0 md:ml-16"}`}>
-      <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
-        
-
-       
-        
-        <div className="flex-1 overflow-y-auto">
-          {showSettings && (
-                         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
-                           <div className="bg-gray-300 max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
-                             <div className="p-4 md:p-6 border-b border-slate-300 bg-gradient-to-r from-gray0 to-purple-50 flex-shrink-0">
-                               <div className="flex items-center justify-between">
-                                 <div className="flex items-center space-x-2 md:space-x-3">
-                                   <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                                     <Settings className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                                   </div>
-                                   <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                                     Business Settings
-                                   </h2>
-                                 </div>
-                                 <button
-                                   onClick={() => setShowSettings(false)}
-                                   className="group p-1.5 md:p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300"
-                                 >
-                                   <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                                 </button>
-                               </div>
-                             </div>
-           
-                             <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-300 to-slate-400 flex-1">
-                               <div className="space-y-4 md:space-y-6">
-                                 {/* Logo Upload */}
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-3">
-                                     Business Logo
-                                   </label>
-                                   <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
-                                     {schoolInfo.logoUrl ? (
-                                       <div className="relative group">
-                                         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
-                                         <img
-                                           src={schoolInfo.logoUrl}
-                                           alt="School Logo"
-                                           className="relative w-20 h-20 md:w-24 md:h-24 object-contain border-2 border-slate-200 rounded-xl shadow-lg"
-                                         />
-                                       </div>
-                                     ) : (
-                                       <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-blue-400 transition-all duration-300">
-                                         <Upload className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />
-                                       </div>
-                                     )}
-           
-                                     <div className="flex-1 text-center sm:text-left ">
-                                       <input
-                                         type="file"
-                                         accept="image/*"
-                                         onChange={handleLogoUpload}
-                                         className="hidden"
-                                         id="logo-upload"
-                                       />
-                                       <label
-                                         htmlFor="logo-upload"
-                                         className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg md:rounded-xl hover:from-blue-700 hover:to-purple-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
-                                       >
-                                         {schoolInfo.logoUrl
-                                           ? "Change Logo"
-                                           : "Upload Logo"}
-                                       </label>
-                                       <p className="text-xs text-slate-500 mt-2 md:mt-3 flex items-center justify-center sm:justify-start space-x-1">
-                                         <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
-                                         <span>Recommended: Square image, max 5MB</span>
-                                       </p>
-                                     </div>
-                                   </div>
-                                 </div>
-           
-                                 {/* Business Name */}
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                     Business Name
-                                   </label>
-                                   <input
-                                     type="text"
-                                     value={schoolInfo.schoolName}
-                                     onChange={(e) =>
-                                       setSchoolInfo({
-                                         ...schoolInfo,
-                                         schoolName: e.target.value,
-                                       })
-                                     }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-black-500 transition-all duration-300 font-medium text-sm md:text-base"
-                                     placeholder="Solidflo Invoicing Saas"
-                                   />
-                                 </div>
-           
-                                 {/* Address Fields */}
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                     Address Line 1
-                                   </label>
-                                   <input
-                                     type="text"
-                                     value={schoolInfo.addressLine1}
-                                     onChange={(e) =>
-                                       setSchoolInfo({
-                                         ...schoolInfo,
-                                         addressLine1: e.target.value,
-                                       })
-                                     }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                     placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
-                                   />
-                                 </div>
-           
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                     Address Line 2
-                                   </label>
-                                   <input
-                                     type="text"
-                                     value={schoolInfo.addressLine2}
-                                     onChange={(e) =>
-                                       setSchoolInfo({
-                                         ...schoolInfo,
-                                         addressLine2: e.target.value,
-                                       })
-                                     }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                     placeholder="WYNBERG"
-                                   />
-                                 </div>
-           
-                                 {/* City and Postal Code */}
-                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                                   <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                     <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                       City
-                                     </label>
-                                     <input
-                                       type="text"
-                                       value={schoolInfo.city}
-                                       onChange={(e) =>
-                                         setSchoolInfo({
-                                           ...schoolInfo,
-                                           city: e.target.value,
-                                         })
-                                       }
-                                       className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       placeholder="SANDTON"
-                                     />
-                                   </div>
-           
-                                   <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                     <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                       Postal Code
-                                     </label>
-                                     <input
-                                       type="text"
-                                       value={schoolInfo.postalCode}
-                                       onChange={(e) =>
-                                         setSchoolInfo({
-                                           ...schoolInfo,
-                                           postalCode: e.target.value,
-                                         })
-                                       }
-                                       className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       placeholder="2090"
-                                     />
-                                   </div>
-                                 </div>
-           
-                                 {/* Phone Numbers */}
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                     Primary Phone <span className="text-red-500">*</span>
-                                   </label>
-                                   <input
-                                     type="tel"
-                                     value={schoolInfo.primaryPhone}
-                                     onChange={(e) =>
-                                       setSchoolInfo({
-                                         ...schoolInfo,
-                                         primaryPhone: e.target.value,
-                                       })
-                                     }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                     placeholder="082 514 4509"
-                                     required
-                                   />
-                                 </div>
-           
-                                 <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                   <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                     Secondary Phone (Optional)
-                                   </label>
-                                   <input
-                                     type="tel"
-                                     value={schoolInfo.secondaryPhone}
-                                     onChange={(e) =>
-                                       setSchoolInfo({
-                                         ...schoolInfo,
-                                         secondaryPhone: e.target.value,
-                                       })
-                                     }
-                                     className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                     placeholder="084 583 9929"
-                                   />
-                                 </div>
-           
-                                 {/* Bank Details Section */}
-                                 <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
-                                   <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                                     <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
-                                       <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                                     </div>
-                                     <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                                       Bank Details
-                                     </h3>
-                                   </div>
-           
-                                   <div className="space-y-3 md:space-y-4">
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                       <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                         Bank Name
-                                       </label>
-                                       <input
-                                         type="text"
-                                         value={schoolInfo.bankName}
-                                         onChange={(e) =>
-                                           setSchoolInfo({
-                                             ...schoolInfo,
-                                             bankName: e.target.value,
-                                           })
-                                         }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       />
-                                     </div>
-           
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                       <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                         Account Holder
-                                       </label>
-                                       <input
-                                         type="text"
-                                         value={schoolInfo.accountHolder}
-                                         onChange={(e) =>
-                                           setSchoolInfo({
-                                             ...schoolInfo,
-                                             accountHolder: e.target.value,
-                                           })
-                                         }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       />
-                                     </div>
-           
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                       <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                         Account Number
-                                       </label>
-                                       <input
-                                         type="text"
-                                         value={schoolInfo.accountNumber}
-                                         onChange={(e) =>
-                                           setSchoolInfo({
-                                             ...schoolInfo,
-                                             accountNumber: e.target.value,
-                                           })
-                                         }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       />
-                                     </div>
-           
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                       <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                         Branch Code
-                                       </label>
-                                       <input
-                                         type="text"
-                                         value={schoolInfo.branchCode}
-                                         onChange={(e) =>
-                                           setSchoolInfo({
-                                             ...schoolInfo,
-                                             branchCode: e.target.value,
-                                           })
-                                         }
-                                         className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                                       />
-                                     </div>
-                                   </div>
-                                 </div>
-           
-                                 {/* Stamp Settings */}
-                                 <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
-                                   <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                                     <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
-                                       <CheckSquare className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                                     </div>
-                                     <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                                       📋 Invoice Stamp Settings
-                                     </h3>
-                                   </div>
-           
-                                   <div className="space-y-3 md:space-y-4">
-                                     <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                                       <label className="flex items-center space-x-2 md:space-x-3 cursor-pointer group">
-                                         <input
-                                           type="checkbox"
-                                           checked={stampSettings.enabled}
-                                           onChange={(e) =>
-                                             setStampSettings({
-                                               ...stampSettings,
-                                               enabled: e.target.checked,
-                                             })
-                                           }
-                                           className="w-4 h-4 md:w-5 md:h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
-                                         />
-                                         <span className="text-xs md:text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
-                                           Show approval stamp on invoices and quotes
-                                         </span>
-                                       </label>
-                                     </div>
-           
-                                     {stampSettings.enabled && (
-                                       <>
-                                         <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                                           <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                             Stamp Text
-                                           </label>
-                                           <input
-                                             type="text"
-                                             value={stampSettings.text}
-                                             onChange={(e) =>
-                                               setStampSettings({
-                                                 ...stampSettings,
-                                                 text: e.target.value.toUpperCase(),
-                                               })
-                                             }
-                                             className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-bold text-sm md:text-base"
-                                             placeholder="APPROVED"
-                                             maxLength={15}
-                                           />
-                                           <p className="text-xs text-slate-500 mt-2 flex items-center space-x-1">
-                                             <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
-                                             <span>Max 15 characters</span>
-                                           </p>
-                                         </div>
-           
-           
-                                         <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                           <label className="block text-sm font-bold text-slate-700 mb-3">
-                                             Stamp Color
-                                           </label>
-                                           <select
-                                             value={stampSettings.color}
-                                             onChange={(e) =>
-                                               setStampSettings({
-                                                 ...stampSettings,
-                                                 color: e.target.value,
-                                               })
-                                             }
-                                             className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-semibold cursor-pointer"
-                                           >
-                                             <option value="#d32f2f">
-                                               🔴 Red (Traditional)
-                                             </option>
-                                             <option value="#1976d2">
-                                               🔵 Blue (Professional)
-                                             </option>
-                                             <option value="#388e3c">
-                                               🟢 Green (Approved)
-                                             </option>
-                                             <option value="#7b1fa2">
-                                               🟣 Purple (Premium)
-                                             </option>
-                                             <option value="#000000">
-                                               ⚫ Black (Formal)
-                                             </option>
-                                             <option value="#f57c00">
-                                               🟠 Orange (Attention)
-                                             </option>
-                                           </select>
-                                         </div>
-           
-                                         <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                           <label className="flex items-center space-x-3 cursor-pointer group">
-                                             <input
-                                               type="checkbox"
-                                               checked={stampSettings.showDate}
-                                               onChange={(e) =>
-                                                 setStampSettings({
-                                                   ...stampSettings,
-                                                   showDate: e.target.checked,
-                                                 })
-                                               }
-                                               className="w-5 h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
-                                             />
-                                             <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
-                                               Include date on stamp
-                                             </span>
-                                           </label>
-                                         </div>
-           
-                                         {/* Preview */}
-                                         <div className="mt-6 p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-2 border-dashed border-slate-300">
-                                           <p className="text-sm font-bold mb-6 text-center text-slate-600">
-                                             Stamp Preview:
-                                           </p>
-                                           <div className="flex justify-center">
-                                             <SignatureStamp
-                                               text={stampSettings.text}
-                                               color={stampSettings.color}
-                                               showDate={stampSettings.showDate}
-                                               rotation={-5}
-                                               size="medium"
-                                             />
-                                           </div>
-                                         </div>
-                                       </>
-                                     )}
-                                   </div>
-                                 </div>
-           
-                                 <button
-                                   onClick={handleSaveSchoolInfo}
-                                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
-                                 >
-                                   💾 Save School Information
-                                 </button>
-                               </div>
-                             </div>
-                           </div>
-                         </div>
-                       )}
-
-          <StudentsListModal
-            showModal={showStudentsListModal}
-            setShowModal={setShowStudentsListModal}
-            students={students}
-            onLoadStudent={loadStudent}
-            onEditStudent={handleEditStudent}
-            onAddNewStudent={handleAddNewStudent}
-          />
-          
-          <StudentModal
-            showModal={showStudentModal}
-            setShowModal={setShowStudentModal}
-            existingStudent={selectedStudent}
-            onStudentSaved={handleStudentSaved}
-          />
-
-          {showReportsList && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-                <div className="p-4 border-b flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Saved Report Cards</h2>
-                  <button
-                    onClick={() => setShowReportsList(false)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    ✕
-                  </button>
+              {/* Report Cards Section */}
+              <div className="mt-2">
+                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+                  <div className="flex items-center space-x-3 md:space-x-4">
+                    <ClipboardList className="w-5 h-5" />
+                    <span className="text-sm font-medium">Report Cards</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
                 </div>
 
-                <div className="overflow-auto p-4">
-                  {savedReports.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      No saved report cards yet
+                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+                  <div
+                    onClick={() => {
+                      setActiveView("reportCard");
+                      setSidebarOpen(false);
+                    }}
+                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                  >
+                    Create Report Card
+                  </div>
+                  <div
+                    onClick={() => {
+                      setShowReportsList(!showReportsList);
+                      setSidebarOpen(false);
+                    }}
+                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>All Reports</span>
+                      <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        {savedReports.length}
+                      </span>
                     </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {savedReports.map((report) => (
-                        <div
-                          key={report.id}
-                          onClick={() => loadReport(report)}
-                          className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <div className="font-semibold text-lg">
-                                {report.reportNumber || "N/A"}
-                              </div>
-                              <div className="text-sm text-gray-600 mt-1">
-                                Student: {report.student?.name || "N/A"}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                Grade: {report.student?.gradeLevel || "N/A"}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                Term: {report.academicInfo?.term || "N/A"} {report.academicInfo?.year || ""}
-                              </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                onClick={() => {
+                  setActiveView("templates");
+                  setSidebarOpen(false);
+                }}
+                className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
+              >
+                <FileText className="w-5 h-5" />
+                <span className="text-sm font-medium">Templates</span>
+              </div>
+
+              {/* Students Section */}
+              <div className="mt-2">
+                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+                  <div className="flex items-center space-x-3 md:space-x-4">
+                    <Users className="w-5 h-5" />
+                    <span className="text-sm font-medium">Students</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+
+                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
+                  <div
+                    onClick={() => {
+                      handleAddNewStudent();
+                      setSidebarOpen(false);
+                    }}
+                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                  >
+                    Add Student
+                  </div>
+                  <div
+                    onClick={() => {
+                      setShowStudentsListModal(true);
+                      setSidebarOpen(false);
+                    }}
+                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>All Students</span>
+                      <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        {savedStudents.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+                <Calendar className="w-5 h-5" />
+                <span className="text-sm font-medium">Attendance</span>
+              </div>
+
+              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+                <BookOpen className="w-5 h-5" />
+                <span className="text-sm font-medium">Curriculum</span>
+              </div>
+
+              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+                <Award className="w-5 h-5" />
+                <span className="text-sm font-medium">Assessments</span>
+              </div>
+
+              <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+                <div className="flex items-center space-x-3 md:space-x-4">
+                  <BarChart3 className="w-5 h-5" />
+                  <span className="text-sm font-medium">Analytics</span>
+                </div>
+                <ChevronDown className="w-4 h-4" />
+              </div>
+
+              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
+                <UserCheck className="w-5 h-5" />
+                <span className="text-sm font-medium">Staff</span>
+              </div>
+            </div>
+          </nav>
+        </div>
+
+        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
+              <img
+                src={schoolInfo.logoUrl}
+                alt="Business Logo"
+                className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
+              />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-white">
+                {user?.name || "Teacher"}
+              </div>
+              <div className="text-xs text-slate-400">
+                {user?.email || "teacher@school.com"}
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-slate-400 hover:text-white hover:bg-slate-700/50 p-2 rounded-lg transition-all duration-200"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : "ml-0 md:ml-16"}`}
+      >
+        <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
+          <div className="flex-1 overflow-y-auto">
+            {showSettings && (
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
+                <div className="bg-gray-300 max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
+                  <div className="p-4 md:p-6 border-b border-slate-300 bg-gradient-to-r from-gray0 to-purple-50 flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 md:space-x-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <Settings className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                        </div>
+                        <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                          Business Settings
+                        </h2>
+                      </div>
+                      <button
+                        onClick={() => setShowSettings(false)}
+                        className="group p-1.5 md:p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300"
+                      >
+                        <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-300 to-slate-400 flex-1">
+                    <div className="space-y-4 md:space-y-6">
+                      {/* Logo Upload */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-3">
+                          Business Logo
+                        </label>
+                        <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
+                          {schoolInfo.logoUrl ? (
+                            <div className="relative group">
+                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
+                              <img
+                                src={schoolInfo.logoUrl}
+                                alt="School Logo"
+                                className="relative w-20 h-20 md:w-24 md:h-24 object-contain border-2 border-slate-200 rounded-xl shadow-lg"
+                              />
                             </div>
-                            <div className="text-right">
-                              <div className="text-lg font-semibold text-indigo-600">
-                                Average: {report.performance?.average || "0"}%
+                          ) : (
+                            <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-blue-400 transition-all duration-300">
+                              <Upload className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />
+                            </div>
+                          )}
+
+                          <div className="flex-1 text-center sm:text-left ">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleLogoUpload}
+                              className="hidden"
+                              id="logo-upload"
+                            />
+                            <label
+                              htmlFor="logo-upload"
+                              className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg md:rounded-xl hover:from-blue-700 hover:to-purple-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
+                            >
+                              {schoolInfo.logoUrl
+                                ? "Change Logo"
+                                : "Upload Logo"}
+                            </label>
+                            <p className="text-xs text-slate-500 mt-2 md:mt-3 flex items-center justify-center sm:justify-start space-x-1">
+                              <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                              <span>Recommended: Square image, max 5MB</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Business Name */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Business Name
+                        </label>
+                        <input
+                          type="text"
+                          value={schoolInfo.schoolName}
+                          onChange={(e) =>
+                            setSchoolInfo({
+                              ...schoolInfo,
+                              schoolName: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-black-500 transition-all duration-300 font-medium text-sm md:text-base"
+                          placeholder="Solidflo Invoicing Saas"
+                        />
+                      </div>
+
+                      {/* Address Fields */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Address Line 1
+                        </label>
+                        <input
+                          type="text"
+                          value={schoolInfo.addressLine1}
+                          onChange={(e) =>
+                            setSchoolInfo({
+                              ...schoolInfo,
+                              addressLine1: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
+                        />
+                      </div>
+
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Address Line 2
+                        </label>
+                        <input
+                          type="text"
+                          value={schoolInfo.addressLine2}
+                          onChange={(e) =>
+                            setSchoolInfo({
+                              ...schoolInfo,
+                              addressLine2: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="WYNBERG"
+                        />
+                      </div>
+
+                      {/* City and Postal Code */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                            City
+                          </label>
+                          <input
+                            type="text"
+                            value={schoolInfo.city}
+                            onChange={(e) =>
+                              setSchoolInfo({
+                                ...schoolInfo,
+                                city: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            placeholder="SANDTON"
+                          />
+                        </div>
+
+                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                            Postal Code
+                          </label>
+                          <input
+                            type="text"
+                            value={schoolInfo.postalCode}
+                            onChange={(e) =>
+                              setSchoolInfo({
+                                ...schoolInfo,
+                                postalCode: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            placeholder="2090"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Phone Numbers */}
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Primary Phone <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          value={schoolInfo.primaryPhone}
+                          onChange={(e) =>
+                            setSchoolInfo({
+                              ...schoolInfo,
+                              primaryPhone: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="082 514 4509"
+                          required
+                        />
+                      </div>
+
+                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                          Secondary Phone (Optional)
+                        </label>
+                        <input
+                          type="tel"
+                          value={schoolInfo.secondaryPhone}
+                          onChange={(e) =>
+                            setSchoolInfo({
+                              ...schoolInfo,
+                              secondaryPhone: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                          placeholder="084 583 9929"
+                        />
+                      </div>
+
+                      {/* Bank Details Section */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            Bank Details
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Bank Name
+                            </label>
+                            <input
+                              type="text"
+                              value={schoolInfo.bankName}
+                              onChange={(e) =>
+                                setSchoolInfo({
+                                  ...schoolInfo,
+                                  bankName: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Account Holder
+                            </label>
+                            <input
+                              type="text"
+                              value={schoolInfo.accountHolder}
+                              onChange={(e) =>
+                                setSchoolInfo({
+                                  ...schoolInfo,
+                                  accountHolder: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Account Number
+                            </label>
+                            <input
+                              type="text"
+                              value={schoolInfo.accountNumber}
+                              onChange={(e) =>
+                                setSchoolInfo({
+                                  ...schoolInfo,
+                                  accountNumber: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                              Branch Code
+                            </label>
+                            <input
+                              type="text"
+                              value={schoolInfo.branchCode}
+                              onChange={(e) =>
+                                setSchoolInfo({
+                                  ...schoolInfo,
+                                  branchCode: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stamp Settings */}
+                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
+                            <CheckSquare className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                          </div>
+                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                            📋 Invoice Stamp Settings
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                            <label className="flex items-center space-x-2 md:space-x-3 cursor-pointer group">
+                              <input
+                                type="checkbox"
+                                checked={stampSettings.enabled}
+                                onChange={(e) =>
+                                  setStampSettings({
+                                    ...stampSettings,
+                                    enabled: e.target.checked,
+                                  })
+                                }
+                                className="w-4 h-4 md:w-5 md:h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
+                              />
+                              <span className="text-xs md:text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
+                                Show approval stamp on invoices and quotes
+                              </span>
+                            </label>
+                          </div>
+
+                          {stampSettings.enabled && (
+                            <>
+                              <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
+                                  Stamp Text
+                                </label>
+                                <input
+                                  type="text"
+                                  value={stampSettings.text}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      text: e.target.value.toUpperCase(),
+                                    })
+                                  }
+                                  className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-bold text-sm md:text-base"
+                                  placeholder="APPROVED"
+                                  maxLength={15}
+                                />
+                                <p className="text-xs text-slate-500 mt-2 flex items-center space-x-1">
+                                  <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                                  <span>Max 15 characters</span>
+                                </p>
                               </div>
-                              <div className="text-sm text-gray-500">
-                                {report.academicInfo?.issueDate
-                                  ? new Date(
-                                      report.academicInfo.issueDate
-                                    ).toLocaleDateString("en-ZA")
-                                  : "N/A"}
+
+                              <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="block text-sm font-bold text-slate-700 mb-3">
+                                  Stamp Color
+                                </label>
+                                <select
+                                  value={stampSettings.color}
+                                  onChange={(e) =>
+                                    setStampSettings({
+                                      ...stampSettings,
+                                      color: e.target.value,
+                                    })
+                                  }
+                                  className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-semibold cursor-pointer"
+                                >
+                                  <option value="#d32f2f">
+                                    🔴 Red (Traditional)
+                                  </option>
+                                  <option value="#1976d2">
+                                    🔵 Blue (Professional)
+                                  </option>
+                                  <option value="#388e3c">
+                                    🟢 Green (Approved)
+                                  </option>
+                                  <option value="#7b1fa2">
+                                    🟣 Purple (Premium)
+                                  </option>
+                                  <option value="#000000">
+                                    ⚫ Black (Formal)
+                                  </option>
+                                  <option value="#f57c00">
+                                    🟠 Orange (Attention)
+                                  </option>
+                                </select>
                               </div>
-                              <div
-                                className={`text-xs mt-1 px-2 py-1 rounded ${
-                                  report.status === "completed"
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-blue-100 text-blue-700"
-                                }`}
-                              >
-                                {report.status || "draft"}
+
+                              <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
+                                <label className="flex items-center space-x-3 cursor-pointer group">
+                                  <input
+                                    type="checkbox"
+                                    checked={stampSettings.showDate}
+                                    onChange={(e) =>
+                                      setStampSettings({
+                                        ...stampSettings,
+                                        showDate: e.target.checked,
+                                      })
+                                    }
+                                    className="w-5 h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
+                                  />
+                                  <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
+                                    Include date on stamp
+                                  </span>
+                                </label>
+                              </div>
+
+                              {/* Preview */}
+                              <div className="mt-6 p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-2 border-dashed border-slate-300">
+                                <p className="text-sm font-bold mb-6 text-center text-slate-600">
+                                  Stamp Preview:
+                                </p>
+                                <div className="flex justify-center">
+                                  <SignatureStamp
+                                    text={stampSettings.text}
+                                    color={stampSettings.color}
+                                    showDate={stampSettings.showDate}
+                                    rotation={-5}
+                                    size="medium"
+                                  />
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleSaveSchoolInfo}
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
+                      >
+                        💾 Save School Information
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <StudentsListModal
+              showModal={showStudentsListModal}
+              setShowModal={setShowStudentsListModal}
+              students={students}
+              onLoadStudent={loadStudent}
+              onEditStudent={handleEditStudent}
+              onAddNewStudent={handleAddNewStudent}
+            />
+
+            <StudentModal
+              showModal={showStudentModal}
+              setShowModal={setShowStudentModal}
+              existingStudent={selectedStudent}
+              onStudentSaved={handleStudentSaved}
+            />
+
+            {showReportsList && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+                  <div className="p-4 border-b flex items-center justify-between">
+                    <h2 className="text-xl font-semibold">
+                      Saved Report Cards
+                    </h2>
+                    <button
+                      onClick={() => setShowReportsList(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="overflow-auto p-4">
+                    {savedReports.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        No saved report cards yet
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {savedReports.map((report) => (
+                          <div
+                            key={report.id}
+                            onClick={() => loadReport(report)}
+                            className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="font-semibold text-lg">
+                                  {report.reportNumber || "N/A"}
+                                </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  Student: {report.student?.name || "N/A"}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  Grade: {report.student?.gradeLevel || "N/A"}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  Term: {report.academicInfo?.term || "N/A"}{" "}
+                                  {report.academicInfo?.year || ""}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-lg font-semibold text-indigo-600">
+                                  Average: {report.performance?.average || "0"}%
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {report.academicInfo?.issueDate
+                                    ? new Date(
+                                        report.academicInfo.issueDate,
+                                      ).toLocaleDateString("en-ZA")
+                                    : "N/A"}
+                                </div>
+                                <div
+                                  className={`text-xs mt-1 px-2 py-1 rounded ${
+                                    report.status === "completed"
+                                      ? "bg-green-100 text-green-700"
+                                      : "bg-blue-100 text-blue-700"
+                                  }`}
+                                >
+                                  {report.status || "draft"}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-        {activeView === "templates" && <Templates user={user} />}
+            {activeView === "templates" && <Templates user={user} />}
             {activeView === "home" && <HomeView user={user} />}
-                    {activeView === "reportCard" && (
-          <>
-           <div className="sticky top-0 z-40 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 lg:space-x-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-              <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
-              <h1 className="text-base lg:text-xl font-semibold">
-                Report Card #{reportNumber || "— not saved yet —"}
-              </h1>
-              <TemplateSelector
-                              user={user}
-                              selectedTemplate={activeTemplate}
-                              onTemplateChange={setActiveTemplate}
-                            />
-            </div>
-
-            <div className="hidden lg:flex items-center space-x-3 print:hidden">
-              <button
-                onClick={handleSaveReport}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700"
-              >
-                Save Report
-              </button>
-
-              <button
-                onClick={handleNewReport}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
-              >
-                <Plus className="w-4 h-4" />
-                New
-              </button>
-
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700">
-                <Send className="w-4 h-4" />
-                <span>Send</span>
-              </button>
-              <button
-                onClick={handleSavePDF}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700"
-              >
-                Save as PDF
-              </button>
-
-              <button
-                onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                <Printer className="w-4 h-4" />
-                Print
-              </button>
-             <button
-                               onClick={handleLogout}
-                               className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
-                             >
-                               <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                               Logout
-                             </button>
-                           </div>
-             
-                           {/* Mobile Logout Button */}
-                           <button
-                             onClick={handleLogout}
-                             className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
-                           >
-                             <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-                           </button>
-          </div>
-        </div>
-</div>
-        <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <button className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 whitespace-nowrap text-sm">
-              <Send className="w-4 h-4" />
-              <span>Send</span>
-            </button>
-            <button
-              onClick={handleSavePDF}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Download className="w-4 h-4" />
-              <span>Save PDF</span>
-            </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Print</span>
-            </button>
-          </div>
-        </div>
-          <button
-            onClick={() => setShowReportCard(!showReportCard)}
-            className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            <FileText className="w-5 h-5" />
-            {showReportCard ? "Hide Report Card" : "View Report Card"}
-          </button>
-
-          <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-            <div
-              className={`${
-                showReportCard ? "hidden" : "block"
-              } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] ml-12`}
-            >
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
-                                      <div className="flex border-b border-slate-200">
-                                        <button
-                        onClick={() => setInputMode("manual")}
-                        className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
-                          inputMode === "manual"
-                            ? "bg-white text-blue-600 border-b-2 border-blue-600 shadow-sm"
-                            : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                        }`}
-                      >
-                        <span className="flex items-center justify-center gap-2">
-                          <Edit className="w-5 h-5" />
-                          Manual Entry
-                        </span>
-                      </button>
-                                       <button
-                        onClick={() => setInputMode("ai")}
-                        className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
-                          inputMode === "ai"
-                            ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm"
-                            : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                        }`}
-                      >
-                        <span className="flex items-center justify-center gap-2">
-                          <Sparkles className="w-5 h-5" />
-                          AI Assistant
-                        </span>
-                      </button>
-                                      </div>
-                  
-                                      {/* Tab Content */}
-                                      <div className="p-6">
-                      {inputMode === "ai" ? (
-                        <AIInvoiceExtractor
-                          onDataExtracted={handleAIDataExtracted}
-                          documentType={documentType}
+            {activeView === "reportCard" && (
+              <>
+                <div className="sticky top-0 z-40 flex flex-col">
+                  <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 lg:space-x-4">
+                        <button
+                          onClick={() => setSidebarOpen(!sidebarOpen)}
+                          className="p-2 hover:bg-gray-100 rounded-lg"
+                        >
+                          <Menu className="w-5 h-5" />
+                        </button>
+                        <ChevronLeft className="hidden lg:block w-5 h-5 text-gray-400" />
+                        <h1 className="text-base lg:text-xl font-semibold">
+                          Report Card #{reportNumber || "— not saved yet —"}
+                        </h1>
+                        <TemplateSelector
+                          user={user}
+                          selectedTemplate={activeTemplate}
+                          onTemplateChange={setActiveTemplate}
                         />
-                      ) : null}
+                      </div>
+
+                      <div className="hidden lg:flex items-center space-x-3 print:hidden">
+                        <button
+                          onClick={handleSaveReport}
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700"
+                        >
+                          Save Report
+                        </button>
+
+                        <button
+                          onClick={handleNewReport}
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700"
+                        >
+                          <Plus className="w-4 h-4" />
+                          New
+                        </button>
+
+                        <button className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700">
+                          <Send className="w-4 h-4" />
+                          <span>Send</span>
+                        </button>
+                        <button
+                          onClick={handleSavePDF}
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700"
+                        >
+                          Save as PDF
+                        </button>
+
+                        <button
+                          onClick={handlePrint}
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
+                        >
+                          <Printer className="w-4 h-4" />
+                          Print
+                        </button>
+                        <button
+                          onClick={handleLogout}
+                          className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
+                        >
+                          <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                          Logout
+                        </button>
+                      </div>
+
+                      {/* Mobile Logout Button */}
+                      <button
+                        onClick={handleLogout}
+                        className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
+                      >
+                        <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+                      </button>
                     </div>
-                                    </div>
-                                     {inputMode === "manual" && (
-                    <>
-              <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                <span className="text-indigo-700 text-sm font-medium">{term} - {academicYear}</span>
-                <span className="text-indigo-600">Academic Year</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Average Grade</div>
-                  <div className="text-2xl font-semibold text-indigo-600">
-                    {calculateAverage()}%
                   </div>
                 </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Subjects</div>
-                  <div className="text-2xl font-semibold text-green-600">
-                    {subjects.length}
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Attendance</div>
-                  <div className="text-2xl font-semibold text-blue-600">
-                    {attendancePresent}/{attendanceDays}
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Users className="w-5 h-5" />
-                    <span>Student Information</span>
-                  </h2>
-                  <button className="flex items-center space-x-2 text-indigo-600 hover:text-indigo-700">
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Student Name</div>
-                    <input
-                      type="text"
-                      value={studentName}
-                      onChange={(e) => setStudentName(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Student ID</div>
-                    <input
-                      type="text"
-                      value={studentId}
-                      onChange={(e) => setStudentId(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Grade Level</div>
-                    <input
-                      type="text"
-                      value={gradeLevel}
-                      onChange={(e) => setGradeLevel(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Date of Birth</div>
-                    <input
-                      type="date"
-                      value={dateOfBirth}
-                      onChange={(e) => setDateOfBirth(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Users className="w-5 h-5" />
-                    <span>Parent/Guardian Information</span>
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Parent Name</div>
-                    <input
-                      type="text"
-                      value={parentName}
-                      onChange={(e) => setParentName(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Email</div>
-                    <input
-                      type="email"
-                      value={parentEmail}
-                      onChange={(e) => setParentEmail(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Phone</div>
-                    <input
-                      type="tel"
-                      value={parentPhone}
-                      onChange={(e) => setParentPhone(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="text-sm text-gray-500">Address</div>
-                    <input
-                      type="text"
-                      value={parentAddress}
-                      onChange={(e) => setParentAddress(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold flex items-center space-x-2">
-                    <Calendar className="w-5 h-5" />
-                    <span>Academic Period</span>
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Term</div>
-                    <select
-                      value={term}
-                      onChange={(e) => setTerm(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    <button className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 whitespace-nowrap text-sm">
+                      <Send className="w-4 h-4" />
+                      <span>Send</span>
+                    </button>
+                    <button
+                      onClick={handleSavePDF}
+                      className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap text-sm"
                     >
-                      <option value="Term 1">Term 1</option>
-                      <option value="Term 2">Term 2</option>
-                      <option value="Term 3">Term 3</option>
-                      <option value="Term 4">Term 4</option>
-                    </select>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Academic Year</div>
-                    <input
-                      type="text"
-                      value={academicYear}
-                      onChange={(e) => setAcademicYear(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                      <Download className="w-4 h-4" />
+                      <span>Save PDF</span>
+                    </button>
+                    <button
+                      onClick={handlePrint}
+                      className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
+                    >
+                      <Printer className="w-4 h-4" />
+                      <span>Print</span>
+                    </button>
                   </div>
                 </div>
-              </div>
+                <button
+                  onClick={() => setShowReportCard(!showReportCard)}
+                  className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  <FileText className="w-5 h-5" />
+                  {showReportCard ? "Hide Report Card" : "View Report Card"}
+                </button>
 
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h2 className="text-lg font-semibold mb-4">Add Subject Grade</h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                  <input
-                    type="text"
-                    placeholder="Subject Name"
-                    value={newSubject.name}
-                    onChange={(e) =>
-                      setNewSubject({ ...newSubject, name: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Mark (%)"
-                    min="0"
-                    max="100"
-                    value={newSubject.mark}
-                    onChange={(e) =>
-                      setNewSubject({ ...newSubject, mark: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="Comments (optional)"
-                    value={newSubject.comments}
-                    onChange={(e) =>
-                      setNewSubject({ ...newSubject, comments: e.target.value })
-                    }
-                    className="px-4 py-2 border rounded"
-                  />
-
-                  <button
-                    onClick={handleAddSubject}
-                    className="bg-gray-500 text-gray-800 rounded-lg px-4 py-2 hover:bg-indigo-700 flex items-center justify-center gap-2"
+                <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+                  <div
+                    className={`${
+                      showReportCard ? "hidden" : "block"
+                    } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] ml-12`}
                   >
-                    <Plus className="w-4 h-4" />
-                    Add
-                  </button>
-                </div>
-              </div>
+                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
+                      <div className="flex border-b border-slate-200">
+                        <button
+                          onClick={() => setInputMode("manual")}
+                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
+                            inputMode === "manual"
+                              ? "bg-white text-blue-600 border-b-2 border-blue-600 shadow-sm"
+                              : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                          }`}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            <Edit className="w-5 h-5" />
+                            Manual Entry
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setInputMode("ai")}
+                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
+                            inputMode === "ai"
+                              ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm"
+                              : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                          }`}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            <Sparkles className="w-5 h-5" />
+                            AI Assistant
+                          </span>
+                        </button>
+                      </div>
 
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Attendance</h2>
-                </div>
+                      {/* Tab Content */}
+                      <div className="p-6">
+                        {inputMode === "ai" ? (
+                          <AIInvoiceExtractor
+                            onDataExtracted={handleAIDataExtracted}
+                            documentType={documentType}
+                          />
+                        ) : null}
+                      </div>
+                    </div>
+                    {inputMode === "manual" && (
+                      <>
+                        <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                          <span className="text-indigo-700 text-sm font-medium">
+                            {term} - {academicYear}
+                          </span>
+                          <span className="text-indigo-600">Academic Year</span>
+                        </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Total Days</div>
-                    <input
-                      type="number"
-                      value={attendanceDays}
-                      onChange={(e) => setAttendanceDays(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="bg-white p-4 rounded-lg border border-gray-200">
+                            <div className="text-sm text-gray-500 mb-1">
+                              Average Grade
+                            </div>
+                            <div className="text-2xl font-semibold text-indigo-600">
+                              {calculateAverage()}%
+                            </div>
+                          </div>
+                          <div className="bg-white p-4 rounded-lg border border-gray-200">
+                            <div className="text-sm text-gray-500 mb-1">
+                              Subjects
+                            </div>
+                            <div className="text-2xl font-semibold text-green-600">
+                              {subjects.length}
+                            </div>
+                          </div>
+                          <div className="bg-white p-4 rounded-lg border border-gray-200">
+                            <div className="text-sm text-gray-500 mb-1">
+                              Attendance
+                            </div>
+                            <div className="text-2xl font-semibold text-blue-600">
+                              {attendancePresent}/{attendanceDays}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white border border-gray-200 rounded-lg p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold flex items-center space-x-2">
+                              <Users className="w-5 h-5" />
+                              <span>Student Information</span>
+                            </h2>
+                            <button className="flex items-center space-x-2 text-indigo-600 hover:text-indigo-700">
+                              <Edit className="w-4 h-4" />
+                              <span>Edit</span>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-sm text-gray-500">
+                                Student Name
+                              </div>
+                              <input
+                                type="text"
+                                value={studentName}
+                                onChange={(e) => setStudentName(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">
+                                Student ID
+                              </div>
+                              <input
+                                type="text"
+                                value={studentId}
+                                onChange={(e) => setStudentId(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">
+                                Grade Level
+                              </div>
+                              <input
+                                type="text"
+                                value={gradeLevel}
+                                onChange={(e) => setGradeLevel(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">
+                                Date of Birth
+                              </div>
+                              <input
+                                type="date"
+                                value={dateOfBirth}
+                                onChange={(e) => setDateOfBirth(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white border border-gray-200 rounded-lg p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold flex items-center space-x-2">
+                              <Users className="w-5 h-5" />
+                              <span>Parent/Guardian Information</span>
+                            </h2>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-sm text-gray-500">
+                                Parent Name
+                              </div>
+                              <input
+                                type="text"
+                                value={parentName}
+                                onChange={(e) => setParentName(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">Email</div>
+                              <input
+                                type="email"
+                                value={parentEmail}
+                                onChange={(e) => setParentEmail(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">Phone</div>
+                              <input
+                                type="tel"
+                                value={parentPhone}
+                                onChange={(e) => setParentPhone(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                            <div className="col-span-1 sm:col-span-2">
+                              <div className="text-sm text-gray-500">
+                                Address
+                              </div>
+                              <input
+                                type="text"
+                                value={parentAddress}
+                                onChange={(e) =>
+                                  setParentAddress(e.target.value)
+                                }
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white border border-gray-200 rounded-lg p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold flex items-center space-x-2">
+                              <Calendar className="w-5 h-5" />
+                              <span>Academic Period</span>
+                            </h2>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-sm text-gray-500">Term</div>
+                              <select
+                                value={term}
+                                onChange={(e) => setTerm(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              >
+                                <option value="Term 1">Term 1</option>
+                                <option value="Term 2">Term 2</option>
+                                <option value="Term 3">Term 3</option>
+                                <option value="Term 4">Term 4</option>
+                              </select>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">
+                                Academic Year
+                              </div>
+                              <input
+                                type="text"
+                                value={academicYear}
+                                onChange={(e) =>
+                                  setAcademicYear(e.target.value)
+                                }
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                          <h2 className="text-lg font-semibold mb-4">
+                            Add Subject Grade
+                          </h2>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                            <input
+                              type="text"
+                              placeholder="Subject Name"
+                              value={newSubject.name}
+                              onChange={(e) =>
+                                setNewSubject({
+                                  ...newSubject,
+                                  name: e.target.value,
+                                })
+                              }
+                              className="px-4 py-2 border rounded"
+                            />
+
+                            <input
+                              type="number"
+                              placeholder="Mark (%)"
+                              min="0"
+                              max="100"
+                              value={newSubject.mark}
+                              onChange={(e) =>
+                                setNewSubject({
+                                  ...newSubject,
+                                  mark: e.target.value,
+                                })
+                              }
+                              className="px-4 py-2 border rounded"
+                            />
+
+                            <input
+                              type="text"
+                              placeholder="Comments (optional)"
+                              value={newSubject.comments}
+                              onChange={(e) =>
+                                setNewSubject({
+                                  ...newSubject,
+                                  comments: e.target.value,
+                                })
+                              }
+                              className="px-4 py-2 border rounded"
+                            />
+
+                            <button
+                              onClick={handleAddSubject}
+                              className="bg-gray-500 text-gray-800 rounded-lg px-4 py-2 hover:bg-indigo-700 flex items-center justify-center gap-2"
+                            >
+                              <Plus className="w-4 h-4" />
+                              Add
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="bg-white border border-gray-200 rounded-lg p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold">
+                              Attendance
+                            </h2>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-sm text-gray-500">
+                                Total Days
+                              </div>
+                              <input
+                                type="number"
+                                value={attendanceDays}
+                                onChange={(e) =>
+                                  setAttendanceDays(e.target.value)
+                                }
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">
+                                Days Present
+                              </div>
+                              <input
+                                type="number"
+                                value={attendancePresent}
+                                onChange={(e) =>
+                                  setAttendancePresent(e.target.value)
+                                }
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white border border-gray-200 rounded-lg p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold">
+                              Teacher Comments
+                            </h2>
+                          </div>
+
+                          <textarea
+                            value={teacherComments}
+                            onChange={(e) => setTeacherComments(e.target.value)}
+                            rows="4"
+                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter teacher comments about the student's performance..."
+                          />
+                        </div>
+                      </>
+                    )}
                   </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Days Present</div>
-                    <input
-                      type="number"
-                      value={attendancePresent}
-                      onChange={(e) => setAttendancePresent(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+
+                  <div
+                    id="print-area"
+                    className={`${!showReportCard ? "hidden lg:block" : "block"} mx-auto bg-white print:block`}
+                    style={{ width: "210mm", minHeight: "297mm" }}
+                  >
+                    {activeView === "reportCard" && (
+                      <>
+                        {/* Add Template Selector */}
+                        <div className="mb-4 print:hidden">
+                          <TemplateSelector
+                            user={user}
+                            selectedTemplate={selectedTemplate}
+                            onTemplateChange={setSelectedTemplate}
+                          />
+                        </div>
+
+                        {/* Use Template Renderer instead of hardcoded report card */}
+                        <TemplateRenderer
+                          templateId={selectedTemplate}
+                          businessInfo={schoolInfo}
+                          loading={loading}
+                          jobCardNumber={reportNumber}
+                          term={term}
+                          academicYear={academicYear}
+                          studentName={studentName}
+                          studentId={studentId}
+                          gradeLevel={gradeLevel}
+                          dateOfBirth={dateOfBirth}
+                          parentName={parentName}
+                          parentPhone={parentPhone}
+                          parentEmail={parentEmail}
+                          subjects={subjects}
+                          attendanceDays={attendanceDays}
+                          attendancePresent={attendancePresent}
+                          teacherComments={teacherComments}
+                          calculateAverage={calculateAverage}
+                          documentType="reportCard"
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Teacher Comments</h2>
-                </div>
-
-                <textarea
-                  value={teacherComments}
-                  onChange={(e) => setTeacherComments(e.target.value)}
-                  rows="4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter teacher comments about the student's performance..."
-                />
-              </div>
-              </>)}
-            </div>
-
-            <div
-  id="print-area"
-  className={`${!showReportCard ? "hidden lg:block" : "block"} mx-auto bg-white print:block`}
-  style={{ width: "210mm", minHeight: "297mm" }}
->
-             {activeView === 'reportCard' && (
-  <>
-    {/* Add Template Selector */}
-    <div className="mb-4 print:hidden">
-      <TemplateSelector 
-        user={user} 
-        selectedTemplate={selectedTemplate}
-        onTemplateChange={setSelectedTemplate}
-      />
-    </div>
-
-    {/* Use Template Renderer instead of hardcoded report card */}
-    <TemplateRenderer
-      templateId={selectedTemplate}
-      businessInfo={schoolInfo}
-      loading={loading}
-      jobCardNumber={reportNumber}
-      term={term}
-      academicYear={academicYear}
-      studentName={studentName}
-      studentId={studentId}
-      gradeLevel={gradeLevel}
-      dateOfBirth={dateOfBirth}
-      parentName={parentName}
-      parentPhone={parentPhone}
-      parentEmail={parentEmail}
-      subjects={subjects}
-      attendanceDays={attendanceDays}
-      attendancePresent={attendancePresent}
-      teacherComments={teacherComments}
-      calculateAverage={calculateAverage}
-      documentType="reportCard"
-    />
-  </>
-)}
-            </div>
-
-            
-
-
+              </>
+            )}
           </div>
-            </>)}
         </div>
-      </div>
       </div>
     </div>
   );
 };
 
 export default EducationDashboard;
-                

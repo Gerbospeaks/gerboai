@@ -1,5 +1,15 @@
-import React, { useState } from 'react';
-import { Users, Building, UserCheck, AlertTriangle, Eye, ArrowRight, ArrowLeft, Check, Shield } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Users,
+  Building,
+  UserCheck,
+  AlertTriangle,
+  Eye,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  Shield,
+} from "lucide-react";
 
 const SecurityIncidentMultiStepForm = ({
   // Client Info Props
@@ -57,25 +67,25 @@ const SecurityIncidentMultiStepForm = ({
 
   const getSeverityColor = (type) => {
     const severityMap = {
-      'Theft': 'high',
-      'Assault': 'high',
-      'Fire': 'critical',
-      'Medical Emergency': 'critical',
-      'Vandalism': 'medium',
-      'Trespassing': 'medium',
-      'Suspicious Activity': 'low',
-      'Other': 'low'
+      Theft: "high",
+      Assault: "high",
+      Fire: "critical",
+      "Medical Emergency": "critical",
+      Vandalism: "medium",
+      Trespassing: "medium",
+      "Suspicious Activity": "low",
+      Other: "low",
     };
-    
-    const severity = severityMap[type] || 'low';
-    
+
+    const severity = severityMap[type] || "low";
+
     const colors = {
-      critical: 'bg-red-100 text-red-700 border-red-300',
-      high: 'bg-orange-100 text-orange-700 border-orange-300',
-      medium: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-      low: 'bg-blue-100 text-blue-700 border-blue-300'
+      critical: "bg-red-100 text-red-700 border-red-300",
+      high: "bg-orange-100 text-orange-700 border-orange-300",
+      medium: "bg-yellow-100 text-yellow-700 border-yellow-300",
+      low: "bg-blue-100 text-blue-700 border-blue-300",
     };
-    
+
     return colors[severity];
   };
 
@@ -91,26 +101,26 @@ const SecurityIncidentMultiStepForm = ({
                   onClick={() => goToStep(step)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
                     currentStep === step
-                      ? 'bg-blue-600 text-white'
+                      ? "bg-blue-600 text-white"
                       : currentStep > step
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-200 text-gray-600'
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-200 text-gray-600"
                   }`}
                 >
                   {currentStep > step ? <Check className="w-5 h-5" /> : step}
                 </button>
                 <span className="mt-2 text-xs font-medium text-gray-700 text-center">
-                  {step === 1 && 'Client'}
-                  {step === 2 && 'Site'}
-                  {step === 3 && 'Guard'}
-                  {step === 4 && 'Incident'}
-                  {step === 5 && 'Witness'}
+                  {step === 1 && "Client"}
+                  {step === 2 && "Site"}
+                  {step === 3 && "Guard"}
+                  {step === 4 && "Incident"}
+                  {step === 5 && "Witness"}
                 </span>
               </div>
               {step < totalSteps && (
                 <div
                   className={`flex-1 h-1 mx-1 ${
-                    currentStep > step ? 'bg-green-500' : 'bg-gray-200'
+                    currentStep > step ? "bg-green-500" : "bg-gray-200"
                   }`}
                 />
               )}
@@ -215,18 +225,24 @@ const SecurityIncidentMultiStepForm = ({
                 <div className="flex items-start space-x-3">
                   <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
                   <div className="flex-1">
-                    <h4 className="font-semibold text-blue-900 mb-1">Site Details</h4>
+                    <h4 className="font-semibold text-blue-900 mb-1">
+                      Site Details
+                    </h4>
                     <div className="space-y-1 text-sm">
                       {siteName && (
                         <div>
                           <span className="text-blue-600">Name:</span>
-                          <span className="ml-2 text-blue-900 font-medium">{siteName}</span>
+                          <span className="ml-2 text-blue-900 font-medium">
+                            {siteName}
+                          </span>
                         </div>
                       )}
                       {siteAddress && (
                         <div>
                           <span className="text-blue-600">Location:</span>
-                          <span className="ml-2 text-blue-900 font-medium">{siteAddress}</span>
+                          <span className="ml-2 text-blue-900 font-medium">
+                            {siteAddress}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -280,18 +296,24 @@ const SecurityIncidentMultiStepForm = ({
                 <div className="flex items-start space-x-3">
                   <UserCheck className="w-5 h-5 text-green-600 mt-0.5" />
                   <div className="flex-1">
-                    <h4 className="font-semibold text-green-900 mb-1">Officer on Duty</h4>
+                    <h4 className="font-semibold text-green-900 mb-1">
+                      Officer on Duty
+                    </h4>
                     <div className="space-y-1 text-sm">
                       {guardName && (
                         <div>
                           <span className="text-green-600">Name:</span>
-                          <span className="ml-2 text-green-900 font-medium">{guardName}</span>
+                          <span className="ml-2 text-green-900 font-medium">
+                            {guardName}
+                          </span>
                         </div>
                       )}
                       {guardId && (
                         <div>
                           <span className="text-green-600">Badge ID:</span>
-                          <span className="ml-2 text-green-900 font-medium">{guardId}</span>
+                          <span className="ml-2 text-green-900 font-medium">
+                            {guardId}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -329,7 +351,9 @@ const SecurityIncidentMultiStepForm = ({
                   <option value="Assault">Assault</option>
                   <option value="Fire">Fire</option>
                   <option value="Medical Emergency">Medical Emergency</option>
-                  <option value="Suspicious Activity">Suspicious Activity</option>
+                  <option value="Suspicious Activity">
+                    Suspicious Activity
+                  </option>
                   <option value="Other">Other</option>
                 </select>
               </div>
@@ -381,16 +405,21 @@ const SecurityIncidentMultiStepForm = ({
 
             {/* Incident Severity Alert */}
             {incidentType && (
-              <div className={`mt-6 p-4 border-2 rounded-lg ${getSeverityColor(incidentType)}`}>
+              <div
+                className={`mt-6 p-4 border-2 rounded-lg ${getSeverityColor(incidentType)}`}
+              >
                 <div className="flex items-start space-x-3">
                   <AlertTriangle className="w-5 h-5 mt-0.5" />
                   <div className="flex-1">
-                    <h4 className="font-semibold mb-1">Incident Classification</h4>
+                    <h4 className="font-semibold mb-1">
+                      Incident Classification
+                    </h4>
                     <div className="text-sm">
                       <span className="font-medium">Type:</span> {incidentType}
                       {incidentDate && incidentTime && (
                         <span className="ml-4">
-                          <span className="font-medium">Occurred:</span> {incidentDate} at {incidentTime}
+                          <span className="font-medium">Occurred:</span>{" "}
+                          {incidentDate} at {incidentTime}
                         </span>
                       )}
                     </div>
@@ -413,7 +442,8 @@ const SecurityIncidentMultiStepForm = ({
 
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> Witness information is optional but recommended if available.
+                <strong>Note:</strong> Witness information is optional but
+                recommended if available.
               </p>
             </div>
 
@@ -446,32 +476,46 @@ const SecurityIncidentMultiStepForm = ({
 
             {/* Report Summary */}
             <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-              <h4 className="font-semibold text-gray-900 mb-3">Report Summary</h4>
+              <h4 className="font-semibold text-gray-900 mb-3">
+                Report Summary
+              </h4>
               <div className="space-y-2 text-sm">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <span className="text-gray-600">Client:</span>
-                    <span className="ml-2 font-medium">{clientName || 'Not provided'}</span>
+                    <span className="ml-2 font-medium">
+                      {clientName || "Not provided"}
+                    </span>
                   </div>
                   <div>
                     <span className="text-gray-600">Site:</span>
-                    <span className="ml-2 font-medium">{siteName || 'Not provided'}</span>
+                    <span className="ml-2 font-medium">
+                      {siteName || "Not provided"}
+                    </span>
                   </div>
                   <div>
                     <span className="text-gray-600">Guard:</span>
-                    <span className="ml-2 font-medium">{guardName || 'Not provided'}</span>
+                    <span className="ml-2 font-medium">
+                      {guardName || "Not provided"}
+                    </span>
                   </div>
                   <div>
                     <span className="text-gray-600">Incident Type:</span>
-                    <span className="ml-2 font-medium">{incidentType || 'Not selected'}</span>
+                    <span className="ml-2 font-medium">
+                      {incidentType || "Not selected"}
+                    </span>
                   </div>
                   <div>
                     <span className="text-gray-600">Date:</span>
-                    <span className="ml-2 font-medium">{incidentDate || 'Not provided'}</span>
+                    <span className="ml-2 font-medium">
+                      {incidentDate || "Not provided"}
+                    </span>
                   </div>
                   <div>
                     <span className="text-gray-600">Witness:</span>
-                    <span className="ml-2 font-medium">{witnessName || 'None'}</span>
+                    <span className="ml-2 font-medium">
+                      {witnessName || "None"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -482,18 +526,24 @@ const SecurityIncidentMultiStepForm = ({
                 <div className="flex items-start space-x-3">
                   <Eye className="w-5 h-5 text-purple-600 mt-0.5" />
                   <div className="flex-1">
-                    <h4 className="font-semibold text-purple-900 mb-1">Witness Details</h4>
+                    <h4 className="font-semibold text-purple-900 mb-1">
+                      Witness Details
+                    </h4>
                     <div className="space-y-1 text-sm">
                       {witnessName && (
                         <div>
                           <span className="text-purple-600">Name:</span>
-                          <span className="ml-2 text-purple-900 font-medium">{witnessName}</span>
+                          <span className="ml-2 text-purple-900 font-medium">
+                            {witnessName}
+                          </span>
                         </div>
                       )}
                       {witnessContact && (
                         <div>
                           <span className="text-purple-600">Contact:</span>
-                          <span className="ml-2 text-purple-900 font-medium">{witnessContact}</span>
+                          <span className="ml-2 text-purple-900 font-medium">
+                            {witnessContact}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -511,12 +561,12 @@ const SecurityIncidentMultiStepForm = ({
             disabled={currentStep === 1}
             className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${
               currentStep === 1
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
             }`}
           >
             <ArrowLeft className="w-4 h-4" />
-            Previous
+            <span className="hidden sm:inline">Previous</span>
           </button>
 
           <div className="text-sm text-gray-500">
@@ -528,11 +578,11 @@ const SecurityIncidentMultiStepForm = ({
             disabled={currentStep === totalSteps}
             className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${
               currentStep === totalSteps
-                ? 'bg-green-600 text-white'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
+                ? "bg-green-600 text-white"
+                : "bg-blue-600 text-white hover:bg-blue-700"
             }`}
           >
-            {currentStep === totalSteps ? 'Complete' : 'Next'}
+            {currentStep === totalSteps ? "Complete" : "Next"}
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

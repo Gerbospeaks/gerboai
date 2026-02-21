@@ -9,7 +9,7 @@ import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
   collection,
@@ -770,25 +770,25 @@ const ElectricalDashboard = () => {
     if (extractedData.items?.length > 0) setItems(extractedData.items);
     alert("✨ Data extracted and populated successfully!");
   };
-const handleTestEmail = async () => {
-  if (!businessInfo.emailPassword) {
-    alert('⚠️ Please enter your email app password first.');
-    return;
-  }
+  const handleTestEmail = async () => {
+    if (!businessInfo.emailPassword) {
+      alert("⚠️ Please enter your email app password first.");
+      return;
+    }
 
-  const userEmail = user?.email || authUser?.email;
-  
-  if (!userEmail) {
-    alert('⚠️ Could not find your email address. Please log in again.');
-    return;
-  }
+    const userEmail = user?.email || authUser?.email;
 
-  try {
-    const testEmailData = {
-      userId: user.uid,
-      to: userEmail, // Send test to self
-      subject: '✅ Test Email - Email Configuration Successful',
-      message: `
+    if (!userEmail) {
+      alert("⚠️ Could not find your email address. Please log in again.");
+      return;
+    }
+
+    try {
+      const testEmailData = {
+        userId: user.uid,
+        to: userEmail, // Send test to self
+        subject: "✅ Test Email - Email Configuration Successful",
+        message: `
 Hello,
 
 This is a test email from your construction quote/invoice system.
@@ -799,7 +799,7 @@ Account Details:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Business: ${businessInfo.businessName}
 Email: ${userEmail}
-Provider: ${businessInfo.emailProvider || 'Gmail'}
+Provider: ${businessInfo.emailProvider || "Gmail"}
 Date: ${new Date().toLocaleString()}
 
 You can now send quotes and invoices to your clients from this email address.
@@ -807,27 +807,30 @@ You can now send quotes and invoices to your clients from this email address.
 Best regards,
 Your Construction Quote System
       `.trim(),
-      documentType: 'test',
-      documentNumber: 'TEST-001',
-    };
+        documentType: "test",
+        documentNumber: "TEST-001",
+      };
 
-    const sendEmail = httpsCallable(functions, 'sendQuoteEmail');
-    await sendEmail(testEmailData);
-    
-    alert(`✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`);
-  } catch (error) {
-    console.error('Test email error:', error);
-    
-    let errorMsg = '❌ Test email failed!\n\n';
-    if (error.message.includes('Invalid login')) {
-      errorMsg += 'Your app password is incorrect. Please check and try again.\n\nMake sure you\'re using an APP PASSWORD, not your regular password.';
-    } else {
-      errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+      const sendEmail = httpsCallable(functions, "sendQuoteEmail");
+      await sendEmail(testEmailData);
+
+      alert(
+        `✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`,
+      );
+    } catch (error) {
+      console.error("Test email error:", error);
+
+      let errorMsg = "❌ Test email failed!\n\n";
+      if (error.message.includes("Invalid login")) {
+        errorMsg +=
+          "Your app password is incorrect. Please check and try again.\n\nMake sure you're using an APP PASSWORD, not your regular password.";
+      } else {
+        errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
+      }
+
+      alert(errorMsg);
     }
-    
-    alert(errorMsg);
-  }
-};
+  };
   // ── navigation ───────────────────────────────────────────────────────────
   const handleNext = () => {
     if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
@@ -885,13 +888,13 @@ Your Construction Quote System
           {/* icon nav */}
           <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
             <button
-  onClick={() => setActiveView("home")}  // ADD THIS
-  className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-  title="Home"
->
-  <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-  <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-</button>
+              onClick={() => setActiveView("home")} // ADD THIS
+              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+              title="Home"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+            </button>
 
             <button
               onClick={() => setShowSettings(true)}
@@ -981,15 +984,21 @@ Your Construction Quote System
           {/* nav */}
           <nav className="space-y-1.5 md:space-y-2">
             <div
-  onClick={() => {setActiveView("home"); setSidebarOpen(false);}}
-  className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
->
-  <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-  <span className="text-xs md:text-sm font-semibold">Home</span>
-</div>
+              onClick={() => {
+                setActiveView("home");
+                setSidebarOpen(false);
+              }}
+              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
+            >
+              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-xs md:text-sm font-semibold">Home</span>
+            </div>
 
             <div
-              onClick={() => {setShowSettings(true); setSidebarOpen(false);}}
+              onClick={() => {
+                setShowSettings(true);
+                setSidebarOpen(false);
+              }}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
             >
               <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
@@ -999,7 +1008,10 @@ Your Construction Quote System
             <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-stone-700/50">
               {/* Financial Dashboard */}
               <div
-                onClick={() => {setActiveView("financial-overview"); setSidebarOpen(false);}}
+                onClick={() => {
+                  setActiveView("financial-overview");
+                  setSidebarOpen(false);
+                }}
                 className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
               >
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
@@ -1183,10 +1195,8 @@ Your Construction Quote System
         className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
       >
         <div className="flex flex-col h-screen">
-         
-          
-                    {/* ── Scrollable Main Content ──────────────────────────────── */}
-                   <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
+          {/* ── Scrollable Main Content ──────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {/* ── Settings Modal ──────────────────────────────────────── */}
             {showSettings && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
@@ -1528,7 +1538,6 @@ Your Construction Quote System
                                 </p>
                               </div>
 
-
                               <div className="bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                                 <label className="block text-sm font-bold text-slate-700 mb-3">
                                   Stamp Color
@@ -1723,1068 +1732,1104 @@ Your Construction Quote System
             )}
             {activeView === "history-view" && <HistoryView user={user} />}
             {activeView === "notes-view" && <NotesView user={user} />}
-             {activeView === "templates" && <Templates user={user} />}
+            {activeView === "templates" && <Templates user={user} />}
             {activeView === "home" && <HomeView user={user} />}
 
             {/* ── Quote / Invoice Builder ──────────────────────────────── */}
             {activeView === "quote" && (
               <>
-               {/* ── Header ──────────────────────────────────────────────────── */}
-          <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-300 lg:hidden flex-shrink-0"
-                >
-                  <Menu className="w-5 h-5" />
-                </button>
-                <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                  <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl shadow-lg flex-shrink-0">
-                    <img
-                      src={businessInfo.logoUrl}
-                      className="w-4 h-4 md:w-5 md:h-5 text-white"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-stone-800 to-blue-600 bg-clip-text text-transparent truncate">
-                      {documentType === "quote" ? "Quote" : "Invoice"} #
-                      {quoteNumber || "—"}
-                    </h1>
-                    <p className="text-xs text-slate-500 hidden md:block truncate">
-                      Create and manage construction{" "}
-                      {documentType === "quote" ? "quotes" : "invoices"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop action buttons */}
-              <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
-                {documentType === "quote" && quoteId && (
-                  <button
-                    onClick={handleConvertToInvoice}
-                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap"
-                  >
-                    <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-                    Convert to Invoice
-                  </button>
-                )}
-                <button
-                  onClick={handlePrint}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"
-                >
-                  <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                  Print
-                </button>
-                <button
-                  onClick={
-                    documentType === "quote" ? handleNewQuote : handleNewInvoice
-                  }
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                  New
-                </button>
-                <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-cyan-500/50 hover:scale-105 whitespace-nowrap">
-                  <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  <span>Send</span>
-                </button>
-                <button
-                  onClick={handleSavePDF}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-blue-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                  Save PDF
-                </button>
-                <button
-                  onClick={handleSaveQuote}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-xl hover:from-stone-700 hover:to-stone-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-stone-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                  Save
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
-                >
-                  <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                  Logout
-                </button>
-              </div>
-
-              {/* Mobile logout */}
-              <button
-                onClick={handleLogout}
-                className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
-              >
-                <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* ── Mobile Action Bar ──────────────────────────────────────── */}
-          <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
-            <div className="flex gap-2 min-w-max pb-1 pr-3">
-              {documentType === "quote" && quoteId && (
-                <button onClick={handleConvertToInvoice} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                  <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
-                  <span>To Invoice</span>
-                </button>
-              )}
-              <button onClick={handleSaveQuote} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                Save
-              </button>
-              <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                <span>Send</span>
-              </button>
-              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                <span>PDF</span>
-              </button>
-              <button onClick={handlePrint} className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95">
-                <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                <span>Print</span>
-              </button>
-            </div>
-          </div>
-              <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
-                <div className="space-y-6">
-                  {/* Tab: Manual / AI */}
-                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
-                    <div className="flex border-b border-slate-200">
+                {/* ── Header ──────────────────────────────────────────────────── */}
+                <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
                       <button
-                        onClick={() => setInputMode("manual")}
-                        className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "manual" ? "bg-white text-cyan-600 border-b-2 border-cyan-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-300 lg:hidden flex-shrink-0"
                       >
-                        <span className="flex items-center justify-center gap-2">
-                          <Edit className="w-5 h-5" />
-                          Manual Entry
-                        </span>
+                        <Menu className="w-5 h-5" />
                       </button>
-                      <button
-                        onClick={() => setInputMode("ai")}
-                        className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
-                      >
-                        <span className="flex items-center justify-center gap-2">
-                          <Sparkles className="w-5 h-5" />
-                          AI Assistant
-                        </span>
-                      </button>
-                    </div>
-                    <div className="p-6">
-                      {inputMode === "ai" && (
-                        <AIInvoiceExtractor
-                          onDataExtracted={handleAIDataExtracted}
-                          documentType={documentType}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {inputMode === "manual" && (
-                    <>
-                      {/* Summary Cards */}
-                      <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
-                        <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-3 rounded-xl border border-cyan-200 shadow-sm">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="text-sm font-medium text-cyan-700">
-                              Total Amount
-                            </div>
-                            <div className="w-8 h-8 bg-cyan-200 rounded-lg flex items-center justify-center">
-                              <DollarSign className="w-5 h-5 text-cyan-600" />
-                            </div>
-                          </div>
-                          <div className="text-2xl font-bold text-cyan-900">
-                            R{total.toFixed(2)}
-                          </div>
+                      <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+                        <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl shadow-lg flex-shrink-0">
+                          <img
+                            src={businessInfo.logoUrl}
+                            className="w-4 h-4 md:w-5 md:h-5 text-white"
+                          />
                         </div>
-
-                        <div
-                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.totalPaid > 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : "from-slate-100 to-slate-300 border-slate-300"}`}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div
-                              className={`text-sm font-medium ${paymentStatus.totalPaid > 0 ? "text-emerald-700" : "text-slate-600"}`}
-                            >
-                              Paid
-                            </div>
-                            <div
-                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.totalPaid > 0 ? "bg-emerald-200" : "bg-slate-200"}`}
-                            >
-                              <CheckSquare
-                                className={`w-5 h-5 ${paymentStatus.totalPaid > 0 ? "text-emerald-600" : "text-slate-400"}`}
-                              />
-                            </div>
-                          </div>
-                          <div
-                            className={`text-2xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}
-                          >
-                            R{paymentStatus.totalPaid.toFixed(2)}
-                          </div>
-                        </div>
-
-                        <div
-                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.balanceDue <= 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : paymentStatus.totalPaid > 0 ? "from-cyan-50 to-cyan-100 border-cyan-200" : "from-rose-50 to-rose-100 border-rose-200"}`}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div
-                              className={`text-sm font-medium ${paymentStatus.balanceDue <= 0 ? "text-emerald-700" : paymentStatus.totalPaid > 0 ? "text-cyan-700" : "text-rose-700"}`}
-                            >
-                              Balance Due
-                            </div>
-                            <div
-                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.balanceDue <= 0 ? "bg-emerald-200" : paymentStatus.totalPaid > 0 ? "bg-cyan-200" : "bg-rose-200"}`}
-                            >
-                              <Wallet
-                                className={`w-5 h-5 ${paymentStatus.balanceDue <= 0 ? "text-emerald-600" : paymentStatus.totalPaid > 0 ? "text-cyan-600" : "text-rose-600"}`}
-                              />
-                            </div>
-                          </div>
-                          <div
-                            className={`text-2xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-cyan-900" : "text-rose-900"}`}
-                          >
-                            R{paymentStatus.balanceDue.toFixed(2)}
-                          </div>
+                        <div className="min-w-0">
+                          <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-stone-800 to-blue-600 bg-clip-text text-transparent truncate">
+                            {documentType === "quote" ? "Quote" : "Invoice"} #
+                            {quoteNumber || "—"}
+                          </h1>
+                          <p className="text-xs text-slate-500 hidden md:block truncate">
+                            Create and manage construction{" "}
+                            {documentType === "quote" ? "quotes" : "invoices"}
+                          </p>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Payment Status Banner */}
-                      {quoteId && (
-                        <div
-                          className={`p-4 rounded-xl border-2 flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-emerald-50 border-emerald-300" : paymentStatus.status === "partially_paid" ? "bg-cyan-50 border-cyan-300" : "bg-rose-50 border-rose-300"}`}
+                    {/* Desktop action buttons */}
+                    <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
+                      {documentType === "quote" && quoteId && (
+                        <button
+                          onClick={handleConvertToInvoice}
+                          className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap"
                         >
-                          <div className="flex items-center gap-3">
-                            {paymentStatus.status === "paid" ? (
-                              <>
-                                <div className="w-10 h-10 bg-emerald-200 rounded-full flex items-center justify-center">
-                                  <CheckSquare className="w-6 h-6 text-emerald-600" />
-                                </div>
-                                <div>
-                                  <div className="font-bold text-emerald-900">
-                                    {documentType === "quote"
-                                      ? "Quote"
-                                      : "Invoice"}{" "}
-                                    Fully Paid
+                          <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+                          Convert to Invoice
+                        </button>
+                      )}
+                      <button
+                        onClick={handlePrint}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"
+                      >
+                        <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                        Print
+                      </button>
+                      <button
+                        onClick={
+                          documentType === "quote"
+                            ? handleNewQuote
+                            : handleNewInvoice
+                        }
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
+                        New
+                      </button>
+                      <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-cyan-500/50 hover:scale-105 whitespace-nowrap">
+                        <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                        <span>Send</span>
+                      </button>
+                      <button
+                        onClick={handleSavePDF}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-blue-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                        Save PDF
+                      </button>
+                      <button
+                        onClick={handleSaveQuote}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-xl hover:from-stone-700 hover:to-stone-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-stone-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                        Save
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
+                      >
+                        <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                        Logout
+                      </button>
+                    </div>
+
+                    {/* Mobile logout */}
+                    <button
+                      onClick={handleLogout}
+                      className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
+                    >
+                      <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── Mobile Action Bar ──────────────────────────────────────── */}
+                <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
+                  <div className="flex gap-2 min-w-max pb-1 pr-3">
+                    {documentType === "quote" && quoteId && (
+                      <button
+                        onClick={handleConvertToInvoice}
+                        className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                      >
+                        <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
+                        <span>To Invoice</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={handleSaveQuote}
+                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                    >
+                      <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                      Save
+                    </button>
+                    <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
+                      <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                      <span>Send</span>
+                    </button>
+                    <button
+                      onClick={handlePrint}
+                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
+                    >
+                      <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
+                      <span>PDF</span>
+                    </button>
+                    <button
+                      onClick={handlePrint}
+                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95"
+                    >
+                      <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
+                      <span>Print</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
+                  <div className="space-y-6">
+                    {/* Tab: Manual / AI */}
+                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
+                      <div className="flex border-b border-slate-200">
+                        <button
+                          onClick={() => setInputMode("manual")}
+                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "manual" ? "bg-white text-cyan-600 border-b-2 border-cyan-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            <Edit className="w-5 h-5" />
+                            Manual Entry
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setInputMode("ai")}
+                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            <Sparkles className="w-5 h-5" />
+                            AI Assistant
+                          </span>
+                        </button>
+                      </div>
+                      <div className="p-6">
+                        {inputMode === "ai" && (
+                          <AIInvoiceExtractor
+                            onDataExtracted={handleAIDataExtracted}
+                            documentType={documentType}
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    {inputMode === "manual" && (
+                      <>
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
+                          <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-3 rounded-xl border border-cyan-200 shadow-sm">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="text-sm font-medium text-cyan-700">
+                                Total Amount
+                              </div>
+                              <div className="w-8 h-8 bg-cyan-200 rounded-lg flex items-center justify-center">
+                                <DollarSign className="w-5 h-5 text-cyan-600" />
+                              </div>
+                            </div>
+                            <div className="text-2xl font-bold text-cyan-900">
+                              R{total.toFixed(2)}
+                            </div>
+                          </div>
+
+                          <div
+                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.totalPaid > 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : "from-slate-100 to-slate-300 border-slate-300"}`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div
+                                className={`text-sm font-medium ${paymentStatus.totalPaid > 0 ? "text-emerald-700" : "text-slate-600"}`}
+                              >
+                                Paid
+                              </div>
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.totalPaid > 0 ? "bg-emerald-200" : "bg-slate-200"}`}
+                              >
+                                <CheckSquare
+                                  className={`w-5 h-5 ${paymentStatus.totalPaid > 0 ? "text-emerald-600" : "text-slate-400"}`}
+                                />
+                              </div>
+                            </div>
+                            <div
+                              className={`text-2xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}
+                            >
+                              R{paymentStatus.totalPaid.toFixed(2)}
+                            </div>
+                          </div>
+
+                          <div
+                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.balanceDue <= 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : paymentStatus.totalPaid > 0 ? "from-cyan-50 to-cyan-100 border-cyan-200" : "from-rose-50 to-rose-100 border-rose-200"}`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div
+                                className={`text-sm font-medium ${paymentStatus.balanceDue <= 0 ? "text-emerald-700" : paymentStatus.totalPaid > 0 ? "text-cyan-700" : "text-rose-700"}`}
+                              >
+                                Balance Due
+                              </div>
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.balanceDue <= 0 ? "bg-emerald-200" : paymentStatus.totalPaid > 0 ? "bg-cyan-200" : "bg-rose-200"}`}
+                              >
+                                <Wallet
+                                  className={`w-5 h-5 ${paymentStatus.balanceDue <= 0 ? "text-emerald-600" : paymentStatus.totalPaid > 0 ? "text-cyan-600" : "text-rose-600"}`}
+                                />
+                              </div>
+                            </div>
+                            <div
+                              className={`text-2xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-cyan-900" : "text-rose-900"}`}
+                            >
+                              R{paymentStatus.balanceDue.toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Payment Status Banner */}
+                        {quoteId && (
+                          <div
+                            className={`p-4 rounded-xl border-2 flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-emerald-50 border-emerald-300" : paymentStatus.status === "partially_paid" ? "bg-cyan-50 border-cyan-300" : "bg-rose-50 border-rose-300"}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              {paymentStatus.status === "paid" ? (
+                                <>
+                                  <div className="w-10 h-10 bg-emerald-200 rounded-full flex items-center justify-center">
+                                    <CheckSquare className="w-6 h-6 text-emerald-600" />
                                   </div>
-                                  <div className="text-sm text-emerald-700">
-                                    Payment complete – Thank you!
+                                  <div>
+                                    <div className="font-bold text-emerald-900">
+                                      {documentType === "quote"
+                                        ? "Quote"
+                                        : "Invoice"}{" "}
+                                      Fully Paid
+                                    </div>
+                                    <div className="text-sm text-emerald-700">
+                                      Payment complete – Thank you!
+                                    </div>
                                   </div>
-                                </div>
-                              </>
-                            ) : paymentStatus.status === "partially_paid" ? (
-                              <>
-                                <div className="w-10 h-10 bg-cyan-200 rounded-full flex items-center justify-center">
-                                  <CreditCard className="w-6 h-6 text-cyan-600" />
-                                </div>
-                                <div>
-                                  <div className="font-bold text-cyan-900">
-                                    Partial Payment Received
+                                </>
+                              ) : paymentStatus.status === "partially_paid" ? (
+                                <>
+                                  <div className="w-10 h-10 bg-cyan-200 rounded-full flex items-center justify-center">
+                                    <CreditCard className="w-6 h-6 text-cyan-600" />
                                   </div>
-                                  <div className="text-sm text-cyan-700">
-                                    R{paymentStatus.totalPaid.toFixed(2)} paid •
-                                    R{paymentStatus.balanceDue.toFixed(2)}{" "}
-                                    remaining
+                                  <div>
+                                    <div className="font-bold text-cyan-900">
+                                      Partial Payment Received
+                                    </div>
+                                    <div className="text-sm text-cyan-700">
+                                      R{paymentStatus.totalPaid.toFixed(2)} paid
+                                      • R{paymentStatus.balanceDue.toFixed(2)}{" "}
+                                      remaining
+                                    </div>
                                   </div>
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center">
-                                  <Wallet className="w-6 h-6 text-rose-600" />
-                                </div>
-                                <div>
-                                  <div className="font-bold text-rose-900">
-                                    Payment Pending
+                                </>
+                              ) : (
+                                <>
+                                  <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center">
+                                    <Wallet className="w-6 h-6 text-rose-600" />
                                   </div>
-                                  <div className="text-sm text-rose-700">
-                                    Full amount due: R
-                                    {paymentStatus.balanceDue.toFixed(2)}
+                                  <div>
+                                    <div className="font-bold text-rose-900">
+                                      Payment Pending
+                                    </div>
+                                    <div className="text-sm text-rose-700">
+                                      Full amount due: R
+                                      {paymentStatus.balanceDue.toFixed(2)}
+                                    </div>
                                   </div>
-                                </div>
-                              </>
+                                </>
+                              )}
+                            </div>
+                            {paymentStatus.status !== "paid" && (
+                              <button
+                                onClick={handleProcessPayment}
+                                className="px-4 py-2 bg-white border-2 border-current rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2"
+                              >
+                                <CreditCard className="w-4 h-4" />
+                                Record Payment
+                              </button>
                             )}
                           </div>
-                          {paymentStatus.status !== "paid" && (
-                            <button
-                              onClick={handleProcessPayment}
-                              className="px-4 py-2 bg-white border-2 border-current rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2"
-                            >
-                              <CreditCard className="w-4 h-4" />
-                              Record Payment
-                            </button>
-                          )}
-                        </div>
-                      )}
-
-                      {/* ── Stepped Form ──────────────────────────────────── */}
-                      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                        {/* Step 1 – Client Information */}
-                        {currentStep === 1 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-                                  <Users className="w-6 h-6 text-cyan-600" />
-                                </div>
-                                Client Information
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">
-                                Enter client / contractor details
-                              </p>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Client / Company Name{" "}
-                                  <span className="text-rose-500">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={customerName}
-                                  onChange={(e) =>
-                                    setCustomerName(e.target.value)
-                                  }
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="Meridian Developments"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Email <span className="text-rose-500">*</span>
-                                </label>
-                                <input
-                                  type="email"
-                                  value={customerEmail}
-                                  onChange={(e) =>
-                                    setCustomerEmail(e.target.value)
-                                  }
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="projects@company.co.za"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Phone <span className="text-rose-500">*</span>
-                                </label>
-                                <input
-                                  type="tel"
-                                  value={customerPhone}
-                                  onChange={(e) =>
-                                    setCustomerPhone(e.target.value)
-                                  }
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="+27 11 234 5678"
-                                />
-                              </div>
-                              <div className="col-span-1 sm:col-span-2">
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property Address{" "}
-                                  <span className="text-rose-500">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={propertyAddress}
-                                  onChange={(e) =>
-                                    setPropertyAddress(e.target.value)
-                                  }
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="45 Corporate Boulevard, Sandton, Johannesburg, 2196"
-                                />
-                              </div>
-                            </div>
-                          </div>
                         )}
 
-                        {/* Step 2 – Site Details */}
-                        {currentStep === 2 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                  <Building className="w-6 h-6 text-blue-600" />
-                                </div>
-                                Site Details
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">
-                                Provide site specifications for an accurate
-                                quote
-                              </p>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property / Building Type
-                                </label>
-                                <select
-                                  value={siteType}
-                                  onChange={(e) => setSiteType(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                >
-                                  <option value="Commercial">Commercial</option>
-                                  <option value="Residential">
-                                    Residential
-                                  </option>
-                                  <option value="Industrial">Industrial</option>
-                                  <option value="Infrastructure">
-                                    Infrastructure
-                                  </option>
-                                  <option value="Renovation">Renovation</option>
-                                  <option value="Government">Government</option>
-                                </select>
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property Area (sqm)
-                                </label>
-                                <input
-                                  type="number"
-                                  value={siteSize}
-                                  onChange={(e) => setSiteSize(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="1200"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Power Rating (Amps)
-                                </label>
-                                <input
-                                  type="number"
-                                  value={floors}
-                                  onChange={(e) => setFloors(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="3"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Urgency Level
-                                </label>
-                                <input
-                                  type="number"
-                                  value={phases}
-                                  onChange={(e) => setPhases(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="2"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Site Summary Card */}
-                            <div className="mt-6 p-4 bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg">
-                              <h3 className="font-semibold text-cyan-900 mb-2 flex items-center gap-2">
-                                <MapPin className="w-4 h-4" />
-                                Site Summary
-                              </h3>
-                              <div className="text-sm text-cyan-800 space-y-1">
-                                <p>
-                                  <span className="font-medium">Type:</span>{" "}
-                                  {siteType}
-                                </p>
-                                <p>
-                                  <span className="font-medium">Area:</span>{" "}
-                                  {siteSize} sqm
-                                </p>
-                                <p>
-                                  <span className="font-medium">Floors:</span>{" "}
-                                  {floors} | Phases: {phases}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 3 – Electrical Work */}
-                        {currentStep === 3 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-stone-100 rounded-lg flex items-center justify-center">
-                                  <Wrench className="w-6 h-6 text-stone-600" />
-                                </div>
-                                Electrical Work
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">
-                                Add work items and materials to the quote
-                              </p>
-                            </div>
-
-                            {/* Add Work-Item Form */}
-                            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 mb-6 border border-slate-200">
-                              <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
-                                <Plus className="w-5 h-5 text-cyan-600" />
-                                Add Electrical Work Item
-                              </h3>
-                              <div className="grid grid-cols-1 gap-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                      Work Category
-                                    </label>
-                                    <select
-                                      value={newItem.workCategory}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          workCategory: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
-                                    >
-                                      <option value="Foundation Work">
-                                        Foundation Work
-                                      </option>
-                                      <option value="Structural Steel">
-                                        Structural Steel
-                                      </option>
-                                      <option value="Concrete & Masonry">
-                                        Concrete & Masonry
-                                      </option>
-                                      <option value="Electrical">
-                                        Electrical
-                                      </option>
-                                      <option value="Plumbing">Plumbing</option>
-                                      <option value="Roofing">Roofing</option>
-                                      <option value="Finishing & Plastering">
-                                        Finishing & Plastering
-                                      </option>
-                                      <option value="Earthworks">
-                                        Earthworks
-                                      </option>
-                                      <option value="Landscaping">
-                                        Landscaping
-                                      </option>
-                                      <option value="Site Preparation">
-                                        Site Preparation
-                                      </option>
-                                      <option value="HVAC">HVAC</option>
-                                      <option value="Windows & Doors">
-                                        Windows & Doors
-                                      </option>
-                                      <option value="Painting">Painting</option>
-                                      <option value="Tiling & Flooring">
-                                        Tiling & Flooring
-                                      </option>
-                                      <option value="Materials Supply">
-                                        Materials Supply
-                                      </option>
-                                    </select>
+                        {/* ── Stepped Form ──────────────────────────────────── */}
+                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                          {/* Step 1 – Client Information */}
+                          {currentStep === 1 && (
+                            <div className="p-8">
+                              <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
+                                    <Users className="w-6 h-6 text-cyan-600" />
                                   </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                      Phase
-                                    </label>
-                                    <select
-                                      value={newItem.phase}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          phase: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
-                                    >
-                                      <option value="Phase 1">Phase 1</option>
-                                      <option value="Phase 2">Phase 2</option>
-                                      <option value="Phase 3">Phase 3</option>
-                                      <option value="Phase 4">Phase 4</option>
-                                      <option value="Ongoing">Ongoing</option>
-                                    </select>
-                                  </div>
-                                </div>
-
+                                  Client Information
+                                </h2>
+                                <p className="text-slate-600 mt-2 ml-13">
+                                  Enter client / contractor details
+                                </p>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <div>
-                                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                    Description
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Client / Company Name{" "}
+                                    <span className="text-rose-500">*</span>
                                   </label>
                                   <input
                                     type="text"
-                                    placeholder="Work item / material description"
-                                    value={newItem.description}
+                                    value={customerName}
                                     onChange={(e) =>
-                                      setNewItem({
-                                        ...newItem,
-                                        description: e.target.value,
-                                      })
+                                      setCustomerName(e.target.value)
                                     }
                                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="Meridian Developments"
                                   />
                                 </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                      Unit Rate (R)
-                                    </label>
-                                    <input
-                                      type="number"
-                                      placeholder="Rate"
-                                      value={newItem.rate}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          rate: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                      Quantity / Units
-                                    </label>
-                                    <input
-                                      type="number"
-                                      placeholder="Qty"
-                                      value={newItem.qty}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          qty: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                      VAT (%)
-                                    </label>
-                                    <input
-                                      type="number"
-                                      placeholder="15"
-                                      value={newItem.taxRate}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          taxRate: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                    />
-                                  </div>
-                                  <div className="flex items-end">
-                                    <button
-                                      onClick={handleAddItem}
-                                      className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg px-4 py-2 hover:from-cyan-700 hover:to-blue-700 flex items-center justify-center gap-2 transition-all font-semibold shadow-md hover:shadow-lg"
-                                    >
-                                      <Plus className="w-4 h-4" />
-                                      Add Item
-                                    </button>
-                                  </div>
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Email{" "}
+                                    <span className="text-rose-500">*</span>
+                                  </label>
+                                  <input
+                                    type="email"
+                                    value={customerEmail}
+                                    onChange={(e) =>
+                                      setCustomerEmail(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="projects@company.co.za"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Phone{" "}
+                                    <span className="text-rose-500">*</span>
+                                  </label>
+                                  <input
+                                    type="tel"
+                                    value={customerPhone}
+                                    onChange={(e) =>
+                                      setCustomerPhone(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="+27 11 234 5678"
+                                  />
+                                </div>
+                                <div className="col-span-1 sm:col-span-2">
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Property Address{" "}
+                                    <span className="text-rose-500">*</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={propertyAddress}
+                                    onChange={(e) =>
+                                      setPropertyAddress(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="45 Corporate Boulevard, Sandton, Johannesburg, 2196"
+                                  />
                                 </div>
                               </div>
                             </div>
+                          )}
 
-                            {/* Work Items Table */}
-                            {items.length > 0 ? (
-                              <div className="mb-6">
-                                <h3 className="text-lg font-bold text-slate-900 mb-4">
-                                  Work Items ({items.length})
+                          {/* Step 2 – Site Details */}
+                          {currentStep === 2 && (
+                            <div className="p-8">
+                              <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <Building className="w-6 h-6 text-blue-600" />
+                                  </div>
+                                  Site Details
+                                </h2>
+                                <p className="text-slate-600 mt-2 ml-13">
+                                  Provide site specifications for an accurate
+                                  quote
+                                </p>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Property / Building Type
+                                  </label>
+                                  <select
+                                    value={siteType}
+                                    onChange={(e) =>
+                                      setSiteType(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                  >
+                                    <option value="Commercial">
+                                      Commercial
+                                    </option>
+                                    <option value="Residential">
+                                      Residential
+                                    </option>
+                                    <option value="Industrial">
+                                      Industrial
+                                    </option>
+                                    <option value="Infrastructure">
+                                      Infrastructure
+                                    </option>
+                                    <option value="Renovation">
+                                      Renovation
+                                    </option>
+                                    <option value="Government">
+                                      Government
+                                    </option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Property Area (sqm)
+                                  </label>
+                                  <input
+                                    type="number"
+                                    value={siteSize}
+                                    onChange={(e) =>
+                                      setSiteSize(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="1200"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Power Rating (Amps)
+                                  </label>
+                                  <input
+                                    type="number"
+                                    value={floors}
+                                    onChange={(e) => setFloors(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="3"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Urgency Level
+                                  </label>
+                                  <input
+                                    type="number"
+                                    value={phases}
+                                    onChange={(e) => setPhases(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    placeholder="2"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Site Summary Card */}
+                              <div className="mt-6 p-4 bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg">
+                                <h3 className="font-semibold text-cyan-900 mb-2 flex items-center gap-2">
+                                  <MapPin className="w-4 h-4" />
+                                  Site Summary
                                 </h3>
-                                <div className="overflow-x-auto rounded-xl border border-slate-200">
-                                  <table className="w-full">
-                                    <thead>
-                                      <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                          Description
-                                        </th>
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                          Category
-                                        </th>
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                          Phase
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          Unit Rate
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          Qty
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          VAT
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          Total
-                                        </th>
-                                        <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">
-                                          Action
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody className="bg-white">
-                                      {items.map((item, index) => (
-                                        <tr
-                                          key={index}
-                                          className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
-                                        >
-                                          <td className="px-4 py-4 text-sm font-medium text-slate-700">
-                                            {item.description}
-                                          </td>
-                                          <td className="px-4 py-4 text-sm">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-cyan-100 text-cyan-700">
-                                              {item.workCategory || "General"}
-                                            </span>
-                                          </td>
-                                          <td className="px-4 py-4 text-sm">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
-                                              {item.phase || "Phase 1"}
-                                            </span>
-                                          </td>
-                                          <td className="px-4 py-4 text-sm text-right text-slate-700">
-                                            R{item.rate.toFixed(2)}
-                                          </td>
-                                          <td className="px-4 py-4 text-sm text-right text-slate-700">
-                                            {item.qty}
-                                          </td>
-                                          <td className="px-4 py-4 text-sm text-right text-slate-700">
-                                            R{item.taxAmount.toFixed(2)}
-                                          </td>
-                                          <td className="px-4 py-4 text-sm text-right font-bold text-slate-900">
-                                            R{item.totalAmount.toFixed(2)}
-                                          </td>
-                                          <td className="px-4 py-4 text-center">
-                                            <button
-                                              onClick={() =>
-                                                handleRemoveItem(index)
-                                              }
-                                              className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all flex items-center gap-1 mx-auto"
-                                            >
-                                              <Trash2 className="w-3 h-3" />
-                                              Remove
-                                            </button>
-                                          </td>
+                                <div className="text-sm text-cyan-800 space-y-1">
+                                  <p>
+                                    <span className="font-medium">Type:</span>{" "}
+                                    {siteType}
+                                  </p>
+                                  <p>
+                                    <span className="font-medium">Area:</span>{" "}
+                                    {siteSize} sqm
+                                  </p>
+                                  <p>
+                                    <span className="font-medium">Floors:</span>{" "}
+                                    {floors} | Phases: {phases}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Step 3 – Electrical Work */}
+                          {currentStep === 3 && (
+                            <div className="p-8">
+                              <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-stone-100 rounded-lg flex items-center justify-center">
+                                    <Wrench className="w-6 h-6 text-stone-600" />
+                                  </div>
+                                  Electrical Work
+                                </h2>
+                                <p className="text-slate-600 mt-2 ml-13">
+                                  Add work items and materials to the quote
+                                </p>
+                              </div>
+
+                              {/* Add Work-Item Form */}
+                              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 mb-6 border border-slate-200">
+                                <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
+                                  <Plus className="w-5 h-5 text-cyan-600" />
+                                  Add Electrical Work Item
+                                </h3>
+                                <div className="grid grid-cols-1 gap-4">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Work Category
+                                      </label>
+                                      <select
+                                        value={newItem.workCategory}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            workCategory: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
+                                      >
+                                        <option value="Foundation Work">
+                                          Foundation Work
+                                        </option>
+                                        <option value="Structural Steel">
+                                          Structural Steel
+                                        </option>
+                                        <option value="Concrete & Masonry">
+                                          Concrete & Masonry
+                                        </option>
+                                        <option value="Electrical">
+                                          Electrical
+                                        </option>
+                                        <option value="Plumbing">
+                                          Plumbing
+                                        </option>
+                                        <option value="Roofing">Roofing</option>
+                                        <option value="Finishing & Plastering">
+                                          Finishing & Plastering
+                                        </option>
+                                        <option value="Earthworks">
+                                          Earthworks
+                                        </option>
+                                        <option value="Landscaping">
+                                          Landscaping
+                                        </option>
+                                        <option value="Site Preparation">
+                                          Site Preparation
+                                        </option>
+                                        <option value="HVAC">HVAC</option>
+                                        <option value="Windows & Doors">
+                                          Windows & Doors
+                                        </option>
+                                        <option value="Painting">
+                                          Painting
+                                        </option>
+                                        <option value="Tiling & Flooring">
+                                          Tiling & Flooring
+                                        </option>
+                                        <option value="Materials Supply">
+                                          Materials Supply
+                                        </option>
+                                      </select>
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Phase
+                                      </label>
+                                      <select
+                                        value={newItem.phase}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            phase: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
+                                      >
+                                        <option value="Phase 1">Phase 1</option>
+                                        <option value="Phase 2">Phase 2</option>
+                                        <option value="Phase 3">Phase 3</option>
+                                        <option value="Phase 4">Phase 4</option>
+                                        <option value="Ongoing">Ongoing</option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                      Description
+                                    </label>
+                                    <input
+                                      type="text"
+                                      placeholder="Work item / material description"
+                                      value={newItem.description}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          description: e.target.value,
+                                        })
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                    />
+                                  </div>
+
+                                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                    <div>
+                                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Unit Rate (R)
+                                      </label>
+                                      <input
+                                        type="number"
+                                        placeholder="Rate"
+                                        value={newItem.rate}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            rate: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        Quantity / Units
+                                      </label>
+                                      <input
+                                        type="number"
+                                        placeholder="Qty"
+                                        value={newItem.qty}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            qty: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                        VAT (%)
+                                      </label>
+                                      <input
+                                        type="number"
+                                        placeholder="15"
+                                        value={newItem.taxRate}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            taxRate: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
+                                      />
+                                    </div>
+                                    <div className="flex items-end">
+                                      <button
+                                        onClick={handleAddItem}
+                                        className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg px-4 py-2 hover:from-cyan-700 hover:to-blue-700 flex items-center justify-center gap-2 transition-all font-semibold shadow-md hover:shadow-lg"
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                        Add Item
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Work Items Table */}
+                              {items.length > 0 ? (
+                                <div className="mb-6">
+                                  <h3 className="text-lg font-bold text-slate-900 mb-4">
+                                    Work Items ({items.length})
+                                  </h3>
+                                  <div className="overflow-x-auto rounded-xl border border-slate-200">
+                                    <table className="w-full">
+                                      <thead>
+                                        <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                                          <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                            Description
+                                          </th>
+                                          <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                            Category
+                                          </th>
+                                          <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                            Phase
+                                          </th>
+                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                            Unit Rate
+                                          </th>
+                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                            Qty
+                                          </th>
+                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                            VAT
+                                          </th>
+                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                            Total
+                                          </th>
+                                          <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">
+                                            Action
+                                          </th>
                                         </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
+                                      </thead>
+                                      <tbody className="bg-white">
+                                        {items.map((item, index) => (
+                                          <tr
+                                            key={index}
+                                            className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                                          >
+                                            <td className="px-4 py-4 text-sm font-medium text-slate-700">
+                                              {item.description}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm">
+                                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-cyan-100 text-cyan-700">
+                                                {item.workCategory || "General"}
+                                              </span>
+                                            </td>
+                                            <td className="px-4 py-4 text-sm">
+                                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                                                {item.phase || "Phase 1"}
+                                              </span>
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                              R{item.rate.toFixed(2)}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                              {item.qty}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                              R{item.taxAmount.toFixed(2)}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-right font-bold text-slate-900">
+                                              R{item.totalAmount.toFixed(2)}
+                                            </td>
+                                            <td className="px-4 py-4 text-center">
+                                              <button
+                                                onClick={() =>
+                                                  handleRemoveItem(index)
+                                                }
+                                                className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all flex items-center gap-1 mx-auto"
+                                              >
+                                                <Trash2 className="w-3 h-3" />
+                                                Remove
+                                              </button>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
                                 </div>
-                              </div>
-                            ) : (
-                              <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-dashed border-slate-300">
-                                <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                  <Wrench className="w-8 h-8 text-slate-400" />
+                              ) : (
+                                <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-dashed border-slate-300">
+                                  <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Wrench className="w-8 h-8 text-slate-400" />
+                                  </div>
+                                  <p className="text-slate-700 font-semibold text-lg">
+                                    No work items added yet
+                                  </p>
+                                  <p className="text-sm text-slate-500 mt-2">
+                                    Add items using the form above
+                                  </p>
                                 </div>
-                                <p className="text-slate-700 font-semibold text-lg">
-                                  No work items added yet
-                                </p>
-                                <p className="text-sm text-slate-500 mt-2">
-                                  Add items using the form above
-                                </p>
-                              </div>
-                            )}
+                              )}
 
-                            {/* Totals */}
-                            {items.length > 0 && (
-                              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-200">
+                              {/* Totals */}
+                              {items.length > 0 && (
+                                <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-200">
+                                  <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-slate-700 font-medium">
+                                        Subtotal:
+                                      </span>
+                                      <span className="font-bold text-slate-900 text-lg">
+                                        R{subtotal.toFixed(2)}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-slate-700 font-medium">
+                                        VAT (15%):
+                                      </span>
+                                      <span className="font-bold text-slate-900 text-lg">
+                                        R{totalTax.toFixed(2)}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-cyan-300">
+                                      <span className="text-slate-900">
+                                        Total:
+                                      </span>
+                                      <span className="text-cyan-700 text-2xl">
+                                        R{total.toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Step 4 – Schedule & Payment */}
+                          {currentStep === 4 && (
+                            <div className="p-8">
+                              <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                    <Calendar className="w-6 h-6 text-emerald-600" />
+                                  </div>
+                                  Schedule & Payment Terms
+                                </h2>
+                                <p className="text-slate-600 mt-2 ml-13">
+                                  Review quote details, milestones, and payment
+                                  terms
+                                </p>
+                              </div>
+
+                              {/* Summary Cards */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 rounded-xl border border-cyan-200">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <span className="text-sm font-semibold text-cyan-700">
+                                      Project Total
+                                    </span>
+                                    <DollarSign className="w-5 h-5 text-cyan-600" />
+                                  </div>
+                                  <div className="text-3xl font-bold text-cyan-900">
+                                    R{total.toFixed(2)}
+                                  </div>
+                                </div>
+                                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <span className="text-sm font-semibold text-emerald-700">
+                                      Work Items
+                                    </span>
+                                    <ClipboardList className="w-5 h-5 text-emerald-600" />
+                                  </div>
+                                  <div className="text-3xl font-bold text-emerald-900">
+                                    {items.length}
+                                  </div>
+                                </div>
+                                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <span className="text-sm font-semibold text-purple-700">
+                                      VAT Amount
+                                    </span>
+                                    <Receipt className="w-5 h-5 text-purple-600" />
+                                  </div>
+                                  <div className="text-3xl font-bold text-purple-900">
+                                    R{totalTax.toFixed(2)}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Payment Terms */}
+                              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-6">
+                                <div className="flex items-center gap-3 mb-5">
+                                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <CreditCard className="w-5 h-5 text-purple-600" />
+                                  </div>
+                                  <h3 className="text-xl font-bold text-slate-900">
+                                    Payment Information
+                                  </h3>
+                                </div>
                                 <div className="space-y-3">
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-slate-700 font-medium">
-                                      Subtotal:
+                                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                    <span className="text-slate-600 font-medium">
+                                      Payment Schedule:
                                     </span>
-                                    <span className="font-bold text-slate-900 text-lg">
-                                      R{subtotal.toFixed(2)}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-slate-700 font-medium">
-                                      VAT (15%):
-                                    </span>
-                                    <span className="font-bold text-slate-900 text-lg">
-                                      R{totalTax.toFixed(2)}
+                                    <span className="font-bold text-slate-900">
+                                      Milestone-Based
                                     </span>
                                   </div>
-                                  <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-cyan-300">
-                                    <span className="text-slate-900">
-                                      Total:
+                                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                    <span className="text-slate-600 font-medium">
+                                      Payment Methods:
                                     </span>
-                                    <span className="text-cyan-700 text-2xl">
-                                      R{total.toFixed(2)}
+                                    <span className="font-bold text-slate-900">
+                                      Bank Transfer, Card, EFT
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                    <span className="text-slate-600 font-medium">
+                                      Quote Valid For:
+                                    </span>
+                                    <span className="font-bold text-slate-900">
+                                      30 Days
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center py-3">
+                                    <span className="text-slate-600 font-medium">
+                                      Currency:
+                                    </span>
+                                    <span className="font-bold text-slate-900">
+                                      ZAR (South African Rand)
                                     </span>
                                   </div>
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        )}
 
-                        {/* Step 4 – Schedule & Payment */}
-                        {currentStep === 4 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                                  <Calendar className="w-6 h-6 text-emerald-600" />
-                                </div>
-                                Schedule & Payment Terms
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">
-                                Review quote details, milestones, and payment
-                                terms
-                              </p>
-                            </div>
-
-                            {/* Summary Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 rounded-xl border border-cyan-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-cyan-700">
-                                    Project Total
-                                  </span>
-                                  <DollarSign className="w-5 h-5 text-cyan-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-cyan-900">
-                                  R{total.toFixed(2)}
-                                </div>
-                              </div>
-                              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-emerald-700">
-                                    Work Items
-                                  </span>
-                                  <ClipboardList className="w-5 h-5 text-emerald-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-emerald-900">
-                                  {items.length}
-                                </div>
-                              </div>
-                              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-purple-700">
-                                    VAT Amount
-                                  </span>
-                                  <Receipt className="w-5 h-5 text-purple-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-purple-900">
-                                  R{totalTax.toFixed(2)}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Payment Terms */}
-                            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-6">
-                              <div className="flex items-center gap-3 mb-5">
-                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                  <CreditCard className="w-5 h-5 text-purple-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900">
-                                  Payment Information
+                              {/* Client & Site Summary */}
+                              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
+                                <h3 className="text-lg font-bold text-slate-900 mb-4">
+                                  Quote Summary
                                 </h3>
-                              </div>
-                              <div className="space-y-3">
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">
-                                    Payment Schedule:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    Milestone-Based
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">
-                                    Payment Methods:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    Bank Transfer, Card, EFT
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">
-                                    Quote Valid For:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    30 Days
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center py-3">
-                                  <span className="text-slate-600 font-medium">
-                                    Currency:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    ZAR (South African Rand)
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Client & Site Summary */}
-                            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
-                              <h3 className="text-lg font-bold text-slate-900 mb-4">
-                                Quote Summary
-                              </h3>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                  <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                                    <Users className="w-4 h-4" />
-                                    Client Details:
-                                  </h4>
-                                  <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">
-                                      {customerName}
-                                    </p>
-                                    <p>{customerEmail}</p>
-                                    <p>{customerPhone}</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                      <Users className="w-4 h-4" />
+                                      Client Details:
+                                    </h4>
+                                    <div className="text-sm text-slate-600 space-y-1">
+                                      <p className="font-semibold text-slate-900">
+                                        {customerName}
+                                      </p>
+                                      <p>{customerEmail}</p>
+                                      <p>{customerPhone}</p>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                      <Building className="w-4 h-4" />
+                                      Site Details:
+                                    </h4>
+                                    <div className="text-sm text-slate-600 space-y-1">
+                                      <p className="font-semibold text-slate-900">
+                                        {propertyAddress}
+                                      </p>
+                                      <p>
+                                        <span className="font-semibold">
+                                          Type:
+                                        </span>{" "}
+                                        {siteType}
+                                      </p>
+                                      <p>
+                                        <span className="font-semibold">
+                                          Area:
+                                        </span>{" "}
+                                        {siteSize} sqm
+                                      </p>
+                                      <p>
+                                        <span className="font-semibold">
+                                          Floors:
+                                        </span>{" "}
+                                        {floors} | Phases: {phases}
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                                <div>
-                                  <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                                    <Building className="w-4 h-4" />
-                                    Site Details:
+
+                                <div className="mt-6 pt-6 border-t border-slate-300">
+                                  <h4 className="text-sm font-semibold text-slate-700 mb-2">
+                                    Quote Details:
                                   </h4>
                                   <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">
-                                      {propertyAddress}
+                                    <p>
+                                      <span className="font-semibold">
+                                        Number:
+                                      </span>{" "}
+                                      {quoteNumber}
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        Date:
+                                      </span>{" "}
+                                      {new Date().toLocaleDateString()}
                                     </p>
                                     <p>
                                       <span className="font-semibold">
                                         Type:
                                       </span>{" "}
-                                      {siteType}
+                                      {documentType === "quote"
+                                        ? "Quote"
+                                        : "Invoice"}
                                     </p>
                                     <p>
                                       <span className="font-semibold">
-                                        Area:
+                                        Status:
                                       </span>{" "}
-                                      {siteSize} sqm
-                                    </p>
-                                    <p>
-                                      <span className="font-semibold">
-                                        Floors:
-                                      </span>{" "}
-                                      {floors} | Phases: {phases}
+                                      <span className="text-cyan-600 font-bold">
+                                        Pending
+                                      </span>
                                     </p>
                                   </div>
                                 </div>
                               </div>
 
-                              <div className="mt-6 pt-6 border-t border-slate-300">
-                                <h4 className="text-sm font-semibold text-slate-700 mb-2">
-                                  Quote Details:
-                                </h4>
-                                <div className="text-sm text-slate-600 space-y-1">
-                                  <p>
-                                    <span className="font-semibold">
-                                      Number:
-                                    </span>{" "}
-                                    {quoteNumber}
-                                  </p>
-                                  <p>
-                                    <span className="font-semibold">Date:</span>{" "}
-                                    {new Date().toLocaleDateString()}
-                                  </p>
-                                  <p>
-                                    <span className="font-semibold">Type:</span>{" "}
-                                    {documentType === "quote"
-                                      ? "Quote"
-                                      : "Invoice"}
-                                  </p>
-                                  <p>
-                                    <span className="font-semibold">
-                                      Status:
-                                    </span>{" "}
-                                    <span className="text-cyan-600 font-bold">
-                                      Pending
-                                    </span>
-                                  </p>
+                              {/* Process Payment button */}
+                              {quoteId && (
+                                <div className="mt-6 flex gap-3">
+                                  <button
+                                    onClick={handleProcessPayment}
+                                    className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105"
+                                  >
+                                    <CreditCard className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                                    Process Payment
+                                  </button>
                                 </div>
-                              </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* ── Step Navigation Bar ──────────────────────────── */}
+                          <div className="px-8 py-5 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+                            <button
+                              onClick={handlePrevious}
+                              disabled={currentStep === 1}
+                              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${currentStep === 1 ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 shadow-sm"}`}
+                            >
+                              <ChevronLeft className="w-5 h-5" />
+                              <span className="hidden sm:inline">Previous</span>
+                            </button>
+
+                            <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">
+                              Step {currentStep} of {totalSteps}
                             </div>
 
-                            {/* Process Payment button */}
-                            {quoteId && (
-                              <div className="mt-6 flex gap-3">
-                                <button
-                                  onClick={handleProcessPayment}
-                                  className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105"
-                                >
-                                  <CreditCard className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                                  Process Payment
-                                </button>
-                              </div>
+                            {currentStep < totalSteps ? (
+                              <button
+                                onClick={handleNext}
+                                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold hover:from-cyan-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
+                              >
+                                <span className="hidden sm:inline">Next</span>
+                                <ChevronRight className="w-5 h-5" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={handleSaveQuote}
+                                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
+                              >
+                                <Save className="w-5 h-5" />
+                                Save{" "}
+                                {documentType === "quote" ? "Quote" : "Invoice"}
+                              </button>
                             )}
                           </div>
-                        )}
-
-                        {/* ── Step Navigation Bar ──────────────────────────── */}
-                        <div className="px-8 py-5 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-                          <button
-                            onClick={handlePrevious}
-                            disabled={currentStep === 1}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${currentStep === 1 ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 shadow-sm"}`}
-                          >
-                            <ChevronLeft className="w-5 h-5" />
-                            Previous
-                          </button>
-
-                          <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">
-                            Step {currentStep} of {totalSteps}
-                          </div>
-
-                          {currentStep < totalSteps ? (
-                            <button
-                              onClick={handleNext}
-                              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold hover:from-cyan-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
-                            >
-                              Next
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                          ) : (
-                            <button
-                              onClick={handleSaveQuote}
-                              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
-                            >
-                              <Save className="w-5 h-5" />
-                              Save{" "}
-                              {documentType === "quote" ? "Quote" : "Invoice"}
-                            </button>
-                          )}
                         </div>
-                      </div>
-                    </>
-                  )}
-                </div>
+                      </>
+                    )}
+                  </div>
 
-                {/* ── Print / PDF Preview (hidden on-screen) ────────────── */}
-                <div
-                  id="print-area"
-                  className="hidden print:block bg-white shadow-2xl origin-top"
-                  style={{
-                    width: "210mm",
-                    minHeight: "297mm",
-                    transform: "scale(0.75)",
-                    transformOrigin: "top center",
-                  }}
-                >
-                  <TemplateRenderer
-                    templateId={selectedTemplate}
-                    businessInfo={businessInfo}
-                    loading={loading}
-                    invoiceNumber={quoteNumber}
-                    customerName={customerName}
-                    billName={customerName}
-                    billEmail={customerEmail}
-                    billPhone={customerPhone}
-                    billAddress={propertyAddress}
-                    customerEmail={customerEmail}
-                    customerPhone={customerPhone}
-                    customerAddress={propertyAddress}
-                    taxId=""
-                    items={items}
-                    subtotal={subtotal}
-                    totalTax={totalTax}
-                    total={total}
-                    documentType={documentType}
-                    stampText={stampSettings.text}
-                    stampColor={stampSettings.color}
-                    showStampDate={stampSettings.showDate}
-                    showStamp={stampSettings.enabled}
-                    paymentStatus={paymentStatus}
-                  />
+                  {/* ── Print / PDF Preview (hidden on-screen) ────────────── */}
+                  <div
+                    id="print-area"
+                    className="hidden print:block bg-white shadow-2xl origin-top"
+                    style={{
+                      width: "210mm",
+                      minHeight: "297mm",
+                      transform: "scale(0.75)",
+                      transformOrigin: "top center",
+                    }}
+                  >
+                    <TemplateRenderer
+                      templateId={selectedTemplate}
+                      businessInfo={businessInfo}
+                      loading={loading}
+                      invoiceNumber={quoteNumber}
+                      customerName={customerName}
+                      billName={customerName}
+                      billEmail={customerEmail}
+                      billPhone={customerPhone}
+                      billAddress={propertyAddress}
+                      customerEmail={customerEmail}
+                      customerPhone={customerPhone}
+                      customerAddress={propertyAddress}
+                      taxId=""
+                      items={items}
+                      subtotal={subtotal}
+                      totalTax={totalTax}
+                      total={total}
+                      documentType={documentType}
+                      stampText={stampSettings.text}
+                      stampColor={stampSettings.color}
+                      showStampDate={stampSettings.showDate}
+                      showStamp={stampSettings.enabled}
+                      paymentStatus={paymentStatus}
+                    />
+                  </div>
                 </div>
-              </div>
               </>
             )}
           </div>

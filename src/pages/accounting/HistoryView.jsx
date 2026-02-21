@@ -77,7 +77,7 @@ const HistoryView = ({ user }) => {
       const invoicesQuery = query(
         invoicesRef,
         orderBy("createdAt", "desc"),
-        limit(100)
+        limit(100),
       );
       const invoicesSnapshot = await getDocs(invoicesQuery);
 
@@ -86,7 +86,7 @@ const HistoryView = ({ user }) => {
       const estimatesQuery = query(
         estimatesRef,
         orderBy("createdAt", "desc"),
-        limit(100)
+        limit(100),
       );
       const estimatesSnapshot = await getDocs(estimatesQuery);
 
@@ -123,11 +123,11 @@ const HistoryView = ({ user }) => {
 
     const totalRevenue = invoices.reduce(
       (sum, inv) => sum + (inv.totals?.total || 0),
-      0
+      0,
     );
     const paidAmount = invoices.reduce(
       (sum, inv) => sum + (inv.totals?.paid || 0),
-      0
+      0,
     );
     const pendingAmount = invoices
       .filter((inv) => inv.status === "pending")
@@ -139,9 +139,7 @@ const HistoryView = ({ user }) => {
       .filter((inv) => {
         if (inv.status !== "pending" && inv.status !== "partially_paid")
           return false;
-        const dueDate = inv.dates?.dueDate
-          ? new Date(inv.dates.dueDate)
-          : null;
+        const dueDate = inv.dates?.dueDate ? new Date(inv.dates.dueDate) : null;
         return dueDate && dueDate < now;
       })
       .reduce((sum, inv) => sum + (inv.totals?.due || 0), 0);
@@ -164,8 +162,10 @@ const HistoryView = ({ user }) => {
       filtered = filtered.filter(
         (doc) =>
           doc.invoiceNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          doc.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          doc.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+          doc.customer?.name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          doc.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
@@ -198,7 +198,7 @@ const HistoryView = ({ user }) => {
             return docDate >= monthAgo;
           case "quarter":
             const quarterAgo = new Date(
-              now.getTime() - 90 * 24 * 60 * 60 * 1000
+              now.getTime() - 90 * 24 * 60 * 60 * 1000,
             );
             return docDate >= quarterAgo;
           default:
@@ -237,7 +237,7 @@ const HistoryView = ({ user }) => {
   const handleDeleteDocument = async (docId, docType) => {
     if (
       !window.confirm(
-        `Are you sure you want to delete this ${docType}? This action cannot be undone.`
+        `Are you sure you want to delete this ${docType}? This action cannot be undone.`,
       )
     ) {
       return;
@@ -405,7 +405,7 @@ const HistoryView = ({ user }) => {
             </span>
             <Clock className="w-4 h-4 text-amber-600" />
           </div>
-          <div className="text-2xl font-bold text-amber-900">
+          <div className="text-base sm:text-lg md:text-2xl font-bold text-amber-900">
             R{stats.pendingAmount.toFixed(2)}
           </div>
         </div>
@@ -603,7 +603,9 @@ const HistoryView = ({ user }) => {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-4">{getStatusBadge(doc.status)}</td>
+                      <td className="px-4 py-4">
+                        {getStatusBadge(doc.status)}
+                      </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
@@ -655,7 +657,9 @@ const HistoryView = ({ user }) => {
                                     </div>
                                     <div className="flex items-center gap-4 text-xs text-slate-600">
                                       <span>Qty: {item.qty}</span>
-                                      <span>Rate: R{item.rate?.toFixed(2)}</span>
+                                      <span>
+                                        Rate: R{item.rate?.toFixed(2)}
+                                      </span>
                                       {item.taxRate > 0 && (
                                         <span>Tax: {item.taxRate}%</span>
                                       )}
@@ -701,7 +705,9 @@ const HistoryView = ({ user }) => {
                                       </span>
                                     </div>
                                     <div className="flex justify-between">
-                                      <span className="text-slate-600">Tax:</span>
+                                      <span className="text-slate-600">
+                                        Tax:
+                                      </span>
                                       <span className="font-semibold">
                                         R{doc.totals?.tax?.toFixed(2)}
                                       </span>

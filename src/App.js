@@ -13,7 +13,6 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsPage from './pages/TermsPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
-
 // Protected Pages
 import Home from './pages/HomeView';
 import DashboardRouter from './components/DashboardRouter';
@@ -67,6 +66,7 @@ import SignatureStamp from './pages/mechanics/SignatureStamp';
 import TemplateSelector from './pages/accounting/TemplateSelector';
 
 function App() {
+
    useEffect(() => {
     // Disable right-click
     const handleContextMenu = (e) => e.preventDefault();
