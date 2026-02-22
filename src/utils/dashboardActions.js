@@ -56,7 +56,7 @@ export const getDashboardActions = (dashboardId, handlers = {}) => {
     ),
 
     mechanics: standard(
-      "New Job Card", Wrench,        handleNewJobcard, "jobcard",
+      "New Job Card", Wrench,        handleNewInvoice, "invoice",
       "New Quote",    ClipboardList, handleNewQuote,   "quote",
     ),
 
