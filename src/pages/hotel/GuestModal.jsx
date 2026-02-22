@@ -15,6 +15,8 @@ import {
 import { createCheckInFromGuest } from "./CheckInOutModal";
 import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
+import BusinessSettingsModal from "../BusinessSettingsModal";
+import AppHeader from "../AppHeader";
 import {
   getFirestore,
   collection,

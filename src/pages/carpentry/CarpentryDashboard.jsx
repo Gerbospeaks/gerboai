@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
+import BusinessSettingsModal from "../BusinessSettingsModal";
+import AppHeader from "../AppHeader";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
+import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -116,24 +119,16 @@ const CarpentryDashboard = () => {
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [showQuotesList, setShowQuotesList] = useState(false);
   const [documentType, setDocumentType] = useState("quote");
-
-  // ── views / modals ───────────────────────────────────────────────────────
   const [showSettings, setShowSettings] = useState(false);
   const [activeView, setActiveView] = useState("home");
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-
-  // ── customers ────────────────────────────────────────────────────────────
   const [customers, setCustomers] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-
-  // ── template & input mode ────────────────────────────────────────────────
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [inputMode, setInputMode] = useState("manual");
-
-  // ── payment ──────────────────────────────────────────────────────────────
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
@@ -142,30 +137,29 @@ const CarpentryDashboard = () => {
   });
   const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
+const location = useLocation();
 
-  // ── stamp ────────────────────────────────────────────────────────────────
+useEffect(() => {
+  if (location.state?.activeView) {
+    setActiveView(location.state.activeView);
+  }
+}, [location.state]);
   const [stampSettings, setStampSettings] = useState({
     text: "PAID",
     color: "#22c55e",
     showDate: true,
     enabled: true,
   });
-
-  // ── client / project fields (carpentry-specific) ─────────────────────────
   const [customerName, setCustomerName] = useState("Smith Residence");
   const [customerEmail, setCustomerEmail] = useState("john.smith@email.com");
   const [customerPhone, setCustomerPhone] = useState("+27 82 123 4567");
   const [propertyAddress, setPropertyAddress] = useState(
     "15 Oak Street, Sandton, Johannesburg, 2196",
   );
-
-  // ── project-detail fields (carpentry-specific) ───────────────────────────
   const [projectType, setProjectType] = useState("Kitchen Cabinetry");
   const [projectSize, setProjectSize] = useState("15");
   const [woodType, setWoodType] = useState("Oak");
   const [finishType, setFinishType] = useState("Varnish");
-
-  // ── business info ────────────────────────────────────────────────────────
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "MASTER CARPENTRY CO.",
     addressLine1: "12 Workshop Lane",
@@ -181,8 +175,6 @@ const CarpentryDashboard = () => {
     logoUrl: "",
   });
   const [loading, setLoading] = useState(true);
-
-  // ── line-item state ──────────────────────────────────────────────────────
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState({
     description: "",
@@ -192,23 +184,15 @@ const CarpentryDashboard = () => {
     taxRate: "15",
     phase: "Phase 1",
   });
-
-  // ── derived totals ───────────────────────────────────────────────────────
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
   const totalTax = items.reduce((sum, item) => sum + item.taxAmount, 0);
   const total = subtotal + totalTax;
-
-  // ── step definitions (carpentry-specific) ────────────────────────────────
   const steps = [
     { number: 1, title: "Client Info", icon: Users },
     { number: 2, title: "Project Details", icon: Hammer },
     { number: 3, title: "Items & Materials", icon: Wrench },
     { number: 4, title: "Schedule & Payment", icon: Calendar },
   ];
-
-  // ============================================================================
-  // Effects
-  // ============================================================================
   useEffect(() => {
     if (!user?.uid) return;
     const loadQuoteNumber = async () => {
@@ -218,8 +202,6 @@ const CarpentryDashboard = () => {
     loadQuoteNumber();
     loadSavedQuotes();
   }, [user, documentType]);
-
-  // responsive
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
@@ -242,8 +224,6 @@ const CarpentryDashboard = () => {
   useEffect(() => {
     if (user?.uid) loadBusinessInfo();
   }, [user]);
-
-  // duplicate fetch kept for parity with original (sets loading = false)
   useEffect(() => {
     const fetchBusinessInfo = async () => {
       if (!user?.uid) return;
@@ -266,10 +246,6 @@ const CarpentryDashboard = () => {
       setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
     }
   }, [total, quoteId]);
-
-  // ============================================================================
-  // Data loaders
-  // ============================================================================
   const loadCustomers = async () => {
     try {
       const q = query(
@@ -834,10 +810,39 @@ Your Carpentry Quote System
       console.error("Error logging out:", error);
     }
   };
+const headerActions = [
+  documentType === "quote" && quoteId && {
+    label: "Convert to Invoice", icon: FileText, onClick: handleConvertToInvoice,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap"
+  },
+  { label: "Print",    icon: Printer,  onClick: handlePrint,        variant: "secondary" },
+  { label: "New",      icon: Plus,     onClick: documentType === "quote" ? handleNewQuote : handleNewInvoice,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Send",     icon: Send,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Save PDF", icon: Download, onClick: handleSavePDF,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Save",     icon: Save,     onClick: handleSaveQuote,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Logout",   icon: LogOut,   onClick: handleLogout,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap" },
+].filter(Boolean);
 
-  // ============================================================================
-  // RENDER
-  // ============================================================================
+const mobileDashboardActions = [
+  documentType === "quote" && quoteId && {
+    label: "To Invoice", icon: FileText, onClick: handleConvertToInvoice,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap"
+  },
+  { label: "Save",  icon: Save,     onClick: handleSaveQuote,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
+  { label: "Send",  icon: Send,  
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
+  { label: "PDF",   icon: Download, onClick: handleSavePDF,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
+  { label: "Print", icon: Printer,  onClick: handlePrint,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap" },
+].filter(Boolean);
+ 
   return (
     <div className="flex h-screen w-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 overflow-hidden">
       {/* Mobile Sidebar Backdrop */}
@@ -1182,611 +1187,19 @@ Your Carpentry Quote System
         className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
       >
         <div className="flex flex-col h-screen">
+                <AppHeader
+            actions={headerActions}
+            mobileActions={mobileDashboardActions}
+            onSettingsOpen={() => setShowSettings(true)}
+          />
+             
           {/* Continue with the rest of the component... Due to length, I'll note that the remaining sections follow the same pattern with carpentry-specific terminology */}
 
           {/* ── Scrollable Main Content ──────────────────────────────── */}
           <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {/* ── Settings Modal ──────────────────────────────────────── */}
             {showSettings && (
-              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 animate-fadeIn overflow-y-auto">
-                <div className="bg-gray-300 max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 animate-slideUp my-auto">
-                  <div className="p-4 md:p-6 border-b border-slate-300 bg-gradient-to-r from-gray0 to-purple-50 flex-shrink-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 md:space-x-3">
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                          <Settings className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                        </div>
-                        <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                          Business Settings
-                        </h2>
-                      </div>
-                      <button
-                        onClick={() => setShowSettings(false)}
-                        className="group p-1.5 md:p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300"
-                      >
-                        <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="overflow-auto p-4 md:p-6 bg-gradient-to-b from-slate-300 to-slate-400 flex-1">
-                    <div className="space-y-4 md:space-y-6">
-                      {/* Logo Upload */}
-                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                        <label className="block text-sm font-bold text-slate-700 mb-3">
-                          Business Logo
-                        </label>
-                        <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
-                          {businessInfo.logoUrl ? (
-                            <div className="relative group">
-                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
-                              <img
-                                src={businessInfo.logoUrl}
-                                alt="Business Logo"
-                                className="relative w-20 h-20 md:w-24 md:h-24 object-contain border-2 border-slate-200 rounded-xl shadow-lg"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 hover:border-blue-400 transition-all duration-300">
-                              <Upload className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />
-                            </div>
-                          )}
-
-                          <div className="flex-1 text-center sm:text-left ">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleLogoUpload}
-                              className="hidden"
-                              id="logo-upload"
-                            />
-                            <label
-                              htmlFor="logo-upload"
-                              className="inline-block px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg md:rounded-xl hover:from-blue-700 hover:to-purple-700 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm md:text-base"
-                            >
-                              {businessInfo.logoUrl
-                                ? "Change Logo"
-                                : "Upload Logo"}
-                            </label>
-                            <p className="text-xs text-slate-500 mt-2 md:mt-3 flex items-center justify-center sm:justify-start space-x-1">
-                              <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
-                              <span>Recommended: Square image, max 5MB</span>
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Business Name */}
-                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                          Business Name
-                        </label>
-                        <input
-                          type="text"
-                          value={businessInfo.businessName}
-                          onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              businessName: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-black-500 transition-all duration-300 font-medium text-sm md:text-base"
-                          placeholder="Solidflo Invoicing Saas"
-                        />
-                      </div>
-
-                      {/* Address Fields */}
-                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                          Address Line 1
-                        </label>
-                        <input
-                          type="text"
-                          value={businessInfo.addressLine1}
-                          onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              addressLine1: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                          placeholder="9-10 CNR THIRD & ARKWRIGHT AVENUE"
-                        />
-                      </div>
-
-                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                          Address Line 2
-                        </label>
-                        <input
-                          type="text"
-                          value={businessInfo.addressLine2}
-                          onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              addressLine2: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                          placeholder="WYNBERG"
-                        />
-                      </div>
-
-                      {/* City and Postal Code */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                            City
-                          </label>
-                          <input
-                            type="text"
-                            value={businessInfo.city}
-                            onChange={(e) =>
-                              setBusinessInfo({
-                                ...businessInfo,
-                                city: e.target.value,
-                              })
-                            }
-                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                            placeholder="SANDTON"
-                          />
-                        </div>
-
-                        <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                          <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                            Postal Code
-                          </label>
-                          <input
-                            type="text"
-                            value={businessInfo.postalCode}
-                            onChange={(e) =>
-                              setBusinessInfo({
-                                ...businessInfo,
-                                postalCode: e.target.value,
-                              })
-                            }
-                            className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                            placeholder="2090"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Phone Numbers */}
-                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                          Primary Phone <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="tel"
-                          value={businessInfo.primaryPhone}
-                          onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              primaryPhone: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                          placeholder="082 514 4509"
-                          required
-                        />
-                      </div>
-
-                      <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                        <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                          Secondary Phone (Optional)
-                        </label>
-                        <input
-                          type="tel"
-                          value={businessInfo.secondaryPhone}
-                          onChange={(e) =>
-                            setBusinessInfo({
-                              ...businessInfo,
-                              secondaryPhone: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                          placeholder="084 583 9929"
-                        />
-                      </div>
-
-                      {/* Bank Details Section */}
-                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
-                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
-                            <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                          </div>
-                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                            Bank Details
-                          </h3>
-                        </div>
-
-                        <div className="space-y-3 md:space-y-4">
-                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                              Bank Name
-                            </label>
-                            <input
-                              type="text"
-                              value={businessInfo.bankName}
-                              onChange={(e) =>
-                                setBusinessInfo({
-                                  ...businessInfo,
-                                  bankName: e.target.value,
-                                })
-                              }
-                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                            />
-                          </div>
-
-                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                              Account Holder
-                            </label>
-                            <input
-                              type="text"
-                              value={businessInfo.accountHolder}
-                              onChange={(e) =>
-                                setBusinessInfo({
-                                  ...businessInfo,
-                                  accountHolder: e.target.value,
-                                })
-                              }
-                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                            />
-                          </div>
-
-                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                              Account Number
-                            </label>
-                            <input
-                              type="text"
-                              value={businessInfo.accountNumber}
-                              onChange={(e) =>
-                                setBusinessInfo({
-                                  ...businessInfo,
-                                  accountNumber: e.target.value,
-                                })
-                              }
-                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                            />
-                          </div>
-
-                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                              Branch Code
-                            </label>
-                            <input
-                              type="text"
-                              value={businessInfo.branchCode}
-                              onChange={(e) =>
-                                setBusinessInfo({
-                                  ...businessInfo,
-                                  branchCode: e.target.value,
-                                })
-                              }
-                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Stamp Settings */}
-                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
-                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
-                            <CheckSquare className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                          </div>
-                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                            📋 Invoice Stamp Settings
-                          </h3>
-                        </div>
-
-                        <div className="space-y-3 md:space-y-4">
-                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                            <label className="flex items-center space-x-2 md:space-x-3 cursor-pointer group">
-                              <input
-                                type="checkbox"
-                                checked={stampSettings.enabled}
-                                onChange={(e) =>
-                                  setStampSettings({
-                                    ...stampSettings,
-                                    enabled: e.target.checked,
-                                  })
-                                }
-                                className="w-4 h-4 md:w-5 md:h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
-                              />
-                              <span className="text-xs md:text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
-                                Show approval stamp on invoices and quotes
-                              </span>
-                            </label>
-                          </div>
-
-                          {stampSettings.enabled && (
-                            <>
-                              <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                                <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                                  Stamp Text
-                                </label>
-                                <input
-                                  type="text"
-                                  value={stampSettings.text}
-                                  onChange={(e) =>
-                                    setStampSettings({
-                                      ...stampSettings,
-                                      text: e.target.value.toUpperCase(),
-                                    })
-                                  }
-                                  className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-300 rounded-lg md:rounded-xl uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-bold text-sm md:text-base"
-                                  placeholder="APPROVED"
-                                  maxLength={15}
-                                />
-                                <p className="text-xs text-slate-500 mt-2 flex items-center space-x-1">
-                                  <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
-                                  <span>Max 15 characters</span>
-                                </p>
-                              </div>
-
-                              <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                <label className="block text-sm font-bold text-slate-700 mb-3">
-                                  Stamp Color
-                                </label>
-                                <select
-                                  value={stampSettings.color}
-                                  onChange={(e) =>
-                                    setStampSettings({
-                                      ...stampSettings,
-                                      color: e.target.value,
-                                    })
-                                  }
-                                  className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 font-semibold cursor-pointer"
-                                >
-                                  <option value="#d32f2f">
-                                    🔴 Red (Traditional)
-                                  </option>
-                                  <option value="#1976d2">
-                                    🔵 Blue (Professional)
-                                  </option>
-                                  <option value="#388e3c">
-                                    🟢 Green (Approved)
-                                  </option>
-                                  <option value="#7b1fa2">
-                                    🟣 Purple (Premium)
-                                  </option>
-                                  <option value="#000000">
-                                    ⚫ Black (Formal)
-                                  </option>
-                                  <option value="#f57c00">
-                                    🟠 Orange (Attention)
-                                  </option>
-                                </select>
-                              </div>
-
-                              <div className="bg-white rounded-xl p-6 border-2 border-slate-300 shadow-sm hover:shadow-md transition-all duration-300">
-                                <label className="flex items-center space-x-3 cursor-pointer group">
-                                  <input
-                                    type="checkbox"
-                                    checked={stampSettings.showDate}
-                                    onChange={(e) =>
-                                      setStampSettings({
-                                        ...stampSettings,
-                                        showDate: e.target.checked,
-                                      })
-                                    }
-                                    className="w-5 h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all duration-300"
-                                  />
-                                  <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
-                                    Include date on stamp
-                                  </span>
-                                </label>
-                              </div>
-
-                              {/* Preview */}
-                              <div className="mt-6 p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-2 border-dashed border-slate-300">
-                                <p className="text-sm font-bold mb-6 text-center text-slate-600">
-                                  Stamp Preview:
-                                </p>
-                                <div className="flex justify-center">
-                                  <SignatureStamp
-                                    text={stampSettings.text}
-                                    color={stampSettings.color}
-                                    showDate={stampSettings.showDate}
-                                    rotation={-5}
-                                    size="medium"
-                                  />
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      {/* Email Configuration Section */}
-                      <div className="border-t-2 border-slate-200 pt-4 md:pt-6 mt-4 md:mt-6">
-                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                            <Send className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                          </div>
-                          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                            Email Configuration
-                          </h3>
-                        </div>
-
-                        <div className="space-y-3 md:space-y-4">
-                          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                            <p className="text-sm text-blue-800">
-                              <strong>📧 Your Sending Email:</strong>{" "}
-                              {user?.email || authUser?.email}
-                            </p>
-                            <p className="text-xs text-blue-600 mt-2">
-                              Quotes and invoices will be sent from this email
-                              address.
-                            </p>
-                          </div>
-
-                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                              Email Provider
-                            </label>
-                            <select
-                              value={businessInfo.emailProvider || "gmail"}
-                              onChange={(e) =>
-                                setBusinessInfo({
-                                  ...businessInfo,
-                                  emailProvider: e.target.value,
-                                })
-                              }
-                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base"
-                            >
-                              <option value="gmail">Gmail</option>
-                              <option value="outlook">Outlook/Hotmail</option>
-                              <option value="yahoo">Yahoo Mail</option>
-                              <option value="other">Other SMTP</option>
-                            </select>
-                          </div>
-
-                          <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-                            <label className="block text-sm font-bold text-slate-700 mb-2 md:mb-3">
-                              Email App Password{" "}
-                              <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="password"
-                              value={businessInfo.emailPassword || ""}
-                              onChange={(e) =>
-                                setBusinessInfo({
-                                  ...businessInfo,
-                                  emailPassword: e.target.value,
-                                })
-                              }
-                              className="w-full px-3 md:px-4 py-2 md:py-3 border-2 border-slate-200 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm md:text-base font-mono"
-                              placeholder="••••••••••••••••"
-                            />
-                            <p className="text-xs text-slate-500 mt-2">
-                              <strong>⚠️ Security Note:</strong> Use an App
-                              Password, not your regular login password
-                            </p>
-                          </div>
-
-                          {/* Gmail Setup Instructions */}
-                          {(businessInfo.emailProvider === "gmail" ||
-                            !businessInfo.emailProvider) && (
-                            <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4">
-                              <h4 className="font-bold text-red-900 mb-2 flex items-center gap-2">
-                                <span>📖</span> How to Get Gmail App Password:
-                              </h4>
-                              <ol className="text-xs md:text-sm text-red-800 space-y-1 ml-4 list-decimal">
-                                <li>
-                                  Go to <strong>myaccount.google.com</strong>
-                                </li>
-                                <li>
-                                  Click <strong>Security</strong> in the left
-                                  menu
-                                </li>
-                                <li>
-                                  Enable <strong>2-Step Verification</strong>{" "}
-                                  (if not already enabled)
-                                </li>
-                                <li>
-                                  Search for <strong>"App passwords"</strong> in
-                                  the search bar
-                                </li>
-                                <li>
-                                  Click <strong>App passwords</strong>
-                                </li>
-                                <li>Enter your Google password if prompted</li>
-                                <li>
-                                  In the "App name" field, type{" "}
-                                  <strong>"Construction Quotes"</strong>
-                                </li>
-                                <li>
-                                  Click <strong>Create</strong>
-                                </li>
-                                <li>
-                                  Copy the 16-character password (shown in
-                                  yellow box)
-                                </li>
-                                <li>Paste it in the field above</li>
-                              </ol>
-
-                              <a
-                                href="https://support.google.com/accounts/answer/185833"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
-                              >
-                                📺 View Video Tutorial →
-                              </a>
-                            </div>
-                          )}
-
-                          {/* Outlook Setup Instructions */}
-                          {businessInfo.emailProvider === "outlook" && (
-                            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
-                              <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
-                                <span>📖</span> How to Get Outlook App Password:
-                              </h4>
-                              <ol className="text-xs md:text-sm text-blue-800 space-y-1 ml-4 list-decimal">
-                                <li>
-                                  Go to{" "}
-                                  <strong>
-                                    account.microsoft.com/security
-                                  </strong>
-                                </li>
-                                <li>Sign in with your Outlook account</li>
-                                <li>
-                                  Click{" "}
-                                  <strong>Advanced security options</strong>
-                                </li>
-                                <li>
-                                  Under "Additional security", click{" "}
-                                  <strong>App passwords</strong>
-                                </li>
-                                <li>
-                                  Click{" "}
-                                  <strong>Create a new app password</strong>
-                                </li>
-                                <li>Copy the generated password</li>
-                                <li>Paste it in the field above</li>
-                              </ol>
-
-                              <a
-                                href="https://support.microsoft.com/en-us/account-billing/manage-app-passwords-for-two-step-verification-d6dc8c6d-4bf7-4851-ad95-6d07799387e9"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block mt-3 text-xs md:text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
-                              >
-                                📺 View Microsoft Instructions →
-                              </a>
-                            </div>
-                          )}
-
-                          {/* Test Email Button */}
-                          <button
-                            onClick={handleTestEmail}
-                            disabled={!businessInfo.emailPassword}
-                            className={`w-full px-4 py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${
-                              !businessInfo.emailPassword
-                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800"
-                            }`}
-                          >
-                            <Send className="w-4 h-4" />
-                            {businessInfo.emailPassword
-                              ? "Send Test Email"
-                              : "Enter App Password First"}
-                          </button>
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleSaveBusinessInfo}
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] text-lg"
-                      >
-                        💾 Save Business Information
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <BusinessSettingsModal onClose={() => setShowSettings(false)} />
             )}
 
             {/* ── Shared Modals ────────────────────────────────────────── */}
@@ -1904,137 +1317,7 @@ Your Carpentry Quote System
             {activeView === "quote" && (
               <>
                 {/* Header */}
-                <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
-                      <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-300 lg:hidden flex-shrink-0"
-                      >
-                        <Menu className="w-5 h-5" />
-                      </button>
-                      <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                        <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0">
-                          <Hammer className="w-8 h-10 md:w-10 md:h-10 text-amber-600" />
-                        </div>
-                        <div className="min-w-0">
-                          <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-amber-800 to-orange-600 bg-clip-text text-transparent truncate">
-                            {documentType === "quote" ? "Quote" : "Invoice"} #
-                            {quoteNumber || "—"}
-                          </h1>
-                          <p className="text-xs text-slate-500 hidden md:block truncate">
-                            Create and manage carpentry{" "}
-                            {documentType === "quote" ? "quotes" : "invoices"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Desktop action buttons */}
-                    <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
-                      {documentType === "quote" && quoteId && (
-                        <button
-                          onClick={handleConvertToInvoice}
-                          className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap"
-                        >
-                          <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-                          Convert to Invoice
-                        </button>
-                      )}
-                      <button
-                        onClick={handlePrint}
-                        className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"
-                      >
-                        <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                        Print
-                      </button>
-                      <button
-                        onClick={
-                          documentType === "quote"
-                            ? handleNewQuote
-                            : handleNewInvoice
-                        }
-                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
-                      >
-                        <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                        New
-                      </button>
-                      <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap">
-                        <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                        <span>Send</span>
-                      </button>
-                      <button
-                        onClick={handleSavePDF}
-                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap"
-                      >
-                        <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                        Save PDF
-                      </button>
-                      <button
-                        onClick={handleSaveQuote}
-                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap"
-                      >
-                        <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                        Save
-                      </button>
-                      <button
-                        onClick={handleLogout}
-                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
-                      >
-                        <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                        Logout
-                      </button>
-                    </div>
-
-                    {/* Mobile logout */}
-                    <button
-                      onClick={handleLogout}
-                      className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
-                    >
-                      <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Mobile Action Bar */}
-                <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
-                  <div className="flex gap-2 min-w-max pb-1 pr-3">
-                    {documentType === "quote" && quoteId && (
-                      <button
-                        onClick={handleConvertToInvoice}
-                        className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
-                      >
-                        <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
-                        <span>To Invoice</span>
-                      </button>
-                    )}
-                    <button
-                      onClick={handleSaveQuote}
-                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-amber-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
-                    >
-                      <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                      Save
-                    </button>
-                    <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                      <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                      <span>Send</span>
-                    </button>
-                    <button
-                      onClick={handlePrint}
-                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
-                    >
-                      <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                      <span>PDF</span>
-                    </button>
-                    <button
-                      onClick={handlePrint}
-                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95"
-                    >
-                      <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                      <span>Print</span>
-                    </button>
-                  </div>
-                </div>
+              
                 <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
                   <div className="space-y-6">
                     {/* Tab: Manual / AI */}
@@ -2105,7 +1388,7 @@ Your Carpentry Quote System
                               </div>
                             </div>
                             <div
-                              className={`text-2xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}
+                              className={`text-lg sm:text-2xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}
                             >
                               R{paymentStatus.totalPaid.toFixed(2)}
                             </div>
@@ -2129,7 +1412,7 @@ Your Carpentry Quote System
                               </div>
                             </div>
                             <div
-                              className={`text-2xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-amber-900" : "text-rose-900"}`}
+                              className={`text-lg sm:text-2xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-amber-900" : "text-rose-900"}`}
                             >
                               R{paymentStatus.balanceDue.toFixed(2)}
                             </div>

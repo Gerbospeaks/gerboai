@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
+import BusinessSettingsModal from "../BusinessSettingsModal";
+import AppHeader from "../AppHeader";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
@@ -30,6 +32,7 @@ import { db } from "../../firebase";
 import GuestModal from "./GuestModal";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
+import { useLocation } from "react-router-dom";
 import HotelAIExtractor from "./HotelAIExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import GuestsListModal from "./GuestsListModal";
@@ -51,6 +54,7 @@ import {
   Menu,
   Plus,
   Send,
+  Save,
   X,
   Edit,
   LogOut,
@@ -132,7 +136,13 @@ const HotelDashboard = () => {
     balanceDue: 0,
     status: "pending",
   });
+const location = useLocation();
 
+useEffect(() => {
+  if (location.state?.activeView) {
+    setActiveView(location.state.activeView);
+  }
+}, [location.state]);
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -930,7 +940,39 @@ Your Construction Quote System
       console.error("Error logging out:", error);
     }
   };
+const headerActions = [
+  documentType === "quote" && invoiceId && {
+    label: "Convert to Invoice", icon: FileText,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap"
+  },
+  { label: "Print",    icon: Printer,  onClick: handlePrint,        variant: "secondary" },
+  { label: "New",      icon: Plus,     onClick: handleNewInvoice,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Send",     icon: Send,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Save PDF", icon: Download, onClick: handleSavePDF,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Save",     icon: Save,     onClick: handleSaveInvoice,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Logout",   icon: LogOut,   onClick: handleLogout,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap" },
+].filter(Boolean);
 
+const mobileDashboardActions = [
+  documentType === "quote" && invoiceId && {
+    label: "To Invoice", icon: FileText,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap"
+  },
+  { label: "Save",  icon: Save,     onClick: handleSaveInvoice,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
+  { label: "Send",  icon: Send,  
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
+  { label: "PDF",   icon: Download, onClick: handleSavePDF,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
+  { label: "Print", icon: Printer,  onClick: handlePrint,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap" },
+].filter(Boolean);
+ 
   return (
     <div className="flex h-screen bg-gray-300 overflow-hidden">
       {/* Mobile Sidebar Backdrop */}
@@ -1309,654 +1351,18 @@ Your Construction Quote System
         className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
       >
         <div className="flex flex-col h-full">
-          <div className="flex-shrink-0 z-40">
-            <div className="bg-gray-300 border-b border-gray-200 px-3 md:px-4 lg:px-6 py-3 md:py-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center space-x-2 lg:space-x-4 min-w-0">
-                  <button
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="p-2 hover:bg-gray-100 rounded-lg flex-shrink-0 lg:hidden"
-                  >
-                    <Menu className="w-5 h-5" />
-                  </button>
-
-                  <h1 className="text-sm md:text-base lg:text-xl font-semibold truncate">
-                    Invoice #{invoiceNumber || "—"}
-                  </h1>
-                </div>
-
-                {/* Desktop Action Buttons */}
-                <div className="hidden lg:flex items-center space-x-2 xl:space-x-3 print:hidden flex-shrink-0">
-                  <button
-                    onClick={handleProcessPayment}
-                    disabled={!invoiceId}
-                    className={`flex items-center space-x-2 px-3 xl:px-4 py-2 border rounded-lg whitespace-nowrap ${
-                      !invoiceId
-                        ? "border-gray-200 text-gray-400 cursor-not-allowed"
-                        : "border-emerald-300 hover:bg-emerald-50 text-emerald-700"
-                    }`}
-                  >
-                    <CreditCard className="w-4 h-4" />
-                    <span className="hidden xl:inline">Process Payment</span>
-                  </button>
-                  <button className="flex items-center space-x-2 px-3 xl:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap">
-                    <CheckSquare className="w-4 h-4" />
-                    <span className="hidden xl:inline">Mark Paid</span>
-                  </button>
-                  <button className="flex items-center space-x-2 px-3 xl:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap">
-                    <Edit className="w-4 h-4" />
-                    <span className="hidden xl:inline">Edit</span>
-                  </button>
-                  <button
-                    onClick={handleSaveInvoice}
-                    className="flex items-center gap-2 px-3 xl:px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap"
-                  >
-                    <span className="hidden xl:inline">Save Invoice</span>
-                    <span className="xl:hidden">Save</span>
-                  </button>
-
-                  <button
-                    onClick={handleNewInvoice}
-                    className="flex items-center gap-2 px-3 xl:px-4 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 whitespace-nowrap"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span className="hidden xl:inline">New</span>
-                  </button>
-
-                  <button className="flex items-center space-x-2 px-3 xl:px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap">
-                    <Send className="w-4 h-4" />
-                    <span className="hidden xl:inline">Send</span>
-                  </button>
-                  <button
-                    onClick={handleSavePDF}
-                    className="flex items-center gap-2 px-3 xl:px-4 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span className="hidden xl:inline">PDF</span>
-                  </button>
-
-                  <button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 px-3 xl:px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap"
-                  >
-                    <Printer className="w-4 h-4" />
-                    <span className="hidden xl:inline">Print</span>
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
-                  >
-                    <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                    Logout
-                  </button>
-                </div>
-
-                {/* Mobile logout */}
-                <button
-                  onClick={handleLogout}
-                  className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
-                >
-                  <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile action buttons */}
-            <div className="lg:hidden bg-white border-b border-gray-200 px-3 py-2 print:hidden overflow-x-auto">
-              <div className="flex gap-2 min-w-max pb-1">
-                <button
-                  onClick={handleProcessPayment}
-                  disabled={!invoiceId}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg whitespace-nowrap text-sm ${
-                    !invoiceId
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-emerald-600 text-white hover:bg-emerald-700"
-                  }`}
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>Payment</span>
-                </button>
-                <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
-                  <CheckSquare className="w-4 h-4" />
-                  <span>Paid</span>
-                </button>
-                <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-800 whitespace-nowrap text-sm">
-                  <Edit className="w-4 h-4" />
-                  <span>Edit</span>
-                </button>
-                <button
-                  onClick={handleSaveInvoice}
-                  className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm"
-                >
-                  <span>Save</span>
-                </button>
-                <button
-                  onClick={handleNewInvoice}
-                  className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap text-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>New</span>
-                </button>
-                <button className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 whitespace-nowrap text-sm">
-                  <Send className="w-4 h-4" />
-                  <span>Send</span>
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>PDF</span>
-                </button>
-                <button
-                  onClick={handlePrint}
-                  className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap text-sm"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>Print</span>
-                </button>
-              </div>
-            </div>
-          </div>
+               <AppHeader
+  actions={headerActions}
+  mobileActions={mobileDashboardActions}
+  onSettingsOpen={() => setShowSettings(true)}
+/>
+   
 
           {/* Main Content Area - Now properly scrollable */}
           <div className="flex-1 overflow-y-auto p-3 md:p-4 lg:p-6">
             {/* Property Settings Modal */}
             {showSettings && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-3 md:p-4">
-                <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-                  <div className="p-3 md:p-4 border-b flex items-center justify-between flex-shrink-0">
-                    <h2 className="text-lg md:text-xl font-semibold">
-                      Property Settings
-                    </h2>
-                    <button
-                      onClick={() => setShowSettings(false)}
-                      className="text-gray-500 hover:text-gray-700 text-2xl"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div className="overflow-auto p-4 md:p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Property Logo
-                        </label>
-                        <div className="flex flex-col sm:flex-row items-center gap-4">
-                          {propertyInfo.logoUrl ? (
-                            <img
-                              src={propertyInfo.logoUrl}
-                              alt="Property Logo"
-                              className="w-24 h-24 object-contain border rounded-lg"
-                            />
-                          ) : (
-                            <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
-                              <Upload className="w-8 h-8 text-gray-400" />
-                            </div>
-                          )}
-
-                          <div className="flex-1 w-full sm:w-auto text-center sm:text-left">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleLogoUpload}
-                              className="hidden"
-                              id="logo-upload"
-                            />
-                            <label
-                              htmlFor="logo-upload"
-                              className="inline-block px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer"
-                            >
-                              {propertyInfo.logoUrl
-                                ? "Change Logo"
-                                : "Upload Logo"}
-                            </label>
-                            <p className="text-xs text-gray-500 mt-2">
-                              Recommended: Square image, max 5MB
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Property Name
-                        </label>
-                        <input
-                          type="text"
-                          value={propertyInfo.propertyName}
-                          onChange={(e) =>
-                            setPropertyInfo({
-                              ...propertyInfo,
-                              propertyName: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                          placeholder="Grand Hotel & Spa"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Registration Number
-                        </label>
-                        <input
-                          type="text"
-                          value={propertyInfo.registrationNumber}
-                          onChange={(e) =>
-                            setPropertyInfo({
-                              ...propertyInfo,
-                              registrationNumber: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                          placeholder="REG123456"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          VAT Number
-                        </label>
-                        <input
-                          type="text"
-                          value={propertyInfo.vatNumber}
-                          onChange={(e) =>
-                            setPropertyInfo({
-                              ...propertyInfo,
-                              vatNumber: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                          placeholder="VAT456789"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Address Line 1
-                        </label>
-                        <input
-                          type="text"
-                          value={propertyInfo.addressLine1}
-                          onChange={(e) =>
-                            setPropertyInfo({
-                              ...propertyInfo,
-                              addressLine1: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                          placeholder="123 BEACH ROAD"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Address Line 2
-                        </label>
-                        <input
-                          type="text"
-                          value={propertyInfo.addressLine2}
-                          onChange={(e) =>
-                            setPropertyInfo({
-                              ...propertyInfo,
-                              addressLine2: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                          placeholder="WATERFRONT DISTRICT"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            City
-                          </label>
-                          <input
-                            type="text"
-                            value={propertyInfo.city}
-                            onChange={(e) =>
-                              setPropertyInfo({
-                                ...propertyInfo,
-                                city: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2 border rounded-lg"
-                            placeholder="CAPE TOWN"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            Postal Code
-                          </label>
-                          <input
-                            type="text"
-                            value={propertyInfo.postalCode}
-                            onChange={(e) =>
-                              setPropertyInfo({
-                                ...propertyInfo,
-                                postalCode: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2 border rounded-lg"
-                            placeholder="8001"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Primary Phone *
-                        </label>
-                        <input
-                          type="tel"
-                          value={propertyInfo.primaryPhone}
-                          onChange={(e) =>
-                            setPropertyInfo({
-                              ...propertyInfo,
-                              primaryPhone: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                          placeholder="021 123 4567"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Secondary Phone (Optional)
-                        </label>
-                        <input
-                          type="tel"
-                          value={propertyInfo.secondaryPhone}
-                          onChange={(e) =>
-                            setPropertyInfo({
-                              ...propertyInfo,
-                              secondaryPhone: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                          placeholder="082 987 6543"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          value={propertyInfo.email}
-                          onChange={(e) =>
-                            setPropertyInfo({
-                              ...propertyInfo,
-                              email: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                          placeholder="info@grandhotel.co.za"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Website
-                        </label>
-                        <input
-                          type="text"
-                          value={propertyInfo.website}
-                          onChange={(e) =>
-                            setPropertyInfo({
-                              ...propertyInfo,
-                              website: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                          placeholder="www.grandhotel.co.za"
-                        />
-                      </div>
-                      <div className="border-t pt-4 mt-6">
-                        <h3 className="text-lg font-semibold mb-4">
-                          Bank Details
-                        </h3>
-
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Bank Name
-                            </label>
-                            <input
-                              type="text"
-                              value={propertyInfo.bankName}
-                              onChange={(e) =>
-                                setPropertyInfo({
-                                  ...propertyInfo,
-                                  bankName: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Account Holder
-                            </label>
-                            <input
-                              type="text"
-                              value={propertyInfo.accountHolder}
-                              onChange={(e) =>
-                                setPropertyInfo({
-                                  ...propertyInfo,
-                                  accountHolder: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Account Number
-                            </label>
-                            <input
-                              type="text"
-                              value={propertyInfo.accountNumber}
-                              onChange={(e) =>
-                                setPropertyInfo({
-                                  ...propertyInfo,
-                                  accountNumber: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Branch Code
-                            </label>
-                            <input
-                              type="text"
-                              value={propertyInfo.branchCode}
-                              onChange={(e) =>
-                                setPropertyInfo({
-                                  ...propertyInfo,
-                                  branchCode: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="border-t pt-6 mt-6">
-                        <h3 className="text-lg font-semibold mb-4">
-                          📋 Invoice Stamp Settings
-                        </h3>
-
-                        <div className="space-y-4">
-                          <div>
-                            <label className="flex items-center space-x-2 mb-4">
-                              <input
-                                type="checkbox"
-                                checked={stampSettings.enabled}
-                                onChange={(e) =>
-                                  setStampSettings({
-                                    ...stampSettings,
-                                    enabled: e.target.checked,
-                                  })
-                                }
-                                className="w-4 h-4 rounded"
-                              />
-                              <span className="text-sm font-medium">
-                                Show approval stamp on invoices and quotes
-                              </span>
-                            </label>
-                          </div>
-
-                          {stampSettings.enabled && (
-                            <>
-                              <div>
-                                <label className="block text-sm font-medium mb-2">
-                                  Stamp Text
-                                </label>
-                                <input
-                                  type="text"
-                                  value={stampSettings.text}
-                                  onChange={(e) =>
-                                    setStampSettings({
-                                      ...stampSettings,
-                                      text: e.target.value.toUpperCase(),
-                                    })
-                                  }
-                                  className="w-full px-4 py-2 border rounded-lg uppercase"
-                                  placeholder="APPROVED"
-                                  maxLength={15}
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Max 15 characters
-                                </p>
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium mb-2">
-                                  Stamp Color
-                                </label>
-                                <select
-                                  value={stampSettings.color}
-                                  onChange={(e) =>
-                                    setStampSettings({
-                                      ...stampSettings,
-                                      color: e.target.value,
-                                    })
-                                  }
-                                  className="w-full px-4 py-2 border rounded-lg"
-                                >
-                                  <option value="#d32f2f">
-                                    🔴 Red (Traditional)
-                                  </option>
-                                  <option value="#1976d2">
-                                    🔵 Blue (Professional)
-                                  </option>
-                                  <option value="#388e3c">
-                                    🟢 Green (Approved)
-                                  </option>
-                                  <option value="#7b1fa2">
-                                    🟣 Purple (Premium)
-                                  </option>
-                                  <option value="#000000">
-                                    ⚫ Black (Formal)
-                                  </option>
-                                  <option value="#f57c00">
-                                    🟠 Orange (Attention)
-                                  </option>
-                                </select>
-                              </div>
-
-                              <div>
-                                <label className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={stampSettings.showDate}
-                                    onChange={(e) =>
-                                      setStampSettings({
-                                        ...stampSettings,
-                                        showDate: e.target.checked,
-                                      })
-                                    }
-                                    className="w-4 h-4 rounded"
-                                  />
-                                  <span className="text-sm font-medium">
-                                    Include date on stamp
-                                  </span>
-                                </label>
-                              </div>
-
-                              {/* Preview */}
-                              <div className="mt-4 p-6 bg-gray-800 rounded-lg border-2 border-dashed border-gray-300">
-                                <p className="text-sm font-medium mb-4 text-center text-gray-600">
-                                  Preview:
-                                </p>
-                                <div className="flex justify-center">
-                                  <SignatureStamp
-                                    text={stampSettings.text}
-                                    color={stampSettings.color}
-                                    showDate={stampSettings.showDate}
-                                    rotation={-5}
-                                    size="medium"
-                                  />
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      <div className="border-t pt-6 mt-6">
-                        <h3 className="text-lg font-semibold mb-4">
-                          ⚙️ Check-In Settings
-                        </h3>
-
-                        <div className="space-y-4">
-                          <div>
-                            <label className="flex items-start space-x-2">
-                              <input
-                                type="checkbox"
-                                checked={autoCreateCheckIn}
-                                onChange={(e) =>
-                                  setAutoCreateCheckIn(e.target.checked)
-                                }
-                                className="w-4 h-4 rounded mt-0.5 flex-shrink-0"
-                              />
-                              <div>
-                                <span className="text-sm font-medium block">
-                                  Automatically create check-in when saving new
-                                  invoices
-                                </span>
-                                <p className="text-xs text-gray-500 mt-1">
-                                  When enabled, a pending check-in will be
-                                  automatically created whenever you save a new
-                                  invoice with booking details.
-                                </p>
-                              </div>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleSavePropertyInfo}
-                        className="w-full bg-gray-50 text-gray-800 py-3 rounded-lg hover:bg-blue-700"
-                      >
-                        Save Property Information
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+             <BusinessSettingsModal onClose={() => setShowSettings(false)} />
             )}
 
             <GuestsListModal

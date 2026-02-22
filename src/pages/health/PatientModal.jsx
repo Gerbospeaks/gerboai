@@ -426,7 +426,7 @@ const PatientModal = ({
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     rows="4"
-                    placeholder="<span className="hidden sm:inline">Previous</span> conditions, surgeries, chronic illnesses, etc."
+                    placeholder="Previous conditions, surgeries, chronic illnesses, etc."
                   />
                 </div>
               </div>

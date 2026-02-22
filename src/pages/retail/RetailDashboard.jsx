@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
+import BusinessSettingsModal from "../BusinessSettingsModal";
+import AppHeader from "../AppHeader";
 import Templates from "./Templates";
+import { useLocation } from "react-router-dom";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
@@ -92,7 +95,13 @@ const RetailDashboard = () => {
     description: "",
     imageUrl: "",
   });
+const location = useLocation();
 
+useEffect(() => {
+  if (location.state?.activeView) {
+    setActiveView(location.state.activeView);
+  }
+}, [location.state]);
   // Orders state
   const [orders, setOrders] = useState([]);
   const [showOrdersModal, setShowOrdersModal] = useState(false);
@@ -1181,153 +1190,7 @@ const RetailDashboard = () => {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="p-4 border-b flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Store Settings</h2>
-              <button
-                onClick={() => setShowSettings(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="overflow-auto p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Store Logo
-                  </label>
-                  <div className="flex items-center gap-4">
-                    {storeInfo.logoUrl ? (
-                      <img
-                        src={storeInfo.logoUrl}
-                        alt="Store Logo"
-                        className="w-24 h-24 object-contain border rounded-lg"
-                      />
-                    ) : (
-                      <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
-                        <Upload className="w-8 h-8 text-gray-400" />
-                      </div>
-                    )}
-                    <div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoUpload}
-                        className="hidden"
-                        id="logo-upload"
-                      />
-                      <label
-                        htmlFor="logo-upload"
-                        className="inline-block px-4 py-2 bg-gray-500 text-gray-800 rounded-lg hover:bg-indigo-700 cursor-pointer"
-                      >
-                        Upload Logo
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Store Name
-                  </label>
-                  <input
-                    type="text"
-                    value={storeInfo.storeName}
-                    onChange={(e) =>
-                      setStoreInfo({ ...storeInfo, storeName: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border rounded-lg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    value={storeInfo.address}
-                    onChange={(e) =>
-                      setStoreInfo({ ...storeInfo, address: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border rounded-lg"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      value={storeInfo.city}
-                      onChange={(e) =>
-                        setStoreInfo({ ...storeInfo, city: e.target.value })
-                      }
-                      className="w-full px-4 py-2 border rounded-lg"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Postal Code
-                    </label>
-                    <input
-                      type="text"
-                      value={storeInfo.postalCode}
-                      onChange={(e) =>
-                        setStoreInfo({
-                          ...storeInfo,
-                          postalCode: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border rounded-lg"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    value={storeInfo.phone}
-                    onChange={(e) =>
-                      setStoreInfo({ ...storeInfo, phone: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border rounded-lg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={storeInfo.email}
-                    onChange={(e) =>
-                      setStoreInfo({ ...storeInfo, email: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border rounded-lg"
-                  />
-                </div>
-
-                <button
-                  onClick={handleSaveStoreInfo}
-                  className="w-full bg-indigo-600 text-gray-800 py-3 rounded-lg hover:bg-indigo-700"
-                >
-                  Save Store Information
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <BusinessSettingsModal onClose={() => setShowSettings(false)} />
       )}
     </div>
   );

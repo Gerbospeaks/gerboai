@@ -43,7 +43,8 @@ export const AuthProvider = ({ children }) => {
             uid: firebaseUser.uid,
             email: firebaseUser.email,
             name: userData.name,
-            emailVerified: firebaseUser.emailVerified
+            emailVerified: firebaseUser.emailVerified,
+            dashboardId: userData.dashboardId,  // ← fix: now available as user.dashboardId
           });
 
           setUserDashboard(userData.dashboardId);
@@ -68,9 +69,8 @@ export const AuthProvider = ({ children }) => {
       console.log('User created:', user.uid);
 
       console.log('2. Sending verification email...');
-      // ✅ ADD CUSTOM URL HERE
       const actionCodeSettings = {
-        url: 'https://solidflo.co.za/verify-email', // Change to your actual domain
+        url: 'https://solidflo.co.za/verify-email',
         handleCodeInApp: true
       };
       await sendEmailVerification(user, actionCodeSettings);
@@ -120,7 +120,6 @@ export const AuthProvider = ({ children }) => {
         logoUrl: '',
         createdAt: serverTimestamp()
       };
-      console.log('Business info data:', businessInfoData);
       
       const businessInfoRef = doc(db, 'users', user.uid, 'settings', 'businessInfo');
       batch.set(businessInfoRef, businessInfoData);
@@ -135,12 +134,10 @@ export const AuthProvider = ({ children }) => {
 
       return { 
         success: true, 
-        message: `Account created successfully! Please check your email (${email}) to verify your account before logging in. You can upload your logo later in settings.`
+        message: `Account created successfully! Please check your email (${email}) to verify your account before logging in.`
       };
     } catch (error) {
       console.error('Registration error:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
       
       let errorMessage = error.message;
       if (error.code === 'auth/email-already-in-use') {
@@ -190,20 +187,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ ADD PASSWORD RESET FUNCTION
   const resetPassword = async (email) => {
     try {
       const resetSettings = {
-        url: 'https://solidflo.co.za/reset-password', // Change to your actual domain
+        url: 'https://solidflo.co.za/reset-password',
         handleCodeInApp: true
       };
-      
       await sendPasswordResetEmail(auth, email, resetSettings);
-      
-      return {
-        success: true,
-        message: 'Password reset email sent! Check your inbox.'
-      };
+      return { success: true, message: 'Password reset email sent! Check your inbox.' };
     } catch (error) {
       let errorMessage = error.message;
       if (error.code === 'auth/user-not-found') {
@@ -211,32 +202,20 @@ export const AuthProvider = ({ children }) => {
       } else if (error.code === 'auth/invalid-email') {
         errorMessage = 'Invalid email address.';
       }
-      
-      return {
-        success: false,
-        message: errorMessage
-      };
+      return { success: false, message: errorMessage };
     }
   };
 
-  // ✅ ADD EMAIL CHANGE FUNCTION
   const updateUserEmail = async (newEmail) => {
     try {
-      if (!authUser) {
-        return { success: false, message: 'No user logged in' };
-      }
+      if (!authUser) return { success: false, message: 'No user logged in' };
 
       const changeSettings = {
-        url: 'https://solidflo.co.za/change-email', // Change to your actual domain
+        url: 'https://solidflo.co.za/change-email',
         handleCodeInApp: true
       };
-      
       await verifyBeforeUpdateEmail(authUser, newEmail, changeSettings);
-      
-      return {
-        success: true,
-        message: 'Verification email sent to your new email address!'
-      };
+      return { success: true, message: 'Verification email sent to your new email address!' };
     } catch (error) {
       let errorMessage = error.message;
       if (error.code === 'auth/email-already-in-use') {
@@ -246,11 +225,7 @@ export const AuthProvider = ({ children }) => {
       } else if (error.code === 'auth/requires-recent-login') {
         errorMessage = 'Please log out and log back in before changing your email.';
       }
-      
-      return {
-        success: false,
-        message: errorMessage
-      };
+      return { success: false, message: errorMessage };
     }
   };
 
@@ -263,8 +238,8 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       logout,
-      resetPassword,      // ✅ ADD THIS
-      updateUserEmail,    // ✅ ADD THIS
+      resetPassword,
+      updateUserEmail,
       loading
     }}>
       {children}

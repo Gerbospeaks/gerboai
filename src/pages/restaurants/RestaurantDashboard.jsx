@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Templates from "./Templates";
+import { useLocation } from "react-router-dom";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
+import BusinessSettingsModal from "../BusinessSettingsModal";
+import AppHeader from "../AppHeader";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
@@ -416,7 +419,13 @@ const RestaurantDashboard = () => {
       setRestaurantInfo((prev) => ({ ...prev, uploading: false }));
     }
   };
+const location = useLocation();
 
+useEffect(() => {
+  if (location.state?.activeView) {
+    setActiveView(location.state.activeView);
+  }
+}, [location.state]);
   const handleLogout = () => {
     alert("Logout functionality would be implemented with Firebase Auth");
   };
@@ -1232,207 +1241,7 @@ const RestaurantDashboard = () => {
       )}
 
       {showSettings && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-              <h2 className="text-xl font-bold">Restaurant Settings</h2>
-              <button
-                onClick={() => setShowSettings(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Restaurant Name
-                </label>
-                <input
-                  type="text"
-                  value={restaurantInfo.restaurantName}
-                  onChange={(e) =>
-                    setRestaurantInfo({
-                      ...restaurantInfo,
-                      restaurantName: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Address
-                </label>
-                <input
-                  type="text"
-                  value={restaurantInfo.address}
-                  onChange={(e) =>
-                    setRestaurantInfo({
-                      ...restaurantInfo,
-                      address: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    value={restaurantInfo.city}
-                    onChange={(e) =>
-                      setRestaurantInfo({
-                        ...restaurantInfo,
-                        city: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Postal Code
-                  </label>
-                  <input
-                    type="text"
-                    value={restaurantInfo.postalCode}
-                    onChange={(e) =>
-                      setRestaurantInfo({
-                        ...restaurantInfo,
-                        postalCode: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    value={restaurantInfo.phone}
-                    onChange={(e) =>
-                      setRestaurantInfo({
-                        ...restaurantInfo,
-                        phone: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={restaurantInfo.email}
-                    onChange={(e) =>
-                      setRestaurantInfo({
-                        ...restaurantInfo,
-                        email: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cuisine Type
-                  </label>
-                  <input
-                    type="text"
-                    value={restaurantInfo.cuisine}
-                    onChange={(e) =>
-                      setRestaurantInfo({
-                        ...restaurantInfo,
-                        cuisine: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Opening Hours
-                  </label>
-                  <input
-                    type="text"
-                    value={restaurantInfo.openingHours}
-                    onChange={(e) =>
-                      setRestaurantInfo({
-                        ...restaurantInfo,
-                        openingHours: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Restaurant Logo
-                </label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    className="hidden"
-                    id="logo-upload"
-                  />
-                  <label
-                    htmlFor="logo-upload"
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Upload Logo
-                  </label>
-                  {restaurantInfo.logoUrl && (
-                    <img
-                      src={restaurantInfo.logoUrl}
-                      alt="Logo Preview"
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="sticky bottom-0 bg-gray-800 border-t border-gray-200 p-6 flex gap-3">
-              <button
-                onClick={() => setShowSettings(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveRestaurantInfo}
-                className="flex-1 px-4 py-2 bg-indigo-600 text-gray-800 rounded-lg hover:bg-indigo-700"
-              >
-                Save Settings
-              </button>
-            </div>
-          </div>
-        </div>
+        <BusinessSettingsModal onClose={() => setShowSettings(false)} />
       )}
     </div>
   );

@@ -1,33 +1,45 @@
-// Map business types to their dashboard routes
+
+
 export const dashboardRoutes = {
-  towing: '/towing',
-  security: '/security',
-  electrical: '/electrical',
-  restaurant: '/restaurant',
-  construction: '/construction',
-  cleaning: '/cleaning',
-  education: '/education',
-  hotel: '/hotel',
-  legal: '/legal',
-  plumbing: '/plumbing',
-  retail: '/retail',
-  landscaping: '/landscaping',
-  logistics: '/logistics',
-  photography: '/photography',
-  realestate: '/realestate',
-  flooring: '/flooring',
-  hvac: '/hvac',
-  accounting: '/accounting',
-  painting: '/painting',
-  'pest-control': '/pest-control',
-  'pool-services': '/pool-services',
-  'solar-installation': '/solar-installation',
-  welding: '/welding',
-  carpentry: '/carpentry',
-  'window-repair': '/window-repair'
+
+  accounting:          "/accounting",
+  carpentry:           "/carpentry",
+  cleaning:            "/cleaning",
+  construction:        "/construction",
+  education:           "/education",
+  electrical:          "/electrical",
+  flooring:            "/flooring",
+  health:              "/healthcare",
+  hotel:               "/hotel",
+  hvac:                "/hvac",
+  landscaping:         "/landscaping",
+  legal:               "/legal",
+  logistics:           "/logistics",
+  mechanics:           "/mechanics",
+  painting:            "/painting",
+  pestcontrol:         "/pest-control",
+  photography:         "/photography",
+  plumbing:            "/plumbing",
+  poolservice:         "/pool-services",
+  realestate:          "/realestate",
+  restaurants:         "/restaurant",
+  retail:              "/retail",
+  security:            "/security",
+  solar:               "/solar-installation",
+  towing:              "/towing",
+  welding:             "/welding",
+  windowrepair:        "/window-repair",
+
+ 
+  "pest-control":      "/pest-control",
+  "pool-services":     "/pool-services",
+  "solar-installation":"/solar-installation",
+  "window-repair":     "/window-repair",
+  "real-estate":       "/realestate",
 };
 
-// Helper function to get dashboard route for a business type
+
 export const getDashboardRoute = (dashboardId) => {
-  return dashboardRoutes[dashboardId] || '/towing'; // fallback to towing
+  if (!dashboardId) return "/dashboard";
+  return dashboardRoutes[dashboardId] ?? "/dashboard";
 };

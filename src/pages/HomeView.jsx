@@ -1,720 +1,390 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDashboardRoute } from "../utils/dashboardRoutes";
+import { getDashboardActions } from "../utils/dashboardActions";
 import { useAuth } from "../contexts/AuthContext";
+import BusinessSettingsModal from "./BusinessSettingsModal";
+import AppHeader from "./AppHeader";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import {
-  getFirestore,
-  collection,
-  getDocs,
-  query,
-  orderBy,
-} from "firebase/firestore";
-import {
-  TrendingUp,
-  FileText,
-  Users,
-  Receipt,
-  TrendingDown,
-  ArrowRight,
-  LogOut,
-  ChevronDown,
+  TrendingUp, FileText, Users, Receipt,
+  TrendingDown, ArrowRight,
 } from "lucide-react";
 
+// ── All sidebar paths relative to src/pages/ ─────────────────────────────────
+const SIDEBAR_MAP = {
+  accounting:   lazy(() => import("./accounting/AccountingSidebar")),
+  carpentry:    lazy(() => import("./carpentry/CarpentrySidebar")),
+  cleaning:     lazy(() => import("./cleaning/CleaningSidebar")),
+  construction: lazy(() => import("./construction/ConstructionSidebar")),
+  education:    lazy(() => import("./education/EducationSidebar")),
+  electrical:   lazy(() => import("./electrical/ElectricalSidebar")),
+  elctrical:    lazy(() => import("./electrical/ElectricalSidebar")),
+  flooring:     lazy(() => import("./flooring/FlooringSidebar")),
+  health:       lazy(() => import("./health/HealthSidebar")),
+  hotel:        lazy(() => import("./hotel/HotelSidebar")),
+  hvac:         lazy(() => import("./hvac/HVACSidebar")),
+  landscaping:  lazy(() => import("./landscaping/LandscapingSidebar")),
+  legal:        lazy(() => import("./legal/LegalSidebar")),
+  logistics:    lazy(() => import("./logistics/LogisticsSidebar")),
+  mechanics:    lazy(() => import("./mechanics/MechanicsSidebar")),
+  painting:     lazy(() => import("./painting/PaintingSidebar")),
+  pestcontrol:  lazy(() => import("./pest-contrrol/PestcontrolSidebar")),
+  photography:  lazy(() => import("./photography/PhotographySidebar")),
+  plumbing:     lazy(() => import("./plumbing/PlumbingSidebar")),
+  poolservice:  lazy(() => import("./pool-services/PoolservicesSidebar")),
+  realestate:   lazy(() => import("./realEstate/RealEstateSidebar")),
+  restaurants:  lazy(() => import("./restaurants/RestaurantsSidebar")),
+  retail:       lazy(() => import("./retail/RetailSidebar")),
+  security:     lazy(() => import("./security/SecuritySidebar")),
+  solar:        lazy(() => import("./solar-installation/SolarSidebar")),
+  towing:       lazy(() => import("./towing/TowingSidebar")),
+  welding:      lazy(() => import("./welding/WeldingSidebar")),
+  windowrepair: lazy(() => import("./window-repair/WindowrepairSidebar")),
+};
+
+const buildSidebarProps = (props) => ({ ...props });
+
 export default function Home() {
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
   const { user, logout } = useAuth();
+
+  const [sidebarOpen, setSidebarOpen]           = useState(false);
+  const [showSettings, setShowSettings]         = useState(false);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [invoices, setInvoices] = useState([]);
+  const [activeView, setActiveView]             = useState("home");
+  const [invoices, setInvoices]                 = useState([]);
+  const [businessInfo, setBusinessInfo]         = useState({ logoUrl: "" });
+  const [savedQuotes, setSavedQuotes]           = useState([]);
+  const [savedCustomers, setSavedCustomers]     = useState([]);
 
   const [stats, setStats] = useState({
-    totalInvoices: 0,
-    totalQuotes: 0,
-    totalInvoiced: 0,
-    totalClients: 0,
-    pendingPayments: 0,
-    loading: true,
+    totalInvoices: 0, totalQuotes: 0,
+    totalInvoiced: 0, totalClients: 0,
+    pendingPayments: 0, loading: true,
   });
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+  const navigateToDashboard = (view) =>
+    navigate(getDashboardRoute(user?.dashboardId), { state: { activeView: view } });
+
+  const handleNewInvoice  = () => navigateToDashboard("invoice");
+  const handleNewQuote    = () => navigateToDashboard("quote");
+  const handleNewEstimate = () => navigateToDashboard("estimate");
+  const handleNewJobcard  = () => navigateToDashboard("jobcard");
+  const handleLogout      = async () => {
+    try { await logout(); navigate("/login"); }
+    catch (e) { console.error(e); }
   };
 
-  const handleCreateInvoice = () => {
-    const dashboardRoute = getDashboardRoute(user?.dashboardId);
-    navigate(dashboardRoute, {
-      state: {
-        action: "createInvoice",
-        activeView: "invoice",
-      },
-    });
-  };
+  const { actions } = getDashboardActions(user?.dashboardId, {
+    handleNewInvoice, handleNewQuote, handleNewEstimate, handleNewJobcard,
+  });
 
-  const handleCreateQuote = () => {
-    const dashboardRoute = getDashboardRoute(user?.dashboardId);
-    navigate(dashboardRoute, {
-      state: {
-        action: "createQuote",
-        activeView: "invoice",
-      },
-    });
-  };
+  // ── Resolve sidebar — log to help debug ──────────────────────────────────
+  const dashboardId = user?.dashboardId;
+  const DashboardSidebar = dashboardId ? (SIDEBAR_MAP[dashboardId] ?? null) : null;
 
-  useEffect(() => {
-    if (user?.uid) {
-      fetchBusinessStats();
-    }
-  }, [user]);
+  // Uncomment to debug: console.log("dashboardId:", dashboardId, "sidebar found:", !!DashboardSidebar);
 
-  // Close user menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (!e.target.closest("#user-menu-container")) {
-        setShowUserMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const sidebarProps = buildSidebarProps({
+    navigate, user, activeView, setActiveView,
+    sidebarOpen, setSidebarOpen,
+    showSettings, setShowSettings,
+    handleNewInvoice, handleNewQuote, handleNewEstimate, handleNewJobcard,
+    businessInfo, savedQuotes, savedCustomers, handleLogout,
+  });
+
+  useEffect(() => { if (user?.uid) fetchBusinessStats(); }, [user]);
 
   const fetchBusinessStats = async () => {
     if (!user?.uid) return;
-
     try {
       const db = getFirestore();
-
-      // Fetch invoices
-      const invoicesRef = collection(db, "users", user.uid, "invoices");
-      const invoicesSnapshot = await getDocs(invoicesRef);
-
-      let totalInvoiced = 0;
-      let pendingPayments = 0;
-      let invoiceCount = 0;
+      const invoicesSnap = await getDocs(collection(db, "users", user.uid, "invoices"));
+      let totalInvoiced = 0, pendingPayments = 0, invoiceCount = 0;
       const invoicesList = [];
 
-      invoicesSnapshot.forEach((doc) => {
-        const data = doc.data();
-        invoiceCount++;
-
-        const amount = parseFloat(data.totals?.total || data.total || 0);
+      invoicesSnap.forEach((doc) => {
+        const d = doc.data(); invoiceCount++;
+        const amount = parseFloat(d.totals?.total || d.total || 0);
         totalInvoiced += amount;
-
-        if (
-          data.status === "pending" ||
-          data.status === "unpaid" ||
-          data.status === "partially_paid"
-        ) {
-          const due = parseFloat(
-            data.totals?.due || data.totals?.total || data.total || 0,
-          );
-          pendingPayments += due;
-        }
-
-        invoicesList.push({
-          id: doc.id,
-          ...data,
-        });
+        if (["pending","unpaid","partially_paid"].includes(d.status))
+          pendingPayments += parseFloat(d.totals?.due || d.totals?.total || d.total || 0);
+        invoicesList.push({ id: doc.id, ...d });
       });
 
       invoicesList.sort((a, b) => {
-        const dateA =
-          a.dates?.invoiceDate ||
-          a.dates?.quoteDate ||
-          a.createdAt?.toDate?.() ||
-          new Date(0);
-        const dateB =
-          b.dates?.invoiceDate ||
-          b.dates?.quoteDate ||
-          b.createdAt?.toDate?.() ||
-          new Date(0);
-
-        const timeA =
-          typeof dateA === "string"
-            ? new Date(dateA).getTime()
-            : dateA.getTime?.() || 0;
-        const timeB =
-          typeof dateB === "string"
-            ? new Date(dateB).getTime()
-            : dateB.getTime?.() || 0;
-
-        return timeB - timeA;
+        const t = (x) => {
+          const v = x.dates?.invoiceDate || x.dates?.quoteDate || x.createdAt?.toDate?.() || new Date(0);
+          return typeof v === "string" ? new Date(v).getTime() : v.getTime?.() || 0;
+        };
+        return t(b) - t(a);
       });
-
       setInvoices(invoicesList);
 
       let quoteCount = 0;
       try {
-        const quotesRef = collection(db, "users", user.uid, "quotes");
-        const quotesSnapshot = await getDocs(quotesRef);
-        quoteCount = quotesSnapshot.docs.length;
-
-        quotesSnapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.status === "paid") {
-            const amount = parseFloat(data.totals?.total || data.total || 0);
-            totalInvoiced += amount;
-          }
+        const qSnap = await getDocs(collection(db, "users", user.uid, "quotes"));
+        quoteCount = qSnap.docs.length;
+        setSavedQuotes(qSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        qSnap.forEach(doc => {
+          const d = doc.data();
+          if (d.status === "paid") totalInvoiced += parseFloat(d.totals?.total || d.total || 0);
         });
-      } catch (error) {
-        console.log("No quotes collection or error fetching quotes:", error);
-      }
+      } catch (_) {}
 
       let clientCount = 0;
       try {
-        const clientsRef = collection(db, "users", user.uid, "clients");
-        const clientsSnapshot = await getDocs(clientsRef);
-        clientCount = clientsSnapshot.docs.length;
-      } catch (error) {
-        console.log("No clients collection or error fetching clients:", error);
-      }
+        const cSnap = await getDocs(collection(db, "users", user.uid, "clients"));
+        clientCount = cSnap.docs.length;
+        setSavedCustomers(cSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+      } catch (_) {}
 
-      setStats({
-        totalInvoices: invoiceCount,
-        totalQuotes: quoteCount,
-        totalInvoiced: totalInvoiced,
-        totalClients: clientCount,
-        pendingPayments: pendingPayments,
-        loading: false,
-      });
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-      setStats((prev) => ({ ...prev, loading: false }));
+      setStats({ totalInvoices: invoiceCount, totalQuotes: quoteCount, totalInvoiced, totalClients: clientCount, pendingPayments, loading: false });
+    } catch (e) {
+      console.error(e);
+      setStats(p => ({ ...p, loading: false }));
     }
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-ZA", {
-      style: "currency",
-      currency: "ZAR",
-    }).format(amount);
-  };
+  const formatCurrency = (n) =>
+    new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(n);
 
-  // Generate initials from name or email
-  const getUserInitials = () => {
-    if (user?.name) {
-      return user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
-    }
-    if (user?.email) {
-      return user.email[0].toUpperCase();
-    }
-    return "U";
-  };
+  const statusStyles = (s) =>
+    s === "paid"    ? "bg-emerald-100 text-emerald-700" :
+    s === "pending" ? "bg-yellow-100 text-yellow-700"  :
+                      "bg-red-100 text-red-700";
 
-  const getUserDisplayName = () =>
-    user?.name || user?.email?.split("@")[0] || "User";
-
-  const StatCard = ({
-    title,
-    value,
-    icon: Icon,
-    gradient,
-    subtitle,
-    loading,
-    trend,
-  }) => (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
-      <div className="flex items-center justify-between mb-4">
-        <div
-          className={`w-12 h-12 rounded-lg flex items-center justify-center ${gradient}`}
-        >
-          <Icon className="w-6 h-6 text-white" />
+  const StatCard = ({ title, value, icon: Icon, gradient, subtitle, loading, trend }) => (
+    <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm border border-gray-200 flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-2">
+        <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center ${gradient}`}>
+          <Icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
         </div>
         {trend && (
-          <div
-            className={`flex items-center gap-1 text-sm font-medium ${trend > 0 ? "text-green-600" : "text-red-600"}`}
-          >
-            {trend > 0 ? (
-              <TrendingUp className="w-4 h-4" />
-            ) : (
-              <TrendingDown className="w-4 h-4" />
-            )}
+          <div className={`flex items-center gap-1 text-xs font-medium ${trend > 0 ? "text-green-600" : "text-red-600"}`}>
+            {trend > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
             <span>{Math.abs(trend)}%</span>
           </div>
         )}
       </div>
-      <h3 className="text-gray-600 text-sm mb-1">{title}</h3>
-      {loading ? (
-        <div className="h-8 bg-gray-100 rounded animate-pulse"></div>
-      ) : (
-        <>
-          <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
-          {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
-        </>
-      )}
+      <div>
+        <p className="text-gray-500 text-xs mb-0.5">{title}</p>
+        {loading
+          ? <div className="h-6 bg-gray-100 rounded animate-pulse" />
+          : <>
+              <p className="text-lg md:text-xl font-bold text-gray-900 leading-tight truncate">{value}</p>
+              {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
+            </>}
+      </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-300">
-      {/* ── Top Header Bar ── */}
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-          {/* Left: User avatar + name + dropdown */}
-          <div id="user-menu-container" className="relative">
-            <button
-              onClick={() => setShowUserMenu((prev) => !prev)}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 transition-colors duration-200 group"
-            >
-              {/* Avatar circle */}
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0">
-                {user?.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt="avatar"
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  getUserInitials()
-                )}
-              </div>
+    <div className="h-screen w-full overflow-hidden flex flex-col bg-gray-50">
 
-              {/* Name (hidden on very small screens) */}
-              <div className="hidden sm:flex flex-col items-start leading-tight">
-                <span className="text-sm font-semibold text-gray-800 truncate max-w-[140px]">
-                  {getUserDisplayName()}
-                </span>
-                <span className="text-xs text-gray-500 truncate max-w-[140px]">
-                  {user?.email}
-                </span>
-              </div>
+      
 
-              <ChevronDown
-                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                  showUserMenu ? "rotate-180" : ""
-                }`}
-              />
-            </button>
+      <div className="flex-1 flex overflow-hidden min-h-0">
 
-            {/* Dropdown menu */}
-            {showUserMenu && (
-              <div className="absolute left-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-                {/* User info header */}
-                <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
-                    {getUserDisplayName()}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    {user?.email}
-                  </p>
-                </div>
+        {/* ── Sidebar ── */}
+        {DashboardSidebar ? (
+          <Suspense fallback={
+            <div className="w-16 md:w-20 bg-stone-900 flex items-center justify-center flex-shrink-0">
+              <div className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+            </div>
+          }>
+            <DashboardSidebar {...sidebarProps} />
+          </Suspense>
+        ) : (
+          // Debug: shows when dashboardId doesn't match any sidebar
+          <div className="hidden">
+            No sidebar for dashboardId: {dashboardId}
+          </div>
+        )}
 
-                {/* Menu items */}
-                <div className="py-1">
-                  <button
-                    onClick={() => {
-                      setShowUserMenu(false);
-                      navigate("/dashboard");
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <FileText className="w-4 h-4 text-gray-400" />
-                    Dashboard
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowUserMenu(false);
-                      handleLogout();
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Sign out
-                  </button>
-                </div>
-              </div>
-            )}
+        {/* ── Main ── */}
+        <div className="flex-1 overflow-hidden flex flex-col px-2 md:px-4 py-2 md:py-4 gap-2 md:gap-3 min-h-0">
+       
+          <div className="grid grid-cols-4 gap-2 md:gap-3 flex-shrink-0">
+            <StatCard title="Invoices" value={stats.totalInvoices} icon={FileText}
+              gradient="bg-gradient-to-br from-purple-600 to-purple-700" subtitle="All time"
+              loading={stats.loading} trend={12} />
+            <StatCard title="Quotes" value={stats.totalQuotes} icon={Receipt}
+              gradient="bg-gradient-to-br from-cyan-600 to-cyan-700" subtitle="Generated"
+              loading={stats.loading} />
+            <StatCard title="Revenue" value={formatCurrency(stats.totalInvoiced)} icon={TrendingUp}
+              gradient="bg-gradient-to-br from-emerald-600 to-emerald-700" subtitle="Total invoiced"
+              loading={stats.loading} trend={8} />
+            <StatCard title="Clients" value={stats.totalClients} icon={Users}
+              gradient="bg-gradient-to-br from-orange-600 to-orange-700" subtitle="Active"
+              loading={stats.loading} />
           </div>
 
-          {/* Right: Brand name + direct logout button */}
-          <div className="flex items-center gap-3">
-            <span className="hidden md:block text-sm font-semibold text-gray-400 tracking-wide">
-              SolidFlo
-            </span>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-200"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* ── Main Content ── */}
-      <div className="p-4 md:p-6">
-        {/* Statistics Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard
-            title="Total Invoices"
-            value={stats.totalInvoices}
-            icon={FileText}
-            gradient="bg-gradient-to-br from-purple-600 to-purple-700"
-            subtitle="All time"
-            loading={stats.loading}
-            trend={12}
-          />
-          <StatCard
-            title="Total Quotes"
-            value={stats.totalQuotes}
-            icon={Receipt}
-            gradient="bg-gradient-to-br from-cyan-600 to-cyan-700"
-            subtitle="Generated"
-            loading={stats.loading}
-          />
-          <StatCard
-            title="Total Revenue"
-            value={formatCurrency(stats.totalInvoiced)}
-            icon={TrendingUp}
-            gradient="bg-gradient-to-br from-emerald-600 to-emerald-700"
-            subtitle="Total invoiced"
-            loading={stats.loading}
-            trend={8}
-          />
-          <StatCard
-            title="Active Clients"
-            value={stats.totalClients}
-            icon={Users}
-            gradient="bg-gradient-to-br from-orange-600 to-orange-700"
-            subtitle="Client base"
-            loading={stats.loading}
-          />
-        </div>
-
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Pending Payments */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Pending Payments
-              </h3>
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 flex-shrink-0">
+            <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm border border-gray-200 flex items-center gap-4">
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Receipt className="w-5 h-5 text-orange-600" />
               </div>
-            </div>
-            {stats.loading ? (
-              <div className="h-12 bg-gray-100 rounded animate-pulse"></div>
-            ) : (
-              <div>
-                <p className="text-4xl font-bold text-orange-600 mb-2">
-                  {formatCurrency(stats.pendingPayments)}
-                </p>
-                <p className="text-sm text-gray-600">
-                  Outstanding invoices awaiting payment
-                </p>
+              <div className="min-w-0">
+                <p className="text-xs text-gray-500 mb-0.5">Pending Payments</p>
+                {stats.loading
+                  ? <div className="h-6 bg-gray-100 rounded animate-pulse w-32" />
+                  : <>
+                      <p className="text-xl md:text-2xl font-bold text-orange-600 leading-tight truncate">
+                        {formatCurrency(stats.pendingPayments)}
+                      </p>
+                      <p className="text-xs text-gray-400">Outstanding invoices</p>
+                    </>}
               </div>
-            )}
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Quick Actions
-            </h3>
-            <div className="space-y-3">
-              <button
-                onClick={handleCreateInvoice}
-                className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border border-purple-200 rounded-lg transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-sm font-semibold text-purple-900">
-                    Create New Invoice
-                  </span>
-                </div>
-                <ArrowRight className="w-5 h-5 text-purple-600 group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
-
-              <button
-                onClick={handleCreateQuote}
-                className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-cyan-50 to-cyan-100 hover:from-cyan-100 hover:to-cyan-200 border border-cyan-200 rounded-lg transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-cyan-600 rounded-lg flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-sm font-semibold text-cyan-900">
-                    Create New Quote
-                  </span>
-                </div>
-                <ArrowRight className="w-5 h-5 text-cyan-600 group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
-
-              <button className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 border border-emerald-200 rounded-lg transition-all duration-300 group">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-                    <Users className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-sm font-semibold text-emerald-900">
-                    Manage Clients
-                  </span>
-                </div>
-                <ArrowRight className="w-5 h-5 text-emerald-600 group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
             </div>
-          </div>
-        </div>
 
-        {/* Recent Activity */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Recent Invoices
-            </h3>
-            <button
-              onClick={() => setShowInvoicesList(true)}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-            >
-              View all
-            </button>
-          </div>
-
-          {stats.loading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-16 bg-gray-100 rounded animate-pulse"
-                ></div>
-              ))}
-            </div>
-          ) : invoices.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                <FileText className="w-8 h-8 text-gray-400" />
-              </div>
-              <h4 className="text-gray-900 font-semibold mb-2">
-                No invoices yet
-              </h4>
-              <p className="text-gray-600 text-sm mb-4">
-                Create your first invoice to get started
-              </p>
-              <button
-                onClick={() => navigate("/dashboard")}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Create Invoice
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {invoices.slice(0, 5).map((invoice) => (
-                <div
-                  key={invoice.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer border border-gray-200"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h4 className="text-sm font-semibold text-gray-900 truncate">
-                        {invoice.quoteNumber ||
-                          invoice.invoiceNumber ||
-                          invoice.id}
-                      </h4>
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${
-                          invoice.status === "paid"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : invoice.status === "pending"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {invoice.status || "Draft"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs text-gray-600">
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        {invoice.customer?.name ||
-                          invoice.customerName ||
-                          "No customer"}
-                      </span>
-                      {(invoice.dates?.invoiceDate || invoice.date) && (
-                        <span>
-                          {new Date(
-                            invoice.dates?.invoiceDate || invoice.date,
-                          ).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right ml-4">
-                    <div className="text-base font-bold text-gray-900">
-                      {formatCurrency(
-                        invoice.totals?.total || invoice.total || 0,
-                      )}
-                    </div>
-                    {(invoice.totals?.subtotal || invoice.subtotal) && (
-                      <div className="text-xs text-gray-500">
-                        Subtotal:{" "}
-                        {formatCurrency(
-                          invoice.totals?.subtotal || invoice.subtotal,
-                        )}
+            <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm border border-gray-200">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Quick Actions</p>
+              <div className="flex gap-2">
+                {actions.map(({ label, icon: Icon, onClick }, i) => {
+                  const colors = [
+                    { bg: "bg-purple-50", hover: "hover:bg-purple-100", border: "border-purple-200", icon: "bg-purple-600", text: "text-purple-900", arrow: "text-purple-500" },
+                    { bg: "bg-cyan-50",   hover: "hover:bg-cyan-100",   border: "border-cyan-200",   icon: "bg-cyan-600",   text: "text-cyan-900",   arrow: "text-cyan-500"   },
+                  ];
+                  const c = colors[i] ?? colors[0];
+                  return (
+                    <button key={label} onClick={onClick}
+                      className={`flex-1 flex items-center justify-between px-3 py-2 ${c.bg} ${c.hover} border ${c.border} rounded-lg transition-all group`}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className={`w-6 h-6 ${c.icon} rounded flex items-center justify-center flex-shrink-0`}>
+                          <Icon className="w-3 h-3 text-white" />
+                        </div>
+                        <span className={`text-xs font-semibold ${c.text} truncate`}>{label}</span>
                       </div>
-                    )}
+                      <ArrowRight className={`w-3 h-3 ${c.arrow} group-hover:translate-x-0.5 transition-transform flex-shrink-0`} />
+                    </button>
+                  );
+                })}
+                <button onClick={() => navigate(getDashboardRoute(user?.dashboardId))}
+                  className="flex-1 flex items-center justify-between px-3 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-all group">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-6 h-6 bg-emerald-600 rounded flex items-center justify-center flex-shrink-0">
+                      <Users className="w-3 h-3 text-white" />
+                    </div>
+                    <span className="text-xs font-semibold text-emerald-900 truncate">Dashboard</span>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* CTA Section */}
-        <div className="bg-gradient-to-r from-gray-600 to-slate-600 rounded-xl p-8 text-center shadow-lg">
-          <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
-            Ready to manage your business?
-          </h3>
-          <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-            Access your full dashboard to create invoices, manage clients, and
-            track payments
-          </p>
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl inline-flex items-center gap-2"
-          >
-            Go to Dashboard
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-12 text-center text-gray-500 text-sm">
-          © 2026 SolidFlo • Modern Invoicing & Billing
-        </div>
-      </div>
-
-      {/* Invoices List Modal */}
-      {showInvoicesList && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  All Invoices
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  {stats.totalInvoices}{" "}
-                  {stats.totalInvoices === 1 ? "invoice" : "invoices"} found
-                </p>
+                  <ArrowRight className="w-3 h-3 text-emerald-500 group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
+                </button>
               </div>
-              <button
-                onClick={() => setShowInvoicesList(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-300"
-              >
-                ✕
-              </button>
             </div>
+          </div>
 
-            <div className="overflow-y-auto max-h-[calc(80vh-140px)] p-6">
-              {invoices.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <Receipt className="w-10 h-10 text-white" />
+          <div className="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
+              <h3 className="text-sm font-semibold text-gray-900">Recent Invoices</h3>
+              <button onClick={() => setShowInvoicesList(true)}
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium">View all</button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
+              {stats.loading ? (
+                [1,2,3].map(i => <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse" />)
+              ) : invoices.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center py-6">
+                  <div className="w-12 h-12 mb-3 bg-gray-100 rounded-full flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No invoices yet
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Create your first invoice to get started
-                  </p>
-                  <button
-                    onClick={() => {
-                      setShowInvoicesList(false);
-                      navigate("/dashboard");
-                    }}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
-                  >
+                  <h4 className="text-gray-900 font-semibold text-sm mb-1">No invoices yet</h4>
+                  <p className="text-gray-500 text-xs mb-3">Create your first invoice to get started</p>
+                  <button onClick={handleNewInvoice}
+                    className="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 transition-colors">
                     Create Invoice
                   </button>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {invoices.map((invoice) => (
-                    <div
-                      key={invoice.id}
-                      className="group bg-gray-50 hover:bg-gray-100 rounded-xl p-4 border border-gray-200 hover:border-gray-300 transition-all duration-300 cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <h3 className="text-gray-900 font-semibold truncate">
-                              {invoice.quoteNumber ||
-                                invoice.invoiceNumber ||
-                                invoice.id}
-                            </h3>
-                            <span
-                              className={`px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0 ${
-                                invoice.status === "paid"
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : invoice.status === "pending"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-red-100 text-red-700"
-                              }`}
-                            >
-                              {invoice.status || "Draft"}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
-                            <span className="flex items-center">
-                              <Users className="w-4 h-4 mr-1.5" />
-                              {invoice.customer?.name ||
-                                invoice.customerName ||
-                                "No customer"}
-                            </span>
-                            {(invoice.dates?.invoiceDate || invoice.date) && (
-                              <span className="flex items-center">
-                                📅{" "}
-                                {new Date(
-                                  invoice.dates?.invoiceDate || invoice.date,
-                                ).toLocaleDateString()}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-4 ml-4">
-                          <div className="text-right">
-                            <div className="text-lg font-bold text-gray-900">
-                              {formatCurrency(
-                                invoice.totals?.total || invoice.total || 0,
-                              )}
-                            </div>
-                            {(invoice.totals?.subtotal || invoice.subtotal) && (
-                              <div className="text-xs text-gray-600">
-                                Subtotal:{" "}
-                                {formatCurrency(
-                                  invoice.totals?.subtotal || invoice.subtotal,
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log("View invoice:", invoice.id);
-                            }}
-                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-lg transition-all duration-300 opacity-0 group-hover:opacity-100"
-                          >
-                            <FileText className="w-5 h-5" />
-                          </button>
-                        </div>
+                invoices.slice(0, 8).map((invoice) => (
+                  <div key={invoice.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer border border-gray-200">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-gray-900 truncate">
+                          {invoice.quoteNumber || invoice.invoiceNumber || invoice.id}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${statusStyles(invoice.status)}`}>
+                          {invoice.status || "Draft"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
+                        <span className="flex items-center gap-1 truncate">
+                          <Users className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{invoice.customer?.name || invoice.customerName || "No customer"}</span>
+                        </span>
+                        {(invoice.dates?.invoiceDate || invoice.date) && (
+                          <span className="flex-shrink-0">
+                            {new Date(invoice.dates?.invoiceDate || invoice.date).toLocaleDateString()}
+                          </span>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
+                    <div className="text-right ml-4 flex-shrink-0">
+                      <div className="text-sm font-bold text-gray-900">
+                        {formatCurrency(invoice.totals?.total || invoice.total || 0)}
+                      </div>
+                    </div>
+                  </div>
+                ))
               )}
+            </div>
+          </div>
+
+          <div className="flex-shrink-0 text-center text-gray-400 text-xs pb-1">
+            © 2026 SolidFlo • Modern Invoicing & Billing
+          </div>
+        </div>
+      </div>
+
+      {showSettings && <BusinessSettingsModal onClose={() => setShowSettings(false)} />}
+
+      {showInvoicesList && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-gray-200 flex-shrink-0">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">All Invoices</h2>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {stats.totalInvoices} {stats.totalInvoices === 1 ? "invoice" : "invoices"} found
+                </p>
+              </div>
+              <button onClick={() => setShowInvoicesList(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all">✕</button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 space-y-3 min-h-0">
+              {invoices.map((invoice) => (
+                <div key={invoice.id}
+                  className="bg-gray-50 hover:bg-gray-100 rounded-xl p-4 border border-gray-200 transition-all cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-gray-900 font-semibold text-sm truncate">
+                          {invoice.quoteNumber || invoice.invoiceNumber || invoice.id}
+                        </span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${statusStyles(invoice.status)}`}>
+                          {invoice.status || "Draft"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {invoice.customer?.name || invoice.customerName || "No customer"}
+                        </span>
+                        {(invoice.dates?.invoiceDate || invoice.date) && (
+                          <span>{new Date(invoice.dates?.invoiceDate || invoice.date).toLocaleDateString()}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right ml-4">
+                      <div className="text-base font-bold text-gray-900">
+                        {formatCurrency(invoice.totals?.total || invoice.total || 0)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

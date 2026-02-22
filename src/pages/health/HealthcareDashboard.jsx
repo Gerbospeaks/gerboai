@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
+import BusinessSettingsModal from "../BusinessSettingsModal";
+import AppHeader from "../AppHeader";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
+import { useLocation } from "react-router-dom";
 import MedicalAIExtractor from "./MedicalAIExtractor";
 import MedicalMultiStepForm from "./MedicalMultiStepForm";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
@@ -145,7 +148,13 @@ const HealthcareDashboard = () => {
   const [doctorName, setDoctorName] = useState("Dr. Jane Smith");
   const [practiceNumber, setPracticeNumber] = useState("MP123456");
   const [additionalNotes, setAdditionalNotes] = useState("");
+const location = useLocation();
 
+useEffect(() => {
+  if (location.state?.activeView) {
+    setActiveView(location.state.activeView);
+  }
+}, [location.state]);
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -963,7 +972,39 @@ Your Construction Quote System
       console.error("Error logging out:", error);
     }
   };
+const headerActions = [
+  documentType === "quote" && invoiceId && {
+    label: "Convert to Invoice", icon: FileText, onClick: handleConvertToInvoice,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap"
+  },
+  { label: "Print",    icon: Printer,  onClick: handlePrint,        variant: "secondary" },
+  { label: "New",      icon: Plus,     onClick: documentType === "quote" ? handleNewQuote : handleNewInvoice,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Send",     icon: Send,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Save PDF", icon: Download, onClick: handleSavePDF,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Save",     icon: Save,     onClick: handleSaveInvoice,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap" },
+  { label: "Logout",   icon: LogOut,   onClick: handleLogout,
+    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap" },
+].filter(Boolean);
 
+const mobileDashboardActions = [
+  documentType === "quote" && invoiceId && {
+    label: "To Invoice", icon: FileText, onClick: handleConvertToInvoice,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap"
+  },
+  { label: "Save",  icon: Save,     onClick: handleSaveInvoice,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
+  { label: "Send",  icon: Send,  
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
+  { label: "PDF",   icon: Download, onClick: handleSavePDF,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
+  { label: "Print", icon: Printer,  onClick: handlePrint,
+    className: "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap" },
+].filter(Boolean);
+ 
   return (
     <div className="flex h-screen bg-gray-300">
       {/* Mobile Sidebar Backdrop */}
@@ -1291,426 +1332,16 @@ Your Construction Quote System
         className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
       >
         <div className="flex flex-col h-screen">
+                <AppHeader
+  actions={headerActions}
+  mobileActions={mobileDashboardActions}
+  onSettingsOpen={() => setShowSettings(true)}
+/>
+   
           <div className="flex-1 overflow-y-auto">
             {/* Facility Settings Modal */}
             {showSettings && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-                  <div className="p-4 border-b flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">Facility Settings</h2>
-                    <button
-                      onClick={() => setShowSettings(false)}
-                      className="text-gray-500 hover:text-gray-700 text-2xl"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div className="overflow-auto p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Facility Logo
-                        </label>
-                        <div className="flex items-center gap-4">
-                          {facilityInfo.logoUrl ? (
-                            <img
-                              src={facilityInfo.logoUrl}
-                              alt="Facility Logo"
-                              className="w-24 h-24 object-contain border rounded-lg"
-                            />
-                          ) : (
-                            <div className="w-24 h-24 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-800">
-                              <Upload className="w-8 h-8 text-gray-400" />
-                            </div>
-                          )}
-
-                          <div className="flex-1">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleLogoUpload}
-                              className="hidden"
-                              id="logo-upload"
-                            />
-                            <label
-                              htmlFor="logo-upload"
-                              className="inline-block px-4 py-2 bg-gray-600 text-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer"
-                            >
-                              {facilityInfo.logoUrl
-                                ? "Change Logo"
-                                : "Upload Logo"}
-                            </label>
-                            <p className="text-xs text-gray-500 mt-2">
-                              Recommended: Square image, max 5MB
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Facility Name
-                        </label>
-                        <input
-                          type="text"
-                          value={facilityInfo.facilityName}
-                          onChange={(e) =>
-                            setFacilityInfo({
-                              ...facilityInfo,
-                              facilityName: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Practice Name
-                        </label>
-                        <input
-                          type="text"
-                          value={facilityInfo.practiceName}
-                          onChange={(e) =>
-                            setFacilityInfo({
-                              ...facilityInfo,
-                              practiceName: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Practice Number
-                        </label>
-                        <input
-                          type="text"
-                          value={facilityInfo.practiceNumber}
-                          onChange={(e) =>
-                            setFacilityInfo({
-                              ...facilityInfo,
-                              practiceNumber: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Address Line 1
-                        </label>
-                        <input
-                          type="text"
-                          value={facilityInfo.addressLine1}
-                          onChange={(e) =>
-                            setFacilityInfo({
-                              ...facilityInfo,
-                              addressLine1: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Address Line 2
-                        </label>
-                        <input
-                          type="text"
-                          value={facilityInfo.addressLine2}
-                          onChange={(e) =>
-                            setFacilityInfo({
-                              ...facilityInfo,
-                              addressLine2: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            City
-                          </label>
-                          <input
-                            type="text"
-                            value={facilityInfo.city}
-                            onChange={(e) =>
-                              setFacilityInfo({
-                                ...facilityInfo,
-                                city: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2 border rounded-lg"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            Postal Code
-                          </label>
-                          <input
-                            type="text"
-                            value={facilityInfo.postalCode}
-                            onChange={(e) =>
-                              setFacilityInfo({
-                                ...facilityInfo,
-                                postalCode: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2 border rounded-lg"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Primary Phone *
-                        </label>
-                        <input
-                          type="tel"
-                          value={facilityInfo.primaryPhone}
-                          onChange={(e) =>
-                            setFacilityInfo({
-                              ...facilityInfo,
-                              primaryPhone: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Secondary Phone (Optional)
-                        </label>
-                        <input
-                          type="tel"
-                          value={facilityInfo.secondaryPhone}
-                          onChange={(e) =>
-                            setFacilityInfo({
-                              ...facilityInfo,
-                              secondaryPhone: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
-                      </div>
-
-                      <div className="border-t pt-4 mt-6">
-                        <h3 className="text-lg font-semibold mb-4">
-                          Bank Details
-                        </h3>
-
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Bank Name
-                            </label>
-                            <input
-                              type="text"
-                              value={facilityInfo.bankName}
-                              onChange={(e) =>
-                                setFacilityInfo({
-                                  ...facilityInfo,
-                                  bankName: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Account Holder
-                            </label>
-                            <input
-                              type="text"
-                              value={facilityInfo.accountHolder}
-                              onChange={(e) =>
-                                setFacilityInfo({
-                                  ...facilityInfo,
-                                  accountHolder: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Account Number
-                            </label>
-                            <input
-                              type="text"
-                              value={facilityInfo.accountNumber}
-                              onChange={(e) =>
-                                setFacilityInfo({
-                                  ...facilityInfo,
-                                  accountNumber: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Branch Code
-                            </label>
-                            <input
-                              type="text"
-                              value={facilityInfo.branchCode}
-                              onChange={(e) =>
-                                setFacilityInfo({
-                                  ...facilityInfo,
-                                  branchCode: e.target.value,
-                                })
-                              }
-                              className="w-full px-4 py-2 border rounded-lg"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="border-t pt-6 mt-6">
-                        <h3 className="text-lg font-semibold mb-4">
-                          📋 Invoice Stamp Settings
-                        </h3>
-
-                        <div className="space-y-4">
-                          <div>
-                            <label className="flex items-center space-x-2 mb-4">
-                              <input
-                                type="checkbox"
-                                checked={stampSettings.enabled}
-                                onChange={(e) =>
-                                  setStampSettings({
-                                    ...stampSettings,
-                                    enabled: e.target.checked,
-                                  })
-                                }
-                                className="w-4 h-4 rounded"
-                              />
-                              <span className="text-sm font-medium">
-                                Show approval stamp on invoices and quotes
-                              </span>
-                            </label>
-                          </div>
-
-                          {stampSettings.enabled && (
-                            <>
-                              <div>
-                                <label className="block text-sm font-medium mb-2">
-                                  Stamp Text
-                                </label>
-                                <input
-                                  type="text"
-                                  value={stampSettings.text}
-                                  onChange={(e) =>
-                                    setStampSettings({
-                                      ...stampSettings,
-                                      text: e.target.value.toUpperCase(),
-                                    })
-                                  }
-                                  className="w-full px-4 py-2 border rounded-lg uppercase"
-                                  placeholder="APPROVED"
-                                  maxLength={15}
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Max 15 characters
-                                </p>
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium mb-2">
-                                  Stamp Color
-                                </label>
-                                <select
-                                  value={stampSettings.color}
-                                  onChange={(e) =>
-                                    setStampSettings({
-                                      ...stampSettings,
-                                      color: e.target.value,
-                                    })
-                                  }
-                                  className="w-full px-4 py-2 border rounded-lg"
-                                >
-                                  <option value="#d32f2f">
-                                    🔴 Red (Traditional)
-                                  </option>
-                                  <option value="#1976d2">
-                                    🔵 Blue (Professional)
-                                  </option>
-                                  <option value="#388e3c">
-                                    🟢 Green (Approved)
-                                  </option>
-                                  <option value="#7b1fa2">
-                                    🟣 Purple (Premium)
-                                  </option>
-                                  <option value="#000000">
-                                    ⚫ Black (Formal)
-                                  </option>
-                                  <option value="#f57c00">
-                                    🟠 Orange (Attention)
-                                  </option>
-                                </select>
-                              </div>
-
-                              <div>
-                                <label className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={stampSettings.showDate}
-                                    onChange={(e) =>
-                                      setStampSettings({
-                                        ...stampSettings,
-                                        showDate: e.target.checked,
-                                      })
-                                    }
-                                    className="w-4 h-4 rounded"
-                                  />
-                                  <span className="text-sm font-medium">
-                                    Include date on stamp
-                                  </span>
-                                </label>
-                              </div>
-
-                              {/* Preview */}
-                              <div className="mt-4 p-6 bg-gray-800 rounded-lg border-2 border-dashed border-gray-300">
-                                <p className="text-sm font-medium mb-4 text-center text-gray-600">
-                                  Preview:
-                                </p>
-                                <div className="flex justify-center">
-                                  <SignatureStamp
-                                    text={stampSettings.text}
-                                    color={stampSettings.color}
-                                    showDate={stampSettings.showDate}
-                                    rotation={-5}
-                                    size="medium"
-                                  />
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleSaveFacilityInfo}
-                        className="w-full bg-gray-50 text-gray-800 py-3 rounded-lg hover:bg-blue-700"
-                      >
-                        Save Facility Information
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+             <BusinessSettingsModal onClose={() => setShowSettings(false)} />
             )}
 
             <PatientsListModal
@@ -1854,151 +1485,7 @@ Your Construction Quote System
             )}
             {activeView === "invoice" && (
               <>
-                <div className="flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 md:px-4 lg:px-8 py-3 md:py-4 shadow-sm">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
-                      <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-300 lg:hidden flex-shrink-0"
-                      >
-                        <Menu className="w-5 h-5" />
-                      </button>
-
-                      <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                        <div className="hidden sm:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg flex-shrink-0">
-                          <FileText className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                        </div>
-                        <div className="min-w-0">
-                          <h1 className="text-sm md:text-lg lg:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent truncate">
-                            {documentType === "quote" ? "Quote" : "Invoice"} #
-                            {invoiceNumber || "—"}
-                          </h1>
-                          <p className="text-xs text-slate-500 hidden md:block truncate">
-                            Create and manage your{" "}
-                            {documentType === "quote" ? "quotes" : "invoices"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Desktop Action Buttons - Hidden on mobile */}
-                    <div className="hidden lg:flex items-center space-x-2 print:hidden flex-shrink-0">
-                      {documentType === "quote" && invoiceId && (
-                        <button
-                          onClick={handleConvertToInvoice}
-                          className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50 hover:scale-105 whitespace-nowrap"
-                        >
-                          <FileText className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-                          Convert to Invoice
-                        </button>
-                      )}
-
-                      <button
-                        onClick={handlePrint}
-                        className="group flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 hover:border-slate-300 transition-all duration-300 font-semibold shadow-sm hover:shadow-md whitespace-nowrap"
-                      >
-                        <Printer className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                        Print
-                      </button>
-
-                      <button
-                        onClick={
-                          documentType === "quote"
-                            ? handleNewQuote
-                            : handleNewInvoice
-                        }
-                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105 whitespace-nowrap"
-                      >
-                        <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                        New
-                      </button>
-
-                      <button className="group flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-blue-500/50 hover:scale-105 whitespace-nowrap">
-                        <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                        <span>Send</span>
-                      </button>
-
-                      <button
-                        onClick={handlePrint}
-                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-orange-500/50 hover:scale-105 whitespace-nowrap"
-                      >
-                        <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                        Save PDF
-                      </button>
-
-                      <button
-                        onClick={handleSaveInvoice}
-                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-amber-500/50 hover:scale-105 whitespace-nowrap"
-                      >
-                        <Save className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                        Save
-                      </button>
-
-                      <button
-                        onClick={handleLogout}
-                        className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-red-500/50 hover:scale-105 whitespace-nowrap"
-                      >
-                        <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-                        Logout
-                      </button>
-                    </div>
-
-                    {/* Mobile Logout Button */}
-                    <button
-                      onClick={handleLogout}
-                      className="lg:hidden p-2 md:p-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg print:hidden flex-shrink-0"
-                    >
-                      <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Enhanced Mobile Action Bar - Better touch targets */}
-                <div className="flex-shrink-0 lg:hidden bg-white/90 backdrop-blur-md px-3 md:px-4 py-2.5 md:py-3 print:hidden border-b border-slate-200 overflow-x-auto">
-                  <div className="flex gap-2 min-w-max pb-1 pr-3">
-                    {documentType === "quote" && invoiceId && (
-                      <button
-                        onClick={handleConvertToInvoice}
-                        className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg md:rounded-xl hover:from-purple-700 hover:to-purple-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
-                      >
-                        <FileText className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
-                        <span>To Invoice</span>
-                      </button>
-                    )}
-                    <button
-                      onClick={handleSaveInvoice}
-                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg md:rounded-xl hover:from-stone-700 hover:to-stone-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
-                    >
-                      <Save className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                      Save
-                    </button>
-                    <button className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg md:rounded-xl hover:from-amber-700 hover:to-orange-700 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95">
-                      <Send className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                      <span>Send</span>
-                    </button>
-                    <button
-                      onClick={handlePrint}
-                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg md:rounded-xl hover:from-orange-700 hover:to-orange-800 whitespace-nowrap text-xs md:text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95"
-                    >
-                      <Download className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-y-0.5 transition-transform duration-300" />
-                      <span>PDF</span>
-                    </button>
-                    <button
-                      onClick={handlePrint}
-                      className="group flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg md:rounded-xl hover:bg-slate-50 whitespace-nowrap text-xs md:text-sm font-semibold shadow-sm transition-all duration-300 active:scale-95"
-                    >
-                      <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform duration-300" />
-                      <span>Print</span>
-                    </button>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowInvoice(!showInvoice)}
-                  className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <FileText className="w-5 h-5" />
-                  {showInvoice ? "Hide Invoice" : "View Invoice"}
-                </button>
+               
 
                 <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                   <div

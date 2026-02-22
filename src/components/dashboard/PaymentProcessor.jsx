@@ -309,7 +309,7 @@ const PaymentProcessor = ({
                       Balance Due:
                     </span>
                     <span
-                      className={`text-2xl font-bold ${
+                      className={`text-lg sm:text-2xl font-bold ${
                         balanceDue <= 0 ? "text-emerald-600" : "text-rose-600"
                       }`}
                     >
