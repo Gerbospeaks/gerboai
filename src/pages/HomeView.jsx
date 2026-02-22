@@ -70,6 +70,7 @@ export default function Home() {
   const handleNewInvoice  = () => navigateToDashboard("invoice");
   const handleNewQuote    = () => navigateToDashboard("quote");
   const handleNewEstimate = () => navigateToDashboard("estimate");
+  const handleNewInvoiceDoc = () => navigateToDashboard("invoiceDoc");
   const handleNewJobcard  = () => navigateToDashboard("jobcard");
   const handleLogout      = async () => {
     try { await logout(); navigate("/login"); }
@@ -77,7 +78,7 @@ export default function Home() {
   };
 
   const { actions } = getDashboardActions(user?.dashboardId, {
-    handleNewInvoice, handleNewQuote, handleNewEstimate, handleNewJobcard,
+    handleNewInvoice, handleNewQuote, handleNewEstimate, handleNewJobcard,handleNewInvoiceDoc,
   });
 
   // ── Resolve sidebar — log to help debug ──────────────────────────────────
