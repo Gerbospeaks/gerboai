@@ -268,6 +268,7 @@ export default function Home() {
   return (
     <div className="h-screen w-full overflow-hidden flex flex-col bg-gray-50">
       <div className="flex-1 flex overflow-hidden min-h-0">
+        
         {/* ── Main ── */}
         <div className="flex-1 overflow-hidden flex flex-col px-2 md:px-4 py-2 md:py-4 gap-2 md:gap-3 min-h-0">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 flex-shrink-0">

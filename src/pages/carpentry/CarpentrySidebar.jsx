@@ -68,7 +68,7 @@ export default function CarpentrySidebar({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-[#253347] flex-shrink-0">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 bg-[#b45309] rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
             <img src={logo} className="w-5 h-5 object-contain" alt="logo" />
           </div>
           <div className="min-w-0">

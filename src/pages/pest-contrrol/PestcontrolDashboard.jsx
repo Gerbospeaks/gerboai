@@ -48,13 +48,13 @@ import {
   Home,
   Settings,
   Users,
+  Eye,
   Calendar,
   X,
   FileText,
   BarChart3,
   Menu,
   Plus,
-  Eye,
   Send,
   Save,
   Edit,
@@ -108,7 +108,6 @@ const generateQuoteNumber = async (userId, documentType) => {
   const nextNumber = lastNumber + 1;
   return `${prefix}-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
-
 const functions = getFunctions();
 const PestcontrolDashboard = () => {
   // ── step navigation ──────────────────────────────────────────────────────
@@ -119,10 +118,10 @@ const PestcontrolDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+
   // ── auth ─────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
-
+  const [showPreview, setShowPreview] = useState(false);
   // ── quote / invoice state ────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState("Quote");
   const [quoteNumber, setQuoteNumber] = useState("");
@@ -163,13 +162,7 @@ const PestcontrolDashboard = () => {
     showDate: true,
     enabled: true,
   });
-  const location = useLocation();
 
-  useEffect(() => {
-    if (location.state?.activeView) {
-      setActiveView(location.state.activeView);
-    }
-  }, [location.state]);
   // ── client / site fields ─────────────────────────────────────────────────
   const [customerName, setCustomerName] = useState("Meridian Developments");
   const [customerEmail, setCustomerEmail] = useState("projects@meridian.co.za");
@@ -224,6 +217,33 @@ const PestcontrolDashboard = () => {
     { number: 3, title: "Scope of Work", icon: Wrench },
     { number: 4, title: "Schedule & Payment", icon: Calendar },
   ];
+
+  // ── shared template props ────────────────────────────────────────────────
+  const templateProps = {
+    templateId: selectedTemplate,
+    businessInfo,
+    loading,
+    invoiceNumber: quoteNumber,
+    customerName,
+    billName: customerName,
+    billEmail: customerEmail,
+    billPhone: customerPhone,
+    billAddress: propertyAddress,
+    customerEmail,
+    customerPhone,
+    customerAddress: propertyAddress,
+    taxId: "",
+    items,
+    subtotal,
+    totalTax,
+    total,
+    documentType,
+    stampText: stampSettings.text,
+    stampColor: stampSettings.color,
+    showStampDate: stampSettings.showDate,
+    showStamp: stampSettings.enabled,
+    paymentStatus,
+  };
 
   // ============================================================================
   // Effects
@@ -737,7 +757,13 @@ const PestcontrolDashboard = () => {
       table { width: 100% !important; border-collapse: collapse !important; }
     }
   `;
+  const location = useLocation();
 
+  useEffect(() => {
+    if (location.state?.activeView) {
+      setActiveView(location.state.activeView);
+    }
+  }, [location.state]);
   const handlePrint = () => {
     const styleSheet = document.createElement("style");
     styleSheet.textContent = printStyles;
@@ -774,6 +800,7 @@ const PestcontrolDashboard = () => {
     if (extractedData.items?.length > 0) setItems(extractedData.items);
     alert("✨ Data extracted and populated successfully!");
   };
+
   const handleTestEmail = async () => {
     if (!businessInfo.emailPassword) {
       alert("⚠️ Please enter your email app password first.");
@@ -790,27 +817,10 @@ const PestcontrolDashboard = () => {
     try {
       const testEmailData = {
         userId: user.uid,
-        to: userEmail, // Send test to self
+        to: userEmail,
         subject: "✅ Test Email - Email Configuration Successful",
-        message: `
-Hello,
-
-This is a test email from your construction quote/invoice system.
-
-✓ Your email configuration is working correctly!
-
-Account Details:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Business: ${businessInfo.businessName}
-Email: ${userEmail}
-Provider: ${businessInfo.emailProvider || "Gmail"}
-Date: ${new Date().toLocaleString()}
-
-You can now send quotes and invoices to your clients from this email address.
-
-Best regards,
-Your Construction Quote System
-      `.trim(),
+        message:
+          `Hello,\n\nThis is a test email from your construction quote/invoice system.\n\n✓ Your email configuration is working correctly!\n\nBest regards,\nYour Construction Quote System`.trim(),
         documentType: "test",
         documentNumber: "TEST-001",
       };
@@ -823,16 +833,7 @@ Your Construction Quote System
       );
     } catch (error) {
       console.error("Test email error:", error);
-
-      let errorMsg = "❌ Test email failed!\n\n";
-      if (error.message.includes("Invalid login")) {
-        errorMsg +=
-          "Your app password is incorrect. Please check and try again.\n\nMake sure you're using an APP PASSWORD, not your regular password.";
-      } else {
-        errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
-      }
-
-      alert(errorMsg);
+      alert(`❌ Test email failed!\n\nError: ${error.message}`);
     }
   };
   const handleNext = () => {
@@ -850,7 +851,6 @@ Your Construction Quote System
       console.error("Error logging out:", error);
     }
   };
-
   const headerActions = [
     documentType === "quote" &&
       quoteId && {
@@ -982,7 +982,7 @@ Your Construction Quote System
           {/* icon nav */}
           <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
             <button
-              onClick={() => setActiveView("home")} // ADD THIS
+              onClick={() => setActiveView("home")}
               className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
               title="Home"
             >
@@ -1130,7 +1130,6 @@ Your Construction Quote System
                   />
                 </div>
 
-                {/* Conditional rendering with animation */}
                 <div
                   className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-stone-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
                     isQuotesInvoicesOpen2
@@ -1201,7 +1200,6 @@ Your Construction Quote System
                   />
                 </div>
 
-                {/* Conditional rendering with animation */}
                 <div
                   className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
                     isClientsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
@@ -1303,218 +1301,215 @@ Your Construction Quote System
 
       {/* ── Main Content Area ────────────────────────────────────────────── */}
       <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
+        className={`flex-1 transition-all duration-300 flex flex-col overflow-hidden ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
       >
-        <div className="flex flex-col h-screen">
-          <AppHeader
-            actions={headerActions}
-            mobileActions={mobileDashboardActions}
-            onSettingsOpen={() => setShowSettings(true)}
+        {/* ── App Header ──────────────────────────────────────────────── */}
+        <AppHeader
+          actions={headerActions}
+          mobileActions={mobileDashboardActions}
+          onSettingsOpen={() => setShowSettings(true)}
+        />
+
+        {/* ── Settings Modal ──────────────────────────────────────────── */}
+        {showSettings && (
+          <BusinessSettingsModal onClose={() => setShowSettings(false)} />
+        )}
+
+        {/* ── Shared Modals ────────────────────────────────────────────── */}
+        <CustomersListModal
+          showModal={showCustomersListModal}
+          setShowModal={setShowCustomersListModal}
+          customers={customers}
+          onLoadCustomer={loadCustomer}
+          onEditCustomer={handleEditCustomer}
+          onAddNewCustomer={handleAddNewCustomer}
+        />
+        <CustomerModal
+          showModal={showCustomerModal}
+          setShowModal={setShowCustomerModal}
+          existingCustomer={selectedCustomer}
+          onCustomerSaved={handleCustomerSaved}
+        />
+
+        {showPaymentModal && selectedQuoteForPayment && (
+          <PaymentProcessor
+            showModal={showPaymentModal}
+            setShowModal={setShowPaymentModal}
+            invoice={selectedQuoteForPayment}
+            onPaymentComplete={handlePaymentComplete}
+            user={user}
+            businessInfo={businessInfo}
           />
+        )}
 
-          {/* ── Scrollable Main Content ──────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
-            {/* ── Settings Modal ──────────────────────────────────────── */}
-            {showSettings && (
-              <BusinessSettingsModal onClose={() => setShowSettings(false)} />
-            )}
-
-            {/* ── Shared Modals ────────────────────────────────────────── */}
-            <CustomersListModal
-              showModal={showCustomersListModal}
-              setShowModal={setShowCustomersListModal}
-              customers={customers}
-              onLoadCustomer={loadCustomer}
-              onEditCustomer={handleEditCustomer}
-              onAddNewCustomer={handleAddNewCustomer}
-            />
-            <CustomerModal
-              showModal={showCustomerModal}
-              setShowModal={setShowCustomerModal}
-              existingCustomer={selectedCustomer}
-              onCustomerSaved={handleCustomerSaved}
-            />
-
-            {showPaymentModal && selectedQuoteForPayment && (
-              <PaymentProcessor
-                showModal={showPaymentModal}
-                setShowModal={setShowPaymentModal}
-                invoice={selectedQuoteForPayment}
-                onPaymentComplete={handlePaymentComplete}
-                user={user}
-                businessInfo={businessInfo}
-              />
-            )}
-
-            {/* ── Saved Quotes / Invoices List Modal ──────────────────── */}
-            {showQuotesList && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-                  <div className="p-4 border-b flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">
-                      Saved {documentType === "quote" ? "Quotes" : "Invoices"}
-                    </h2>
-                    <button
-                      onClick={() => setShowQuotesList(false)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      ✕
-                    </button>
+        {/* ── Saved Quotes / Invoices List Modal ──────────────────── */}
+        {showQuotesList && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+              <div className="p-4 border-b flex items-center justify-between">
+                <h2 className="text-xl font-semibold">
+                  Saved {documentType === "quote" ? "Quotes" : "Invoices"}
+                </h2>
+                <button
+                  onClick={() => setShowQuotesList(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="overflow-auto p-4">
+                {savedQuotes.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No saved {documentType === "quote" ? "quotes" : "invoices"}{" "}
+                    yet
                   </div>
-                  <div className="overflow-auto p-4">
-                    {savedQuotes.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        No saved{" "}
-                        {documentType === "quote" ? "quotes" : "invoices"} yet
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {savedQuotes.map((quote) => (
-                          <div
-                            key={quote.id}
-                            onClick={() => loadQuote(quote)}
-                            className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <div className="font-semibold text-lg">
-                                  {quote.quoteNumber || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600 mt-1">
-                                  Client: {quote.customer?.name || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  Email: {quote.customer?.email || "N/A"}
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-lg font-semibold text-amber-600">
-                                  R{quote.totals?.total?.toFixed(2) || "0.00"}
-                                </div>
-                                {quote.totals?.paid > 0 && (
-                                  <div className="text-sm text-emerald-600 font-semibold">
-                                    Paid: R{quote.totals.paid.toFixed(2)}
-                                  </div>
-                                )}
-                                {quote.totals?.due > 0 && (
-                                  <div className="text-sm text-rose-600 font-semibold">
-                                    Due: R{quote.totals.due.toFixed(2)}
-                                  </div>
-                                )}
-                                <div
-                                  className={`text-xs mt-1 px-2 py-1 rounded ${quote.status === "paid" ? "bg-emerald-100 text-emerald-700" : quote.status === "partially_paid" ? "bg-amber-100 text-amber-700" : quote.status === "pending" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}
-                                >
-                                  {quote.status === "paid"
-                                    ? "Paid"
-                                    : quote.status === "partially_paid"
-                                      ? "Partial"
-                                      : "Pending"}
-                                </div>
-                              </div>
+                ) : (
+                  <div className="space-y-2">
+                    {savedQuotes.map((quote) => (
+                      <div
+                        key={quote.id}
+                        onClick={() => loadQuote(quote)}
+                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="font-semibold text-lg">
+                              {quote.quoteNumber || "N/A"}
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              Client: {quote.customer?.name || "N/A"}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              Email: {quote.customer?.email || "N/A"}
                             </div>
                           </div>
-                        ))}
+                          <div className="text-right">
+                            <div className="text-lg font-semibold text-amber-600">
+                              R{quote.totals?.total?.toFixed(2) || "0.00"}
+                            </div>
+                            {quote.totals?.paid > 0 && (
+                              <div className="text-sm text-emerald-600 font-semibold">
+                                Paid: R{quote.totals.paid.toFixed(2)}
+                              </div>
+                            )}
+                            {quote.totals?.due > 0 && (
+                              <div className="text-sm text-rose-600 font-semibold">
+                                Due: R{quote.totals.due.toFixed(2)}
+                              </div>
+                            )}
+                            <div
+                              className={`text-xs mt-1 px-2 py-1 rounded ${quote.status === "paid" ? "bg-emerald-100 text-emerald-700" : quote.status === "partially_paid" ? "bg-amber-100 text-amber-700" : quote.status === "pending" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}
+                            >
+                              {quote.status === "paid"
+                                ? "Paid"
+                                : quote.status === "partially_paid"
+                                  ? "Partial"
+                                  : "Pending"}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    )}
+                    ))}
                   </div>
-                </div>
+                )}
               </div>
-            )}
-            {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
-            {showPreview && (
-              <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
-                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
-                  {/* Modal header */}
-                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
-                        <Eye className="w-4 h-4 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-sm font-semibold text-[#1e293b]">
-                          {documentType === "quote" ? "Quote" : "Invoice"}{" "}
-                          Preview
-                        </h2>
-                        <p className="text-xs text-[#64748b]">
-                          {quoteNumber || "Draft"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handlePrint}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
-                      >
-                        <Printer className="w-3.5 h-3.5" />
-                        Print
-                      </button>
-                      <button
-                        onClick={handleSavePDF}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        Save PDF
-                      </button>
-                      <button
-                        onClick={() => setShowPreview(false)}
-                        className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
+            </div>
+          </div>
+        )}
 
-                  {/* Scrollable canvas area */}
-                  <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
-                    <div
-                      className="mx-auto bg-white shadow-xl"
-                      style={{ width: "210mm", minHeight: "297mm" }}
-                    >
-                      <TemplateRenderer
-                        templateId={selectedTemplate}
-                        businessInfo={businessInfo}
-                        loading={loading}
-                        invoiceNumber={quoteNumber}
-                        customerName={customerName}
-                        billName={customerName}
-                        billEmail={customerEmail}
-                        billPhone={customerPhone}
-                        billAddress={propertyAddress}
-                        customerEmail={customerEmail}
-                        customerPhone={customerPhone}
-                        customerAddress={propertyAddress}
-                        taxId=""
-                        items={items}
-                        subtotal={subtotal}
-                        totalTax={totalTax}
-                        total={total}
-                        documentType={documentType}
-                        stampText={stampSettings.text}
-                        stampColor={stampSettings.color}
-                        showStampDate={stampSettings.showDate}
-                        showStamp={stampSettings.enabled}
-                        paymentStatus={paymentStatus}
-                      />
-                    </div>
+        {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
+        {showPreview && (
+          <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+              {/* Modal header */}
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
+                    <Eye className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-semibold text-[#1e293b]">
+                      {documentType === "quote" ? "Quote" : "Invoice"} Preview
+                    </h2>
+                    <p className="text-xs text-[#64748b]">
+                      {quoteNumber || "Draft"}
+                    </p>
                   </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handlePrint}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    Print
+                  </button>
+                  <button
+                    onClick={handleSavePDF}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Save PDF
+                  </button>
+                  <button
+                    onClick={() => setShowPreview(false)}
+                    className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            )}
-            {/* ── Alternate Views ──────────────────────────────────────── */}
-            {activeView === "financial-overview" && (
+
+              {/* Scrollable canvas area */}
+              <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
+                <div
+                  className="mx-auto bg-white shadow-xl"
+                  style={{ width: "210mm", minHeight: "297mm" }}
+                >
+                  <TemplateRenderer {...templateProps} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Main scrollable content ──────────────────────────────────── */}
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+          {/* ── Alternate Views ──────────────────────────────────────── */}
+          {activeView === "financial-overview" && (
+            <div className="flex-1 overflow-y-auto p-4">
               <FinancialOverview user={user} />
-            )}
-            {activeView === "history-view" && <HistoryView user={user} />}
-            {activeView === "notes-view" && <NotesView user={user} />}
-            {activeView === "templates" && <Templates user={user} />}
-            {activeView === "home" && <HomeView user={user} />}
+            </div>
+          )}
+          {activeView === "history-view" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <HistoryView user={user} />
+            </div>
+          )}
+          {activeView === "notes-view" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <NotesView user={user} />
+            </div>
+          )}
+          {activeView === "templates" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <Templates user={user} />
+            </div>
+          )}
+          {activeView === "home" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <HomeView user={user} />
+            </div>
+          )}
 
-            {/* ── Quote / Invoice Builder ──────────────────────────────── */}
-            {activeView === "quote" && (
-              <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
-                <div className="space-y-6">
+          {/* ── Quote / Invoice Builder — split layout ──────────────── */}
+          {activeView === "quote" && (
+            <div className="flex-1 overflow-hidden flex min-h-0">
+              {/* ── LEFT: Form panel ─────────────────────────────────── */}
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+                <div className="space-y-5">
                   {/* Tab: Manual / AI */}
-                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
+                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     <div className="flex border-b border-slate-200">
                       <button
                         onClick={() => setInputMode("manual")}
@@ -1535,14 +1530,14 @@ Your Construction Quote System
                         </span>
                       </button>
                     </div>
-                    <div className="p-6">
-                      {inputMode === "ai" && (
+                    {inputMode === "ai" && (
+                      <div className="p-6">
                         <AIInvoiceExtractor
                           onDataExtracted={handleAIDataExtracted}
                           documentType={documentType}
                         />
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
 
                   {inputMode === "manual" && (
@@ -1682,6 +1677,35 @@ Your Construction Quote System
 
                       {/* ── Stepped Form ──────────────────────────────────── */}
                       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        {/* Step indicator */}
+                        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
+                          <div className="flex items-center gap-0">
+                            {steps.map((step, idx) => (
+                              <React.Fragment key={step.number}>
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${currentStep === step.number ? "bg-amber-600 text-white" : currentStep > step.number ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500" : "bg-slate-200 text-slate-400"}`}
+                                  >
+                                    {currentStep > step.number
+                                      ? "✓"
+                                      : step.number}
+                                  </div>
+                                  <span
+                                    className={`text-xs font-medium hidden sm:block ${currentStep === step.number ? "text-amber-600" : currentStep > step.number ? "text-emerald-600" : "text-slate-400"}`}
+                                  >
+                                    {step.title}
+                                  </span>
+                                </div>
+                                {idx < steps.length - 1 && (
+                                  <div
+                                    className={`flex-1 h-px mx-2 ${currentStep > step.number ? "bg-emerald-400" : "bg-slate-200"}`}
+                                  />
+                                )}
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        </div>
+
                         {/* Step 1 – Client Information */}
                         {currentStep === 1 && (
                           <div className="p-8">
@@ -2407,48 +2431,67 @@ Your Construction Quote System
                     </>
                   )}
                 </div>
+              </div>
 
-                {/* ── Print / PDF Preview (hidden on-screen) ────────────── */}
-                <div
-                  id="print-area"
-                  className="hidden print:block bg-white shadow-2xl origin-top"
-                  style={{
-                    width: "210mm",
-                    minHeight: "297mm",
-                    transform: "scale(0.75)",
-                    transformOrigin: "top center",
-                  }}
-                >
-                  <TemplateRenderer
-                    templateId={selectedTemplate}
-                    businessInfo={businessInfo}
-                    loading={loading}
-                    invoiceNumber={quoteNumber}
-                    customerName={customerName}
-                    billName={customerName}
-                    billEmail={customerEmail}
-                    billPhone={customerPhone}
-                    billAddress={propertyAddress}
-                    customerEmail={customerEmail}
-                    customerPhone={customerPhone}
-                    customerAddress={propertyAddress}
-                    taxId=""
-                    items={items}
-                    subtotal={subtotal}
-                    totalTax={totalTax}
-                    total={total}
-                    documentType={documentType}
-                    stampText={stampSettings.text}
-                    stampColor={stampSettings.color}
-                    showStampDate={stampSettings.showDate}
-                    showStamp={stampSettings.enabled}
-                    paymentStatus={paymentStatus}
+              {/* ── RIGHT: Live preview panel ─────────────────────────────── */}
+              <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-stone-200 bg-stone-100 overflow-hidden">
+                {/* Panel header */}
+                <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-stone-200 flex-shrink-0">
+                  <TemplateSelector
+                    selectedTemplate={selectedTemplate}
+                    onTemplateChange={setSelectedTemplate}
                   />
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={handlePrint}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-stone-200 text-stone-700 text-xs font-medium rounded-lg hover:bg-stone-50 transition-colors"
+                    >
+                      <Printer className="w-3 h-3" />
+                      Print
+                    </button>
+                    <button
+                      onClick={handleSavePDF}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700 transition-colors"
+                    >
+                      <Download className="w-3 h-3" />
+                      PDF
+                    </button>
+                  </div>
+                </div>
+
+                {/* Scrollable preview canvas */}
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div
+                    className="bg-white shadow-lg rounded origin-top"
+                    style={{
+                      width: "210mm",
+                      minHeight: "297mm",
+                      transform: "scale(0.44)",
+                      transformOrigin: "top left",
+                      marginBottom: `calc((297mm * 0.44) - 297mm)`,
+                    }}
+                  >
+                    <TemplateRenderer {...templateProps} />
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* ── Print / PDF Preview (hidden on-screen) ────────────── */}
+      <div
+        id="print-area"
+        className="hidden print:block bg-white shadow-2xl origin-top"
+        style={{
+          width: "210mm",
+          minHeight: "297mm",
+          transform: "scale(0.75)",
+          transformOrigin: "top center",
+        }}
+      >
+        <TemplateRenderer {...templateProps} />
       </div>
     </div>
   );

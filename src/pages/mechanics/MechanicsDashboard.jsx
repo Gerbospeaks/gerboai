@@ -795,13 +795,13 @@ const MechanicsDashboard = () => {
         className:
           "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
       },
-       {
-            label: "Preview",
-            icon: Eye,
-            onClick: () => setShowPreview(true),
-            className:
-              "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-          },
+    {
+      label: "Preview",
+      icon: Eye,
+      onClick: () => setShowPreview(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
     {
       label: "Print",
       icon: Printer,
@@ -953,6 +953,43 @@ const MechanicsDashboard = () => {
     { number: 4, title: "Services", icon: Wrench },
     { number: 5, title: "Payment", icon: CreditCard },
   ];
+
+  // ── Shared template props ─────────────────────────────────────────────────
+  const templateProps = {
+    templateId: selectedTemplate,
+    businessInfo,
+    loading,
+    jobCardNumber,
+    customerName,
+    billName,
+    billEmail,
+    billPhone,
+    billAddress,
+    merchant_code,
+    customerCompany: "",
+    customerEmail,
+    customerPhone,
+    customerAddress,
+    vehicleReg,
+    vehicleMake,
+    vehicleModel,
+    vehicleYear,
+    vehicleVin,
+    vehicleMileage,
+    preAuth,
+    authCode,
+    items,
+    subtotal,
+    vat,
+    total,
+    merchantCode: merchant_code,
+    serviceType: "SERVICE",
+    documentType,
+    stampText: stampSettings.text,
+    stampColor: stampSettings.color,
+    showStampDate: stampSettings.showDate,
+    showStamp: stampSettings.enabled,
+  };
 
   // ── Home view ─────────────────────────────────────────────────────────────
   const HomeViewLocal = () => (
@@ -1209,41 +1246,7 @@ const MechanicsDashboard = () => {
         className="hidden print:block bg-white"
         style={{ width: "210mm", minHeight: "297mm" }}
       >
-        <TemplateRenderer
-          templateId={selectedTemplate}
-          businessInfo={businessInfo}
-          loading={loading}
-          jobCardNumber={jobCardNumber}
-          customerName={customerName}
-          billName={billName}
-          billEmail={billEmail}
-          billPhone={billPhone}
-          billAddress={billAddress}
-          merchant_code={merchant_code}
-          customerCompany=""
-          customerEmail={customerEmail}
-          customerPhone={customerPhone}
-          customerAddress={customerAddress}
-          vehicleReg={vehicleReg}
-          vehicleMake={vehicleMake}
-          vehicleModel={vehicleModel}
-          vehicleYear={vehicleYear}
-          vehicleVin={vehicleVin}
-          vehicleMileage={vehicleMileage}
-          preAuth={preAuth}
-          authCode={authCode}
-          items={items}
-          subtotal={subtotal}
-          vat={vat}
-          total={total}
-          merchantCode={merchant_code}
-          serviceType="SERVICE"
-          documentType={documentType}
-          stampText={stampSettings.text}
-          stampColor={stampSettings.color}
-          showStampDate={stampSettings.showDate}
-          showStamp={stampSettings.enabled}
-        />
+        <TemplateRenderer {...templateProps} />
       </div>
 
       <div className="flex-1 flex overflow-hidden min-h-0">
@@ -1417,11 +1420,11 @@ const MechanicsDashboard = () => {
               </div>
             </div>
           )}
-          {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
+
+          {/* ── Invoice Preview Modal (fullscreen, for header Preview button) ── */}
           {showPreview && (
             <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
               <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
-                {/* Modal header */}
                 <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
                   <div className="flex items-center gap-3">
                     <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
@@ -1459,53 +1462,18 @@ const MechanicsDashboard = () => {
                     </button>
                   </div>
                 </div>
-
-                {/* Scrollable canvas area */}
                 <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                   <div
                     className="mx-auto bg-white shadow-xl"
                     style={{ width: "210mm", minHeight: "297mm" }}
                   >
-                    <TemplateRenderer
-                      templateId={selectedTemplate}
-                      businessInfo={businessInfo}
-                      loading={loading}
-                      jobCardNumber={jobCardNumber}
-                      customerName={customerName}
-                      billName={billName}
-                      billEmail={billEmail}
-                      billPhone={billPhone}
-                      billAddress={billAddress}
-                      merchant_code={merchant_code}
-                      customerCompany=""
-                      customerEmail={customerEmail}
-                      customerPhone={customerPhone}
-                      customerAddress={customerAddress}
-                      vehicleReg={vehicleReg}
-                      vehicleMake={vehicleMake}
-                      vehicleModel={vehicleModel}
-                      vehicleYear={vehicleYear}
-                      vehicleVin={vehicleVin}
-                      vehicleMileage={vehicleMileage}
-                      preAuth={preAuth}
-                      authCode={authCode}
-                      items={items}
-                      subtotal={subtotal}
-                      vat={vat}
-                      total={total}
-                      merchantCode={merchant_code}
-                      serviceType="SERVICE"
-                      documentType={documentType}
-                      stampText={stampSettings.text}
-                      stampColor={stampSettings.color}
-                      showStampDate={stampSettings.showDate}
-                      showStamp={stampSettings.enabled}
-                    />
+                    <TemplateRenderer {...templateProps} />
                   </div>
                 </div>
               </div>
             </div>
           )}
+
           {/* ── Views ──────────────────────────────────────────────────────── */}
           {activeView === "home" && <HomeViewLocal />}
           {activeView === "financial-overview" && (
@@ -1539,798 +1507,844 @@ const MechanicsDashboard = () => {
             </div>
           )}
 
-          {/* ── Invoice / Job Card Builder ─────────────────────────────────── */}
+          {/* ── Invoice / Job Card Builder — split layout ──────────────────── */}
           {activeView === "invoice" && (
-            <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
-              <div className="max-w-4xl mx-auto space-y-5">
-                {/* Summary stat cards */}
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    {
-                      label: "Total Amount",
-                      value: `R${total.toFixed(2)}`,
-                      icon: Receipt,
-                      iconBg: "bg-[#eff6ff]",
-                      iconColor: "text-[#2563eb]",
-                      textColor: "text-[#1e293b]",
-                    },
-                    {
-                      label: "Paid",
-                      value: `R${paymentStatus.totalPaid.toFixed(2)}`,
-                      icon: CheckSquare,
-                      iconBg:
-                        paymentStatus.totalPaid > 0
-                          ? "bg-[#dcfce7]"
-                          : "bg-[#f1f5f9]",
-                      iconColor:
-                        paymentStatus.totalPaid > 0
-                          ? "text-[#059669]"
-                          : "text-[#94a3b8]",
-                      textColor:
-                        paymentStatus.totalPaid > 0
-                          ? "text-[#059669]"
-                          : "text-[#1e293b]",
-                    },
-                    {
-                      label: "Balance Due",
-                      value: `R${paymentStatus.balanceDue.toFixed(2)}`,
-                      icon: Wallet,
-                      iconBg:
-                        paymentStatus.balanceDue <= 0
-                          ? "bg-[#dcfce7]"
-                          : "bg-[#fef2f2]",
-                      iconColor:
-                        paymentStatus.balanceDue <= 0
-                          ? "text-[#059669]"
-                          : "text-[#dc2626]",
-                      textColor:
-                        paymentStatus.balanceDue <= 0
-                          ? "text-[#059669]"
-                          : "text-[#dc2626]",
-                    },
-                  ].map(
-                    ({
-                      label,
-                      value,
-                      icon: Icon,
-                      iconBg,
-                      iconColor,
-                      textColor,
-                    }) => (
-                      <div
-                        key={label}
-                        className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm"
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">
-                            {label}
-                          </span>
-                          <div
-                            className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center`}
-                          >
-                            <Icon className={`w-4 h-4 ${iconColor}`} />
+            <div className="flex-1 overflow-hidden flex min-h-0">
+              {/* ── LEFT: Form panel ───────────────────────────────────────── */}
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+                <div className="space-y-5">
+                  {/* Summary stat cards */}
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      {
+                        label: "Total Amount",
+                        value: `R${total.toFixed(2)}`,
+                        icon: Receipt,
+                        iconBg: "bg-[#eff6ff]",
+                        iconColor: "text-[#2563eb]",
+                        textColor: "text-[#1e293b]",
+                      },
+                      {
+                        label: "Paid",
+                        value: `R${paymentStatus.totalPaid.toFixed(2)}`,
+                        icon: CheckSquare,
+                        iconBg:
+                          paymentStatus.totalPaid > 0
+                            ? "bg-[#dcfce7]"
+                            : "bg-[#f1f5f9]",
+                        iconColor:
+                          paymentStatus.totalPaid > 0
+                            ? "text-[#059669]"
+                            : "text-[#94a3b8]",
+                        textColor:
+                          paymentStatus.totalPaid > 0
+                            ? "text-[#059669]"
+                            : "text-[#1e293b]",
+                      },
+                      {
+                        label: "Balance Due",
+                        value: `R${paymentStatus.balanceDue.toFixed(2)}`,
+                        icon: Wallet,
+                        iconBg:
+                          paymentStatus.balanceDue <= 0
+                            ? "bg-[#dcfce7]"
+                            : "bg-[#fef2f2]",
+                        iconColor:
+                          paymentStatus.balanceDue <= 0
+                            ? "text-[#059669]"
+                            : "text-[#dc2626]",
+                        textColor:
+                          paymentStatus.balanceDue <= 0
+                            ? "text-[#059669]"
+                            : "text-[#dc2626]",
+                      },
+                    ].map(
+                      ({
+                        label,
+                        value,
+                        icon: Icon,
+                        iconBg,
+                        iconColor,
+                        textColor,
+                      }) => (
+                        <div
+                          key={label}
+                          className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+                              {label}
+                            </span>
+                            <div
+                              className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center`}
+                            >
+                              <Icon className={`w-4 h-4 ${iconColor}`} />
+                            </div>
+                          </div>
+                          <div className={`text-xl font-bold ${textColor}`}>
+                            {value}
                           </div>
                         </div>
-                        <div className={`text-xl font-bold ${textColor}`}>
-                          {value}
-                        </div>
-                      </div>
-                    ),
-                  )}
-                </div>
-
-                {/* Payment status banner */}
-                {jobCardId && (
-                  <div
-                    className={`px-5 py-3.5 rounded-xl border flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-[#f0fdf4] border-[#bbf7d0]" : paymentStatus.status === "partially_paid" ? "bg-[#fffbeb] border-[#fde68a]" : "bg-[#fff7ed] border-[#fed7aa]"}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center ${paymentStatus.status === "paid" ? "bg-[#dcfce7]" : paymentStatus.status === "partially_paid" ? "bg-[#fef3c7]" : "bg-[#ffedd5]"}`}
-                      >
-                        <CreditCard
-                          className={`w-4 h-4 ${paymentStatus.status === "paid" ? "text-[#059669]" : paymentStatus.status === "partially_paid" ? "text-[#d97706]" : "text-[#ea580c]"}`}
-                        />
-                      </div>
-                      <div
-                        className={`text-sm font-semibold ${paymentStatus.status === "paid" ? "text-[#166534]" : paymentStatus.status === "partially_paid" ? "text-[#92400e]" : "text-[#9a3412]"}`}
-                      >
-                        {paymentStatus.status === "paid"
-                          ? "Invoice Fully Paid"
-                          : paymentStatus.status === "partially_paid"
-                            ? `R${paymentStatus.totalPaid.toFixed(2)} paid · R${paymentStatus.balanceDue.toFixed(2)} remaining`
-                            : `Payment Pending — R${paymentStatus.balanceDue.toFixed(2)} due`}
-                      </div>
-                    </div>
-                    {paymentStatus.status !== "paid" && (
-                      <button
-                        onClick={handleProcessPayment}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-sm font-medium rounded-lg hover:bg-[#f8fafc] transition-colors shadow-sm"
-                      >
-                        <CreditCard className="w-4 h-4" />
-                        Record Payment
-                      </button>
+                      ),
                     )}
                   </div>
-                )}
 
-                {/* Main card */}
-                <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
-                  {/* Input mode tabs */}
-                  <div className="flex border-b border-[#e2e8f0] bg-[#f8fafc]">
-                    <button
-                      onClick={() => setInputMode("manual")}
-                      className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "manual" ? "border-[#2563eb] text-[#2563eb] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
+                  {/* Payment status banner */}
+                  {jobCardId && (
+                    <div
+                      className={`px-5 py-3.5 rounded-xl border flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-[#f0fdf4] border-[#bbf7d0]" : paymentStatus.status === "partially_paid" ? "bg-[#fffbeb] border-[#fde68a]" : "bg-[#fff7ed] border-[#fed7aa]"}`}
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                      Manual Entry
-                    </button>
-                    <button
-                      onClick={() => setInputMode("ai")}
-                      className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "ai" ? "border-[#7c3aed] text-[#7c3aed] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      AI Assistant
-                    </button>
-                  </div>
-
-                  {inputMode === "ai" && (
-                    <div className="p-6 border-b border-[#e2e8f0]">
-                      <AIInvoiceExtractor
-                        onDataExtracted={handleAIDataExtracted}
-                        documentType={documentType}
-                      />
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center ${paymentStatus.status === "paid" ? "bg-[#dcfce7]" : paymentStatus.status === "partially_paid" ? "bg-[#fef3c7]" : "bg-[#ffedd5]"}`}
+                        >
+                          <CreditCard
+                            className={`w-4 h-4 ${paymentStatus.status === "paid" ? "text-[#059669]" : paymentStatus.status === "partially_paid" ? "text-[#d97706]" : "text-[#ea580c]"}`}
+                          />
+                        </div>
+                        <div
+                          className={`text-sm font-semibold ${paymentStatus.status === "paid" ? "text-[#166534]" : paymentStatus.status === "partially_paid" ? "text-[#92400e]" : "text-[#9a3412]"}`}
+                        >
+                          {paymentStatus.status === "paid"
+                            ? "Invoice Fully Paid"
+                            : paymentStatus.status === "partially_paid"
+                              ? `R${paymentStatus.totalPaid.toFixed(2)} paid · R${paymentStatus.balanceDue.toFixed(2)} remaining`
+                              : `Payment Pending — R${paymentStatus.balanceDue.toFixed(2)} due`}
+                        </div>
+                      </div>
+                      {paymentStatus.status !== "paid" && (
+                        <button
+                          onClick={handleProcessPayment}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-sm font-medium rounded-lg hover:bg-[#f8fafc] transition-colors shadow-sm"
+                        >
+                          <CreditCard className="w-4 h-4" />
+                          Record Payment
+                        </button>
+                      )}
                     </div>
                   )}
 
-                  {inputMode === "manual" && (
-                    <>
-                      {/* Step indicator */}
-                      <div className="px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
-                        <div className="flex items-center gap-0">
-                          {steps.map((step, idx) => (
-                            <React.Fragment key={step.number}>
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${currentStep === step.number ? "bg-[#2563eb] text-white" : currentStep > step.number ? "bg-[#dcfce7] text-[#059669] ring-1 ring-[#059669]" : "bg-[#e2e8f0] text-[#94a3b8]"}`}
-                                >
-                                  {currentStep > step.number
-                                    ? "✓"
-                                    : step.number}
-                                </div>
-                                <span
-                                  className={`text-xs font-medium hidden sm:block ${currentStep === step.number ? "text-[#2563eb]" : currentStep > step.number ? "text-[#059669]" : "text-[#94a3b8]"}`}
-                                >
-                                  {step.title}
-                                </span>
-                              </div>
-                              {idx < steps.length - 1 && (
-                                <div
-                                  className={`flex-1 h-px mx-2 ${currentStep > step.number ? "bg-[#059669]" : "bg-[#e2e8f0]"}`}
-                                />
-                              )}
-                            </React.Fragment>
-                          ))}
-                        </div>
+                  {/* Main card */}
+                  <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
+                    {/* Input mode tabs */}
+                    <div className="flex border-b border-[#e2e8f0] bg-[#f8fafc]">
+                      <button
+                        onClick={() => setInputMode("manual")}
+                        className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "manual" ? "border-[#2563eb] text-[#2563eb] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
+                        </svg>
+                        Manual Entry
+                      </button>
+                      <button
+                        onClick={() => setInputMode("ai")}
+                        className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "ai" ? "border-[#7c3aed] text-[#7c3aed] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        AI Assistant
+                      </button>
+                    </div>
+
+                    {inputMode === "ai" && (
+                      <div className="p-6 border-b border-[#e2e8f0]">
+                        <AIInvoiceExtractor
+                          onDataExtracted={handleAIDataExtracted}
+                          documentType={documentType}
+                        />
                       </div>
+                    )}
 
-                      {/* Step content */}
-                      <div className="p-6">
-                        {/* Step 1 – Invoice To */}
-                        {currentStep === 1 && (
-                          <div>
-                            <div className="flex items-center gap-3 mb-5">
-                              <div className="w-9 h-9 bg-[#eff6ff] rounded-lg flex items-center justify-center">
-                                <Users className="w-5 h-5 text-[#2563eb]" />
-                              </div>
-                              <div>
-                                <h2 className="text-base font-semibold text-[#1e293b]">
-                                  Invoice To
-                                </h2>
-                                <p className="text-xs text-[#64748b]">
-                                  Client details for this job card
-                                </p>
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              {[
-                                {
-                                  label: "Customer Name",
-                                  value: customerName,
-                                  set: setCustomerName,
-                                  placeholder: "Enter customer name",
-                                  required: true,
-                                },
-                                {
-                                  label: "Customer ID",
-                                  value: merchant_code,
-                                  set: setCustomerId,
-                                  placeholder: "Customer ID",
-                                },
-                                {
-                                  label: "Email",
-                                  value: customerEmail,
-                                  set: setCustomerEmail,
-                                  type: "email",
-                                  placeholder: "email@example.com",
-                                  required: true,
-                                },
-                                {
-                                  label: "Phone",
-                                  value: customerPhone,
-                                  set: setCustomerPhone,
-                                  type: "tel",
-                                  placeholder: "082 123 4567",
-                                  required: true,
-                                },
-                              ].map(
-                                ({
-                                  label,
-                                  value,
-                                  set,
-                                  placeholder,
-                                  type = "text",
-                                  required,
-                                }) => (
-                                  <div key={label}>
-                                    <label className={labelCls}>
-                                      {label}{" "}
-                                      {required && (
-                                        <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                          *
-                                        </span>
-                                      )}
-                                    </label>
-                                    <input
-                                      type={type}
-                                      value={value}
-                                      onChange={(e) => set(e.target.value)}
-                                      placeholder={placeholder}
-                                      className={inputCls}
-                                    />
-                                  </div>
-                                ),
-                              )}
-                              <div className="col-span-1 sm:col-span-2">
-                                <label className={labelCls}>
-                                  Address{" "}
-                                  <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                    *
-                                  </span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={customerAddress}
-                                  onChange={(e) =>
-                                    setCustomerAddress(e.target.value)
-                                  }
-                                  placeholder="Street address, City, Postal Code"
-                                  className={inputCls}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 2 – Bill To */}
-                        {currentStep === 2 && (
-                          <div>
-                            <div className="flex items-center gap-3 mb-5">
-                              <div className="w-9 h-9 bg-[#f0fdf4] rounded-lg flex items-center justify-center">
-                                <FileText className="w-5 h-5 text-[#059669]" />
-                              </div>
-                              <div>
-                                <h2 className="text-base font-semibold text-[#1e293b]">
-                                  Bill To
-                                </h2>
-                                <p className="text-xs text-[#64748b]">
-                                  Billing contact (may differ from client)
-                                </p>
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              {[
-                                {
-                                  label: "Billing Name",
-                                  value: billName,
-                                  set: setBillName,
-                                  placeholder: "Billing contact name",
-                                  required: true,
-                                },
-                                {
-                                  label: "Email",
-                                  value: billEmail,
-                                  set: setBillEmail,
-                                  placeholder: "billing@example.com",
-                                  type: "email",
-                                },
-                                {
-                                  label: "Phone",
-                                  value: billPhone,
-                                  set: setBillPhone,
-                                  placeholder: "082 123 4567",
-                                  type: "tel",
-                                },
-                              ].map(
-                                ({
-                                  label,
-                                  value,
-                                  set,
-                                  placeholder,
-                                  type = "text",
-                                  required,
-                                }) => (
-                                  <div key={label}>
-                                    <label className={labelCls}>
-                                      {label}{" "}
-                                      {required && (
-                                        <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                          *
-                                        </span>
-                                      )}
-                                    </label>
-                                    <input
-                                      type={type}
-                                      value={value}
-                                      onChange={(e) => set(e.target.value)}
-                                      placeholder={placeholder}
-                                      className={inputCls}
-                                    />
-                                  </div>
-                                ),
-                              )}
-                              <div className="col-span-1 sm:col-span-2">
-                                <label className={labelCls}>
-                                  Billing Address
-                                </label>
-                                <input
-                                  type="text"
-                                  value={billAddress}
-                                  onChange={(e) =>
-                                    setBillAddress(e.target.value)
-                                  }
-                                  placeholder="Billing address if different"
-                                  className={inputCls}
-                                />
-                              </div>
-                            </div>
-                            <div className="mt-4 p-3.5 bg-[#eff6ff] border border-[#bfdbfe] rounded-lg">
-                              <button
-                                onClick={() => {
-                                  setBillName(customerName);
-                                  setBillEmail(customerEmail);
-                                  setBillPhone(customerPhone);
-                                  setBillAddress(customerAddress);
-                                }}
-                                className="flex items-center gap-2 text-[#2563eb] hover:text-[#1d4ed8] text-sm font-medium transition-colors"
-                              >
-                                <Users className="w-4 h-4" />
-                                Copy from Client Information
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 3 – Vehicle */}
-                        {currentStep === 3 && (
-                          <div>
-                            <div className="flex items-center gap-3 mb-5">
-                              <div className="w-9 h-9 bg-[#f0f9ff] rounded-lg flex items-center justify-center">
-                                <Car className="w-5 h-5 text-[#0284c7]" />
-                              </div>
-                              <div>
-                                <h2 className="text-base font-semibold text-[#1e293b]">
-                                  Vehicle Information
-                                </h2>
-                                <p className="text-xs text-[#64748b]">
-                                  Enter vehicle details and authorization codes
-                                </p>
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              {[
-                                {
-                                  label: "Make",
-                                  value: vehicleMake,
-                                  set: setVehicleMake,
-                                  placeholder: "Toyota",
-                                  required: true,
-                                },
-                                {
-                                  label: "Model",
-                                  value: vehicleModel,
-                                  set: setVehicleModel,
-                                  placeholder: "Hilux",
-                                  required: true,
-                                },
-                                {
-                                  label: "Year",
-                                  value: vehicleYear,
-                                  set: setVehicleYear,
-                                  placeholder: "2020",
-                                  required: true,
-                                },
-                                {
-                                  label: "Registration",
-                                  value: vehicleReg,
-                                  set: setVehicleReg,
-                                  placeholder: "ABC 123 GP",
-                                  required: true,
-                                },
-                                {
-                                  label: "VIN",
-                                  value: vehicleVin,
-                                  set: setVehicleVin,
-                                  placeholder: "1HGBH41JXMN109186",
-                                },
-                                {
-                                  label: "Mileage (km)",
-                                  value: vehicleMileage,
-                                  set: setVehicleMileage,
-                                  placeholder: "45000",
-                                  required: true,
-                                },
-                                {
-                                  label: "Pre Auth",
-                                  value: preAuth,
-                                  set: setPreAuth,
-                                  placeholder: "AUTH123",
-                                },
-                                {
-                                  label: "Auth Code",
-                                  value: authCode,
-                                  set: setAuthCode,
-                                  placeholder: "456789",
-                                },
-                              ].map(
-                                ({
-                                  label,
-                                  value,
-                                  set,
-                                  placeholder,
-                                  required,
-                                }) => (
-                                  <div key={label}>
-                                    <label className={labelCls}>
-                                      {label}{" "}
-                                      {required && (
-                                        <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                          *
-                                        </span>
-                                      )}
-                                    </label>
-                                    <input
-                                      type="text"
-                                      value={value}
-                                      onChange={(e) => set(e.target.value)}
-                                      placeholder={placeholder}
-                                      className={inputCls}
-                                    />
-                                  </div>
-                                ),
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 4 – Services & Parts */}
-                        {currentStep === 4 && (
-                          <div>
-                            <div className="flex items-center gap-3 mb-5">
-                              <div className="w-9 h-9 bg-[#f8fafc] rounded-lg flex items-center justify-center">
-                                <Wrench className="w-5 h-5 text-[#475569]" />
-                              </div>
-                              <div>
-                                <h2 className="text-base font-semibold text-[#1e293b]">
-                                  Services & Parts
-                                </h2>
-                                <p className="text-xs text-[#64748b]">
-                                  Add services and parts to the invoice
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Add item form */}
-                            <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-5">
-                              <h3 className="text-sm font-semibold text-[#374151] mb-4 flex items-center gap-2">
-                                <Plus className="w-4 h-4 text-[#2563eb]" />
-                                Add New Item
-                              </h3>
-                              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                                <div>
-                                  <label className={labelCls}>Type</label>
-                                  <select
-                                    value={newItem.type}
-                                    onChange={(e) =>
-                                      setNewItem({
-                                        ...newItem,
-                                        type: e.target.value,
-                                      })
-                                    }
-                                    className={selectCls}
+                    {inputMode === "manual" && (
+                      <>
+                        {/* Step indicator */}
+                        <div className="px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
+                          <div className="flex items-center gap-0">
+                            {steps.map((step, idx) => (
+                              <React.Fragment key={step.number}>
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${currentStep === step.number ? "bg-[#2563eb] text-white" : currentStep > step.number ? "bg-[#dcfce7] text-[#059669] ring-1 ring-[#059669]" : "bg-[#e2e8f0] text-[#94a3b8]"}`}
                                   >
-                                    <option value="Labor">Labor</option>
-                                    <option value="Parts">Parts</option>
-                                  </select>
+                                    {currentStep > step.number
+                                      ? "✓"
+                                      : step.number}
+                                  </div>
+                                  <span
+                                    className={`text-xs font-medium hidden sm:block ${currentStep === step.number ? "text-[#2563eb]" : currentStep > step.number ? "text-[#059669]" : "text-[#94a3b8]"}`}
+                                  >
+                                    {step.title}
+                                  </span>
                                 </div>
-                                <div className="sm:col-span-2">
+                                {idx < steps.length - 1 && (
+                                  <div
+                                    className={`flex-1 h-px mx-2 ${currentStep > step.number ? "bg-[#059669]" : "bg-[#e2e8f0]"}`}
+                                  />
+                                )}
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Step content */}
+                        <div className="p-6">
+                          {/* Step 1 – Invoice To */}
+                          {currentStep === 1 && (
+                            <div>
+                              <div className="flex items-center gap-3 mb-5">
+                                <div className="w-9 h-9 bg-[#eff6ff] rounded-lg flex items-center justify-center">
+                                  <Users className="w-5 h-5 text-[#2563eb]" />
+                                </div>
+                                <div>
+                                  <h2 className="text-base font-semibold text-[#1e293b]">
+                                    Invoice To
+                                  </h2>
+                                  <p className="text-xs text-[#64748b]">
+                                    Client details for this job card
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {[
+                                  {
+                                    label: "Customer Name",
+                                    value: customerName,
+                                    set: setCustomerName,
+                                    placeholder: "Enter customer name",
+                                    required: true,
+                                  },
+                                  {
+                                    label: "Customer ID",
+                                    value: merchant_code,
+                                    set: setCustomerId,
+                                    placeholder: "Customer ID",
+                                  },
+                                  {
+                                    label: "Email",
+                                    value: customerEmail,
+                                    set: setCustomerEmail,
+                                    type: "email",
+                                    placeholder: "email@example.com",
+                                    required: true,
+                                  },
+                                  {
+                                    label: "Phone",
+                                    value: customerPhone,
+                                    set: setCustomerPhone,
+                                    type: "tel",
+                                    placeholder: "082 123 4567",
+                                    required: true,
+                                  },
+                                ].map(
+                                  ({
+                                    label,
+                                    value,
+                                    set,
+                                    placeholder,
+                                    type = "text",
+                                    required,
+                                  }) => (
+                                    <div key={label}>
+                                      <label className={labelCls}>
+                                        {label}{" "}
+                                        {required && (
+                                          <span className="text-[#dc2626] normal-case tracking-normal font-normal">
+                                            *
+                                          </span>
+                                        )}
+                                      </label>
+                                      <input
+                                        type={type}
+                                        value={value}
+                                        onChange={(e) => set(e.target.value)}
+                                        placeholder={placeholder}
+                                        className={inputCls}
+                                      />
+                                    </div>
+                                  ),
+                                )}
+                                <div className="col-span-1 sm:col-span-2">
                                   <label className={labelCls}>
-                                    Description
+                                    Address{" "}
+                                    <span className="text-[#dc2626] normal-case tracking-normal font-normal">
+                                      *
+                                    </span>
                                   </label>
                                   <input
                                     type="text"
-                                    placeholder="Work description"
-                                    value={newItem.description}
+                                    value={customerAddress}
                                     onChange={(e) =>
-                                      setNewItem({
-                                        ...newItem,
-                                        description: e.target.value,
-                                      })
+                                      setCustomerAddress(e.target.value)
                                     }
-                                    className={inputCls}
-                                  />
-                                </div>
-                                <div>
-                                  <label className={labelCls}>Rate (R)</label>
-                                  <input
-                                    type="number"
-                                    placeholder="0.00"
-                                    value={newItem.rate}
-                                    onChange={(e) =>
-                                      setNewItem({
-                                        ...newItem,
-                                        rate: e.target.value,
-                                      })
-                                    }
-                                    className={inputCls}
-                                  />
-                                </div>
-                                <div>
-                                  <label className={labelCls}>Qty</label>
-                                  <input
-                                    type="number"
-                                    placeholder="1"
-                                    value={newItem.qty}
-                                    onChange={(e) =>
-                                      setNewItem({
-                                        ...newItem,
-                                        qty: e.target.value,
-                                      })
-                                    }
+                                    placeholder="Street address, City, Postal Code"
                                     className={inputCls}
                                   />
                                 </div>
                               </div>
-                              <button
-                                onClick={handleAddItem}
-                                className="mt-3 flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors"
-                              >
-                                <Plus className="w-4 h-4" />
-                                Add Item
-                              </button>
                             </div>
+                          )}
 
-                            {/* Items table */}
-                            {items.length > 0 ? (
-                              <div className="border border-[#e2e8f0] rounded-xl overflow-hidden mb-5">
-                                <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center justify-between">
-                                  <span className="text-sm font-semibold text-[#374151]">
-                                    Line Items
-                                  </span>
-                                  <span className="text-xs text-[#64748b] bg-[#e2e8f0] px-2 py-0.5 rounded-full">
-                                    {items.length} items
-                                  </span>
+                          {/* Step 2 – Bill To */}
+                          {currentStep === 2 && (
+                            <div>
+                              <div className="flex items-center gap-3 mb-5">
+                                <div className="w-9 h-9 bg-[#f0fdf4] rounded-lg flex items-center justify-center">
+                                  <FileText className="w-5 h-5 text-[#059669]" />
                                 </div>
-                                <div className="overflow-x-auto">
-                                  <table className="w-full">
-                                    <thead>
-                                      <tr className="border-b border-[#e2e8f0]">
-                                        {[
-                                          "Type",
-                                          "Description",
-                                          "Rate",
-                                          "Qty",
-                                          "Amount",
-                                          "",
-                                        ].map((h) => (
-                                          <th
-                                            key={h}
-                                            className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
-                                          >
-                                            {h}
-                                          </th>
-                                        ))}
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {items.map((item, index) => (
-                                        <tr
-                                          key={index}
-                                          className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
-                                        >
-                                          <td className="px-4 py-3">
-                                            <span
-                                              className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${item.type === "Labor" ? "bg-[#eff6ff] text-[#1d4ed8]" : "bg-[#f0fdf4] text-[#166534]"}`}
-                                            >
-                                              {item.type}
-                                            </span>
-                                          </td>
-                                          <td className="px-4 py-3 text-sm font-medium text-[#374151]">
-                                            {item.description}
-                                          </td>
-                                          <td className="px-4 py-3 text-sm text-[#374151]">
-                                            R{item.rate.toFixed(2)}
-                                          </td>
-                                          <td className="px-4 py-3 text-sm text-[#374151]">
-                                            {item.qty}
-                                          </td>
-                                          <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
-                                            R{item.amount.toFixed(2)}
-                                          </td>
-                                          <td className="px-4 py-3">
-                                            <button
-                                              onClick={() =>
-                                                handleRemoveItem(index)
-                                              }
-                                              className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all"
-                                            >
-                                              <X className="w-3.5 h-3.5" />
-                                            </button>
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
+                                <div>
+                                  <h2 className="text-base font-semibold text-[#1e293b]">
+                                    Bill To
+                                  </h2>
+                                  <p className="text-xs text-[#64748b]">
+                                    Billing contact (may differ from client)
+                                  </p>
                                 </div>
-                                {/* Totals footer */}
-                                <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-                                  <div className="flex flex-col items-end gap-1 text-sm">
-                                    <div className="flex justify-between w-44 text-[#64748b]">
-                                      <span>Subtotal</span>
-                                      <span className="font-medium text-[#374151]">
-                                        R{subtotal.toFixed(2)}
-                                      </span>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {[
+                                  {
+                                    label: "Billing Name",
+                                    value: billName,
+                                    set: setBillName,
+                                    placeholder: "Billing contact name",
+                                    required: true,
+                                  },
+                                  {
+                                    label: "Email",
+                                    value: billEmail,
+                                    set: setBillEmail,
+                                    placeholder: "billing@example.com",
+                                    type: "email",
+                                  },
+                                  {
+                                    label: "Phone",
+                                    value: billPhone,
+                                    set: setBillPhone,
+                                    placeholder: "082 123 4567",
+                                    type: "tel",
+                                  },
+                                ].map(
+                                  ({
+                                    label,
+                                    value,
+                                    set,
+                                    placeholder,
+                                    type = "text",
+                                    required,
+                                  }) => (
+                                    <div key={label}>
+                                      <label className={labelCls}>
+                                        {label}{" "}
+                                        {required && (
+                                          <span className="text-[#dc2626] normal-case tracking-normal font-normal">
+                                            *
+                                          </span>
+                                        )}
+                                      </label>
+                                      <input
+                                        type={type}
+                                        value={value}
+                                        onChange={(e) => set(e.target.value)}
+                                        placeholder={placeholder}
+                                        className={inputCls}
+                                      />
                                     </div>
-                                    <div className="flex justify-between w-44 text-[#64748b]">
-                                      <span>VAT (0%)</span>
-                                      <span className="font-medium text-[#374151]">
-                                        R{vat.toFixed(2)}
-                                      </span>
+                                  ),
+                                )}
+                                <div className="col-span-1 sm:col-span-2">
+                                  <label className={labelCls}>
+                                    Billing Address
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={billAddress}
+                                    onChange={(e) =>
+                                      setBillAddress(e.target.value)
+                                    }
+                                    placeholder="Billing address if different"
+                                    className={inputCls}
+                                  />
+                                </div>
+                              </div>
+                              <div className="mt-4 p-3.5 bg-[#eff6ff] border border-[#bfdbfe] rounded-lg">
+                                <button
+                                  onClick={() => {
+                                    setBillName(customerName);
+                                    setBillEmail(customerEmail);
+                                    setBillPhone(customerPhone);
+                                    setBillAddress(customerAddress);
+                                  }}
+                                  className="flex items-center gap-2 text-[#2563eb] hover:text-[#1d4ed8] text-sm font-medium transition-colors"
+                                >
+                                  <Users className="w-4 h-4" />
+                                  Copy from Client Information
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Step 3 – Vehicle */}
+                          {currentStep === 3 && (
+                            <div>
+                              <div className="flex items-center gap-3 mb-5">
+                                <div className="w-9 h-9 bg-[#f0f9ff] rounded-lg flex items-center justify-center">
+                                  <Car className="w-5 h-5 text-[#0284c7]" />
+                                </div>
+                                <div>
+                                  <h2 className="text-base font-semibold text-[#1e293b]">
+                                    Vehicle Information
+                                  </h2>
+                                  <p className="text-xs text-[#64748b]">
+                                    Enter vehicle details and authorization
+                                    codes
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {[
+                                  {
+                                    label: "Make",
+                                    value: vehicleMake,
+                                    set: setVehicleMake,
+                                    placeholder: "Toyota",
+                                    required: true,
+                                  },
+                                  {
+                                    label: "Model",
+                                    value: vehicleModel,
+                                    set: setVehicleModel,
+                                    placeholder: "Hilux",
+                                    required: true,
+                                  },
+                                  {
+                                    label: "Year",
+                                    value: vehicleYear,
+                                    set: setVehicleYear,
+                                    placeholder: "2020",
+                                    required: true,
+                                  },
+                                  {
+                                    label: "Registration",
+                                    value: vehicleReg,
+                                    set: setVehicleReg,
+                                    placeholder: "ABC 123 GP",
+                                    required: true,
+                                  },
+                                  {
+                                    label: "VIN",
+                                    value: vehicleVin,
+                                    set: setVehicleVin,
+                                    placeholder: "1HGBH41JXMN109186",
+                                  },
+                                  {
+                                    label: "Mileage (km)",
+                                    value: vehicleMileage,
+                                    set: setVehicleMileage,
+                                    placeholder: "45000",
+                                    required: true,
+                                  },
+                                  {
+                                    label: "Pre Auth",
+                                    value: preAuth,
+                                    set: setPreAuth,
+                                    placeholder: "AUTH123",
+                                  },
+                                  {
+                                    label: "Auth Code",
+                                    value: authCode,
+                                    set: setAuthCode,
+                                    placeholder: "456789",
+                                  },
+                                ].map(
+                                  ({
+                                    label,
+                                    value,
+                                    set,
+                                    placeholder,
+                                    required,
+                                  }) => (
+                                    <div key={label}>
+                                      <label className={labelCls}>
+                                        {label}{" "}
+                                        {required && (
+                                          <span className="text-[#dc2626] normal-case tracking-normal font-normal">
+                                            *
+                                          </span>
+                                        )}
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={value}
+                                        onChange={(e) => set(e.target.value)}
+                                        placeholder={placeholder}
+                                        className={inputCls}
+                                      />
                                     </div>
-                                    <div className="flex justify-between w-44 pt-2 border-t border-[#e2e8f0] font-semibold text-[#1e293b]">
-                                      <span>Total</span>
-                                      <span className="text-[#2563eb]">
-                                        R{total.toFixed(2)}
-                                      </span>
-                                    </div>
+                                  ),
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Step 4 – Services & Parts */}
+                          {currentStep === 4 && (
+                            <div>
+                              <div className="flex items-center gap-3 mb-5">
+                                <div className="w-9 h-9 bg-[#f8fafc] rounded-lg flex items-center justify-center">
+                                  <Wrench className="w-5 h-5 text-[#475569]" />
+                                </div>
+                                <div>
+                                  <h2 className="text-base font-semibold text-[#1e293b]">
+                                    Services & Parts
+                                  </h2>
+                                  <p className="text-xs text-[#64748b]">
+                                    Add services and parts to the invoice
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Add item form */}
+                              <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-5">
+                                <h3 className="text-sm font-semibold text-[#374151] mb-4 flex items-center gap-2">
+                                  <Plus className="w-4 h-4 text-[#2563eb]" />
+                                  Add New Item
+                                </h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                  <div>
+                                    <label className={labelCls}>Type</label>
+                                    <select
+                                      value={newItem.type}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          type: e.target.value,
+                                        })
+                                      }
+                                      className={selectCls}
+                                    >
+                                      <option value="Labor">Labor</option>
+                                      <option value="Parts">Parts</option>
+                                    </select>
+                                  </div>
+                                  <div className="sm:col-span-2">
+                                    <label className={labelCls}>
+                                      Description
+                                    </label>
+                                    <input
+                                      type="text"
+                                      placeholder="Work description"
+                                      value={newItem.description}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          description: e.target.value,
+                                        })
+                                      }
+                                      className={inputCls}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className={labelCls}>Rate (R)</label>
+                                    <input
+                                      type="number"
+                                      placeholder="0.00"
+                                      value={newItem.rate}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          rate: e.target.value,
+                                        })
+                                      }
+                                      className={inputCls}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className={labelCls}>Qty</label>
+                                    <input
+                                      type="number"
+                                      placeholder="1"
+                                      value={newItem.qty}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          qty: e.target.value,
+                                        })
+                                      }
+                                      className={inputCls}
+                                    />
                                   </div>
                                 </div>
+                                <button
+                                  onClick={handleAddItem}
+                                  className="mt-3 flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  Add Item
+                                </button>
                               </div>
-                            ) : (
-                              <div className="border-2 border-dashed border-[#e2e8f0] rounded-xl py-12 text-center">
-                                <Wrench className="w-8 h-8 text-[#cbd5e1] mx-auto mb-3" />
-                                <p className="text-sm font-medium text-[#94a3b8]">
-                                  No items added yet
-                                </p>
-                                <p className="text-xs text-[#cbd5e1] mt-1">
-                                  Use the form above to add services or parts
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
 
-                        {/* Step 5 – Payment */}
-                        {currentStep === 5 && (
-                          <div>
-                            <div className="flex items-center gap-3 mb-5">
-                              <div className="w-9 h-9 bg-[#faf5ff] rounded-lg flex items-center justify-center">
-                                <CreditCard className="w-5 h-5 text-[#7c3aed]" />
-                              </div>
-                              <div>
-                                <h2 className="text-base font-semibold text-[#1e293b]">
-                                  Payment Terms
-                                </h2>
-                                <p className="text-xs text-[#64748b]">
-                                  Review and process payment
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Payment info table */}
-                            <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm mb-5">
-                              <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
-                                <span className="text-sm font-semibold text-[#374151]">
-                                  Payment Information
-                                </span>
-                              </div>
-                              <div className="divide-y divide-[#f1f5f9]">
-                                {[
-                                  ["Payment Method", "Cash / Card / EFT"],
-                                  ["Payment Terms", "Due on Completion"],
-                                  ["Warranty", "90 Days Parts & Labor"],
-                                  ["Total Due", `R${total.toFixed(2)}`],
-                                ].map(([k, v]) => (
-                                  <div
-                                    key={k}
-                                    className="flex items-center justify-between px-5 py-3 text-sm"
-                                  >
-                                    <span className="text-[#64748b]">{k}</span>
-                                    <span
-                                      className={`font-semibold ${k === "Total Due" ? "text-[#2563eb]" : "text-[#1e293b]"}`}
-                                    >
-                                      {v}
+                              {/* Items table */}
+                              {items.length > 0 ? (
+                                <div className="border border-[#e2e8f0] rounded-xl overflow-hidden mb-5">
+                                  <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center justify-between">
+                                    <span className="text-sm font-semibold text-[#374151]">
+                                      Line Items
+                                    </span>
+                                    <span className="text-xs text-[#64748b] bg-[#e2e8f0] px-2 py-0.5 rounded-full">
+                                      {items.length} items
                                     </span>
                                   </div>
-                                ))}
-                              </div>
+                                  <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                      <thead>
+                                        <tr className="border-b border-[#e2e8f0]">
+                                          {[
+                                            "Type",
+                                            "Description",
+                                            "Rate",
+                                            "Qty",
+                                            "Amount",
+                                            "",
+                                          ].map((h) => (
+                                            <th
+                                              key={h}
+                                              className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
+                                            >
+                                              {h}
+                                            </th>
+                                          ))}
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {items.map((item, index) => (
+                                          <tr
+                                            key={index}
+                                            className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
+                                          >
+                                            <td className="px-4 py-3">
+                                              <span
+                                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${item.type === "Labor" ? "bg-[#eff6ff] text-[#1d4ed8]" : "bg-[#f0fdf4] text-[#166534]"}`}
+                                              >
+                                                {item.type}
+                                              </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-sm font-medium text-[#374151]">
+                                              {item.description}
+                                            </td>
+                                            <td className="px-4 py-3 text-sm text-[#374151]">
+                                              R{item.rate.toFixed(2)}
+                                            </td>
+                                            <td className="px-4 py-3 text-sm text-[#374151]">
+                                              {item.qty}
+                                            </td>
+                                            <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
+                                              R{item.amount.toFixed(2)}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                              <button
+                                                onClick={() =>
+                                                  handleRemoveItem(index)
+                                                }
+                                                className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all"
+                                              >
+                                                <X className="w-3.5 h-3.5" />
+                                              </button>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                  {/* Totals footer */}
+                                  <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+                                    <div className="flex flex-col items-end gap-1 text-sm">
+                                      <div className="flex justify-between w-44 text-[#64748b]">
+                                        <span>Subtotal</span>
+                                        <span className="font-medium text-[#374151]">
+                                          R{subtotal.toFixed(2)}
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between w-44 text-[#64748b]">
+                                        <span>VAT (0%)</span>
+                                        <span className="font-medium text-[#374151]">
+                                          R{vat.toFixed(2)}
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between w-44 pt-2 border-t border-[#e2e8f0] font-semibold text-[#1e293b]">
+                                        <span>Total</span>
+                                        <span className="text-[#2563eb]">
+                                          R{total.toFixed(2)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="border-2 border-dashed border-[#e2e8f0] rounded-xl py-12 text-center">
+                                  <Wrench className="w-8 h-8 text-[#cbd5e1] mx-auto mb-3" />
+                                  <p className="text-sm font-medium text-[#94a3b8]">
+                                    No items added yet
+                                  </p>
+                                  <p className="text-xs text-[#cbd5e1] mt-1">
+                                    Use the form above to add services or parts
+                                  </p>
+                                </div>
+                              )}
                             </div>
+                          )}
 
-                            {jobCardId && (
-                              <button
-                                onClick={handleProcessPayment}
-                                className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-medium transition-colors shadow-sm"
-                              >
-                                <CreditCard className="w-4 h-4" />
-                                Process Payment
-                              </button>
-                            )}
-
-                            {!jobCardId && (
-                              <div className="flex items-center gap-2 px-4 py-3 bg-[#fff7ed] border border-[#fed7aa] rounded-lg text-sm text-[#9a3412]">
-                                <Receipt className="w-4 h-4 flex-shrink-0" />
-                                Save the invoice first to process payment
+                          {/* Step 5 – Payment */}
+                          {currentStep === 5 && (
+                            <div>
+                              <div className="flex items-center gap-3 mb-5">
+                                <div className="w-9 h-9 bg-[#faf5ff] rounded-lg flex items-center justify-center">
+                                  <CreditCard className="w-5 h-5 text-[#7c3aed]" />
+                                </div>
+                                <div>
+                                  <h2 className="text-base font-semibold text-[#1e293b]">
+                                    Payment Terms
+                                  </h2>
+                                  <p className="text-xs text-[#64748b]">
+                                    Review and process payment
+                                  </p>
+                                </div>
                               </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
 
-                      {/* Step nav bar */}
-                      <div className="px-6 py-4 bg-[#f8fafc] border-t border-[#e2e8f0] flex items-center justify-between">
-                        <button
-                          onClick={handlePrevious}
-                          disabled={currentStep === 1}
-                          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${currentStep === 1 ? "bg-[#f1f5f9] text-[#cbd5e1] cursor-not-allowed" : "bg-white border border-[#e2e8f0] text-[#374151] hover:bg-[#f8fafc] shadow-sm"}`}
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                          <span className="hidden sm:inline">Previous</span>
-                        </button>
-                        <div className="text-xs font-medium text-[#64748b] bg-white border border-[#e2e8f0] px-3 py-1.5 rounded-lg">
-                          Step {currentStep} of {totalSteps}
+                              <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm mb-5">
+                                <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
+                                  <span className="text-sm font-semibold text-[#374151]">
+                                    Payment Information
+                                  </span>
+                                </div>
+                                <div className="divide-y divide-[#f1f5f9]">
+                                  {[
+                                    ["Payment Method", "Cash / Card / EFT"],
+                                    ["Payment Terms", "Due on Completion"],
+                                    ["Warranty", "90 Days Parts & Labor"],
+                                    ["Total Due", `R${total.toFixed(2)}`],
+                                  ].map(([k, v]) => (
+                                    <div
+                                      key={k}
+                                      className="flex items-center justify-between px-5 py-3 text-sm"
+                                    >
+                                      <span className="text-[#64748b]">
+                                        {k}
+                                      </span>
+                                      <span
+                                        className={`font-semibold ${k === "Total Due" ? "text-[#2563eb]" : "text-[#1e293b]"}`}
+                                      >
+                                        {v}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {jobCardId && (
+                                <button
+                                  onClick={handleProcessPayment}
+                                  className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-medium transition-colors shadow-sm"
+                                >
+                                  <CreditCard className="w-4 h-4" />
+                                  Process Payment
+                                </button>
+                              )}
+
+                              {!jobCardId && (
+                                <div className="flex items-center gap-2 px-4 py-3 bg-[#fff7ed] border border-[#fed7aa] rounded-lg text-sm text-[#9a3412]">
+                                  <Receipt className="w-4 h-4 flex-shrink-0" />
+                                  Save the invoice first to process payment
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        {currentStep < totalSteps ? (
+
+                        {/* Step nav bar */}
+                        <div className="px-6 py-4 bg-[#f8fafc] border-t border-[#e2e8f0] flex items-center justify-between">
                           <button
-                            onClick={handleNext}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                            onClick={handlePrevious}
+                            disabled={currentStep === 1}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${currentStep === 1 ? "bg-[#f1f5f9] text-[#cbd5e1] cursor-not-allowed" : "bg-white border border-[#e2e8f0] text-[#374151] hover:bg-[#f8fafc] shadow-sm"}`}
                           >
-                            <span className="hidden sm:inline">Next</span>
-                            <ChevronRight className="w-4 h-4" />
+                            <ChevronLeft className="w-4 h-4" />
+                            <span className="hidden sm:inline">Previous</span>
                           </button>
-                        ) : (
-                          <button
-                            onClick={handleSaveJobCard}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
-                          >
-                            <Save className="w-4 h-4" />
-                            Save Invoice
-                          </button>
-                        )}
-                      </div>
-                    </>
-                  )}
+                          <div className="text-xs font-medium text-[#64748b] bg-white border border-[#e2e8f0] px-3 py-1.5 rounded-lg">
+                            Step {currentStep} of {totalSteps}
+                          </div>
+                          {currentStep < totalSteps ? (
+                            <button
+                              onClick={handleNext}
+                              className="flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                            >
+                              <span className="hidden sm:inline">Next</span>
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={handleSaveJobCard}
+                              className="flex items-center gap-1.5 px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                            >
+                              <Save className="w-4 h-4" />
+                              Save Invoice
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── RIGHT: Live preview panel ──────────────────────────────── */}
+              <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
+                {/* Panel header */}
+                <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
+                  
+                  <TemplateSelector/>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={handlePrint}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-xs font-medium rounded-lg hover:bg-[#f1f5f9] transition-colors"
+                    >
+                      <Printer className="w-3 h-3" />
+                      Print
+                    </button>
+                    <button
+                      onClick={handleSavePDF}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-[#059669] text-white text-xs font-medium rounded-lg hover:bg-[#047857] transition-colors"
+                    >
+                      <Download className="w-3 h-3" />
+                      PDF
+                    </button>
+                  </div>
+                </div>
+
+                {/* Scrollable preview canvas */}
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div
+                    className="bg-white shadow-lg rounded origin-top"
+                    style={{
+                      width: "210mm",
+                      minHeight: "297mm",
+                      transform: "scale(0.44)",
+                      transformOrigin: "top left",
+                      marginBottom: `calc((297mm * 0.44) - 297mm)`,
+                    }}
+                  >
+                    <TemplateRenderer {...templateProps} />
+                  </div>
                 </div>
               </div>
             </div>

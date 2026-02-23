@@ -8,11 +8,9 @@ import logo from "../../assets/img/solidflo-logo.png";
 import SecurityIncidentMultiStepForm from "./SecurityIncidentMultiStepForm";
 import Templates from "./Templates";
 import { useLocation } from "react-router-dom";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getAuth, signOut } from "firebase/auth";
-import SignatureStamp from "../SignatureStamp";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
@@ -27,7 +25,6 @@ import {
   limit,
   getDocs,
 } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
 import {
@@ -42,15 +39,12 @@ import {
   Shield,
   FileBarChart,
   BarChart3,
-  Menu,
   X,
   Plus,
   Send,
-  Edit,
   LogOut,
-  CheckSquare,
   TrendingUp,
-  CreditCard,
+  TrendingDown,
   Receipt,
   AlertTriangle,
   MapPin,
@@ -59,99 +53,212 @@ import {
   Clock,
   UserCheck,
   Building,
-  Upload,
+  ArrowRight,
+  CheckSquare,
+  AlertCircle,
 } from "lucide-react";
 
+// ─── Number generation ────────────────────────────────────────────────────────
 const generateIncidentNumber = async (userId) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
-
   const incidentsRef = collection(db, "users", userId, "incidents");
   const q = query(incidentsRef, orderBy("createdAt", "desc"), limit(1));
   const snapshot = await getDocs(q);
-
   let lastNumber = 1000;
-
   if (!snapshot.empty) {
     const lastIncident = snapshot.docs[0].data();
     const match = lastIncident.incidentNumber?.match(/(\d+)$/);
-
-    if (match) {
-      lastNumber = Number(match[1]);
-    }
+    if (match) lastNumber = Number(match[1]);
   }
-
   const nextNumber = lastNumber + 1;
   return `INC-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
+
 const functions = getFunctions();
+
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const inputCls =
+  "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
+const labelCls =
+  "block text-xs font-semibold text-[#374151] uppercase tracking-wide mb-1.5";
+
+// ─── Status badge helper ──────────────────────────────────────────────────────
+const statusBadge = (s) =>
+  s === "resolved"
+    ? "bg-[#dcfce7] text-[#166534]"
+    : s === "under_investigation"
+    ? "bg-[#fef3c7] text-[#92400e]"
+    : s === "closed"
+    ? "bg-[#f1f5f9] text-[#475569]"
+    : "bg-[#fef2f2] text-[#991b1b]";
+
+const statusLabel = (s) =>
+  s === "under_investigation" ? "Investigating" : s === "resolved" ? "Resolved" : s === "closed" ? "Closed" : "Open";
+
+// ─── Stat card ────────────────────────────────────────────────────────────────
+const StatCard = ({ title, value, icon: Icon, iconBg, iconColor, subtitle, loading: l, trend }) => (
+  <div className="bg-white rounded-xl p-4 border border-[#e2e8f0] shadow-sm flex flex-col justify-between">
+    <div className="flex items-center justify-between mb-3">
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${iconBg}`}>
+        <Icon className={`w-4 h-4 ${iconColor}`} />
+      </div>
+      {trend !== undefined && (
+        <span className={`flex items-center gap-0.5 text-xs font-semibold ${trend > 0 ? "text-[#dc2626]" : "text-[#059669]"}`}>
+          {trend > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+          {Math.abs(trend)}%
+        </span>
+      )}
+    </div>
+    <div>
+      <p className="text-xs text-[#64748b] mb-0.5">{title}</p>
+      {l ? (
+        <div className="h-6 bg-[#f1f5f9] rounded animate-pulse" />
+      ) : (
+        <>
+          <p className="text-lg font-bold text-[#1e293b] truncate">{value}</p>
+          {subtitle && <p className="text-xs text-[#94a3b8] mt-0.5">{subtitle}</p>}
+        </>
+      )}
+    </div>
+  </div>
+);
+
+// ─── Main component ───────────────────────────────────────────────────────────
 const SecurityDashboard = () => {
+  // ── Layout / sidebar ──────────────────────────────────────────────────────
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [inputMode, setInputMode] = useState("manual");
-  const [documentType, setDocumentType] = useState("invoice");
-  const [useAI, setUseAI] = useState(false);
-  const [activeTab, setActiveTab] = useState("IncidentReport");
-  const [showIncidentReport, setShowIncidentReport] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
+
+  // ── Incident state ────────────────────────────────────────────────────────
+  const [documentType, setDocumentType] = useState("invoice");
   const [incidentNumber, setIncidentNumber] = useState("");
   const [incidentId, setIncidentId] = useState(null);
   const [savedIncidents, setSavedIncidents] = useState([]);
   const [showIncidentsList, setShowIncidentsList] = useState(false);
+
+  // ── Views / modals ────────────────────────────────────────────────────────
   const [showSettings, setShowSettings] = useState(false);
   const [activeView, setActiveView] = useState("home");
-  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
-  const [isClientsOpen, setIsClientsOpen] = useState(false);
-  const [activeTemplate, setActiveTemplate] = useState("classic");
-  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
-    useState(null);
-  const [selectedTemplate, setSelectedTemplate] = useState("professional");
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [stampSettings, setStampSettings] = useState({
-    text: "APPROVED",
-    color: "#d32f2f",
-    showDate: false,
-    enabled: false,
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  // ── Sidebar dropdowns ─────────────────────────────────────────────────────
+  const [isIncidentsOpen, setIsIncidentsOpen] = useState(false);
+  const [isSchedulesOpen, setIsSchedulesOpen] = useState(false);
+  const [isInvoicesOpen, setIsInvoicesOpen] = useState(false);
+
+  // ── Template & stamp ──────────────────────────────────────────────────────
+  const [selectedTemplate, setSelectedTemplate] = useState("professional");
+  const [stampSettings, setStampSettings] = useState({ text: "APPROVED", color: "#d32f2f", showDate: false, enabled: false });
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  const [stats, setStats] = useState({ total: 0, investigating: 0, resolved: 0, sites: 0, loading: true });
+
+  // ── Incident fields ───────────────────────────────────────────────────────
+  const [clientName, setClientName] = useState("ABC Corporation");
+  const [clientContact, setClientContact] = useState("011 234 5678");
+  const [clientEmail, setClientEmail] = useState("security@abccorp.co.za");
+  const [siteName, setSiteName] = useState("Head Office");
+  const [siteAddress, setSiteAddress] = useState("123 Business Park, Sandton, 2196");
+  const [guardName, setGuardName] = useState("John Doe");
+  const [guardId, setGuardId] = useState("GRD-2024-0012");
+  const [incidentType, setIncidentType] = useState("Theft");
+  const [incidentDate, setIncidentDate] = useState(new Date().toISOString().split("T")[0]);
+  const [incidentTime, setIncidentTime] = useState(new Date().toTimeString().slice(0, 5));
+  const [incidentDescription, setIncidentDescription] = useState("");
+  const [actionsTaken, setActionsTaken] = useState("");
+  const [witnessName, setWitnessName] = useState("");
+  const [witnessContact, setWitnessContact] = useState("");
+
+  // ── Business info ─────────────────────────────────────────────────────────
+  const [businessInfo, setBusinessInfo] = useState({
+    businessName: "ELITE SECURITY SERVICES",
+    addressLine1: "45 SECURITY AVENUE",
+    addressLine2: "MIDRAND",
+    city: "JOHANNESBURG",
+    postalCode: "1685",
+    primaryPhone: "011 555 0100",
+    secondaryPhone: "082 555 0200",
+    logoUrl: "",
+    psiraReg: "PSIRA-123456",
   });
+  const [loading, setLoading] = useState(true);
+
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.activeView) setActiveView(location.state.activeView);
+  }, [location.state]);
+
+  // ── Effects ───────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!user?.uid) return;
-
     const loadIncidentNumber = async () => {
-      const nextIncident = await generateIncidentNumber(user.uid);
-      setIncidentNumber(nextIncident);
+      const next = await generateIncidentNumber(user.uid);
+      setIncidentNumber(next);
     };
-
     loadIncidentNumber();
     loadSavedIncidents();
   }, [user]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setSidebarOpen(width >= 1024);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => { if (user?.uid) { loadBusinessInfo(); fetchStats(); } }, [user]);
+
+  // ── Fetch stats ───────────────────────────────────────────────────────────
+  const fetchStats = async () => {
+    if (!user?.uid) return;
+    try {
+      const db = getFirestore();
+      const snap = await getDocs(collection(db, "users", user.uid, "incidents"));
+      let investigating = 0, resolved = 0;
+      snap.forEach((d) => {
+        const s = d.data().status;
+        if (s === "under_investigation") investigating++;
+        if (s === "resolved") resolved++;
+      });
+      setStats({ total: snap.docs.length, investigating, resolved, sites: 0, loading: false });
+    } catch (e) {
+      setStats((p) => ({ ...p, loading: false }));
+    }
+  };
+
+  // ── Data loaders ──────────────────────────────────────────────────────────
   const loadSavedIncidents = async () => {
     if (!user?.uid) return;
-
     const db = getFirestore();
-    const incidentsRef = collection(db, "users", user.uid, "incidents");
-    const q = query(incidentsRef, orderBy("createdAt", "desc"), limit(50));
+    const q = query(collection(db, "users", user.uid, "incidents"), orderBy("createdAt", "desc"), limit(50));
     const snapshot = await getDocs(q);
-
-    const incidents = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    setSavedIncidents(incidents);
+    setSavedIncidents(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
   };
-  const [paymentStatus, setPaymentStatus] = useState({
-    totalPaid: 0,
-    balanceDue: 0,
-    status: "pending",
-  });
-  const location = useLocation();
 
-  useEffect(() => {
-    if (location.state?.activeView) {
-      setActiveView(location.state.activeView);
+  const loadBusinessInfo = async () => {
+    if (!user?.uid) return;
+    try {
+      const db = getFirestore();
+      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) setBusinessInfo(docSnap.data());
+    } catch (error) {
+      console.error("Error loading business info:", error);
+    } finally {
+      setLoading(false);
     }
-  }, [location.state]);
+  };
+
+  // ── Handlers – incidents ──────────────────────────────────────────────────
   const loadIncident = (incident) => {
     setIncidentId(incident.id);
     setIncidentNumber(incident.incidentNumber || "");
@@ -170,427 +277,43 @@ const SecurityDashboard = () => {
     setWitnessName(incident.witness?.name || "");
     setWitnessContact(incident.witness?.contact || "");
     setShowIncidentsList(false);
-  };
-  const handleProcessPayment = async () => {
-    if (!incidentId || !user?.uid) {
-      alert("Please save the invoice before processing payment");
-      return;
-    }
-
-    try {
-      const collectionName =
-        documentType === "estimate" ? "estimates" : "invoices";
-      const invoiceDoc = await getDoc(
-        doc(db, "users", user.uid, collectionName, incidentId),
-      );
-
-      if (invoiceDoc.exists()) {
-        const invoiceData = invoiceDoc.data();
-        setSelectedInvoiceForPayment({
-          id: incidentId,
-          ...invoiceData,
-        });
-        setShowPaymentModal(true);
-      } else {
-        alert("Invoice not found. Please save the invoice first.");
-      }
-    } catch (error) {
-      console.error("Error loading invoice:", error);
-      alert("Failed to load invoice for payment");
-    }
-  };
-
-  const loadPaymentStatus = async () => {
-    if (!user?.uid || !incidentId) {
-      setPaymentStatus({
-        totalPaid: 0,
-        balanceDue: 0, // ✅ Use 0 as default
-        status: "pending",
-      });
-      return;
-    }
-
-    try {
-      const collectionName =
-        documentType === "estimate" ? "estimates" : "invoices";
-      const invoiceDoc = await getDoc(
-        doc(db, "users", user.uid, collectionName, incidentId),
-      );
-
-      if (invoiceDoc.exists()) {
-        const data = invoiceDoc.data();
-        setPaymentStatus({
-          totalPaid: data.totals?.paid || 0,
-          balanceDue: data.totals?.due || data.totals?.total || 0,
-          status: data.status || "pending",
-        });
-      } else {
-        setPaymentStatus({
-          totalPaid: 0,
-          balanceDue: 0, // ✅ Use 0 since no invoice exists
-          status: "pending",
-        });
-      }
-    } catch (error) {
-      console.error("Error loading payment status:", error);
-      setPaymentStatus({
-        totalPaid: 0,
-        balanceDue: 0, // ✅ Use 0 on error
-        status: "pending",
-      });
-    }
-  };
-  const handleTestEmail = async () => {
-    if (!businessInfo.emailPassword) {
-      alert("⚠️ Please enter your email app password first.");
-      return;
-    }
-
-    const userEmail = user?.email || authUser?.email;
-
-    if (!userEmail) {
-      alert("⚠️ Could not find your email address. Please log in again.");
-      return;
-    }
-
-    try {
-      const testEmailData = {
-        userId: user.uid,
-        to: userEmail, // Send test to self
-        subject: "✅ Test Email - Email Configuration Successful",
-        message: `
-Hello,
-
-This is a test email from your construction quote/invoice system.
-
-✓ Your email configuration is working correctly!
-
-Account Details:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Business: ${businessInfo.businessName}
-Email: ${userEmail}
-Provider: ${businessInfo.emailProvider || "Gmail"}
-Date: ${new Date().toLocaleString()}
-
-You can now send quotes and invoices to your clients from this email address.
-
-Best regards,
-Your Construction Quote System
-      `.trim(),
-        documentType: "test",
-        documentNumber: "TEST-001",
-      };
-
-      const sendEmail = httpsCallable(functions, "sendQuoteEmail");
-      await sendEmail(testEmailData);
-
-      alert(
-        `✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`,
-      );
-    } catch (error) {
-      console.error("Test email error:", error);
-
-      let errorMsg = "❌ Test email failed!\n\n";
-      if (error.message.includes("Invalid login")) {
-        errorMsg +=
-          "Your app password is incorrect. Please check and try again.\n\nMake sure you're using an APP PASSWORD, not your regular password.";
-      } else {
-        errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
-      }
-
-      alert(errorMsg);
-    }
-  };
-  const handlePaymentComplete = () => {
-    loadSavedIncidents();
-    loadPaymentStatus();
-    setShowPaymentModal(false);
-  };
-  const handlePrint = () => {
-    // Add print styles to document
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = printStyles;
-    document.head.appendChild(styleSheet);
-
-    // Trigger print
-    window.print();
-
-    // Clean up (remove after print dialog closes)
-    setTimeout(() => {
-      document.head.removeChild(styleSheet);
-    }, 1000);
-  };
-  const printStyles = `
-  @media print {
-    /* Hide everything except the print area */
-    body * {
-      visibility: hidden !important;
-    }
-    
-    #print-area,
-    #print-area * {
-      visibility: visible !important;
-    }
-    
-    /* Force print area to display even if hidden */
-    #print-area {
-      display: block !important;
-      position: absolute !important;
-      left: 0 !important;
-      top: 0 !important;
-      width: 210mm !important;
-      min-height: 297mm !important;
-      margin: 0 !important;
-      padding: 10mm !important;
-      box-sizing: border-box !important;
-      background: white !important;
-      box-shadow: none !important;
-    }
-    
-    /* Reset page margins and size */
-    @page {
-      size: A4 portrait;
-      margin: 0;
-    }
-    
-    html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-      width: 210mm !important;
-      height: 297mm !important;
-      background: white !important;
-    }
-    
-    /* Ensure colors print correctly */
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      color-adjust: exact !important;
-    }
-    
-    /* Logo sizing */
-    .logo img {
-      height: 60px;
-      width: auto;
-    }
-    
-    /* Remove any borders or shadows */
-    .shadow-lg, .rounded-lg, .shadow-xl, .shadow-2xl {
-      border: none !important;
-      box-shadow: none !important;
-    }
-    
-    /* Prevent page breaks inside elements */
-    table, tr, td, th, div {
-      page-break-inside: avoid !important;
-    }
-    
-    /* Ensure tables print correctly */
-    table {
-      width: 100% !important;
-      border-collapse: collapse !important;
-    }
-  }
-`;
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
-      }
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const [clientName, setClientName] = useState("ABC Corporation");
-  const [clientContact, setClientContact] = useState("011 234 5678");
-  const [clientEmail, setClientEmail] = useState("security@abccorp.co.za");
-  const [siteName, setSiteName] = useState("Head Office");
-  const [siteAddress, setSiteAddress] = useState(
-    "123 Business Park, Sandton, 2196",
-  );
-  const [guardName, setGuardName] = useState("John Doe");
-  const [guardId, setGuardId] = useState("GRD-2024-0012");
-  const [incidentType, setIncidentType] = useState("Theft");
-  const [incidentDate, setIncidentDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
-  const [incidentTime, setIncidentTime] = useState(
-    new Date().toTimeString().slice(0, 5),
-  );
-  const [incidentDescription, setIncidentDescription] = useState("");
-  const [actionsTaken, setActionsTaken] = useState("");
-  const [witnessName, setWitnessName] = useState("");
-  const [witnessContact, setWitnessContact] = useState("");
-
-  const [businessInfo, setBusinessInfo] = useState({
-    businessName: "ELITE SECURITY SERVICES",
-    addressLine1: "45 SECURITY AVENUE",
-    addressLine2: "MIDRAND",
-    city: "JOHANNESBURG",
-    postalCode: "1685",
-    primaryPhone: "011 555 0100",
-    secondaryPhone: "082 555 0200",
-    logoUrl: "",
-    psiraReg: "PSIRA-123456",
-  });
-
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (user?.uid) {
-      loadBusinessInfo();
-    }
-  }, [user]);
-
-  const loadBusinessInfo = async () => {
-    if (!user?.uid) return;
-
-    try {
-      const db = getFirestore();
-      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        setBusinessInfo(docSnap.data());
-      }
-    } catch (error) {
-      console.error("Error loading business info:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !user?.uid || !authUser) return;
-
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
-      return;
-    }
-
-    try {
-      setBusinessInfo((prev) => ({ ...prev, uploading: true }));
-
-      // ✅ Upload to Cloudflare R2 (Worker handles userId)
-      const logoUrl = await uploadLogoToR2(file, authUser);
-
-      setBusinessInfo((prev) => ({
-        ...prev,
-        logoUrl,
-        uploading: false,
-      }));
-
-      // Save URL to Firestore
-      const db = getFirestore();
-      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-
-      await setDoc(
-        docRef,
-        {
-          logoUrl,
-          updatedAt: new Date().toISOString(),
-        },
-        { merge: true },
-      );
-
-      alert("Logo uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading logo:", error);
-      alert("Failed to upload logo: " + error.message);
-      setBusinessInfo((prev) => ({ ...prev, uploading: false }));
-    }
-  };
-
-  const handleSaveBusinessInfo = async () => {
-    if (!user?.uid) return;
-
-    try {
-      const db = getFirestore();
-      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-      await setDoc(docRef, businessInfo);
-      alert("Business information saved successfully!");
-      setShowSettings(false);
-    } catch (error) {
-      console.error("Error saving business info:", error);
-      alert("Failed to save business information");
-    }
+    setActiveView("invoice");
   };
 
   const buildIncidentPayload = (numberToUse) => ({
     incidentNumber: numberToUse,
     status: "under_investigation",
-
-    client: {
-      name: clientName,
-      contact: clientContact,
-      email: clientEmail,
-    },
-
-    site: {
-      name: siteName,
-      address: siteAddress,
-    },
-
-    guard: {
-      name: guardName,
-      guardId: guardId,
-    },
-
+    client: { name: clientName, contact: clientContact, email: clientEmail },
+    site: { name: siteName, address: siteAddress },
+    guard: { name: guardName, guardId },
     incidentType,
     incidentDate,
     incidentTime,
     description: incidentDescription,
     actionsTaken,
-
-    witness: {
-      name: witnessName,
-      contact: witnessContact,
-    },
-
+    witness: { name: witnessName, contact: witnessContact },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
 
   const handleSaveIncident = async () => {
     if (!user?.uid) return;
-
     const db = getFirestore();
     let numberToUse = incidentNumber;
-
     if (!incidentId) {
       numberToUse = await generateIncidentNumber(user.uid);
       setIncidentNumber(numberToUse);
     }
-
     const incidentData = buildIncidentPayload(numberToUse);
-
     if (incidentId) {
-      await updateDoc(doc(db, "users", user.uid, "incidents", incidentId), {
-        ...incidentData,
-        updatedAt: serverTimestamp(),
-      });
+      await updateDoc(doc(db, "users", user.uid, "incidents", incidentId), { ...incidentData, updatedAt: serverTimestamp() });
     } else {
-      const ref = await addDoc(
-        collection(db, "users", user.uid, "incidents"),
-        incidentData,
-      );
+      const ref = await addDoc(collection(db, "users", user.uid, "incidents"), incidentData);
       setIncidentId(ref.id);
     }
-
     alert("Incident report saved");
     loadSavedIncidents();
+    fetchStats();
   };
 
   const handleNewIncident = () => {
@@ -610,780 +333,536 @@ Your Construction Quote System
     setActionsTaken("");
     setWitnessName("");
     setWitnessContact("");
-
     const loadNewNumber = async () => {
-      if (user?.uid) {
-        const nextIncident = await generateIncidentNumber(user.uid);
-        setIncidentNumber(nextIncident);
-      }
+      if (user?.uid) { const next = await generateIncidentNumber(user.uid); setIncidentNumber(next); }
     };
     loadNewNumber();
   };
 
-  const handleLogout = async () => {
-    const auth = getAuth();
+  // ── Handlers – print / settings ───────────────────────────────────────────
+  const printStyles = `@media print { body * { visibility: hidden !important; } #print-area, #print-area * { visibility: visible !important; } #print-area { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 210mm !important; min-height: 297mm !important; margin: 0 !important; padding: 10mm !important; box-sizing: border-box !important; background: white !important; } @page { size: A4 portrait; margin: 0; } html, body { margin: 0 !important; padding: 0 !important; width: 210mm !important; background: white !important; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }`;
+
+  const handlePrint = () => {
+    const s = document.createElement("style");
+    s.textContent = printStyles;
+    document.head.appendChild(s);
+    window.print();
+    setTimeout(() => document.head.removeChild(s), 1000);
+  };
+
+  const handleSaveBusinessInfo = async () => {
+    if (!user?.uid) return;
     try {
-      await signOut(auth);
+      const db = getFirestore();
+      await setDoc(doc(db, "users", user.uid, "settings", "businessInfo"), businessInfo);
+      alert("Business information saved successfully!");
+      setShowSettings(false);
+    } catch (error) { alert("Failed to save business information"); }
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !user?.uid || !authUser) return;
+    if (!file.type.startsWith("image/")) { alert("Please upload an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { alert("Image size should be less than 5MB"); return; }
+    try {
+      setBusinessInfo((prev) => ({ ...prev, uploading: true }));
+      const logoUrl = await uploadLogoToR2(file, authUser);
+      setBusinessInfo((prev) => ({ ...prev, logoUrl, uploading: false }));
+      const db = getFirestore();
+      await setDoc(doc(db, "users", user.uid, "settings", "businessInfo"), { logoUrl, updatedAt: new Date().toISOString() }, { merge: true });
+      alert("Logo uploaded successfully!");
     } catch (error) {
-      console.error("Error logging out:", error);
+      alert("Failed to upload logo: " + error.message);
+      setBusinessInfo((prev) => ({ ...prev, uploading: false }));
     }
   };
+
+  const handleLogout = async () => {
+    try { await signOut(getAuth()); } catch (error) { console.error("Error logging out:", error); }
+  };
+
+  // ── Template props (incident mapped to template) ───────────────────────────
+  const templateProps = {
+    templateId: selectedTemplate,
+    businessInfo,
+    loading,
+    jobCardNumber: incidentNumber,
+    customerName: clientName,
+    customerEmail: clientEmail,
+    customerPhone: clientContact,
+    customerAddress: siteAddress,
+    vehicleReg: siteName,
+    vehicleMake: incidentType,
+    vehicleModel: "N/A",
+    vehicleYear: "N/A",
+    vehicleVin: "N/A",
+    vehicleMileage: "N/A",
+    items: [
+      { description: `Incident Type: ${incidentType}`, qty: 1, rate: 0, amount: 0 },
+      { description: `Description: ${incidentDescription || "N/A"}`, qty: 1, rate: 0, amount: 0 },
+      { description: `Actions Taken: ${actionsTaken || "N/A"}`, qty: 1, rate: 0, amount: 0 },
+    ],
+    subtotal: 0, vat: 0, total: 0,
+    showStamp: stampSettings?.enabled || false,
+    stampText: stampSettings?.text || "APPROVED",
+    stampColor: stampSettings?.color || "#d32f2f",
+    showStampDate: stampSettings?.showDate || false,
+  };
+
+  // ── Header actions ────────────────────────────────────────────────────────
   const headerActions = [
-    documentType === "quote" &&
-      incidentId && {
-        label: "Convert to Invoice",
-        icon: FileText,
-        className:
-          "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap",
-      },
-    {
-      label: "Preview",
-      icon: Eye,
-      onClick: () => setShowPreview(true),
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
-    {
-      label: "Print",
-      icon: Printer,
-      onClick: handlePrint,
-      variant: "secondary",
-    },
-    {
-      label: "New",
-      icon: Plus,
-      onClick: documentType === "quote" ? handleNewIncident : handleNewIncident,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap",
-    },
-    {
-      label: "Send",
-      icon: Send,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap",
-    },
-    {
-      label: "Save PDF",
-      icon: Download,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap",
-    },
-    {
-      label: "Save",
-      icon: Save,
-      onClick: handleSaveIncident,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap",
-    },
-    {
-      label: "Logout",
-      icon: LogOut,
-      onClick: handleLogout,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap",
-    },
+    { label: "Preview", icon: Eye, onClick: () => setShowPreview(true), className: "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
+    { label: "Print", icon: Printer, onClick: handlePrint, variant: "secondary" },
+    { label: "New", icon: Plus, onClick: handleNewIncident, className: "flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
+    { label: "Send", icon: Send, className: "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
+    { label: "Save PDF", icon: Download, className: "flex items-center gap-1.5 px-3 py-1.5 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
+    { label: "Save", icon: Save, onClick: handleSaveIncident, className: "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
+    { label: "Logout", icon: LogOut, onClick: handleLogout, className: "flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#f1f5f9] text-[#64748b] border border-[#e2e8f0] text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
   ].filter(Boolean);
 
   const mobileDashboardActions = [
-    documentType === "quote" &&
-      incidentId && {
-        label: "To Invoice",
-        icon: FileText,
-        className:
-          "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
-      },
-    {
-      label: "Save",
-      icon: Save,
-      onClick: handleSaveIncident,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
-    },
-    {
-      label: "Send",
-      icon: Send,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
-    },
-    {
-      label: "PDF",
-      icon: Download,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
-    },
-    {
-      label: "Print",
-      icon: Printer,
-      onClick: handlePrint,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap",
-    },
-  ].filter(Boolean);
+    { label: "Save", icon: Save, onClick: handleSaveIncident, className: "flex items-center gap-1.5 px-3 py-2 bg-[#2563eb] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
+    { label: "Send", icon: Send, className: "flex items-center gap-1.5 px-3 py-2 bg-[#059669] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
+    { label: "PDF", icon: Download, className: "flex items-center gap-1.5 px-3 py-2 bg-[#0891b2] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
+    { label: "Print", icon: Printer, onClick: handlePrint, className: "flex items-center gap-1.5 px-3 py-2 bg-white border border-[#e2e8f0] text-[#374151] rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
+  ];
 
-  return (
-    <div className="flex h-screen bg-gray-300">
-      {/* Mobile Sidebar Backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        ></div>
-      )}
-
-      {/* Collapsed Sidebar (Icon Only) */}
-      <div
-        className={`${
-          sidebarOpen ? "hidden" : "hidden md:block"
-        } fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
-      >
-        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
-          {/* Toggle Button */}
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:scale-110"
-            title="Expand Sidebar"
-          >
-            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
-          </button>
-
-          {/* Logo */}
-          <div className="w-10 h-10 mb-2">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-full h-full object-contain rounded-lg"
-            />
-          </div>
-
-          <div className="w-10 border-t border-slate-600"></div>
-
-          {/* Icon Navigation */}
-          <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
-            <button
-              onClick={() => setActiveView("home")} // ADD THIS
-              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-              title="Home"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-            </button>
-
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Business Overview"
-            >
-              <TrendingUp className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Incident Reports"
-            >
-              <AlertTriangle className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Security Guards"
-            >
-              <UserCheck className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Clients"
-            >
-              <Users className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Sites"
-            >
-              <Building className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Patrol Routes"
-            >
-              <MapPin className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Schedules"
-            >
-              <Clock className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Invoices"
-            >
-              <Receipt className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Reports"
-            >
-              <FileBarChart className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Calendar"
-            >
-              <Calendar className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center group"
-              title="Analytics"
-            >
-              <BarChart3 className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* User Icon at Bottom */}
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
-          <div className="relative group">
-            <div className="absolute inset-0 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
-              <img src={businessInfo.logoUrl} alt="" />
-            </div>
-          </div>
-        </div>
+  // ── Home view ─────────────────────────────────────────────────────────────
+  const HomeViewLocal = () => (
+    <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard title="Total Incidents" value={stats.total} icon={AlertTriangle} iconBg="bg-[#fef2f2]" iconColor="text-[#dc2626]" subtitle="All time" loading={stats.loading} trend={5} />
+        <StatCard title="Investigating" value={stats.investigating} icon={AlertCircle} iconBg="bg-[#fffbeb]" iconColor="text-[#d97706]" subtitle="Active cases" loading={stats.loading} />
+        <StatCard title="Resolved" value={stats.resolved} icon={CheckSquare} iconBg="bg-[#f0fdf4]" iconColor="text-[#059669]" subtitle="Closed cases" loading={stats.loading} trend={-8} />
+        <StatCard title="Guards" value="—" icon={UserCheck} iconBg="bg-[#eff6ff]" iconColor="text-[#2563eb]" subtitle="On duty" loading={stats.loading} />
       </div>
 
-      {/* Expanded Sidebar (Full Width) */}
-      <div
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl`}
-      >
-        <div className="p-4 md:p-6">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <div className="flex items-center space-x-3 md:space-x-4">
-              <img
-                src={logo}
-                alt="Business Logo"
-                className="w-16 h-12 object-contain rounded-lg"
-              />
-            </div>
-            {/* Close Button */}
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
-              title="Collapse Sidebar"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm flex items-center gap-4">
+          <div className="w-10 h-10 bg-[#fef2f2] rounded-lg flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-5 h-5 text-[#dc2626]" />
           </div>
-
-          <nav className="space-y-1">
-            <div
-              onClick={() => {
-                setActiveView("home");
-                setSidebarOpen(false);
-              }}
-              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
-            >
-              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-xs md:text-sm font-semibold">Home</span>
-            </div>
-            <div
-              onClick={() => {
-                setShowSettings(true);
-                setSidebarOpen(false);
-              }}
-              className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
-            >
-              <Settings className="w-5 h-5" />
-              <span className="text-sm font-medium">Settings</span>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-slate-700/50">
-              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 hover:border-l-4 hover:border-blue-500 rounded-lg cursor-pointer transition-all duration-200">
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-sm font-medium">Business Overview</span>
-              </div>
-
-              {/* Incident Reports Section */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3 md:space-x-4">
-                    <AlertTriangle className="w-5 h-5" />
-                    <span className="text-sm font-medium">
-                      Incident Reports
-                    </span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-                  <div
-                    onClick={handleNewIncident}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    New Incident Report
-                  </div>
-                  <div
-                    onClick={() => {
-                      setShowIncidentsList(!showIncidentsList);
-                      setSidebarOpen(false);
-                    }}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>All Incidents</span>
-                      <span className=" text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        {savedIncidents.length}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200">
-                    <div className="flex items-center justify-between">
-                      <span>Under Investigation</span>
-                      <span className="bg-amber-600/30 text-amber-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        0
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2">
-                <UserCheck className="w-5 h-5" />
-                <span className="text-sm font-medium">Security Guards</span>
-              </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                <Users className="w-5 h-5" />
-                <span className="text-sm font-medium">Clients</span>
-              </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                <Building className="w-5 h-5" />
-                <span className="text-sm font-medium">Sites</span>
-              </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                <MapPin className="w-5 h-5" />
-                <span className="text-sm font-medium">Patrol Routes</span>
-              </div>
-
-              {/* Schedules Section */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3 md:space-x-4">
-                    <Clock className="w-5 h-5" />
-                    <span className="text-sm font-medium">Schedules</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-              </div>
-
-              {/* Invoices Section */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3 md:space-x-4">
-                    <Receipt className="w-5 h-5" />
-                    <span className="text-sm font-medium">Invoices</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-              </div>
-
-              <div
-                onClick={() => {
-                  setActiveView("templates");
-                  setSidebarOpen(false);
-                }}
-                className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
-              >
-                <FileText className="w-5 h-5" />
-                <span className="text-sm font-medium">Invoice Templates</span>
-              </div>
-
-              {/* Reports Section */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3 md:space-x-4">
-                    <FileBarChart className="w-5 h-5" />
-                    <span className="text-sm font-medium">Reports</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                <Calendar className="w-5 h-5" />
-                <span className="text-sm font-medium">Shift Calendar</span>
-              </div>
-            </div>
-          </nav>
-        </div>
-
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
-          <div className="flex items-center space-x-2 md:space-x-3">
-            <div className="relative group flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
-                <img
-                  src={businessInfo.logoUrl}
-                  alt="Business Logo"
-                  className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-                />
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-slate-400 truncate">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-            >
-              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className={`flex-1 transition-all duration-300 ml-16 lg:ml-64`}>
-        <div className="flex-1 overflow-auto">
-          <AppHeader
-            actions={headerActions}
-            mobileActions={mobileDashboardActions}
-            onSettingsOpen={() => setShowSettings(true)}
-          />
-
-          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
-            {showSettings && (
-              <BusinessSettingsModal onClose={() => setShowSettings(false)} />
-            )}
-
-            {showIncidentsList && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-                  <div className="p-4 border-b flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">
-                      Saved Incident Reports
-                    </h2>
-                    <button
-                      onClick={() => setShowIncidentsList(false)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div className="overflow-auto p-4">
-                    {savedIncidents.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        No saved incident reports yet
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {savedIncidents.map((incident) => (
-                          <div
-                            key={incident.id}
-                            onClick={() => loadIncident(incident)}
-                            className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <div className="font-semibold text-lg">
-                                  {incident.incidentNumber || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600 mt-1">
-                                  Type: {incident.incidentType || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  Client: {incident.client?.name || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  Site: {incident.site?.name || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  Guard: {incident.guard?.name || "N/A"}
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-sm text-gray-500">
-                                  {incident.incidentDate || "N/A"} at{" "}
-                                  {incident.incidentTime || "N/A"}
-                                </div>
-                                <div
-                                  className={`text-xs mt-1 px-2 py-1 rounded ${
-                                    incident.status === "resolved"
-                                      ? "bg-green-100 text-green-700"
-                                      : incident.status ===
-                                          "under_investigation"
-                                        ? "bg-yellow-100 text-yellow-700"
-                                        : "bg-red-100 text-red-700"
-                                  }`}
-                                >
-                                  {incident.status?.replace("_", " ") ||
-                                    "unknown"}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-            {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
-            {showPreview && (
-              <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
-                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
-                  {/* Modal header */}
-                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
-                        <Eye className="w-4 h-4 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-sm font-semibold text-[#1e293b]">
-                          {documentType === "quote" ? "Quote" : "Invoice"}{" "}
-                          Preview
-                        </h2>
-                        <p className="text-xs text-[#64748b]">
-                          {incidentNumber || "Draft"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handlePrint}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
-                      >
-                        <Printer className="w-3.5 h-3.5" />
-                        Print
-                      </button>
-                      <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors">
-                        <Download className="w-3.5 h-3.5" />
-                        Save PDF
-                      </button>
-                      <button
-                        onClick={() => setShowPreview(false)}
-                        className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Scrollable canvas area */}
-                  <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
-                    <div
-                      className="mx-auto bg-white shadow-xl"
-                      style={{ width: "210mm", minHeight: "297mm" }}
-                    >
-                      <TemplateRenderer
-                        templateId={selectedTemplate}
-                        businessInfo={businessInfo}
-                        loading={loading}
-                        // Map incident data to template props
-                        jobCardNumber={incidentNumber}
-                        customerName={clientName}
-                        customerEmail={clientEmail}
-                        customerPhone={clientContact}
-                        customerAddress={siteAddress}
-                        // Vehicle details (use incident data or defaults)
-                        vehicleReg={siteName}
-                        vehicleMake={incidentType}
-                        vehicleModel="N/A"
-                        vehicleYear="N/A"
-                        vehicleVin="N/A"
-                        vehicleMileage="N/A"
-                        // Items array with incident details
-                        items={[
-                          {
-                            description: `Incident Type: ${incidentType}`,
-                            qty: 1,
-                            rate: 0,
-                            amount: 0,
-                          },
-                          {
-                            description: `Description: ${incidentDescription || "N/A"}`,
-                            qty: 1,
-                            rate: 0,
-                            amount: 0,
-                          },
-                          {
-                            description: `Actions Taken: ${actionsTaken || "N/A"}`,
-                            qty: 1,
-                            rate: 0,
-                            amount: 0,
-                          },
-                        ]}
-                        // Financial totals (all zero for incident reports)
-                        subtotal={0}
-                        vat={0}
-                        total={0}
-                        // Stamp settings
-                        showStamp={stampSettings?.enabled || false}
-                        stampText={stampSettings?.text || "APPROVED"}
-                        stampColor={stampSettings?.color || "#d32f2f"}
-                        showStampDate={stampSettings?.showDate || false}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            {activeView === "templates" && <Templates user={user} />}
-            {activeView === "home" && <HomeView user={user} />}
-            {activeView === "invoice" && (
+          <div>
+            <p className="text-xs text-[#64748b] mb-0.5">Under Investigation</p>
+            {stats.loading ? <div className="h-6 bg-[#f1f5f9] rounded animate-pulse w-20" /> : (
               <>
-                <button
-                  onClick={() => setShowIncidentReport(!showIncidentReport)}
-                  className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <FileText className="w-5 h-5" />
-                  {showIncidentReport ? "Hide Report" : "View Report"}
-                </button>
-
-                <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
-                  <div
-                    className={`${
-                      showIncidentReport ? "hidden" : "block"
-                    } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
-                  >
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-yellow-700 text-sm font-medium">
-                        Under Investigation
-                      </span>
-                      <span className="text-yellow-600">Reported Today</span>
-                    </div>
-
-                    <SecurityIncidentMultiStepForm
-                      // Client Info Props
-                      clientName={clientName}
-                      setClientName={setClientName}
-                      clientContact={clientContact}
-                      setClientContact={setClientContact}
-                      clientEmail={clientEmail}
-                      setClientEmail={setClientEmail}
-                      // Site Info Props
-                      siteName={siteName}
-                      setSiteName={setSiteName}
-                      siteAddress={siteAddress}
-                      setSiteAddress={setSiteAddress}
-                      // Guard Info Props
-                      guardName={guardName}
-                      setGuardName={setGuardName}
-                      guardId={guardId}
-                      setGuardId={setGuardId}
-                      // Incident Details Props
-                      incidentType={incidentType}
-                      setIncidentType={setIncidentType}
-                      incidentDate={incidentDate}
-                      setIncidentDate={setIncidentDate}
-                      incidentTime={incidentTime}
-                      setIncidentTime={setIncidentTime}
-                      incidentDescription={incidentDescription}
-                      setIncidentDescription={setIncidentDescription}
-                      actionsTaken={actionsTaken}
-                      setActionsTaken={setActionsTaken}
-                      // Witness Info Props
-                      witnessName={witnessName}
-                      setWitnessName={setWitnessName}
-                      witnessContact={witnessContact}
-                      setWitnessContact={setWitnessContact}
-                    />
-                  </div>
-
-                  <div
-                    id="print-area"
-                    className={`${!showIncidentReport ? "hidden lg:block" : "block"} mx-auto bg-white print:block`}
-                    style={{ width: "210mm", minHeight: "297mm" }}
-                  >
-                    <>
-                      {/* Add Template Selector */}
-                      <div className="mb-4 print:hidden">
-                        <TemplateSelector
-                          user={user}
-                          selectedTemplate={selectedTemplate}
-                          onTemplateChange={setSelectedTemplate}
-                        />
-                      </div>
-
-                      {/* Use Template Renderer instead of hardcoded incident report */}
-                      <TemplateRenderer
-                        templateId={selectedTemplate}
-                        businessInfo={businessInfo}
-                        loading={loading}
-                        // Map incident data to template props
-                        jobCardNumber={incidentNumber}
-                        customerName={clientName}
-                        customerEmail={clientEmail}
-                        customerPhone={clientContact}
-                        customerAddress={siteAddress}
-                        // Vehicle details (use incident data or defaults)
-                        vehicleReg={siteName}
-                        vehicleMake={incidentType}
-                        vehicleModel="N/A"
-                        vehicleYear="N/A"
-                        vehicleVin="N/A"
-                        vehicleMileage="N/A"
-                        // Items array with incident details
-                        items={[
-                          {
-                            description: `Incident Type: ${incidentType}`,
-                            qty: 1,
-                            rate: 0,
-                            amount: 0,
-                          },
-                          {
-                            description: `Description: ${incidentDescription || "N/A"}`,
-                            qty: 1,
-                            rate: 0,
-                            amount: 0,
-                          },
-                          {
-                            description: `Actions Taken: ${actionsTaken || "N/A"}`,
-                            qty: 1,
-                            rate: 0,
-                            amount: 0,
-                          },
-                        ]}
-                        // Financial totals (all zero for incident reports)
-                        subtotal={0}
-                        vat={0}
-                        total={0}
-                        // Stamp settings
-                        showStamp={stampSettings?.enabled || false}
-                        stampText={stampSettings?.text || "APPROVED"}
-                        stampColor={stampSettings?.color || "#d32f2f"}
-                        showStampDate={stampSettings?.showDate || false}
-                      />
-                    </>
-                  </div>
-                </div>
+                <p className="text-xl font-bold text-[#dc2626]">{stats.investigating}</p>
+                <p className="text-xs text-[#94a3b8]">Require immediate attention</p>
               </>
             )}
           </div>
+        </div>
+
+        <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
+          <p className="text-xs font-semibold text-[#94a3b8] uppercase tracking-widest mb-3">Quick Actions</p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            {[
+              { label: "New Report", icon: AlertTriangle, onClick: () => { handleNewIncident(); setActiveView("invoice"); }, bg: "bg-[#fef2f2]", hover: "hover:bg-[#fee2e2]", border: "border-[#fecaca]", iconBg: "bg-[#dc2626]", text: "text-[#991b1b]" },
+              { label: "Guards", icon: UserCheck, onClick: () => {}, bg: "bg-[#eff6ff]", hover: "hover:bg-[#dbeafe]", border: "border-[#bfdbfe]", iconBg: "bg-[#2563eb]", text: "text-[#1e40af]" },
+              { label: "Sites", icon: Building, onClick: () => {}, bg: "bg-[#f0fdf4]", hover: "hover:bg-[#dcfce7]", border: "border-[#bbf7d0]", iconBg: "bg-[#059669]", text: "text-[#166534]" },
+            ].map(({ label, icon: Icon, onClick, bg, hover, border, iconBg, text }) => (
+              <button key={label} onClick={onClick} className={`flex-1 flex items-center justify-between px-3 py-2.5 ${bg} ${hover} border ${border} rounded-lg transition-all group`}>
+                <div className="flex items-center gap-2">
+                  <div className={`w-6 h-6 ${iconBg} rounded flex items-center justify-center flex-shrink-0`}><Icon className="w-3 h-3 text-white" /></div>
+                  <span className={`text-xs font-semibold ${text}`}>{label}</span>
+                </div>
+                <ArrowRight className={`w-3 h-3 ${text} opacity-60 group-hover:translate-x-0.5 transition-transform`} />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent incidents */}
+      <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
+          <h3 className="text-sm font-semibold text-[#1e293b]">Recent Incidents</h3>
+          <button onClick={() => setShowIncidentsList(true)} className="text-xs text-[#2563eb] hover:text-[#1d4ed8] font-medium">View all</button>
+        </div>
+        <div className="divide-y divide-[#f1f5f9]">
+          {stats.loading ? (
+            [1, 2, 3].map((i) => <div key={i} className="h-14 bg-[#f8fafc] animate-pulse m-3 rounded-lg" />)
+          ) : savedIncidents.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-10 h-10 mb-3 bg-[#f1f5f9] rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-[#94a3b8]" />
+              </div>
+              <p className="text-sm font-medium text-[#374151] mb-1">No incident reports yet</p>
+              <p className="text-xs text-[#94a3b8] mb-3">Create your first incident report</p>
+              <button onClick={() => { handleNewIncident(); setActiveView("invoice"); }} className="px-4 py-1.5 bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded-lg text-xs font-medium transition-colors">
+                New Report
+              </button>
+            </div>
+          ) : (
+            savedIncidents.slice(0, 8).map((incident) => (
+              <div key={incident.id} onClick={() => loadIncident(incident)} className="flex items-center justify-between px-5 py-3.5 hover:bg-[#f8fafc] cursor-pointer transition-colors">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-sm font-semibold text-[#1e293b] truncate">{incident.incidentNumber || incident.id}</span>
+                    <span className={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${statusBadge(incident.status)}`}>{statusLabel(incident.status)}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-[#64748b]">
+                    <span className="flex items-center gap-1 truncate"><AlertTriangle className="w-3 h-3 flex-shrink-0" />{incident.incidentType || "—"}</span>
+                    <span className="flex items-center gap-1 truncate"><Building className="w-3 h-3 flex-shrink-0" />{incident.site?.name || "—"}</span>
+                    <span className="flex items-center gap-1 truncate"><UserCheck className="w-3 h-3 flex-shrink-0" />{incident.guard?.name || "—"}</span>
+                  </div>
+                </div>
+                <div className="text-right ml-4 flex-shrink-0">
+                  <div className="text-xs text-[#64748b]">{incident.incidentDate || "—"}</div>
+                  <div className="text-xs text-[#94a3b8]">{incident.incidentTime || ""}</div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ═════════════════════════════════════════════════════════════════════════
+  return (
+    <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
+      {/* Print area */}
+      <div id="print-area" className="hidden print:block bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
+        <TemplateRenderer {...templateProps} />
+      </div>
+
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        {/* ── Sidebar backdrop (mobile) ─────────────────────────────────── */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        )}
+
+        {/* ── Collapsed Sidebar ─────────────────────────────────────────── */}
+        <div className={`${sidebarOpen ? "hidden" : "hidden md:flex"} fixed z-40 w-16 bg-[#0f172a] border-r border-[#1e293b] h-full flex-col items-center py-4 space-y-3 print:hidden`}>
+          <button onClick={() => setSidebarOpen(true)} className="p-2 text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg transition-all">
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <div className="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center">
+            <img src={logo} className="w-full h-full object-contain" />
+          </div>
+          <div className="flex flex-col items-center space-y-2 w-full px-2 pt-2">
+            {[
+              { icon: Home, onClick: () => setActiveView("home"), title: "Home", color: "text-[#38bdf8]" },
+              { icon: Settings, onClick: () => setShowSettings(true), title: "Settings", color: "text-[#64748b]" },
+              { icon: TrendingUp, onClick: () => {}, title: "Overview", color: "text-[#64748b]" },
+              { icon: AlertTriangle, onClick: () => { handleNewIncident(); setActiveView("invoice"); }, title: "Incident Reports", color: "text-[#64748b]" },
+              { icon: UserCheck, onClick: () => {}, title: "Security Guards", color: "text-[#64748b]" },
+              { icon: Users, onClick: () => {}, title: "Clients", color: "text-[#64748b]" },
+              { icon: Building, onClick: () => {}, title: "Sites", color: "text-[#64748b]" },
+              { icon: MapPin, onClick: () => {}, title: "Patrol Routes", color: "text-[#64748b]" },
+              { icon: Clock, onClick: () => {}, title: "Schedules", color: "text-[#64748b]" },
+              { icon: Receipt, onClick: () => {}, title: "Invoices", color: "text-[#64748b]" },
+              { icon: FileBarChart, onClick: () => {}, title: "Reports", color: "text-[#64748b]" },
+              { icon: Calendar, onClick: () => {}, title: "Shift Calendar", color: "text-[#64748b]" },
+            ].map(({ icon: Icon, onClick, title, color }) => (
+              <button key={title} onClick={onClick} title={title} className={`group p-2 ${color} hover:text-white hover:bg-[#1e293b] rounded-lg transition-all w-10 h-10 flex items-center justify-center`}>
+                <Icon className="w-5 h-5" />
+              </button>
+            ))}
+          </div>
+          <div className="absolute bottom-4">
+            <div className="w-9 h-9 bg-[#1e293b] rounded-full flex items-center justify-center ring-1 ring-[#334155]">
+              {businessInfo.logoUrl ? <img src={businessInfo.logoUrl} className="w-6 h-6 object-contain" /> : <Shield className="w-4 h-4 text-[#64748b]" />}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Expanded Sidebar ──────────────────────────────────────────── */}
+        <div className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 bg-[#0f172a] border-r border-[#1e293b] transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto flex flex-col`}>
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-[#1e293b]">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg overflow-hidden"><img src={logo} className="w-full h-full object-contain" /></div>
+              <span className="text-sm font-bold text-white truncate">{businessInfo.businessName || "Elite Security"}</span>
+            </div>
+            <button onClick={() => setSidebarOpen(false)} className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg transition-all">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Nav */}
+          <nav className="flex-1 p-3 space-y-1">
+            <div onClick={() => { setActiveView("home"); setSidebarOpen(false); }}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${activeView === "home" ? "bg-[#1e3a5f] text-[#38bdf8]" : "text-[#94a3b8] hover:text-white hover:bg-[#1e293b]"}`}>
+              <Home className="w-4 h-4 flex-shrink-0" />Home
+            </div>
+            <div onClick={() => { setShowSettings(true); setSidebarOpen(false); }}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b]">
+              <Settings className="w-4 h-4 flex-shrink-0" />Settings
+            </div>
+
+            <div className="pt-3 border-t border-[#1e293b] space-y-1">
+              <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b]">
+                <TrendingUp className="w-4 h-4 flex-shrink-0" />Business Overview
+              </div>
+
+              {/* Incident Reports dropdown */}
+              <div>
+                <div onClick={() => setIsIncidentsOpen(!isIncidentsOpen)}
+                  className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all text-sm font-medium">
+                  <div className="flex items-center gap-3"><AlertTriangle className="w-4 h-4 flex-shrink-0" />Incident Reports</div>
+                  <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isIncidentsOpen ? "rotate-180" : ""}`} />
+                </div>
+                <div className={`ml-4 mt-1 space-y-0.5 border-l border-[#1e293b] pl-3 overflow-hidden transition-all duration-200 ${isIncidentsOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}>
+                  {[
+                    { label: "New Report", dot: "bg-[#dc2626]", onClick: () => { handleNewIncident(); setActiveView("invoice"); if (isMobile) setSidebarOpen(false); } },
+                    { label: "All Incidents", dot: "bg-[#7c3aed]", badge: savedIncidents.length, onClick: () => { setShowIncidentsList(!showIncidentsList); if (isMobile) setSidebarOpen(false); } },
+                    { label: "Under Investigation", dot: "bg-[#d97706]", badge: stats.investigating, onClick: () => {} },
+                    { label: "Resolved", dot: "bg-[#059669]", onClick: () => {} },
+                  ].map(({ label, dot, badge, onClick }) => (
+                    <div key={label} onClick={onClick} className="flex items-center justify-between py-2 px-2 text-xs text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all">
+                      <div className="flex items-center gap-2"><div className={`w-1.5 h-1.5 rounded-full ${dot}`} />{label}</div>
+                      {badge !== undefined && <span className="bg-[#2563eb] text-white px-1.5 py-0.5 rounded text-xs font-bold">{badge}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Static nav items */}
+              {[
+                { label: "Security Guards", icon: UserCheck },
+                { label: "Clients", icon: Users },
+                { label: "Sites", icon: Building },
+                { label: "Patrol Routes", icon: MapPin },
+              ].map(({ label, icon: Icon }) => (
+                <div key={label} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b] transition-all cursor-default opacity-60">
+                  <Icon className="w-4 h-4 flex-shrink-0" />{label}
+                </div>
+              ))}
+
+              {/* Schedules dropdown */}
+              <div>
+                <div onClick={() => setIsSchedulesOpen(!isSchedulesOpen)}
+                  className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all text-sm font-medium">
+                  <div className="flex items-center gap-3"><Clock className="w-4 h-4 flex-shrink-0" />Schedules</div>
+                  <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isSchedulesOpen ? "rotate-180" : ""}`} />
+                </div>
+              </div>
+
+              {/* Invoices dropdown */}
+              <div>
+                <div onClick={() => setIsInvoicesOpen(!isInvoicesOpen)}
+                  className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all text-sm font-medium">
+                  <div className="flex items-center gap-3"><Receipt className="w-4 h-4 flex-shrink-0" />Invoices</div>
+                  <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isInvoicesOpen ? "rotate-180" : ""}`} />
+                </div>
+              </div>
+
+              <div onClick={() => { setActiveView("templates"); setSidebarOpen(false); }}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b] transition-all">
+                <FileText className="w-4 h-4 flex-shrink-0" />Invoice Templates
+              </div>
+
+              {[
+                { label: "Reports", icon: FileBarChart },
+                { label: "Shift Calendar", icon: Calendar },
+                { label: "Analytics", icon: BarChart3 },
+              ].map(({ label, icon: Icon }) => (
+                <div key={label} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b] transition-all cursor-default opacity-60">
+                  <Icon className="w-4 h-4 flex-shrink-0" />{label}
+                </div>
+              ))}
+            </div>
+          </nav>
+
+          {/* Sidebar footer */}
+          <div className="p-4 border-t border-[#1e293b]">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-[#1e293b] rounded-full flex items-center justify-center ring-1 ring-[#334155] flex-shrink-0">
+                {businessInfo.logoUrl ? <img src={businessInfo.logoUrl} className="w-6 h-6 object-contain" /> : <Shield className="w-4 h-4 text-[#64748b]" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-bold text-white truncate">{user?.name || "User"}</div>
+                <div className="text-xs text-[#64748b] truncate">{user?.email || "email@example.com"}</div>
+              </div>
+              <button onClick={handleLogout} className="p-1.5 text-[#64748b] hover:text-[#ef4444] hover:bg-[#1e293b] rounded-lg transition-all">
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Main content ──────────────────────────────────────────────── */}
+        <div className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-64" : "ml-0 md:ml-16"}`}>
+          <AppHeader actions={headerActions} mobileActions={mobileDashboardActions} onSettingsOpen={() => setShowSettings(true)} />
+
+          {/* ── Modals ──────────────────────────────────────────────────── */}
+          {showSettings && <BusinessSettingsModal onClose={() => setShowSettings(false)} />}
+
+          {/* ── Incidents list modal ───────────────────────────────────── */}
+          {showIncidentsList && (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-[#e2e8f0]">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
+                  <div>
+                    <h2 className="text-base font-semibold text-[#1e293b]">Incident Reports</h2>
+                    <p className="text-xs text-[#64748b] mt-0.5">{savedIncidents.length} records</p>
+                  </div>
+                  <button onClick={() => setShowIncidentsList(false)} className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"><X className="w-4 h-4" /></button>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  {savedIncidents.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                      <AlertTriangle className="w-10 h-10 text-[#cbd5e1] mb-3" />
+                      <p className="text-sm text-[#94a3b8]">No incident reports found</p>
+                    </div>
+                  ) : (
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                          {["Number", "Type", "Client", "Site", "Guard", "Date & Time", "Status"].map((h) => (
+                            <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {savedIncidents.map((incident) => (
+                          <tr key={incident.id} onClick={() => { loadIncident(incident); setShowIncidentsList(false); }} className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] cursor-pointer transition-colors">
+                            <td className="px-4 py-3 text-sm font-semibold text-[#2563eb]">{incident.incidentNumber || "N/A"}</td>
+                            <td className="px-4 py-3 text-sm text-[#374151]">{incident.incidentType || "N/A"}</td>
+                            <td className="px-4 py-3 text-sm text-[#374151]">{incident.client?.name || "N/A"}</td>
+                            <td className="px-4 py-3 text-sm text-[#374151]">{incident.site?.name || "N/A"}</td>
+                            <td className="px-4 py-3 text-sm text-[#374151]">{incident.guard?.name || "N/A"}</td>
+                            <td className="px-4 py-3 text-sm text-[#374151]">{incident.incidentDate || "N/A"} {incident.incidentTime ? `@ ${incident.incidentTime}` : ""}</td>
+                            <td className="px-4 py-3">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${statusBadge(incident.status)}`}>
+                                {statusLabel(incident.status)}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Preview modal ─────────────────────────────────────────────── */}
+          {showPreview && (
+            <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center"><Eye className="w-4 h-4 text-white" /></div>
+                    <div>
+                      <h2 className="text-sm font-semibold text-[#1e293b]">Incident Report Preview</h2>
+                      <p className="text-xs text-[#64748b]">{incidentNumber || "Draft"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={handlePrint} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"><Printer className="w-3.5 h-3.5" />Print</button>
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"><Download className="w-3.5 h-3.5" />Save PDF</button>
+                    <button onClick={() => setShowPreview(false)} className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"><X className="w-4 h-4" /></button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
+                  <div className="mx-auto bg-white shadow-xl" style={{ width: "210mm", minHeight: "297mm" }}>
+                    <TemplateRenderer {...templateProps} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Views ───────────────────────────────────────────────────── */}
+          {activeView === "templates" && <div className="flex-1 overflow-y-auto p-4"><Templates user={user} /></div>}
+          {activeView === "home" && <HomeViewLocal />}
+
+          {/* ── Incident report builder ──────────────────────────────────── */}
+          {activeView === "invoice" && (
+            <div className="flex-1 overflow-hidden flex min-h-0">
+              {/* ── LEFT: Form panel ───────────────────────────────────── */}
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+                <div className="space-y-5">
+
+                  {/* Status banner */}
+                  <div className="flex items-center gap-3 px-5 py-3.5 bg-[#fffbeb] border border-[#fde68a] rounded-xl">
+                    <div className="w-8 h-8 bg-[#fef3c7] rounded-full flex items-center justify-center flex-shrink-0">
+                      <AlertTriangle className="w-4 h-4 text-[#d97706]" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#92400e]">Under Investigation</p>
+                      <p className="text-xs text-[#b45309]">Incident reported — {incidentDate || "today"} at {incidentTime || "—"}</p>
+                    </div>
+                    {incidentId && (
+                      <span className="ml-auto text-xs font-bold text-[#b45309] bg-[#fef3c7] px-2.5 py-1 rounded-lg">{incidentNumber}</span>
+                    )}
+                  </div>
+
+                  {/* Summary cards */}
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { label: "Incident Type", value: incidentType || "—", icon: AlertTriangle, iconBg: "bg-[#fef2f2]", iconColor: "text-[#dc2626]" },
+                      { label: "Guard on Duty", value: guardName || "—", icon: UserCheck, iconBg: "bg-[#eff6ff]", iconColor: "text-[#2563eb]" },
+                      { label: "Site", value: siteName || "—", icon: Building, iconBg: "bg-[#f0fdf4]", iconColor: "text-[#059669]" },
+                    ].map(({ label, value, icon: Icon, iconBg, iconColor }) => (
+                      <div key={label} className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">{label}</span>
+                          <div className={`w-7 h-7 ${iconBg} rounded-lg flex items-center justify-center`}><Icon className={`w-3.5 h-3.5 ${iconColor}`} /></div>
+                        </div>
+                        <p className="text-sm font-bold text-[#1e293b] truncate">{value}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Main form */}
+                  <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
+                    <SecurityIncidentMultiStepForm
+                      clientName={clientName} setClientName={setClientName}
+                      clientContact={clientContact} setClientContact={setClientContact}
+                      clientEmail={clientEmail} setClientEmail={setClientEmail}
+                      siteName={siteName} setSiteName={setSiteName}
+                      siteAddress={siteAddress} setSiteAddress={setSiteAddress}
+                      guardName={guardName} setGuardName={setGuardName}
+                      guardId={guardId} setGuardId={setGuardId}
+                      incidentType={incidentType} setIncidentType={setIncidentType}
+                      incidentDate={incidentDate} setIncidentDate={setIncidentDate}
+                      incidentTime={incidentTime} setIncidentTime={setIncidentTime}
+                      incidentDescription={incidentDescription} setIncidentDescription={setIncidentDescription}
+                      actionsTaken={actionsTaken} setActionsTaken={setActionsTaken}
+                      witnessName={witnessName} setWitnessName={setWitnessName}
+                      witnessContact={witnessContact} setWitnessContact={setWitnessContact}
+                    />
+                  </div>
+
+                  {/* Save button */}
+                  <button onClick={handleSaveIncident} className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl font-medium transition-colors shadow-sm">
+                    <Save className="w-4 h-4" />Save Incident Report
+                  </button>
+                </div>
+              </div>
+
+              {/* ── RIGHT: Live preview panel (xl only) ──────────────────── */}
+              <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
+                  <TemplateSelector user={user} selectedTemplate={selectedTemplate} onTemplateChange={setSelectedTemplate} />
+                  <div className="flex items-center gap-1.5">
+                    <button onClick={handlePrint} className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-xs font-medium rounded-lg hover:bg-[#f1f5f9] transition-colors">
+                      <Printer className="w-3 h-3" />Print
+                    </button>
+                    <button className="flex items-center gap-1 px-2.5 py-1.5 bg-[#059669] text-white text-xs font-medium rounded-lg hover:bg-[#047857] transition-colors">
+                      <Download className="w-3 h-3" />PDF
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div
+                    className="bg-white shadow-lg rounded origin-top"
+                    style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.44)", transformOrigin: "top left", marginBottom: `calc((297mm * 0.44) - 297mm)` }}
+                  >
+                    <TemplateRenderer {...templateProps} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

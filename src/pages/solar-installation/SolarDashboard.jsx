@@ -26,22 +26,12 @@ import {
   limit,
   getDocs,
 } from "firebase/firestore";
-import {
-  Printer,
-  Download,
-  Sparkles,
-  Trash2,
-  Home as HomeIcon,
-  Zap,
-  Sun,
-  Battery,
-} from "lucide-react";
+import { Printer, Download, Sparkles, Trash2, Sun } from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
-import SignatureStamp from "../SignatureStamp";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import {
   ChevronDown,
@@ -54,7 +44,6 @@ import {
   X,
   FileText,
   BarChart3,
-  Menu,
   Plus,
   Send,
   Save,
@@ -62,131 +51,183 @@ import {
   LogOut,
   CheckSquare,
   TrendingUp,
+  TrendingDown,
   CreditCard,
   Receipt,
   Wallet,
-  PieChart,
   ClipboardList,
-  Upload,
   DollarSign,
   Building,
   FileBarChart,
-  Calculator,
-  Briefcase,
-  TrendingDown,
-  ArrowUpRight,
-  ArrowDownRight,
   MapPin,
   Eye,
-  Clock,
   Wrench,
-  Layers,
+  ArrowRight,
+  Zap,
+  Battery,
 } from "lucide-react";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+// ─── Number generation ────────────────────────────────────────────────────────
 const generateQuoteNumber = async (userId, documentType) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
-
   const collectionName = documentType === "quote" ? "quotes" : "invoices";
   const prefix = documentType === "quote" ? "SQ" : "SI";
-
   const quotesRef = collection(db, "users", userId, collectionName);
   const q = query(quotesRef, orderBy("createdAt", "desc"), limit(1));
   const snapshot = await getDocs(q);
-
   let lastNumber = 1000;
-
   if (!snapshot.empty) {
     const lastQuote = snapshot.docs[0].data();
     const match = lastQuote.quoteNumber?.match(/(\d+)$/);
-    if (match) {
-      lastNumber = Number(match[1]);
-    }
+    if (match) lastNumber = Number(match[1]);
   }
-
   const nextNumber = lastNumber + 1;
   return `${prefix}-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
 
 const functions = getFunctions();
+
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const inputCls =
+  "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
+const labelCls =
+  "block text-xs font-semibold text-[#374151] uppercase tracking-wide mb-1.5";
+const selectCls =
+  "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
+
+// ─── Stat card ────────────────────────────────────────────────────────────────
+const StatCard = ({ title, value, icon: Icon, iconBg, iconColor, subtitle, loading: l, trend }) => (
+  <div className="bg-white rounded-xl p-4 border border-[#e2e8f0] shadow-sm flex flex-col justify-between">
+    <div className="flex items-center justify-between mb-3">
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${iconBg}`}>
+        <Icon className={`w-4 h-4 ${iconColor}`} />
+      </div>
+      {trend !== undefined && (
+        <span className={`flex items-center gap-0.5 text-xs font-semibold ${trend > 0 ? "text-[#059669]" : "text-[#dc2626]"}`}>
+          {trend > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+          {Math.abs(trend)}%
+        </span>
+      )}
+    </div>
+    <div>
+      <p className="text-xs text-[#64748b] mb-0.5">{title}</p>
+      {l ? (
+        <div className="h-6 bg-[#f1f5f9] rounded animate-pulse" />
+      ) : (
+        <>
+          <p className="text-lg font-bold text-[#1e293b] truncate">{value}</p>
+          {subtitle && <p className="text-xs text-[#94a3b8] mt-0.5">{subtitle}</p>}
+        </>
+      )}
+    </div>
+  </div>
+);
+
+const statusBadge = (s) =>
+  s === "paid"
+    ? "bg-[#dcfce7] text-[#166534]"
+    : s === "partially_paid"
+    ? "bg-[#fef3c7] text-[#92400e]"
+    : s === "pending"
+    ? "bg-[#dbeafe] text-[#1e40af]"
+    : "bg-[#fef2f2] text-[#991b1b]";
+
+const formatCurrency = (n) =>
+  `R${Number(n).toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+// ─── Step indicator ────────────────────────────────────────────────────────────
+const StepIndicator = ({ steps, currentStep }) => (
+  <div className="flex items-center px-6 py-4 bg-[#f8fafc] border-b border-[#e2e8f0]">
+    {steps.map((step, idx) => {
+      const done = currentStep > step.number;
+      const active = currentStep === step.number;
+      const Icon = step.icon;
+      return (
+        <React.Fragment key={step.number}>
+          <div className="flex flex-col items-center gap-1 flex-shrink-0">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
+              ${done ? "bg-[#dcfce7] ring-2 ring-[#059669] text-[#059669]" : active ? "bg-[#2563eb] text-white" : "bg-[#e2e8f0] text-[#94a3b8]"}`}>
+              {done ? <CheckSquare className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+            </div>
+            <span className={`text-xs font-semibold hidden sm:block ${active ? "text-[#2563eb]" : done ? "text-[#059669]" : "text-[#94a3b8]"}`}>
+              {step.title}
+            </span>
+          </div>
+          {idx < steps.length - 1 && (
+            <div className={`flex-1 h-0.5 mx-2 transition-all ${done ? "bg-[#059669]" : "bg-[#e2e8f0]"}`} />
+          )}
+        </React.Fragment>
+      );
+    })}
+  </div>
+);
+
+// ═════════════════════════════════════════════════════════════════════════════
 const SolarDashboard = () => {
-  // ── step navigation ──────────────────────────────────────────────────────
+  // ── step navigation ────────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
 
-  // ── layout / sidebar ─────────────────────────────────────────────────────
+  // ── layout / sidebar ──────────────────────────────────────────────────────
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
 
-  // ── auth ─────────────────────────────────────────────────────────────────
+  // ── auth ──────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
 
-  // ── quote / invoice state ────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState("Quote");
+  // ── quote / invoice state ──────────────────────────────────────────────────
   const [quoteNumber, setQuoteNumber] = useState("");
   const [quoteId, setQuoteId] = useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [showQuotesList, setShowQuotesList] = useState(false);
   const [documentType, setDocumentType] = useState("quote");
 
-  // ── views / modals ───────────────────────────────────────────────────────
+  // ── views / modals ─────────────────────────────────────────────────────────
   const [showSettings, setShowSettings] = useState(false);
   const [activeView, setActiveView] = useState("home");
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-
-  // ── customers ────────────────────────────────────────────────────────────
-  const [customers, setCustomers] = useState([]);
-  const [savedCustomers, setSavedCustomers] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [propertyType, setPropertyType] = useState("Residential");
-  const [propertySize, setPropertySize] = useState("150");
-  const [powerRating, setPowerRating] = useState("5");
   const [showPreview, setShowPreview] = useState(false);
-  const [urgencyLevel, setUrgencyLevel] = useState("Standard");
-
-  // ── template & input mode ────────────────────────────────────────────────
-  const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [inputMode, setInputMode] = useState("manual");
+
+  // ── sidebar dropdowns ──────────────────────────────────────────────────────
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
 
-  // ── payment ──────────────────────────────────────────────────────────────
+  // ── customers ──────────────────────────────────────────────────────────────
+  const [customers, setCustomers] = useState([]);
+  const [savedCustomers, setSavedCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
-  const [paymentStatus, setPaymentStatus] = useState({
-    totalPaid: 0,
-    balanceDue: 0,
-    status: "pending",
-  });
 
-  // ── stamp ────────────────────────────────────────────────────────────────
-  const [stampSettings, setStampSettings] = useState({
-    text: "PAID",
-    color: "#22c55e",
-    showDate: true,
-    enabled: true,
-  });
-  const location = useLocation();
+  // ── payment ────────────────────────────────────────────────────────────────
+  const [paymentStatus, setPaymentStatus] = useState({ totalPaid: 0, balanceDue: 0, status: "pending" });
 
-  useEffect(() => {
-    if (location.state?.activeView) {
-      setActiveView(location.state.activeView);
-    }
-  }, [location.state]);
-  // ── client / site fields ─────────────────────────────────────────────────
+  // ── stamp ──────────────────────────────────────────────────────────────────
+  const [stampSettings, setStampSettings] = useState({ text: "PAID", color: "#22c55e", showDate: true, enabled: true });
+
+  // ── template ───────────────────────────────────────────────────────────────
+  const [selectedTemplate, setSelectedTemplate] = useState("professional");
+
+  // ── stats ──────────────────────────────────────────────────────────────────
+  const [stats, setStats] = useState({ totalQuotes: 0, totalRevenue: 0, totalClients: 0, pendingPayments: 0, loading: true });
+
+  // ── client fields ──────────────────────────────────────────────────────────
   const [customerName, setCustomerName] = useState("Green Energy Solutions");
   const [customerEmail, setCustomerEmail] = useState("info@greenenergy.co.za");
   const [customerPhone, setCustomerPhone] = useState("+27 11 234 5678");
-  const [propertyAddress, setPropertyAddress] = useState(
-    "45 Sunset Avenue, Sandton, Johannesburg, 2196",
-  );
+  const [propertyAddress, setPropertyAddress] = useState("45 Sunset Avenue, Sandton, Johannesburg, 2196");
 
-  // ── solar-specific fields ────────────────────────────────────────────────
+  // ── site / property fields ─────────────────────────────────────────────────
+  const [propertyType, setPropertyType] = useState("Residential");
+  const [propertySize, setPropertySize] = useState("150");
+  const [powerRating, setPowerRating] = useState("5");
+  const [urgencyLevel, setUrgencyLevel] = useState("Standard");
+
+  // ── solar-specific fields ──────────────────────────────────────────────────
   const [systemSize, setSystemSize] = useState("5");
   const [panelType, setPanelType] = useState("Monocrystalline");
   const [inverterType, setInverterType] = useState("Hybrid");
@@ -196,7 +237,7 @@ const SolarDashboard = () => {
   const [roofPitch, setRoofPitch] = useState("30");
   const [shadingAnalysis, setShadingAnalysis] = useState("Minimal");
 
-  // ── business info ────────────────────────────────────────────────────────
+  // ── business info ──────────────────────────────────────────────────────────
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "SOLARTECH INSTALLATIONS",
     addressLine1: "12 Solar Park Drive",
@@ -213,33 +254,27 @@ const SolarDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  // ── line-item state ──────────────────────────────────────────────────────
+  // ── line items ─────────────────────────────────────────────────────────────
   const [items, setItems] = useState([]);
-  const [newItem, setNewItem] = useState({
-    description: "",
-    rate: "",
-    qty: "",
-    workCategory: "Solar Panels",
-    taxRate: "15",
-    urgency: "Standard",
-  });
+  const [newItem, setNewItem] = useState({ description: "", rate: "", qty: "", workCategory: "Solar Panels", taxRate: "15", urgency: "Standard" });
 
-  // ── derived totals ───────────────────────────────────────────────────────
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
   const totalTax = items.reduce((sum, item) => sum + item.taxAmount, 0);
   const total = subtotal + totalTax;
 
-  // ── step definitions ─────────────────────────────────────────────────────
   const steps = [
     { number: 1, title: "Client Info", icon: Users },
-    { number: 2, title: "Property Details", icon: Building },
+    { number: 2, title: "Site Details", icon: Building },
     { number: 3, title: "Solar System", icon: Sun },
-    { number: 4, title: "Review & Payment", icon: Calendar },
+    { number: 4, title: "Review", icon: Calendar },
   ];
 
-  // ============================================================================
-  // Effects
-  // ============================================================================
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.activeView) setActiveView(location.state.activeView);
+  }, [location.state]);
+
+  // ── Effects ────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!user?.uid) return;
     const loadQuoteNumber = async () => {
@@ -250,7 +285,6 @@ const SolarDashboard = () => {
     loadSavedQuotes();
   }, [user, documentType]);
 
-  // responsive
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
@@ -263,19 +297,10 @@ const SolarDashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    loadCustomers();
-  }, []);
+  useEffect(() => { loadCustomers(); }, []);
+  useEffect(() => { loadPaymentStatus(); }, [quoteId, user?.uid, documentType]);
+  useEffect(() => { if (user?.uid) { loadBusinessInfo(); fetchStats(); } }, [user]);
 
-  useEffect(() => {
-    loadPaymentStatus();
-  }, [quoteId, user?.uid, documentType]);
-
-  useEffect(() => {
-    if (user?.uid) loadBusinessInfo();
-  }, [user]);
-
-  // duplicate fetch kept for parity with original (sets loading = false)
   useEffect(() => {
     const fetchBusinessInfo = async () => {
       if (!user?.uid) return;
@@ -284,45 +309,55 @@ const SolarDashboard = () => {
         const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) setBusinessInfo(docSnap.data());
-      } catch (error) {
-        console.error("Error fetching business info:", error);
-      } finally {
-        setLoading(false);
-      }
+      } catch (error) { console.error("Error fetching business info:", error); }
+      finally { setLoading(false); }
     };
     fetchBusinessInfo();
   }, [user]);
 
   useEffect(() => {
-    if (!quoteId) {
-      setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
-    }
+    if (!quoteId) setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
   }, [total, quoteId]);
 
-  // ============================================================================
-  // Data loaders
-  // ============================================================================
+  // ── Fetch stats ────────────────────────────────────────────────────────────
+  const fetchStats = async () => {
+    if (!user?.uid) return;
+    try {
+      const db = getFirestore();
+      const [quotesSnap, invoicesSnap] = await Promise.all([
+        getDocs(collection(db, "users", user.uid, "quotes")),
+        getDocs(collection(db, "users", user.uid, "invoices")),
+      ]);
+      let totalRevenue = 0, pendingPayments = 0;
+      [...quotesSnap.docs, ...invoicesSnap.docs].forEach((d) => {
+        const data = d.data();
+        totalRevenue += parseFloat(data.totals?.total || 0);
+        if (["pending", "partially_paid"].includes(data.status))
+          pendingPayments += parseFloat(data.totals?.due || data.totals?.total || 0);
+      });
+      let clientCount = 0;
+      try {
+        const cSnap = await getDocs(collection(db, "users", user.uid, "clients"));
+        clientCount = cSnap.docs.length;
+      } catch (_) {}
+      setStats({ totalQuotes: quotesSnap.docs.length + invoicesSnap.docs.length, totalRevenue, totalClients: clientCount, pendingPayments, loading: false });
+    } catch (e) { setStats((p) => ({ ...p, loading: false })); }
+  };
+
+  // ── Data loaders ───────────────────────────────────────────────────────────
   const loadCustomers = async () => {
     try {
-      const q = query(
-        collection(db, "users", user.uid, "clients"),
-        orderBy("createdAt", "desc"),
-      );
+      const q = query(collection(db, "users", user.uid, "clients"), orderBy("createdAt", "desc"));
       const snap = await getDocs(q);
-      const data = [];
-      snap.forEach((d) => data.push({ id: d.id, ...d.data() }));
-      setCustomers(data);
-    } catch (error) {
-      console.error("Error loading customers:", error);
-    }
+      setCustomers(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    } catch (error) { console.error("Error loading customers:", error); }
   };
 
   const loadSavedQuotes = async () => {
     if (!user?.uid) return;
     const db = getFirestore();
     const collectionName = documentType === "quote" ? "quotes" : "invoices";
-    const quotesRef = collection(db, "users", user.uid, collectionName);
-    const q = query(quotesRef, orderBy("createdAt", "desc"), limit(50));
+    const q = query(collection(db, "users", user.uid, collectionName), orderBy("createdAt", "desc"), limit(50));
     const snapshot = await getDocs(q);
     setSavedQuotes(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
   };
@@ -330,11 +365,9 @@ const SolarDashboard = () => {
   const loadSavedCustomers = async () => {
     if (!user?.uid) return;
     const db = getFirestore();
-    const customersRef = collection(db, "users", user.uid, "clients");
-    const q = query(customersRef, orderBy("createdAt", "desc"), limit(50));
+    const q = query(collection(db, "users", user.uid, "clients"), orderBy("createdAt", "desc"), limit(50));
     const snapshot = await getDocs(q);
-    const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-    setSavedCustomers(list.filter((c) => !c._placeholder));
+    setSavedCustomers(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })).filter((c) => !c._placeholder));
   };
 
   const loadBusinessInfo = async () => {
@@ -348,78 +381,41 @@ const SolarDashboard = () => {
         setBusinessInfo(data);
         if (data.stampSettings) setStampSettings(data.stampSettings);
       }
-    } catch (error) {
-      console.error("Error loading business info:", error);
-    }
+    } catch (error) { console.error("Error loading business info:", error); }
   };
 
   const loadPaymentStatus = async () => {
-    if (!user?.uid || !quoteId) {
-      setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
-      return;
-    }
+    if (!user?.uid || !quoteId) { setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" }); return; }
     try {
       const collectionName = documentType === "quote" ? "quotes" : "invoices";
-      const quoteDoc = await getDoc(
-        doc(db, "users", user.uid, collectionName, quoteId),
-      );
+      const quoteDoc = await getDoc(doc(db, "users", user.uid, collectionName, quoteId));
       if (quoteDoc.exists()) {
         const data = quoteDoc.data();
-        setPaymentStatus({
-          totalPaid: data.totals?.paid || 0,
-          balanceDue: data.totals?.due || data.totals?.total || 0,
-          status: data.status || "pending",
-        });
-      } else {
-        setPaymentStatus({
-          totalPaid: 0,
-          balanceDue: total,
-          status: "pending",
-        });
-      }
-    } catch (error) {
-      console.error("Error loading payment status:", error);
-      setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
-    }
+        setPaymentStatus({ totalPaid: data.totals?.paid || 0, balanceDue: data.totals?.due || data.totals?.total || 0, status: data.status || "pending" });
+      } else { setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" }); }
+    } catch (error) { setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" }); }
   };
 
   const loadQuoteForExport = async () => {
     if (!user?.uid || !quoteId) return null;
     const db = getFirestore();
     const collectionName = documentType === "quote" ? "quotes" : "invoices";
-    const snap = await getDoc(
-      doc(db, "users", user.uid, collectionName, quoteId),
-    );
+    const snap = await getDoc(doc(db, "users", user.uid, collectionName, quoteId));
     return snap.exists() ? snap.data() : null;
   };
 
-  // ============================================================================
-  // Handlers – customers
-  // ============================================================================
-  const handleAddNewCustomer = () => {
-    setSelectedCustomer(null);
-    setShowCustomerModal(true);
-  };
-
-  const handleEditCustomer = (customer) => {
-    setSelectedCustomer(customer);
-    setShowCustomerModal(true);
-  };
-
+  // ── Handlers – customers ───────────────────────────────────────────────────
+  const handleAddNewCustomer = () => { setSelectedCustomer(null); setShowCustomerModal(true); };
+  const handleEditCustomer = (customer) => { setSelectedCustomer(customer); setShowCustomerModal(true); };
   const loadCustomer = (customer) => {
     setCustomerName(customer.name || "");
     setCustomerEmail(customer.email || "");
     setCustomerPhone(customer.phone || "");
     setPropertyAddress(customer.address || "");
   };
+  const handleCustomerSaved = () => { loadCustomers(); };
 
-  const handleCustomerSaved = () => {
-    loadCustomers();
-  };
-
-  // ============================================================================
-  // Handlers – quote / invoice CRUD
-  // ============================================================================
+  // ── Handlers – quote / invoice CRUD ───────────────────────────────────────
   const loadQuote = (quote) => {
     setQuoteId(quote.id);
     setQuoteNumber(quote.quoteNumber || "");
@@ -427,8 +423,6 @@ const SolarDashboard = () => {
     setCustomerEmail(quote.customer?.email || "");
     setCustomerPhone(quote.customer?.phone || "");
     setPropertyAddress(quote.customer?.address || "");
-
-    // Solar-specific fields
     setSystemSize(quote.solarDetails?.systemSize || "5");
     setPanelType(quote.solarDetails?.panelType || "Monocrystalline");
     setInverterType(quote.solarDetails?.inverterType || "Hybrid");
@@ -437,18 +431,14 @@ const SolarDashboard = () => {
     setRoofOrientation(quote.solarDetails?.roofOrientation || "North");
     setRoofPitch(quote.solarDetails?.roofPitch || "30");
     setShadingAnalysis(quote.solarDetails?.shadingAnalysis || "Minimal");
-
     setItems(quote.items || []);
     setShowQuotesList(false);
     setPropertyType(quote.propertyDetails?.type || "");
     setPropertySize(quote.propertyDetails?.size || "");
     setPowerRating(quote.propertyDetails?.powerRating || "");
     setUrgencyLevel(quote.propertyDetails?.urgency || "");
-    setPaymentStatus({
-      totalPaid: quote.totals?.paid || 0,
-      balanceDue: quote.totals?.due || quote.totals?.total || 0,
-      status: quote.status || "pending",
-    });
+    setPaymentStatus({ totalPaid: quote.totals?.paid || 0, balanceDue: quote.totals?.due || quote.totals?.total || 0, status: quote.status || "pending" });
+    setActiveView("quote");
   };
 
   const buildQuotePayload = (numberToUse) => ({
@@ -456,47 +446,12 @@ const SolarDashboard = () => {
     locked: true,
     status: "pending",
     documentType,
-
-    dates: {
-      quoteDate: new Date().toISOString(),
-      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-
-    customer: {
-      name: customerName,
-      email: customerEmail,
-      phone: customerPhone,
-      address: propertyAddress,
-    },
-
-    propertyDetails: {
-      type: propertyType,
-      size: propertySize,
-      powerRating,
-      urgency: urgencyLevel,
-    },
-
-    solarDetails: {
-      systemSize,
-      panelType,
-      inverterType,
-      batteryStorage,
-      roofType,
-      roofOrientation,
-      roofPitch,
-      shadingAnalysis,
-    },
-
+    dates: { quoteDate: new Date().toISOString(), validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() },
+    customer: { name: customerName, email: customerEmail, phone: customerPhone, address: propertyAddress },
+    propertyDetails: { type: propertyType, size: propertySize, powerRating, urgency: urgencyLevel },
+    solarDetails: { systemSize, panelType, inverterType, batteryStorage, roofType, roofOrientation, roofPitch, shadingAnalysis },
     items,
-
-    totals: {
-      subtotal,
-      tax: totalTax,
-      total,
-      paid: 0,
-      due: total,
-    },
-
+    totals: { subtotal, tax: totalTax, total, paid: 0, due: total },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -505,85 +460,41 @@ const SolarDashboard = () => {
     if (!user?.uid) return;
     const db = getFirestore();
     let numberToUse = quoteNumber;
-
-    if (!quoteId) {
-      numberToUse = await generateQuoteNumber(user.uid, documentType);
-      setQuoteNumber(numberToUse);
-    }
-
+    if (!quoteId) { numberToUse = await generateQuoteNumber(user.uid, documentType); setQuoteNumber(numberToUse); }
     const quoteData = buildQuotePayload(numberToUse);
     const collectionName = documentType === "quote" ? "quotes" : "invoices";
-
     if (quoteId) {
-      await updateDoc(doc(db, "users", user.uid, collectionName, quoteId), {
-        ...quoteData,
-        updatedAt: serverTimestamp(),
-      });
+      await updateDoc(doc(db, "users", user.uid, collectionName, quoteId), { ...quoteData, updatedAt: serverTimestamp() });
     } else {
-      const ref = await addDoc(
-        collection(db, "users", user.uid, collectionName),
-        quoteData,
-      );
+      const ref = await addDoc(collection(db, "users", user.uid, collectionName), quoteData);
       setQuoteId(ref.id);
     }
-
-    alert(
-      `${documentType === "quote" ? "Quote" : "Invoice"} saved successfully`,
-    );
+    alert(`${documentType === "quote" ? "Quote" : "Invoice"} saved successfully`);
     loadSavedQuotes();
+    fetchStats();
   };
 
   const handleConvertToInvoice = async () => {
-    if (!user?.uid) return;
-    if (!quoteId) {
-      alert("Please save the quote first before converting to invoice");
-      return;
-    }
-    if (
-      !window.confirm(
-        "Convert this quote to an invoice? This will create a new invoice with the same details.",
-      )
-    )
-      return;
-
+    if (!user?.uid || !quoteId) { alert("Please save the quote first before converting to invoice"); return; }
+    if (!window.confirm("Convert this quote to an invoice?")) return;
     try {
       const db = getFirestore();
       const newInvoiceNumber = await generateQuoteNumber(user.uid, "invoice");
-
       const invoiceData = buildQuotePayload(newInvoiceNumber);
       invoiceData.documentType = "invoice";
       invoiceData.convertedFromQuote = quoteId;
       invoiceData.convertedFromQuoteNumber = quoteNumber;
       invoiceData.convertedAt = serverTimestamp();
-
-      const invoiceRef = await addDoc(
-        collection(db, "users", user.uid, "invoices"),
-        invoiceData,
-      );
-
-      await updateDoc(doc(db, "users", user.uid, "quotes", quoteId), {
-        convertedToInvoice: true,
-        convertedToInvoiceId: invoiceRef.id,
-        convertedToInvoiceNumber: newInvoiceNumber,
-        convertedAt: serverTimestamp(),
-        status: "converted",
-      });
-
+      const invoiceRef = await addDoc(collection(db, "users", user.uid, "invoices"), invoiceData);
+      await updateDoc(doc(db, "users", user.uid, "quotes", quoteId), { convertedToInvoice: true, convertedToInvoiceId: invoiceRef.id, convertedToInvoiceNumber: newInvoiceNumber, convertedAt: serverTimestamp(), status: "converted" });
       setDocumentType("invoice");
       setQuoteId(invoiceRef.id);
       setQuoteNumber(newInvoiceNumber);
-
       alert(`Quote successfully converted to Invoice ${newInvoiceNumber}`);
       loadSavedQuotes();
-    } catch (error) {
-      console.error("Error converting quote to invoice:", error);
-      alert("Failed to convert quote to invoice");
-    }
+    } catch (error) { alert("Failed to convert quote to invoice"); }
   };
 
-  // ============================================================================
-  // Handlers – new document
-  // ============================================================================
   const handleNewDocument = () => {
     setQuoteId(null);
     setQuoteNumber("");
@@ -591,140 +502,82 @@ const SolarDashboard = () => {
     setCustomerEmail("info@greenenergy.co.za");
     setCustomerPhone("+27 11 234 5678");
     setPropertyAddress("45 Sunset Avenue, Sandton, Johannesburg, 2196");
-
-    // Reset solar fields
-    setSystemSize("5");
-    setPanelType("Monocrystalline");
-    setInverterType("Hybrid");
-    setBatteryStorage("10");
-    setRoofType("Tile");
-    setRoofOrientation("North");
-    setRoofPitch("30");
-    setShadingAnalysis("Minimal");
-
+    setSystemSize("5"); setPanelType("Monocrystalline"); setInverterType("Hybrid"); setBatteryStorage("10");
+    setRoofType("Tile"); setRoofOrientation("North"); setRoofPitch("30"); setShadingAnalysis("Minimal");
     setItems([]);
     setCurrentStep(1);
-
     const loadNewNumber = async () => {
-      if (user?.uid) {
-        const next = await generateQuoteNumber(user.uid, documentType);
-        setQuoteNumber(next);
-      }
+      if (user?.uid) { const next = await generateQuoteNumber(user.uid, documentType); setQuoteNumber(next); }
     };
     loadNewNumber();
   };
 
-  const handleNewQuote = () => {
-    setDocumentType("quote");
-    handleNewDocument();
-  };
+  const handleNewQuote = () => { setDocumentType("quote"); handleNewDocument(); };
+  const handleNewInvoice = () => { setDocumentType("invoice"); handleNewDocument(); };
 
-  const handleNewInvoice = () => {
-    setDocumentType("invoice");
-    handleNewDocument();
-  };
-
-  // ============================================================================
-  // Handlers – line items
-  // ============================================================================
+  // ── Handlers – line items ──────────────────────────────────────────────────
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
-
     const rate = Number(newItem.rate) || 0;
     const qty = Number(newItem.qty);
     const taxRate = Number(newItem.taxRate) || 0;
     const amount = rate * qty;
     const taxAmount = amount * (taxRate / 100);
-
-    setItems((prev) => [
-      ...prev,
-      {
-        description: newItem.description,
-        workCategory: newItem.workCategory || "Solar Panels",
-        rate,
-        qty,
-        amount,
-        taxRate,
-        taxAmount,
-        totalAmount: amount + taxAmount,
-        urgency: newItem.urgency || "Standard",
-      },
-    ]);
-
-    setNewItem({
-      description: "",
-      rate: "",
-      qty: "",
-      workCategory: "Solar Panels",
-      taxRate: "15",
-      urgency: "Standard",
-    });
+    setItems((prev) => [...prev, { description: newItem.description, workCategory: newItem.workCategory || "Solar Panels", rate, qty, amount, taxRate, taxAmount, totalAmount: amount + taxAmount, urgency: newItem.urgency || "Standard" }]);
+    setNewItem({ description: "", rate: "", qty: "", workCategory: "Solar Panels", taxRate: "15", urgency: "Standard" });
   };
 
-  const handleRemoveItem = (index) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
-  };
+  const handleRemoveItem = (index) => { setItems((prev) => prev.filter((_, i) => i !== index)); };
 
-  // ============================================================================
-  // Handlers – payment
-  // ============================================================================
+  // ── Handlers – payment ─────────────────────────────────────────────────────
   const handleProcessPayment = async () => {
-    if (!quoteId || !user?.uid) {
-      alert("Please save the quote before processing payment");
-      return;
-    }
+    if (!quoteId || !user?.uid) { alert("Please save the quote before processing payment"); return; }
     try {
       const collectionName = documentType === "quote" ? "quotes" : "invoices";
-      const quoteDoc = await getDoc(
-        doc(db, "users", user.uid, collectionName, quoteId),
-      );
-      if (quoteDoc.exists()) {
-        setSelectedQuoteForPayment({ id: quoteId, ...quoteDoc.data() });
-        setShowPaymentModal(true);
-      } else {
-        alert("Quote not found. Please save the quote first.");
-      }
-    } catch (error) {
-      console.error("Error loading quote:", error);
-      alert("Failed to load quote for payment");
-    }
+      const quoteDoc = await getDoc(doc(db, "users", user.uid, collectionName, quoteId));
+      if (quoteDoc.exists()) { setSelectedQuoteForPayment({ id: quoteId, ...quoteDoc.data() }); setShowPaymentModal(true); }
+      else { alert("Quote not found. Please save the quote first."); }
+    } catch (error) { alert("Failed to load quote for payment"); }
   };
 
-  const handlePaymentComplete = () => {
-    loadSavedQuotes();
-    loadPaymentStatus();
-    setShowPaymentModal(false);
+  const handlePaymentComplete = () => { loadSavedQuotes(); loadPaymentStatus(); setShowPaymentModal(false); fetchStats(); };
+
+  // ── Print / PDF ────────────────────────────────────────────────────────────
+  const printStyles = `@media print { body * { visibility: hidden !important; } #print-area, #print-area * { visibility: visible !important; } #print-area { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 210mm !important; min-height: 297mm !important; margin: 0 !important; padding: 10mm !important; box-sizing: border-box !important; background: white !important; } @page { size: A4 portrait; margin: 0; } html, body { margin: 0 !important; padding: 0 !important; width: 210mm !important; background: white !important; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }`;
+
+  const handlePrint = () => {
+    const s = document.createElement("style");
+    s.textContent = printStyles;
+    document.head.appendChild(s);
+    window.print();
+    setTimeout(() => document.head.removeChild(s), 1000);
   };
 
-  // ============================================================================
-  // Handlers – settings / logo / print / PDF
-  // ============================================================================
+  const handleSavePDF = async () => {
+    const saved = await loadQuoteForExport();
+    if (!saved) { alert(`Please save the ${documentType} before exporting PDF`); return; }
+    setQuoteNumber(saved.quoteNumber);
+    setItems(saved.items);
+    setCustomerName(saved.customer.name);
+    setCustomerEmail(saved.customer.email);
+    setCustomerPhone(saved.customer.phone);
+    setPropertyAddress(saved.customer.address);
+    setTimeout(() => window.print(), 300);
+  };
+
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || !user?.uid || !authUser) return;
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
-      return;
-    }
-
+    if (!file.type.startsWith("image/")) { alert("Please upload an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { alert("Image size should be less than 5MB"); return; }
     try {
       setBusinessInfo((prev) => ({ ...prev, uploading: true }));
       const logoUrl = await uploadLogoToR2(file, authUser);
       setBusinessInfo((prev) => ({ ...prev, logoUrl, uploading: false }));
-
       const db = getFirestore();
-      await setDoc(
-        doc(db, "users", user.uid, "settings", "businessInfo"),
-        { logoUrl, updatedAt: new Date().toISOString() },
-        { merge: true },
-      );
+      await setDoc(doc(db, "users", user.uid, "settings", "businessInfo"), { logoUrl, updatedAt: new Date().toISOString() }, { merge: true });
       alert("Logo uploaded successfully!");
     } catch (error) {
-      console.error("Error uploading logo:", error);
       alert("Failed to upload logo: " + error.message);
       setBusinessInfo((prev) => ({ ...prev, uploading: false }));
     }
@@ -734,1757 +587,803 @@ const SolarDashboard = () => {
     if (!user?.uid) return;
     try {
       const db = getFirestore();
-      await setDoc(doc(db, "users", user.uid, "settings", "businessInfo"), {
-        ...businessInfo,
-        stampSettings,
-      });
+      await setDoc(doc(db, "users", user.uid, "settings", "businessInfo"), { ...businessInfo, stampSettings });
       alert("Business information saved successfully!");
       setShowSettings(false);
-    } catch (error) {
-      console.error("Error saving business info:", error);
-      alert("Failed to save business information");
-    }
+    } catch (error) { alert("Failed to save business information"); }
   };
 
-  const printStyles = `
-    @media print {
-      body * { visibility: hidden !important; }
-      #print-area, #print-area * { visibility: visible !important; }
-      #print-area {
-        display: block !important;
-        position: absolute !important;
-        left: 0 !important; top: 0 !important;
-        width: 210mm !important; min-height: 297mm !important;
-        margin: 0 !important; padding: 10mm !important;
-        box-sizing: border-box !important;
-        background: white !important;
-        box-shadow: none !important; transform: none !important;
-      }
-      @page { size: A4 portrait; margin: 0; }
-      html, body {
-        margin: 0 !important; padding: 0 !important;
-        width: 210mm !important; height: 297mm !important;
-        background: white !important;
-      }
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-      }
-      .logo img { height: 60px; width: auto; }
-      .shadow-lg, .rounded-lg, .shadow-xl, .shadow-2xl {
-        border: none !important; box-shadow: none !important;
-      }
-      table, tr, td, th, div { page-break-inside: avoid !important; }
-      table { width: 100% !important; border-collapse: collapse !important; }
-    }
-  `;
-
-  const handlePrint = () => {
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = printStyles;
-    document.head.appendChild(styleSheet);
-    window.print();
-    setTimeout(() => document.head.removeChild(styleSheet), 1000);
-  };
-
-  const handleSavePDF = async () => {
-    const savedQuote = await loadQuoteForExport();
-    if (!savedQuote) {
-      alert(`Please save the ${documentType} before exporting PDF`);
-      return;
-    }
-    setQuoteNumber(savedQuote.quoteNumber);
-    setItems(savedQuote.items);
-    setCustomerName(savedQuote.customer.name);
-    setCustomerEmail(savedQuote.customer.email);
-    setCustomerPhone(savedQuote.customer.phone);
-    setPropertyAddress(savedQuote.customer.address);
-    setTimeout(() => window.print(), 300);
-  };
-
-  // ── AI extraction ────────────────────────────────────────────────────────
   const handleAIDataExtracted = (extractedData) => {
-    if (extractedData.customer?.name)
-      setCustomerName(extractedData.customer.name);
-    if (extractedData.customer?.email)
-      setCustomerEmail(extractedData.customer.email);
-    if (extractedData.customer?.phone)
-      setCustomerPhone(extractedData.customer.phone);
-    if (extractedData.customer?.address)
-      setPropertyAddress(extractedData.customer.address);
+    if (extractedData.customer?.name) setCustomerName(extractedData.customer.name);
+    if (extractedData.customer?.email) setCustomerEmail(extractedData.customer.email);
+    if (extractedData.customer?.phone) setCustomerPhone(extractedData.customer.phone);
+    if (extractedData.customer?.address) setPropertyAddress(extractedData.customer.address);
     if (extractedData.items?.length > 0) setItems(extractedData.items);
     alert("✨ Data extracted and populated successfully!");
   };
-  const handleTestEmail = async () => {
-    if (!businessInfo.emailPassword) {
-      alert("⚠️ Please enter your email app password first.");
-      return;
-    }
 
-    const userEmail = user?.email || authUser?.email;
+  const handleNext = () => { if (currentStep < totalSteps) setCurrentStep(currentStep + 1); };
+  const handlePrevious = () => { if (currentStep > 1) setCurrentStep(currentStep - 1); };
+  const handleLogout = async () => { try { await signOut(getAuth()); } catch (error) { console.error(error); } };
 
-    if (!userEmail) {
-      alert("⚠️ Could not find your email address. Please log in again.");
-      return;
-    }
-
-    try {
-      const testEmailData = {
-        userId: user.uid,
-        to: userEmail, // Send test to self
-        subject: "✅ Test Email - Email Configuration Successful",
-        message: `
-Hello,
-
-This is a test email from your construction quote/invoice system.
-
-✓ Your email configuration is working correctly!
-
-Account Details:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Business: ${businessInfo.businessName}
-Email: ${userEmail}
-Provider: ${businessInfo.emailProvider || "Gmail"}
-Date: ${new Date().toLocaleString()}
-
-You can now send quotes and invoices to your clients from this email address.
-
-Best regards,
-Your Construction Quote System
-      `.trim(),
-        documentType: "test",
-        documentNumber: "TEST-001",
-      };
-
-      const sendEmail = httpsCallable(functions, "sendQuoteEmail");
-      await sendEmail(testEmailData);
-
-      alert(
-        `✅ Test email sent successfully!\n\nCheck your inbox at: ${userEmail}`,
-      );
-    } catch (error) {
-      console.error("Test email error:", error);
-
-      let errorMsg = "❌ Test email failed!\n\n";
-      if (error.message.includes("Invalid login")) {
-        errorMsg +=
-          "Your app password is incorrect. Please check and try again.\n\nMake sure you're using an APP PASSWORD, not your regular password.";
-      } else {
-        errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
-      }
-
-      alert(errorMsg);
-    }
-  };
-  // ── navigation ───────────────────────────────────────────────────────────
-  const handleNext = () => {
-    if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
-  };
-  const handlePrevious = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  // ── Template props ─────────────────────────────────────────────────────────
+  const templateProps = {
+    templateId: selectedTemplate,
+    businessInfo,
+    loading,
+    invoiceNumber: quoteNumber,
+    customerName,
+    billName: customerName,
+    billEmail: customerEmail,
+    billPhone: customerPhone,
+    billAddress: propertyAddress,
+    customerEmail,
+    customerPhone,
+    customerAddress: propertyAddress,
+    taxId: "",
+    items,
+    subtotal,
+    totalTax,
+    total,
+    documentType,
+    stampText: stampSettings.text,
+    stampColor: stampSettings.color,
+    showStampDate: stampSettings.showDate,
+    showStamp: stampSettings.enabled,
+    paymentStatus,
   };
 
-  // ── logout ───────────────────────────────────────────────────────────────
-  const handleLogout = async () => {
-    try {
-      await signOut(getAuth());
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
+  // ── Header actions ─────────────────────────────────────────────────────────
   const headerActions = [
-    documentType === "quote" &&
-      quoteId && {
-        label: "Convert to Invoice",
-        icon: FileText,
-        onClick: handleConvertToInvoice,
-        className:
-          "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap",
-      },
-    {
-      label: "Preview",
-      icon: Eye,
-      onClick: () => setShowPreview(true),
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    documentType === "quote" && quoteId && {
+      label: "Convert to Invoice", icon: FileText, onClick: handleConvertToInvoice,
+      className: "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    {
-      label: "Print",
-      icon: Printer,
-      onClick: handlePrint,
-      variant: "secondary",
-    },
-    {
-      label: "New",
-      icon: Plus,
-      onClick: documentType === "quote" ? handleNewQuote : handleNewInvoice,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap",
-    },
-    {
-      label: "Send",
-      icon: Send,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap",
-    },
-    {
-      label: "Save PDF",
-      icon: Download,
-      onClick: handleSavePDF,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap",
-    },
-    {
-      label: "Save",
-      icon: Save,
-      onClick: handleSaveQuote,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap",
-    },
-    {
-      label: "Logout",
-      icon: LogOut,
-      onClick: handleLogout,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap",
-    },
+    { label: "Preview", icon: Eye, onClick: () => setShowPreview(true), className: "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
+    { label: "Print", icon: Printer, onClick: handlePrint, variant: "secondary" },
+    { label: "New", icon: Plus, onClick: documentType === "quote" ? handleNewQuote : handleNewInvoice, className: "flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
+    { label: "Send", icon: Send, className: "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
+    { label: "Save PDF", icon: Download, onClick: handleSavePDF, className: "flex items-center gap-1.5 px-3 py-1.5 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
+    { label: "Save", icon: Save, onClick: handleSaveQuote, className: "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
+    { label: "Logout", icon: LogOut, onClick: handleLogout, className: "flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#f1f5f9] text-[#64748b] border border-[#e2e8f0] text-sm font-medium rounded-md transition-colors whitespace-nowrap" },
   ].filter(Boolean);
 
   const mobileDashboardActions = [
-    documentType === "quote" &&
-      quoteId && {
-        label: "To Invoice",
-        icon: FileText,
-        onClick: handleConvertToInvoice,
-        className:
-          "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
-      },
-    {
-      label: "Save",
-      icon: Save,
-      onClick: handleSaveQuote,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    documentType === "quote" && quoteId && {
+      label: "To Invoice", icon: FileText, onClick: handleConvertToInvoice,
+      className: "flex items-center gap-1.5 px-3 py-2 bg-[#7c3aed] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
     },
-    {
-      label: "Send",
-      icon: Send,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
-    },
-    {
-      label: "PDF",
-      icon: Download,
-      onClick: handleSavePDF,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
-    },
-    {
-      label: "Print",
-      icon: Printer,
-      onClick: handlePrint,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap",
-    },
+    { label: "Save", icon: Save, onClick: handleSaveQuote, className: "flex items-center gap-1.5 px-3 py-2 bg-[#2563eb] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
+    { label: "Send", icon: Send, className: "flex items-center gap-1.5 px-3 py-2 bg-[#059669] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
+    { label: "PDF", icon: Download, onClick: handleSavePDF, className: "flex items-center gap-1.5 px-3 py-2 bg-[#0891b2] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
+    { label: "Print", icon: Printer, onClick: handlePrint, className: "flex items-center gap-1.5 px-3 py-2 bg-white border border-[#e2e8f0] text-[#374151] rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
   ].filter(Boolean);
 
-  return (
-    <div className="flex h-screen w-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 overflow-hidden">
-      {/* ── Mobile Sidebar Backdrop ──────────────────────────────────────── */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
-          onClick={() => setSidebarOpen(false)}
-        ></div>
-      )}
+  // ── Home view ──────────────────────────────────────────────────────────────
+  const HomeViewLocal = () => (
+    <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard title="Quotes & Invoices" value={stats.totalQuotes} icon={FileText} iconBg="bg-[#eff6ff]" iconColor="text-[#2563eb]" subtitle="All time" loading={stats.loading} trend={12} />
+        <StatCard title="Revenue" value={formatCurrency(stats.totalRevenue)} icon={TrendingUp} iconBg="bg-[#f0fdf4]" iconColor="text-[#059669]" subtitle="Total invoiced" loading={stats.loading} trend={8} />
+        <StatCard title="Clients" value={stats.totalClients} icon={Users} iconBg="bg-[#fff7ed]" iconColor="text-[#ea580c]" subtitle="Active" loading={stats.loading} />
+        <StatCard title="Solar Systems" value="—" icon={Sun} iconBg="bg-[#fefce8]" iconColor="text-[#ca8a04]" subtitle="Installed" loading={stats.loading} />
+      </div>
 
-      {/* ── Collapsed Sidebar ────────────────────────────────────────────── */}
-      <div
-        className={`${
-          sidebarOpen ? "hidden" : "hidden md:block"
-        } fixed z-40 w-16 md:w-20 bg-gradient-to-b from-orange-900 via-orange-800 to-orange-900 border-r border-orange-700/50 h-full print:hidden transition-all duration-300 shadow-2xl`}
-      >
-        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
-          {/* expand toggle */}
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="group p-2 md:p-3 text-amber-400 hover:text-white hover:bg-gradient-to-r hover:from-orange-600 hover:to-orange-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-amber-500/50 hover:scale-110"
-            title="Expand Sidebar"
-          >
-            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
-          </button>
-
-          {/* brand icon */}
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
-            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4  rounded-xl p-1 shadow-lg">
-              <img src={logo} alt="" />
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm flex items-center gap-4">
+          <div className="w-10 h-10 bg-[#fff7ed] rounded-lg flex items-center justify-center flex-shrink-0">
+            <Receipt className="w-5 h-5 text-[#ea580c]" />
           </div>
-
-          {/* icon nav */}
-          <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
-            <button
-              onClick={() => setActiveView("home")}
-              className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-              title="Home"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-            </button>
-
-            <button
-              onClick={() => setShowSettings(true)}
-              className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-              title="Settings"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-600 to-amber-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Settings className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:rotate-90 transition-transform duration-500" />
-            </button>
-
-            {!isMobile && (
+          <div>
+            <p className="text-xs text-[#64748b] mb-0.5">Pending Payments</p>
+            {stats.loading ? <div className="h-6 bg-[#f1f5f9] rounded animate-pulse w-32" /> : (
               <>
-                <button
-                  onClick={() => setActiveView("financial-overview")}
-                  className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                  title="Financial Dashboard"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <TrendingUp className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                </button>
-
-                <button
-                  onClick={() => {
-                    handleNewInvoice();
-                    setActiveView("quote");
-                  }}
-                  className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                  title="Quotes & Invoices"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Receipt className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                </button>
-
-                <button
-                  onClick={() => setShowCustomersListModal(true)}
-                  className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                  title="Clients"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-600 to-yellow-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Users className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                </button>
+                <p className="text-xl font-bold text-[#ea580c]">{formatCurrency(stats.pendingPayments)}</p>
+                <p className="text-xs text-[#94a3b8]">Outstanding balance</p>
               </>
             )}
           </div>
         </div>
 
-        {/* avatar bottom */}
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
-          <div className="relative group">
-            <div className="absolute inset-0 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center ring-2 ring-orange-700 shadow-lg group-hover:ring-4 group-hover:ring-amber-500/50 transition-all duration-300">
-              <img src={businessInfo.logoUrl} alt="" />
-            </div>
+        <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
+          <p className="text-xs font-semibold text-[#94a3b8] uppercase tracking-widest mb-3">Quick Actions</p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            {[
+              { label: "New Quote", icon: FileText, onClick: () => { handleNewQuote(); setActiveView("quote"); }, bg: "bg-[#eff6ff]", hover: "hover:bg-[#dbeafe]", border: "border-[#bfdbfe]", iconBg: "bg-[#2563eb]", text: "text-[#1e40af]" },
+              { label: "New Invoice", icon: Receipt, onClick: () => { handleNewInvoice(); setActiveView("quote"); }, bg: "bg-[#f0fdf4]", hover: "hover:bg-[#dcfce7]", border: "border-[#bbf7d0]", iconBg: "bg-[#059669]", text: "text-[#166534]" },
+              { label: "Clients", icon: Users, onClick: () => setShowCustomersListModal(true), bg: "bg-[#fefce8]", hover: "hover:bg-[#fef9c3]", border: "border-[#fde68a]", iconBg: "bg-[#ca8a04]", text: "text-[#854d0e]" },
+            ].map(({ label, icon: Icon, onClick, bg, hover, border, iconBg, text }) => (
+              <button key={label} onClick={onClick} className={`flex-1 flex items-center justify-between px-3 py-2.5 ${bg} ${hover} border ${border} rounded-lg transition-all group`}>
+                <div className="flex items-center gap-2">
+                  <div className={`w-6 h-6 ${iconBg} rounded flex items-center justify-center flex-shrink-0`}><Icon className="w-3 h-3 text-white" /></div>
+                  <span className={`text-xs font-semibold ${text}`}>{label}</span>
+                </div>
+                <ArrowRight className={`w-3 h-3 ${text} opacity-60 group-hover:translate-x-0.5 transition-transform`} />
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* ── Expanded Sidebar ─────────────────────────────────────────────── */}
-      <div
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed z-50 w-64 md:w-72 bg-gradient-to-b from-orange-900 via-orange-800 to-orange-900 border-r border-orange-700/50 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
-      >
-        <div className="p-4 md:p-6">
-          {/* header */}
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <div className="flex items-center space-x-3 md:space-x-4">
-              <img
-                src={logo}
-                alt="Business Logo"
-                className="w-16 h-12 object-contain rounded-lg"
-              />
+      <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
+          <h3 className="text-sm font-semibold text-[#1e293b]">Recent {documentType === "quote" ? "Quotes" : "Invoices"}</h3>
+          <button onClick={() => setShowQuotesList(true)} className="text-xs text-[#2563eb] hover:text-[#1d4ed8] font-medium">View all</button>
+        </div>
+        <div className="divide-y divide-[#f1f5f9]">
+          {stats.loading ? (
+            [1, 2, 3].map((i) => <div key={i} className="h-14 bg-[#f8fafc] animate-pulse m-3 rounded-lg" />)
+          ) : savedQuotes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-10 h-10 mb-3 bg-[#f1f5f9] rounded-full flex items-center justify-center">
+                <Zap className="w-5 h-5 text-[#94a3b8]" />
+              </div>
+              <p className="text-sm font-medium text-[#374151] mb-1">No quotes yet</p>
+              <p className="text-xs text-[#94a3b8] mb-3">Create your first solar quote to get started</p>
+              <button onClick={() => { handleNewQuote(); setActiveView("quote"); }} className="px-4 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-lg text-xs font-medium transition-colors">
+                Create Quote
+              </button>
             </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="group p-2 text-amber-400 hover:text-white hover:bg-orange-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
-              title="Collapse Sidebar"
-            >
-              <ChevronLeft className="w-5 h-5" />
+          ) : (
+            savedQuotes.slice(0, 8).map((quote) => (
+              <div key={quote.id} onClick={() => loadQuote(quote)} className="flex items-center justify-between px-5 py-3.5 hover:bg-[#f8fafc] cursor-pointer transition-colors">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-sm font-semibold text-[#1e293b] truncate">{quote.quoteNumber || quote.id}</span>
+                    <span className={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${statusBadge(quote.status)}`}>
+                      {quote.status === "partially_paid" ? "Partial" : quote.status || "Pending"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-[#64748b]">
+                    <span className="flex items-center gap-1 truncate"><Users className="w-3 h-3 flex-shrink-0" />{quote.customer?.name || "No client"}</span>
+                    <span className="flex items-center gap-1 truncate"><Zap className="w-3 h-3 flex-shrink-0" />{quote.solarDetails?.systemSize || "—"}kW System</span>
+                  </div>
+                </div>
+                <div className="text-right ml-4 flex-shrink-0">
+                  <div className="text-sm font-bold text-[#1e293b]">{formatCurrency(quote.totals?.total || 0)}</div>
+                  {quote.totals?.due > 0 && quote.totals?.due < quote.totals?.total && (
+                    <div className="text-xs text-[#d97706]">Due: {formatCurrency(quote.totals.due)}</div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════════════════
+  return (
+    <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
+      {/* Print area */}
+      <div id="print-area" className="hidden print:block bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
+        <TemplateRenderer {...templateProps} />
+      </div>
+
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        {/* ── Sidebar backdrop ──────────────────────────────────────────────── */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        )}
+
+        {/* ── Collapsed Sidebar ─────────────────────────────────────────────── */}
+        <div className={`${sidebarOpen ? "hidden" : "hidden md:flex"} fixed z-40 w-16 bg-[#0f172a] border-r border-[#1e293b] h-full flex-col items-center py-4 space-y-3 print:hidden`}>
+          <button onClick={() => setSidebarOpen(true)} className="p-2 text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg transition-all">
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <div className="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center">
+            <img src={logo} className="w-full h-full object-contain" />
+          </div>
+          <div className="flex flex-col items-center space-y-2 w-full px-2 pt-2">
+            {[
+              { icon: Home, onClick: () => setActiveView("home"), title: "Home", color: "text-[#38bdf8]" },
+              { icon: Settings, onClick: () => setShowSettings(true), title: "Settings", color: "text-[#64748b]" },
+              { icon: TrendingUp, onClick: () => setActiveView("financial-overview"), title: "Financial", color: "text-[#64748b]" },
+              { icon: Receipt, onClick: () => { handleNewQuote(); setActiveView("quote"); }, title: "Quotes", color: "text-[#64748b]" },
+              { icon: Users, onClick: () => setShowCustomersListModal(true), title: "Clients", color: "text-[#64748b]" },
+              { icon: Sun, onClick: () => {}, title: "Solar Systems", color: "text-[#64748b]" },
+              { icon: BarChart3, onClick: () => setActiveView("reports"), title: "Reports", color: "text-[#64748b]" },
+            ].map(({ icon: Icon, onClick, title, color }) => (
+              <button key={title} onClick={onClick} title={title} className={`group p-2 ${color} hover:text-white hover:bg-[#1e293b] rounded-lg transition-all w-10 h-10 flex items-center justify-center`}>
+                <Icon className="w-5 h-5" />
+              </button>
+            ))}
+          </div>
+          <div className="absolute bottom-4">
+            <div className="w-9 h-9 bg-[#1e293b] rounded-full flex items-center justify-center ring-1 ring-[#334155]">
+              {businessInfo.logoUrl ? <img src={businessInfo.logoUrl} className="w-6 h-6 object-contain" /> : <Sun className="w-4 h-4 text-[#64748b]" />}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Expanded Sidebar ──────────────────────────────────────────────── */}
+        <div className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 bg-[#0f172a] border-r border-[#1e293b] transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto flex flex-col`}>
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-[#1e293b]">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg overflow-hidden"><img src={logo} className="w-full h-full object-contain" /></div>
+              <span className="text-sm font-bold text-white truncate">{businessInfo.businessName || "SolarTech"}</span>
+            </div>
+            <button onClick={() => setSidebarOpen(false)} className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg transition-all">
+              <ChevronLeft className="w-4 h-4" />
             </button>
           </div>
 
-          {/* nav */}
-          <nav className="space-y-1.5 md:space-y-2">
-            <div
-              onClick={() => {
-                setActiveView("home");
-                setSidebarOpen(false);
-              }}
-              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-amber-500/30"
-            >
-              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-xs md:text-sm font-semibold">Home</span>
+          {/* Nav */}
+          <nav className="flex-1 p-3 space-y-1">
+            {[
+              { label: "Home", icon: Home, view: "home", active: activeView === "home" },
+            ].map(({ label, icon: Icon, view, active }) => (
+              <div key={label} onClick={() => { setActiveView(view); setSidebarOpen(false); }}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${active ? "bg-[#1e3a5f] text-[#38bdf8]" : "text-[#94a3b8] hover:text-white hover:bg-[#1e293b]"}`}>
+                <Icon className="w-4 h-4 flex-shrink-0" />{label}
+              </div>
+            ))}
+
+            <div onClick={() => { setShowSettings(true); setSidebarOpen(false); }}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b]">
+              <Settings className="w-4 h-4 flex-shrink-0" />Settings
             </div>
 
-            <div
-              onClick={() => {
-                setShowSettings(true);
-                setSidebarOpen(false);
-              }}
-              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-amber-600/20 hover:to-amber-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-amber-500/30"
-            >
-              <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
-              <span className="text-xs md:text-sm font-semibold">Settings</span>
-            </div>
-
-            <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-orange-700/50">
-              {/* Financial Dashboard */}
-              <div
-                onClick={() => {
-                  setActiveView("financial-overview");
-                  setSidebarOpen(false);
-                }}
-                className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
-              >
-                <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-xs md:text-sm font-semibold truncate">
-                  Financial Dashboard
-                </span>
+            <div className="pt-3 border-t border-[#1e293b] space-y-1">
+              <div onClick={() => { setActiveView("financial-overview"); setSidebarOpen(false); }}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b] transition-all">
+                <TrendingUp className="w-4 h-4 flex-shrink-0" />Financial Dashboard
               </div>
 
               {/* Quotes & Invoices dropdown */}
-              <div className="mt-2 md:mt-3">
-                <div className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30">
-                  <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                    <Receipt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">
-                      Quotes & Invoices
-                    </span>
-                  </div>
-                  <ChevronDown className="w-4 h-4 flex-shrink-0 group-hover:translate-y-0.5 transition-transform duration-300" />
+              <div>
+                <div onClick={() => setIsInvoicingOpen(!isInvoicingOpen)}
+                  className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all text-sm font-medium">
+                  <div className="flex items-center gap-3"><Receipt className="w-4 h-4 flex-shrink-0" />Quotes &amp; Invoices</div>
+                  <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isInvoicingOpen ? "rotate-180" : ""}`} />
                 </div>
-
-                <div className="ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-orange-700/50 pl-3 md:pl-4">
-                  <div
-                    onClick={() => {
-                      handleNewQuote();
-                      setActiveView("quote");
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-orange-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                    <span className="truncate">Create Quote</span>
-                  </div>
-                  <div
-                    onClick={() => {
-                      handleNewInvoice();
-                      setActiveView("quote");
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-orange-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                    <span className="truncate">Create Invoice</span>
-                  </div>
-                  <div
-                    onClick={() => {
-                      setShowQuotesList(!showQuotesList);
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-orange-700/30 rounded-lg cursor-pointer transition-all duration-300"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                        <span className="truncate">
-                          All {documentType === "quote" ? "Quotes" : "Invoices"}
-                        </span>
-                      </div>
-                      <span className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
-                        {savedQuotes.length}
-                      </span>
+                <div className={`ml-4 mt-1 space-y-0.5 border-l border-[#1e293b] pl-3 overflow-hidden transition-all duration-200 ${isInvoicingOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"}`}>
+                  {[
+                    { label: "Create Quote", dot: "bg-[#2563eb]", onClick: () => { handleNewQuote(); setActiveView("quote"); if (isMobile) setSidebarOpen(false); } },
+                    { label: "Create Invoice", dot: "bg-[#059669]", onClick: () => { handleNewInvoice(); setActiveView("quote"); if (isMobile) setSidebarOpen(false); } },
+                    { label: `All ${documentType === "quote" ? "Quotes" : "Invoices"}`, dot: "bg-[#7c3aed]", badge: savedQuotes.length, onClick: () => { setShowQuotesList(!showQuotesList); if (isMobile) setSidebarOpen(false); } },
+                  ].map(({ label, dot, badge, onClick }) => (
+                    <div key={label} onClick={onClick} className="flex items-center justify-between py-2 px-2 text-xs text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all">
+                      <div className="flex items-center gap-2"><div className={`w-1.5 h-1.5 rounded-full ${dot}`} />{label}</div>
+                      {badge !== undefined && <span className="bg-[#2563eb] text-white px-1.5 py-0.5 rounded text-xs font-bold">{badge}</span>}
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
               {/* Clients dropdown */}
-              <div className="mt-2 md:mt-3">
-                <div
-                  onClick={() => setIsClientsOpen(!isClientsOpen)}
-                  className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-yellow-600/20 hover:to-yellow-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-yellow-500/30"
-                >
-                  <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                    <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">
-                      Clients
-                    </span>
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
-                      isClientsOpen ? "rotate-180" : ""
-                    }`}
-                  />
+              <div>
+                <div onClick={() => setIsClientsOpen(!isClientsOpen)}
+                  className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all text-sm font-medium">
+                  <div className="flex items-center gap-3"><Users className="w-4 h-4 flex-shrink-0" />Clients</div>
+                  <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isClientsOpen ? "rotate-180" : ""}`} />
                 </div>
-
-                <div
-                  className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-orange-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
-                    isClientsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                  }`}
-                >
-                  <div
-                    onClick={() => {
-                      handleAddNewCustomer();
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-orange-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-                    <span className="truncate">Add Client</span>
-                  </div>
-                  <div
-                    onClick={() => {
-                      setShowCustomersListModal(true);
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-orange-700/30 rounded-lg cursor-pointer transition-all duration-300"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-                        <span className="truncate">All Clients</span>
-                      </div>
-                      <span className="bg-gradient-to-r from-yellow-600 to-orange-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
-                        {savedCustomers.length}
-                      </span>
+                <div className={`ml-4 mt-1 space-y-0.5 border-l border-[#1e293b] pl-3 overflow-hidden transition-all duration-200 ${isClientsOpen ? "max-h-32 opacity-100" : "max-h-0 opacity-0"}`}>
+                  {[
+                    { label: "Add Client", dot: "bg-[#059669]", onClick: () => { handleAddNewCustomer(); if (isMobile) setSidebarOpen(false); } },
+                    { label: "All Clients", dot: "bg-[#2563eb]", badge: savedCustomers.length, onClick: () => { setShowCustomersListModal(true); if (isMobile) setSidebarOpen(false); } },
+                  ].map(({ label, dot, badge, onClick }) => (
+                    <div key={label} onClick={onClick} className="flex items-center justify-between py-2 px-2 text-xs text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all">
+                      <div className="flex items-center gap-2"><div className={`w-1.5 h-1.5 rounded-full ${dot}`} />{label}</div>
+                      {badge !== undefined && <span className="bg-[#7c3aed] text-white px-1.5 py-0.5 rounded text-xs font-bold">{badge}</span>}
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Schedule / Reports (desktop only) */}
-              {!isMobile && (
-                <>
-                  <div
-                    onClick={() => {
-                      setActiveView("schedule");
-                      setSidebarOpen(false);
-                    }}
-                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-blue-500/30"
-                  >
-                    <Calendar className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">
-                      Schedule
-                    </span>
-                  </div>
-                  <div
-                    onClick={() => {
-                      setActiveView("reports");
-                      setSidebarOpen(false);
-                    }}
-                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-purple-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-purple-500/30"
-                  >
-                    <BarChart3 className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">
-                      Reports
-                    </span>
-                  </div>
-                </>
-              )}
+              {/* Static items */}
+              {[
+                { label: "Schedule", icon: Calendar, onClick: () => { setActiveView("schedule"); setSidebarOpen(false); } },
+                { label: "Reports", icon: BarChart3, onClick: () => { setActiveView("reports"); setSidebarOpen(false); } },
+                { label: "Templates", icon: FileText, onClick: () => { setActiveView("templates"); setSidebarOpen(false); } },
+              ].map(({ label, icon: Icon, onClick }) => (
+                <div key={label} onClick={onClick} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b] transition-all cursor-pointer">
+                  <Icon className="w-4 h-4 flex-shrink-0" />{label}
+                </div>
+              ))}
             </div>
           </nav>
-        </div>
 
-        {/* sidebar footer – user info + logout */}
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center px-4">
-          <div className="flex items-center space-x-2 md:space-x-3 w-full">
-            <div className="relative group flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-orange-700 shadow-lg group-hover:ring-4 group-hover:ring-amber-500/50 transition-all duration-300">
-                <img
-                  src={businessInfo.logoUrl}
-                  alt="Business Logo"
-                  className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-                />
+          {/* Sidebar footer */}
+          <div className="p-4 border-t border-[#1e293b]">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-[#1e293b] rounded-full flex items-center justify-center ring-1 ring-[#334155] flex-shrink-0">
+                {businessInfo.logoUrl ? <img src={businessInfo.logoUrl} className="w-6 h-6 object-contain" /> : <Sun className="w-4 h-4 text-[#64748b]" />}
               </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-bold text-white truncate">{user?.name || "User"}</div>
+                <div className="text-xs text-[#64748b] truncate">{user?.email || "email@example.com"}</div>
+              </div>
+              <button onClick={handleLogout} className="p-1.5 text-[#64748b] hover:text-[#ef4444] hover:bg-[#1e293b] rounded-lg transition-all">
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent truncate">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-amber-400 truncate">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="group text-amber-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-            >
-              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-            </button>
           </div>
         </div>
-      </div>
 
-      {/* ── Main Content Area ────────────────────────────────────────────── */}
-      <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
-      >
-        <div className="flex flex-col h-screen">
-          <AppHeader
-            actions={headerActions}
-            mobileActions={mobileDashboardActions}
-            onSettingsOpen={() => setShowSettings(true)}
-          />
+        {/* ── Main content ───────────────────────────────────────────────────── */}
+        <div className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-64" : "ml-0 md:ml-16"}`}>
+          <AppHeader actions={headerActions} mobileActions={mobileDashboardActions} onSettingsOpen={() => setShowSettings(true)} />
 
-          {/* ── Scrollable Main Content ──────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
-            {/* ── Settings Modal ──────────────────────────────────────── */}
-            {showSettings && (
-              <BusinessSettingsModal onClose={() => setShowSettings(false)} />
-            )}
+          {/* ── Modals ──────────────────────────────────────────────────────── */}
+          {showSettings && <BusinessSettingsModal onClose={() => setShowSettings(false)} />}
+          <CustomersListModal showModal={showCustomersListModal} setShowModal={setShowCustomersListModal} customers={customers} onLoadCustomer={loadCustomer} onEditCustomer={handleEditCustomer} onAddNewCustomer={handleAddNewCustomer} />
+          <CustomerModal showModal={showCustomerModal} setShowModal={setShowCustomerModal} existingCustomer={selectedCustomer} onCustomerSaved={handleCustomerSaved} />
+          {showPaymentModal && selectedQuoteForPayment && (
+            <PaymentProcessor showModal={showPaymentModal} setShowModal={setShowPaymentModal} invoice={selectedQuoteForPayment} onPaymentComplete={handlePaymentComplete} user={user} businessInfo={businessInfo} />
+          )}
 
-            {/* ── Shared Modals ────────────────────────────────────────── */}
-            <CustomersListModal
-              showModal={showCustomersListModal}
-              setShowModal={setShowCustomersListModal}
-              customers={customers}
-              onLoadCustomer={loadCustomer}
-              onEditCustomer={handleEditCustomer}
-              onAddNewCustomer={handleAddNewCustomer}
-            />
-            <CustomerModal
-              showModal={showCustomerModal}
-              setShowModal={setShowCustomerModal}
-              existingCustomer={selectedCustomer}
-              onCustomerSaved={handleCustomerSaved}
-            />
-
-            {showPaymentModal && selectedQuoteForPayment && (
-              <PaymentProcessor
-                showModal={showPaymentModal}
-                setShowModal={setShowPaymentModal}
-                invoice={selectedQuoteForPayment}
-                onPaymentComplete={handlePaymentComplete}
-                user={user}
-                businessInfo={businessInfo}
-              />
-            )}
-
-            {/* ── Saved Quotes / Invoices List Modal ──────────────────── */}
-            {showQuotesList && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-                  <div className="p-4 border-b flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">
-                      Saved {documentType === "quote" ? "Quotes" : "Invoices"}
-                    </h2>
-                    <button
-                      onClick={() => setShowQuotesList(false)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      ✕
-                    </button>
+          {/* ── Quotes list modal ────────────────────────────────────────────── */}
+          {showQuotesList && (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-[#e2e8f0]">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
+                  <div>
+                    <h2 className="text-base font-semibold text-[#1e293b]">Saved {documentType === "quote" ? "Quotes" : "Invoices"}</h2>
+                    <p className="text-xs text-[#64748b] mt-0.5">{savedQuotes.length} records</p>
                   </div>
-                  <div className="overflow-auto p-4">
-                    {savedQuotes.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        No saved{" "}
-                        {documentType === "quote" ? "quotes" : "invoices"} yet
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
+                  <button onClick={() => setShowQuotesList(false)} className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"><X className="w-4 h-4" /></button>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  {savedQuotes.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                      <Zap className="w-10 h-10 text-[#cbd5e1] mb-3" />
+                      <p className="text-sm text-[#94a3b8]">No records found</p>
+                    </div>
+                  ) : (
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                          {["Number", "Client", "System", "Total", "Paid", "Status"].map((h) => (
+                            <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
                         {savedQuotes.map((quote) => (
-                          <div
-                            key={quote.id}
-                            onClick={() => loadQuote(quote)}
-                            className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <div className="font-semibold text-lg">
-                                  {quote.quoteNumber || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600 mt-1">
-                                  Client: {quote.customer?.name || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  Email: {quote.customer?.email || "N/A"}
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-lg font-semibold text-orange-600">
-                                  R{quote.totals?.total?.toFixed(2) || "0.00"}
-                                </div>
-                                {quote.totals?.paid > 0 && (
-                                  <div className="text-sm text-emerald-600 font-semibold">
-                                    Paid: R{quote.totals.paid.toFixed(2)}
-                                  </div>
-                                )}
-                                {quote.totals?.due > 0 && (
-                                  <div className="text-sm text-rose-600 font-semibold">
-                                    Due: R{quote.totals.due.toFixed(2)}
-                                  </div>
-                                )}
-                                <div
-                                  className={`text-xs mt-1 px-2 py-1 rounded ${quote.status === "paid" ? "bg-emerald-100 text-emerald-700" : quote.status === "partially_paid" ? "bg-orange-100 text-orange-700" : quote.status === "pending" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}
-                                >
-                                  {quote.status === "paid"
-                                    ? "Paid"
-                                    : quote.status === "partially_paid"
-                                      ? "Partial"
-                                      : "Pending"}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                          <tr key={quote.id} onClick={() => loadQuote(quote)} className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] cursor-pointer transition-colors">
+                            <td className="px-5 py-3 text-sm font-semibold text-[#2563eb]">{quote.quoteNumber || "N/A"}</td>
+                            <td className="px-5 py-3 text-sm text-[#374151]">{quote.customer?.name || "N/A"}</td>
+                            <td className="px-5 py-3 text-sm text-[#374151]">{quote.solarDetails?.systemSize || "—"}kW</td>
+                            <td className="px-5 py-3 text-sm font-semibold text-[#1e293b]">{formatCurrency(quote.totals?.total || 0)}</td>
+                            <td className="px-5 py-3 text-sm font-semibold text-[#059669]">{quote.totals?.paid > 0 ? formatCurrency(quote.totals.paid) : "—"}</td>
+                            <td className="px-5 py-3">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${statusBadge(quote.status)}`}>
+                                {quote.status === "partially_paid" ? "Partial" : quote.status || "Pending"}
+                              </span>
+                            </td>
+                          </tr>
                         ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Preview modal ────────────────────────────────────────────────── */}
+          {showPreview && (
+            <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center"><Eye className="w-4 h-4 text-white" /></div>
+                    <div>
+                      <h2 className="text-sm font-semibold text-[#1e293b]">{documentType === "quote" ? "Quote" : "Invoice"} Preview</h2>
+                      <p className="text-xs text-[#64748b]">{quoteNumber || "Draft"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={handlePrint} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"><Printer className="w-3.5 h-3.5" />Print</button>
+                    <button onClick={handleSavePDF} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"><Download className="w-3.5 h-3.5" />Save PDF</button>
+                    <button onClick={() => setShowPreview(false)} className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"><X className="w-4 h-4" /></button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
+                  <div className="mx-auto bg-white shadow-xl" style={{ width: "210mm", minHeight: "297mm" }}>
+                    <TemplateRenderer {...templateProps} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Alternate views ──────────────────────────────────────────────── */}
+          {activeView === "financial-overview" && <div className="flex-1 overflow-y-auto p-4"><FinancialOverview user={user} /></div>}
+          {activeView === "history-view" && <div className="flex-1 overflow-y-auto p-4"><HistoryView user={user} /></div>}
+          {activeView === "notes-view" && <div className="flex-1 overflow-y-auto p-4"><NotesView user={user} /></div>}
+          {activeView === "templates" && <div className="flex-1 overflow-y-auto p-4"><Templates user={user} /></div>}
+          {activeView === "home" && <HomeViewLocal />}
+
+          {/* ── Quote / Invoice builder ───────────────────────────────────────── */}
+          {activeView === "quote" && (
+            <div className="flex-1 overflow-hidden flex min-h-0">
+              {/* ── LEFT: Form ─────────────────────────────────────────────── */}
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+                <div className="space-y-5">
+
+                  {/* Summary stat cards */}
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { label: "Total Amount", value: formatCurrency(total), icon: DollarSign, iconBg: "bg-[#eff6ff]", iconColor: "text-[#2563eb]", textColor: "text-[#1e293b]" },
+                      { label: "Paid", value: formatCurrency(paymentStatus.totalPaid), icon: CheckSquare, iconBg: paymentStatus.totalPaid > 0 ? "bg-[#dcfce7]" : "bg-[#f1f5f9]", iconColor: paymentStatus.totalPaid > 0 ? "text-[#059669]" : "text-[#94a3b8]", textColor: paymentStatus.totalPaid > 0 ? "text-[#059669]" : "text-[#1e293b]" },
+                      { label: "Balance Due", value: formatCurrency(paymentStatus.balanceDue), icon: Wallet, iconBg: paymentStatus.balanceDue <= 0 ? "bg-[#dcfce7]" : "bg-[#fef2f2]", iconColor: paymentStatus.balanceDue <= 0 ? "text-[#059669]" : "text-[#dc2626]", textColor: paymentStatus.balanceDue <= 0 ? "text-[#059669]" : "text-[#dc2626]" },
+                    ].map(({ label, value, icon: Icon, iconBg, iconColor, textColor }) => (
+                      <div key={label} className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">{label}</span>
+                          <div className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center`}><Icon className={`w-4 h-4 ${iconColor}`} /></div>
+                        </div>
+                        <div className={`text-xl font-bold ${textColor}`}>{value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Payment status banner */}
+                  {quoteId && (
+                    <div className={`px-5 py-3.5 rounded-xl border flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-[#f0fdf4] border-[#bbf7d0]" : paymentStatus.status === "partially_paid" ? "bg-[#fffbeb] border-[#fde68a]" : "bg-[#fff7ed] border-[#fed7aa]"}`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${paymentStatus.status === "paid" ? "bg-[#dcfce7]" : paymentStatus.status === "partially_paid" ? "bg-[#fef3c7]" : "bg-[#ffedd5]"}`}>
+                          <CreditCard className={`w-4 h-4 ${paymentStatus.status === "paid" ? "text-[#059669]" : paymentStatus.status === "partially_paid" ? "text-[#d97706]" : "text-[#ea580c]"}`} />
+                        </div>
+                        <div className={`text-sm font-semibold ${paymentStatus.status === "paid" ? "text-[#166534]" : paymentStatus.status === "partially_paid" ? "text-[#92400e]" : "text-[#9a3412]"}`}>
+                          {paymentStatus.status === "paid" ? `${documentType === "quote" ? "Quote" : "Invoice"} Fully Paid` : paymentStatus.status === "partially_paid" ? `${formatCurrency(paymentStatus.totalPaid)} paid · ${formatCurrency(paymentStatus.balanceDue)} remaining` : `Payment Pending — ${formatCurrency(paymentStatus.balanceDue)} due`}
+                        </div>
+                      </div>
+                      {paymentStatus.status !== "paid" && (
+                        <button onClick={handleProcessPayment} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-sm font-medium rounded-lg hover:bg-[#f8fafc] transition-colors shadow-sm">
+                          <CreditCard className="w-4 h-4" />Record Payment
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Input mode tabs */}
+                  <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm">
+                    <div className="flex border-b border-[#e2e8f0]">
+                      <button onClick={() => setInputMode("manual")} className={`flex-1 px-5 py-3 text-sm font-semibold transition-all flex items-center justify-center gap-2 ${inputMode === "manual" ? "bg-white text-[#2563eb] border-b-2 border-[#2563eb]" : "bg-[#f8fafc] text-[#64748b] hover:text-[#374151]"}`}>
+                        <Edit className="w-4 h-4" />Manual Entry
+                      </button>
+                      <button onClick={() => setInputMode("ai")} className={`flex-1 px-5 py-3 text-sm font-semibold transition-all flex items-center justify-center gap-2 ${inputMode === "ai" ? "bg-white text-[#7c3aed] border-b-2 border-[#7c3aed]" : "bg-[#f8fafc] text-[#64748b] hover:text-[#374151]"}`}>
+                        <Sparkles className="w-4 h-4" />AI Assistant
+                      </button>
+                    </div>
+                    {inputMode === "ai" && (
+                      <div className="p-5">
+                        <AIInvoiceExtractor onDataExtracted={handleAIDataExtracted} documentType={documentType} />
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
-            )}
-            {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
-            {showPreview && (
-              <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
-                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
-                  {/* Modal header */}
-                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
-                        <Eye className="w-4 h-4 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-sm font-semibold text-[#1e293b]">
-                          {documentType === "quote" ? "Quote" : "Invoice"}{" "}
-                          Preview
-                        </h2>
-                        <p className="text-xs text-[#64748b]">
-                          {quoteNumber || "Draft"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handlePrint}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
-                      >
-                        <Printer className="w-3.5 h-3.5" />
-                        Print
-                      </button>
-                      <button
-                        onClick={handleSavePDF}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        Save PDF
-                      </button>
-                      <button
-                        onClick={() => setShowPreview(false)}
-                        className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
 
-                  {/* Scrollable canvas area */}
-                  <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
-                    <div
-                      className="mx-auto bg-white shadow-xl"
-                      style={{ width: "210mm", minHeight: "297mm" }}
-                    >
-                      <TemplateRenderer
-                        templateId={selectedTemplate}
-                        businessInfo={businessInfo}
-                        loading={loading}
-                        invoiceNumber={quoteNumber}
-                        customerName={customerName}
-                        billName={customerName}
-                        billEmail={customerEmail}
-                        billPhone={customerPhone}
-                        billAddress={propertyAddress}
-                        customerEmail={customerEmail}
-                        customerPhone={customerPhone}
-                        customerAddress={propertyAddress}
-                        taxId=""
-                        items={items}
-                        subtotal={subtotal}
-                        totalTax={totalTax}
-                        total={total}
-                        documentType={documentType}
-                        stampText={stampSettings.text}
-                        stampColor={stampSettings.color}
-                        showStampDate={stampSettings.showDate}
-                        showStamp={stampSettings.enabled}
-                        paymentStatus={paymentStatus}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── Alternate Views ──────────────────────────────────────── */}
-            {activeView === "financial-overview" && (
-              <FinancialOverview user={user} />
-            )}
-            {activeView === "history-view" && <HistoryView user={user} />}
-            {activeView === "notes-view" && <NotesView user={user} />}
-            {activeView === "templates" && <Templates user={user} />}
-            {activeView === "home" && <HomeView user={user} />}
-
-            {/* ── Quote / Invoice Builder ──────────────────────────────── */}
-            {activeView === "quote" && (
-              <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
-                <div className="space-y-6">
-                  {/* Tab: Manual / AI */}
-                  <div className="bg-white border border-orange-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
-                    <div className="flex border-b border-orange-200">
-                      <button
-                        onClick={() => setInputMode("manual")}
-                        className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "manual" ? "bg-white text-orange-600 border-b-2 border-orange-600 shadow-sm" : "bg-orange-50 text-orange-600 hover:bg-orange-100 hover:text-orange-900"}`}
-                      >
-                        <span className="flex items-center justify-center gap-2">
-                          <Edit className="w-5 h-5" />
-                          Manual Entry
-                        </span>
-                      </button>
-                      <button
-                        onClick={() => setInputMode("ai")}
-                        className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-orange-50 text-orange-600 hover:bg-orange-100 hover:text-orange-900"}`}
-                      >
-                        <span className="flex items-center justify-center gap-2">
-                          <Sparkles className="w-5 h-5" />
-                          AI Assistant
-                        </span>
-                      </button>
-                    </div>
-                    <div className="p-6">
-                      {inputMode === "ai" && (
-                        <AIInvoiceExtractor
-                          onDataExtracted={handleAIDataExtracted}
-                          documentType={documentType}
-                        />
-                      )}
-                    </div>
-                  </div>
-
+                  {/* Stepped form */}
                   {inputMode === "manual" && (
-                    <>
-                      {/* Summary Cards */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-3 rounded-xl border border-amber-200 shadow-sm">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="text-sm font-medium text-amber-700">
-                              Total Amount
-                            </div>
-                            <div className="w-8 h-8 bg-amber-200 rounded-lg flex items-center justify-center">
-                              <DollarSign className="w-5 h-5 text-amber-600" />
+                    <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
+                      <StepIndicator steps={steps} currentStep={currentStep} />
+
+                      {/* ── Step 1: Client Info ──────────────────────────────── */}
+                      {currentStep === 1 && (
+                        <div className="p-6">
+                          <div className="flex items-center gap-3 mb-5">
+                            <div className="w-8 h-8 bg-[#eff6ff] rounded-lg flex items-center justify-center"><Users className="w-4 h-4 text-[#2563eb]" /></div>
+                            <div>
+                              <h2 className="text-base font-semibold text-[#1e293b]">Client Information</h2>
+                              <p className="text-xs text-[#64748b]">Enter client / contractor details</p>
                             </div>
                           </div>
-                          <div className="text-base sm:text-lg md:text-2xl font-bold text-amber-900">
-                            R{total.toFixed(2)}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className={labelCls}>Client / Company Name <span className="text-[#dc2626]">*</span></label>
+                              <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className={inputCls} placeholder="Green Energy Solutions" />
+                            </div>
+                            <div>
+                              <label className={labelCls}>Email <span className="text-[#dc2626]">*</span></label>
+                              <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className={inputCls} placeholder="info@company.co.za" />
+                            </div>
+                            <div>
+                              <label className={labelCls}>Phone <span className="text-[#dc2626]">*</span></label>
+                              <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className={inputCls} placeholder="+27 11 234 5678" />
+                            </div>
+                            <div className="sm:col-span-2">
+                              <label className={labelCls}>Property Address <span className="text-[#dc2626]">*</span></label>
+                              <input type="text" value={propertyAddress} onChange={(e) => setPropertyAddress(e.target.value)} className={inputCls} placeholder="45 Sunset Avenue, Sandton, Johannesburg" />
+                            </div>
                           </div>
                         </div>
+                      )}
 
-                        <div
-                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.totalPaid > 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : "from-slate-100 to-slate-300 border-slate-300"}`}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div
-                              className={`text-sm font-medium ${paymentStatus.totalPaid > 0 ? "text-emerald-700" : "text-slate-600"}`}
-                            >
-                              Paid
-                            </div>
-                            <div
-                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.totalPaid > 0 ? "bg-emerald-200" : "bg-slate-200"}`}
-                            >
-                              <CheckSquare
-                                className={`w-5 h-5 ${paymentStatus.totalPaid > 0 ? "text-emerald-600" : "text-slate-400"}`}
-                              />
+                      {/* ── Step 2: Site Details ─────────────────────────────── */}
+                      {currentStep === 2 && (
+                        <div className="p-6">
+                          <div className="flex items-center gap-3 mb-5">
+                            <div className="w-8 h-8 bg-[#eff6ff] rounded-lg flex items-center justify-center"><Building className="w-4 h-4 text-[#2563eb]" /></div>
+                            <div>
+                              <h2 className="text-base font-semibold text-[#1e293b]">Site Details</h2>
+                              <p className="text-xs text-[#64748b]">Provide site specifications for an accurate quote</p>
                             </div>
                           </div>
-                          <div
-                            className={`text-lg sm:text-2xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}
-                          >
-                            R{paymentStatus.totalPaid.toFixed(2)}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className={labelCls}>Property / Building Type</label>
+                              <select value={roofType} onChange={(e) => setRoofType(e.target.value)} className={selectCls}>
+                                {["Commercial","Residential","Industrial","Infrastructure","Renovation","Government"].map((o) => <option key={o} value={o}>{o}</option>)}
+                              </select>
+                            </div>
+                            <div>
+                              <label className={labelCls}>Property Area (sqm)</label>
+                              <input type="number" value={roofOrientation} onChange={(e) => setRoofOrientation(e.target.value)} className={inputCls} placeholder="1200" />
+                            </div>
+                            <div>
+                              <label className={labelCls}>Power Rating (Amps)</label>
+                              <input type="number" value={roofPitch} onChange={(e) => setRoofPitch(e.target.value)} className={inputCls} placeholder="3" />
+                            </div>
+                            <div>
+                              <label className={labelCls}>Shading Analysis</label>
+                              <input type="text" value={shadingAnalysis} onChange={(e) => setShadingAnalysis(e.target.value)} className={inputCls} placeholder="Minimal" />
+                            </div>
+                          </div>
+                          <div className="mt-5 p-4 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg">
+                            <h3 className="text-xs font-semibold text-[#374151] uppercase tracking-wide mb-3 flex items-center gap-2"><MapPin className="w-3.5 h-3.5" />Site Summary</h3>
+                            <div className="grid grid-cols-2 gap-2 text-xs text-[#64748b]">
+                              {[["Type", roofType], ["Area", `${roofOrientation} sqm`], ["Power", `${roofPitch} A`], ["Shading", shadingAnalysis]].map(([k, v]) => (
+                                <div key={k}><span className="font-semibold text-[#374151]">{k}:</span> {v}</div>
+                              ))}
+                            </div>
                           </div>
                         </div>
+                      )}
 
-                        <div
-                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${paymentStatus.balanceDue <= 0 ? "from-emerald-100 to-emerald-300 border-emerald-600" : paymentStatus.totalPaid > 0 ? "from-amber-50 to-amber-100 border-amber-200" : "from-rose-50 to-rose-100 border-rose-200"}`}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div
-                              className={`text-sm font-medium ${paymentStatus.balanceDue <= 0 ? "text-emerald-700" : paymentStatus.totalPaid > 0 ? "text-amber-700" : "text-rose-700"}`}
-                            >
-                              Balance Due
-                            </div>
-                            <div
-                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${paymentStatus.balanceDue <= 0 ? "bg-emerald-200" : paymentStatus.totalPaid > 0 ? "bg-amber-200" : "bg-rose-200"}`}
-                            >
-                              <Wallet
-                                className={`w-5 h-5 ${paymentStatus.balanceDue <= 0 ? "text-emerald-600" : paymentStatus.totalPaid > 0 ? "text-amber-600" : "text-rose-600"}`}
-                              />
+                      {/* ── Step 3: Solar System / Line Items ────────────────── */}
+                      {currentStep === 3 && (
+                        <div className="p-6">
+                          <div className="flex items-center gap-3 mb-5">
+                            <div className="w-8 h-8 bg-[#fefce8] rounded-lg flex items-center justify-center"><Sun className="w-4 h-4 text-[#ca8a04]" /></div>
+                            <div>
+                              <h2 className="text-base font-semibold text-[#1e293b]">Solar System Design</h2>
+                              <p className="text-xs text-[#64748b]">Add work items and materials to the quote</p>
                             </div>
                           </div>
-                          <div
-                            className={`text-lg sm:text-2xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-amber-900" : "text-rose-900"}`}
-                          >
-                            R{paymentStatus.balanceDue.toFixed(2)}
-                          </div>
-                        </div>
-                      </div>
 
-                      {/* Payment Status Banner */}
-                      {quoteId && (
-                        <div
-                          className={`p-4 rounded-xl border-2 flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-emerald-50 border-emerald-300" : paymentStatus.status === "partially_paid" ? "bg-amber-50 border-amber-300" : "bg-rose-50 border-rose-300"}`}
-                        >
-                          <div className="flex items-center gap-3">
-                            {paymentStatus.status === "paid" ? (
-                              <>
-                                <div className="w-10 h-10 bg-emerald-200 rounded-full flex items-center justify-center">
-                                  <CheckSquare className="w-6 h-6 text-emerald-600" />
+                          {/* Add item form */}
+                          <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-5">
+                            <h3 className="text-sm font-semibold text-[#374151] mb-4 flex items-center gap-2"><Plus className="w-4 h-4 text-[#2563eb]" />Add Work Item</h3>
+                            <div className="grid grid-cols-1 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                  <label className={labelCls}>Category</label>
+                                  <select value={newItem.workCategory} onChange={(e) => setNewItem({ ...newItem, workCategory: e.target.value })} className={selectCls}>
+                                    {["Solar Panels","Inverter","Battery Storage","Mounting System","Wiring & Conduit","Monitoring System","Grid Connection","Installation Labor","Materials Supply","Other"].map((o) => <option key={o} value={o}>{o}</option>)}
+                                  </select>
                                 </div>
                                 <div>
-                                  <div className="font-bold text-emerald-900">
-                                    {documentType === "quote"
-                                      ? "Quote"
-                                      : "Invoice"}{" "}
-                                    Fully Paid
-                                  </div>
-                                  <div className="text-sm text-emerald-700">
-                                    Payment complete – Thank you!
-                                  </div>
+                                  <label className={labelCls}>Urgency</label>
+                                  <select value={newItem.urgency} onChange={(e) => setNewItem({ ...newItem, urgency: e.target.value })} className={selectCls}>
+                                    {["Standard","Urgent","Emergency"].map((o) => <option key={o} value={o}>{o}</option>)}
+                                  </select>
                                 </div>
-                              </>
-                            ) : paymentStatus.status === "partially_paid" ? (
-                              <>
-                                <div className="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center">
-                                  <CreditCard className="w-6 h-6 text-amber-600" />
+                              </div>
+                              <div>
+                                <label className={labelCls}>Description</label>
+                                <input type="text" placeholder="Work item / material description" value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className={inputCls} />
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div>
+                                  <label className={labelCls}>Rate (R)</label>
+                                  <input type="number" placeholder="0.00" value={newItem.rate} onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })} className={inputCls} />
                                 </div>
                                 <div>
-                                  <div className="font-bold text-amber-900">
-                                    Partial Payment Received
-                                  </div>
-                                  <div className="text-sm text-amber-700">
-                                    R{paymentStatus.totalPaid.toFixed(2)} paid •
-                                    R{paymentStatus.balanceDue.toFixed(2)}{" "}
-                                    remaining
-                                  </div>
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center">
-                                  <Wallet className="w-6 h-6 text-rose-600" />
+                                  <label className={labelCls}>Qty</label>
+                                  <input type="number" placeholder="1" value={newItem.qty} onChange={(e) => setNewItem({ ...newItem, qty: e.target.value })} className={inputCls} />
                                 </div>
                                 <div>
-                                  <div className="font-bold text-rose-900">
-                                    Payment Pending
-                                  </div>
-                                  <div className="text-sm text-rose-700">
-                                    Full amount due: R
-                                    {paymentStatus.balanceDue.toFixed(2)}
-                                  </div>
+                                  <label className={labelCls}>VAT (%)</label>
+                                  <input type="number" placeholder="15" value={newItem.taxRate} onChange={(e) => setNewItem({ ...newItem, taxRate: e.target.value })} className={inputCls} />
                                 </div>
-                              </>
-                            )}
+                                <div className="flex items-end">
+                                  <button onClick={handleAddItem} className="w-full px-3 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1.5">
+                                    <Plus className="w-4 h-4" />Add
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          {paymentStatus.status !== "paid" && (
-                            <button
-                              onClick={handleProcessPayment}
-                              className="px-4 py-2 bg-white border-2 border-current rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2"
-                            >
-                              <CreditCard className="w-4 h-4" />
-                              Record Payment
-                            </button>
+
+                          {/* Items table */}
+                          {items.length > 0 ? (
+                            <>
+                              <div className="border border-[#e2e8f0] rounded-xl overflow-hidden mb-4">
+                                <table className="w-full">
+                                  <thead>
+                                    <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                                      {["Description","Category","Rate","Qty","VAT","Total",""].map((h) => (
+                                        <th key={h} className={`px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide ${!h || h === "" ? "w-10" : ""}`}>{h}</th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody className="bg-white divide-y divide-[#f1f5f9]">
+                                    {items.map((item, index) => (
+                                      <tr key={index} className="hover:bg-[#f8fafc] transition-colors">
+                                        <td className="px-4 py-3 text-sm text-[#374151]">{item.description}</td>
+                                        <td className="px-4 py-3 text-sm">
+                                          <span className="px-2 py-0.5 bg-[#eff6ff] text-[#1e40af] text-xs font-semibold rounded">{item.workCategory}</span>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-[#374151]">{formatCurrency(item.rate)}</td>
+                                        <td className="px-4 py-3 text-sm text-[#374151]">{item.qty}</td>
+                                        <td className="px-4 py-3 text-sm text-[#374151]">{formatCurrency(item.taxAmount)}</td>
+                                        <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">{formatCurrency(item.totalAmount)}</td>
+                                        <td className="px-4 py-3 text-center">
+                                          <button onClick={() => handleRemoveItem(index)} className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all">
+                                            <X className="w-3.5 h-3.5" />
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                              <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-5 py-4">
+                                <div className="space-y-2 text-sm">
+                                  {[["Subtotal", formatCurrency(subtotal), false], ["VAT", formatCurrency(totalTax), false], ["Total", formatCurrency(total), true]].map(([k, v, bold]) => (
+                                    <div key={k} className={`flex justify-between items-center ${bold ? "pt-2 border-t border-[#e2e8f0]" : ""}`}>
+                                      <span className={bold ? "font-bold text-[#1e293b]" : "text-[#64748b]"}>{k}</span>
+                                      <span className={bold ? "font-bold text-[#2563eb] text-base" : "font-semibold text-[#1e293b]"}>{v}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-[#e2e8f0] rounded-xl">
+                              <div className="w-10 h-10 bg-[#f1f5f9] rounded-full flex items-center justify-center mb-3"><Zap className="w-5 h-5 text-[#94a3b8]" /></div>
+                              <p className="text-sm font-medium text-[#374151] mb-1">No items added yet</p>
+                              <p className="text-xs text-[#94a3b8]">Add solar system components using the form above</p>
+                            </div>
                           )}
                         </div>
                       )}
 
-                      {/* ── Stepped Form ──────────────────────────────────── */}
-                      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                        {/* Step 1 – Client Information */}
-                        {currentStep === 1 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-                                  <Users className="w-6 h-6 text-cyan-600" />
-                                </div>
-                                Client Information
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">
-                                Enter client / contractor details
-                              </p>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Client / Company Name{" "}
-                                  <span className="text-rose-500">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={customerName}
-                                  onChange={(e) =>
-                                    setCustomerName(e.target.value)
-                                  }
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="Meridian Developments"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Email <span className="text-rose-500">*</span>
-                                </label>
-                                <input
-                                  type="email"
-                                  value={customerEmail}
-                                  onChange={(e) =>
-                                    setCustomerEmail(e.target.value)
-                                  }
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="projects@company.co.za"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Phone <span className="text-rose-500">*</span>
-                                </label>
-                                <input
-                                  type="tel"
-                                  value={customerPhone}
-                                  onChange={(e) =>
-                                    setCustomerPhone(e.target.value)
-                                  }
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="+27 11 234 5678"
-                                />
-                              </div>
-                              <div className="col-span-1 sm:col-span-2">
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property Address{" "}
-                                  <span className="text-rose-500">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={propertyAddress}
-                                  onChange={(e) =>
-                                    setPropertyAddress(e.target.value)
-                                  }
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="45 Corporate Boulevard, Sandton, Johannesburg, 2196"
-                                />
-                              </div>
+                      {/* ── Step 4: Review ───────────────────────────────────── */}
+                      {currentStep === 4 && (
+                        <div className="p-6">
+                          <div className="flex items-center gap-3 mb-5">
+                            <div className="w-8 h-8 bg-[#f0fdf4] rounded-lg flex items-center justify-center"><Calendar className="w-4 h-4 text-[#059669]" /></div>
+                            <div>
+                              <h2 className="text-base font-semibold text-[#1e293b]">Schedule &amp; Payment Terms</h2>
+                              <p className="text-xs text-[#64748b]">Review quote details and payment terms</p>
                             </div>
                           </div>
-                        )}
 
-                        {/* Step 2 – Site Details */}
-                        {currentStep === 2 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                  <Building className="w-6 h-6 text-blue-600" />
+                          {/* Summary stat cards */}
+                          <div className="grid grid-cols-3 gap-3 mb-5">
+                            {[
+                              { label: "Project Total", value: formatCurrency(total), icon: DollarSign, bg: "bg-[#eff6ff]", color: "text-[#2563eb]" },
+                              { label: "Work Items", value: items.length, icon: ClipboardList, bg: "bg-[#f0fdf4]", color: "text-[#059669]" },
+                              { label: "VAT Amount", value: formatCurrency(totalTax), icon: Receipt, bg: "bg-[#faf5ff]", color: "text-[#7c3aed]" },
+                            ].map(({ label, value, icon: Icon, bg, color }) => (
+                              <div key={label} className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-xs font-semibold text-[#64748b]">{label}</span>
+                                  <div className={`w-7 h-7 ${bg} rounded-lg flex items-center justify-center`}><Icon className={`w-3.5 h-3.5 ${color}`} /></div>
                                 </div>
-                                Site Details
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">
-                                Provide site specifications for an accurate
-                                quote
-                              </p>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property / Building Type
-                                </label>
-                                <select
-                                  value={roofType}
-                                  onChange={(e) => setRoofType(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                >
-                                  <option value="Commercial">Commercial</option>
-                                  <option value="Residential">
-                                    Residential
-                                  </option>
-                                  <option value="Industrial">Industrial</option>
-                                  <option value="Infrastructure">
-                                    Infrastructure
-                                  </option>
-                                  <option value="Renovation">Renovation</option>
-                                  <option value="Government">Government</option>
-                                </select>
+                                <div className={`text-lg font-bold ${color}`}>{value}</div>
                               </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Property Area (sqm)
-                                </label>
-                                <input
-                                  type="number"
-                                  value={roofOrientation}
-                                  onChange={(e) =>
-                                    setRoofOrientation(e.target.value)
-                                  }
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="1200"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Power Rating (Amps)
-                                </label>
-                                <input
-                                  type="number"
-                                  value={roofPitch}
-                                  onChange={(e) => setRoofPitch(e.target.value)}
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="3"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                  Urgency Level
-                                </label>
-                                <input
-                                  type="number"
-                                  value={shadingAnalysis}
-                                  onChange={(e) =>
-                                    setShadingAnalysis(e.target.value)
-                                  }
-                                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  placeholder="2"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Site Summary Card */}
-                            <div className="mt-6 p-4 bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg">
-                              <h3 className="font-semibold text-cyan-900 mb-2 flex items-center gap-2">
-                                <MapPin className="w-4 h-4" />
-                                Site Summary
-                              </h3>
-                              <div className="text-sm text-cyan-800 space-y-1">
-                                <p>
-                                  <span className="font-medium">Type:</span>{" "}
-                                  {roofType}
-                                </p>
-                                <p>
-                                  <span className="font-medium">Area:</span>{" "}
-                                  {roofOrientation} sqm
-                                </p>
-                                <p>
-                                  <span className="font-medium">Pitch:</span>{" "}
-                                  {roofPitch}
-                                </p>
-                                <p>
-                                  <span className="font-medium">Shading:</span>{" "}
-                                  {shadingAnalysis}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 3 – Electrical Work */}
-                        {currentStep === 3 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-stone-100 rounded-lg flex items-center justify-center">
-                                  <Sun className="w-6 h-6 text-stone-600" />
-                                </div>
-                                Solar System Design
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">
-                                Add work items and materials to the quote
-                              </p>
-                            </div>
-
-                            {/* Add Work-Item Form */}
-                            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 mb-6 border border-slate-200">
-                              <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
-                                <Plus className="w-5 h-5 text-cyan-600" />
-                                Add Electrical Work Item
-                              </h3>
-                              <div className="grid grid-cols-1 gap-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                      Work Category
-                                    </label>
-                                    <select
-                                      value={newItem.workCategory}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          workCategory: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
-                                    >
-                                      <option value="Foundation Work">
-                                        Foundation Work
-                                      </option>
-                                      <option value="Structural Steel">
-                                        Structural Steel
-                                      </option>
-                                      <option value="Concrete & Masonry">
-                                        Concrete & Masonry
-                                      </option>
-                                      <option value="Electrical">
-                                        Electrical
-                                      </option>
-                                      <option value="Plumbing">Plumbing</option>
-                                      <option value="Roofing">Roofing</option>
-                                      <option value="Finishing & Plastering">
-                                        Finishing & Plastering
-                                      </option>
-                                      <option value="Earthworks">
-                                        Earthworks
-                                      </option>
-                                      <option value="Landscaping">
-                                        Landscaping
-                                      </option>
-                                      <option value="Site Preparation">
-                                        Site Preparation
-                                      </option>
-                                      <option value="HVAC">HVAC</option>
-                                      <option value="Windows & Doors">
-                                        Windows & Doors
-                                      </option>
-                                      <option value="Painting">Painting</option>
-                                      <option value="Tiling & Flooring">
-                                        Tiling & Flooring
-                                      </option>
-                                      <option value="Materials Supply">
-                                        Materials Supply
-                                      </option>
-                                    </select>
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                      Phase
-                                    </label>
-                                    <select
-                                      value={newItem.phase}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          phase: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
-                                    >
-                                      <option value="Phase 1">Phase 1</option>
-                                      <option value="Phase 2">Phase 2</option>
-                                      <option value="Phase 3">Phase 3</option>
-                                      <option value="Phase 4">Phase 4</option>
-                                      <option value="Ongoing">Ongoing</option>
-                                    </select>
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                    Description
-                                  </label>
-                                  <input
-                                    type="text"
-                                    placeholder="Work item / material description"
-                                    value={newItem.description}
-                                    onChange={(e) =>
-                                      setNewItem({
-                                        ...newItem,
-                                        description: e.target.value,
-                                      })
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                  />
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                      Unit Rate (R)
-                                    </label>
-                                    <input
-                                      type="number"
-                                      placeholder="Rate"
-                                      value={newItem.rate}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          rate: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                      Quantity / Units
-                                    </label>
-                                    <input
-                                      type="number"
-                                      placeholder="Qty"
-                                      value={newItem.qty}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          qty: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                      VAT (%)
-                                    </label>
-                                    <input
-                                      type="number"
-                                      placeholder="15"
-                                      value={newItem.taxRate}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          taxRate: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all bg-white hover:border-slate-400"
-                                    />
-                                  </div>
-                                  <div className="flex items-end">
-                                    <button
-                                      onClick={handleAddItem}
-                                      className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg px-4 py-2 hover:from-cyan-700 hover:to-blue-700 flex items-center justify-center gap-2 transition-all font-semibold shadow-md hover:shadow-lg"
-                                    >
-                                      <Plus className="w-4 h-4" />
-                                      Add Item
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Work Items Table */}
-                            {items.length > 0 ? (
-                              <div className="mb-6">
-                                <h3 className="text-lg font-bold text-slate-900 mb-4">
-                                  Work Items ({items.length})
-                                </h3>
-                                <div className="overflow-x-auto rounded-xl border border-slate-200">
-                                  <table className="w-full">
-                                    <thead>
-                                      <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                          Description
-                                        </th>
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                          Category
-                                        </th>
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                          Phase
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          Unit Rate
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          Qty
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          VAT
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          Total
-                                        </th>
-                                        <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">
-                                          Action
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody className="bg-white">
-                                      {items.map((item, index) => (
-                                        <tr
-                                          key={index}
-                                          className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
-                                        >
-                                          <td className="px-4 py-4 text-sm font-medium text-slate-700">
-                                            {item.description}
-                                          </td>
-                                          <td className="px-4 py-4 text-sm">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-cyan-100 text-cyan-700">
-                                              {item.workCategory || "General"}
-                                            </span>
-                                          </td>
-                                          <td className="px-4 py-4 text-sm">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
-                                              {item.phase || "Phase 1"}
-                                            </span>
-                                          </td>
-                                          <td className="px-4 py-4 text-sm text-right text-slate-700">
-                                            R{item.rate.toFixed(2)}
-                                          </td>
-                                          <td className="px-4 py-4 text-sm text-right text-slate-700">
-                                            {item.qty}
-                                          </td>
-                                          <td className="px-4 py-4 text-sm text-right text-slate-700">
-                                            R{item.taxAmount.toFixed(2)}
-                                          </td>
-                                          <td className="px-4 py-4 text-sm text-right font-bold text-slate-900">
-                                            R{item.totalAmount.toFixed(2)}
-                                          </td>
-                                          <td className="px-4 py-4 text-center">
-                                            <button
-                                              onClick={() =>
-                                                handleRemoveItem(index)
-                                              }
-                                              className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all flex items-center gap-1 mx-auto"
-                                            >
-                                              <Trash2 className="w-3 h-3" />
-                                              Remove
-                                            </button>
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-dashed border-slate-300">
-                                <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                  <Wrench className="w-8 h-8 text-slate-400" />
-                                </div>
-                                <p className="text-slate-700 font-semibold text-lg">
-                                  No work items added yet
-                                </p>
-                                <p className="text-sm text-slate-500 mt-2">
-                                  Add items using the form above
-                                </p>
-                              </div>
-                            )}
-
-                            {/* Totals */}
-                            {items.length > 0 && (
-                              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-200">
-                                <div className="space-y-3">
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-slate-700 font-medium">
-                                      Subtotal:
-                                    </span>
-                                    <span className="font-bold text-slate-900 text-lg">
-                                      R{subtotal.toFixed(2)}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-slate-700 font-medium">
-                                      VAT (15%):
-                                    </span>
-                                    <span className="font-bold text-slate-900 text-lg">
-                                      R{totalTax.toFixed(2)}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-cyan-300">
-                                    <span className="text-slate-900">
-                                      Total:
-                                    </span>
-                                    <span className="text-cyan-700 text-2xl">
-                                      R{total.toFixed(2)}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Step 4 – Schedule & Payment */}
-                        {currentStep === 4 && (
-                          <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                                  <Calendar className="w-6 h-6 text-emerald-600" />
-                                </div>
-                                Schedule & Payment Terms
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">
-                                Review quote details, milestones, and payment
-                                terms
-                              </p>
-                            </div>
-
-                            {/* Summary Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 rounded-xl border border-cyan-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-cyan-700">
-                                    Project Total
-                                  </span>
-                                  <DollarSign className="w-5 h-5 text-cyan-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-cyan-900">
-                                  R{total.toFixed(2)}
-                                </div>
-                              </div>
-                              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-emerald-700">
-                                    Work Items
-                                  </span>
-                                  <ClipboardList className="w-5 h-5 text-emerald-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-emerald-900">
-                                  {items.length}
-                                </div>
-                              </div>
-                              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-purple-700">
-                                    VAT Amount
-                                  </span>
-                                  <Receipt className="w-5 h-5 text-purple-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-purple-900">
-                                  R{totalTax.toFixed(2)}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Payment Terms */}
-                            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-6">
-                              <div className="flex items-center gap-3 mb-5">
-                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                  <CreditCard className="w-5 h-5 text-purple-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900">
-                                  Payment Information
-                                </h3>
-                              </div>
-                              <div className="space-y-3">
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">
-                                    Payment Schedule:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    Milestone-Based
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">
-                                    Payment Methods:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    Bank Transfer, Card, EFT
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">
-                                    Quote Valid For:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    30 Days
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center py-3">
-                                  <span className="text-slate-600 font-medium">
-                                    Currency:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    ZAR (South African Rand)
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Client & Site Summary */}
-                            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
-                              <h3 className="text-lg font-bold text-slate-900 mb-4">
-                                Quote Summary
-                              </h3>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                  <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                                    <Users className="w-4 h-4" />
-                                    Client Details:
-                                  </h4>
-                                  <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">
-                                      {customerName}
-                                    </p>
-                                    <p>{customerEmail}</p>
-                                    <p>{customerPhone}</p>
-                                  </div>
-                                </div>
-                                <div>
-                                  <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                                    <Building className="w-4 h-4" />
-                                    Site Details:
-                                  </h4>
-                                  <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">
-                                      {propertyAddress}
-                                    </p>
-                                    <p>
-                                      <span className="font-semibold">
-                                        Type:
-                                      </span>{" "}
-                                      {roofType}
-                                    </p>
-                                    <p>
-                                      <span className="font-semibold">
-                                        Area:
-                                      </span>{" "}
-                                      {roofOrientation} sqm
-                                    </p>
-                                    <p>
-                                      <span className="font-semibold">
-                                        Pitch:
-                                      </span>{" "}
-                                      {roofPitch}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="mt-6 pt-6 border-t border-slate-300">
-                                <h4 className="text-sm font-semibold text-slate-700 mb-2">
-                                  Quote Details:
-                                </h4>
-                                <div className="text-sm text-slate-600 space-y-1">
-                                  <p>
-                                    <span className="font-semibold">
-                                      Number:
-                                    </span>{" "}
-                                    {quoteNumber}
-                                  </p>
-                                  <p>
-                                    <span className="font-semibold">Date:</span>{" "}
-                                    {new Date().toLocaleDateString()}
-                                  </p>
-                                  <p>
-                                    <span className="font-semibold">Type:</span>{" "}
-                                    {documentType === "quote"
-                                      ? "Quote"
-                                      : "Invoice"}
-                                  </p>
-                                  <p>
-                                    <span className="font-semibold">
-                                      Status:
-                                    </span>{" "}
-                                    <span className="text-cyan-600 font-bold">
-                                      Pending
-                                    </span>
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Process Payment button */}
-                            {quoteId && (
-                              <div className="mt-6 flex gap-3">
-                                <button
-                                  onClick={handleProcessPayment}
-                                  className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105"
-                                >
-                                  <CreditCard className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                                  Process Payment
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* ── Step Navigation Bar ──────────────────────────── */}
-                        <div className="px-8 py-5 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-                          <button
-                            onClick={handlePrevious}
-                            disabled={currentStep === 1}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${currentStep === 1 ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 shadow-sm"}`}
-                          >
-                            <ChevronLeft className="w-5 h-5" />
-                            <span className="hidden sm:inline">Previous</span>
-                          </button>
-
-                          <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">
-                            Step {currentStep} of {totalSteps}
+                            ))}
                           </div>
 
-                          {currentStep < totalSteps ? (
-                            <button
-                              onClick={handleNext}
-                              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold hover:from-cyan-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
-                            >
-                              <span className="hidden sm:inline">Next</span>
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                          ) : (
-                            <button
-                              onClick={handleSaveQuote}
-                              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
-                            >
-                              <Save className="w-5 h-5" />
-                              Save{" "}
-                              {documentType === "quote" ? "Quote" : "Invoice"}
+                          {/* Payment terms */}
+                          <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm mb-4">
+                            <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
+                              <span className="text-sm font-semibold text-[#374151]">Payment Information</span>
+                            </div>
+                            <div className="divide-y divide-[#f1f5f9]">
+                              {[
+                                ["Payment Schedule", "Milestone-Based"],
+                                ["Payment Methods", "Bank Transfer, Card, EFT"],
+                                ["Quote Valid For", "30 Days"],
+                                ["Currency", "ZAR (South African Rand)"],
+                                ["Total Due", formatCurrency(total)],
+                              ].map(([k, v]) => (
+                                <div key={k} className="flex items-center justify-between px-5 py-3 text-sm">
+                                  <span className="text-[#64748b]">{k}</span>
+                                  <span className={`font-semibold ${k === "Total Due" ? "text-[#2563eb]" : "text-[#1e293b]"}`}>{v}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Quote summary */}
+                          <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5">
+                            <h3 className="text-xs font-semibold text-[#374151] uppercase tracking-wide mb-4">Quote Summary</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
+                              <div>
+                                <h4 className="text-xs font-semibold text-[#94a3b8] uppercase tracking-wide mb-2 flex items-center gap-1.5"><Users className="w-3 h-3" />Client</h4>
+                                <p className="font-semibold text-[#1e293b]">{customerName}</p>
+                                <p className="text-[#64748b]">{customerEmail}</p>
+                                <p className="text-[#64748b]">{customerPhone}</p>
+                                <p className="text-[#64748b] mt-1">{propertyAddress}</p>
+                              </div>
+                              <div>
+                                <h4 className="text-xs font-semibold text-[#94a3b8] uppercase tracking-wide mb-2 flex items-center gap-1.5"><Zap className="w-3 h-3" />Solar System</h4>
+                                <p className="text-[#64748b]"><span className="font-semibold text-[#374151]">Type:</span> {roofType}</p>
+                                <p className="text-[#64748b]"><span className="font-semibold text-[#374151]">System Size:</span> {systemSize}kW</p>
+                                <p className="text-[#64748b]"><span className="font-semibold text-[#374151]">Panel Type:</span> {panelType}</p>
+                                <p className="text-[#64748b]"><span className="font-semibold text-[#374151]">Battery:</span> {batteryStorage}kWh</p>
+                              </div>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-[#e2e8f0] grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-[#64748b]">
+                              {[["Number", quoteNumber], ["Date", new Date().toLocaleDateString()], ["Type", documentType === "quote" ? "Quote" : "Invoice"], ["Status", "Pending"]].map(([k, v]) => (
+                                <div key={k}><span className="font-semibold text-[#374151] block">{k}</span>{v}</div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {quoteId && (
+                            <button onClick={handleProcessPayment} className="mt-4 flex items-center justify-center gap-2 w-full px-6 py-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-medium transition-colors shadow-sm">
+                              <CreditCard className="w-4 h-4" />Process Payment
                             </button>
                           )}
+                          {!quoteId && (
+                            <div className="mt-4 flex items-center gap-2 px-4 py-3 bg-[#fff7ed] border border-[#fed7aa] rounded-lg text-sm text-[#9a3412]">
+                              <Receipt className="w-4 h-4 flex-shrink-0" />Save the {documentType} first to process payment
+                            </div>
+                          )}
                         </div>
+                      )}
+
+                      {/* ── Step navigation ──────────────────────────────────── */}
+                      <div className="px-6 py-4 bg-[#f8fafc] border-t border-[#e2e8f0] flex justify-between items-center">
+                        <button onClick={handlePrevious} disabled={currentStep === 1}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${currentStep === 1 ? "bg-[#f1f5f9] text-[#94a3b8] cursor-not-allowed" : "bg-white border border-[#e2e8f0] text-[#374151] hover:bg-[#f8fafc] shadow-sm"}`}>
+                          <ChevronLeft className="w-4 h-4" /><span className="hidden sm:inline">Previous</span>
+                        </button>
+
+                        <div className="text-xs font-semibold text-[#64748b] bg-white px-3 py-1.5 rounded-lg border border-[#e2e8f0]">
+                          Step {currentStep} of {totalSteps}
+                        </div>
+
+                        {currentStep < totalSteps ? (
+                          <button onClick={handleNext} className="flex items-center gap-2 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                            <span className="hidden sm:inline">Next</span><ChevronRight className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <button onClick={handleSaveQuote} className="flex items-center gap-2 px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                            <Save className="w-4 h-4" />Save {documentType === "quote" ? "Quote" : "Invoice"}
+                          </button>
+                        )}
                       </div>
-                    </>
+                    </div>
                   )}
                 </div>
+              </div>
 
-                {/* ── Print / PDF Preview (hidden on-screen) ────────────── */}
-                <div
-                  id="print-area"
-                  className="hidden print:block bg-white shadow-2xl origin-top"
-                  style={{
-                    width: "210mm",
-                    minHeight: "297mm",
-                    transform: "scale(0.75)",
-                    transformOrigin: "top center",
-                  }}
-                >
-                  <TemplateRenderer
-                    templateId={selectedTemplate}
-                    businessInfo={businessInfo}
-                    loading={loading}
-                    invoiceNumber={quoteNumber}
-                    customerName={customerName}
-                    billName={customerName}
-                    billEmail={customerEmail}
-                    billPhone={customerPhone}
-                    billAddress={propertyAddress}
-                    customerEmail={customerEmail}
-                    customerPhone={customerPhone}
-                    customerAddress={propertyAddress}
-                    taxId=""
-                    items={items}
-                    subtotal={subtotal}
-                    totalTax={totalTax}
-                    total={total}
-                    documentType={documentType}
-                    stampText={stampSettings.text}
-                    stampColor={stampSettings.color}
-                    showStampDate={stampSettings.showDate}
-                    showStamp={stampSettings.enabled}
-                    paymentStatus={paymentStatus}
-                  />
+              {/* ── RIGHT: Live preview panel (xl only) ───────────────────────── */}
+              <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
+                  <TemplateSelector user={user} selectedTemplate={selectedTemplate} onTemplateChange={setSelectedTemplate} />
+                  <div className="flex items-center gap-1.5">
+                    <button onClick={handlePrint} className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-xs font-medium rounded-lg hover:bg-[#f1f5f9] transition-colors">
+                      <Printer className="w-3 h-3" />Print
+                    </button>
+                    <button onClick={handleSavePDF} className="flex items-center gap-1 px-2.5 py-1.5 bg-[#059669] text-white text-xs font-medium rounded-lg hover:bg-[#047857] transition-colors">
+                      <Download className="w-3 h-3" />PDF
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div
+                    className="bg-white shadow-lg rounded origin-top"
+                    style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.44)", transformOrigin: "top left", marginBottom: `calc((297mm * 0.44) - 297mm)` }}
+                  >
+                    <TemplateRenderer {...templateProps} />
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

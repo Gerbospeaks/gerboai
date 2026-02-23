@@ -218,6 +218,33 @@ const PaintingDashboard = () => {
     { number: 4, title: "Schedule & Payment", icon: Calendar },
   ];
 
+  // ── shared template props ────────────────────────────────────────────────
+  const templateProps = {
+    templateId: selectedTemplate,
+    businessInfo,
+    loading,
+    invoiceNumber: quoteNumber,
+    customerName,
+    billName: customerName,
+    billEmail: customerEmail,
+    billPhone: customerPhone,
+    billAddress: propertyAddress,
+    customerEmail,
+    customerPhone,
+    customerAddress: propertyAddress,
+    taxId: "",
+    items,
+    subtotal,
+    totalTax,
+    total,
+    documentType,
+    stampText: stampSettings.text,
+    stampColor: stampSettings.color,
+    showStampDate: stampSettings.showDate,
+    showStamp: stampSettings.enabled,
+    paymentStatus,
+  };
+
   // ============================================================================
   // Effects
   // ============================================================================
@@ -790,27 +817,9 @@ const PaintingDashboard = () => {
     try {
       const testEmailData = {
         userId: user.uid,
-        to: userEmail, // Send test to self
+        to: userEmail,
         subject: "✅ Test Email - Email Configuration Successful",
-        message: `
- Hello,
- 
- This is a test email from your construction quote/invoice system.
- 
- ✓ Your email configuration is working correctly!
- 
- Account Details:
- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Business: ${businessInfo.businessName}
- Email: ${userEmail}
- Provider: ${businessInfo.emailProvider || "Gmail"}
- Date: ${new Date().toLocaleString()}
- 
- You can now send quotes and invoices to your clients from this email address.
- 
- Best regards,
- Your Construction Quote System
-       `.trim(),
+        message: `Hello,\n\nThis is a test email from your construction quote/invoice system.\n\n✓ Your email configuration is working correctly!\n\nBest regards,\nYour Construction Quote System`.trim(),
         documentType: "test",
         documentNumber: "TEST-001",
       };
@@ -823,16 +832,7 @@ const PaintingDashboard = () => {
       );
     } catch (error) {
       console.error("Test email error:", error);
-
-      let errorMsg = "❌ Test email failed!\n\n";
-      if (error.message.includes("Invalid login")) {
-        errorMsg +=
-          "Your app password is incorrect. Please check and try again.\n\nMake sure you're using an APP PASSWORD, not your regular password.";
-      } else {
-        errorMsg += `Error: ${error.message}\n\nPlease check your app password and try again.`;
-      }
-
-      alert(errorMsg);
+      alert(`❌ Test email failed!\n\nError: ${error.message}`);
     }
   };
   const handleNext = () => {
@@ -981,7 +981,7 @@ const PaintingDashboard = () => {
           {/* icon nav */}
           <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
             <button
-              onClick={() => setActiveView("home")} // ADD THIS
+              onClick={() => setActiveView("home")}
               className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
               title="Home"
             >
@@ -1129,7 +1129,6 @@ const PaintingDashboard = () => {
                   />
                 </div>
 
-                {/* Conditional rendering with animation */}
                 <div
                   className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-stone-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
                     isQuotesInvoicesOpen2
@@ -1200,7 +1199,6 @@ const PaintingDashboard = () => {
                   />
                 </div>
 
-                {/* Conditional rendering with animation */}
                 <div
                   className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
                     isClientsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
@@ -1302,217 +1300,218 @@ const PaintingDashboard = () => {
 
       {/* ── Main Content Area ────────────────────────────────────────────── */}
       <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
+        className={`flex-1 transition-all duration-300 flex flex-col overflow-hidden ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
       >
-        <div className="flex flex-col h-screen">
-          {/* ── Scrollable Main Content ──────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
-            <AppHeader
-              actions={headerActions}
-              mobileActions={mobileDashboardActions}
-              onSettingsOpen={() => setShowSettings(true)}
-            />
+        {/* ── App Header ──────────────────────────────────────────────── */}
+        <AppHeader
+          actions={headerActions}
+          mobileActions={mobileDashboardActions}
+          onSettingsOpen={() => setShowSettings(true)}
+        />
 
-            {/* ── Settings Modal ──────────────────────────────────────── */}
-            {showSettings && (
-              <BusinessSettingsModal onClose={() => setShowSettings(false)} />
-            )}
-            {/* ── Shared Modals ────────────────────────────────────────── */}
-            <CustomersListModal
-              showModal={showCustomersListModal}
-              setShowModal={setShowCustomersListModal}
-              customers={customers}
-              onLoadCustomer={loadCustomer}
-              onEditCustomer={handleEditCustomer}
-              onAddNewCustomer={handleAddNewCustomer}
-            />
-            <CustomerModal
-              showModal={showCustomerModal}
-              setShowModal={setShowCustomerModal}
-              existingCustomer={selectedCustomer}
-              onCustomerSaved={handleCustomerSaved}
-            />
+        {/* ── Settings Modal ──────────────────────────────────────────── */}
+        {showSettings && (
+          <BusinessSettingsModal onClose={() => setShowSettings(false)} />
+        )}
 
-            {showPaymentModal && selectedQuoteForPayment && (
-              <PaymentProcessor
-                showModal={showPaymentModal}
-                setShowModal={setShowPaymentModal}
-                invoice={selectedQuoteForPayment}
-                onPaymentComplete={handlePaymentComplete}
-                user={user}
-                businessInfo={businessInfo}
-              />
-            )}
+        {/* ── Shared Modals ────────────────────────────────────────────── */}
+        <CustomersListModal
+          showModal={showCustomersListModal}
+          setShowModal={setShowCustomersListModal}
+          customers={customers}
+          onLoadCustomer={loadCustomer}
+          onEditCustomer={handleEditCustomer}
+          onAddNewCustomer={handleAddNewCustomer}
+        />
+        <CustomerModal
+          showModal={showCustomerModal}
+          setShowModal={setShowCustomerModal}
+          existingCustomer={selectedCustomer}
+          onCustomerSaved={handleCustomerSaved}
+        />
 
-            {/* ── Saved Quotes / Invoices List Modal ──────────────────── */}
-            {showQuotesList && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-                  <div className="p-4 border-b flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">
-                      Saved {documentType === "quote" ? "Quotes" : "Invoices"}
-                    </h2>
-                    <button
-                      onClick={() => setShowQuotesList(false)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      ✕
-                    </button>
+        {showPaymentModal && selectedQuoteForPayment && (
+          <PaymentProcessor
+            showModal={showPaymentModal}
+            setShowModal={setShowPaymentModal}
+            invoice={selectedQuoteForPayment}
+            onPaymentComplete={handlePaymentComplete}
+            user={user}
+            businessInfo={businessInfo}
+          />
+        )}
+
+        {/* ── Saved Quotes / Invoices List Modal ──────────────────── */}
+        {showQuotesList && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+              <div className="p-4 border-b flex items-center justify-between">
+                <h2 className="text-xl font-semibold">
+                  Saved {documentType === "quote" ? "Quotes" : "Invoices"}
+                </h2>
+                <button
+                  onClick={() => setShowQuotesList(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="overflow-auto p-4">
+                {savedQuotes.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No saved{" "}
+                    {documentType === "quote" ? "quotes" : "invoices"} yet
                   </div>
-                  <div className="overflow-auto p-4">
-                    {savedQuotes.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        No saved{" "}
-                        {documentType === "quote" ? "quotes" : "invoices"} yet
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {savedQuotes.map((quote) => (
-                          <div
-                            key={quote.id}
-                            onClick={() => loadQuote(quote)}
-                            className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <div className="font-semibold text-lg">
-                                  {quote.quoteNumber || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600 mt-1">
-                                  Client: {quote.customer?.name || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  Email: {quote.customer?.email || "N/A"}
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-lg font-semibold text-amber-600">
-                                  R{quote.totals?.total?.toFixed(2) || "0.00"}
-                                </div>
-                                {quote.totals?.paid > 0 && (
-                                  <div className="text-sm text-emerald-600 font-semibold">
-                                    Paid: R{quote.totals.paid.toFixed(2)}
-                                  </div>
-                                )}
-                                {quote.totals?.due > 0 && (
-                                  <div className="text-sm text-rose-600 font-semibold">
-                                    Due: R{quote.totals.due.toFixed(2)}
-                                  </div>
-                                )}
-                                <div
-                                  className={`text-xs mt-1 px-2 py-1 rounded ${quote.status === "paid" ? "bg-emerald-100 text-emerald-700" : quote.status === "partially_paid" ? "bg-amber-100 text-amber-700" : quote.status === "pending" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}
-                                >
-                                  {quote.status === "paid"
-                                    ? "Paid"
-                                    : quote.status === "partially_paid"
-                                      ? "Partial"
-                                      : "Pending"}
-                                </div>
-                              </div>
+                ) : (
+                  <div className="space-y-2">
+                    {savedQuotes.map((quote) => (
+                      <div
+                        key={quote.id}
+                        onClick={() => loadQuote(quote)}
+                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="font-semibold text-lg">
+                              {quote.quoteNumber || "N/A"}
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              Client: {quote.customer?.name || "N/A"}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              Email: {quote.customer?.email || "N/A"}
                             </div>
                           </div>
-                        ))}
+                          <div className="text-right">
+                            <div className="text-lg font-semibold text-amber-600">
+                              R{quote.totals?.total?.toFixed(2) || "0.00"}
+                            </div>
+                            {quote.totals?.paid > 0 && (
+                              <div className="text-sm text-emerald-600 font-semibold">
+                                Paid: R{quote.totals.paid.toFixed(2)}
+                              </div>
+                            )}
+                            {quote.totals?.due > 0 && (
+                              <div className="text-sm text-rose-600 font-semibold">
+                                Due: R{quote.totals.due.toFixed(2)}
+                              </div>
+                            )}
+                            <div
+                              className={`text-xs mt-1 px-2 py-1 rounded ${quote.status === "paid" ? "bg-emerald-100 text-emerald-700" : quote.status === "partially_paid" ? "bg-amber-100 text-amber-700" : quote.status === "pending" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}
+                            >
+                              {quote.status === "paid"
+                                ? "Paid"
+                                : quote.status === "partially_paid"
+                                  ? "Partial"
+                                  : "Pending"}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    )}
+                    ))}
                   </div>
-                </div>
+                )}
               </div>
-            )}
-            {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
-            {showPreview && (
-              <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
-                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
-                  {/* Modal header */}
-                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
-                        <Eye className="w-4 h-4 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-sm font-semibold text-[#1e293b]">
-                          {documentType === "quote" ? "Quote" : "Invoice"}{" "}
-                          Preview
-                        </h2>
-                        <p className="text-xs text-[#64748b]">
-                          {quoteNumber || "Draft"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handlePrint}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
-                      >
-                        <Printer className="w-3.5 h-3.5" />
-                        Print
-                      </button>
-                      <button
-                        onClick={handleSavePDF}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        Save PDF
-                      </button>
-                      <button
-                        onClick={() => setShowPreview(false)}
-                        className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
+            </div>
+          </div>
+        )}
 
-                  {/* Scrollable canvas area */}
-                  <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
-                    <div
-                      className="mx-auto bg-white shadow-xl"
-                      style={{ width: "210mm", minHeight: "297mm" }}
-                    >
-                      <TemplateRenderer
-                        templateId={selectedTemplate}
-                        businessInfo={businessInfo}
-                        loading={loading}
-                        invoiceNumber={quoteNumber}
-                        customerName={customerName}
-                        billName={customerName}
-                        billEmail={customerEmail}
-                        billPhone={customerPhone}
-                        billAddress={propertyAddress}
-                        customerEmail={customerEmail}
-                        customerPhone={customerPhone}
-                        customerAddress={propertyAddress}
-                        taxId=""
-                        items={items}
-                        subtotal={subtotal}
-                        totalTax={totalTax}
-                        total={total}
-                        documentType={documentType}
-                        stampText={stampSettings.text}
-                        stampColor={stampSettings.color}
-                        showStampDate={stampSettings.showDate}
-                        showStamp={stampSettings.enabled}
-                        paymentStatus={paymentStatus}
-                      />
-                    </div>
+        {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
+        {showPreview && (
+          <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+              {/* Modal header */}
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
+                    <Eye className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-semibold text-[#1e293b]">
+                      {documentType === "quote" ? "Quote" : "Invoice"}{" "}
+                      Preview
+                    </h2>
+                    <p className="text-xs text-[#64748b]">
+                      {quoteNumber || "Draft"}
+                    </p>
                   </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handlePrint}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    Print
+                  </button>
+                  <button
+                    onClick={handleSavePDF}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Save PDF
+                  </button>
+                  <button
+                    onClick={() => setShowPreview(false)}
+                    className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            )}
-            {/* ── Alternate Views ──────────────────────────────────────── */}
-            {activeView === "financial-overview" && (
+
+              {/* Scrollable canvas area */}
+              <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
+                <div
+                  className="mx-auto bg-white shadow-xl"
+                  style={{ width: "210mm", minHeight: "297mm" }}
+                >
+                  <TemplateRenderer {...templateProps} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Main scrollable content ──────────────────────────────────── */}
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+          {/* ── Alternate Views ──────────────────────────────────────── */}
+          {activeView === "financial-overview" && (
+            <div className="flex-1 overflow-y-auto p-4">
               <FinancialOverview user={user} />
-            )}
-            {activeView === "history-view" && <HistoryView user={user} />}
-            {activeView === "notes-view" && <NotesView user={user} />}
-            {activeView === "templates" && <Templates user={user} />}
-            {activeView === "home" && <HomeView user={user} />}
+            </div>
+          )}
+          {activeView === "history-view" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <HistoryView user={user} />
+            </div>
+          )}
+          {activeView === "notes-view" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <NotesView user={user} />
+            </div>
+          )}
+          {activeView === "templates" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <Templates user={user} />
+            </div>
+          )}
+          {activeView === "home" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <HomeView user={user} />
+            </div>
+          )}
 
-            {/* ── Quote / Invoice Builder ──────────────────────────────── */}
-            {activeView === "quote" && (
-              <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
-                <div className="space-y-6">
+          {/* ── Quote / Invoice Builder — split layout ──────────────── */}
+          {activeView === "quote" && (
+            <div className="flex-1 overflow-hidden flex min-h-0">
+
+              {/* ── LEFT: Form panel ─────────────────────────────────── */}
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+                <div className="space-y-5">
+
                   {/* Tab: Manual / AI */}
-                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
+                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     <div className="flex border-b border-slate-200">
                       <button
                         onClick={() => setInputMode("manual")}
@@ -1533,14 +1532,14 @@ const PaintingDashboard = () => {
                         </span>
                       </button>
                     </div>
-                    <div className="p-6">
-                      {inputMode === "ai" && (
+                    {inputMode === "ai" && (
+                      <div className="p-6">
                         <AIInvoiceExtractor
                           onDataExtracted={handleAIDataExtracted}
                           documentType={documentType}
                         />
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
 
                   {inputMode === "manual" && (
@@ -1623,9 +1622,7 @@ const PaintingDashboard = () => {
                                 </div>
                                 <div>
                                   <div className="font-bold text-emerald-900">
-                                    {documentType === "quote"
-                                      ? "Quote"
-                                      : "Invoice"}{" "}
+                                    {documentType === "quote" ? "Quote" : "Invoice"}{" "}
                                     Fully Paid
                                   </div>
                                   <div className="text-sm text-emerald-700">
@@ -1680,6 +1677,34 @@ const PaintingDashboard = () => {
 
                       {/* ── Stepped Form ──────────────────────────────────── */}
                       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+
+                        {/* Step indicator */}
+                        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
+                          <div className="flex items-center gap-0">
+                            {steps.map((step, idx) => (
+                              <React.Fragment key={step.number}>
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${currentStep === step.number ? "bg-amber-600 text-white" : currentStep > step.number ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500" : "bg-slate-200 text-slate-400"}`}
+                                  >
+                                    {currentStep > step.number ? "✓" : step.number}
+                                  </div>
+                                  <span
+                                    className={`text-xs font-medium hidden sm:block ${currentStep === step.number ? "text-amber-600" : currentStep > step.number ? "text-emerald-600" : "text-slate-400"}`}
+                                  >
+                                    {step.title}
+                                  </span>
+                                </div>
+                                {idx < steps.length - 1 && (
+                                  <div
+                                    className={`flex-1 h-px mx-2 ${currentStep > step.number ? "bg-emerald-400" : "bg-slate-200"}`}
+                                  />
+                                )}
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        </div>
+
                         {/* Step 1 – Client Information */}
                         {currentStep === 1 && (
                           <div className="p-8">
@@ -1783,13 +1808,9 @@ const PaintingDashboard = () => {
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
                                 >
                                   <option value="Commercial">Commercial</option>
-                                  <option value="Residential">
-                                    Residential
-                                  </option>
+                                  <option value="Residential">Residential</option>
                                   <option value="Industrial">Industrial</option>
-                                  <option value="Infrastructure">
-                                    Infrastructure
-                                  </option>
+                                  <option value="Infrastructure">Infrastructure</option>
                                   <option value="Renovation">Renovation</option>
                                   <option value="Government">Government</option>
                                 </select>
@@ -1893,43 +1914,21 @@ const PaintingDashboard = () => {
                                       }
                                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
                                     >
-                                      <option value="Foundation Work">
-                                        Foundation Work
-                                      </option>
-                                      <option value="Structural Steel">
-                                        Structural Steel
-                                      </option>
-                                      <option value="Concrete & Masonry">
-                                        Concrete & Masonry
-                                      </option>
-                                      <option value="Electrical">
-                                        Electrical
-                                      </option>
+                                      <option value="Foundation Work">Foundation Work</option>
+                                      <option value="Structural Steel">Structural Steel</option>
+                                      <option value="Concrete & Masonry">Concrete & Masonry</option>
+                                      <option value="Electrical">Electrical</option>
                                       <option value="Plumbing">Plumbing</option>
                                       <option value="Roofing">Roofing</option>
-                                      <option value="Finishing & Plastering">
-                                        Finishing & Plastering
-                                      </option>
-                                      <option value="Earthworks">
-                                        Earthworks
-                                      </option>
-                                      <option value="Landscaping">
-                                        Landscaping
-                                      </option>
-                                      <option value="Site Preparation">
-                                        Site Preparation
-                                      </option>
+                                      <option value="Finishing & Plastering">Finishing & Plastering</option>
+                                      <option value="Earthworks">Earthworks</option>
+                                      <option value="Landscaping">Landscaping</option>
+                                      <option value="Site Preparation">Site Preparation</option>
                                       <option value="HVAC">HVAC</option>
-                                      <option value="Windows & Doors">
-                                        Windows & Doors
-                                      </option>
+                                      <option value="Windows & Doors">Windows & Doors</option>
                                       <option value="Painting">Painting</option>
-                                      <option value="Tiling & Flooring">
-                                        Tiling & Flooring
-                                      </option>
-                                      <option value="Materials Supply">
-                                        Materials Supply
-                                      </option>
+                                      <option value="Tiling & Flooring">Tiling & Flooring</option>
+                                      <option value="Materials Supply">Materials Supply</option>
                                     </select>
                                   </div>
                                   <div>
@@ -2048,30 +2047,14 @@ const PaintingDashboard = () => {
                                   <table className="w-full">
                                     <thead>
                                       <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                          Description
-                                        </th>
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                          Category
-                                        </th>
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                          Phase
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          Unit Rate
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          Qty
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          VAT
-                                        </th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                          Total
-                                        </th>
-                                        <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">
-                                          Action
-                                        </th>
+                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">Description</th>
+                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">Category</th>
+                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">Phase</th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">Unit Rate</th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">Qty</th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">VAT</th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">Total</th>
+                                        <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">Action</th>
                                       </tr>
                                     </thead>
                                     <tbody className="bg-white">
@@ -2107,9 +2090,7 @@ const PaintingDashboard = () => {
                                           </td>
                                           <td className="px-4 py-4 text-center">
                                             <button
-                                              onClick={() =>
-                                                handleRemoveItem(index)
-                                              }
+                                              onClick={() => handleRemoveItem(index)}
                                               className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all flex items-center gap-1 mx-auto"
                                             >
                                               <Trash2 className="w-3 h-3" />
@@ -2157,9 +2138,7 @@ const PaintingDashboard = () => {
                                     </span>
                                   </div>
                                   <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-amber-300">
-                                    <span className="text-slate-900">
-                                      Total:
-                                    </span>
+                                    <span className="text-slate-900">Total:</span>
                                     <span className="text-amber-700 text-2xl">
                                       R{total.toFixed(2)}
                                     </span>
@@ -2173,107 +2152,11 @@ const PaintingDashboard = () => {
                         {/* Step 4 – Schedule & Payment */}
                         {currentStep === 4 && (
                           <div className="p-8">
-                            <div className="mb-8">
-                              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                                  <Calendar className="w-6 h-6 text-emerald-600" />
-                                </div>
-                                Schedule & Payment Terms
-                              </h2>
-                              <p className="text-slate-600 mt-2 ml-13">
-                                Review quote details, milestones, and payment
-                                terms
-                              </p>
-                            </div>
-
-                            {/* Summary Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                              <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl border border-amber-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-amber-700">
-                                    Project Total
-                                  </span>
-                                  <DollarSign className="w-5 h-5 text-amber-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-amber-900">
-                                  R{total.toFixed(2)}
-                                </div>
-                              </div>
-                              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-emerald-700">
-                                    Work Items
-                                  </span>
-                                  <ClipboardList className="w-5 h-5 text-emerald-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-emerald-900">
-                                  {items.length}
-                                </div>
-                              </div>
-                              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-semibold text-purple-700">
-                                    VAT Amount
-                                  </span>
-                                  <Receipt className="w-5 h-5 text-purple-600" />
-                                </div>
-                                <div className="text-3xl font-bold text-purple-900">
-                                  R{totalTax.toFixed(2)}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Payment Terms */}
-                            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-6">
-                              <div className="flex items-center gap-3 mb-5">
-                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                  <CreditCard className="w-5 h-5 text-purple-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900">
-                                  Payment Information
-                                </h3>
-                              </div>
-                              <div className="space-y-3">
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">
-                                    Payment Schedule:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    Milestone-Based
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">
-                                    Payment Methods:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    Bank Transfer, Card, EFT
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                  <span className="text-slate-600 font-medium">
-                                    Quote Valid For:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    30 Days
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center py-3">
-                                  <span className="text-slate-600 font-medium">
-                                    Currency:
-                                  </span>
-                                  <span className="font-bold text-slate-900">
-                                    ZAR (South African Rand)
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
+                        
 
                             {/* Client & Site Summary */}
                             <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
-                              <h3 className="text-lg font-bold text-slate-900 mb-4">
-                                Quote Summary
-                              </h3>
+                              <h3 className="text-lg font-bold text-slate-900 mb-4">Quote Summary</h3>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                   <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
@@ -2281,9 +2164,7 @@ const PaintingDashboard = () => {
                                     Client Details:
                                   </h4>
                                   <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">
-                                      {customerName}
-                                    </p>
+                                    <p className="font-semibold text-slate-900">{customerName}</p>
                                     <p>{customerEmail}</p>
                                     <p>{customerPhone}</p>
                                   </div>
@@ -2294,60 +2175,21 @@ const PaintingDashboard = () => {
                                     Site Details:
                                   </h4>
                                   <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">
-                                      {propertyAddress}
-                                    </p>
-                                    <p>
-                                      <span className="font-semibold">
-                                        Type:
-                                      </span>{" "}
-                                      {siteType}
-                                    </p>
-                                    <p>
-                                      <span className="font-semibold">
-                                        Area:
-                                      </span>{" "}
-                                      {siteSize} sqm
-                                    </p>
-                                    <p>
-                                      <span className="font-semibold">
-                                        Floors:
-                                      </span>{" "}
-                                      {floors} | Phases: {phases}
-                                    </p>
+                                    <p className="font-semibold text-slate-900">{propertyAddress}</p>
+                                    <p><span className="font-semibold">Type:</span> {siteType}</p>
+                                    <p><span className="font-semibold">Area:</span> {siteSize} sqm</p>
+                                    <p><span className="font-semibold">Floors:</span> {floors} | Phases: {phases}</p>
                                   </div>
                                 </div>
                               </div>
 
                               <div className="mt-6 pt-6 border-t border-slate-300">
-                                <h4 className="text-sm font-semibold text-slate-700 mb-2">
-                                  Quote Details:
-                                </h4>
+                                <h4 className="text-sm font-semibold text-slate-700 mb-2">Quote Details:</h4>
                                 <div className="text-sm text-slate-600 space-y-1">
-                                  <p>
-                                    <span className="font-semibold">
-                                      Number:
-                                    </span>{" "}
-                                    {quoteNumber}
-                                  </p>
-                                  <p>
-                                    <span className="font-semibold">Date:</span>{" "}
-                                    {new Date().toLocaleDateString()}
-                                  </p>
-                                  <p>
-                                    <span className="font-semibold">Type:</span>{" "}
-                                    {documentType === "quote"
-                                      ? "Quote"
-                                      : "Invoice"}
-                                  </p>
-                                  <p>
-                                    <span className="font-semibold">
-                                      Status:
-                                    </span>{" "}
-                                    <span className="text-amber-600 font-bold">
-                                      Pending
-                                    </span>
-                                  </p>
+                                  <p><span className="font-semibold">Number:</span> {quoteNumber}</p>
+                                  <p><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</p>
+                                  <p><span className="font-semibold">Type:</span> {documentType === "quote" ? "Quote" : "Invoice"}</p>
+                                  <p><span className="font-semibold">Status:</span>{" "}<span className="text-amber-600 font-bold">Pending</span></p>
                                 </div>
                               </div>
                             </div>
@@ -2396,8 +2238,7 @@ const PaintingDashboard = () => {
                               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
                             >
                               <Save className="w-5 h-5" />
-                              Save{" "}
-                              {documentType === "quote" ? "Quote" : "Invoice"}
+                              Save {documentType === "quote" ? "Quote" : "Invoice"}
                             </button>
                           )}
                         </div>
@@ -2405,48 +2246,67 @@ const PaintingDashboard = () => {
                     </>
                   )}
                 </div>
+              </div>
 
-                {/* ── Print / PDF Preview (hidden on-screen) ────────────── */}
-                <div
-                  id="print-area"
-                  className="hidden print:block bg-white shadow-2xl origin-top"
-                  style={{
-                    width: "210mm",
-                    minHeight: "297mm",
-                    transform: "scale(0.75)",
-                    transformOrigin: "top center",
-                  }}
-                >
-                  <TemplateRenderer
-                    templateId={selectedTemplate}
-                    businessInfo={businessInfo}
-                    loading={loading}
-                    invoiceNumber={quoteNumber}
-                    customerName={customerName}
-                    billName={customerName}
-                    billEmail={customerEmail}
-                    billPhone={customerPhone}
-                    billAddress={propertyAddress}
-                    customerEmail={customerEmail}
-                    customerPhone={customerPhone}
-                    customerAddress={propertyAddress}
-                    taxId=""
-                    items={items}
-                    subtotal={subtotal}
-                    totalTax={totalTax}
-                    total={total}
-                    documentType={documentType}
-                    stampText={stampSettings.text}
-                    stampColor={stampSettings.color}
-                    showStampDate={stampSettings.showDate}
-                    showStamp={stampSettings.enabled}
-                    paymentStatus={paymentStatus}
+              {/* ── RIGHT: Live preview panel ─────────────────────────────── */}
+              <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-stone-200 bg-stone-100 overflow-hidden">
+                {/* Panel header */}
+                <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-stone-200 flex-shrink-0">
+                  <TemplateSelector
+                    selectedTemplate={selectedTemplate}
+                    onTemplateChange={setSelectedTemplate}
                   />
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={handlePrint}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-stone-200 text-stone-700 text-xs font-medium rounded-lg hover:bg-stone-50 transition-colors"
+                    >
+                      <Printer className="w-3 h-3" />
+                      Print
+                    </button>
+                    <button
+                      onClick={handleSavePDF}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700 transition-colors"
+                    >
+                      <Download className="w-3 h-3" />
+                      PDF
+                    </button>
+                  </div>
+                </div>
+
+                {/* Scrollable preview canvas */}
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div
+                    className="bg-white shadow-lg rounded origin-top"
+                    style={{
+                      width: "210mm",
+                      minHeight: "297mm",
+                      transform: "scale(0.44)",
+                      transformOrigin: "top left",
+                      marginBottom: `calc((297mm * 0.44) - 297mm)`,
+                    }}
+                  >
+                    <TemplateRenderer {...templateProps} />
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* ── Print / PDF Preview (hidden on-screen) ────────────── */}
+      <div
+        id="print-area"
+        className="hidden print:block bg-white shadow-2xl origin-top"
+        style={{
+          width: "210mm",
+          minHeight: "297mm",
+          transform: "scale(0.75)",
+          transformOrigin: "top center",
+        }}
+      >
+        <TemplateRenderer {...templateProps} />
       </div>
     </div>
   );
