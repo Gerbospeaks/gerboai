@@ -81,6 +81,7 @@ const RestaurantDashboard = () => {
   const [activeView, setActiveView] = useState("home");
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [menuItems, setMenuItems] = useState([
     {
       id: "1",
@@ -419,13 +420,13 @@ const RestaurantDashboard = () => {
       setRestaurantInfo((prev) => ({ ...prev, uploading: false }));
     }
   };
-const location = useLocation();
+  const location = useLocation();
 
-useEffect(() => {
-  if (location.state?.activeView) {
-    setActiveView(location.state.activeView);
-  }
-}, [location.state]);
+  useEffect(() => {
+    if (location.state?.activeView) {
+      setActiveView(location.state.activeView);
+    }
+  }, [location.state]);
   const handleLogout = () => {
     alert("Logout functionality would be implemented with Firebase Auth");
   };

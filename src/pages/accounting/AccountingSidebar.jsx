@@ -13,11 +13,10 @@ import {
   LogOut,
   DollarSign,
   FileText,
-  BookOpen,
-  CreditCard,
-  PieChart,
-  Landmark,
   ClipboardList,
+  Landmark,
+  Menu,
+  X,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -54,391 +53,416 @@ export default function AccountingSidebar({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    document.body.style.overflow = isMobile && sidebarOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobile, sidebarOpen]);
+
   const goTo = (view) => {
     setActiveView(view);
-    setSidebarOpen(false);
+    if (isMobile) setSidebarOpen(false);
   };
+
+  // ── Shared sidebar body ───────────────────────────────────────────────────
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-4 border-b border-[#253347] flex-shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 bg-[#2563eb] rounded-lg flex items-center justify-center flex-shrink-0">
+            <img src={logo} className="w-5 h-5 object-contain" alt="logo" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white truncate leading-tight">
+              {businessInfo?.businessName || "Accounting"}
+            </p>
+            <p className="text-[10px] text-[#64748b]">Dashboard</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg transition-all flex-shrink-0"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Scrollable nav */}
+      <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
+        <NavItem
+          icon={Home}
+          label="Home"
+          onClick={() => goTo("home")}
+          active={activeView === "home"}
+        />
+        <NavItem
+          icon={Settings}
+          label="Settings"
+          onClick={() => {
+            setShowSettings(true);
+            if (isMobile) setSidebarOpen(false);
+          }}
+        />
+
+        <SectionLabel>Finance</SectionLabel>
+
+        <NavItem
+          icon={TrendingUp}
+          label="Financial Overview"
+          onClick={() => goTo("financial-overview")}
+          active={activeView === "financial-overview"}
+        />
+
+        {/* Invoicing */}
+        <Accordion
+          icon={Receipt}
+          label="Invoicing"
+          isOpen={isInvoicingOpen}
+          onToggle={() => setIsInvoicingOpen((p) => !p)}
+        >
+          <SubItem
+            dot="bg-[#2563eb]"
+            label="Create Estimate"
+            onClick={() => {
+              handleNewEstimate?.();
+              goTo("invoice");
+            }}
+          />
+          <SubItem
+            dot="bg-[#059669]"
+            label="Create Invoice"
+            onClick={() => {
+              handleNewInvoiceDoc?.();
+              goTo("invoice");
+            }}
+          />
+          <SubItem
+            dot="bg-[#7c3aed]"
+            label="All Documents"
+            badge={savedInvoices?.length ?? 0}
+            onClick={() => {
+              setShowInvoicesList?.(true);
+              if (isMobile) setSidebarOpen(false);
+            }}
+          />
+        </Accordion>
+
+        {/* Expenses */}
+        <NavItem
+          icon={TrendingDown}
+          label="Expenses"
+          onClick={() => goTo("expenses")}
+          active={activeView === "expenses"}
+        />
+
+        {/* Clients */}
+        <Accordion
+          icon={Users}
+          label="Clients"
+          isOpen={isClientsOpen}
+          onToggle={() => setIsClientsOpen((p) => !p)}
+        >
+          <SubItem
+            dot="bg-[#059669]"
+            label="Add Client"
+            onClick={() => {
+              handleAddNewCustomer?.();
+              if (isMobile) setSidebarOpen(false);
+            }}
+          />
+          <SubItem
+            dot="bg-[#2563eb]"
+            label="All Clients"
+            badge={savedCustomers?.length ?? 0}
+            badgeBg="bg-[#7c3aed]"
+            onClick={() => {
+              setShowCustomersListModal?.(true);
+              if (isMobile) setSidebarOpen(false);
+            }}
+          />
+        </Accordion>
+
+        <SectionLabel>Accounting</SectionLabel>
+
+        {/* Banking */}
+        <Accordion
+          icon={Landmark}
+          label="Banking"
+          isOpen={isBankingOpen}
+          onToggle={() => setIsBankingOpen((p) => !p)}
+        >
+          <SubItem
+            dot="bg-[#0d9488]"
+            label="Bank Accounts"
+            onClick={() => goTo("bank-accounts")}
+          />
+          <SubItem
+            dot="bg-[#0891b2]"
+            label="Reconciliation"
+            onClick={() => goTo("reconciliation")}
+          />
+          <SubItem
+            dot="bg-[#2563eb]"
+            label="Transactions"
+            onClick={() => goTo("transactions")}
+          />
+        </Accordion>
+
+        {/* Reports */}
+        <Accordion
+          icon={BarChart3}
+          label="Reports"
+          isOpen={isReportsOpen}
+          onToggle={() => setIsReportsOpen((p) => !p)}
+        >
+          <SubItem
+            dot="bg-[#059669]"
+            label="Profit & Loss"
+            onClick={() => goTo("report-pnl")}
+          />
+          <SubItem
+            dot="bg-[#2563eb]"
+            label="Balance Sheet"
+            onClick={() => goTo("report-balance")}
+          />
+          <SubItem
+            dot="bg-[#7c3aed]"
+            label="Cash Flow"
+            onClick={() => goTo("report-cashflow")}
+          />
+          <SubItem
+            dot="bg-[#d97706]"
+            label="Tax Summary"
+            onClick={() => goTo("report-tax")}
+          />
+        </Accordion>
+
+        <NavItem
+          icon={ClipboardList}
+          label="Chart of Accounts"
+          onClick={() => goTo("chart-of-accounts")}
+          active={activeView === "chart-of-accounts"}
+        />
+        <NavItem
+          icon={DollarSign}
+          label="Payroll"
+          onClick={() => goTo("payroll")}
+          active={activeView === "payroll"}
+        />
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[#253347] px-4 py-3 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-[#253347] rounded-full flex items-center justify-center ring-1 ring-[#334155] flex-shrink-0 overflow-hidden">
+            {businessInfo?.logoUrl ? (
+              <img
+                src={businessInfo.logoUrl}
+                alt="biz"
+                className="w-5 h-5 object-contain"
+              />
+            ) : (
+              <div className="w-4 h-4 bg-[#059669] rounded-full" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-white truncate">
+              {user?.name || "User"}
+            </p>
+            <p className="text-xs text-[#64748b] truncate">
+              {user?.email || "email@example.com"}
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            title="Log out"
+            className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg transition-all flex-shrink-0"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
-      {/* ── Mobile overlay ─────────────────────────────────────────────── */}
-      {sidebarOpen && (
+      {/* ════════════════════════════════════════════════════════════════
+          MOBILE — hamburger + slide-in drawer
+      ════════════════════════════════════════════════════════════════ */}
+      <div className="md:hidden print:hidden">
+        {/* Hamburger — fixed top-left when drawer closed */}
+        {!sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+            className="fixed top-3 left-3 z-50 w-9 h-9 bg-[#1a2332] border border-[#253347] text-[#94a3b8] hover:text-white hover:bg-[#253347] rounded-lg flex items-center justify-center shadow-lg transition-all"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* Dim overlay */}
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
+            sidebarOpen
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+          }`}
           onClick={() => setSidebarOpen(false)}
         />
-      )}
 
-      {/* ── Collapsed sidebar (icon rail) — flex child, NOT fixed ─────── */}
-      {!sidebarOpen && (
-        <div className="hidden md:flex flex-col flex-shrink-0 w-16 md:w-20 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 h-full print:hidden shadow-2xl z-30">
-          <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6 flex-1">
-            {/* Expand toggle */}
+        {/* Drawer */}
+        <div
+          className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#1a2332] shadow-2xl transform transition-transform duration-300 ease-in-out ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <SidebarContent />
+        </div>
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════════
+          DESKTOP — collapsed icon rail OR expanded panel
+      ════════════════════════════════════════════════════════════════ */}
+      <div className="hidden md:flex print:hidden h-full">
+        {/* Collapsed icon rail */}
+        {!sidebarOpen && (
+          <div className="flex flex-col flex-shrink-0 w-16 bg-[#1a2332] border-r border-[#253347] h-full items-center py-4 gap-2 z-30">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="group p-2 md:p-3 text-emerald-400 hover:text-white hover:bg-slate-700 rounded-xl transition-all duration-300 hover:scale-110"
-              title="Expand Sidebar"
+              title="Expand"
+              className="p-2 text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg transition-all"
             >
-              <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+              <ChevronRight className="w-5 h-5" />
             </button>
 
-            {/* Logo */}
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl p-1">
-              <img
-                src={logo}
-                className="w-full h-full p-1.5 object-contain"
-                alt="logo"
-              />
+            <div className="w-9 h-9 bg-[#253347] rounded-lg flex items-center justify-center my-1">
+              <img src={logo} className="w-6 h-6 object-contain" alt="logo" />
             </div>
 
-            {/* Icon nav */}
-            <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
+            <div className="flex flex-col items-center gap-1 w-full px-2 mt-1">
               {[
-                {
-                  icon: Home,
-                  title: "Home",
-                  view: "home",
-                  color: "from-slate-600 to-slate-700",
-                  text: "text-cyan-400",
-                },
+                { icon: Home, title: "Home", action: () => goTo("home") },
                 {
                   icon: Settings,
                   title: "Settings",
                   action: () => setShowSettings(true),
-                  color: "from-violet-600 to-violet-700",
-                  text: "text-slate-400",
                 },
-              ].map(({ icon: Icon, title, view, action, color, text }) => (
+                {
+                  icon: TrendingUp,
+                  title: "Financial Overview",
+                  action: () => goTo("financial-overview"),
+                },
+                {
+                  icon: Receipt,
+                  title: "Invoicing",
+                  action: () => {
+                    handleNewInvoiceDoc?.();
+                    goTo("invoice");
+                  },
+                },
+                {
+                  icon: TrendingDown,
+                  title: "Expenses",
+                  action: () => goTo("expenses"),
+                },
+                {
+                  icon: Users,
+                  title: "Clients",
+                  action: () => setShowCustomersListModal?.(true),
+                },
+                {
+                  icon: BarChart3,
+                  title: "Reports",
+                  action: () => goTo("reports"),
+                },
+              ].map(({ icon: Icon, title, action }) => (
                 <button
                   key={title}
-                  onClick={action ?? (() => goTo(view))}
-                  className={`group relative p-2 md:p-3 ${text} hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden`}
+                  onClick={action}
                   title={title}
+                  className="w-10 h-10 flex items-center justify-center text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg transition-all"
                 >
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
-                  />
-                  <Icon className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                  <Icon className="w-5 h-5" />
                 </button>
               ))}
-
-              {!isMobile && (
-                <>
-                  <button
-                    onClick={() => goTo("financial-overview")}
-                    className="group relative p-2 md:p-3 text-emerald-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                    title="Financial Overview"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <TrendingUp className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleNewInvoiceDoc?.();
-                      goTo("invoice");
-                    }}
-                    className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                    title="Invoices"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <Receipt className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                  </button>
-                  <button
-                    onClick={() => goTo("expenses")}
-                    className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                    title="Expenses"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-rose-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <TrendingDown className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                  </button>
-                  <button
-                    onClick={() => goTo("clients")}
-                    className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                    title="Clients"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <Users className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                  </button>
-                  <button
-                    onClick={() => goTo("reports")}
-                    className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                    title="Reports"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <BarChart3 className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Business logo bottom */}
-          <div className="flex justify-center pb-4 md:pb-6">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center overflow-hidden">
-              {businessInfo?.logoUrl ? (
-                <img
-                  src={businessInfo.logoUrl}
-                  className="w-6 h-6 object-contain"
-                  alt="biz"
-                />
-              ) : (
-                <div className="w-6 h-6 bg-emerald-400 rounded-full" />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Expanded sidebar — flex child on desktop, fixed overlay on mobile ── */}
-      {sidebarOpen && (
-        <div className="flex-shrink-0 w-64 md:w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 h-full print:hidden shadow-2xl overflow-y-auto z-50 md:relative fixed inset-y-0 left-0">
-          <div className="p-4 md:p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6 md:mb-8">
-              <img src={logo} className="w-12 h-auto" alt="logo" />
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
             </div>
 
-            {/* Nav */}
-            <nav className="space-y-1.5 md:space-y-2">
-              <NavItem
-                icon={Home}
-                label="Home"
-                onClick={() => goTo("home")}
-                color="cyan"
-              />
-              <NavItem
-                icon={Settings}
-                label="Settings"
-                onClick={() => {
-                  setShowSettings(true);
-                  setSidebarOpen(false);
-                }}
-                color="violet"
-              />
-
-              <div className="pt-3 mt-3 border-t border-slate-700/50 space-y-1.5">
-                <NavItem
-                  icon={TrendingUp}
-                  label="Financial Overview"
-                  onClick={() => goTo("financial-overview")}
-                  color="emerald"
-                />
-
-                {/* Invoicing accordion */}
-                <Accordion
-                  icon={Receipt}
-                  label="Invoicing"
-                  isOpen={isInvoicingOpen}
-                  onToggle={() => setIsInvoicingOpen((p) => !p)}
-                  accentColor="blue"
-                >
-                  <SubItem
-                    label="Create Estimate"
-                    dot="bg-blue-500"
-                    onClick={() => {
-                      handleNewEstimate?.();
-                      goTo("invoice");
-                    }}
-                  />
-                  <SubItem
-                    label="Create Invoice"
-                    dot="bg-emerald-500"
-                    onClick={() => {
-                      handleNewInvoiceDoc?.();
-                      goTo("invoice");
-                    }}
-                  />
-                  <SubItem
-                    label="All Documents"
-                    dot="bg-purple-500"
-                    badge={savedInvoices?.length ?? 0}
-                    badgeColor="from-blue-600 to-purple-600"
-                    onClick={() => {
-                      setShowInvoicesList?.(true);
-                      setSidebarOpen(false);
-                    }}
-                  />
-                </Accordion>
-
-                {/* Expenses accordion */}
-                <NavItem
-                  icon={TrendingDown}
-                  label="Expenses"
-                  onClick={() => goTo("expenses")}
-                  color="rose"
-                />
-
-                {/* Clients accordion */}
-                <Accordion
-                  icon={Users}
-                  label="Clients"
-                  isOpen={isClientsOpen}
-                  onToggle={() => setIsClientsOpen((p) => !p)}
-                  accentColor="pink"
-                >
-                  <SubItem
-                    label="Add Client"
-                    dot="bg-emerald-500"
-                    onClick={() => {
-                      handleAddNewCustomer?.();
-                      setSidebarOpen(false);
-                    }}
-                  />
-                  <SubItem
-                    label="All Clients"
-                    dot="bg-blue-500"
-                    badge={savedCustomers?.length ?? 0}
-                    badgeColor="from-pink-600 to-purple-600"
-                    onClick={() => {
-                      setShowCustomersListModal?.(true);
-                      setSidebarOpen(false);
-                    }}
-                  />
-                </Accordion>
-
-                {!isMobile && (
-                  <>
-                    {/* Banking accordion */}
-                    <Accordion
-                      icon={Landmark}
-                      label="Banking"
-                      isOpen={isBankingOpen}
-                      onToggle={() => setIsBankingOpen((p) => !p)}
-                      accentColor="teal"
-                    >
-                      <SubItem
-                        label="Bank Accounts"
-                        dot="bg-teal-500"
-                        onClick={() => goTo("bank-accounts")}
-                      />
-                      <SubItem
-                        label="Reconciliation"
-                        dot="bg-cyan-500"
-                        onClick={() => goTo("reconciliation")}
-                      />
-                      <SubItem
-                        label="Transactions"
-                        dot="bg-blue-400"
-                        onClick={() => goTo("transactions")}
-                      />
-                    </Accordion>
-
-                    {/* Reports accordion */}
-                    <Accordion
-                      icon={BarChart3}
-                      label="Reports"
-                      isOpen={isReportsOpen}
-                      onToggle={() => setIsReportsOpen((p) => !p)}
-                      accentColor="cyan"
-                    >
-                      <SubItem
-                        label="Profit & Loss"
-                        dot="bg-emerald-500"
-                        onClick={() => goTo("report-pnl")}
-                      />
-                      <SubItem
-                        label="Balance Sheet"
-                        dot="bg-blue-500"
-                        onClick={() => goTo("report-balance")}
-                      />
-                      <SubItem
-                        label="Cash Flow"
-                        dot="bg-violet-500"
-                        onClick={() => goTo("report-cashflow")}
-                      />
-                      <SubItem
-                        label="Tax Summary"
-                        dot="bg-amber-500"
-                        onClick={() => goTo("report-tax")}
-                      />
-                    </Accordion>
-
-                    <NavItem
-                      icon={ClipboardList}
-                      label="Chart of Accounts"
-                      onClick={() => goTo("chart-of-accounts")}
-                      color="indigo"
-                    />
-
-                    <NavItem
-                      icon={DollarSign}
-                      label="Payroll"
-                      onClick={() => goTo("payroll")}
-                      color="amber"
-                    />
-                  </>
-                )}
-              </div>
-            </nav>
-          </div>
-
-          {/* Footer */}
-          <div className="sticky bottom-0 p-4 md:p-5 border-t border-slate-700/50 bg-slate-900">
-            <div className="flex items-center space-x-2 md:space-x-3">
-              <div className="w-9 h-9 md:w-10 md:h-10 bg-white rounded-full ring-2 ring-slate-700 flex-shrink-0 flex items-center justify-center overflow-hidden">
+            <div className="mt-auto pb-2">
+              <div className="w-9 h-9 bg-[#253347] rounded-full flex items-center justify-center ring-1 ring-[#334155] overflow-hidden">
                 {businessInfo?.logoUrl ? (
                   <img
                     src={businessInfo.logoUrl}
+                    className="w-5 h-5 object-contain"
                     alt="biz"
-                    className="max-h-[70%] max-w-[70%] object-contain"
                   />
                 ) : (
-                  <div className="w-5 h-5 bg-emerald-400 rounded-full" />
+                  <div className="w-4 h-4 bg-[#059669] rounded-full" />
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs md:text-sm font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent truncate">
-                  {user?.name || "User"}
-                </p>
-                <p className="text-xs text-slate-400 truncate">{user?.email}</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="group text-slate-400 hover:text-white hover:bg-red-600/20 p-2 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-              >
-                <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Expanded panel */}
+        {sidebarOpen && (
+          <div className="flex-shrink-0 w-64 bg-[#1a2332] border-r border-[#253347] h-full shadow-xl z-30">
+            <SidebarContent />
+          </div>
+        )}
+      </div>
     </>
   );
 }
 
-// ── Accordion wrapper ─────────────────────────────────────────────────────────
-const accentMap = {
-  blue:   { text: "text-blue-300",    hover: "hover:from-blue-600/20 hover:to-blue-700/20",     border: "hover:border-blue-500/30"   },
-  pink:   { text: "text-pink-300",    hover: "hover:from-pink-600/20 hover:to-pink-700/20",     border: "hover:border-pink-500/30"   },
-  teal:   { text: "text-teal-300",    hover: "hover:from-teal-600/20 hover:to-teal-700/20",     border: "hover:border-teal-500/30"   },
-  cyan:   { text: "text-cyan-300",    hover: "hover:from-cyan-600/20 hover:to-cyan-700/20",     border: "hover:border-cyan-500/30"   },
-  amber:  { text: "text-amber-300",   hover: "hover:from-amber-600/20 hover:to-amber-700/20",   border: "hover:border-amber-500/30"  },
-};
+// ── Sub-components ────────────────────────────────────────────────────────────
+function SectionLabel({ children }) {
+  return (
+    <div className="pt-3 pb-1">
+      <p className="px-3 text-[10px] font-bold text-[#475569] uppercase tracking-widest">
+        {children}
+      </p>
+    </div>
+  );
+}
 
-function Accordion({ icon: Icon, label, isOpen, onToggle, accentColor, children }) {
-  const c = accentMap[accentColor] ?? accentMap.blue;
+function NavItem({ icon: Icon, label, onClick, active = false }) {
+  return (
+    <div
+      onClick={onClick}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${
+        active
+          ? "bg-[#253347] text-white"
+          : "text-[#94a3b8] hover:bg-[#253347] hover:text-white"
+      }`}
+    >
+      <Icon className="w-4 h-4 flex-shrink-0" />
+      <span className="truncate">{label}</span>
+    </div>
+  );
+}
+
+function Accordion({ icon: Icon, label, isOpen, onToggle, children }) {
   return (
     <div>
       <button
         onClick={onToggle}
-        className={`w-full group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 ${c.text} hover:text-white hover:bg-gradient-to-r ${c.hover} rounded-xl cursor-pointer transition-all duration-300 border border-transparent ${c.border}`}
+        className="w-full flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#253347] rounded-lg transition-all text-sm font-medium"
       >
-        <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-          <Icon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-          <span className="text-xs md:text-sm font-semibold truncate">{label}</span>
+        <div className="flex items-center gap-3">
+          <Icon className="w-4 h-4 flex-shrink-0" />
+          <span>{label}</span>
         </div>
         <ChevronDown
-          className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+          className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
       <div
-        className={`ml-6 mt-1.5 space-y-1 border-l-2 border-slate-700/50 pl-4 overflow-hidden transition-all duration-300 ${
+        className={`ml-7 mt-0.5 space-y-0.5 overflow-hidden transition-all duration-200 ${
           isOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
@@ -448,50 +472,25 @@ function Accordion({ icon: Icon, label, isOpen, onToggle, accentColor, children 
   );
 }
 
-// ── NavItem ───────────────────────────────────────────────────────────────────
-function NavItem({ icon: Icon, label, onClick, color }) {
-  const colors = {
-    cyan:   { text: "text-cyan-300",   hover: "hover:from-slate-600/20 hover:to-slate-700/20",   border: "hover:border-cyan-500/30"   },
-    violet: { text: "text-violet-300", hover: "hover:from-violet-600/20 hover:to-violet-700/20", border: "hover:border-violet-500/30" },
-    emerald:{ text: "text-emerald-300",hover: "hover:from-emerald-600/20 hover:to-emerald-700/20",border:"hover:border-emerald-500/30"},
-    rose:   { text: "text-rose-300",   hover: "hover:from-rose-600/20 hover:to-rose-700/20",     border: "hover:border-rose-500/30"   },
-    indigo: { text: "text-indigo-300", hover: "hover:from-indigo-600/20 hover:to-indigo-700/20", border: "hover:border-indigo-500/30" },
-    amber:  { text: "text-amber-300",  hover: "hover:from-amber-600/20 hover:to-amber-700/20",   border: "hover:border-amber-500/30"  },
-  };
-  const c = colors[color] ?? colors.cyan;
+function SubItem({ label, dot, onClick, badge, badgeBg = "bg-[#2563eb]" }) {
   return (
     <div
       onClick={onClick}
-      className={`group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 ${c.text} hover:text-white hover:bg-gradient-to-r ${c.hover} rounded-xl cursor-pointer transition-all duration-300 border border-transparent ${c.border}`}
+      className="flex items-center justify-between px-2 py-2 text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg cursor-pointer transition-all text-sm"
     >
-      <Icon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-      <span className="text-xs md:text-sm font-semibold truncate">{label}</span>
-    </div>
-  );
-}
-
-// ── SubItem ───────────────────────────────────────────────────────────────────
-function SubItem({ label, dot, onClick, badge, badgeColor }) {
-  return (
-    <div
-      onClick={onClick}
-      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 min-w-0">
-          <div
-            className={`w-1.5 h-1.5 rounded-full ${dot} flex-shrink-0 group-hover:scale-150 transition-transform duration-300`}
-          />
-          <span className="truncate">{label}</span>
-        </div>
-        {badge != null && (
-          <span
-            className={`bg-gradient-to-r ${badgeColor} text-white px-2 py-0.5 rounded-full text-xs font-bold flex-shrink-0 ml-2`}
-          >
-            {badge}
-          </span>
+      <div className="flex items-center gap-2 min-w-0">
+        {dot && (
+          <div className={`w-1.5 h-1.5 rounded-full ${dot} flex-shrink-0`} />
         )}
+        <span className="truncate">{label}</span>
       </div>
+      {badge != null && (
+        <span
+          className={`${badgeBg} text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ml-2`}
+        >
+          {badge}
+        </span>
+      )}
     </div>
   );
 }

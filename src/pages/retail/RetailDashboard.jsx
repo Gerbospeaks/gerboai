@@ -84,6 +84,7 @@ const RetailDashboard = () => {
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
     useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [productForm, setProductForm] = useState({
     name: "",
     sku: "",
@@ -95,13 +96,13 @@ const RetailDashboard = () => {
     description: "",
     imageUrl: "",
   });
-const location = useLocation();
+  const location = useLocation();
 
-useEffect(() => {
-  if (location.state?.activeView) {
-    setActiveView(location.state.activeView);
-  }
-}, [location.state]);
+  useEffect(() => {
+    if (location.state?.activeView) {
+      setActiveView(location.state.activeView);
+    }
+  }, [location.state]);
   // Orders state
   const [orders, setOrders] = useState([]);
   const [showOrdersModal, setShowOrdersModal] = useState(false);

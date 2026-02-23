@@ -1,341 +1,450 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { dashboards } from '../config/dashboardConfig';
-import logon from '../assets/img/register.png';
 import logo from '../assets/img/solidflo.png';
 import slide1 from '../assets/img/slide1.avif';
 import slide2 from '../assets/img/slide2.avif';
 import slide3 from '../assets/img/slide3.jpg';
+import {
+  Eye, EyeOff, ArrowRight, ChevronLeft, ChevronRight, Check, Search,
+} from 'lucide-react';
 
-// Add your slide images here
 const slides = [
-  {
-    image: slide1,
-    title: "Seamless work experience",
-    description: "Everything you need in an easily customizable dashboard"
-  },
-  {
-    image: slide2,
-    title: "Boost your productivity",
-    description: "Streamline your workflow with powerful tools"
-  },
-  {
-    image: slide3,
-    title: "Collaborate effortlessly",
-    description: "Work together with your team in real-time"
-  }
+  { image: slide1, title: "Seamless work experience",   description: "Everything you need in an easily customizable dashboard" },
+  { image: slide2, title: "Boost your productivity",    description: "Streamline your workflow with powerful tools"             },
+  { image: slide3, title: "Collaborate effortlessly",   description: "Work together with your team in real-time"               },
 ];
 
-function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+// ── Step indicator ────────────────────────────────────────────────────────────
+function StepDot({ step, current, label }) {
+  const done    = current > step;
+  const active  = current === step;
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
+        ${done   ? 'bg-[#1655e0] text-white' :
+          active ? 'bg-[#1655e0] text-white ring-4 ring-[#1655e0]/20' :
+                   'bg-[#f1f3f9] text-[#a0aec0]'}`}>
+        {done ? <Check className="w-4 h-4" /> : step}
+      </div>
+      <span className={`text-[10px] font-medium ${active ? 'text-[#1655e0]' : 'text-[#a0aec0]'}`}>{label}</span>
+    </div>
+  );
+}
+
+function StepLine({ active }) {
+  return (
+    <div className="flex-1 h-[2px] mt-[-12px] rounded-full transition-all duration-500"
+      style={{ background: active ? '#1655e0' : '#e8eaf0' }} />
+  );
+}
+
+// ── Industry card ─────────────────────────────────────────────────────────────
+function IndustryCard({ dashboard, selected, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative group flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 text-left w-full
+        ${selected
+          ? 'border-[#1655e0] bg-[#f0f4ff] shadow-md'
+          : 'border-[#e8eaf0] bg-white hover:border-[#b8c5f0] hover:bg-[#f8f9ff] hover:shadow-sm'
+        }`}
+    >
+      {/* Selected checkmark */}
+      {selected && (
+        <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[#1655e0] rounded-full flex items-center justify-center">
+          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+        </span>
+      )}
+      {/* Icon */}
+      <span className="text-2xl leading-none">{dashboard.icon}</span>
+      {/* Name */}
+      <span className={`text-[11px] font-semibold leading-tight text-center transition-colors
+        ${selected ? 'text-[#1655e0]' : 'text-[#374151] group-hover:text-[#1655e0]'}`}>
+        {dashboard.name}
+      </span>
+    </button>
+  );
+}
+
+// ── Input field ───────────────────────────────────────────────────────────────
+function Field({ label, children }) {
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-[13px] font-semibold text-[#374151]">{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function Input({ type = 'text', placeholder, value, onChange, disabled, rightElement }) {
+  return (
+    <div className="relative">
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        disabled={disabled}
+        className="w-full px-4 py-3 bg-white border border-[#d1d5db] text-[#111827] rounded-lg text-sm
+          focus:outline-none focus:ring-2 focus:ring-[#1655e0]/30 focus:border-[#1655e0]
+          disabled:bg-[#f9fafb] disabled:text-[#9ca3af] placeholder:text-[#c0c4ce] transition-all"
+      />
+      {rightElement && (
+        <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightElement}</div>
+      )}
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+export default function Register() {
+  const [step, setStep] = useState(1);                // 1 = account, 2 = industry
+  const [name,            setName]            = useState('');
+  const [email,           setEmail]           = useState('');
+  const [password,        setPassword]        = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [selectedDashboard, setSelectedDashboard] = useState('');
-  const [error, setError] = useState('');
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [success, setSuccess] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [industrySearch,  setIndustrySearch]  = useState('');
+  const [showPassword,    setShowPassword]    = useState(false);
+  const [showConfirm,     setShowConfirm]     = useState(false);
+  const [error,           setError]           = useState('');
+  const [success,         setSuccess]         = useState('');
+  const [isSubmitting,    setIsSubmitting]    = useState(false);
+  const [currentSlide,    setCurrentSlide]    = useState(0);
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [companyName, setCompanyName] = useState('');
-  const [companyAddress, setCompanyAddress] = useState('');
-  const [companyLogo, setCompanyLogo] = useState(null);
+
+  // Auto-advance slides
+  useEffect(() => {
+    const t = setInterval(() => setCurrentSlide(p => (p + 1) % slides.length), 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  const filteredDashboards = dashboards.filter(d =>
+    d.name.toLowerCase().includes(industrySearch.toLowerCase()) ||
+    d.description.toLowerCase().includes(industrySearch.toLowerCase())
+  );
+
+  const selectedInfo = dashboards.find(d => d.id === selectedDashboard);
+
+  const validateStep1 = () => {
+    if (!name.trim())          return 'Please enter your full name';
+    if (!email.trim())         return 'Please enter your email address';
+    if (password.length < 6)   return 'Password must be at least 6 characters';
+    if (password !== confirmPassword) return 'Passwords do not match';
+    return null;
+  };
+
+  const handleNext = () => {
+    const err = validateStep1();
+    if (err) { setError(err); return; }
+    setError('');
+    setStep(2);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (step === 1) { handleNext(); return; }
+    if (!selectedDashboard) { setError('Please select your industry to continue'); return; }
     setError('');
-    setSuccess('');
-
-    if (!name || !email || !password || !confirmPassword || !selectedDashboard) {
-      setError('Please fill in all fields');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
     setIsSubmitting(true);
-    
     try {
-      console.log('Starting registration...');
-      console.log('Company Logo:', companyLogo);
-      
-      // Prepare company info object
-      const companyInfo = {
-        companyName,
-        companyAddress,
-        companyLogo // This is the file object
-      };
-      
-      console.log('Company Info:', companyInfo);
-      
-      // Pass company info to register function
-      const result = await register(name, email, password, selectedDashboard, companyInfo);
-      
-      console.log('Registration result:', result);
-      
+      const result = await register(name, email, password, selectedDashboard, {});
       if (result.success) {
         setSuccess(result.message);
-        setTimeout(() => {
-          navigate('/login');
-        }, 5000);
+        setTimeout(() => navigate('/login'), 5000);
       } else {
         setError(result.message);
       }
-    } catch (error) {
-      console.error('Registration error in component:', error);
-      setError('An unexpected error occurred: ' + error.message);
+    } catch (err) {
+      setError('An unexpected error occurred: ' + err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Registration Form */}
-      <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-8 overflow-y-auto">
-        <div className="max-w-md w-full">
+    <div className="min-h-screen flex bg-[#f8f9fc]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+
+      {/* ── LEFT PANEL ─────────────────────────────────────────────────────── */}
+      <div className="w-full lg:w-[52%] flex flex-col overflow-y-auto">
+        <div className="flex-1 flex flex-col px-8 py-8 max-w-[520px] mx-auto w-full">
+
           {/* Logo */}
           <div className="mb-8">
-            <img
-              src={logo}
-              alt="Business Logo"
-              className="w-16 h-12 object-contain"
-            />
+            <img src={logo} alt="logo" className="h-9 object-contain" />
           </div>
 
-          {/* Welcome Text */}
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
-          <p className="text-gray-500 mb-8">Please enter your details to get started</p>
+          {/* Step indicator */}
+          <div className="flex items-center gap-0 mb-8">
+            <StepDot step={1} current={step} label="Account" />
+            <StepLine active={step >= 2} />
+            <StepDot step={2} current={step} label="Industry" />
+          </div>
 
-          {/* Error Message */}
+          {/* Heading */}
+          {step === 1 ? (
+            <>
+              <h1 className="text-[26px] font-bold text-[#111827] mb-1">Create your account</h1>
+              <p className="text-[14px] text-[#6b7280] mb-7">Get started — it's free. No credit card required.</p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-[26px] font-bold text-[#111827] mb-1">Choose your industry</h1>
+              <p className="text-[14px] text-[#6b7280] mb-7">We'll tailor your dashboard to match your business type.</p>
+            </>
+          )}
+
+          {/* Alerts */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
-              {error}
+            <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-5 text-sm">
+              <span className="mt-0.5">⚠️</span> {error}
             </div>
           )}
-
-          {/* Success Message */}
           {success && (
-            <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6">
-              {success}
+            <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl mb-5 text-sm">
+              <span className="mt-0.5">✅</span> {success}
             </div>
           )}
 
-          {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-gray-700 text-sm font-medium mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter your full name"
-                disabled={isSubmitting}
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1">
 
-            <div>
-              <label className="block text-gray-700 text-sm font-medium mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter your email"
-                disabled={isSubmitting}
-              />
-            </div>
+            {/* ── STEP 1: Account details ─────────────────────────────────── */}
+            {step === 1 && (
+              <div className="space-y-4 flex-1">
+                <Field label="Full Name">
+                  <Input
+                    placeholder="John Smith"
+                    value={name} onChange={e => setName(e.target.value)}
+                    disabled={isSubmitting}
+                  />
+                </Field>
 
-            <div>
-              <label className="block text-gray-700 text-sm font-medium mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter password (min. 6 characters)"
-                disabled={isSubmitting}
-              />
-            </div>
+                <Field label="Email Address">
+                  <Input
+                    type="email"
+                    placeholder="john@company.com"
+                    value={email} onChange={e => setEmail(e.target.value)}
+                    disabled={isSubmitting}
+                  />
+                </Field>
 
-            <div>
-              <label className="block text-gray-700 text-sm font-medium mb-2">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Confirm your password"
-                disabled={isSubmitting}
-              />
-            </div>
+                <Field label="Password">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Min. 6 characters"
+                    value={password} onChange={e => setPassword(e.target.value)}
+                    disabled={isSubmitting}
+                    rightElement={
+                      <button type="button" onClick={() => setShowPassword(p => !p)}
+                        className="text-[#9ca3af] hover:text-[#374151] transition-colors">
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    }
+                  />
+                  {/* Password strength bar */}
+                  {password && (
+                    <div className="flex gap-1 mt-2">
+                      {[...Array(4)].map((_, i) => {
+                        const strength = Math.min(Math.floor(password.length / 3), 4);
+                        const colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-emerald-400'];
+                        return (
+                          <div key={i}
+                            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                              i < strength ? colors[strength - 1] : 'bg-[#e8eaf0]'
+                            }`} />
+                        );
+                      })}
+                    </div>
+                  )}
+                </Field>
 
-            <div>
-              <label className="block text-gray-700 text-sm font-medium mb-2">
-                Select Your Industry
-              </label>
-              <select
-                value={selectedDashboard}
-                onChange={(e) => setSelectedDashboard(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={isSubmitting}
-              >
-                <option value="">-- Choose an Industry --</option>
-                {dashboards.map((dashboard) => (
-                  <option key={dashboard.id} value={dashboard.id}>
-                    {dashboard.icon} {dashboard.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <Field label="Confirm Password">
+                  <Input
+                    type={showConfirm ? 'text' : 'password'}
+                    placeholder="Re-enter your password"
+                    value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                    disabled={isSubmitting}
+                    rightElement={
+                      <button type="button" onClick={() => setShowConfirm(p => !p)}
+                        className="text-[#9ca3af] hover:text-[#374151] transition-colors">
+                        {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    }
+                  />
+                </Field>
 
-            {/* Optional Company Fields - Commented out as in original */}
-            {/* <div>
-              <label className="block text-gray-700 text-sm font-medium mb-2">Company Name</label>
-              <input
-                type="text"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+                <button type="button" onClick={handleNext}
+                  className="w-full mt-2 bg-[#1655e0] hover:bg-[#1245c0] text-white font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm shadow-md shadow-[#1655e0]/20">
+                  Continue <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
 
-            <div>
-              <label className="block text-gray-700 text-sm font-medium mb-2">Company Address</label>
-              <textarea
-                value={companyAddress}
-                onChange={(e) => setCompanyAddress(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+            {/* ── STEP 2: Industry selection ──────────────────────────────── */}
+            {step === 2 && (
+              <div className="flex flex-col flex-1 min-h-0">
+                {/* Search */}
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af]" />
+                  <input
+                    type="text"
+                    placeholder="Search industry..."
+                    value={industrySearch}
+                    onChange={e => setIndustrySearch(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2.5 bg-white border border-[#d1d5db] rounded-lg text-sm
+                      focus:outline-none focus:ring-2 focus:ring-[#1655e0]/30 focus:border-[#1655e0]
+                      placeholder:text-[#c0c4ce] transition-all"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-gray-700 text-sm font-medium mb-2">Company Logo</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setCompanyLogo(e.target.files[0])}
-                className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div> */}
+                {/* Selected indicator */}
+                {selectedInfo && (
+                  <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-[#f0f4ff] border border-[#c7d5f8] rounded-lg">
+                    <span className="text-base">{selectedInfo.icon}</span>
+                    <span className="text-[13px] font-semibold text-[#1655e0]">{selectedInfo.name}</span>
+                    <span className="text-[11px] text-[#6b7280] ml-1">— {selectedInfo.description}</span>
+                  </div>
+                )}
 
-            {/* Register Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
-            >
-              {isSubmitting ? 'Creating Account...' : 'Create Account'}
-              {!isSubmitting && (
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              )}
-            </button>
+                {/* Grid */}
+                <div className="overflow-y-auto flex-1 pr-1 pb-1" style={{ maxHeight: '320px' }}>
+                  {filteredDashboards.length === 0 ? (
+                    <div className="text-center py-8 text-[#9ca3af] text-sm">No industries found for "{industrySearch}"</div>
+                  ) : (
+                    <div className="grid grid-cols-4 gap-2">
+                      {filteredDashboards.map(d => (
+                        <IndustryCard
+                          key={d.id}
+                          dashboard={d}
+                          selected={selectedDashboard === d.id}
+                          onClick={() => setSelectedDashboard(d.id)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Action row */}
+                <div className="flex gap-3 mt-4 pt-3 border-t border-[#e8eaf0]">
+                  <button
+                    type="button"
+                    onClick={() => { setStep(1); setError(''); }}
+                    className="flex items-center gap-1.5 px-4 py-3 border border-[#d1d5db] text-[#374151] rounded-xl text-sm font-semibold hover:bg-[#f9fafb] transition-all"
+                  >
+                    <ChevronLeft className="w-4 h-4" /> Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !selectedDashboard}
+                    className="flex-1 bg-[#1655e0] hover:bg-[#1245c0] text-white font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm shadow-md shadow-[#1655e0]/20 disabled:bg-[#a0aec0] disabled:cursor-not-allowed disabled:shadow-none"
+                  >
+                    {isSubmitting ? (
+                      <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Creating account...</>
+                    ) : (
+                      <>{selectedDashboard ? 'Create Account' : 'Select an Industry'} {selectedDashboard && <ArrowRight className="w-4 h-4" />}</>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </form>
 
-          {/* Terms and Privacy */}
-          <p className="text-xs text-gray-500 text-center mt-6">
-            By creating an account, you agree to our{' '}
-            <Link to="/terms" className="text-blue-600 hover:text-blue-700">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link to="/privacy" className="text-blue-600 hover:text-blue-700">
-              Privacy Policy
-            </Link>
-          </p>
-
-          {/* Login Link */}
-          <p className="text-gray-600 text-center mt-6">
-            Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
-              Login here
-            </Link>
-          </p>
+          {/* Footer */}
+          <div className="mt-6 pt-5 border-t border-[#e8eaf0]">
+            <p className="text-[12px] text-[#9ca3af] text-center mb-3">
+              By creating an account, you agree to our{' '}
+              <Link to="/terms" className="text-[#1655e0] hover:underline">Terms</Link> and{' '}
+              <Link to="/privacy" className="text-[#1655e0] hover:underline">Privacy Policy</Link>
+            </p>
+            <p className="text-[13px] text-[#6b7280] text-center">
+              Already have an account?{' '}
+              <Link to="/login" className="text-[#1655e0] font-semibold hover:underline">Sign in</Link>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Right Side - Illustration */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-600 via-blue-600 to-gray-700 items-center justify-center p-12">
-  <div className="max-w-lg w-full">
-    {/* Illustration Card */}
-    <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-3xl p-12 text-center">
-      {/* Slides Container with Pagination */}
-      <div className="relative w-full">
-        {/* Slides */}
-        <div className="relative w-full" style={{ minHeight: '450px' }}>
-          {slides.map((slide, index) => (
-            <div
-              key={index}
-              className={`transition-all duration-700 ease-in-out ${
-                index === currentSlide
-                  ? 'opacity-100 relative'
-                  : 'opacity-0 absolute top-0 left-0 right-0 pointer-events-none'
-              }`}
-            >
-              {/* Image */}
-              <div className="mb-8 w-full flex items-center justify-center" style={{ height: '280px' }}>
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="max-w-full max-h-full object-contain rounded-lg"
+      {/* ── RIGHT PANEL ────────────────────────────────────────────────────── */}
+      <div className="hidden lg:flex lg:w-[48%] bg-[#0f1c3f] relative overflow-hidden items-center justify-center p-10">
+
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#1655e0]/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#1655e0]/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#2563eb]/10 rounded-full blur-2xl" />
+          {/* Grid pattern */}
+          <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+          </svg>
+        </div>
+
+        <div className="relative z-10 max-w-sm w-full">
+          {/* Slide card */}
+          <div className="bg-white/[0.06] backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+
+            {/* Image area */}
+            <div className="relative overflow-hidden" style={{ height: '260px' }}>
+              {slides.map((slide, i) => (
+                <img key={i} src={slide.image} alt={slide.title}
+                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out ${
+                    i === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+                  }`}
                 />
-              </div>
-              
-              {/* Title */}
-              <h3 className="text-3xl font-bold text-white mb-4">
-                {slide.title}
-              </h3>
-              
-              {/* Description */}
-              <p className="text-purple-100 text-lg">
-                {slide.description}
-              </p>
+              ))}
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0f1c3f]/60 to-transparent" />
             </div>
-          ))}
-        </div>
 
-        {/* Pagination Dots */}
-        <div className="flex justify-center space-x-2 mt-8">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`transition-all duration-300 rounded-full ${
-                index === currentSlide
-                  ? 'w-8 h-2 bg-white'
-                  : 'w-2 h-2 bg-white bg-opacity-40 hover:bg-opacity-60'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
+            {/* Text content */}
+            <div className="px-8 py-7">
+              {slides.map((slide, i) => (
+                <div key={i}
+                  className={`transition-all duration-500 ${
+                    i === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 absolute translate-y-2 pointer-events-none'
+                  }`}
+                >
+                  <h3 className="text-[20px] font-bold text-white mb-2">{slide.title}</h3>
+                  <p className="text-[14px] text-white/60 leading-relaxed">{slide.description}</p>
+                </div>
+              ))}
+
+              {/* Dots */}
+              <div className="flex gap-2 mt-5">
+                {slides.map((_, i) => (
+                  <button key={i} onClick={() => setCurrentSlide(i)}
+                    className={`rounded-full transition-all duration-300 ${
+                      i === currentSlide ? 'w-6 h-2 bg-[#1655e0]' : 'w-2 h-2 bg-white/30 hover:bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-3 mt-4">
+            {[
+              { value: '28+', label: 'Industries' },
+              { value: '10k+', label: 'Businesses' },
+              { value: '99.9%', label: 'Uptime' },
+            ].map(s => (
+              <div key={s.label} className="bg-white/[0.06] border border-white/10 rounded-2xl px-4 py-3 text-center backdrop-blur-sm">
+                <div className="text-[18px] font-bold text-white">{s.value}</div>
+                <div className="text-[11px] text-white/50 mt-0.5">{s.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
     </div>
   );
 }
-
-export default Register;

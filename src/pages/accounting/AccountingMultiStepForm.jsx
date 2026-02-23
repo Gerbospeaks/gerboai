@@ -134,12 +134,6 @@ const AccountingMultiStepForm = ({
     <div className="p-6 sm:p-8">
       {/* page header */}
       <div className="mb-7">
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-            <Users className="w-6 h-6 text-blue-600" />
-          </div>
-          Customer Information
-        </h2>
         <p className="text-slate-500 mt-2 ml-0 sm:ml-13 text-sm">
           Enter customer and billing details
         </p>
@@ -593,7 +587,8 @@ const AccountingMultiStepForm = ({
               : "bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-sm"
           }`}
         >
-          <ChevronLeft className="w-4 h-4" /> <span className="hidden sm:inline">Previous</span>
+          <ChevronLeft className="w-4 h-4" />{" "}
+          <span className="hidden sm:inline">Previous</span>
         </button>
 
         {/* step counter badge */}
@@ -610,7 +605,8 @@ const AccountingMultiStepForm = ({
               : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow-lg"
           }`}
         >
-          <span className="hidden sm:inline">Next</span> <ChevronRight className="w-4 h-4" />
+          <span className="hidden sm:inline">Next</span>{" "}
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
     </div>

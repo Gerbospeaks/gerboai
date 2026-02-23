@@ -81,7 +81,11 @@ export default function EducationSidebar({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
               <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 rounded-xl p-1 shadow-lg">
-                <img src={logo} alt="Logo" className="w-full h-full object-contain" />
+                <img
+                  src={logo}
+                  alt="Logo"
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
 
@@ -90,17 +94,83 @@ export default function EducationSidebar({
             {/* Icon nav */}
             <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
               {[
-                { icon: Home,         title: "Home",          action: () => setActiveView("home"),      color: "from-stone-600 to-stone-700",   text: "text-cyan-400"  },
-                { icon: Settings,     title: "Settings",      action: () => setShowSettings(true),      color: "from-blue-600 to-blue-700",     text: "text-slate-400" },
-                { icon: TrendingUp,   title: "School Overview",action: () => goTo("overview"),          color: "from-indigo-600 to-indigo-700", text: "text-slate-400" },
-                { icon: ClipboardList,title: "Report Cards",  action: () => goTo("reportCard"),         color: "from-violet-600 to-violet-700", text: "text-slate-400" },
-                { icon: FileText,     title: "Templates",     action: () => goTo("templates"),          color: "from-purple-600 to-purple-700", text: "text-slate-400" },
-                { icon: Users,        title: "Students",      action: () => setShowStudentsListModal?.(true), color: "from-blue-600 to-blue-700", text: "text-slate-400" },
-                { icon: Calendar,     title: "Attendance",    action: () => goTo("attendance"),         color: "from-cyan-600 to-cyan-700",     text: "text-slate-400" },
-                { icon: BookOpen,     title: "Curriculum",    action: () => goTo("curriculum"),         color: "from-teal-600 to-teal-700",     text: "text-slate-400" },
-                { icon: Award,        title: "Assessments",   action: () => goTo("assessments"),        color: "from-blue-600 to-blue-700",     text: "text-slate-400" },
-                { icon: BarChart3,    title: "Analytics",     action: () => goTo("analytics"),          color: "from-indigo-600 to-indigo-700", text: "text-slate-400" },
-                { icon: UserCheck,    title: "Staff",         action: () => goTo("staff"),              color: "from-slate-600 to-slate-700",   text: "text-slate-400" },
+                {
+                  icon: Home,
+                  title: "Home",
+                  action: () => setActiveView("home"),
+                  color: "from-stone-600 to-stone-700",
+                  text: "text-cyan-400",
+                },
+                {
+                  icon: Settings,
+                  title: "Settings",
+                  action: () => setShowSettings(true),
+                  color: "from-blue-600 to-blue-700",
+                  text: "text-slate-400",
+                },
+                {
+                  icon: TrendingUp,
+                  title: "School Overview",
+                  action: () => goTo("overview"),
+                  color: "from-indigo-600 to-indigo-700",
+                  text: "text-slate-400",
+                },
+                {
+                  icon: ClipboardList,
+                  title: "Report Cards",
+                  action: () => goTo("reportCard"),
+                  color: "from-violet-600 to-violet-700",
+                  text: "text-slate-400",
+                },
+                {
+                  icon: FileText,
+                  title: "Templates",
+                  action: () => goTo("templates"),
+                  color: "from-purple-600 to-purple-700",
+                  text: "text-slate-400",
+                },
+                {
+                  icon: Users,
+                  title: "Students",
+                  action: () => setShowStudentsListModal?.(true),
+                  color: "from-blue-600 to-blue-700",
+                  text: "text-slate-400",
+                },
+                {
+                  icon: Calendar,
+                  title: "Attendance",
+                  action: () => goTo("attendance"),
+                  color: "from-cyan-600 to-cyan-700",
+                  text: "text-slate-400",
+                },
+                {
+                  icon: BookOpen,
+                  title: "Curriculum",
+                  action: () => goTo("curriculum"),
+                  color: "from-teal-600 to-teal-700",
+                  text: "text-slate-400",
+                },
+                {
+                  icon: Award,
+                  title: "Assessments",
+                  action: () => goTo("assessments"),
+                  color: "from-blue-600 to-blue-700",
+                  text: "text-slate-400",
+                },
+                {
+                  icon: BarChart3,
+                  title: "Analytics",
+                  action: () => goTo("analytics"),
+                  color: "from-indigo-600 to-indigo-700",
+                  text: "text-slate-400",
+                },
+                {
+                  icon: UserCheck,
+                  title: "Staff",
+                  action: () => goTo("staff"),
+                  color: "from-slate-600 to-slate-700",
+                  text: "text-slate-400",
+                },
               ].map(({ icon: Icon, title, action, color, text }) => (
                 <button
                   key={title}
@@ -108,7 +178,9 @@ export default function EducationSidebar({
                   className={`group relative p-2 md:p-3 ${text} hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden`}
                   title={title}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+                  />
                   <Icon className="w-5 h-5 relative z-10 group-hover:scale-110 transition-transform duration-300" />
                 </button>
               ))}
@@ -119,7 +191,11 @@ export default function EducationSidebar({
           <div className="flex justify-center pb-4 md:pb-6">
             <div className="relative w-10 h-10 md:w-12 md:h-12 bg-white rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center overflow-hidden">
               {schoolInfo?.logoUrl ? (
-                <img src={schoolInfo.logoUrl} className="w-6 h-6 object-contain" alt="school" />
+                <img
+                  src={schoolInfo.logoUrl}
+                  className="w-6 h-6 object-contain"
+                  alt="school"
+                />
               ) : (
                 <GraduationCap className="w-5 h-5 text-blue-600" />
               )}
@@ -134,7 +210,11 @@ export default function EducationSidebar({
           <div className="p-4 md:p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8">
-              <img src={logo} alt="School Logo" className="w-16 h-12 object-contain rounded-lg" />
+              <img
+                src={logo}
+                alt="School Logo"
+                className="w-16 h-12 object-contain rounded-lg"
+              />
               <button
                 onClick={() => setSidebarOpen(false)}
                 className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
@@ -146,7 +226,12 @@ export default function EducationSidebar({
 
             {/* Nav */}
             <nav className="space-y-1">
-              <NavItem icon={Home} label="Home" onClick={() => goTo("home")} color="cyan" />
+              <NavItem
+                icon={Home}
+                label="Home"
+                onClick={() => goTo("home")}
+                color="cyan"
+              />
               <NavItem
                 icon={Settings}
                 label="Settings"
@@ -217,9 +302,24 @@ export default function EducationSidebar({
                   />
                 </Accordion>
 
-                <NavItem icon={Calendar}  label="Attendance"  onClick={() => goTo("attendance")}  color="blue" />
-                <NavItem icon={BookOpen}  label="Curriculum"  onClick={() => goTo("curriculum")}  color="teal" />
-                <NavItem icon={Award}     label="Assessments" onClick={() => goTo("assessments")} color="blue" />
+                <NavItem
+                  icon={Calendar}
+                  label="Attendance"
+                  onClick={() => goTo("attendance")}
+                  color="blue"
+                />
+                <NavItem
+                  icon={BookOpen}
+                  label="Curriculum"
+                  onClick={() => goTo("curriculum")}
+                  color="teal"
+                />
+                <NavItem
+                  icon={Award}
+                  label="Assessments"
+                  onClick={() => goTo("assessments")}
+                  color="blue"
+                />
 
                 {/* Analytics accordion */}
                 <Accordion
@@ -228,14 +328,38 @@ export default function EducationSidebar({
                   isOpen={isAnalyticsOpen}
                   onToggle={() => setIsAnalyticsOpen((p) => !p)}
                 >
-                  <SubItem label="Performance"    onClick={() => goTo("analytics-performance")} />
-                  <SubItem label="Attendance Trends" onClick={() => goTo("analytics-attendance")} />
-                  <SubItem label="Grade Reports"  onClick={() => goTo("analytics-grades")} />
+                  <SubItem
+                    label="Performance"
+                    onClick={() => goTo("analytics-performance")}
+                  />
+                  <SubItem
+                    label="Attendance Trends"
+                    onClick={() => goTo("analytics-attendance")}
+                  />
+                  <SubItem
+                    label="Grade Reports"
+                    onClick={() => goTo("analytics-grades")}
+                  />
                 </Accordion>
 
-                <NavItem icon={UserCheck} label="Staff"       onClick={() => goTo("staff")}       color="slate" />
-                <NavItem icon={Library}   label="Library"     onClick={() => goTo("library")}     color="indigo" />
-                <NavItem icon={Bell}      label="Notices"     onClick={() => goTo("notices")}     color="blue" />
+                <NavItem
+                  icon={UserCheck}
+                  label="Staff"
+                  onClick={() => goTo("staff")}
+                  color="slate"
+                />
+                <NavItem
+                  icon={Library}
+                  label="Library"
+                  onClick={() => goTo("library")}
+                  color="indigo"
+                />
+                <NavItem
+                  icon={Bell}
+                  label="Notices"
+                  onClick={() => goTo("notices")}
+                  color="blue"
+                />
               </div>
             </nav>
           </div>
@@ -307,12 +431,15 @@ function Accordion({ icon: Icon, label, isOpen, onToggle, children }) {
 // ── NavItem ───────────────────────────────────────────────────────────────────
 function NavItem({ icon: Icon, label, onClick, color }) {
   const colors = {
-    cyan:   "text-cyan-300 hover:from-stone-600/20 hover:to-stone-700/20 hover:border-cyan-500/30",
-    blue:   "text-slate-300 hover:from-blue-600/20 hover:to-blue-700/20 hover:border-blue-500/30",
-    indigo: "text-slate-300 hover:from-indigo-600/20 hover:to-indigo-700/20 hover:border-indigo-500/30",
-    purple: "text-slate-300 hover:from-purple-600/20 hover:to-purple-700/20 hover:border-purple-500/30",
-    teal:   "text-slate-300 hover:from-teal-600/20 hover:to-teal-700/20 hover:border-teal-500/30",
-    slate:  "text-slate-300 hover:from-slate-600/20 hover:to-slate-700/20 hover:border-slate-500/30",
+    cyan: "text-cyan-300 hover:from-stone-600/20 hover:to-stone-700/20 hover:border-cyan-500/30",
+    blue: "text-slate-300 hover:from-blue-600/20 hover:to-blue-700/20 hover:border-blue-500/30",
+    indigo:
+      "text-slate-300 hover:from-indigo-600/20 hover:to-indigo-700/20 hover:border-indigo-500/30",
+    purple:
+      "text-slate-300 hover:from-purple-600/20 hover:to-purple-700/20 hover:border-purple-500/30",
+    teal: "text-slate-300 hover:from-teal-600/20 hover:to-teal-700/20 hover:border-teal-500/30",
+    slate:
+      "text-slate-300 hover:from-slate-600/20 hover:to-slate-700/20 hover:border-slate-500/30",
   };
   const c = colors[color] ?? colors.blue;
   return (

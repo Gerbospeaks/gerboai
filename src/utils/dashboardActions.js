@@ -69,9 +69,12 @@ export const getDashboardActions = (dashboardId, handlers = {}) => {
       "New Invoice",  FileText,      handleNewInvoice,  "invoice",
       "New Estimate", ClipboardList, handleNewEstimate, "estimate",
     ),
+    accounting: standard(
+      "New Invoice",  FileText,      handleNewInvoice,  "invoice",
+      "New Quote", ClipboardList, handleNewQuote,   "quote",
+    ),
 
     // ── Everything else → Invoice + Quote ────────────────────
-    accounting:  invoiceQuote,
     cleaning:    invoiceQuote,
     education:   invoiceQuote,
     electrical:  invoiceQuote,

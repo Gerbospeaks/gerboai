@@ -55,6 +55,7 @@ import {
   AlertTriangle,
   MapPin,
   Save,
+  Eye,
   Clock,
   UserCheck,
   Building,
@@ -105,6 +106,7 @@ const SecurityDashboard = () => {
     useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -145,11 +147,11 @@ const SecurityDashboard = () => {
   });
   const location = useLocation();
 
-useEffect(() => {
-  if (location.state?.activeView) {
-    setActiveView(location.state.activeView);
-  }
-}, [location.state]);
+  useEffect(() => {
+    if (location.state?.activeView) {
+      setActiveView(location.state.activeView);
+    }
+  }, [location.state]);
   const loadIncident = (incident) => {
     setIncidentId(incident.id);
     setIncidentNumber(incident.incidentNumber || "");
@@ -626,39 +628,98 @@ Your Construction Quote System
       console.error("Error logging out:", error);
     }
   };
-const headerActions = [
-  documentType === "quote" && incidentId && {
-    label: "Convert to Invoice", icon: FileText,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap"
-  },
-  { label: "Print",    icon: Printer,  onClick: handlePrint,        variant: "secondary" },
-  { label: "New",      icon: Plus,     onClick: documentType === "quote" ? handleNewIncident : handleNewIncident,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Send",     icon: Send,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Save PDF", icon: Download,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Save",     icon: Save,     onClick: handleSaveIncident,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Logout",   icon: LogOut,   onClick: handleLogout,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap" },
-].filter(Boolean);
+  const headerActions = [
+    documentType === "quote" &&
+      incidentId && {
+        label: "Convert to Invoice",
+        icon: FileText,
+        className:
+          "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap",
+      },
+    {
+      label: "Preview",
+      icon: Eye,
+      onClick: () => setShowPreview(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
+    {
+      label: "Print",
+      icon: Printer,
+      onClick: handlePrint,
+      variant: "secondary",
+    },
+    {
+      label: "New",
+      icon: Plus,
+      onClick: documentType === "quote" ? handleNewIncident : handleNewIncident,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Send",
+      icon: Send,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Save PDF",
+      icon: Download,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Save",
+      icon: Save,
+      onClick: handleSaveIncident,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Logout",
+      icon: LogOut,
+      onClick: handleLogout,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+  ].filter(Boolean);
 
-const mobileDashboardActions = [
-  documentType === "quote" && incidentId && {
-    label: "To Invoice", icon: FileText,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap"
-  },
-  { label: "Save",  icon: Save,     onClick: handleSaveIncident,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "Send",  icon: Send,  
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "PDF",   icon: Download, 
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "Print", icon: Printer,  onClick: handlePrint,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap" },
-].filter(Boolean);
- 
+  const mobileDashboardActions = [
+    documentType === "quote" &&
+      incidentId && {
+        label: "To Invoice",
+        icon: FileText,
+        className:
+          "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+      },
+    {
+      label: "Save",
+      icon: Save,
+      onClick: handleSaveIncident,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "Send",
+      icon: Send,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "PDF",
+      icon: Download,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "Print",
+      icon: Printer,
+      onClick: handlePrint,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap",
+    },
+  ].filter(Boolean);
+
   return (
     <div className="flex h-screen bg-gray-300">
       {/* Mobile Sidebar Backdrop */}
@@ -1005,12 +1066,11 @@ const mobileDashboardActions = [
       </div>
       <div className={`flex-1 transition-all duration-300 ml-16 lg:ml-64`}>
         <div className="flex-1 overflow-auto">
-               <AppHeader
-  actions={headerActions}
-  mobileActions={mobileDashboardActions}
-  onSettingsOpen={() => setShowSettings(true)}
-/>
-   
+          <AppHeader
+            actions={headerActions}
+            mobileActions={mobileDashboardActions}
+            onSettingsOpen={() => setShowSettings(true)}
+          />
 
           <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {showSettings && (
@@ -1087,6 +1147,106 @@ const mobileDashboardActions = [
                         ))}
                       </div>
                     )}
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
+            {showPreview && (
+              <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+                  {/* Modal header */}
+                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
+                        <Eye className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-sm font-semibold text-[#1e293b]">
+                          {documentType === "quote" ? "Quote" : "Invoice"}{" "}
+                          Preview
+                        </h2>
+                        <p className="text-xs text-[#64748b]">
+                          {incidentNumber || "Draft"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handlePrint}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        Print
+                      </button>
+                      <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors">
+                        <Download className="w-3.5 h-3.5" />
+                        Save PDF
+                      </button>
+                      <button
+                        onClick={() => setShowPreview(false)}
+                        className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Scrollable canvas area */}
+                  <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
+                    <div
+                      className="mx-auto bg-white shadow-xl"
+                      style={{ width: "210mm", minHeight: "297mm" }}
+                    >
+                      <TemplateRenderer
+                        templateId={selectedTemplate}
+                        businessInfo={businessInfo}
+                        loading={loading}
+                        // Map incident data to template props
+                        jobCardNumber={incidentNumber}
+                        customerName={clientName}
+                        customerEmail={clientEmail}
+                        customerPhone={clientContact}
+                        customerAddress={siteAddress}
+                        // Vehicle details (use incident data or defaults)
+                        vehicleReg={siteName}
+                        vehicleMake={incidentType}
+                        vehicleModel="N/A"
+                        vehicleYear="N/A"
+                        vehicleVin="N/A"
+                        vehicleMileage="N/A"
+                        // Items array with incident details
+                        items={[
+                          {
+                            description: `Incident Type: ${incidentType}`,
+                            qty: 1,
+                            rate: 0,
+                            amount: 0,
+                          },
+                          {
+                            description: `Description: ${incidentDescription || "N/A"}`,
+                            qty: 1,
+                            rate: 0,
+                            amount: 0,
+                          },
+                          {
+                            description: `Actions Taken: ${actionsTaken || "N/A"}`,
+                            qty: 1,
+                            rate: 0,
+                            amount: 0,
+                          },
+                        ]}
+                        // Financial totals (all zero for incident reports)
+                        subtotal={0}
+                        vat={0}
+                        total={0}
+                        // Stamp settings
+                        showStamp={stampSettings?.enabled || false}
+                        stampText={stampSettings?.text || "APPROVED"}
+                        stampColor={stampSettings?.color || "#d32f2f"}
+                        showStampDate={stampSettings?.showDate || false}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

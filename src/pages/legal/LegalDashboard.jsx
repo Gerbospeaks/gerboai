@@ -61,6 +61,7 @@ import {
   Wallet,
   Scale,
   Gavel,
+  Eye,
   BookOpen,
   FolderOpen,
   Upload,
@@ -108,6 +109,7 @@ const LegalDashboard = () => {
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [activeView, setActiveView] = useState("home");
+  const [showPreview, setShowPreview] = useState(false);
   const [showCustomersList, setShowCustomersList] = useState(false);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
@@ -161,13 +163,13 @@ const LegalDashboard = () => {
       console.error("Error loading clients:", error);
     }
   };
-const location = useLocation();
+  const location = useLocation();
 
-useEffect(() => {
-  if (location.state?.activeView) {
-    setActiveView(location.state.activeView);
-  }
-}, [location.state]);
+  useEffect(() => {
+    if (location.state?.activeView) {
+      setActiveView(location.state.activeView);
+    }
+  }, [location.state]);
   const handleProcessPayment = async () => {
     if (!invoiceId || !user?.uid) {
       alert("Please save the invoice before processing payment");
@@ -903,39 +905,102 @@ useEffect(() => {
       console.error("Error logging out:", error);
     }
   };
-const headerActions = [
-  documentType === "quote" && invoiceId && {
-    label: "Convert to Invoice", icon: FileText, onClick: handleConvertToInvoice,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap"
-  },
-  { label: "Print",    icon: Printer,  onClick: handlePrint,        variant: "secondary" },
-  { label: "New",      icon: Plus,     onClick: documentType === "quote" ? handleNewInvoice : handleNewInvoice,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Send",     icon: Send,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Save PDF", icon: Download, onClick: handleSavePDF,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Save",     icon: Save,     onClick: handleSaveInvoice,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Logout",   icon: LogOut,   onClick: handleLogout,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap" },
-].filter(Boolean);
+  const headerActions = [
+    documentType === "quote" &&
+      invoiceId && {
+        label: "Convert to Invoice",
+        icon: FileText,
+        onClick: handleConvertToInvoice,
+        className:
+          "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap",
+      },
+    {
+      label: "Preview",
+      icon: Eye,
+      onClick: () => setShowPreview(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
+    {
+      label: "Print",
+      icon: Printer,
+      onClick: handlePrint,
+      variant: "secondary",
+    },
+    {
+      label: "New",
+      icon: Plus,
+      onClick: documentType === "quote" ? handleNewInvoice : handleNewInvoice,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Send",
+      icon: Send,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Save PDF",
+      icon: Download,
+      onClick: handleSavePDF,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Save",
+      icon: Save,
+      onClick: handleSaveInvoice,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Logout",
+      icon: LogOut,
+      onClick: handleLogout,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+  ].filter(Boolean);
 
-const mobileDashboardActions = [
-  documentType === "quote" && invoiceId && {
-    label: "To Invoice", icon: FileText, onClick: handleConvertToInvoice,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap"
-  },
-  { label: "Save",  icon: Save,     onClick: handleSaveInvoice,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "Send",  icon: Send,  
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "PDF",   icon: Download, onClick: handleSavePDF,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "Print", icon: Printer,  onClick: handlePrint,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap" },
-].filter(Boolean);
- 
+  const mobileDashboardActions = [
+    documentType === "quote" &&
+      invoiceId && {
+        label: "To Invoice",
+        icon: FileText,
+        onClick: handleConvertToInvoice,
+        className:
+          "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+      },
+    {
+      label: "Save",
+      icon: Save,
+      onClick: handleSaveInvoice,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "Send",
+      icon: Send,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "PDF",
+      icon: Download,
+      onClick: handleSavePDF,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "Print",
+      icon: Printer,
+      onClick: handlePrint,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap",
+    },
+  ].filter(Boolean);
+
   return (
     <div className="flex h-screen w-screen bg-gradient-to-br from-amber-50 via-orange-50 to-stone-50 overflow-hidden">
       {/* Mobile Sidebar Backdrop */}
@@ -1359,381 +1424,476 @@ const mobileDashboardActions = [
         className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
       >
         <div className="flex flex-col h-screen">
-                 <AppHeader
-  actions={headerActions}
-  mobileActions={mobileDashboardActions}
-  onSettingsOpen={() => setShowSettings(true)}
-/>
-   
-            {/* ── Scrollable Main Content ──────────────────────────────── */}
-            <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
-              {/* Business Settings Modal */}
-              {showSettings && (
-               <BusinessSettingsModal onClose={() => setShowSettings(false)} />
-              )}
-              <CustomersListModal
-                showModal={showCustomersListModal}
-                setShowModal={setShowCustomersListModal}
-                customers={customers}
-                onLoadCustomer={loadCustomer}
-                onEditCustomer={handleEditCustomer}
-                onAddNewCustomer={handleAddNewCustomer}
-              />
-              {/* Customer Modal */}
-              <CustomerModal
-                showModal={showCustomerModal}
-                setShowModal={setShowCustomerModal}
-                existingCustomer={selectedCustomer}
-                onCustomerSaved={handleCustomerSaved}
-              />
-              {/* Saved Invoices List Modal */}
-              {showInvoicesList && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                  <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-                    <div className="p-4 border-b flex items-center justify-between">
-                      <h2 className="text-xl font-semibold">Saved Invoices</h2>
-                      <button
-                        onClick={() => setShowInvoicesList(false)}
-                        className="text-gray-500 hover:text-gray-700"
-                      >
-                        ✕
-                      </button>
-                    </div>
+          <AppHeader
+            actions={headerActions}
+            mobileActions={mobileDashboardActions}
+            onSettingsOpen={() => setShowSettings(true)}
+          />
 
-                    <div className="overflow-auto p-4">
-                      {savedInvoices.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          No saved invoices yet
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          {savedInvoices.map((invoice) => (
-                            <div
-                              key={invoice.id}
-                              onClick={() => loadInvoice(invoice)}
-                              className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
-                            >
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <div className="font-semibold text-lg">
-                                    {invoice.invoiceNumber || "N/A"}
-                                  </div>
-                                  <div className="text-sm text-gray-600 mt-1">
-                                    Client: {invoice.client?.name || "N/A"}
-                                  </div>
-                                  <div className="text-sm text-gray-600">
-                                    Case: {invoice.case?.type || "N/A"}
-                                  </div>
-                                  <div className="text-sm text-gray-600">
-                                    Case #: {invoice.case?.caseNumber || "N/A"}
-                                  </div>
+          {/* ── Scrollable Main Content ──────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
+            {/* Business Settings Modal */}
+            {showSettings && (
+              <BusinessSettingsModal onClose={() => setShowSettings(false)} />
+            )}
+            <CustomersListModal
+              showModal={showCustomersListModal}
+              setShowModal={setShowCustomersListModal}
+              customers={customers}
+              onLoadCustomer={loadCustomer}
+              onEditCustomer={handleEditCustomer}
+              onAddNewCustomer={handleAddNewCustomer}
+            />
+            {/* Customer Modal */}
+            <CustomerModal
+              showModal={showCustomerModal}
+              setShowModal={setShowCustomerModal}
+              existingCustomer={selectedCustomer}
+              onCustomerSaved={handleCustomerSaved}
+            />
+            {/* Saved Invoices List Modal */}
+            {showInvoicesList && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+                  <div className="p-4 border-b flex items-center justify-between">
+                    <h2 className="text-xl font-semibold">Saved Invoices</h2>
+                    <button
+                      onClick={() => setShowInvoicesList(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="overflow-auto p-4">
+                    {savedInvoices.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        No saved invoices yet
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {savedInvoices.map((invoice) => (
+                          <div
+                            key={invoice.id}
+                            onClick={() => loadInvoice(invoice)}
+                            className="border rounded-lg p-4 hover:bg-gray-800 cursor-pointer transition-colors"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="font-semibold text-lg">
+                                  {invoice.invoiceNumber || "N/A"}
                                 </div>
-                                <div className="text-right">
-                                  <div className="text-lg font-semibold text-blue-600">
-                                    R
-                                    {invoice.totals?.total?.toFixed(2) ||
-                                      "0.00"}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {invoice.dates?.invoiceDate
-                                      ? new Date(
-                                          invoice.dates.invoiceDate,
-                                        ).toLocaleDateString("en-ZA")
-                                      : "N/A"}
-                                  </div>
-                                  <div
-                                    className={`text-xs mt-1 px-2 py-1 rounded ${
-                                      invoice.status === "paid"
-                                        ? "bg-green-100 text-green-700"
-                                        : invoice.status === "pending"
-                                          ? "bg-blue-100 text-blue-700"
-                                          : "bg-gray-100 text-gray-700"
-                                    }`}
-                                  >
-                                    {invoice.status || "unknown"}
-                                  </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  Client: {invoice.client?.name || "N/A"}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  Case: {invoice.case?.type || "N/A"}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  Case #: {invoice.case?.caseNumber || "N/A"}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-lg font-semibold text-blue-600">
+                                  R{invoice.totals?.total?.toFixed(2) || "0.00"}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {invoice.dates?.invoiceDate
+                                    ? new Date(
+                                        invoice.dates.invoiceDate,
+                                      ).toLocaleDateString("en-ZA")
+                                    : "N/A"}
+                                </div>
+                                <div
+                                  className={`text-xs mt-1 px-2 py-1 rounded ${
+                                    invoice.status === "paid"
+                                      ? "bg-green-100 text-green-700"
+                                      : invoice.status === "pending"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "bg-gray-100 text-gray-700"
+                                  }`}
+                                >
+                                  {invoice.status || "unknown"}
                                 </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
+            {showPreview && (
+              <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+                  {/* Modal header */}
+                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
+                        <Eye className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-sm font-semibold text-[#1e293b]">
+                          {documentType === "quote" ? "Quote" : "Invoice"}{" "}
+                          Preview
+                        </h2>
+                        <p className="text-xs text-[#64748b]">
+                          {invoiceNumber || "Draft"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handlePrint}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        Print
+                      </button>
+                      <button
+                        onClick={handleSavePDF}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Save PDF
+                      </button>
+                      <button
+                        onClick={() => setShowPreview(false)}
+                        className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Scrollable canvas area */}
+                  <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
+                    <div
+                      className="mx-auto bg-white shadow-xl"
+                      style={{ width: "210mm", minHeight: "297mm" }}
+                    >
+                      <TemplateRenderer
+                        templateId={selectedTemplate}
+                        businessInfo={businessInfo}
+                        loading={loading}
+                        jobCardNumber={invoiceNumber}
+                        customerName={clientName}
+                        customerEmail={clientEmail}
+                        customerPhone={clientPhone}
+                        customerAddress={clientAddress}
+                        caseNumber={caseNumber}
+                        caseType={caseType}
+                        matterDescription={matterDescription}
+                        items={items}
+                        subtotal={subtotal}
+                        vat={vat}
+                        total={total}
+                        documentType="legal"
+                        serviceType="LEGAL"
+                        stampSettings={stampSettings}
+                        showStamp={stampSettings.enabled}
+                        showStampDate={stampSettings.showDate}
+                        stampText={stampSettings.text}
+                        stampColor={stampSettings.color}
+                        paymentStatus={paymentStatus}
+                      />
                     </div>
                   </div>
                 </div>
-              )}
-              {activeView === "financial-overview" && (
-                <FinancialOverview user={user} />
-              )}
-              {activeView === "templates" && <Templates user={user} />}
-              {activeView === "home" && <HomeView user={user} />}
-              {activeView === "invoice" && (
-                <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
-                  <div className="space-y-6">
+              </div>
+            )}
+            {activeView === "financial-overview" && (
+              <FinancialOverview user={user} />
+            )}
+            {activeView === "templates" && <Templates user={user} />}
+            {activeView === "home" && <HomeView user={user} />}
+            {activeView === "invoice" && (
+              <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
+                <div className="space-y-6">
+                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
                     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
                       <div className="flex border-b border-slate-200">
                         <button
                           onClick={() => setInputMode("manual")}
-                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
-                            inputMode === "manual"
-                              ? "bg-white text-blue-600 border-b-2 border-blue-600 shadow-sm"
-                              : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                          }`}
+                          className={`flex-1 px-2 sm:px-6 py-2 sm:py-4 font-semibold text-xs sm:text-base transition-all duration-200 ${inputMode === "manual" ? "bg-white text-blue-600 border-b-2 border-blue-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
                         >
-                          <span className="flex items-center justify-center gap-2">
-                            <Edit className="w-5 h-5" />
-                            Manual Entry
+                          <span className="flex items-center justify-center gap-1 sm:gap-2">
+                            <svg
+                              className="w-4 h-4 sm:w-5 sm:h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                            <span className="hidden sm:inline">
+                              Manual Entry
+                            </span>
+                            <span className="sm:hidden">Manual</span>
                           </span>
                         </button>
                         <button
                           onClick={() => setInputMode("ai")}
-                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
-                            inputMode === "ai"
-                              ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm"
-                              : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                          }`}
+                          className={`flex-1 px-2 sm:px-6 py-2 sm:py-4 font-semibold text-xs sm:text-base transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
                         >
-                          <span className="flex items-center justify-center gap-2">
-                            <Sparkles className="w-5 h-5" />
-                            AI Assistant
+                          <span className="flex items-center justify-center gap-1 sm:gap-2">
+                            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+                            <span className="hidden sm:inline">
+                              AI Assistant
+                            </span>
+                            <span className="sm:hidden">AI</span>
                           </span>
                         </button>
                       </div>
-
-                      {/* Tab Content */}
-                      <div className="p-6">
-                        {inputMode === "ai" ? (
+                      <div className="p-3 sm:p-6">
+                        {inputMode === "ai" && (
                           <AIInvoiceExtractor
                             onDataExtracted={handleAIDataExtracted}
                             documentType={documentType}
                           />
-                        ) : null}
+                        )}
                       </div>
                     </div>
-                    {inputMode === "manual" && (
-                      <>
-                        <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
-                          <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="text-sm font-medium text-orange-700">
-                                Total Amount
-                              </div>
-                              <div className="w-8 h-8 bg-orange-200 rounded-lg flex items-center justify-center">
-                                <DollarSign className="w-5 h-5 text-orange-600" />
-                              </div>
+
+                    {/* Tab Content */}
+                    <div className="p-6">
+                      {inputMode === "ai" ? (
+                        <AIInvoiceExtractor
+                          onDataExtracted={handleAIDataExtracted}
+                          documentType={documentType}
+                        />
+                      ) : null}
+                    </div>
+                  </div>
+                  {inputMode === "manual" && (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-sm font-medium text-orange-700">
+                              Total Amount
                             </div>
-                            <div className="text-base sm:text-lg md:text-2xl font-bold text-orange-900">
-                              R{total.toFixed(2)}
+                            <div className="w-8 h-8 bg-orange-200 rounded-lg flex items-center justify-center">
+                              <DollarSign className="w-5 h-5 text-orange-600" />
                             </div>
                           </div>
+                          <div className="text-base sm:text-lg md:text-2xl font-bold text-orange-900">
+                            R{total.toFixed(2)}
+                          </div>
+                        </div>
 
-                          <div
-                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
-                              paymentStatus.totalPaid > 0
-                                ? "from-emerald-100 to-emerald-300 border-emerald-600"
-                                : "from-slate-100 to-slate-300 border-slate-300"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div
-                                className={`text-sm font-medium ${
-                                  paymentStatus.totalPaid > 0
-                                    ? "text-emerald-700"
-                                    : "text-slate-600"
-                                }`}
-                              >
-                                Paid
-                              </div>
-                              <div
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                  paymentStatus.totalPaid > 0
-                                    ? "bg-emerald-200"
-                                    : "bg-slate-200"
-                                }`}
-                              >
-                                <CheckSquare
-                                  className={`w-5 h-5 ${
-                                    paymentStatus.totalPaid > 0
-                                      ? "text-emerald-600"
-                                      : "text-slate-400"
-                                  }`}
-                                />
-                              </div>
-                            </div>
+                        <div
+                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                            paymentStatus.totalPaid > 0
+                              ? "from-emerald-100 to-emerald-300 border-emerald-600"
+                              : "from-slate-100 to-slate-300 border-slate-300"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
                             <div
-                              className={`text-lg sm:text-2xl font-bold ${
+                              className={`text-sm font-medium ${
                                 paymentStatus.totalPaid > 0
-                                  ? "text-emerald-900"
-                                  : "text-slate-900"
+                                  ? "text-emerald-700"
+                                  : "text-slate-600"
                               }`}
                             >
-                              R{paymentStatus.totalPaid.toFixed(2)}
-                            </div>
-                          </div>
-
-                          <div
-                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
-                              paymentStatus.balanceDue <= 0
-                                ? "from-emerald-100 to-emerald-300 border-emerald-600"
-                                : paymentStatus.totalPaid > 0
-                                  ? "from-amber-100 to-amber-300 border-amber-300"
-                                  : "from-rose-50 to-rose-100 border-rose-200"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div
-                                className={`text-sm font-medium ${
-                                  paymentStatus.balanceDue <= 0
-                                    ? "text-emerald-700"
-                                    : paymentStatus.totalPaid > 0
-                                      ? "text-amber-700"
-                                      : "text-rose-700"
-                                }`}
-                              >
-                                Balance Due
-                              </div>
-                              <div
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                  paymentStatus.balanceDue <= 0
-                                    ? "bg-emerald-200"
-                                    : paymentStatus.totalPaid > 0
-                                      ? "bg-amber-200"
-                                      : "bg-rose-200"
-                                }`}
-                              >
-                                <Wallet
-                                  className={`w-5 h-5 ${
-                                    paymentStatus.balanceDue <= 0
-                                      ? "text-emerald-600"
-                                      : paymentStatus.totalPaid > 0
-                                        ? "text-amber-600"
-                                        : "text-rose-600"
-                                  }`}
-                                />
-                              </div>
+                              Paid
                             </div>
                             <div
-                              className={`text-lg sm:text-2xl font-bold ${
-                                paymentStatus.balanceDue <= 0
-                                  ? "text-emerald-900"
-                                  : paymentStatus.totalPaid > 0
-                                    ? "text-amber-900"
-                                    : "text-rose-900"
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                paymentStatus.totalPaid > 0
+                                  ? "bg-emerald-200"
+                                  : "bg-slate-200"
                               }`}
                             >
-                              R{paymentStatus.balanceDue.toFixed(2)}
+                              <CheckSquare
+                                className={`w-5 h-5 ${
+                                  paymentStatus.totalPaid > 0
+                                    ? "text-emerald-600"
+                                    : "text-slate-400"
+                                }`}
+                              />
                             </div>
+                          </div>
+                          <div
+                            className={`text-lg sm:text-2xl font-bold ${
+                              paymentStatus.totalPaid > 0
+                                ? "text-emerald-900"
+                                : "text-slate-900"
+                            }`}
+                          >
+                            R{paymentStatus.totalPaid.toFixed(2)}
                           </div>
                         </div>
 
-                        {inputMode === "manual" && (
-                          <LegalMultiStepForm
-                            // Client Info Props
-                            clientName={clientName}
-                            setClientName={setClientName}
-                            clientId={clientId}
-                            setClientId={setClientId}
-                            clientEmail={clientEmail}
-                            setClientEmail={setClientEmail}
-                            clientPhone={clientPhone}
-                            setClientPhone={setClientPhone}
-                            clientAddress={clientAddress}
-                            setClientAddress={setClientAddress}
-                            // Case Info Props
-                            caseType={caseType}
-                            setCaseType={setCaseType}
-                            caseNumber={caseNumber}
-                            setCaseNumber={setCaseNumber}
-                            matterDescription={matterDescription}
-                            setMatterDescription={setMatterDescription}
-                            // Items Props
-                            items={items}
-                            newItem={newItem}
-                            setNewItem={setNewItem}
-                            handleAddItem={handleAddItem}
-                          />
-                        )}
-
-                        <div className="bg-white border border-gray-200 rounded-lg p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold">
-                              Payment Terms
-                            </h2>
+                        <div
+                          className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                            paymentStatus.balanceDue <= 0
+                              ? "from-emerald-100 to-emerald-300 border-emerald-600"
+                              : paymentStatus.totalPaid > 0
+                                ? "from-amber-100 to-amber-300 border-amber-300"
+                                : "from-rose-50 to-rose-100 border-rose-200"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div
+                              className={`text-sm font-medium ${
+                                paymentStatus.balanceDue <= 0
+                                  ? "text-emerald-700"
+                                  : paymentStatus.totalPaid > 0
+                                    ? "text-amber-700"
+                                    : "text-rose-700"
+                              }`}
+                            >
+                              Balance Due
+                            </div>
+                            <div
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                paymentStatus.balanceDue <= 0
+                                  ? "bg-emerald-200"
+                                  : paymentStatus.totalPaid > 0
+                                    ? "bg-amber-200"
+                                    : "bg-rose-200"
+                              }`}
+                            >
+                              <Wallet
+                                className={`w-5 h-5 ${
+                                  paymentStatus.balanceDue <= 0
+                                    ? "text-emerald-600"
+                                    : paymentStatus.totalPaid > 0
+                                      ? "text-amber-600"
+                                      : "text-rose-600"
+                                }`}
+                              />
+                            </div>
                           </div>
-
-                          <div className="space-y-3 text-sm">
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">
-                                Payment Method:
-                              </span>
-                              <span className="text-sm font-medium">
-                                EFT/Bank Transfer
-                              </span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">
-                                Payment Terms:
-                              </span>
-                              <span className="text-sm font-medium">
-                                Due Within 30 Days
-                              </span>
-                            </div>
-                            <div className="flex justify-between py-2">
-                              <span className="text-gray-600">
-                                Late Payment:
-                              </span>
-                              <span className="text-sm font-medium">
-                                Interest at Prime + 2%
-                              </span>
-                            </div>
+                          <div
+                            className={`text-lg sm:text-2xl font-bold ${
+                              paymentStatus.balanceDue <= 0
+                                ? "text-emerald-900"
+                                : paymentStatus.totalPaid > 0
+                                  ? "text-amber-900"
+                                  : "text-rose-900"
+                            }`}
+                          >
+                            R{paymentStatus.balanceDue.toFixed(2)}
                           </div>
                         </div>
-                      </>
-                    )}
-                  </div>
+                      </div>
 
-                  <div
-                    id="print-area"
-                    className="hidden print:block bg-white shadow-2xl origin-top"
-                    style={{
-                      width: "210mm",
-                      minHeight: "297mm",
-                      transform: "scale(0.75)",
-                      transformOrigin: "top center",
-                    }}
-                  >
-                    {/* Use Template Renderer instead of hardcoded invoice */}
-                    <TemplateRenderer
-                      templateId={selectedTemplate}
-                      businessInfo={businessInfo}
-                      loading={loading}
-                      jobCardNumber={invoiceNumber}
-                      customerName={clientName}
-                      customerEmail={clientEmail}
-                      customerPhone={clientPhone}
-                      customerAddress={clientAddress}
-                      caseNumber={caseNumber}
-                      caseType={caseType}
-                      matterDescription={matterDescription}
-                      items={items}
-                      subtotal={subtotal}
-                      vat={vat}
-                      total={total}
-                      documentType="legal"
-                      serviceType="LEGAL"
-                      stampSettings={stampSettings}
-                      showStamp={stampSettings.enabled}
-                      showStampDate={stampSettings.showDate}
-                      stampText={stampSettings.text}
-                      stampColor={stampSettings.color}
-                      paymentStatus={paymentStatus}
-                    />
-                  </div>
+                      {inputMode === "manual" && (
+                        <LegalMultiStepForm
+                          // Client Info Props
+                          clientName={clientName}
+                          setClientName={setClientName}
+                          clientId={clientId}
+                          setClientId={setClientId}
+                          clientEmail={clientEmail}
+                          setClientEmail={setClientEmail}
+                          clientPhone={clientPhone}
+                          setClientPhone={setClientPhone}
+                          clientAddress={clientAddress}
+                          setClientAddress={setClientAddress}
+                          // Case Info Props
+                          caseType={caseType}
+                          setCaseType={setCaseType}
+                          caseNumber={caseNumber}
+                          setCaseNumber={setCaseNumber}
+                          matterDescription={matterDescription}
+                          setMatterDescription={setMatterDescription}
+                          // Items Props
+                          items={items}
+                          newItem={newItem}
+                          setNewItem={setNewItem}
+                          handleAddItem={handleAddItem}
+                        />
+                      )}
+
+                      <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-lg font-semibold">
+                            Payment Terms
+                          </h2>
+                        </div>
+
+                        <div className="space-y-3 text-sm">
+                          <div className="flex justify-between py-2 border-b">
+                            <span className="text-gray-600">
+                              Payment Method:
+                            </span>
+                            <span className="text-sm font-medium">
+                              EFT/Bank Transfer
+                            </span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b">
+                            <span className="text-gray-600">
+                              Payment Terms:
+                            </span>
+                            <span className="text-sm font-medium">
+                              Due Within 30 Days
+                            </span>
+                          </div>
+                          <div className="flex justify-between py-2">
+                            <span className="text-gray-600">Late Payment:</span>
+                            <span className="text-sm font-medium">
+                              Interest at Prime + 2%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
-              )}
-            </div>
+
+                <div
+                  id="print-area"
+                  className="hidden print:block bg-white shadow-2xl origin-top"
+                  style={{
+                    width: "210mm",
+                    minHeight: "297mm",
+                    transform: "scale(0.75)",
+                    transformOrigin: "top center",
+                  }}
+                >
+                  {/* Use Template Renderer instead of hardcoded invoice */}
+                  <TemplateRenderer
+                    templateId={selectedTemplate}
+                    businessInfo={businessInfo}
+                    loading={loading}
+                    jobCardNumber={invoiceNumber}
+                    customerName={clientName}
+                    customerEmail={clientEmail}
+                    customerPhone={clientPhone}
+                    customerAddress={clientAddress}
+                    caseNumber={caseNumber}
+                    caseType={caseType}
+                    matterDescription={matterDescription}
+                    items={items}
+                    subtotal={subtotal}
+                    vat={vat}
+                    total={total}
+                    documentType="legal"
+                    serviceType="LEGAL"
+                    stampSettings={stampSettings}
+                    showStamp={stampSettings.enabled}
+                    showStampDate={stampSettings.showDate}
+                    stampText={stampSettings.text}
+                    stampColor={stampSettings.color}
+                    paymentStatus={paymentStatus}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-        
+        </div>
       </div>
     </div>
   );

@@ -61,6 +61,7 @@ import {
   Droplets,
   ClipboardList,
   Package,
+  Eye,
   X,
   MapPin,
   Upload,
@@ -116,6 +117,7 @@ const PlumbingDashboard = () => {
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -692,65 +694,7 @@ Your Construction Quote System
       document.head.removeChild(styleSheet);
     }, 1000);
   };
-  const printStyles = `
-  @media print {
-    /* Hide everything except the print area */
-    body * {
-      visibility: hidden !important;
-    }
-    
-    #print-area,
-    #print-area * {
-      visibility: visible !important;
-    }
-    
-    /* Reset page margins and size */
-    @page {
-      size: A4 portrait;
-      margin: 0;
-    }
-    
-    html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-      width: 210mm !important;
-      height: 297mm !important;
-      background: white !important;
-    }
-    
-    /* Position print area to fill the page */
-    #print-area {
-      position: absolute !important;
-      left: 0 !important;
-      top: 0 !important;
-      width: 210mm !important;
-      min-height: 297mm !important;
-      margin: 0 !important;
-      padding: 10mm !important;
-      box-sizing: border-box !important;
-      background: white !important;
-      box-shadow: none !important;
-    }
-    
-    /* Ensure colors print correctly */
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      color-adjust: exact !important;
-    }
-    
-    /* Remove any borders or shadows */
-    .shadow-lg, .rounded-lg {
-      border: none !important;
-      box-shadow: none !important;
-    }
-    
-    /* Prevent page breaks inside elements */
-    table, tr, td, th, div {
-      page-break-inside: avoid !important;
-    }
-  }
-`;
+  const printStyles = `@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } html,body { margin:0!important;padding:0!important;width:210mm!important;background:white!important; } body * { visibility:hidden!important; } #print-area,#print-area * { visibility:visible!important; } #print-area { display:block!important;position:absolute!important;left:0!important;top:0!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;background:white!important; } @page { size:A4 portrait;margin:40px!important; } }`;
 
   const handleSave = () => {
     window.print();
@@ -836,13 +780,13 @@ Your Construction Quote System
     alert("Work order saved and locked");
     loadSavedJobCards();
   };
-const location = useLocation();
+  const location = useLocation();
 
-useEffect(() => {
-  if (location.state?.activeView) {
-    setActiveView(location.state.activeView);
-  }
-}, [location.state]);
+  useEffect(() => {
+    if (location.state?.activeView) {
+      setActiveView(location.state.activeView);
+    }
+  }, [location.state]);
   const handleNewJobCard = () => {
     setJobCardId(null);
     setJobCardNumber("");
@@ -875,39 +819,102 @@ useEffect(() => {
       console.error("Error logging out:", error);
     }
   };
-const headerActions = [
-  documentType === "quote" && jobCardId && {
-    label: "Convert to Invoice", icon: FileText, onClick: handleConvertToInvoice,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap"
-  },
-  { label: "Print",    icon: Printer,  onClick: handlePrint,        variant: "secondary" },
-  { label: "New",      icon: Plus,     onClick: documentType === "quote" ? handleNewJobCard : handleNewJobCard,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Send",     icon: Send,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Save PDF", icon: Download, onClick: handleSavePDF,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Save",     icon: Save,     onClick: handleSaveJobCard,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Logout",   icon: LogOut,   onClick: handleLogout,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap" },
-].filter(Boolean);
+  const headerActions = [
+    documentType === "quote" &&
+      jobCardId && {
+        label: "Convert to Invoice",
+        icon: FileText,
+        onClick: handleConvertToInvoice,
+        className:
+          "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap",
+      },
+    {
+      label: "Preview",
+      icon: Eye,
+      onClick: () => setShowPreview(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
+    {
+      label: "Print",
+      icon: Printer,
+      onClick: handlePrint,
+      variant: "secondary",
+    },
+    {
+      label: "New",
+      icon: Plus,
+      onClick: documentType === "quote" ? handleNewJobCard : handleNewJobCard,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Send",
+      icon: Send,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Save PDF",
+      icon: Download,
+      onClick: handleSavePDF,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Save",
+      icon: Save,
+      onClick: handleSaveJobCard,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Logout",
+      icon: LogOut,
+      onClick: handleLogout,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+  ].filter(Boolean);
 
-const mobileDashboardActions = [
-  documentType === "quote" && jobCardId && {
-    label: "To Invoice", icon: FileText, onClick: handleConvertToInvoice,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap"
-  },
-  { label: "Save",  icon: Save,     onClick: handleSaveJobCard,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "Send",  icon: Send,  
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "PDF",   icon: Download, onClick: handleSavePDF,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "Print", icon: Printer,  onClick: handlePrint,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap" },
-].filter(Boolean);
- 
+  const mobileDashboardActions = [
+    documentType === "quote" &&
+      jobCardId && {
+        label: "To Invoice",
+        icon: FileText,
+        onClick: handleConvertToInvoice,
+        className:
+          "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+      },
+    {
+      label: "Save",
+      icon: Save,
+      onClick: handleSaveJobCard,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "Send",
+      icon: Send,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "PDF",
+      icon: Download,
+      onClick: handleSavePDF,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "Print",
+      icon: Printer,
+      onClick: handlePrint,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap",
+    },
+  ].filter(Boolean);
+
   return (
     <div className="flex h-screen bg-gray-300">
       {/* Mobile Sidebar Backdrop */}
@@ -1249,17 +1256,17 @@ const mobileDashboardActions = [
         className={`flex-1 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : "ml-0 md:ml-16"}`}
       >
         <div className="flex-1 overflow-auto h-screen border-b-[25px] border-gray-800">
-               <AppHeader
-  actions={headerActions}
-  mobileActions={mobileDashboardActions}
-  onSettingsOpen={() => setShowSettings(true)}
-/>
-   
+          <AppHeader
+            actions={headerActions}
+            mobileActions={mobileDashboardActions}
+            onSettingsOpen={() => setShowSettings(true)}
+          />
+
           {/* ── Scrollable Main Content ──────────────────────────────── */}
           <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {/* Business Settings Modal */}
             {showSettings && (
-             <BusinessSettingsModal onClose={() => setShowSettings(false)} />
+              <BusinessSettingsModal onClose={() => setShowSettings(false)} />
             )}
 
             <CustomersListModal
@@ -1356,6 +1363,81 @@ const mobileDashboardActions = [
                 </div>
               </div>
             )}
+            {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
+            {showPreview && (
+              <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+                  {/* Modal header */}
+                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
+                        <Eye className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-sm font-semibold text-[#1e293b]">
+                          {documentType === "quote" ? "Quote" : "Invoice"}{" "}
+                          Preview
+                        </h2>
+                        <p className="text-xs text-[#64748b]">
+                          {jobCardNumber || "Draft"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handlePrint}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        Print
+                      </button>
+                      <button
+                        onClick={handleSavePDF}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Save PDF
+                      </button>
+                      <button
+                        onClick={() => setShowPreview(false)}
+                        className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Scrollable canvas area */}
+                  <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
+                    <div
+                      className="mx-auto bg-white shadow-xl"
+                      style={{ width: "210mm", minHeight: "297mm" }}
+                    >
+                      <TemplateRenderer
+                        templateId={selectedTemplate}
+                        businessInfo={businessInfo}
+                        loading={loading}
+                        jobCardNumber={jobCardNumber}
+                        customerName={customerName}
+                        customerEmail={customerEmail}
+                        customerPhone={customerPhone}
+                        customerAddress={customerAddress}
+                        propertyType={propertyType}
+                        propertyAddress={propertyAddress}
+                        accessDetails={accessDetails}
+                        emergencyService={emergencyService}
+                        items={items}
+                        subtotal={subtotal}
+                        vat={vat}
+                        total={total}
+                        documentType="plumbing"
+                        serviceType="PLUMBING"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             {activeView === "templates" && <Templates user={user} />}
             {activeView === "home" && <HomeView user={user} />}
             {activeView === "invoice" && (
@@ -1376,33 +1458,53 @@ const mobileDashboardActions = [
                     } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] overflow-y-auto`}
                   >
                     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
-                      <div className="flex border-b border-slate-200">
-                        <button
-                          onClick={() => setInputMode("manual")}
-                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
-                            inputMode === "manual"
-                              ? "bg-white text-blue-600 border-b-2 border-blue-600 shadow-sm"
-                              : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                          }`}
-                        >
-                          <span className="flex items-center justify-center gap-2">
-                            <Edit className="w-5 h-5" />
-                            Manual Entry
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => setInputMode("ai")}
-                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
-                            inputMode === "ai"
-                              ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm"
-                              : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                          }`}
-                        >
-                          <span className="flex items-center justify-center gap-2">
-                            <Sparkles className="w-5 h-5" />
-                            AI Assistant
-                          </span>
-                        </button>
+                      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
+                        <div className="flex border-b border-slate-200">
+                          <button
+                            onClick={() => setInputMode("manual")}
+                            className={`flex-1 px-2 sm:px-6 py-2 sm:py-4 font-semibold text-xs sm:text-base transition-all duration-200 ${inputMode === "manual" ? "bg-white text-blue-600 border-b-2 border-blue-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                          >
+                            <span className="flex items-center justify-center gap-1 sm:gap-2">
+                              <svg
+                                className="w-4 h-4 sm:w-5 sm:h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                              </svg>
+                              <span className="hidden sm:inline">
+                                Manual Entry
+                              </span>
+                              <span className="sm:hidden">Manual</span>
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => setInputMode("ai")}
+                            className={`flex-1 px-2 sm:px-6 py-2 sm:py-4 font-semibold text-xs sm:text-base transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                          >
+                            <span className="flex items-center justify-center gap-1 sm:gap-2">
+                              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+                              <span className="hidden sm:inline">
+                                AI Assistant
+                              </span>
+                              <span className="sm:hidden">AI</span>
+                            </span>
+                          </button>
+                        </div>
+                        <div className="p-3 sm:p-6">
+                          {inputMode === "ai" && (
+                            <AIInvoiceExtractor
+                              onDataExtracted={handleAIDataExtracted}
+                              documentType={documentType}
+                            />
+                          )}
+                        </div>
                       </div>
 
                       {/* Tab Content */}
@@ -1425,7 +1527,7 @@ const mobileDashboardActions = [
                           <span className="text-blue-600">Started Today</span>
                         </div>
 
-                        <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
                             <div className="flex items-center justify-between mb-2">
                               <div className="text-sm font-medium text-orange-700">
@@ -1568,39 +1670,6 @@ const mobileDashboardActions = [
                           setNewItem={setNewItem}
                           handleAddItem={handleAddItem}
                         />
-
-                        <div className="bg-white border border-gray-200 rounded-lg p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold">
-                              Payment Terms
-                            </h2>
-                          </div>
-
-                          <div className="space-y-3 text-sm">
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">
-                                Payment Method:
-                              </span>
-                              <span className="text-sm font-medium">
-                                Cash/Card/Bank Transfer
-                              </span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">
-                                Payment Terms:
-                              </span>
-                              <span className="text-sm font-medium">
-                                Due on Completion
-                              </span>
-                            </div>
-                            <div className="flex justify-between py-2">
-                              <span className="text-gray-600">Warranty:</span>
-                              <span className="text-sm font-medium">
-                                12 Months Parts & Labor
-                              </span>
-                            </div>
-                          </div>
-                        </div>
                       </>
                     )}
                   </div>

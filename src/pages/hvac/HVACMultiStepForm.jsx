@@ -88,13 +88,6 @@ const HVACMultiStepForm = ({
       {/* Step 1: Customer Information */}
       {currentStep === 1 && (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold flex items-center space-x-2">
-              <Users className="w-5 h-5" />
-              <span>Customer Information</span>
-            </h2>
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <div className="text-sm text-gray-500 mb-1">Customer Name *</div>

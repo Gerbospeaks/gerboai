@@ -8,6 +8,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
+import AccountingSidebar from "./AccountingSidebar";
 import Templates from "./Templates";
 import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
@@ -39,6 +40,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,
+  Eye,
   Settings,
   Users,
   Calendar,
@@ -97,6 +99,7 @@ const generateInvoiceNumber = async (userId, documentType) => {
 const functions = getFunctions();
 const AccountingDashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [showPreview, setShowPreview] = useState(false);
   const totalSteps = 4;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Invoice");
@@ -122,13 +125,13 @@ const AccountingDashboard = () => {
   const [isTablet, setIsTablet] = useState(false);
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
-const location = useLocation();
+  const location = useLocation();
 
-useEffect(() => {
-  if (location.state?.activeView) {
-    setActiveView(location.state.activeView);
-  }
-}, [location.state]);
+  useEffect(() => {
+    if (location.state?.activeView) {
+      setActiveView(location.state.activeView);
+    }
+  }, [location.state]);
   const [stampSettings, setStampSettings] = useState({
     text: "PAID",
     color: "#22c55e",
@@ -930,1453 +933,1262 @@ Your Construction Quote System
       console.error("Error logging out:", error);
     }
   };
-const headerActions = [
-  documentType === "quote" && invoiceId && {
-    label: "Convert to Invoice", icon: FileText, onClick: handleConvertToInvoice,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap"
-  },
-  { label: "Print",    icon: Printer,  onClick: handlePrint,        variant: "secondary" },
-  { label: "New",      icon: Plus,     onClick: documentType === "quote" ? handleNewEstimate : handleNewInvoice,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Send",     icon: Send,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Save PDF", icon: Download, onClick: handleSavePDF,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Save",     icon: Save,     onClick: handleSaveInvoice,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Logout",   icon: LogOut,   onClick: handleLogout,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap" },
-].filter(Boolean);
+  const headerActions = [
+    documentType === "quote" &&
+      invoiceId && {
+        label: "Convert to Invoice",
+        icon: FileText,
+        onClick: handleConvertToInvoice,
+        className:
+          "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap",
+      },
+    {
+      label: "Preview",
+      icon: Eye,
+      onClick: () => setShowPreview(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
+    {
+      label: "Print",
+      icon: Printer,
+      onClick: handlePrint,
+      variant: "secondary",
+    },
+    {
+      label: "New",
+      icon: Plus,
+      onClick: documentType === "quote" ? handleNewEstimate : handleNewInvoice,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Send",
+      icon: Send,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Save PDF",
+      icon: Download,
+      onClick: handleSavePDF,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Save",
+      icon: Save,
+      onClick: handleSaveInvoice,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Logout",
+      icon: LogOut,
+      onClick: handleLogout,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+  ].filter(Boolean);
 
-const mobileDashboardActions = [
-  documentType === "quote" && invoiceId && {
-    label: "To Invoice", icon: FileText, onClick: handleConvertToInvoice,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap"
-  },
-  { label: "Save",  icon: Save,     onClick: handleSaveInvoice,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "Send",  icon: Send,  
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "PDF",   icon: Download, onClick: handleSavePDF,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "Print", icon: Printer,  onClick: handlePrint,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap" },
-].filter(Boolean);
- 
+  const mobileDashboardActions = [
+    documentType === "quote" &&
+      invoiceId && {
+        label: "To Invoice",
+        icon: FileText,
+        onClick: handleConvertToInvoice,
+        className:
+          "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+      },
+    {
+      label: "Save",
+      icon: Save,
+      onClick: handleSaveInvoice,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "Send",
+      icon: Send,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "PDF",
+      icon: Download,
+      onClick: handleSavePDF,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "Print",
+      icon: Printer,
+      onClick: handlePrint,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap",
+    },
+  ].filter(Boolean);
+
   return (
-    <div className="flex h-screen w-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 overflow-hidden">
-      {/* Mobile Sidebar Backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
-          onClick={() => setSidebarOpen(false)}
-        ></div>
-      )}
+    <div className="flex h-screen w-screen bg-[#f4f5f7] overflow-hidden">
+      <AccountingSidebar
+        user={user}
+        activeView={activeView}
+        setActiveView={setActiveView}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        setShowSettings={setShowSettings}
+        handleNewInvoice={handleNewInvoiceDoc}
+        handleNewQuote={handleNewEstimate}
+        businessInfo={businessInfo}
+        savedQuotes={savedInvoices}
+        savedCustomers={savedCustomers}
+        handleLogout={handleLogout}
+      />
 
-      {/* Collapsed Sidebar */}
+      {/* Main Content Area */}
       <div
-        className={`${
-          sidebarOpen ? "hidden" : "hidden md:block"
-        } fixed z-40 w-16 md:w-20 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 h-full print:hidden transition-all duration-300 shadow-2xl`}
+        className={`flex-1 flex flex-col min-w-0 overflow-hidden transition-all duration-300`}
       >
-        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6 ">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:scale-110"
-            title="Expand Sidebar"
-          >
-            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
-          </button>
+        <div className="flex flex-col h-screen">
+          <AppHeader
+            actions={headerActions}
+            mobileActions={mobileDashboardActions}
+            onSettingsOpen={() => setShowSettings(true)}
+          />
 
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
-            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4  rounded-xl p-1 shadow-lg">
-              <img src={logo} alt="" />
-            </div>
-          </div>
+          {/* ── Scrollable Main Content ──────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6">
+              {/* Settings Modal */}
+              {showSettings && (
+                <BusinessSettingsModal onClose={() => setShowSettings(false)} />
+              )}
 
-          <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
-            <button
-              onClick={() => setActiveView("home")} // ADD THIS
-              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-              title="Home"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-            </button>
+              <CustomersListModal
+                showModal={showCustomersListModal}
+                setShowModal={setShowCustomersListModal}
+                customers={customers}
+                onLoadCustomer={loadCustomer}
+                onEditCustomer={handleEditCustomer}
+                onAddNewCustomer={handleAddNewCustomer}
+              />
 
-            <button
-              onClick={() => setShowSettings(true)}
-              className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-              title="Settings"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <Settings className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:rotate-90 transition-transform duration-500" />
-            </button>
+              <CustomerModal
+                showModal={showCustomerModal}
+                setShowModal={setShowCustomerModal}
+                existingCustomer={selectedCustomer}
+                onCustomerSaved={handleCustomerSaved}
+              />
 
-            {!isMobile && (
-              <>
-                <button
-                  onClick={() => setActiveView("financial-overview")}
-                  className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                  title="Financial Dashboard"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <TrendingUp className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                </button>
+              {showPaymentModal && selectedInvoiceForPayment && (
+                <PaymentProcessor
+                  showModal={showPaymentModal}
+                  setShowModal={setShowPaymentModal}
+                  invoice={selectedInvoiceForPayment}
+                  onPaymentComplete={handlePaymentComplete}
+                  user={user}
+                  businessInfo={businessInfo}
+                />
+              )}
 
-                <button
-                  onClick={() => {
-                    handleNewInvoiceDoc();
-                    setActiveView("invoice");
-                  }}
-                  className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                  title="Invoices"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <Receipt className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                </button>
+              {showInvoicesList && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                  <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+                    <div className="p-4 border-b flex items-center justify-between">
+                      <h2 className="text-xl font-semibold">
+                        Saved{" "}
+                        {documentType === "estimate" ? "Estimates" : "Invoices"}
+                      </h2>
+                      <button
+                        onClick={() => setShowInvoicesList(false)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        ✕
+                      </button>
+                    </div>
 
-                <button
-                  onClick={() => setShowCustomersListModal(true)}
-                  className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                  title="Clients"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <Users className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
-          <div className="relative group">
-            <div className="absolute inset-0 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
-              <img src={businessInfo.logoUrl} alt="" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Expanded Sidebar */}
-      <div
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed z-50 w-64 md:w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
-      >
-        <div className="p-4 md:p-6">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <div className="flex items-center space-x-3 md:space-x-4">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300"></div>
-                <div className="relative  p-1 rounded-xl shadow-lg">
-                  <img
-                    src={logo}
-                    alt="Company Logo"
-                    className="w-8 h-8 md:w-10 md:h-10"
-                  />
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="group p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
-              title="Collapse Sidebar"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          </div>
-
-          <nav className="space-y-1.5 md:space-y-2">
-            <div
-              onClick={() => {
-                setActiveView("home");
-                setSidebarOpen(false);
-              }}
-              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
-            >
-              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-xs md:text-sm font-semibold">Home</span>
-            </div>
-
-            <div
-              onClick={() => {
-                setShowSettings(true);
-                setSidebarOpen(false);
-              }}
-              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-purple-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-purple-500/30"
-            >
-              <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
-              <span className="text-xs md:text-sm font-semibold">Settings</span>
-            </div>
-
-            <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-slate-700/50">
-              <div
-                onClick={() => {
-                  setActiveView("financial-overview");
-                  setSidebarOpen(false);
-                }}
-                className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
-              >
-                <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-xs md:text-sm font-semibold truncate">
-                  Financial Dashboard
-                </span>
-              </div>
-
-              <div className="mt-2 md:mt-3">
-                <div
-                  onClick={() => {
-                    setIsInvoicingOpen(!isInvoicingOpen);
-                    setSidebarOpen(false);
-                  }}
-                  className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
-                >
-                  <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                    <Receipt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">
-                      Invoicing
-                    </span>
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
-                      isInvoicingOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </div>
-
-                {/* Conditional rendering with animation */}
-                <div
-                  className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
-                    isInvoicingOpen
-                      ? "max-h-96 opacity-100"
-                      : "max-h-0 opacity-0"
-                  }`}
-                >
-                  <div
-                    onClick={() => {
-                      handleNewEstimate();
-                      setSidebarOpen(false);
-                      setActiveView("invoice");
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-                    <span className="truncate">Create Estimate</span>
-                  </div>
-                  <div
-                    onClick={() => {
-                      handleNewInvoiceDoc();
-                      setActiveView("invoice");
-                      setSidebarOpen(false);
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-                    <span className="truncate">Create Invoice</span>
-                  </div>
-                  <div
-                    onClick={() => {
-                      setShowInvoicesList(!showInvoicesList);
-                      setSidebarOpen(false);
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-                        <span className="truncate">
-                          All{" "}
+                    <div className="overflow-auto p-4">
+                      {savedInvoices.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                          No saved{" "}
                           {documentType === "estimate"
-                            ? "Estimates"
-                            : "Invoices"}
-                        </span>
-                      </div>
-                      <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
-                        {savedInvoices.length}
-                      </span>
+                            ? "estimates"
+                            : "invoices"}{" "}
+                          yet
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {savedInvoices.map((invoice) => (
+                            <div
+                              key={invoice.id}
+                              onClick={() => loadInvoice(invoice)}
+                              className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                            >
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <div className="font-semibold text-lg">
+                                    {invoice.invoiceNumber || "N/A"}
+                                  </div>
+                                  <div className="text-sm text-gray-600 mt-1">
+                                    Client: {invoice.customer?.name || "N/A"}
+                                  </div>
+                                  <div className="text-sm text-gray-600">
+                                    Email: {invoice.customer?.email || "N/A"}
+                                  </div>
+                                </div>
+
+                                <div className="text-right">
+                                  <div className="text-lg font-semibold text-orange-600">
+                                    R
+                                    {invoice.totals?.total?.toFixed(2) ||
+                                      "0.00"}
+                                  </div>
+                                  {invoice.totals?.paid > 0 && (
+                                    <div className="text-sm text-emerald-600 font-semibold">
+                                      Paid: R{invoice.totals.paid.toFixed(2)}
+                                    </div>
+                                  )}
+                                  {invoice.totals?.due > 0 && (
+                                    <div className="text-sm text-rose-600 font-semibold">
+                                      Due: R{invoice.totals.due.toFixed(2)}
+                                    </div>
+                                  )}
+                                  <div
+                                    className={`text-xs mt-1 px-2 py-1 rounded ${
+                                      invoice.status === "paid"
+                                        ? "bg-emerald-100 text-emerald-700"
+                                        : invoice.status === "partially_paid"
+                                          ? "bg-amber-100 text-amber-700"
+                                          : invoice.status === "pending"
+                                            ? "bg-blue-100 text-blue-700"
+                                            : "bg-gray-100 text-gray-700"
+                                    }`}
+                                  >
+                                    {invoice.status === "paid"
+                                      ? "Paid"
+                                      : invoice.status === "partially_paid"
+                                        ? "Partial"
+                                        : "Pending"}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="mt-2 md:mt-3">
-                <div
-                  onClick={() => setIsClientsOpen(!isClientsOpen)}
-                  className="group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-pink-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30"
-                >
-                  <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                    <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">
-                      Clients
-                    </span>
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
-                      isClientsOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </div>
-
-                {/* Conditional rendering with animation */}
-                <div
-                  className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${
-                    isClientsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                  }`}
-                >
-                  <div
-                    onClick={() => {
-                      handleAddNewCustomer();
-                      setSidebarOpen(false);
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-                    <span className="truncate">Add Client</span>
-                  </div>
-                  <div
-                    onClick={() => {
-                      setShowCustomersListModal(true);
-                      setSidebarOpen(false);
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-150 transition-transform duration-300"></div>
-                        <span className="truncate">All Clients</span>
+              )}
+              {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
+              {showPreview && (
+                <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
+                  <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+                    {/* Modal header */}
+                    <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
+                          <Eye className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <h2 className="text-sm font-semibold text-[#1e293b]">
+                            {documentType === "quote" ? "Quote" : "Invoice"}{" "}
+                            Preview
+                          </h2>
+                          <p className="text-xs text-[#64748b]">
+                            {invoiceNumber || "Draft"}
+                          </p>
+                        </div>
                       </div>
-                      <span className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2">
-                        {savedCustomers.length}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={handlePrint}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          Print
+                        </button>
+                        <button
+                          onClick={handleSavePDF}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Save PDF
+                        </button>
+                        <button
+                          onClick={() => setShowPreview(false)}
+                          className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Scrollable canvas area */}
+                    <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
+                      <div
+                        className="mx-auto bg-white shadow-xl"
+                        style={{ width: "210mm", minHeight: "297mm" }}
+                      >
+                        <TemplateRenderer
+                          templateId={selectedTemplate}
+                          businessInfo={businessInfo}
+                          loading={loading}
+                          invoiceNumber={invoiceNumber}
+                          customerName={customerName}
+                          billName={billName}
+                          billEmail={billEmail}
+                          billPhone={billPhone}
+                          billAddress={billAddress}
+                          customerEmail={customerEmail}
+                          customerPhone={customerPhone}
+                          customerAddress={customerAddress}
+                          taxId={taxId}
+                          items={items}
+                          subtotal={subtotal}
+                          totalTax={totalTax}
+                          total={total}
+                          documentType={documentType}
+                          stampText={stampSettings.text}
+                          stampColor={stampSettings.color}
+                          showStampDate={stampSettings.showDate}
+                          showStamp={stampSettings.enabled}
+                          paymentStatus={paymentStatus}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {!isMobile && (
+              )}
+              {activeView === "financial-overview" && (
+                <FinancialOverview user={user} />
+              )}
+              {activeView === "history-view" && <HistoryView user={user} />}
+              {activeView === "notes-view" && <NotesView user={user} />}
+              {activeView === "templates" && <Templates user={user} />}
+              {activeView === "home" && <HomeView user={user} />}
+              {activeView === "invoice" && (
                 <>
-                  <div
-                    onClick={() => {
-                      setActiveView("templates");
-                      setSidebarOpen(false);
-                    }}
-                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
-                  >
-                    <FileText className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">
-                      Invoice Templates
-                    </span>
-                  </div>
+                  <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
+                    <div className="space-y-6">
+                      {/* Tab Navigation */}
+                      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
+                        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
+                          <div className="flex border-b border-slate-200">
+                            <button
+                              onClick={() => setInputMode("manual")}
+                              className={`flex-1 px-2 sm:px-6 py-2 sm:py-4 font-semibold text-xs sm:text-base transition-all duration-200 ${inputMode === "manual" ? "bg-white text-blue-600 border-b-2 border-blue-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                            >
+                              <span className="flex items-center justify-center gap-1 sm:gap-2">
+                                <svg
+                                  className="w-4 h-4 sm:w-5 sm:h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                  />
+                                </svg>
+                                <span className="hidden sm:inline">
+                                  Manual Entry
+                                </span>
+                                <span className="sm:hidden">Manual</span>
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => setInputMode("ai")}
+                              className={`flex-1 px-2 sm:px-6 py-2 sm:py-4 font-semibold text-xs sm:text-base transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                            >
+                              <span className="flex items-center justify-center gap-1 sm:gap-2">
+                                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <span className="hidden sm:inline">
+                                  AI Assistant
+                                </span>
+                                <span className="sm:hidden">AI</span>
+                              </span>
+                            </button>
+                          </div>
+                          <div className="p-3 sm:p-6">
+                            {inputMode === "ai" && (
+                              <AIInvoiceExtractor
+                                onDataExtracted={handleAIDataExtracted}
+                                documentType={documentType}
+                              />
+                            )}
+                          </div>
+                        </div>
 
-                  <div
-                    onClick={() => {
-                      setActiveView("reports");
-                      setSidebarOpen(false);
-                    }}
-                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-cyan-600/20 hover:to-cyan-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
-                  >
-                    <BarChart3 className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">
-                      Reports
-                    </span>
-                  </div>
+                        <div className="p-6">
+                          {inputMode === "ai" ? (
+                            <AIInvoiceExtractor
+                              onDataExtracted={handleAIDataExtracted}
+                              documentType={documentType}
+                            />
+                          ) : null}
+                        </div>
+                      </div>
 
-                  <div
-                    onClick={() => {
-                      setActiveView("expenses");
-                      setSidebarOpen(false);
-                    }}
-                    className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-rose-600/20 hover:to-rose-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-rose-500/30"
-                  >
-                    <TrendingDown className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-xs md:text-sm font-semibold truncate">
-                      Expenses
-                    </span>
+                      {inputMode === "manual" && (
+                        <>
+                          {/* Summary Cards */}
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="text-sm font-medium text-orange-700">
+                                  Total Amount
+                                </div>
+                                <div className="w-8 h-8 bg-orange-200 rounded-lg flex items-center justify-center">
+                                  <DollarSign className="w-5 h-5 text-orange-600" />
+                                </div>
+                              </div>
+                              <div className="text-base sm:text-lg md:text-2xl font-bold text-orange-900">
+                                R{total.toFixed(2)}
+                              </div>
+                            </div>
+
+                            <div
+                              className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                                paymentStatus.totalPaid > 0
+                                  ? "from-emerald-100 to-emerald-300 border-emerald-600"
+                                  : "from-slate-100 to-slate-300 border-slate-300"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div
+                                  className={`text-sm font-medium ${
+                                    paymentStatus.totalPaid > 0
+                                      ? "text-emerald-700"
+                                      : "text-slate-600"
+                                  }`}
+                                >
+                                  Paid
+                                </div>
+                                <div
+                                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                    paymentStatus.totalPaid > 0
+                                      ? "bg-emerald-200"
+                                      : "bg-slate-200"
+                                  }`}
+                                >
+                                  <CheckSquare
+                                    className={`w-5 h-5 ${
+                                      paymentStatus.totalPaid > 0
+                                        ? "text-emerald-600"
+                                        : "text-slate-400"
+                                    }`}
+                                  />
+                                </div>
+                              </div>
+                              <div
+                                className={`text-lg sm:text-2xl font-bold ${
+                                  paymentStatus.totalPaid > 0
+                                    ? "text-emerald-900"
+                                    : "text-slate-900"
+                                }`}
+                              >
+                                R{paymentStatus.totalPaid.toFixed(2)}
+                              </div>
+                            </div>
+
+                            <div
+                              className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
+                                paymentStatus.balanceDue <= 0
+                                  ? "from-emerald-100 to-emerald-300 border-emerald-600"
+                                  : paymentStatus.totalPaid > 0
+                                    ? "from-amber-100 to-amber-300 border-amber-300"
+                                    : "from-rose-50 to-rose-100 border-rose-200"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div
+                                  className={`text-sm font-medium ${
+                                    paymentStatus.balanceDue <= 0
+                                      ? "text-emerald-700"
+                                      : paymentStatus.totalPaid > 0
+                                        ? "text-amber-700"
+                                        : "text-rose-700"
+                                  }`}
+                                >
+                                  Balance Due
+                                </div>
+                                <div
+                                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                    paymentStatus.balanceDue <= 0
+                                      ? "bg-emerald-200"
+                                      : paymentStatus.totalPaid > 0
+                                        ? "bg-amber-200"
+                                        : "bg-rose-200"
+                                  }`}
+                                >
+                                  <Wallet
+                                    className={`w-5 h-5 ${
+                                      paymentStatus.balanceDue <= 0
+                                        ? "text-emerald-600"
+                                        : paymentStatus.totalPaid > 0
+                                          ? "text-amber-600"
+                                          : "text-rose-600"
+                                    }`}
+                                  />
+                                </div>
+                              </div>
+                              <div
+                                className={`text-lg sm:text-2xl font-bold ${
+                                  paymentStatus.balanceDue <= 0
+                                    ? "text-emerald-900"
+                                    : paymentStatus.totalPaid > 0
+                                      ? "text-amber-900"
+                                      : "text-rose-900"
+                                }`}
+                              >
+                                R{paymentStatus.balanceDue.toFixed(2)}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Payment Status Banner */}
+                          {invoiceId && (
+                            <div
+                              className={`p-4 rounded-xl border-2 flex items-center justify-between ${
+                                paymentStatus.status === "paid"
+                                  ? "bg-emerald-50 border-emerald-300"
+                                  : paymentStatus.status === "partially_paid"
+                                    ? "bg-amber-50 border-amber-300"
+                                    : "bg-rose-50 border-rose-300"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                {paymentStatus.status === "paid" ? (
+                                  <>
+                                    <div className="w-10 h-10 bg-emerald-200 rounded-full flex items-center justify-center">
+                                      <CheckSquare className="w-6 h-6 text-emerald-600" />
+                                    </div>
+                                    <div>
+                                      <div className="font-bold text-emerald-900">
+                                        Invoice Fully Paid
+                                      </div>
+                                      <div className="text-sm text-emerald-700">
+                                        Payment complete - Thank you!
+                                      </div>
+                                    </div>
+                                  </>
+                                ) : paymentStatus.status ===
+                                  "partially_paid" ? (
+                                  <>
+                                    <div className="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center">
+                                      <CreditCard className="w-6 h-6 text-amber-600" />
+                                    </div>
+                                    <div>
+                                      <div className="font-bold text-amber-900">
+                                        Partial Payment Received
+                                      </div>
+                                      <div className="text-sm text-amber-700">
+                                        R{paymentStatus.totalPaid.toFixed(2)}{" "}
+                                        paid • R
+                                        {paymentStatus.balanceDue.toFixed(2)}{" "}
+                                        remaining
+                                      </div>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center">
+                                      <Wallet className="w-6 h-6 text-rose-600" />
+                                    </div>
+                                    <div>
+                                      <div className="font-bold text-rose-900">
+                                        Payment Pending
+                                      </div>
+                                      <div className="text-sm text-rose-700">
+                                        Full amount due: R
+                                        {paymentStatus.balanceDue.toFixed(2)}
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+
+                              {paymentStatus.status !== "paid" && (
+                                <button
+                                  onClick={handleProcessPayment}
+                                  className="px-4 py-2 bg-white border-2 border-current rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2"
+                                >
+                                  <CreditCard className="w-4 h-4" />
+                                  Record Payment
+                                </button>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Stepped Form */}
+                          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            {/* Step 1: Client Info */}
+                            {currentStep === 1 && (
+                              <div className="p-8">
+                                <div className="mb-8">
+                                  <p className="text-slate-600 mt-2 ml-13">
+                                    Enter client details
+                                  </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                      Company Name{" "}
+                                      <span className="text-rose-500">*</span>
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={customerName}
+                                      onChange={(e) =>
+                                        setCustomerName(e.target.value)
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      placeholder="Enter company  name"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                      Tax ID
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={taxId}
+                                      onChange={(e) => setTaxId(e.target.value)}
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      placeholder="TAX-123-456-789"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                      Email{" "}
+                                      <span className="text-rose-500">*</span>
+                                    </label>
+                                    <input
+                                      type="email"
+                                      value={customerEmail}
+                                      onChange={(e) =>
+                                        setCustomerEmail(e.target.value)
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      placeholder="contact@example.com"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                      Phone{" "}
+                                      <span className="text-rose-500">*</span>
+                                    </label>
+                                    <input
+                                      type="tel"
+                                      value={customerPhone}
+                                      onChange={(e) =>
+                                        setCustomerPhone(e.target.value)
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      placeholder="+27 11 123 4567"
+                                    />
+                                  </div>
+                                  <div className="col-span-1 sm:col-span-2">
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                      Address{" "}
+                                      <span className="text-rose-500">*</span>
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={customerAddress}
+                                      onChange={(e) =>
+                                        setCustomerAddress(e.target.value)
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      placeholder="123 Business Park, Sandton, Johannesburg, 2196"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Step 2: Billing Details */}
+                            {currentStep === 2 && (
+                              <div className="p-8">
+                                <div className="mb-8">
+                                  <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                      <Building className="w-6 h-6 text-emerald-600" />
+                                    </div>
+                                    Billing Details
+                                  </h2>
+                                  <p className="text-slate-600 mt-2 ml-13">
+                                    Enter billing contact information
+                                  </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                      Billing Contact Name
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={billName}
+                                      onChange={(e) =>
+                                        setBillName(e.target.value)
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      placeholder="Billing contact name"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                      Billing Email
+                                    </label>
+                                    <input
+                                      type="email"
+                                      value={billEmail}
+                                      onChange={(e) =>
+                                        setBillEmail(e.target.value)
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      placeholder="billing@example.com"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                      Billing Phone
+                                    </label>
+                                    <input
+                                      type="tel"
+                                      value={billPhone}
+                                      onChange={(e) =>
+                                        setBillPhone(e.target.value)
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      placeholder="+27 11 123 4567"
+                                    />
+                                  </div>
+                                  <div className="col-span-1 sm:col-span-2">
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                      Billing Address
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={billAddress}
+                                      onChange={(e) =>
+                                        setBillAddress(e.target.value)
+                                      }
+                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      placeholder="Billing address if different from company address"
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Quick Copy Option */}
+                                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                  <button
+                                    onClick={() => {
+                                      setBillName(customerName);
+                                      setBillEmail(customerEmail);
+                                      setBillPhone(customerPhone);
+                                      setBillAddress(customerAddress);
+                                    }}
+                                    className="flex items-center gap-2 text-blue-700 hover:text-blue-800 font-semibold transition-colors"
+                                  >
+                                    <Users className="w-4 h-4" />
+                                    Copy from Client Information
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Step 3: Line Items */}
+                            {currentStep === 3 && (
+                              <div className="p-8">
+                                <div className="mb-8">
+                                  <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                      <FileText className="w-6 h-6 text-purple-600" />
+                                    </div>
+                                    Line Items
+                                  </h2>
+                                  <p className="text-slate-600 mt-2 ml-13">
+                                    Add products or services to the invoice
+                                  </p>
+                                </div>
+
+                                {/* Add Item Form */}
+                                <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 mb-6 border border-slate-200">
+                                  <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
+                                    <Plus className="w-5 h-5 text-blue-600" />
+                                    Add New Item
+                                  </h3>
+                                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                                    <div className="sm:col-span-5">
+                                      <input
+                                        type="text"
+                                        placeholder="Description / Service"
+                                        value={newItem.description}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            description: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      />
+                                    </div>
+
+                                    <div className="sm:col-span-2">
+                                      <select
+                                        value={newItem.category}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            category: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
+                                      >
+                                        <option value="Service">Service</option>
+                                        <option value="Product">Product</option>
+                                        <option value="Consulting">
+                                          Consulting
+                                        </option>
+                                        <option value="Other">Other</option>
+                                      </select>
+                                    </div>
+
+                                    <div className="sm:col-span-2">
+                                      <input
+                                        type="number"
+                                        placeholder="Rate"
+                                        value={newItem.rate}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            rate: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      />
+                                    </div>
+
+                                    <div className="sm:col-span-1">
+                                      <input
+                                        type="number"
+                                        placeholder="Qty"
+                                        value={newItem.qty}
+                                        onChange={(e) =>
+                                          setNewItem({
+                                            ...newItem,
+                                            qty: e.target.value,
+                                          })
+                                        }
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
+                                      />
+                                    </div>
+
+                                    <div className="sm:col-span-2">
+                                      <button
+                                        onClick={handleAddItem}
+                                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg px-4 py-2 hover:from-blue-700 hover:to-blue-800 flex items-center justify-center gap-2 transition-all font-semibold shadow-md hover:shadow-lg"
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                        Add
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Items List */}
+                                {items.length > 0 ? (
+                                  <div className="mb-6">
+                                    <h3 className="text-lg font-bold text-slate-900 mb-4">
+                                      Items Added ({items.length})
+                                    </h3>
+                                    <div className="overflow-x-auto rounded-xl border border-slate-200">
+                                      <table className="w-full">
+                                        <thead>
+                                          <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                                            <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                              Description
+                                            </th>
+                                            <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                              Category
+                                            </th>
+                                            <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                              Rate
+                                            </th>
+                                            <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                              Qty
+                                            </th>
+                                            <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                              Tax
+                                            </th>
+                                            <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                              Amount
+                                            </th>
+                                            <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">
+                                              Action
+                                            </th>
+                                          </tr>
+                                        </thead>
+                                        <tbody className="bg-white">
+                                          {items.map((item, index) => (
+                                            <tr
+                                              key={index}
+                                              className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                                            >
+                                              <td className="px-4 py-4 text-sm font-medium text-slate-700">
+                                                {item.description}
+                                              </td>
+                                              <td className="px-4 py-4 text-sm">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                                                  {item.category || "Service"}
+                                                </span>
+                                              </td>
+                                              <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                                R{item.rate.toFixed(2)}
+                                              </td>
+                                              <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                                {item.qty}
+                                              </td>
+                                              <td className="px-4 py-4 text-sm text-right text-slate-700">
+                                                R{item.taxAmount.toFixed(2)}
+                                              </td>
+                                              <td className="px-4 py-4 text-sm text-right font-bold text-slate-900">
+                                                R{item.totalAmount.toFixed(2)}
+                                              </td>
+                                              <td className="px-4 py-4 text-center">
+                                                <button
+                                                  onClick={() =>
+                                                    handleRemoveItem(index)
+                                                  }
+                                                  className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all"
+                                                >
+                                                  Remove
+                                                </button>
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-dashed border-slate-300">
+                                    <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                      <FileText className="w-8 h-8 text-slate-400" />
+                                    </div>
+                                    <p className="text-slate-700 font-semibold text-lg">
+                                      No items added yet
+                                    </p>
+                                    <p className="text-sm text-slate-500 mt-2">
+                                      Add products or services using the form
+                                      above
+                                    </p>
+                                  </div>
+                                )}
+
+                                {/* Total Summary */}
+                                {items.length > 0 && (
+                                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                                    <div className="space-y-3">
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-slate-700 font-medium">
+                                          Subtotal:
+                                        </span>
+                                        <span className="font-bold text-slate-900 text-lg">
+                                          R{subtotal.toFixed(2)}
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-slate-700 font-medium">
+                                          VAT (15%):
+                                        </span>
+                                        <span className="font-bold text-slate-900 text-lg">
+                                          R{totalTax.toFixed(2)}
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-blue-300">
+                                        <span className="text-slate-900">
+                                          Total:
+                                        </span>
+                                        <span className="text-blue-700 text-2xl">
+                                          R{total.toFixed(2)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Step 4: Payment Terms */}
+                            {currentStep === 4 && (
+                              <div className="p-8">
+                                <div className="mb-8">
+                                  <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                      <CreditCard className="w-6 h-6 text-emerald-600" />
+                                    </div>
+                                    Payment Terms & Summary
+                                  </h2>
+                                  <p className="text-slate-600 mt-2 ml-13">
+                                    Review invoice details and payment
+                                    information
+                                  </p>
+                                </div>
+
+                                {/* Invoice Summary Cards */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
+                                    <div className="flex items-center justify-between mb-3">
+                                      <span className="text-sm font-semibold text-blue-700">
+                                        Invoice Total
+                                      </span>
+                                      <DollarSign className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="text-3xl font-bold text-blue-900">
+                                      R{total.toFixed(2)}
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200">
+                                    <div className="flex items-center justify-between mb-3">
+                                      <span className="text-sm font-semibold text-emerald-700">
+                                        Items Count
+                                      </span>
+                                      <ClipboardList className="w-5 h-5 text-emerald-600" />
+                                    </div>
+                                    <div className="text-3xl font-bold text-emerald-900">
+                                      {items.length}
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+                                    <div className="flex items-center justify-between mb-3">
+                                      <span className="text-sm font-semibold text-purple-700">
+                                        Tax Amount
+                                      </span>
+                                      <Receipt className="w-5 h-5 text-purple-600" />
+                                    </div>
+                                    <div className="text-3xl font-bold text-purple-900">
+                                      R{totalTax.toFixed(2)}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Payment Terms Section */}
+                                <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-6">
+                                  <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                      <CreditCard className="w-5 h-5 text-purple-600" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-900">
+                                      Payment Information
+                                    </h3>
+                                  </div>
+
+                                  <div className="space-y-3">
+                                    <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                      <span className="text-slate-600 font-medium">
+                                        Payment Due:
+                                      </span>
+                                      <span className="font-bold text-slate-900">
+                                        Net 30 Days
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                      <span className="text-slate-600 font-medium">
+                                        Payment Methods:
+                                      </span>
+                                      <span className="font-bold text-slate-900">
+                                        Bank Transfer, Card, Cash
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                                      <span className="text-slate-600 font-medium">
+                                        Late Payment Fee:
+                                      </span>
+                                      <span className="font-bold text-slate-900">
+                                        2% per month
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-3">
+                                      <span className="text-slate-600 font-medium">
+                                        Currency:
+                                      </span>
+                                      <span className="font-bold text-slate-900">
+                                        ZAR (South African Rand)
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Client Summary */}
+                                <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
+                                  <h3 className="text-lg font-bold text-slate-900 mb-4">
+                                    Invoice Summary
+                                  </h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                      <h4 className="text-sm font-semibold text-slate-700 mb-2">
+                                        Bill To:
+                                      </h4>
+                                      <div className="text-sm text-slate-600 space-y-1">
+                                        <p className="font-semibold text-slate-900">
+                                          {customerName}
+                                        </p>
+                                        <p>{customerEmail}</p>
+                                        <p>{customerPhone}</p>
+                                        <p>{customerAddress}</p>
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <h4 className="text-sm font-semibold text-slate-700 mb-2">
+                                        Invoice Details:
+                                      </h4>
+                                      <div className="text-sm text-slate-600 space-y-1">
+                                        <p>
+                                          <span className="font-semibold">
+                                            Number:
+                                          </span>{" "}
+                                          {invoiceNumber}
+                                        </p>
+                                        <p>
+                                          <span className="font-semibold">
+                                            Date:
+                                          </span>{" "}
+                                          {new Date().toLocaleDateString()}
+                                        </p>
+                                        <p>
+                                          <span className="font-semibold">
+                                            Type:
+                                          </span>{" "}
+                                          {documentType === "estimate"
+                                            ? "Estimate"
+                                            : "Invoice"}
+                                        </p>
+                                        <p>
+                                          <span className="font-semibold">
+                                            Status:
+                                          </span>{" "}
+                                          <span className="text-amber-600 font-bold">
+                                            Pending
+                                          </span>
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                {invoiceId && (
+                                  <div className="mt-6 flex gap-3">
+                                    <button
+                                      onClick={handleProcessPayment}
+                                      className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105"
+                                    >
+                                      <CreditCard className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                                      Process Payment
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Navigation Buttons */}
+                            <div className="px-8 py-5 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+                              <button
+                                onClick={handlePrevious}
+                                disabled={currentStep === 1}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                                  currentStep === 1
+                                    ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                                    : "bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 shadow-sm"
+                                }`}
+                              >
+                                <ChevronLeft className="w-5 h-5" />
+                                <span className="hidden sm:inline">
+                                  Previous
+                                </span>
+                              </button>
+
+                              <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">
+                                Step {currentStep} of {totalSteps}
+                              </div>
+
+                              {currentStep < totalSteps ? (
+                                <button
+                                  onClick={handleNext}
+                                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg"
+                                >
+                                  <span className="hidden sm:inline">Next</span>
+                                  <ChevronRight className="w-5 h-5" />
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={handleSaveInvoice}
+                                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
+                                >
+                                  <Save className="w-5 h-5" />
+                                  Save{" "}
+                                  {documentType === "estimate"
+                                    ? "Estimate"
+                                    : "Invoice"}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Invoice Preview - This remains at the end */}
+                    <div
+                      id="print-area"
+                      className="hidden print:block bg-white shadow-2xl origin-top"
+                      style={{
+                        width: "210mm",
+                        minHeight: "297mm",
+                        transform: "scale(0.75)",
+                        transformOrigin: "top center",
+                      }}
+                    >
+                      <TemplateRenderer
+                        templateId={selectedTemplate}
+                        businessInfo={businessInfo}
+                        loading={loading}
+                        invoiceNumber={invoiceNumber}
+                        customerName={customerName}
+                        billName={billName}
+                        billEmail={billEmail}
+                        billPhone={billPhone}
+                        billAddress={billAddress}
+                        customerEmail={customerEmail}
+                        customerPhone={customerPhone}
+                        customerAddress={customerAddress}
+                        taxId={taxId}
+                        items={items}
+                        subtotal={subtotal}
+                        totalTax={totalTax}
+                        total={total}
+                        documentType={documentType}
+                        stampText={stampSettings.text}
+                        stampColor={stampSettings.color}
+                        showStampDate={stampSettings.showDate}
+                        showStamp={stampSettings.enabled}
+                        paymentStatus={paymentStatus}
+                      />
+                    </div>
                   </div>
                 </>
               )}
             </div>
-          </nav>
-        </div>
-
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
-          <div className="flex items-center space-x-2 md:space-x-3">
-            <div className="relative group flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300">
-                <img
-                  src={businessInfo.logoUrl}
-                  alt="Business Logo"
-                  className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-                />
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-slate-400 truncate">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-            >
-              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
-      >
-        <div className="flex flex-col h-screen">
-               <AppHeader
-  actions={headerActions}
-  mobileActions={mobileDashboardActions}
-  onSettingsOpen={() => setShowSettings(true)}
-/>
-   
-          {/* ── Scrollable Main Content ──────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
-            {/* Settings Modal */}
-            {showSettings && (
-              <BusinessSettingsModal onClose={() => setShowSettings(false)} />
-            )}
-
-            <CustomersListModal
-              showModal={showCustomersListModal}
-              setShowModal={setShowCustomersListModal}
-              customers={customers}
-              onLoadCustomer={loadCustomer}
-              onEditCustomer={handleEditCustomer}
-              onAddNewCustomer={handleAddNewCustomer}
-            />
-
-            <CustomerModal
-              showModal={showCustomerModal}
-              setShowModal={setShowCustomerModal}
-              existingCustomer={selectedCustomer}
-              onCustomerSaved={handleCustomerSaved}
-            />
-
-            {showPaymentModal && selectedInvoiceForPayment && (
-              <PaymentProcessor
-                showModal={showPaymentModal}
-                setShowModal={setShowPaymentModal}
-                invoice={selectedInvoiceForPayment}
-                onPaymentComplete={handlePaymentComplete}
-                user={user}
-                businessInfo={businessInfo}
-              />
-            )}
-
-            {showInvoicesList && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-                  <div className="p-4 border-b flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">
-                      Saved{" "}
-                      {documentType === "estimate" ? "Estimates" : "Invoices"}
-                    </h2>
-                    <button
-                      onClick={() => setShowInvoicesList(false)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div className="overflow-auto p-4">
-                    {savedInvoices.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        No saved{" "}
-                        {documentType === "estimate" ? "estimates" : "invoices"}{" "}
-                        yet
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {savedInvoices.map((invoice) => (
-                          <div
-                            key={invoice.id}
-                            onClick={() => loadInvoice(invoice)}
-                            className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <div className="font-semibold text-lg">
-                                  {invoice.invoiceNumber || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600 mt-1">
-                                  Client: {invoice.customer?.name || "N/A"}
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  Email: {invoice.customer?.email || "N/A"}
-                                </div>
-                              </div>
-
-                              <div className="text-right">
-                                <div className="text-lg font-semibold text-orange-600">
-                                  R{invoice.totals?.total?.toFixed(2) || "0.00"}
-                                </div>
-                                {invoice.totals?.paid > 0 && (
-                                  <div className="text-sm text-emerald-600 font-semibold">
-                                    Paid: R{invoice.totals.paid.toFixed(2)}
-                                  </div>
-                                )}
-                                {invoice.totals?.due > 0 && (
-                                  <div className="text-sm text-rose-600 font-semibold">
-                                    Due: R{invoice.totals.due.toFixed(2)}
-                                  </div>
-                                )}
-                                <div
-                                  className={`text-xs mt-1 px-2 py-1 rounded ${
-                                    invoice.status === "paid"
-                                      ? "bg-emerald-100 text-emerald-700"
-                                      : invoice.status === "partially_paid"
-                                        ? "bg-amber-100 text-amber-700"
-                                        : invoice.status === "pending"
-                                          ? "bg-blue-100 text-blue-700"
-                                          : "bg-gray-100 text-gray-700"
-                                  }`}
-                                >
-                                  {invoice.status === "paid"
-                                    ? "Paid"
-                                    : invoice.status === "partially_paid"
-                                      ? "Partial"
-                                      : "Pending"}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeView === "financial-overview" && (
-              <FinancialOverview user={user} />
-            )}
-            {activeView === "history-view" && <HistoryView user={user} />}
-            {activeView === "notes-view" && <NotesView user={user} />}
-            {activeView === "templates" && <Templates user={user} />}
-            {activeView === "home" && <HomeView user={user} />}
-            {activeView === "invoice" && (
-              <>
-               
-                <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
-                  <div className="space-y-6">
-                    {/* Tab Navigation */}
-                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
-                      <div className="flex border-b border-slate-200">
-                        <button
-                          onClick={() => setInputMode("manual")}
-                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
-                            inputMode === "manual"
-                              ? "bg-white text-blue-600 border-b-2 border-blue-600 shadow-sm"
-                              : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                          }`}
-                        >
-                          <span className="flex items-center justify-center gap-2">
-                            <Edit className="w-5 h-5" />
-                            Manual Entry
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => setInputMode("ai")}
-                          className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
-                            inputMode === "ai"
-                              ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm"
-                              : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                          }`}
-                        >
-                          <span className="flex items-center justify-center gap-2">
-                            <Sparkles className="w-5 h-5" />
-                            AI Assistant
-                          </span>
-                        </button>
-                      </div>
-
-                      <div className="p-6">
-                        {inputMode === "ai" ? (
-                          <AIInvoiceExtractor
-                            onDataExtracted={handleAIDataExtracted}
-                            documentType={documentType}
-                          />
-                        ) : null}
-                      </div>
-                    </div>
-
-                    {inputMode === "manual" && (
-                      <>
-                        {/* Summary Cards */}
-                        <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
-                          <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="text-sm font-medium text-orange-700">
-                                Total Amount
-                              </div>
-                              <div className="w-8 h-8 bg-orange-200 rounded-lg flex items-center justify-center">
-                                <DollarSign className="w-5 h-5 text-orange-600" />
-                              </div>
-                            </div>
-                            <div className="text-base sm:text-lg md:text-2xl font-bold text-orange-900">
-                              R{total.toFixed(2)}
-                            </div>
-                          </div>
-
-                          <div
-                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
-                              paymentStatus.totalPaid > 0
-                                ? "from-emerald-100 to-emerald-300 border-emerald-600"
-                                : "from-slate-100 to-slate-300 border-slate-300"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div
-                                className={`text-sm font-medium ${
-                                  paymentStatus.totalPaid > 0
-                                    ? "text-emerald-700"
-                                    : "text-slate-600"
-                                }`}
-                              >
-                                Paid
-                              </div>
-                              <div
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                  paymentStatus.totalPaid > 0
-                                    ? "bg-emerald-200"
-                                    : "bg-slate-200"
-                                }`}
-                              >
-                                <CheckSquare
-                                  className={`w-5 h-5 ${
-                                    paymentStatus.totalPaid > 0
-                                      ? "text-emerald-600"
-                                      : "text-slate-400"
-                                  }`}
-                                />
-                              </div>
-                            </div>
-                            <div
-                              className={`text-lg sm:text-2xl font-bold ${
-                                paymentStatus.totalPaid > 0
-                                  ? "text-emerald-900"
-                                  : "text-slate-900"
-                              }`}
-                            >
-                              R{paymentStatus.totalPaid.toFixed(2)}
-                            </div>
-                          </div>
-
-                          <div
-                            className={`bg-gradient-to-br p-3 rounded-xl border shadow-sm transition-all ${
-                              paymentStatus.balanceDue <= 0
-                                ? "from-emerald-100 to-emerald-300 border-emerald-600"
-                                : paymentStatus.totalPaid > 0
-                                  ? "from-amber-100 to-amber-300 border-amber-300"
-                                  : "from-rose-50 to-rose-100 border-rose-200"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div
-                                className={`text-sm font-medium ${
-                                  paymentStatus.balanceDue <= 0
-                                    ? "text-emerald-700"
-                                    : paymentStatus.totalPaid > 0
-                                      ? "text-amber-700"
-                                      : "text-rose-700"
-                                }`}
-                              >
-                                Balance Due
-                              </div>
-                              <div
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                  paymentStatus.balanceDue <= 0
-                                    ? "bg-emerald-200"
-                                    : paymentStatus.totalPaid > 0
-                                      ? "bg-amber-200"
-                                      : "bg-rose-200"
-                                }`}
-                              >
-                                <Wallet
-                                  className={`w-5 h-5 ${
-                                    paymentStatus.balanceDue <= 0
-                                      ? "text-emerald-600"
-                                      : paymentStatus.totalPaid > 0
-                                        ? "text-amber-600"
-                                        : "text-rose-600"
-                                  }`}
-                                />
-                              </div>
-                            </div>
-                            <div
-                              className={`text-lg sm:text-2xl font-bold ${
-                                paymentStatus.balanceDue <= 0
-                                  ? "text-emerald-900"
-                                  : paymentStatus.totalPaid > 0
-                                    ? "text-amber-900"
-                                    : "text-rose-900"
-                              }`}
-                            >
-                              R{paymentStatus.balanceDue.toFixed(2)}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Payment Status Banner */}
-                        {invoiceId && (
-                          <div
-                            className={`p-4 rounded-xl border-2 flex items-center justify-between ${
-                              paymentStatus.status === "paid"
-                                ? "bg-emerald-50 border-emerald-300"
-                                : paymentStatus.status === "partially_paid"
-                                  ? "bg-amber-50 border-amber-300"
-                                  : "bg-rose-50 border-rose-300"
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              {paymentStatus.status === "paid" ? (
-                                <>
-                                  <div className="w-10 h-10 bg-emerald-200 rounded-full flex items-center justify-center">
-                                    <CheckSquare className="w-6 h-6 text-emerald-600" />
-                                  </div>
-                                  <div>
-                                    <div className="font-bold text-emerald-900">
-                                      Invoice Fully Paid
-                                    </div>
-                                    <div className="text-sm text-emerald-700">
-                                      Payment complete - Thank you!
-                                    </div>
-                                  </div>
-                                </>
-                              ) : paymentStatus.status === "partially_paid" ? (
-                                <>
-                                  <div className="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center">
-                                    <CreditCard className="w-6 h-6 text-amber-600" />
-                                  </div>
-                                  <div>
-                                    <div className="font-bold text-amber-900">
-                                      Partial Payment Received
-                                    </div>
-                                    <div className="text-sm text-amber-700">
-                                      R{paymentStatus.totalPaid.toFixed(2)} paid
-                                      • R{paymentStatus.balanceDue.toFixed(2)}{" "}
-                                      remaining
-                                    </div>
-                                  </div>
-                                </>
-                              ) : (
-                                <>
-                                  <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center">
-                                    <Wallet className="w-6 h-6 text-rose-600" />
-                                  </div>
-                                  <div>
-                                    <div className="font-bold text-rose-900">
-                                      Payment Pending
-                                    </div>
-                                    <div className="text-sm text-rose-700">
-                                      Full amount due: R
-                                      {paymentStatus.balanceDue.toFixed(2)}
-                                    </div>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-
-                            {paymentStatus.status !== "paid" && (
-                              <button
-                                onClick={handleProcessPayment}
-                                className="px-4 py-2 bg-white border-2 border-current rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2"
-                              >
-                                <CreditCard className="w-4 h-4" />
-                                Record Payment
-                              </button>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Stepped Form */}
-                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                          {/* Step 1: Client Info */}
-                          {currentStep === 1 && (
-                            <div className="p-8">
-                              <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <Users className="w-6 h-6 text-blue-600" />
-                                  </div>
-                                  Client Information
-                                </h2>
-                                <p className="text-slate-600 mt-2 ml-13">
-                                  Enter client details
-                                </p>
-                              </div>
-
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Company Name{" "}
-                                    <span className="text-rose-500">*</span>
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={customerName}
-                                    onChange={(e) =>
-                                      setCustomerName(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="Enter company  name"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Tax ID
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={taxId}
-                                    onChange={(e) => setTaxId(e.target.value)}
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="TAX-123-456-789"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Email{" "}
-                                    <span className="text-rose-500">*</span>
-                                  </label>
-                                  <input
-                                    type="email"
-                                    value={customerEmail}
-                                    onChange={(e) =>
-                                      setCustomerEmail(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="contact@example.com"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Phone{" "}
-                                    <span className="text-rose-500">*</span>
-                                  </label>
-                                  <input
-                                    type="tel"
-                                    value={customerPhone}
-                                    onChange={(e) =>
-                                      setCustomerPhone(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="+27 11 123 4567"
-                                  />
-                                </div>
-                                <div className="col-span-1 sm:col-span-2">
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Address{" "}
-                                    <span className="text-rose-500">*</span>
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={customerAddress}
-                                    onChange={(e) =>
-                                      setCustomerAddress(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="123 Business Park, Sandton, Johannesburg, 2196"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Step 2: Billing Details */}
-                          {currentStep === 2 && (
-                            <div className="p-8">
-                              <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                                    <Building className="w-6 h-6 text-emerald-600" />
-                                  </div>
-                                  Billing Details
-                                </h2>
-                                <p className="text-slate-600 mt-2 ml-13">
-                                  Enter billing contact information
-                                </p>
-                              </div>
-
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Billing Contact Name
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={billName}
-                                    onChange={(e) =>
-                                      setBillName(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="Billing contact name"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Billing Email
-                                  </label>
-                                  <input
-                                    type="email"
-                                    value={billEmail}
-                                    onChange={(e) =>
-                                      setBillEmail(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="billing@example.com"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Billing Phone
-                                  </label>
-                                  <input
-                                    type="tel"
-                                    value={billPhone}
-                                    onChange={(e) =>
-                                      setBillPhone(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="+27 11 123 4567"
-                                  />
-                                </div>
-                                <div className="col-span-1 sm:col-span-2">
-                                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Billing Address
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={billAddress}
-                                    onChange={(e) =>
-                                      setBillAddress(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    placeholder="Billing address if different from company address"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Quick Copy Option */}
-                              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                <button
-                                  onClick={() => {
-                                    setBillName(customerName);
-                                    setBillEmail(customerEmail);
-                                    setBillPhone(customerPhone);
-                                    setBillAddress(customerAddress);
-                                  }}
-                                  className="flex items-center gap-2 text-blue-700 hover:text-blue-800 font-semibold transition-colors"
-                                >
-                                  <Users className="w-4 h-4" />
-                                  Copy from Client Information
-                                </button>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Step 3: Line Items */}
-                          {currentStep === 3 && (
-                            <div className="p-8">
-                              <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <FileText className="w-6 h-6 text-purple-600" />
-                                  </div>
-                                  Line Items
-                                </h2>
-                                <p className="text-slate-600 mt-2 ml-13">
-                                  Add products or services to the invoice
-                                </p>
-                              </div>
-
-                              {/* Add Item Form */}
-                              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 mb-6 border border-slate-200">
-                                <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
-                                  <Plus className="w-5 h-5 text-blue-600" />
-                                  Add New Item
-                                </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                                  <div className="sm:col-span-5">
-                                    <input
-                                      type="text"
-                                      placeholder="Description / Service"
-                                      value={newItem.description}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          description: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    />
-                                  </div>
-
-                                  <div className="sm:col-span-2">
-                                    <select
-                                      value={newItem.category}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          category: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
-                                    >
-                                      <option value="Service">Service</option>
-                                      <option value="Product">Product</option>
-                                      <option value="Consulting">
-                                        Consulting
-                                      </option>
-                                      <option value="Other">Other</option>
-                                    </select>
-                                  </div>
-
-                                  <div className="sm:col-span-2">
-                                    <input
-                                      type="number"
-                                      placeholder="Rate"
-                                      value={newItem.rate}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          rate: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    />
-                                  </div>
-
-                                  <div className="sm:col-span-1">
-                                    <input
-                                      type="number"
-                                      placeholder="Qty"
-                                      value={newItem.qty}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          qty: e.target.value,
-                                        })
-                                      }
-                                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-slate-400"
-                                    />
-                                  </div>
-
-                                  <div className="sm:col-span-2">
-                                    <button
-                                      onClick={handleAddItem}
-                                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg px-4 py-2 hover:from-blue-700 hover:to-blue-800 flex items-center justify-center gap-2 transition-all font-semibold shadow-md hover:shadow-lg"
-                                    >
-                                      <Plus className="w-4 h-4" />
-                                      Add
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Items List */}
-                              {items.length > 0 ? (
-                                <div className="mb-6">
-                                  <h3 className="text-lg font-bold text-slate-900 mb-4">
-                                    Items Added ({items.length})
-                                  </h3>
-                                  <div className="overflow-x-auto rounded-xl border border-slate-200">
-                                    <table className="w-full">
-                                      <thead>
-                                        <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                          <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                            Description
-                                          </th>
-                                          <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
-                                            Category
-                                          </th>
-                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                            Rate
-                                          </th>
-                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                            Qty
-                                          </th>
-                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                            Tax
-                                          </th>
-                                          <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
-                                            Amount
-                                          </th>
-                                          <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">
-                                            Action
-                                          </th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="bg-white">
-                                        {items.map((item, index) => (
-                                          <tr
-                                            key={index}
-                                            className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
-                                          >
-                                            <td className="px-4 py-4 text-sm font-medium text-slate-700">
-                                              {item.description}
-                                            </td>
-                                            <td className="px-4 py-4 text-sm">
-                                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
-                                                {item.category || "Service"}
-                                              </span>
-                                            </td>
-                                            <td className="px-4 py-4 text-sm text-right text-slate-700">
-                                              R{item.rate.toFixed(2)}
-                                            </td>
-                                            <td className="px-4 py-4 text-sm text-right text-slate-700">
-                                              {item.qty}
-                                            </td>
-                                            <td className="px-4 py-4 text-sm text-right text-slate-700">
-                                              R{item.taxAmount.toFixed(2)}
-                                            </td>
-                                            <td className="px-4 py-4 text-sm text-right font-bold text-slate-900">
-                                              R{item.totalAmount.toFixed(2)}
-                                            </td>
-                                            <td className="px-4 py-4 text-center">
-                                              <button
-                                                onClick={() =>
-                                                  handleRemoveItem(index)
-                                                }
-                                                className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all"
-                                              >
-                                                Remove
-                                              </button>
-                                            </td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-dashed border-slate-300">
-                                  <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <FileText className="w-8 h-8 text-slate-400" />
-                                  </div>
-                                  <p className="text-slate-700 font-semibold text-lg">
-                                    No items added yet
-                                  </p>
-                                  <p className="text-sm text-slate-500 mt-2">
-                                    Add products or services using the form
-                                    above
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Total Summary */}
-                              {items.length > 0 && (
-                                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
-                                  <div className="space-y-3">
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-slate-700 font-medium">
-                                        Subtotal:
-                                      </span>
-                                      <span className="font-bold text-slate-900 text-lg">
-                                        R{subtotal.toFixed(2)}
-                                      </span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-slate-700 font-medium">
-                                        VAT (15%):
-                                      </span>
-                                      <span className="font-bold text-slate-900 text-lg">
-                                        R{totalTax.toFixed(2)}
-                                      </span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-blue-300">
-                                      <span className="text-slate-900">
-                                        Total:
-                                      </span>
-                                      <span className="text-blue-700 text-2xl">
-                                        R{total.toFixed(2)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Step 4: Payment Terms */}
-                          {currentStep === 4 && (
-                            <div className="p-8">
-                              <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                                    <CreditCard className="w-6 h-6 text-emerald-600" />
-                                  </div>
-                                  Payment Terms & Summary
-                                </h2>
-                                <p className="text-slate-600 mt-2 ml-13">
-                                  Review invoice details and payment information
-                                </p>
-                              </div>
-
-                              {/* Invoice Summary Cards */}
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
-                                  <div className="flex items-center justify-between mb-3">
-                                    <span className="text-sm font-semibold text-blue-700">
-                                      Invoice Total
-                                    </span>
-                                    <DollarSign className="w-5 h-5 text-blue-600" />
-                                  </div>
-                                  <div className="text-3xl font-bold text-blue-900">
-                                    R{total.toFixed(2)}
-                                  </div>
-                                </div>
-
-                                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200">
-                                  <div className="flex items-center justify-between mb-3">
-                                    <span className="text-sm font-semibold text-emerald-700">
-                                      Items Count
-                                    </span>
-                                    <ClipboardList className="w-5 h-5 text-emerald-600" />
-                                  </div>
-                                  <div className="text-3xl font-bold text-emerald-900">
-                                    {items.length}
-                                  </div>
-                                </div>
-
-                                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
-                                  <div className="flex items-center justify-between mb-3">
-                                    <span className="text-sm font-semibold text-purple-700">
-                                      Tax Amount
-                                    </span>
-                                    <Receipt className="w-5 h-5 text-purple-600" />
-                                  </div>
-                                  <div className="text-3xl font-bold text-purple-900">
-                                    R{totalTax.toFixed(2)}
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Payment Terms Section */}
-                              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-6">
-                                <div className="flex items-center gap-3 mb-5">
-                                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <CreditCard className="w-5 h-5 text-purple-600" />
-                                  </div>
-                                  <h3 className="text-xl font-bold text-slate-900">
-                                    Payment Information
-                                  </h3>
-                                </div>
-
-                                <div className="space-y-3">
-                                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                    <span className="text-slate-600 font-medium">
-                                      Payment Due:
-                                    </span>
-                                    <span className="font-bold text-slate-900">
-                                      Net 30 Days
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                    <span className="text-slate-600 font-medium">
-                                      Payment Methods:
-                                    </span>
-                                    <span className="font-bold text-slate-900">
-                                      Bank Transfer, Card, Cash
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                                    <span className="text-slate-600 font-medium">
-                                      Late Payment Fee:
-                                    </span>
-                                    <span className="font-bold text-slate-900">
-                                      2% per month
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center py-3">
-                                    <span className="text-slate-600 font-medium">
-                                      Currency:
-                                    </span>
-                                    <span className="font-bold text-slate-900">
-                                      ZAR (South African Rand)
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Client Summary */}
-                              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
-                                <h3 className="text-lg font-bold text-slate-900 mb-4">
-                                  Invoice Summary
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  <div>
-                                    <h4 className="text-sm font-semibold text-slate-700 mb-2">
-                                      Bill To:
-                                    </h4>
-                                    <div className="text-sm text-slate-600 space-y-1">
-                                      <p className="font-semibold text-slate-900">
-                                        {customerName}
-                                      </p>
-                                      <p>{customerEmail}</p>
-                                      <p>{customerPhone}</p>
-                                      <p>{customerAddress}</p>
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <h4 className="text-sm font-semibold text-slate-700 mb-2">
-                                      Invoice Details:
-                                    </h4>
-                                    <div className="text-sm text-slate-600 space-y-1">
-                                      <p>
-                                        <span className="font-semibold">
-                                          Number:
-                                        </span>{" "}
-                                        {invoiceNumber}
-                                      </p>
-                                      <p>
-                                        <span className="font-semibold">
-                                          Date:
-                                        </span>{" "}
-                                        {new Date().toLocaleDateString()}
-                                      </p>
-                                      <p>
-                                        <span className="font-semibold">
-                                          Type:
-                                        </span>{" "}
-                                        {documentType === "estimate"
-                                          ? "Estimate"
-                                          : "Invoice"}
-                                      </p>
-                                      <p>
-                                        <span className="font-semibold">
-                                          Status:
-                                        </span>{" "}
-                                        <span className="text-amber-600 font-bold">
-                                          Pending
-                                        </span>
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Action Buttons */}
-                              {invoiceId && (
-                                <div className="mt-6 flex gap-3">
-                                  <button
-                                    onClick={handleProcessPayment}
-                                    className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-emerald-500/50 hover:scale-105"
-                                  >
-                                    <CreditCard className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                                    Process Payment
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Navigation Buttons */}
-                          <div className="px-8 py-5 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-                            <button
-                              onClick={handlePrevious}
-                              disabled={currentStep === 1}
-                              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                                currentStep === 1
-                                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                                  : "bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 shadow-sm"
-                              }`}
-                            >
-                              <ChevronLeft className="w-5 h-5" />
-                              <span className="hidden sm:inline">Previous</span>
-                            </button>
-
-                            <div className="text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-lg border border-slate-200">
-                              Step {currentStep} of {totalSteps}
-                            </div>
-
-                            {currentStep < totalSteps ? (
-                              <button
-                                onClick={handleNext}
-                                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg"
-                              >
-                                <span className="hidden sm:inline">Next</span>
-                                <ChevronRight className="w-5 h-5" />
-                              </button>
-                            ) : (
-                              <button
-                                onClick={handleSaveInvoice}
-                                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
-                              >
-                                <Save className="w-5 h-5" />
-                                Save{" "}
-                                {documentType === "estimate"
-                                  ? "Estimate"
-                                  : "Invoice"}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Invoice Preview - This remains at the end */}
-                  <div
-                    id="print-area"
-                    className="hidden print:block bg-white shadow-2xl origin-top"
-                    style={{
-                      width: "210mm",
-                      minHeight: "297mm",
-                      transform: "scale(0.75)",
-                      transformOrigin: "top center",
-                    }}
-                  >
-                    <TemplateRenderer
-                      templateId={selectedTemplate}
-                      businessInfo={businessInfo}
-                      loading={loading}
-                      invoiceNumber={invoiceNumber}
-                      customerName={customerName}
-                      billName={billName}
-                      billEmail={billEmail}
-                      billPhone={billPhone}
-                      billAddress={billAddress}
-                      customerEmail={customerEmail}
-                      customerPhone={customerPhone}
-                      customerAddress={customerAddress}
-                      taxId={taxId}
-                      items={items}
-                      subtotal={subtotal}
-                      totalTax={totalTax}
-                      total={total}
-                      documentType={documentType}
-                      stampText={stampSettings.text}
-                      stampColor={stampSettings.color}
-                      showStampDate={stampSettings.showDate}
-                      showStamp={stampSettings.enabled}
-                      paymentStatus={paymentStatus}
-                    />
-                  </div>
-                </div>
-              </>
-            )}
           </div>
         </div>
       </div>

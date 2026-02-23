@@ -107,13 +107,6 @@ const PlumbingMultiStepForm = ({
         {/* Step 1: Customer Information */}
         {currentStep === 1 && (
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold flex items-center space-x-2">
-                <Users className="w-6 h-6 text-blue-600" />
-                <span>Customer Information</span>
-              </h2>
-            </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

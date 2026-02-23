@@ -126,6 +126,7 @@ const TowingDashboard = () => {
   const [inputMode, setInputMode] = useState("manual");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
     useState(null);
@@ -167,13 +168,13 @@ const TowingDashboard = () => {
       setCurrentStep(currentStep - 1);
     }
   };
-const location = useLocation();
+  const location = useLocation();
 
-useEffect(() => {
-  if (location.state?.activeView) {
-    setActiveView(location.state.activeView);
-  }
-}, [location.state]);
+  useEffect(() => {
+    if (location.state?.activeView) {
+      setActiveView(location.state.activeView);
+    }
+  }, [location.state]);
   const [documentType, setDocumentType] = useState("invoice");
 
   const handleAIDataExtracted = (extractedData) => {
@@ -999,7 +1000,7 @@ Your Construction Quote System
     setDocumentType("invoice");
     handleNewJobCard();
   };
- const handleLogout = async () => {
+  const handleLogout = async () => {
     const auth = getAuth();
     try {
       await signOut(auth);
@@ -1035,43 +1036,104 @@ Your Construction Quote System
     };
     loadNewNumber();
   };
-const headerActions = [
-  documentType === "quote" && jobCardId && {
-    label: "Convert to Invoice", icon: FileText, onClick: handleConvertToInvoice,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap"
-  },
-  { label: "Print",    icon: Printer,  onClick: handlePrint,        variant: "secondary" },
-  { label: "New",      icon: Plus,     onClick: documentType === "quote" ? handleNewQuote : handleNewInvoice,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Send",     icon: Send,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Save PDF", icon: Download, onClick: handleSavePDF,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Save",     icon: Save,     onClick: handleSaveJobCard,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap" },
-  { label: "Logout",   icon: LogOut,   onClick: handleLogout,
-    className: "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap" },
-].filter(Boolean);
+  const headerActions = [
+    documentType === "quote" &&
+      jobCardId && {
+        label: "Convert to Invoice",
+        icon: FileText,
+        onClick: handleConvertToInvoice,
+        className:
+          "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap",
+      },
+    {
+      label: "Preview",
+      icon: Eye,
+      onClick: () => setShowPreview(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
+    {
+      label: "Print",
+      icon: Printer,
+      onClick: handlePrint,
+      variant: "secondary",
+    },
+    {
+      label: "New",
+      icon: Plus,
+      onClick: documentType === "quote" ? handleNewQuote : handleNewInvoice,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Send",
+      icon: Send,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Save PDF",
+      icon: Download,
+      onClick: handleSavePDF,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Save",
+      icon: Save,
+      onClick: handleSaveJobCard,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+    {
+      label: "Logout",
+      icon: LogOut,
+      onClick: handleLogout,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap",
+    },
+  ].filter(Boolean);
 
-const mobileDashboardActions = [
-  documentType === "quote" && jobCardId && {
-    label: "To Invoice", icon: FileText, onClick: handleConvertToInvoice,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap"
-  },
-  { label: "Save",  icon: Save,     onClick: handleSaveJobCard,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "Send",  icon: Send,  
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "PDF",   icon: Download, onClick: handleSavePDF,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap" },
-  { label: "Print", icon: Printer,  onClick: handlePrint,
-    className: "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap" },
-].filter(Boolean);
- 
+  const mobileDashboardActions = [
+    documentType === "quote" &&
+      jobCardId && {
+        label: "To Invoice",
+        icon: FileText,
+        onClick: handleConvertToInvoice,
+        className:
+          "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+      },
+    {
+      label: "Save",
+      icon: Save,
+      onClick: handleSaveJobCard,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-stone-600 to-stone-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "Send",
+      icon: Send,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "PDF",
+      icon: Download,
+      onClick: handleSavePDF,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg text-xs font-semibold shadow-lg transition-all active:scale-95 whitespace-nowrap",
+    },
+    {
+      label: "Print",
+      icon: Printer,
+      onClick: handlePrint,
+      className:
+        "flex items-center gap-1.5 px-3 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 whitespace-nowrap",
+    },
+  ].filter(Boolean);
 
   return (
     <div className="flex h-screen w-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 overflow-hidden">
-      
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
@@ -1415,17 +1477,17 @@ const mobileDashboardActions = [
         className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
       >
         <AppHeader
-  actions={headerActions}
-  mobileActions={mobileDashboardActions}
-  onSettingsOpen={() => setShowSettings(true)}
-/>
+          actions={headerActions}
+          mobileActions={mobileDashboardActions}
+          onSettingsOpen={() => setShowSettings(true)}
+        />
         <div className="flex flex-col h-screen">
           {/* ── Scrollable Main Content ──────────────────────────────── */}
           <div className="flex-1 overflow-y-auto pr-4 md:pr-6 lg:pr-8">
             {/* All your existing modals and content... */}
             {/* Settings Modal */}
             {showSettings && (
-             <BusinessSettingsModal onClose={() => setShowSettings(false)} />
+              <BusinessSettingsModal onClose={() => setShowSettings(false)} />
             )}
 
             <CustomersListModal
@@ -1547,6 +1609,96 @@ const mobileDashboardActions = [
                 </div>
               </div>
             )}
+            {/* ── Invoice Preview Modal ─────────────────────────────────────── */}
+            {showPreview && (
+              <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+                  {/* Modal header */}
+                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
+                        <Eye className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-sm font-semibold text-[#1e293b]">
+                          {documentType === "quote" ? "Quote" : "Invoice"}{" "}
+                          Preview
+                        </h2>
+                        <p className="text-xs text-[#64748b]">
+                          {jobCardNumber || "Draft"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handlePrint}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        Print
+                      </button>
+                      <button
+                        onClick={handleSavePDF}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Save PDF
+                      </button>
+                      <button
+                        onClick={() => setShowPreview(false)}
+                        className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Scrollable canvas area */}
+                  <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
+                    <div
+                      className="mx-auto bg-white shadow-xl"
+                      style={{ width: "210mm", minHeight: "297mm" }}
+                    >
+                      <TemplateRenderer
+                        templateId={selectedTemplate}
+                        businessInfo={businessInfo}
+                        loading={loading}
+                        jobCardNumber={jobCardNumber}
+                        customerName={customerName}
+                        billName={billName}
+                        billEmail={billEmail}
+                        billPhone={billPhone}
+                        billAddress={billAddress}
+                        merchant_code={merchant_code}
+                        customerCompany=""
+                        customerEmail={customerEmail}
+                        customerPhone={customerPhone}
+                        customerAddress={customerAddress}
+                        vehicleReg={vehicleReg}
+                        vehicleMake={vehicleMake}
+                        vehicleModel={vehicleModel}
+                        vehicleYear={vehicleYear}
+                        vehicleVin={vehicleVin}
+                        vehicleMileage={vehicleMileage}
+                        preAuth={preAuth}
+                        authCode={authCode}
+                        items={items}
+                        subtotal={subtotal}
+                        vat={vat}
+                        total={total}
+                        merchantCode="{merchant_code}"
+                        serviceType="SERVICE"
+                        documentType={documentType}
+                        stampText={stampSettings.text}
+                        stampColor={stampSettings.color}
+                        showStampDate={stampSettings.showDate}
+                        showStamp={stampSettings.enabled}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {activeView === "financial-overview" && (
               <FinancialOverview user={user} />
@@ -1560,10 +1712,6 @@ const mobileDashboardActions = [
 
             {activeView === "invoice" && (
               <>
-               
-
-              
-
                 <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
                   <div
                     className={`${showJobCard ? "hidden" : "block"} space-y-6 lg:block print:hidden max-h-[calc(100vh)]`}
@@ -1626,7 +1774,7 @@ const mobileDashboardActions = [
                     {inputMode === "manual" && (
                       <>
                         {/* Summary Cards */}
-                        <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl border border-orange-200 shadow-sm">
                             <div className="flex items-center justify-between mb-2">
                               <div className="text-sm font-medium text-orange-700">
@@ -1922,18 +2070,6 @@ const mobileDashboardActions = [
                           {/* Step 1: Customer Information */}
                           {currentStep === 1 && (
                             <div className="p-8">
-                              <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <Users className="w-6 h-6 text-blue-600" />
-                                  </div>
-                                  Customer Information
-                                </h2>
-                                <p className="text-slate-600 mt-2 ml-13">
-                                  Enter customer and billing details
-                                </p>
-                              </div>
-
                               {/* Invoice To Section */}
                               <div className="mb-8">
                                 <div className="flex items-center gap-2 mb-5">

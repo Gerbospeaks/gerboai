@@ -76,7 +76,11 @@ export default function SolarSidebar({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
               <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 rounded-xl p-1 shadow-lg">
-                <img src={logo} className="w-full h-full object-contain" alt="logo" />
+                <img
+                  src={logo}
+                  className="w-full h-full object-contain"
+                  alt="logo"
+                />
               </div>
             </div>
 
@@ -111,7 +115,10 @@ export default function SolarSidebar({
                     <TrendingUp className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
                   </button>
                   <button
-                    onClick={() => { handleNewInvoice(); goTo("quote"); }}
+                    onClick={() => {
+                      handleNewInvoice();
+                      goTo("quote");
+                    }}
                     className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
                     title="Quotes & Invoices"
                   >
@@ -135,7 +142,11 @@ export default function SolarSidebar({
           <div className="flex justify-center pb-4 md:pb-6">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center ring-2 ring-orange-700 shadow-lg overflow-hidden">
               {businessInfo?.logoUrl ? (
-                <img src={businessInfo.logoUrl} className="w-6 h-6 object-contain" alt="biz" />
+                <img
+                  src={businessInfo.logoUrl}
+                  className="w-6 h-6 object-contain"
+                  alt="biz"
+                />
               ) : (
                 <div className="w-6 h-6 bg-amber-300 rounded-full" />
               )}
@@ -150,7 +161,11 @@ export default function SolarSidebar({
           <div className="p-4 md:p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8">
-              <img src={logo} className="w-16 h-12 object-contain rounded-lg" alt="logo" />
+              <img
+                src={logo}
+                className="w-16 h-12 object-contain rounded-lg"
+                alt="logo"
+              />
               <button
                 onClick={() => setSidebarOpen(false)}
                 className="group p-2 text-amber-400 hover:text-white hover:bg-orange-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
@@ -170,7 +185,10 @@ export default function SolarSidebar({
               <NavItem
                 icon={Settings}
                 label="Settings"
-                onClick={() => { setShowSettings(true); setSidebarOpen(false); }}
+                onClick={() => {
+                  setShowSettings(true);
+                  setSidebarOpen(false);
+                }}
                 color="amber"
               />
 
@@ -190,7 +208,9 @@ export default function SolarSidebar({
                   >
                     <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                       <Receipt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="text-xs md:text-sm font-semibold truncate">Quotes & Invoices</span>
+                      <span className="text-xs md:text-sm font-semibold truncate">
+                        Quotes & Invoices
+                      </span>
                     </div>
                     <ChevronDown
                       className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${isQuotesOpen ? "rotate-180" : ""}`}
@@ -202,19 +222,28 @@ export default function SolarSidebar({
                     <SubItem
                       dot="bg-amber-500"
                       label="Create Quote"
-                      onClick={() => { handleNewQuote(); goTo("quote"); }}
+                      onClick={() => {
+                        handleNewQuote();
+                        goTo("quote");
+                      }}
                     />
                     <SubItem
                       dot="bg-emerald-500"
                       label="Create Invoice"
-                      onClick={() => { handleNewInvoice(); goTo("quote"); }}
+                      onClick={() => {
+                        handleNewInvoice();
+                        goTo("quote");
+                      }}
                     />
                     <SubItem
                       dot="bg-orange-500"
                       label={`All ${documentType === "quote" ? "Quotes" : "Invoices"}`}
                       badge={savedQuotes?.length ?? 0}
                       badgeColor="from-amber-600 to-orange-600"
-                      onClick={() => { setShowQuotesList(!showQuotesList); if (isMobile) setSidebarOpen(false); }}
+                      onClick={() => {
+                        setShowQuotesList(!showQuotesList);
+                        if (isMobile) setSidebarOpen(false);
+                      }}
                     />
                   </div>
                 </div>
@@ -227,7 +256,9 @@ export default function SolarSidebar({
                   >
                     <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                       <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="text-xs md:text-sm font-semibold truncate">Clients</span>
+                      <span className="text-xs md:text-sm font-semibold truncate">
+                        Clients
+                      </span>
                     </div>
                     <ChevronDown
                       className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${isClientsOpen ? "rotate-180" : ""}`}
@@ -239,14 +270,20 @@ export default function SolarSidebar({
                     <SubItem
                       dot="bg-emerald-500"
                       label="Add Client"
-                      onClick={() => { handleAddNewCustomer(); if (isMobile) setSidebarOpen(false); }}
+                      onClick={() => {
+                        handleAddNewCustomer();
+                        if (isMobile) setSidebarOpen(false);
+                      }}
                     />
                     <SubItem
                       dot="bg-yellow-500"
                       label="All Clients"
                       badge={savedCustomers?.length ?? 0}
                       badgeColor="from-yellow-600 to-orange-600"
-                      onClick={() => { setShowCustomersListModal(true); if (isMobile) setSidebarOpen(false); }}
+                      onClick={() => {
+                        setShowCustomersListModal(true);
+                        if (isMobile) setSidebarOpen(false);
+                      }}
                     />
                   </div>
                 </div>
@@ -361,7 +398,9 @@ function SubItem({ label, dot, onClick, badge, badgeColor }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 min-w-0">
           {dot && (
-            <div className={`w-1.5 h-1.5 rounded-full ${dot} flex-shrink-0 group-hover:scale-150 transition-transform duration-300`} />
+            <div
+              className={`w-1.5 h-1.5 rounded-full ${dot} flex-shrink-0 group-hover:scale-150 transition-transform duration-300`}
+            />
           )}
           <span className="truncate">{label}</span>
         </div>

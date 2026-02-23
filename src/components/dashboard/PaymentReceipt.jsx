@@ -114,7 +114,9 @@ const PaymentReceipt = ({ payment, invoice, businessInfo }) => {
           </span>
         </div>
         <div className="flex justify-between mb-2">
-          <span className="text-slate-600"><span className="hidden sm:inline">Previous</span> Payments:</span>
+          <span className="text-slate-600">
+            <span className="hidden sm:inline">Previous</span> Payments:
+          </span>
           <span className="font-bold">
             R
             {((invoice?.totals?.paid || 0) - (payment?.amount || 0)).toFixed(2)}
