@@ -58,7 +58,31 @@ const AppHeader = ({ actions = [], showActions = true, onSettingsOpen }) => {
     user?.name || user?.email?.split("@")[0] || "User";
 
   const getBusinessName = () =>
-    user?.settings?.businessInfo?.businessName || "SOLIDFLO";
+    user?.invoices.businessInfo?.businessName || "SOLIDFLO";
+
+ const getNextInvoiceNumber = () => {
+  const invoices = user?.invoices || {};
+  
+  console.log("All invoice keys:", Object.keys(invoices));
+  Object.keys(invoices).forEach(key => {
+    console.log(`invoices[${key}]:`, invoices[key]);
+  });
+
+  const invoiceNumbers = Object.keys(invoices)
+    .filter(key => key !== "businessInfo")
+    .map(key => {
+      const jobCardNumber = invoices[key]?.jobCardNumber;
+      console.log(`key: ${key}, jobCardNumber: ${jobCardNumber}`);
+      const match = jobCardNumber?.match(/(\d+)$/);
+      return match ? parseInt(match[1], 10) : 0;
+    })
+    .filter(num => !isNaN(num));
+
+  const lastNumber = invoiceNumbers.length > 0 ? Math.max(...invoiceNumbers) : 0;
+  const nextNum = lastNumber + 1;
+ console.log("Full user object:", JSON.stringify(user, null, 2));
+  return `JC-2026-${String(nextNum).padStart(4, '0')}`;
+};
 
   return (
     <header className="sticky top-0 z-40 bg-gray-50">
@@ -69,7 +93,7 @@ const AppHeader = ({ actions = [], showActions = true, onSettingsOpen }) => {
           onClick={() => navigate("/")}
         >
           <span className="font-bold text-gray-800 text-sm tracking-tight hidden sm:block">
-            {getBusinessName()}
+            {getNextInvoiceNumber()}
           </span>
         </div>
 

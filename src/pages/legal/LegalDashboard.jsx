@@ -591,13 +591,7 @@ const LegalDashboard = () => {
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    {
-      label: "Logout",
-      icon: LogOut,
-      onClick: handleLogout,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#f1f5f9] text-[#64748b] border border-[#e2e8f0] text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
+    
   ].filter(Boolean);
 
   const mobileDashboardActions = [

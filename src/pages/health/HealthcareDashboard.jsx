@@ -905,13 +905,7 @@ const HealthcareDashboard = () => {
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    {
-      label: "Logout",
-      icon: LogOut,
-      onClick: handleLogout,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#f1f5f9] text-[#64748b] border border-[#e2e8f0] text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
+    
   ];
 
   const mobileDashboardActions = [

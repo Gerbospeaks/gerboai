@@ -112,8 +112,7 @@ const PlumbingDashboard = () => {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [customers, setCustomers] = useState([]);
-  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
-    useState(null);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
@@ -131,8 +130,6 @@ const PlumbingDashboard = () => {
     balanceDue: 0,
     status: "pending",
   });
-
-  // ── Customer fields ────────────────────────────────────────────────────
   const [customerName, setCustomerName] = useState("John Smith");
   const [customerId, setCustomerId] = useState("CUST-2026-5678");
   const [customerEmail, setCustomerEmail] = useState("john.smith@example.com");
@@ -140,8 +137,6 @@ const PlumbingDashboard = () => {
   const [customerAddress, setCustomerAddress] = useState(
     "456 Water Street, Manchester, M1 2AB",
   );
-
-  // ── Property fields ────────────────────────────────────────────────────
   const [propertyType, setPropertyType] = useState("Residential");
   const [propertyAddress, setPropertyAddress] = useState(
     "456 Water Street, Manchester, M1 2AB",
@@ -150,7 +145,6 @@ const PlumbingDashboard = () => {
     "Key available from main office",
   );
   const [emergencyService, setEmergencyService] = useState(false);
-
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "AQUA FLOW PLUMBING SERVICES",
     addressLine1: "25 PIPELINE ROAD",
@@ -161,7 +155,6 @@ const PlumbingDashboard = () => {
     secondaryPhone: "07700 900123",
     logoUrl: "",
   });
-
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState({
@@ -170,14 +163,10 @@ const PlumbingDashboard = () => {
     qty: "",
     type: "Labor",
   });
-
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
   const vat = subtotal * 0.2;
   const total = subtotal + vat;
-
   const location = useLocation();
-
-  // ── shared template props ──────────────────────────────────────────────
   const templateProps = {
     templateId: selectedTemplate,
     businessInfo,
@@ -706,13 +695,7 @@ const PlumbingDashboard = () => {
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-cyan-700 text-white text-sm font-semibold rounded-lg hover:from-cyan-700 transition-colors shadow-sm whitespace-nowrap",
     },
-    {
-      label: "Logout",
-      icon: LogOut,
-      onClick: handleLogout,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap",
-    },
+    
   ].filter(Boolean);
 
   const mobileDashboardActions = [

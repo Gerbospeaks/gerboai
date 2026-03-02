@@ -1,8 +1,10 @@
 // components/BusinessSettingsModal.jsx
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "../firebase"; 
+import { getAuth } from "firebase/auth";
+import { uploadLogoToR2 } from "../utils/uploadLogoToR2";
 import {
   Settings,
   X,
@@ -19,7 +21,7 @@ import SignatureStamp from "./mechanics/SignatureStamp";
 
 const BusinessSettingsModal = ({ onClose }) => {
   const { user, authUser } = useAuth();
-
+const [uploading, setUploading] = useState(false);
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "",
     addressLine1: "",
@@ -59,22 +61,34 @@ const BusinessSettingsModal = ({ onClose }) => {
     }
   };
 
-  const handleLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !user?.uid) return;
-    if (!file.type.startsWith("image/"))
-      return alert("Please upload an image file.");
-    if (file.size > 5 * 1024 * 1024) return alert("Image must be under 5MB.");
-    try {
-      const storage = getStorage();
-      const storageRef = ref(storage, `users/${user.uid}/logo/${file.name}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      setBusinessInfo((prev) => ({ ...prev, logoUrl: downloadURL }));
-    } catch (error) {
-      console.error("Error uploading logo:", error);
-    }
-  };
+ const handleLogoUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file || !user?.uid) return;
+
+  if (!file.type.startsWith("image/"))
+    return alert("Please upload an image file.");
+  if (file.size > 5 * 1024 * 1024)
+    return alert("Image must be under 5MB.");
+
+  try {
+    setUploading(true);
+
+    // ✅ Get the real Firebase Auth user (has getIdToken method)
+    const authUser = getAuth().currentUser;
+    if (!authUser) throw new Error("Not authenticated");
+
+    const logoUrl = await uploadLogoToR2(file, authUser);
+
+    await updateDoc(doc(db, "users", user.uid), { logoUrl });
+    setBusinessInfo((prev) => ({ ...prev, logoUrl }));
+
+  } catch (error) {
+    console.error("Error uploading logo:", error);
+    alert("Upload failed: " + error.message);
+  } finally {
+    setUploading(false);
+  }
+};
 
   const handleSaveBusinessInfo = async () => {
     if (!user?.uid) return;

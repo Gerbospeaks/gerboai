@@ -143,7 +143,7 @@ const MechanicsDashboard = () => {
     pendingPayments: 0,
     loading: true,
   });
-  const [showInvoicesList, setShowInvoicesList] = useState(false);
+
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -835,13 +835,7 @@ const MechanicsDashboard = () => {
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    {
-      label: "Logout",
-      icon: LogOut,
-      onClick: handleLogout,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#f1f5f9] text-[#64748b] border border-[#e2e8f0] text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
+    
   ].filter(Boolean);
 
   const mobileDashboardActions = [
@@ -1144,7 +1138,7 @@ const MechanicsDashboard = () => {
             Recent Invoices
           </h3>
           <button
-            onClick={() => setShowInvoicesList(true)}
+            onClick={() => setShowJobCardsList(true)}
             className="text-xs text-[#2563eb] hover:text-[#1d4ed8] font-medium"
           >
             View all
@@ -1324,8 +1318,8 @@ const MechanicsDashboard = () => {
             />
           )}
 
-          {/* All invoices modal */}
-          {showInvoicesList && (
+          {/* All job cards modal */}
+          {showJobCardsList && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
               <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-[#e2e8f0]">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
@@ -1338,7 +1332,7 @@ const MechanicsDashboard = () => {
                     </p>
                   </div>
                   <button
-                    onClick={() => setShowInvoicesList(false)}
+                    onClick={() => setShowJobCardsList(false)}
                     className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
                   >
                     <X className="w-4 h-4" />
@@ -1377,7 +1371,7 @@ const MechanicsDashboard = () => {
                             key={card.id}
                             onClick={() => {
                               loadJobCard(card);
-                              setShowInvoicesList(false);
+                              setShowJobCardsList(false);
                             }}
                             className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] cursor-pointer transition-colors"
                           >
