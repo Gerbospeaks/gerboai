@@ -9,6 +9,7 @@ import {
   ChevronDown,
   FileText,
   ClipboardList,
+  ShoppingBag,
   Car,
   Package,
   LogOut,
@@ -80,7 +81,7 @@ export default function MechanicsSidebar({
           onClick={() => setSidebarOpen(false)}
           className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg transition-all flex-shrink-0"
         >
-          <X className="w-4 h-4" />
+          <ChevronLeft className="w-4 h-4" />
         </button>
       </div>
 
@@ -109,7 +110,12 @@ export default function MechanicsSidebar({
           onClick={() => goTo("financial-overview")}
           active={activeView === "financial-overview"}
         />
-
+         <NavItem
+          icon={ShoppingBag}
+          label="Purchase Orders"
+          onClick={() => goTo("purchase-orders")}
+          active={activeView === "purchase-orders"}
+        />
         {/* Job Cards */}
         <Accordion
           icon={ClipboardList}

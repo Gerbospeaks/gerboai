@@ -36,13 +36,12 @@ export default function CarpentrySidebar({
   setShowCustomersListModal,
   handleAddNewCustomer,
   documentType,
-  isQuotesInvoicesOpen2,
-  setIsQuotesInvoicesOpen2,
+  
 }) {
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
+  const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);  
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", onResize);
@@ -117,7 +116,7 @@ export default function CarpentrySidebar({
           icon={Receipt}
           label="Quotes & Invoices"
           isOpen={isQuotesInvoicesOpen2}
-          onToggle={() => setIsQuotesInvoicesOpen2?.((p) => !p)}
+          onToggle={() => setIsQuotesInvoicesOpen2((p) => !p)}
         >
           <SubItem
             dot="bg-[#b45309]"

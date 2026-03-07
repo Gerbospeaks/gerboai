@@ -135,7 +135,7 @@ export default function AccountingSidebar({
             dot="bg-[#059669]"
             label="Create Invoice"
             onClick={() => {
-              handleNewInvoiceDoc?.();
+              handleNewInvoice?.();
               goTo("invoice");
             }}
           />

@@ -1,85 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../../contexts/AuthContext";
-import HomeView from "../HomeView";
-import BusinessSettingsModal from "../BusinessSettingsModal";
-import AppHeader from "../AppHeader";
-import { serverTimestamp } from "firebase/firestore";
-import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
-import FinancialOverview from "../FinancialOverview";
-import Vehicles from "./Vehicles";
-import { useNavigate, useLocation } from "react-router-dom";
-import PartsInventory from "./PartsInventory";
-import uploadLogoToR2 from "../../utils/uploadLogoToR2";
-import Templates from "./Templates";
-import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
-import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
-import PaymentReceipt from "../../components/dashboard/PaymentReceipt";
-import { getFunctions, httpsCallable } from "firebase/functions";
-import MechanicsSidebar from "./MechanicsSidebar";
 import {
-  getFirestore,
-  collection,
-  query,
-  addDoc,
-  updateDoc,
-  doc,
-  getDoc,
-  setDoc,
-  orderBy,
-  limit,
-  getDocs,
+  addDoc, collection, doc,
+  getDoc, getDocs, getFirestore, limit, orderBy, query, serverTimestamp, setDoc, updateDoc
 } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Printer, Download, Sparkles } from "lucide-react";
+import { getFunctions } from "firebase/functions";
+import {
+  ArrowRight, Building2, Car, CheckSquare, ChevronLeft,
+  ChevronRight, CreditCard, Download, Eye, FileText, MapPin, Package, Plus, Printer, Receipt, Save, Send, Sparkles, TrendingDown, TrendingUp, Truck, Users, Wallet, Wrench, X
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import logo from "../../assets/img/solidflo-logo.png";
+import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
+import { useAuth } from "../../contexts/AuthContext";
 import { db } from "../../firebase";
+import uploadLogoToR2 from "../../utils/uploadLogoToR2";
+import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AppHeader from "../AppHeader";
+import BusinessSettingsModal from "../BusinessSettingsModal";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
-import HistoryView from "./HistoryView";
-import NotesView from "./NotesView";
-import { logHistory } from "./historyLogger";
-import SignatureStamp from "./SignatureStamp";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import FinancialOverview from "../FinancialOverview";
 import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  Settings,
-  Users,
-  Image,
-  Building2,
-  MapPin,
-  Phone,
-  X,
-  FileText,
-  Wrench,
-  FileBarChart,
-  BarChart3,
-  Menu,
-  TrendingDown,
-  ArrowRight,
-  Plus,
-  Send,
-  Save,
-  Edit,
-  LogOut,
-  CheckSquare,
-  TrendingUp,
-  CreditCard,
-  Receipt,
-  Wallet,
-  PieChart,
-  Car,
-  ClipboardList,
-  Package,
-  Upload,
-  Eye,
-  EyeOff,
-  Search,
-  Filter,
-  MoreVertical,
-} from "lucide-react";
+  POTemplateRenderer
+} from "../Purchaseordertemplates";
+import HistoryView from "./HistoryView";
+import MechanicsSidebar from "./MechanicsSidebar";
+import NotesView from "./NotesView";
+import PartsInventory from "./PartsInventory";
+import Templates from "./Templates";
+import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
+import Vehicles from "./Vehicles";
 
 const generateJobCardNumber = async (userId, documentType) => {
   const db = getFirestore();
@@ -102,10 +53,17 @@ const generateJobCardNumber = async (userId, documentType) => {
 const functions = getFunctions();
 
 const MechanicsDashboard = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeView, setActiveView]   = useState("home");
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 5;
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const handleQuickCreate = ({ view, action }) => {
+  if (action === "newInvoice")  handleNewInvoice();
+  if (action === "newQuote")    handleNewQuote();
+  if (action === "newCustomer") handleAddNewCustomer();
+  if (view) setActiveView(view);
+};
+  const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState("JobCard");
   const [showJobCard, setShowJobCard] = useState(false);
   const { user, authUser } = useAuth();
@@ -115,7 +73,6 @@ const MechanicsDashboard = () => {
   const [showJobCardsList, setShowJobCardsList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersList, setShowCustomersList] = useState(false);
-  const [activeView, setActiveView] = useState("home");
   const [currentJobCardId, setCurrentJobCardId] = useState(null);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
@@ -143,13 +100,23 @@ const MechanicsDashboard = () => {
     pendingPayments: 0,
     loading: true,
   });
-
-  const [stampSettings, setStampSettings] = useState({
-    text: "APPROVED",
-    color: "#d32f2f",
-    showDate: false,
-    enabled: false,
-  });
+  const [poNumber, setPoNumber] = useState("");
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
+  const [deliveryDate, setDeliveryDate] = useState("");
+  const [supplierName, setSupplierName] = useState("");
+  const [supplierContact, setSupplierContact] = useState("");
+  const [supplierEmail, setSupplierEmail] = useState("");
+  const [supplierPhone, setSupplierPhone] = useState("");
+  const [supplierAddress, setSupplierAddress] = useState("");
+  const [deliveryName, setDeliveryName] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [poItems, setPoItems] = useState([
+    { description: "", qty: 1, unit: "ea", unitPrice: 0, amount: 0 },
+  ]);
+  const [notes, setNotes] = useState("");
+  const [paymentTerms, setPaymentTerms] = useState("30 Days");
+  const [shippingMethod, setShippingMethod] = useState("");
+  const [stampSettings, setStampSettings] = useState("");
   const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
     balanceDue: 0,
@@ -161,7 +128,69 @@ const MechanicsDashboard = () => {
   useEffect(() => {
     if (location.state?.activeView) setActiveView(location.state.activeView);
   }, [location.state]);
+  const [newPoItem, setNewPoItem] = useState({
+    description: "",
+    qty: 1,
+    unit: "ea",
+    unitPrice: 0,
+  });
 
+  const handleAddPoItem = () => {
+    if (!newPoItem.description || !newPoItem.qty) return;
+    const unitPrice = Number(newPoItem.unitPrice) || 0;
+    const qty = Number(newPoItem.qty);
+    setPoItems((prev) => [
+      ...prev.filter((i) => i.description), 
+      {
+        description: newPoItem.description,
+        qty,
+        unit: newPoItem.unit,
+        unitPrice,
+        amount: unitPrice * qty,
+      },
+    ]);
+    setNewPoItem({ description: "", qty: 1, unit: "ea", unitPrice: 0 });
+  };
+  const handleSavePO = async () => {
+    if (!user?.uid) return;
+    try {
+      const db = getFirestore();
+      const poData = {
+        poNumber,
+        poDate,
+        deliveryDate,
+        supplierName,
+        supplierContact,
+        supplierEmail,
+        supplierPhone,
+        supplierAddress,
+        deliveryName,
+        deliveryAddress,
+        items: poItems.filter((i) => i.description),
+        totals: { subtotal: poSubtotal, vat: poVat, total: poTotal },
+        notes,
+        paymentTerms,
+        shippingMethod,
+        status: "pending",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      const posRef = collection(db, "users", user.uid, "purchaseOrders");
+      await addDoc(posRef, poData);
+
+      alert("Purchase Order saved successfully!");
+    } catch (error) {
+      console.error("Error saving PO:", error);
+      alert("Failed to save Purchase Order");
+    }
+  };
+  const poSubtotal = poItems.reduce(
+    (sum, item) => sum + Number(item.amount),
+    0,
+  );
+  const poVat = poSubtotal * 0.15;
+  const poTotal = poSubtotal + poVat;
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleAIDataExtracted = (extractedData) => {
     if (extractedData.customer.name)
@@ -420,6 +449,10 @@ const MechanicsDashboard = () => {
     setCustomerPhone(jobCard.customer?.phone || "");
     setCustomerAddress(jobCard.customer?.address || "");
     setCustomerId(jobCard.customer?.merchant_code || "");
+    setBillName(jobCard.billTo?.name || "");
+    setBillEmail(jobCard.billTo?.email || "");
+    setBillPhone(jobCard.billTo?.phone || "");
+    setBillAddress(jobCard.billTo?.address || "");
     setVehicleMake(jobCard.vehicle?.make || "");
     setVehicleModel(jobCard.vehicle?.model || "");
     setVehicleYear(jobCard.vehicle?.year || "");
@@ -622,10 +655,20 @@ const MechanicsDashboard = () => {
     const styleSheet = document.createElement("style");
     styleSheet.textContent = printStyles;
     document.head.appendChild(styleSheet);
-    window.print();
-    setTimeout(() => document.head.removeChild(styleSheet), 1000);
-  };
 
+    // Wait for styles to apply and DOM to repaint
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        window.print();
+      }, 300);
+    });
+
+    // Clean up stylesheet after printing is done
+    window.onafterprint = () => {
+      document.head.removeChild(styleSheet);
+      window.onafterprint = null;
+    };
+  };
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState({
     description: "",
@@ -655,6 +698,12 @@ const MechanicsDashboard = () => {
       phone: customerPhone,
       address: customerAddress,
       merchant_code,
+    },
+    billTo: {
+      name: billName,
+      email: billEmail,
+      phone: billPhone,
+      address: billAddress,
     },
     vehicle: {
       make: vehicleMake,
@@ -788,7 +837,8 @@ const MechanicsDashboard = () => {
   // ── Header action buttons ─────────────────────────────────────────────────
   const headerActions = [
     documentType === "quote" &&
-      jobCardId && {
+      jobCardId &&
+      activeView !== "purchase-orders" && {
         label: "Convert to Invoice",
         icon: FileText,
         onClick: handleConvertToInvoice,
@@ -808,7 +858,7 @@ const MechanicsDashboard = () => {
       onClick: handlePrint,
       variant: "secondary",
     },
-    {
+    activeView !== "purchase-orders" && {
       label: "New",
       icon: Plus,
       onClick: documentType === "quote" ? handleNewQuote : handleNewInvoice,
@@ -829,18 +879,19 @@ const MechanicsDashboard = () => {
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
     {
-      label: "Save",
+      label: activeView === "purchase-orders" ? "Save P.O." : "Save",
       icon: Save,
-      onClick: handleSaveJobCard,
+      onClick:
+        activeView === "purchase-orders" ? handleSavePO : handleSaveJobCard,
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    
   ].filter(Boolean);
 
   const mobileDashboardActions = [
     documentType === "quote" &&
-      jobCardId && {
+      jobCardId &&
+      activeView !== "purchase-orders" && {
         label: "To Invoice",
         icon: FileText,
         onClick: handleConvertToInvoice,
@@ -848,9 +899,10 @@ const MechanicsDashboard = () => {
           "flex items-center gap-1.5 px-3 py-2 bg-[#7c3aed] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
       },
     {
-      label: "Save",
+      label: activeView === "purchase-orders" ? "Save P.O." : "Save",
       icon: Save,
-      onClick: handleSaveJobCard,
+      onClick:
+        activeView === "purchase-orders" ? handleSavePO : handleSaveJobCard,
       className:
         "flex items-center gap-1.5 px-3 py-2 bg-[#2563eb] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
     },
@@ -875,7 +927,6 @@ const MechanicsDashboard = () => {
         "flex items-center gap-1.5 px-3 py-2 bg-white border border-[#e2e8f0] text-[#374151] rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
     },
   ].filter(Boolean);
-
   // ── Helpers ───────────────────────────────────────────────────────────────
   const formatCurrency = (n) =>
     new Intl.NumberFormat("en-ZA", {
@@ -940,15 +991,23 @@ const MechanicsDashboard = () => {
   );
 
   // ── Step definitions ──────────────────────────────────────────────────────
-  const steps = [
-    { number: 1, title: "Invoice To", icon: Users },
-    { number: 2, title: "Bill To", icon: FileText },
-    { number: 3, title: "Vehicle", icon: Car },
-    { number: 4, title: "Services", icon: Wrench },
-    { number: 5, title: "Payment", icon: CreditCard },
-  ];
+  const steps =
+    activeView === "purchase-orders"
+      ? [
+          { number: 1, title: "Supplier", icon: Truck },
+          { number: 2, title: "Delivery", icon: MapPin },
+          { number: 3, title: "Items", icon: Package },
+          { number: 4, title: "Summary", icon: FileText },
+        ]
+      : [
+          { number: 1, title: "Invoice To", icon: Users },
+          { number: 2, title: "Bill To", icon: FileText },
+          { number: 3, title: "Vehicle", icon: Car },
+          { number: 4, title: "Services", icon: Wrench },
+          { number: 5, title: "Payment", icon: CreditCard },
+        ];
+  const totalSteps = steps.length;
 
-  // ── Shared template props ─────────────────────────────────────────────────
   const templateProps = {
     templateId: selectedTemplate,
     businessInfo,
@@ -984,7 +1043,27 @@ const MechanicsDashboard = () => {
     showStampDate: stampSettings.showDate,
     showStamp: stampSettings.enabled,
   };
-
+  const poTemplateProps = {
+    templateId: selectedTemplate,
+    businessInfo,
+    poNumber,
+    poDate,
+    deliveryDate,
+    supplierName,
+    supplierContact,
+    supplierEmail,
+    supplierPhone,
+    supplierAddress,
+    deliveryName,
+    deliveryAddress,
+    items: poItems.filter((i) => i.description),
+    subtotal: poSubtotal,
+    vat: poVat,
+    total: poTotal,
+    notes,
+    paymentTerms,
+    shippingMethod,
+  };
   // ── Home view ─────────────────────────────────────────────────────────────
   const HomeViewLocal = () => (
     <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-4">
@@ -1240,7 +1319,11 @@ const MechanicsDashboard = () => {
         className="hidden print:block bg-white"
         style={{ width: "210mm", minHeight: "297mm" }}
       >
-        <TemplateRenderer {...templateProps} />
+        {documentType === "purchase-order" ? (
+          <POTemplateRenderer {...poTemplateProps} />
+        ) : (
+          <TemplateRenderer {...templateProps} />
+        )}
       </div>
 
       <div className="flex-1 flex overflow-hidden min-h-0">
@@ -1286,6 +1369,13 @@ const MechanicsDashboard = () => {
             actions={headerActions}
             mobileActions={mobileDashboardActions}
             onSettingsOpen={() => setShowSettings(true)}
+            dashboardType="mechanics"        // adapts Quick Create menu + accent colour
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            onQuickCreate={handleQuickCreate}
+            pageTitle="Job Cards"            // optional breadcrumb
+            plan="pro"
+            notifications={notifications}
           />
 
           {/* Modals */}
@@ -1502,7 +1592,7 @@ const MechanicsDashboard = () => {
           )}
 
           {/* ── Invoice / Job Card Builder — split layout ──────────────────── */}
-          {activeView === "invoice" && (
+          {(activeView === "invoice" || activeView === "purchase-orders") && (
             <div className="flex-1 overflow-hidden flex min-h-0">
               {/* ── LEFT: Form panel ───────────────────────────────────────── */}
               <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
@@ -1692,575 +1782,1103 @@ const MechanicsDashboard = () => {
 
                         {/* Step content */}
                         <div className="p-6">
-                          {/* Step 1 – Invoice To */}
-                          {currentStep === 1 && (
-                            <div>
-                              <div className="flex items-center gap-3 mb-5">
-                                <div className="w-9 h-9 bg-[#eff6ff] rounded-lg flex items-center justify-center">
-                                  <Users className="w-5 h-5 text-[#2563eb]" />
-                                </div>
+                          {activeView === "purchase-orders" ? (
+                            <>
+                              {/* PO Step 1 – Supplier */}
+                              {currentStep === 1 && (
                                 <div>
-                                  <h2 className="text-base font-semibold text-[#1e293b]">
-                                    Invoice To
-                                  </h2>
-                                  <p className="text-xs text-[#64748b]">
-                                    Client details for this job card
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {[
-                                  {
-                                    label: "Customer Name",
-                                    value: customerName,
-                                    set: setCustomerName,
-                                    placeholder: "Enter customer name",
-                                    required: true,
-                                  },
-                                  {
-                                    label: "Customer ID",
-                                    value: merchant_code,
-                                    set: setCustomerId,
-                                    placeholder: "Customer ID",
-                                  },
-                                  {
-                                    label: "Email",
-                                    value: customerEmail,
-                                    set: setCustomerEmail,
-                                    type: "email",
-                                    placeholder: "email@example.com",
-                                    required: true,
-                                  },
-                                  {
-                                    label: "Phone",
-                                    value: customerPhone,
-                                    set: setCustomerPhone,
-                                    type: "tel",
-                                    placeholder: "082 123 4567",
-                                    required: true,
-                                  },
-                                ].map(
-                                  ({
-                                    label,
-                                    value,
-                                    set,
-                                    placeholder,
-                                    type = "text",
-                                    required,
-                                  }) => (
-                                    <div key={label}>
-                                      <label className={labelCls}>
-                                        {label}{" "}
-                                        {required && (
-                                          <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                            *
-                                          </span>
-                                        )}
-                                      </label>
-                                      <input
-                                        type={type}
-                                        value={value}
-                                        onChange={(e) => set(e.target.value)}
-                                        placeholder={placeholder}
-                                        className={inputCls}
-                                      />
+                                  <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-9 h-9 bg-[#eff6ff] rounded-lg flex items-center justify-center">
+                                      <Truck className="w-5 h-5 text-[#2563eb]" />
                                     </div>
-                                  ),
-                                )}
-                                <div className="col-span-1 sm:col-span-2">
-                                  <label className={labelCls}>
-                                    Address{" "}
-                                    <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                      *
-                                    </span>
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={customerAddress}
-                                    onChange={(e) =>
-                                      setCustomerAddress(e.target.value)
-                                    }
-                                    placeholder="Street address, City, Postal Code"
-                                    className={inputCls}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Step 2 – Bill To */}
-                          {currentStep === 2 && (
-                            <div>
-                              <div className="flex items-center gap-3 mb-5">
-                                <div className="w-9 h-9 bg-[#f0fdf4] rounded-lg flex items-center justify-center">
-                                  <FileText className="w-5 h-5 text-[#059669]" />
-                                </div>
-                                <div>
-                                  <h2 className="text-base font-semibold text-[#1e293b]">
-                                    Bill To
-                                  </h2>
-                                  <p className="text-xs text-[#64748b]">
-                                    Billing contact (may differ from client)
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {[
-                                  {
-                                    label: "Billing Name",
-                                    value: billName,
-                                    set: setBillName,
-                                    placeholder: "Billing contact name",
-                                    required: true,
-                                  },
-                                  {
-                                    label: "Email",
-                                    value: billEmail,
-                                    set: setBillEmail,
-                                    placeholder: "billing@example.com",
-                                    type: "email",
-                                  },
-                                  {
-                                    label: "Phone",
-                                    value: billPhone,
-                                    set: setBillPhone,
-                                    placeholder: "082 123 4567",
-                                    type: "tel",
-                                  },
-                                ].map(
-                                  ({
-                                    label,
-                                    value,
-                                    set,
-                                    placeholder,
-                                    type = "text",
-                                    required,
-                                  }) => (
-                                    <div key={label}>
-                                      <label className={labelCls}>
-                                        {label}{" "}
-                                        {required && (
-                                          <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                            *
-                                          </span>
-                                        )}
-                                      </label>
-                                      <input
-                                        type={type}
-                                        value={value}
-                                        onChange={(e) => set(e.target.value)}
-                                        placeholder={placeholder}
-                                        className={inputCls}
-                                      />
+                                    <div>
+                                      <h2 className="text-base font-semibold text-[#1e293b]">
+                                        Supplier Details
+                                      </h2>
+                                      <p className="text-xs text-[#64748b]">
+                                        Vendor information for this purchase
+                                        order
+                                      </p>
                                     </div>
-                                  ),
-                                )}
-                                <div className="col-span-1 sm:col-span-2">
-                                  <label className={labelCls}>
-                                    Billing Address
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={billAddress}
-                                    onChange={(e) =>
-                                      setBillAddress(e.target.value)
-                                    }
-                                    placeholder="Billing address if different"
-                                    className={inputCls}
-                                  />
-                                </div>
-                              </div>
-                              <div className="mt-4 p-3.5 bg-[#eff6ff] border border-[#bfdbfe] rounded-lg">
-                                <button
-                                  onClick={() => {
-                                    setBillName(customerName);
-                                    setBillEmail(customerEmail);
-                                    setBillPhone(customerPhone);
-                                    setBillAddress(customerAddress);
-                                  }}
-                                  className="flex items-center gap-2 text-[#2563eb] hover:text-[#1d4ed8] text-sm font-medium transition-colors"
-                                >
-                                  <Users className="w-4 h-4" />
-                                  Copy from Client Information
-                                </button>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Step 3 – Vehicle */}
-                          {currentStep === 3 && (
-                            <div>
-                              <div className="flex items-center gap-3 mb-5">
-                                <div className="w-9 h-9 bg-[#f0f9ff] rounded-lg flex items-center justify-center">
-                                  <Car className="w-5 h-5 text-[#0284c7]" />
-                                </div>
-                                <div>
-                                  <h2 className="text-base font-semibold text-[#1e293b]">
-                                    Vehicle Information
-                                  </h2>
-                                  <p className="text-xs text-[#64748b]">
-                                    Enter vehicle details and authorization
-                                    codes
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {[
-                                  {
-                                    label: "Make",
-                                    value: vehicleMake,
-                                    set: setVehicleMake,
-                                    placeholder: "Toyota",
-                                    required: true,
-                                  },
-                                  {
-                                    label: "Model",
-                                    value: vehicleModel,
-                                    set: setVehicleModel,
-                                    placeholder: "Hilux",
-                                    required: true,
-                                  },
-                                  {
-                                    label: "Year",
-                                    value: vehicleYear,
-                                    set: setVehicleYear,
-                                    placeholder: "2020",
-                                    required: true,
-                                  },
-                                  {
-                                    label: "Registration",
-                                    value: vehicleReg,
-                                    set: setVehicleReg,
-                                    placeholder: "ABC 123 GP",
-                                    required: true,
-                                  },
-                                  {
-                                    label: "VIN",
-                                    value: vehicleVin,
-                                    set: setVehicleVin,
-                                    placeholder: "1HGBH41JXMN109186",
-                                  },
-                                  {
-                                    label: "Mileage (km)",
-                                    value: vehicleMileage,
-                                    set: setVehicleMileage,
-                                    placeholder: "45000",
-                                    required: true,
-                                  },
-                                  {
-                                    label: "Pre Auth",
-                                    value: preAuth,
-                                    set: setPreAuth,
-                                    placeholder: "AUTH123",
-                                  },
-                                  {
-                                    label: "Auth Code",
-                                    value: authCode,
-                                    set: setAuthCode,
-                                    placeholder: "456789",
-                                  },
-                                ].map(
-                                  ({
-                                    label,
-                                    value,
-                                    set,
-                                    placeholder,
-                                    required,
-                                  }) => (
-                                    <div key={label}>
+                                  </div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[
+                                      {
+                                        label: "Supplier Name",
+                                        value: supplierName,
+                                        set: setSupplierName,
+                                        placeholder: "ABC Parts Supplier",
+                                        required: true,
+                                      },
+                                      {
+                                        label: "Contact Person",
+                                        value: supplierContact,
+                                        set: setSupplierContact,
+                                        placeholder: "John Doe",
+                                      },
+                                      {
+                                        label: "Email",
+                                        value: supplierEmail,
+                                        set: setSupplierEmail,
+                                        placeholder: "supplier@example.com",
+                                        type: "email",
+                                      },
+                                      {
+                                        label: "Phone",
+                                        value: supplierPhone,
+                                        set: setSupplierPhone,
+                                        placeholder: "011 123 4567",
+                                        type: "tel",
+                                      },
+                                    ].map(
+                                      ({
+                                        label,
+                                        value,
+                                        set,
+                                        placeholder,
+                                        type = "text",
+                                        required,
+                                      }) => (
+                                        <div key={label}>
+                                          <label className={labelCls}>
+                                            {label}{" "}
+                                            {required && (
+                                              <span className="text-[#dc2626] normal-case tracking-normal font-normal">
+                                                *
+                                              </span>
+                                            )}
+                                          </label>
+                                          <input
+                                            type={type}
+                                            value={value}
+                                            onChange={(e) =>
+                                              set(e.target.value)
+                                            }
+                                            placeholder={placeholder}
+                                            className={inputCls}
+                                          />
+                                        </div>
+                                      ),
+                                    )}
+                                    <div className="col-span-1 sm:col-span-2">
                                       <label className={labelCls}>
-                                        {label}{" "}
-                                        {required && (
-                                          <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                            *
-                                          </span>
-                                        )}
+                                        Supplier Address
                                       </label>
                                       <input
                                         type="text"
-                                        value={value}
-                                        onChange={(e) => set(e.target.value)}
-                                        placeholder={placeholder}
+                                        value={supplierAddress}
+                                        onChange={(e) =>
+                                          setSupplierAddress(e.target.value)
+                                        }
+                                        placeholder="Street address, City, Postal Code"
                                         className={inputCls}
                                       />
                                     </div>
-                                  ),
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Step 4 – Services & Parts */}
-                          {currentStep === 4 && (
-                            <div>
-                              <div className="flex items-center gap-3 mb-5">
-                                <div className="w-9 h-9 bg-[#f8fafc] rounded-lg flex items-center justify-center">
-                                  <Wrench className="w-5 h-5 text-[#475569]" />
+                                  </div>
                                 </div>
+                              )}
+
+                              {/* PO Step 2 – Delivery */}
+                              {currentStep === 2 && (
                                 <div>
-                                  <h2 className="text-base font-semibold text-[#1e293b]">
-                                    Services & Parts
-                                  </h2>
-                                  <p className="text-xs text-[#64748b]">
-                                    Add services and parts to the invoice
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Add item form */}
-                              <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-5">
-                                <h3 className="text-sm font-semibold text-[#374151] mb-4 flex items-center gap-2">
-                                  <Plus className="w-4 h-4 text-[#2563eb]" />
-                                  Add New Item
-                                </h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                                  <div>
-                                    <label className={labelCls}>Type</label>
-                                    <select
-                                      value={newItem.type}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          type: e.target.value,
-                                        })
-                                      }
-                                      className={selectCls}
-                                    >
-                                      <option value="Labor">Labor</option>
-                                      <option value="Parts">Parts</option>
-                                    </select>
+                                  <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-9 h-9 bg-[#f0fdf4] rounded-lg flex items-center justify-center">
+                                      <MapPin className="w-5 h-5 text-[#059669]" />
+                                    </div>
+                                    <div>
+                                      <h2 className="text-base font-semibold text-[#1e293b]">
+                                        Delivery Details
+                                      </h2>
+                                      <p className="text-xs text-[#64748b]">
+                                        Where and when to deliver
+                                      </p>
+                                    </div>
                                   </div>
-                                  <div className="sm:col-span-2">
-                                    <label className={labelCls}>
-                                      Description
-                                    </label>
-                                    <input
-                                      type="text"
-                                      placeholder="Work description"
-                                      value={newItem.description}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          description: e.target.value,
-                                        })
-                                      }
-                                      className={inputCls}
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className={labelCls}>Rate (R)</label>
-                                    <input
-                                      type="number"
-                                      placeholder="0.00"
-                                      value={newItem.rate}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          rate: e.target.value,
-                                        })
-                                      }
-                                      className={inputCls}
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className={labelCls}>Qty</label>
-                                    <input
-                                      type="number"
-                                      placeholder="1"
-                                      value={newItem.qty}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          qty: e.target.value,
-                                        })
-                                      }
-                                      className={inputCls}
-                                    />
-                                  </div>
-                                </div>
-                                <button
-                                  onClick={handleAddItem}
-                                  className="mt-3 flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors"
-                                >
-                                  <Plus className="w-4 h-4" />
-                                  Add Item
-                                </button>
-                              </div>
-
-                              {/* Items table */}
-                              {items.length > 0 ? (
-                                <div className="border border-[#e2e8f0] rounded-xl overflow-hidden mb-5">
-                                  <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center justify-between">
-                                    <span className="text-sm font-semibold text-[#374151]">
-                                      Line Items
-                                    </span>
-                                    <span className="text-xs text-[#64748b] bg-[#e2e8f0] px-2 py-0.5 rounded-full">
-                                      {items.length} items
-                                    </span>
-                                  </div>
-                                  <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                      <thead>
-                                        <tr className="border-b border-[#e2e8f0]">
-                                          {[
-                                            "Type",
-                                            "Description",
-                                            "Rate",
-                                            "Qty",
-                                            "Amount",
-                                            "",
-                                          ].map((h) => (
-                                            <th
-                                              key={h}
-                                              className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
-                                            >
-                                              {h}
-                                            </th>
-                                          ))}
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {items.map((item, index) => (
-                                          <tr
-                                            key={index}
-                                            className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
-                                          >
-                                            <td className="px-4 py-3">
-                                              <span
-                                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${item.type === "Labor" ? "bg-[#eff6ff] text-[#1d4ed8]" : "bg-[#f0fdf4] text-[#166534]"}`}
-                                              >
-                                                {item.type}
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[
+                                      {
+                                        label: "Deliver To (Name)",
+                                        value: deliveryName,
+                                        set: setDeliveryName,
+                                        placeholder: "Workshop / Company name",
+                                      },
+                                      {
+                                        label: "P.O. Number",
+                                        value: poNumber,
+                                        set: setPoNumber,
+                                        placeholder: "PO-2026-0001",
+                                        required: true,
+                                      },
+                                      {
+                                        label: "P.O. Date",
+                                        value: poDate,
+                                        set: setPoDate,
+                                        placeholder: "DD/MM/YYYY",
+                                        type: "date",
+                                      },
+                                      {
+                                        label: "Delivery Date",
+                                        value: deliveryDate,
+                                        set: setDeliveryDate,
+                                        placeholder: "DD/MM/YYYY",
+                                        type: "date",
+                                      },
+                                      {
+                                        label: "Payment Terms",
+                                        value: paymentTerms,
+                                        set: setPaymentTerms,
+                                        placeholder: "30 Days",
+                                      },
+                                      {
+                                        label: "Shipping Method",
+                                        value: shippingMethod,
+                                        set: setShippingMethod,
+                                        placeholder: "Courier / Collection",
+                                      },
+                                    ].map(
+                                      ({
+                                        label,
+                                        value,
+                                        set,
+                                        placeholder,
+                                        type = "text",
+                                        required,
+                                      }) => (
+                                        <div key={label}>
+                                          <label className={labelCls}>
+                                            {label}{" "}
+                                            {required && (
+                                              <span className="text-[#dc2626] normal-case tracking-normal font-normal">
+                                                *
                                               </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-sm font-medium text-[#374151]">
-                                              {item.description}
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-[#374151]">
-                                              R{item.rate.toFixed(2)}
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-[#374151]">
-                                              {item.qty}
-                                            </td>
-                                            <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
-                                              R{item.amount.toFixed(2)}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                              <button
-                                                onClick={() =>
-                                                  handleRemoveItem(index)
-                                                }
-                                                className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all"
-                                              >
-                                                <X className="w-3.5 h-3.5" />
-                                              </button>
-                                            </td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                  {/* Totals footer */}
-                                  <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-                                    <div className="flex flex-col items-end gap-1 text-sm">
-                                      <div className="flex justify-between w-44 text-[#64748b]">
-                                        <span>Subtotal</span>
-                                        <span className="font-medium text-[#374151]">
-                                          R{subtotal.toFixed(2)}
-                                        </span>
-                                      </div>
-                                      <div className="flex justify-between w-44 text-[#64748b]">
-                                        <span>VAT (0%)</span>
-                                        <span className="font-medium text-[#374151]">
-                                          R{vat.toFixed(2)}
-                                        </span>
-                                      </div>
-                                      <div className="flex justify-between w-44 pt-2 border-t border-[#e2e8f0] font-semibold text-[#1e293b]">
-                                        <span>Total</span>
-                                        <span className="text-[#2563eb]">
-                                          R{total.toFixed(2)}
-                                        </span>
-                                      </div>
+                                            )}
+                                          </label>
+                                          <input
+                                            type={type}
+                                            value={value}
+                                            onChange={(e) =>
+                                              set(e.target.value)
+                                            }
+                                            placeholder={placeholder}
+                                            className={inputCls}
+                                          />
+                                        </div>
+                                      ),
+                                    )}
+                                    <div className="col-span-1 sm:col-span-2">
+                                      <label className={labelCls}>
+                                        Delivery Address
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={deliveryAddress}
+                                        onChange={(e) =>
+                                          setDeliveryAddress(e.target.value)
+                                        }
+                                        placeholder="Delivery address"
+                                        className={inputCls}
+                                      />
                                     </div>
                                   </div>
-                                </div>
-                              ) : (
-                                <div className="border-2 border-dashed border-[#e2e8f0] rounded-xl py-12 text-center">
-                                  <Wrench className="w-8 h-8 text-[#cbd5e1] mx-auto mb-3" />
-                                  <p className="text-sm font-medium text-[#94a3b8]">
-                                    No items added yet
-                                  </p>
-                                  <p className="text-xs text-[#cbd5e1] mt-1">
-                                    Use the form above to add services or parts
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Step 5 – Payment */}
-                          {currentStep === 5 && (
-                            <div>
-                              <div className="flex items-center gap-3 mb-5">
-                                <div className="w-9 h-9 bg-[#faf5ff] rounded-lg flex items-center justify-center">
-                                  <CreditCard className="w-5 h-5 text-[#7c3aed]" />
-                                </div>
-                                <div>
-                                  <h2 className="text-base font-semibold text-[#1e293b]">
-                                    Payment Terms
-                                  </h2>
-                                  <p className="text-xs text-[#64748b]">
-                                    Review and process payment
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm mb-5">
-                                <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
-                                  <span className="text-sm font-semibold text-[#374151]">
-                                    Payment Information
-                                  </span>
-                                </div>
-                                <div className="divide-y divide-[#f1f5f9]">
-                                  {[
-                                    ["Payment Method", "Cash / Card / EFT"],
-                                    ["Payment Terms", "Due on Completion"],
-                                    ["Warranty", "90 Days Parts & Labor"],
-                                    ["Total Due", `R${total.toFixed(2)}`],
-                                  ].map(([k, v]) => (
-                                    <div
-                                      key={k}
-                                      className="flex items-center justify-between px-5 py-3 text-sm"
+                                  <div className="mt-4 p-3.5 bg-[#eff6ff] border border-[#bfdbfe] rounded-lg">
+                                    <button
+                                      onClick={() => {
+                                        setDeliveryName(
+                                          businessInfo.businessName,
+                                        );
+                                        setDeliveryAddress(
+                                          businessInfo.addressLine1,
+                                        );
+                                      }}
+                                      className="flex items-center gap-2 text-[#2563eb] hover:text-[#1d4ed8] text-sm font-medium transition-colors"
                                     >
-                                      <span className="text-[#64748b]">
-                                        {k}
-                                      </span>
-                                      <span
-                                        className={`font-semibold ${k === "Total Due" ? "text-[#2563eb]" : "text-[#1e293b]"}`}
-                                      >
-                                        {v}
+                                      <Building2 className="w-4 h-4" />
+                                      Use My Business Address
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* PO Step 3 – Items */}
+                              {currentStep === 3 && (
+                                <div>
+                                  <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-9 h-9 bg-[#f8fafc] rounded-lg flex items-center justify-center">
+                                      <Package className="w-5 h-5 text-[#475569]" />
+                                    </div>
+                                    <div>
+                                      <h2 className="text-base font-semibold text-[#1e293b]">
+                                        Order Items
+                                      </h2>
+                                      <p className="text-xs text-[#64748b]">
+                                        Add parts and items to order
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {/* Add PO item form */}
+                                  <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-5">
+                                    <h3 className="text-sm font-semibold text-[#374151] mb-4 flex items-center gap-2">
+                                      <Plus className="w-4 h-4 text-[#2563eb]" />{" "}
+                                      Add Item
+                                    </h3>
+                                    <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
+                                      <div className="sm:col-span-2">
+                                        <label className={labelCls}>
+                                          Description
+                                        </label>
+                                        <input
+                                          type="text"
+                                          placeholder="Part / item name"
+                                          value={newPoItem.description}
+                                          onChange={(e) =>
+                                            setNewPoItem({
+                                              ...newPoItem,
+                                              description: e.target.value,
+                                            })
+                                          }
+                                          className={inputCls}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className={labelCls}>Qty</label>
+                                        <input
+                                          type="number"
+                                          placeholder="1"
+                                          value={newPoItem.qty}
+                                          onChange={(e) =>
+                                            setNewPoItem({
+                                              ...newPoItem,
+                                              qty: e.target.value,
+                                            })
+                                          }
+                                          className={inputCls}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className={labelCls}>Unit</label>
+                                        <select
+                                          value={newPoItem.unit}
+                                          onChange={(e) =>
+                                            setNewPoItem({
+                                              ...newPoItem,
+                                              unit: e.target.value,
+                                            })
+                                          }
+                                          className={selectCls}
+                                        >
+                                          <option value="ea">ea</option>
+                                          <option value="set">set</option>
+                                          <option value="ltr">ltr</option>
+                                          <option value="kg">kg</option>
+                                          <option value="m">m</option>
+                                        </select>
+                                      </div>
+                                      <div>
+                                        <label className={labelCls}>
+                                          Unit Price
+                                        </label>
+                                        <input
+                                          type="number"
+                                          placeholder="0.00"
+                                          value={newPoItem.unitPrice}
+                                          onChange={(e) =>
+                                            setNewPoItem({
+                                              ...newPoItem,
+                                              unitPrice: e.target.value,
+                                            })
+                                          }
+                                          className={inputCls}
+                                        />
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={handleAddPoItem}
+                                      className="mt-3 flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors"
+                                    >
+                                      <Plus className="w-4 h-4" /> Add Item
+                                    </button>
+                                  </div>
+
+                                  {/* PO items table */}
+                                  {poItems.filter((i) => i.description).length >
+                                  0 ? (
+                                    <div className="border border-[#e2e8f0] rounded-xl overflow-hidden mb-5">
+                                      <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center justify-between">
+                                        <span className="text-sm font-semibold text-[#374151]">
+                                          Order Items
+                                        </span>
+                                        <span className="text-xs text-[#64748b] bg-[#e2e8f0] px-2 py-0.5 rounded-full">
+                                          {
+                                            poItems.filter((i) => i.description)
+                                              .length
+                                          }{" "}
+                                          items
+                                        </span>
+                                      </div>
+                                      <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                          <thead>
+                                            <tr className="border-b border-[#e2e8f0]">
+                                              {[
+                                                "Description",
+                                                "Qty",
+                                                "Unit",
+                                                "Unit Price",
+                                                "Amount",
+                                                "",
+                                              ].map((h) => (
+                                                <th
+                                                  key={h}
+                                                  className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
+                                                >
+                                                  {h}
+                                                </th>
+                                              ))}
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {poItems
+                                              .filter((i) => i.description)
+                                              .map((item, index) => (
+                                                <tr
+                                                  key={index}
+                                                  className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
+                                                >
+                                                  <td className="px-4 py-3 text-sm font-medium text-[#374151]">
+                                                    {item.description}
+                                                  </td>
+                                                  <td className="px-4 py-3 text-sm text-[#374151]">
+                                                    {item.qty}
+                                                  </td>
+                                                  <td className="px-4 py-3 text-sm text-[#374151]">
+                                                    {item.unit}
+                                                  </td>
+                                                  <td className="px-4 py-3 text-sm text-[#374151]">
+                                                    R
+                                                    {Number(
+                                                      item.unitPrice,
+                                                    ).toFixed(2)}
+                                                  </td>
+                                                  <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
+                                                    R
+                                                    {Number(
+                                                      item.amount,
+                                                    ).toFixed(2)}
+                                                  </td>
+                                                  <td className="px-4 py-3">
+                                                    <button
+                                                      onClick={() =>
+                                                        setPoItems((prev) =>
+                                                          prev.filter(
+                                                            (_, i) =>
+                                                              i !== index,
+                                                          ),
+                                                        )
+                                                      }
+                                                      className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all"
+                                                    >
+                                                      <X className="w-3.5 h-3.5" />
+                                                    </button>
+                                                  </td>
+                                                </tr>
+                                              ))}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                      {/* PO Totals */}
+                                      <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+                                        <div className="flex flex-col items-end gap-1 text-sm">
+                                          <div className="flex justify-between w-44 text-[#64748b]">
+                                            <span>Subtotal</span>
+                                            <span className="font-medium text-[#374151]">
+                                              R{poSubtotal.toFixed(2)}
+                                            </span>
+                                          </div>
+                                          <div className="flex justify-between w-44 text-[#64748b]">
+                                            <span>VAT (15%)</span>
+                                            <span className="font-medium text-[#374151]">
+                                              R{poVat.toFixed(2)}
+                                            </span>
+                                          </div>
+                                          <div className="flex justify-between w-44 pt-2 border-t border-[#e2e8f0] font-semibold text-[#1e293b]">
+                                            <span>Total</span>
+                                            <span className="text-[#2563eb]">
+                                              R{poTotal.toFixed(2)}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="border-2 border-dashed border-[#e2e8f0] rounded-xl py-12 text-center">
+                                      <Package className="w-8 h-8 text-[#cbd5e1] mx-auto mb-3" />
+                                      <p className="text-sm font-medium text-[#94a3b8]">
+                                        No items added yet
+                                      </p>
+                                      <p className="text-xs text-[#cbd5e1] mt-1">
+                                        Use the form above to add order items
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* PO Step 4 – Summary */}
+                              {currentStep === 4 && (
+                                <div>
+                                  <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-9 h-9 bg-[#faf5ff] rounded-lg flex items-center justify-center">
+                                      <FileText className="w-5 h-5 text-[#7c3aed]" />
+                                    </div>
+                                    <div>
+                                      <h2 className="text-base font-semibold text-[#1e293b]">
+                                        Order Summary
+                                      </h2>
+                                      <p className="text-xs text-[#64748b]">
+                                        Review and add notes
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm mb-5">
+                                    <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
+                                      <span className="text-sm font-semibold text-[#374151]">
+                                        Order Overview
                                       </span>
                                     </div>
-                                  ))}
-                                </div>
-                              </div>
+                                    <div className="divide-y divide-[#f1f5f9]">
+                                      {[
+                                        ["P.O. Number", poNumber || "Not set"],
+                                        ["Supplier", supplierName || "Not set"],
+                                        [
+                                          "Delivery Date",
+                                          deliveryDate || "TBD",
+                                        ],
+                                        ["Payment Terms", paymentTerms],
+                                        [
+                                          "Items",
+                                          `${poItems.filter((i) => i.description).length} items`,
+                                        ],
+                                        [
+                                          "Order Total",
+                                          `R${poTotal.toFixed(2)}`,
+                                        ],
+                                      ].map(([k, v]) => (
+                                        <div
+                                          key={k}
+                                          className="flex items-center justify-between px-5 py-3 text-sm"
+                                        >
+                                          <span className="text-[#64748b]">
+                                            {k}
+                                          </span>
+                                          <span
+                                            className={`font-semibold ${k === "Order Total" ? "text-[#2563eb]" : "text-[#1e293b]"}`}
+                                          >
+                                            {v}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
 
-                              {jobCardId && (
-                                <button
-                                  onClick={handleProcessPayment}
-                                  className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-medium transition-colors shadow-sm"
-                                >
-                                  <CreditCard className="w-4 h-4" />
-                                  Process Payment
-                                </button>
+                                  <div>
+                                    <label className={labelCls}>
+                                      Notes / Special Instructions
+                                    </label>
+                                    <textarea
+                                      value={notes}
+                                      onChange={(e) => setNotes(e.target.value)}
+                                      placeholder="Any special delivery instructions or notes..."
+                                      rows={4}
+                                      className={`${inputCls} resize-none`}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              {/* Step 1 – Invoice To */}
+                              {currentStep === 1 && (
+                                <div>
+                                  <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-9 h-9 bg-[#eff6ff] rounded-lg flex items-center justify-center">
+                                      <Users className="w-5 h-5 text-[#2563eb]" />
+                                    </div>
+                                    <div>
+                                      <h2 className="text-base font-semibold text-[#1e293b]">
+                                        Invoice To
+                                      </h2>
+                                      <p className="text-xs text-[#64748b]">
+                                        Client details for this job card
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[
+                                      {
+                                        label: "Customer Name",
+                                        value: customerName,
+                                        set: setCustomerName,
+                                        placeholder: "Enter customer name",
+                                        required: true,
+                                      },
+                                      {
+                                        label: "Customer ID",
+                                        value: merchant_code,
+                                        set: setCustomerId,
+                                        placeholder: "Customer ID",
+                                      },
+                                      {
+                                        label: "Email",
+                                        value: customerEmail,
+                                        set: setCustomerEmail,
+                                        type: "email",
+                                        placeholder: "email@example.com",
+                                        required: true,
+                                      },
+                                      {
+                                        label: "Phone",
+                                        value: customerPhone,
+                                        set: setCustomerPhone,
+                                        type: "tel",
+                                        placeholder: "082 123 4567",
+                                        required: true,
+                                      },
+                                    ].map(
+                                      ({
+                                        label,
+                                        value,
+                                        set,
+                                        placeholder,
+                                        type = "text",
+                                        required,
+                                      }) => (
+                                        <div key={label}>
+                                          <label className={labelCls}>
+                                            {label}{" "}
+                                            {required && (
+                                              <span className="text-[#dc2626] normal-case tracking-normal font-normal">
+                                                *
+                                              </span>
+                                            )}
+                                          </label>
+                                          <input
+                                            type={type}
+                                            value={value}
+                                            onChange={(e) =>
+                                              set(e.target.value)
+                                            }
+                                            placeholder={placeholder}
+                                            className={inputCls}
+                                          />
+                                        </div>
+                                      ),
+                                    )}
+                                    <div className="col-span-1 sm:col-span-2">
+                                      <label className={labelCls}>
+                                        Address{" "}
+                                        <span className="text-[#dc2626] normal-case tracking-normal font-normal">
+                                          *
+                                        </span>
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={customerAddress}
+                                        onChange={(e) =>
+                                          setCustomerAddress(e.target.value)
+                                        }
+                                        placeholder="Street address, City, Postal Code"
+                                        className={inputCls}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
                               )}
 
-                              {!jobCardId && (
-                                <div className="flex items-center gap-2 px-4 py-3 bg-[#fff7ed] border border-[#fed7aa] rounded-lg text-sm text-[#9a3412]">
-                                  <Receipt className="w-4 h-4 flex-shrink-0" />
-                                  Save the invoice first to process payment
+                              {/* Step 2 – Bill To */}
+                              {currentStep === 2 && (
+                                <div>
+                                  <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-9 h-9 bg-[#f0fdf4] rounded-lg flex items-center justify-center">
+                                      <FileText className="w-5 h-5 text-[#059669]" />
+                                    </div>
+                                    <div>
+                                      <h2 className="text-base font-semibold text-[#1e293b]">
+                                        Bill To
+                                      </h2>
+                                      <p className="text-xs text-[#64748b]">
+                                        Billing contact (may differ from client)
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[
+                                      {
+                                        label: "Billing Name",
+                                        value: billName,
+                                        set: setBillName,
+                                        placeholder: "Billing contact name",
+                                        required: true,
+                                      },
+                                      {
+                                        label: "Email",
+                                        value: billEmail,
+                                        set: setBillEmail,
+                                        placeholder: "billing@example.com",
+                                        type: "email",
+                                      },
+                                      {
+                                        label: "Phone",
+                                        value: billPhone,
+                                        set: setBillPhone,
+                                        placeholder: "082 123 4567",
+                                        type: "tel",
+                                      },
+                                    ].map(
+                                      ({
+                                        label,
+                                        value,
+                                        set,
+                                        placeholder,
+                                        type = "text",
+                                        required,
+                                      }) => (
+                                        <div key={label}>
+                                          <label className={labelCls}>
+                                            {label}{" "}
+                                            {required && (
+                                              <span className="text-[#dc2626] normal-case tracking-normal font-normal">
+                                                *
+                                              </span>
+                                            )}
+                                          </label>
+                                          <input
+                                            type={type}
+                                            value={value}
+                                            onChange={(e) =>
+                                              set(e.target.value)
+                                            }
+                                            placeholder={placeholder}
+                                            className={inputCls}
+                                          />
+                                        </div>
+                                      ),
+                                    )}
+                                    <div className="col-span-1 sm:col-span-2">
+                                      <label className={labelCls}>
+                                        Billing Address
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={billAddress}
+                                        onChange={(e) =>
+                                          setBillAddress(e.target.value)
+                                        }
+                                        placeholder="Billing address if different"
+                                        className={inputCls}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="mt-4 p-3.5 bg-[#eff6ff] border border-[#bfdbfe] rounded-lg">
+                                    <button
+                                      onClick={() => {
+                                        setBillName(customerName);
+                                        setBillEmail(customerEmail);
+                                        setBillPhone(customerPhone);
+                                        setBillAddress(customerAddress);
+                                      }}
+                                      className="flex items-center gap-2 text-[#2563eb] hover:text-[#1d4ed8] text-sm font-medium transition-colors"
+                                    >
+                                      <Users className="w-4 h-4" />
+                                      Copy from Client Information
+                                    </button>
+                                  </div>
                                 </div>
                               )}
-                            </div>
+
+                              {/* Step 3 – Vehicle */}
+                              {currentStep === 3 && (
+                                <div>
+                                  <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-9 h-9 bg-[#f0f9ff] rounded-lg flex items-center justify-center">
+                                      <Car className="w-5 h-5 text-[#0284c7]" />
+                                    </div>
+                                    <div>
+                                      <h2 className="text-base font-semibold text-[#1e293b]">
+                                        Vehicle Information
+                                      </h2>
+                                      <p className="text-xs text-[#64748b]">
+                                        Enter vehicle details and authorization
+                                        codes
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[
+                                      {
+                                        label: "Make",
+                                        value: vehicleMake,
+                                        set: setVehicleMake,
+                                        placeholder: "Toyota",
+                                        required: true,
+                                      },
+                                      {
+                                        label: "Model",
+                                        value: vehicleModel,
+                                        set: setVehicleModel,
+                                        placeholder: "Hilux",
+                                        required: true,
+                                      },
+                                      {
+                                        label: "Year",
+                                        value: vehicleYear,
+                                        set: setVehicleYear,
+                                        placeholder: "2020",
+                                        required: true,
+                                      },
+                                      {
+                                        label: "Registration",
+                                        value: vehicleReg,
+                                        set: setVehicleReg,
+                                        placeholder: "ABC 123 GP",
+                                        required: true,
+                                      },
+                                      {
+                                        label: "VIN",
+                                        value: vehicleVin,
+                                        set: setVehicleVin,
+                                        placeholder: "1HGBH41JXMN109186",
+                                      },
+                                      {
+                                        label: "Mileage (km)",
+                                        value: vehicleMileage,
+                                        set: setVehicleMileage,
+                                        placeholder: "45000",
+                                        required: true,
+                                      },
+                                      {
+                                        label: "Pre Auth",
+                                        value: preAuth,
+                                        set: setPreAuth,
+                                        placeholder: "AUTH123",
+                                      },
+                                      {
+                                        label: "Auth Code",
+                                        value: authCode,
+                                        set: setAuthCode,
+                                        placeholder: "456789",
+                                      },
+                                    ].map(
+                                      ({
+                                        label,
+                                        value,
+                                        set,
+                                        placeholder,
+                                        required,
+                                      }) => (
+                                        <div key={label}>
+                                          <label className={labelCls}>
+                                            {label}{" "}
+                                            {required && (
+                                              <span className="text-[#dc2626] normal-case tracking-normal font-normal">
+                                                *
+                                              </span>
+                                            )}
+                                          </label>
+                                          <input
+                                            type="text"
+                                            value={value}
+                                            onChange={(e) =>
+                                              set(e.target.value)
+                                            }
+                                            placeholder={placeholder}
+                                            className={inputCls}
+                                          />
+                                        </div>
+                                      ),
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Step 4 – Services & Parts */}
+                              {currentStep === 4 && (
+                                <div>
+                                  <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-9 h-9 bg-[#f8fafc] rounded-lg flex items-center justify-center">
+                                      <Wrench className="w-5 h-5 text-[#475569]" />
+                                    </div>
+                                    <div>
+                                      <h2 className="text-base font-semibold text-[#1e293b]">
+                                        Services & Parts
+                                      </h2>
+                                      <p className="text-xs text-[#64748b]">
+                                        Add services and parts to the invoice
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {/* Add item form */}
+                                  <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-5">
+                                    <h3 className="text-sm font-semibold text-[#374151] mb-4 flex items-center gap-2">
+                                      <Plus className="w-4 h-4 text-[#2563eb]" />
+                                      Add New Item
+                                    </h3>
+                                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                      <div>
+                                        <label className={labelCls}>Type</label>
+                                        <select
+                                          value={newItem.type}
+                                          onChange={(e) =>
+                                            setNewItem({
+                                              ...newItem,
+                                              type: e.target.value,
+                                            })
+                                          }
+                                          className={selectCls}
+                                        >
+                                          <option value="Labor">Labor</option>
+                                          <option value="Parts">Parts</option>
+                                        </select>
+                                      </div>
+                                      <div className="sm:col-span-2">
+                                        <label className={labelCls}>
+                                          Description
+                                        </label>
+                                        <input
+                                          type="text"
+                                          placeholder="Work description"
+                                          value={newItem.description}
+                                          onChange={(e) =>
+                                            setNewItem({
+                                              ...newItem,
+                                              description: e.target.value,
+                                            })
+                                          }
+                                          className={inputCls}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className={labelCls}>
+                                          Rate (R)
+                                        </label>
+                                        <input
+                                          type="number"
+                                          placeholder="0.00"
+                                          value={newItem.rate}
+                                          onChange={(e) =>
+                                            setNewItem({
+                                              ...newItem,
+                                              rate: e.target.value,
+                                            })
+                                          }
+                                          className={inputCls}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className={labelCls}>Qty</label>
+                                        <input
+                                          type="number"
+                                          placeholder="1"
+                                          value={newItem.qty}
+                                          onChange={(e) =>
+                                            setNewItem({
+                                              ...newItem,
+                                              qty: e.target.value,
+                                            })
+                                          }
+                                          className={inputCls}
+                                        />
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={handleAddItem}
+                                      className="mt-3 flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                      Add Item
+                                    </button>
+                                  </div>
+
+                                  {/* Items table */}
+                                  {items.length > 0 ? (
+                                    <div className="border border-[#e2e8f0] rounded-xl overflow-hidden mb-5">
+                                      <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center justify-between">
+                                        <span className="text-sm font-semibold text-[#374151]">
+                                          Line Items
+                                        </span>
+                                        <span className="text-xs text-[#64748b] bg-[#e2e8f0] px-2 py-0.5 rounded-full">
+                                          {items.length} items
+                                        </span>
+                                      </div>
+                                      <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                          <thead>
+                                            <tr className="border-b border-[#e2e8f0]">
+                                              {[
+                                                "Type",
+                                                "Description",
+                                                "Rate",
+                                                "Qty",
+                                                "Amount",
+                                                "",
+                                              ].map((h) => (
+                                                <th
+                                                  key={h}
+                                                  className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
+                                                >
+                                                  {h}
+                                                </th>
+                                              ))}
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {items.map((item, index) => (
+                                              <tr
+                                                key={index}
+                                                className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
+                                              >
+                                                <td className="px-4 py-3">
+                                                  <span
+                                                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${item.type === "Labor" ? "bg-[#eff6ff] text-[#1d4ed8]" : "bg-[#f0fdf4] text-[#166534]"}`}
+                                                  >
+                                                    {item.type}
+                                                  </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-sm font-medium text-[#374151]">
+                                                  {item.description}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-[#374151]">
+                                                  R{item.rate.toFixed(2)}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-[#374151]">
+                                                  {item.qty}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
+                                                  R{item.amount.toFixed(2)}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                  <button
+                                                    onClick={() =>
+                                                      handleRemoveItem(index)
+                                                    }
+                                                    className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all"
+                                                  >
+                                                    <X className="w-3.5 h-3.5" />
+                                                  </button>
+                                                </td>
+                                              </tr>
+                                            ))}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                      {/* Totals footer */}
+                                      <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+                                        <div className="flex flex-col items-end gap-1 text-sm">
+                                          <div className="flex justify-between w-44 text-[#64748b]">
+                                            <span>Subtotal</span>
+                                            <span className="font-medium text-[#374151]">
+                                              R{subtotal.toFixed(2)}
+                                            </span>
+                                          </div>
+                                          <div className="flex justify-between w-44 text-[#64748b]">
+                                            <span>VAT (0%)</span>
+                                            <span className="font-medium text-[#374151]">
+                                              R{vat.toFixed(2)}
+                                            </span>
+                                          </div>
+                                          <div className="flex justify-between w-44 pt-2 border-t border-[#e2e8f0] font-semibold text-[#1e293b]">
+                                            <span>Total</span>
+                                            <span className="text-[#2563eb]">
+                                              R{total.toFixed(2)}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="border-2 border-dashed border-[#e2e8f0] rounded-xl py-12 text-center">
+                                      <Wrench className="w-8 h-8 text-[#cbd5e1] mx-auto mb-3" />
+                                      <p className="text-sm font-medium text-[#94a3b8]">
+                                        No items added yet
+                                      </p>
+                                      <p className="text-xs text-[#cbd5e1] mt-1">
+                                        Use the form above to add services or
+                                        parts
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Step 5 – Payment */}
+                              {currentStep === 5 && (
+                                <div>
+                                  <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-9 h-9 bg-[#faf5ff] rounded-lg flex items-center justify-center">
+                                      <CreditCard className="w-5 h-5 text-[#7c3aed]" />
+                                    </div>
+                                    <div>
+                                      <h2 className="text-base font-semibold text-[#1e293b]">
+                                        Payment Terms
+                                      </h2>
+                                      <p className="text-xs text-[#64748b]">
+                                        Review and process payment
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm mb-5">
+                                    <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
+                                      <span className="text-sm font-semibold text-[#374151]">
+                                        Payment Information
+                                      </span>
+                                    </div>
+                                    <div className="divide-y divide-[#f1f5f9]">
+                                      {[
+                                        ["Payment Method", "Cash / Card / EFT"],
+                                        ["Payment Terms", "Due on Completion"],
+                                        ["Warranty", "90 Days Parts & Labor"],
+                                        ["Total Due", `R${total.toFixed(2)}`],
+                                      ].map(([k, v]) => (
+                                        <div
+                                          key={k}
+                                          className="flex items-center justify-between px-5 py-3 text-sm"
+                                        >
+                                          <span className="text-[#64748b]">
+                                            {k}
+                                          </span>
+                                          <span
+                                            className={`font-semibold ${k === "Total Due" ? "text-[#2563eb]" : "text-[#1e293b]"}`}
+                                          >
+                                            {v}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {jobCardId && (
+                                    <button
+                                      onClick={handleProcessPayment}
+                                      className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-medium transition-colors shadow-sm"
+                                    >
+                                      <CreditCard className="w-4 h-4" />
+                                      Process Payment
+                                    </button>
+                                  )}
+
+                                  {!jobCardId && (
+                                    <div className="flex items-center gap-2 px-4 py-3 bg-[#fff7ed] border border-[#fed7aa] rounded-lg text-sm text-[#9a3412]">
+                                      <Receipt className="w-4 h-4 flex-shrink-0" />
+                                      Save the invoice first to process payment
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
 
@@ -2278,20 +2896,23 @@ const MechanicsDashboard = () => {
                             Step {currentStep} of {totalSteps}
                           </div>
                           {currentStep < totalSteps ? (
-                            <button
-                              onClick={handleNext}
-                              className="flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
-                            >
+                            <button onClick={handleNext} className="...">
                               <span className="hidden sm:inline">Next</span>
                               <ChevronRight className="w-4 h-4" />
                             </button>
                           ) : (
                             <button
-                              onClick={handleSaveJobCard}
+                              onClick={
+                                activeView === "purchase-orders"
+                                  ? handleSavePO
+                                  : handleSaveJobCard
+                              }
                               className="flex items-center gap-1.5 px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
                             >
                               <Save className="w-4 h-4" />
-                              Save Invoice
+                              {activeView === "purchase-orders"
+                                ? "Save P.O."
+                                : "Save Invoice"}
                             </button>
                           )}
                         </div>
@@ -2302,11 +2923,14 @@ const MechanicsDashboard = () => {
               </div>
 
               {/* ── RIGHT: Live preview panel ──────────────────────────────── */}
-              <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
+              <div className="hidden xl:flex w-[380px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
                 {/* Panel header */}
                 <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
-                  
-                  <TemplateSelector/>
+                  <TemplateSelector
+                    user={user}
+                    selectedTemplate={selectedTemplate}
+                    onTemplateChange={setSelectedTemplate}
+                  />
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={handlePrint}
@@ -2337,7 +2961,11 @@ const MechanicsDashboard = () => {
                       marginBottom: `calc((297mm * 0.44) - 297mm)`,
                     }}
                   >
-                    <TemplateRenderer {...templateProps} />
+                    {activeView === "purchase-orders" ? (
+                      <POTemplateRenderer {...poTemplateProps} />
+                    ) : (
+                      <TemplateRenderer {...templateProps} />
+                    )}
                   </div>
                 </div>
               </div>

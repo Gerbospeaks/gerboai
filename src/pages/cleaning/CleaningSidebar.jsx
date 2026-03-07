@@ -37,9 +37,8 @@ export default function CleaningSidebar({
   setShowCustomersListModal,
   handleAddNewCustomer,
   documentType,
-  isQuotesInvoicesOpen,
-  setIsQuotesInvoicesOpen,
 }) {
+  const [isQuotesInvoicesOpen, setIsQuotesInvoicesOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [isJobsOpen, setIsJobsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -69,7 +68,7 @@ export default function CleaningSidebar({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-[#253347] flex-shrink-0">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 bg-[#2563eb] rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
             <img src={logo} className="w-5 h-5 object-contain" alt="logo" />
           </div>
           <div className="min-w-0">
@@ -141,7 +140,7 @@ export default function CleaningSidebar({
             label={`All ${documentType === "quote" ? "Quotes" : "Invoices"}`}
             badge={savedQuotes?.length ?? 0}
             onClick={() => {
-              setShowQuotesList?.((p) => !p);
+              setShowQuotesList(!showQuotesList);
               if (isMobile) setSidebarOpen(false);
             }}
           />

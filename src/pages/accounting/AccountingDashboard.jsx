@@ -81,14 +81,20 @@ const AccountingDashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
   const totalSteps = 4;
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const { user, authUser } = useAuth();
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceId, setInvoiceId] = useState(null);
   const [savedInvoices, setSavedInvoices] = useState([]);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [activeView, setActiveView] = useState("invoice");
+  const [activeView, setActiveView] = useState("home");
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();       setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewEstimate();         setActiveView("invoice"); }
+    if (action === "newCustomer") { handleAddNewCustomer(); }
+    if (view && !action)          { setActiveView(view); }
+  };
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
@@ -461,7 +467,13 @@ const AccountingDashboard = () => {
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+             dashboardType="accounting"
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
+            plan="pro"
+
           />
 
           {/* Modals */}
@@ -533,6 +545,7 @@ const AccountingDashboard = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    
                     <button onClick={handlePrint} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"><Printer className="w-3.5 h-3.5" />Print</button>
                     <button onClick={handleSavePDF} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"><Download className="w-3.5 h-3.5" />Save PDF</button>
                     <button onClick={() => setShowPreview(false)} className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"><X className="w-4 h-4" /></button>
@@ -886,8 +899,9 @@ const AccountingDashboard = () => {
               <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
                 {/* Panel header */}
                 <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
-                 
+                
                   <div className="flex items-center gap-1.5">
+                    
                     <button onClick={handlePrint} className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-xs font-medium rounded-lg hover:bg-[#f1f5f9] transition-colors">
                       <Printer className="w-3 h-3" />Print
                     </button>

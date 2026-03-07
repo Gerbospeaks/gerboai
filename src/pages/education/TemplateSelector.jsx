@@ -116,7 +116,7 @@ export const ClassicTemplate = ({
           />
         )}
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          {businessInfo.schoolName || "SCHOOL NAME"}
+          {businessInfo.businessName || "SCHOOL NAME"}
         </h1>
         <p className="text-sm text-gray-600">
           {businessInfo.addressLine1}, {businessInfo.city}
@@ -302,7 +302,7 @@ export const ModernTemplate = (props) => {
             )}
             <div>
               <h1 className="text-2xl font-bold text-indigo-900">
-                {props.businessInfo.schoolName || "SCHOOL NAME"}
+                {props.businessInfo.businessName || "SCHOOL NAME"}
               </h1>
               <p className="text-sm text-gray-600">
                 {props.businessInfo.addressLine1}
@@ -473,7 +473,7 @@ export const ProfessionalTemplate = (props) => {
               />
             )}
             <h1 className="text-2xl font-bold text-gray-900">
-              {props.businessInfo.schoolName || "SCHOOL NAME"}
+              {props.businessInfo.businessName || "SCHOOL NAME"}
             </h1>
             <p className="text-xs text-gray-600 mt-1">
               {props.businessInfo.addressLine1}
@@ -660,7 +660,7 @@ export const ColorfulTemplate = (props) => {
             />
           )}
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            {props.businessInfo.schoolName || "SCHOOL NAME"}
+            {props.businessInfo.businessName || "SCHOOL NAME"}
           </h1>
           <div className="inline-block bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-800 px-6 py-2 rounded-full font-bold text-lg">
             ⭐ REPORT CARD ⭐

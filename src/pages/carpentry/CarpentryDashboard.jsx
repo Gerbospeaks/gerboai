@@ -84,6 +84,12 @@ const CarpentryDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { user, authUser } = useAuth();
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();       setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewQuote();         setActiveView("invoice"); }
+    if (action === "newCustomer") { handleAddNewCustomer(); }
+    if (view && !action)          { setActiveView(view); }
+  };
   const [quoteNumber, setQuoteNumber] = useState("");
   const [quoteId, setQuoteId] = useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
@@ -407,7 +413,16 @@ const CarpentryDashboard = () => {
 
         {/* Main content */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          <AppHeader actions={headerActions} mobileActions={mobileDashboardActions} onSettingsOpen={() => setShowSettings(true)} />
+          <AppHeader 
+          actions={headerActions} 
+          mobileActions={mobileDashboardActions} 
+          dashboardType="carpentry"
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          onQuickCreate={handleQuickCreate}
+          onSettingsOpen={() => setShowSettings(true)}
+          plan="pro"
+           />
 
           {/* Modals */}
           {showSettings && <BusinessSettingsModal onClose={() => setShowSettings(false)} />}
@@ -856,8 +871,7 @@ const CarpentryDashboard = () => {
                 {/* Panel header */}
                 <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-[#0f172a] rounded flex items-center justify-center"><Eye className="w-3.5 h-3.5 text-white" /></div>
-                    <span className="text-sm font-semibold text-[#1e293b]">Live Preview</span>
+                   <TemplateSelector/>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button onClick={handlePrint} className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-xs font-medium rounded-lg hover:bg-[#f1f5f9] transition-colors">

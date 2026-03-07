@@ -13,15 +13,10 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsPage from './pages/TermsPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
-// Protected Pages
 import Home from './pages/HomeView';
 import DashboardRouter from './components/DashboardRouter';
 import FinancialOverview from './pages/FinancialOverview';
-
-// Admin
 import AdminDashboard from './pages/AdminDashboard';
-
-// Industry Dashboards
 import MechanicsDashboard from './pages/mechanics/MechanicsDashboard';
 import SecurityDashboard from './pages/security/SecurityDashboard';
 import HealthcareDashboard from './pages/health/HealthcareDashboard';
@@ -53,18 +48,14 @@ import AuthAction from './pages/AuthAction';
 import PracticeOverview from './pages/health/PracticeOverview';
 import PendingPayments from './pages/health/PendingPayments';
 import AppointmentsCalendar from './pages/health/AppointmentsCalendar';
-
-// Mechanics specific
 import Vehicles from './pages/mechanics/Vehicles';
 import Templates from './pages/mechanics/Templates';
 import PartsInventory from './pages/mechanics/PartsInventory';
 import HistoryView from './pages/mechanics/HistoryView';
 import NotesView from './pages/mechanics/NotesView';
 import SignatureStamp from './pages/mechanics/SignatureStamp';
-
-// Accounting specific
 import TemplateSelector from './pages/accounting/TemplateSelector';
-
+import ParentPortal from './pages/education/ParentPortal';
 function App() {
 
    useEffect(() => {
@@ -152,7 +143,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
+             
             {/* Template Renderer */}
             <Route 
               path="/template-renderer" 
@@ -457,6 +448,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route path="/parents/:schoolSlug" element={<ParentPortal />} />
           </Routes>
         </AdminProvider>
       </AuthProvider>

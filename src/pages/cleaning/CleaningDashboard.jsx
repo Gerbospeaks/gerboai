@@ -89,8 +89,8 @@ const CleaningDashboard = () => {
   const totalSteps = 4;
 
   // ── UI state ──────────────────────────────────────────────────────────────
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeView, setActiveView] = useState("quote");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeView, setActiveView] = useState("home");
   const [showPreview, setShowPreview] = useState(false);
   const [showQuotesList, setShowQuotesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -116,7 +116,12 @@ const CleaningDashboard = () => {
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();       setActiveView("quote"); }
+    if (action === "newQuote")    { handleNewQuote();         setActiveView("quote"); }
+    if (action === "newCustomer") {  }
+    if (view && !action)          { setActiveView(view); }
+  };
   // ── Form fields ───────────────────────────────────────────────────────────
   const [customerName, setCustomerName] = useState("Johnson Residence");
   const [customerEmail, setCustomerEmail] = useState("johnson@email.com");
@@ -146,13 +151,20 @@ const CleaningDashboard = () => {
     balanceDue: 0,
     status: "pending",
   });
-  const [stampSettings, setStampSettings] = useState({
-    text: "PAID",
-    color: "#22c55e",
-    showDate: true,
-    enabled: true,
-  });
-
+ const [stampSettings, setStampSettings] = useState("");
+useEffect(() => {
+  const loadStampSettings = async () => {
+    if (!user?.uid) return;
+    const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+    const snap = await getDoc(docRef);
+    if (snap.exists() && snap.data().stampSettings) {
+      setStampSettings(snap.data().stampSettings);
+    } else {
+      setStampSettings("");
+    }
+  };
+  loadStampSettings();
+}, [user]);
   // ── Business info ─────────────────────────────────────────────────────────
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "SPARKLE CLEAN SERVICES",
@@ -700,7 +712,12 @@ const CleaningDashboard = () => {
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            dashboardType="cleaning"
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
+            plan="pro"
           />
 
           {/* ── Modals ──────────────────────────────────────────────────── */}
@@ -794,10 +811,10 @@ const CleaningDashboard = () => {
                               {q.customer?.name || "N/A"}
                             </td>
                             <td className="px-5 py-3 text-sm font-semibold text-[#1e293b]">
-                              R{q.totals?.total?.toFixed(2) || "0.00"}
+                              R{Number(q.totals?.total).toFixed(2) || "0.00"}
                             </td>
                             <td className="px-5 py-3 text-sm text-[#059669] font-medium">
-                              R{q.totals?.paid?.toFixed(2) || "0.00"}
+                              R{Number(q.totals?.paid).toFixed(2) || "0.00"}
                             </td>
                             <td className="px-5 py-3">
                               <span
@@ -1619,53 +1636,6 @@ const CleaningDashboard = () => {
                                   </p>
                                 </div>
                               </div>
-
-                              {/* Summary cards */}
-                              <div className="grid grid-cols-3 gap-3 mb-5">
-                                {[
-                                  {
-                                    label: "Quote Total",
-                                    value: `R${total.toFixed(2)}`,
-                                    icon: DollarSign,
-                                    bg: "bg-[#ecfeff]",
-                                    color: "text-[#0891b2]",
-                                  },
-                                  {
-                                    label: "Services",
-                                    value: items.length,
-                                    icon: ClipboardList,
-                                    bg: "bg-[#f0fdf4]",
-                                    color: "text-[#059669]",
-                                  },
-                                  {
-                                    label: "VAT Amount",
-                                    value: `R${totalTax.toFixed(2)}`,
-                                    icon: Receipt,
-                                    bg: "bg-[#faf5ff]",
-                                    color: "text-[#7c3aed]",
-                                  },
-                                ].map(
-                                  ({ label, value, icon: Icon, bg, color }) => (
-                                    <div
-                                      key={label}
-                                      className={`${bg} border border-[#e2e8f0] rounded-xl p-4`}
-                                    >
-                                      <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs font-semibold text-[#64748b]">
-                                          {label}
-                                        </span>
-                                        <Icon className={`w-4 h-4 ${color}`} />
-                                      </div>
-                                      <div
-                                        className={`text-xl font-bold ${color}`}
-                                      >
-                                        {value}
-                                      </div>
-                                    </div>
-                                  ),
-                                )}
-                              </div>
-
                               {/* Payment info */}
                               <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm mb-5">
                                 <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
@@ -1835,8 +1805,11 @@ const CleaningDashboard = () => {
                 {/* Panel header */}
                 <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
                   <div className="flex items-center gap-2">
-                    <TemplateSelector/>
-                    
+                  <TemplateSelector
+                                     user={user}
+                                     selectedTemplate={selectedTemplate}
+                                     onTemplateChange={setSelectedTemplate}
+                                   />
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button

@@ -1,6 +1,7 @@
 // components/BusinessSettingsModal.jsx
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { updatePortalSlug } from '../contexts/AuthContext';
 import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase"; 
 import { getAuth } from "firebase/auth";
@@ -20,8 +21,8 @@ import {
 import SignatureStamp from "./mechanics/SignatureStamp";
 
 const BusinessSettingsModal = ({ onClose }) => {
-  const { user, authUser } = useAuth();
-const [uploading, setUploading] = useState(false);
+  const { user, refreshUser, authUser } = useAuth();
+  const [uploading, setUploading] = useState(false);
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "",
     addressLine1: "",
@@ -43,7 +44,7 @@ const [uploading, setUploading] = useState(false);
     text: "APPROVED",
     color: "#d32f2f",
     showDate: true,
-    enabled: true,
+    enabled: false,
   });
 
   useEffect(() => {
@@ -60,7 +61,17 @@ const [uploading, setUploading] = useState(false);
       console.error("Error loading business info:", error);
     }
   };
-
+useEffect(() => {
+  const loadStampSettings = async () => {
+    if (!user?.uid) return;
+    const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+    const snap = await getDoc(docRef);
+    if (snap.exists() && snap.data().stampSettings) {
+      setStampSettings(snap.data().stampSettings);
+    }
+  };
+  loadStampSettings();
+}, [user]);
  const handleLogoUpload = async (e) => {
   const file = e.target.files[0];
   if (!file || !user?.uid) return;
@@ -91,17 +102,20 @@ const [uploading, setUploading] = useState(false);
 };
 
   const handleSaveBusinessInfo = async () => {
-    if (!user?.uid) return;
-    try {
-      const db = getFirestore();
-      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-      await setDoc(docRef, businessInfo);
-      onClose();
-    } catch (error) {
-      console.error("Error saving business info:", error);
+  if (!user?.uid) return;
+  try {
+    const db = getFirestore();
+    const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+    await setDoc(docRef, { ...businessInfo, stampSettings }); 
+    if (user?.dashboardId === 'education' && businessInfo?.businessName) {
+      await updatePortalSlug(user.uid, businessInfo.businessName);
     }
-  };
-
+    await refreshUser();
+    onClose();
+  } catch (error) {
+    console.error("Error saving business info:", error);
+  }
+};
   const handleTestEmail = async () => {
     // your existing test email logic here
   };

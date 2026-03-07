@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { FileText, Check } from "lucide-react";
-
-// Mock SignatureStamp component for this artifact
 const SignatureStamp = ({ text, color, showDate, rotation, size }) => (
   <div
     style={{
@@ -25,7 +23,6 @@ const SignatureStamp = ({ text, color, showDate, rotation, size }) => (
   </div>
 );
 
-// Template Selector Dropdown Component
 export const TemplateSelector = ({ selectedTemplate, onTemplateChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -281,9 +278,9 @@ export const DefaultTemplate = ({
             <tr key={index} className="border-b">
               <td className="px-2 py-2">{item.description}</td>
               <td className="text-center px-2 py-2">{item.qty}</td>
-              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">R {Number(item.rate).toFixed(2)}</td>
               <td className="text-right px-2 py-2">
-                R {item.amount.toFixed(2)}
+                R {Number(item.amount).toFixed(2)}
               </td>
             </tr>
           ))}
@@ -296,15 +293,15 @@ export const DefaultTemplate = ({
       <div className="w-64 text-xs">
         <div className="flex justify-between py-1">
           <span>Subtotal:</span>
-          <span>R {(subtotal || 0).toFixed(2)}</span>
+          <span>R {(Number(subtotal) || 0).toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-1">
           <span>VAT (15%):</span>
-          <span>R {(vat || 0).toFixed(2)}</span>
+          <span>R {(Number(vat) || 0).toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-2 font-bold bg-gray-50 text-gray-800 px-2">
           <span>TOTAL:</span>
-          <span>R {(total || 0).toFixed(2)}</span>
+          <span>R {(Number(total) || 0).toFixed(2)}</span>
         </div>
       </div>
     </div>
