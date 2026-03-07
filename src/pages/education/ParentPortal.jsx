@@ -21,366 +21,909 @@ import {
   DollarSign,
   GraduationCap,
   School,
+  ChevronRight,
+  FileText,
+  Download,
+  ExternalLink,
+  User,
+  Search,
+  Lock,
+  X,
+  UserCheck,
 } from "lucide-react";
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const T = {
+  primary: "#1a6b4a",
+  primaryLight: "#e8f5ef",
+  primaryMid: "#2d8a62",
+  accent: "#f59e0b",
+  accentLight: "#fef3c7",
+  red: "#e53e3e",
+  redLight: "#fff5f5",
+  blue: "#2b6cb0",
+  blueLight: "#ebf8ff",
+  purple: "#6b46c1",
+  purpleLight: "#faf5ff",
+  bg: "#f7f8f9",
+  surface: "#ffffff",
+  border: "#e8ecf0",
+  text: "#1a202c",
+  textMid: "#4a5568",
+  textSoft: "#718096",
+  textFaint: "#a0aec0",
+  radius: 16,
+  shadow: "0 2px 12px rgba(0,0,0,0.07)",
+};
+
 export default function ParentPortal() {
   const { schoolSlug } = useParams();
+
+  // ── School data ────────────────────────────────────────────────────────────
+  const [businessInfo, setBusinessInfo] = useState(null);
   const [homework, setHomework] = useState([]);
   const [notices, setNotices] = useState([]);
   const [events, setEvents] = useState([]);
-  const [businessInfo, setBusinessInfo] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [attendance, setAttendance] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [activeTab, setActiveTab] = useState("homework");
+  const [activeTab, setActiveTab] = useState("notices");
   const [gradeFilter, setGradeFilter] = useState("All");
+  const [expandedNotice, setExpandedNotice] = useState(null);
 
+  // ── Identity gate ──────────────────────────────────────────────────────────
+  const [showIdentityModal, setShowIdentityModal] = useState(false);
+  const [childInput, setChildInput] = useState("");
+  const [identityError, setIdentityError] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [verifiedStudent, setVerifiedStudent] = useState(null);
+
+  // ── Load data ──────────────────────────────────────────────────────────────
   useEffect(() => {
-  const load = async () => {
-  try {
-    // 1. Find uid by matching portalSlug in users collection
-    const usersQuery = query(
-      collection(db, "users"),
-      where("portalSlug", "==", schoolSlug)
-    );
-    const usersSnap = await getDocs(usersQuery);
+    const load = async () => {
+      try {
+        const usersSnap = await getDocs(
+          query(collection(db, "users"), where("portalSlug", "==", schoolSlug)),
+        );
+        if (usersSnap.empty) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
+        const uid = usersSnap.docs[0].id;
 
-    if (usersSnap.empty) {
-      setNotFound(true);
-      setLoading(false);
-      return;
-    }
+        const [bizDoc, hwSnap, nSnap, eSnap, stuSnap, attSnap] =
+          await Promise.all([
+            getDoc(doc(db, "users", uid, "settings", "businessInfo")),
+            getDocs(
+              query(
+                collection(db, "users", uid, "homework"),
+                orderBy("createdAt", "desc"),
+              ),
+            ),
+            getDocs(
+              query(
+                collection(db, "users", uid, "notices"),
+                orderBy("createdAt", "desc"),
+              ),
+            ),
+            getDocs(
+              query(
+                collection(db, "users", uid, "events"),
+                orderBy("date", "asc"),
+              ),
+            ),
+            getDocs(collection(db, "users", uid, "students")),
+            getDocs(collection(db, "users", uid, "attendance")),
+          ]);
 
-    const uid = usersSnap.docs[0].id; // document ID = uid
-
-    // 2. Load school info from settings/businessInfo
-    const bizDoc = await getDoc(
-      doc(db, "users", uid, "settings", "businessInfo")
-    );
-    setBusinessInfo(bizDoc.data());
-
-    // 3. Load homework
-    const hwSnap = await getDocs(
-      query(
-        collection(db, "users", uid, "homework"),
-        orderBy("createdAt", "desc")
-      )
-    );
-    setHomework(
-      hwSnap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .filter((d) => !d._placeholder)
-    );
-
-    // 4. Load notices
-    const nSnap = await getDocs(
-      query(
-        collection(db, "users", uid, "notices"),
-        orderBy("createdAt", "desc")
-      )
-    );
-    setNotices(
-      nSnap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .filter((d) => !d._placeholder)
-    );
-
-    // 5. Load upcoming events
-    const eSnap = await getDocs(
-      query(
-        collection(db, "users", uid, "events"),
-        orderBy("date", "asc")
-      )
-    );
-    const today = new Date().toISOString().split("T")[0];
-    setEvents(
-      eSnap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .filter((d) => !d._placeholder && d.date >= today)
-    );
-
-  } catch (err) {
-    console.error("Error loading portal:", err);
-    setNotFound(true);
-  } finally {
-    setLoading(false);
-  }
-};
-
+        const today = new Date().toISOString().split("T")[0];
+        setBusinessInfo(bizDoc.data());
+        setHomework(
+          hwSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder),
+        );
+        setNotices(
+          nSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder),
+        );
+        setEvents(
+          eSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder && d.date >= today),
+        );
+        setStudents(
+          stuSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder),
+        );
+        setAttendance(
+          attSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder),
+        );
+      } catch (err) {
+        console.error(err);
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    };
     load();
   }, [schoolSlug]);
 
-  // ── Get unique grades from homework for filter ──────────────────────────
-  const grades = [
-    "All",
-    ...new Set(homework.map((h) => h.grade).filter(Boolean)),
-  ];
+  // ── Verify child name only ─────────────────────────────────────────────────
+  const handleVerify = () => {
+    if (!childInput.trim()) {
+      setIdentityError("Please enter your child's full name.");
+      return;
+    }
+    setVerifying(true);
+    setIdentityError("");
 
-  const filteredHomework =
-    gradeFilter === "All"
-      ? homework
-      : homework.filter((h) => h.grade === gradeFilter);
-
-  // ── Loading screen ──────────────────────────────────────────────────────
-  if (loading)
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-3">
-        <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center animate-pulse">
-          <School className="w-5 h-5 text-white" />
-        </div>
-        <div className="text-slate-400 text-sm">Loading portal...</div>
-      </div>
+    const normalize = (s) => s.trim().toLowerCase();
+    const match = students.find(
+      (s) => normalize(s.name) === normalize(childInput),
     );
 
-  // ── Not found screen ────────────────────────────────────────────────────
-  if (notFound)
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-3 px-6 text-center">
-        <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
-          <AlertCircle className="w-6 h-6 text-red-500" />
-        </div>
-        <div className="text-lg font-700 text-slate-800">School not found</div>
-        <div className="text-sm text-slate-400 max-w-xs">
-          The link you followed doesn't match any school. Please ask your school
-          for the correct link.
-        </div>
-      </div>
-    );
+    setTimeout(() => {
+      setVerifying(false);
+      if (match) {
+        setVerifiedStudent(match);
+        setShowIdentityModal(false);
+        setChildInput("");
+      } else {
+        setIdentityError(
+          "No child found with that name. Please check the spelling and try again.",
+        );
+      }
+    }, 500);
+  };
 
-  const noticeTypeConfig = {
+  // ── Derived attendance for verified student ────────────────────────────────
+  const studentAttendance = verifiedStudent
+    ? attendance
+        .filter(
+          (a) =>
+            a.studentId === verifiedStudent.id ||
+            a.studentName === verifiedStudent.name,
+        )
+        .sort((a, b) => (b.date > a.date ? 1 : -1))
+        .slice(0, 30)
+    : [];
+
+  const attStats = {
+    present: studentAttendance.filter((a) => a.status === "present").length,
+    absent: studentAttendance.filter((a) => a.status === "absent").length,
+    late: studentAttendance.filter((a) => a.status === "late").length,
+  };
+  const attTotal = studentAttendance.length;
+  const attPercent = attTotal
+    ? Math.round((attStats.present / attTotal) * 100)
+    : null;
+
+  // ── Configs ────────────────────────────────────────────────────────────────
+  const noticeConfig = {
     important: {
       icon: AlertCircle,
-      color: "#dc2626",
-      bg: "#fee2e2",
+      color: T.red,
+      bg: T.redLight,
       label: "Important",
     },
     action: {
       icon: CheckCircle,
-      color: "#ca8a04",
-      bg: "#fef9c3",
+      color: "#b45309",
+      bg: "#fffbeb",
       label: "Action Required",
     },
     fee: {
       icon: DollarSign,
-      color: "#7c3aed",
-      bg: "#ede9fe",
+      color: T.purple,
+      bg: T.purpleLight,
       label: "Fee Notice",
     },
-    info: { icon: Info, color: "#2563eb", bg: "#dbeafe", label: "Info" },
+    info: { icon: Info, color: T.blue, bg: T.blueLight, label: "Info" },
+  };
+  const priorityConfig = {
+    high: { label: "Urgent", bg: "#fff0f0", color: T.red, dot: T.red },
+    medium: {
+      label: "Medium",
+      bg: "#fffbeb",
+      color: "#b45309",
+      dot: "#f59e0b",
+    },
+    low: { label: "Low", bg: "#f0fdf4", color: "#15803d", dot: "#22c55e" },
   };
 
-  const priorityConfig = {
-    high: { label: "Urgent", bg: "#fee2e2", color: "#dc2626" },
-    medium: { label: "Medium", bg: "#fef9c3", color: "#b45309" },
-    low: { label: "Low", bg: "#dcfce7", color: "#16a34a" },
-  };
+  const grades = [
+    "All",
+    ...new Set(homework.map((h) => h.grade).filter(Boolean)),
+  ];
+  const filteredHW =
+    gradeFilter === "All"
+      ? homework
+      : homework.filter((h) => h.grade === gradeFilter);
+  const schoolName =
+    businessInfo?.name || businessInfo?.businessName || "School Portal";
+
+  const allTabs = [
+    {
+      id: "homework",
+      label: "Homework",
+      icon: BookOpen,
+      count: homework.length,
+      locked: !verifiedStudent,
+    },
+    {
+      id: "notices",
+      label: "Notices",
+      icon: Megaphone,
+      count: notices.length,
+      locked: false,
+    },
+    {
+      id: "events",
+      label: "Events",
+      icon: Calendar,
+      count: events.length,
+      locked: false,
+    },
+    {
+      id: "fees",
+      label: "Fees",
+      icon: DollarSign,
+      count: null,
+      locked: !verifiedStudent,
+    },
+    {
+      id: "attendance",
+      label: "Attendance",
+      icon: UserCheck,
+      count: null,
+      locked: !verifiedStudent,
+    },
+  ];
+
+  // ── Loading ────────────────────────────────────────────────────────────────
+  if (loading)
+    return (
+      <div
+        style={{
+          minHeight: "100svh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background: T.bg,
+          gap: 14,
+        }}
+      >
+        <style>{fonts + keyframes}</style>
+        <div
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: 16,
+            background: T.primary,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <School style={{ width: 26, height: 26, color: "#fff" }} />
+        </div>
+        <div style={{ display: "flex", gap: 6 }}>
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: T.primary,
+                opacity: 0.3,
+                animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite`,
+              }}
+            />
+          ))}
+        </div>
+        <p
+          style={{
+            fontFamily: "'Outfit',sans-serif",
+            fontSize: 13,
+            color: T.textSoft,
+          }}
+        >
+          Loading portal…
+        </p>
+      </div>
+    );
+
+  if (notFound)
+    return (
+      <div
+        style={{
+          minHeight: "100svh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background: T.bg,
+          gap: 12,
+          padding: "0 24px",
+          textAlign: "center",
+        }}
+      >
+        <style>{fonts + keyframes}</style>
+        <div
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 20,
+            background: T.redLight,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <AlertCircle style={{ width: 28, height: 28, color: T.red }} />
+        </div>
+        <p
+          style={{
+            fontFamily: "'Outfit',sans-serif",
+            fontSize: 18,
+            fontWeight: 700,
+            color: T.text,
+            margin: 0,
+          }}
+        >
+          School not found
+        </p>
+        <p
+          style={{
+            fontFamily: "'Outfit',sans-serif",
+            fontSize: 14,
+            color: T.textSoft,
+            maxWidth: 280,
+            lineHeight: 1.6,
+            margin: 0,
+          }}
+        >
+          This link doesn't match any school. Please ask your school for the
+          correct portal link.
+        </p>
+      </div>
+    );
 
   return (
     <div
-      className="min-h-screen bg-slate-50"
-      style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif" }}
+      style={{
+        minHeight: "100svh",
+        background: T.bg,
+        fontFamily: "'Outfit',sans-serif",
+        WebkitFontSmoothing: "antialiased",
+      }}
     >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
-        * { box-sizing: border-box; }
-      `}</style>
+      <style>{fonts + keyframes}</style>
 
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div
-        style={{
-          background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
-          padding: "24px 20px 20px",
-        }}
-      >
-        <div style={{ maxWidth: 640, margin: "0 auto" }}>
+      {/* ── IDENTITY MODAL ──────────────────────────────────────────────────── */}
+      {showIdentityModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.55)",
+            zIndex: 100,
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            padding: "0",
+          }}
+          onClick={() => {
+            setShowIdentityModal(false);
+            setIdentityError("");
+            setChildInput("");
+          }}
+        >
+          {/* Bottom sheet on mobile */}
           <div
             style={{
-              fontSize: 10,
-              fontWeight: 700,
-              color: "rgba(255,255,255,0.6)",
-              letterSpacing: ".1em",
-              textTransform: "uppercase",
-              marginBottom: 8,
+              background: T.surface,
+              borderRadius: "22px 22px 0 0",
+              width: "100%",
+              maxWidth: 480,
+              padding: "24px 24px calc(env(safe-area-inset-bottom,0px) + 24px)",
+              boxShadow: "0 -8px 40px rgba(0,0,0,0.18)",
+              animation: "slideUp .25s ease",
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            Parent Portal
-          </div>
-          <div className="flex items-center gap-3">
+            {/* Handle bar */}
             <div
               style={{
-                width: 44,
-                height: 44,
-                borderRadius: 12,
-                background: "rgba(255,255,255,0.15)",
+                width: 40,
+                height: 4,
+                borderRadius: 99,
+                background: T.border,
+                margin: "0 auto 20px",
+              }}
+            />
+
+            <div
+              style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
+                gap: 12,
+                marginBottom: 20,
               }}
             >
-              {businessInfo?.logoUrl ? (
-                <img
-                  src={businessInfo.logoUrl}
-                  alt="logo"
-                  style={{
-                    width: 28,
-                    height: 28,
-                    objectFit: "contain",
-                    borderRadius: 6,
-                  }}
-                />
-              ) : (
-                <GraduationCap
-                  style={{ width: 22, height: 22, color: "#fff" }}
-                />
-              )}
-            </div>
-            <div>
               <div
                 style={{
-                  fontSize: 18,
-                  fontWeight: 800,
-                  color: "#fff",
-                  lineHeight: 1.2,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 13,
+                  background: T.primaryLight,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
                 }}
               >
-                {businessInfo?.name || businessInfo?.businessName || "School Portal"}
+                <User style={{ width: 20, height: 20, color: T.primary }} />
               </div>
-              <div
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 16,
+                    fontWeight: 800,
+                    color: T.text,
+                  }}
+                >
+                  Find your child
+                </p>
+                <p
+                  style={{ margin: "2px 0 0", fontSize: 12, color: T.textSoft }}
+                >
+                  Enter your child's full name to view their info
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div>
+                <label
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: T.textMid,
+                    display: "block",
+                    marginBottom: 7,
+                  }}
+                >
+                  Child's Full Name
+                </label>
+                <input
+                  autoFocus
+                  style={{
+                    width: "100%",
+                    padding: "13px 16px",
+                    borderRadius: 13,
+                    border: `1.5px solid ${identityError ? T.red : T.border}`,
+                    fontSize: 15,
+                    fontFamily: "'Outfit',sans-serif",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    color: T.text,
+                    background: T.bg,
+                    transition: "border-color .15s",
+                  }}
+                  placeholder="e.g. Amara Dlamini"
+                  value={childInput}
+                  onChange={(e) => {
+                    setChildInput(e.target.value);
+                    setIdentityError("");
+                  }}
+                  onKeyDown={(e) => e.key === "Enter" && handleVerify()}
+                />
+              </div>
+
+              {identityError && (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    padding: "10px 13px",
+                    background: T.redLight,
+                    borderRadius: 11,
+                    border: `1px solid #fecaca`,
+                  }}
+                >
+                  <AlertCircle
+                    style={{
+                      width: 15,
+                      height: 15,
+                      color: T.red,
+                      flexShrink: 0,
+                      marginTop: 1,
+                    }}
+                  />
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 12,
+                      color: T.red,
+                      fontWeight: 500,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {identityError}
+                  </p>
+                </div>
+              )}
+
+              <button
+                onClick={handleVerify}
+                disabled={verifying}
                 style={{
-                  fontSize: 12,
-                  color: "rgba(255,255,255,0.65)",
+                  padding: "14px",
+                  borderRadius: 13,
+                  background: T.primary,
+                  color: "#fff",
+                  fontSize: 15,
+                  fontWeight: 700,
+                  border: "none",
+                  cursor: verifying ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  opacity: verifying ? 0.75 : 1,
+                  transition: "opacity .15s",
                   marginTop: 2,
                 }}
               >
-                Stay up to date with homework &amp; notices
-              </div>
+                <Search style={{ width: 17, height: 17 }} />
+                {verifying ? "Searching…" : "View My Child's Info"}
+              </button>
+
+              <p
+                style={{
+                  fontSize: 11,
+                  color: T.textFaint,
+                  textAlign: "center",
+                  lineHeight: 1.6,
+                  margin: 0,
+                }}
+              >
+                The name must match exactly what the school has on record.
+              </p>
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Stats strip */}
+      {/* ── HEADER ──────────────────────────────────────────────────────────── */}
+      <div
+        style={{
+          background: `linear-gradient(160deg,${T.primary} 0%,${T.primaryMid} 100%)`,
+          paddingTop: "env(safe-area-inset-top,0px)",
+        }}
+      >
+        <div
+          style={{ padding: "20px 20px 0", maxWidth: 640, margin: "0 auto" }}
+        >
+          {/* Top row */}
           <div
             style={{
               display: "flex",
-              gap: 12,
-              marginTop: 16,
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 20,
             }}
           >
-            {[
-              {
-                label: "Homework Tasks",
-                count: homework.length,
-                color: "#a5b4fc",
-              },
-              { label: "Notices", count: notices.length, color: "#fcd34d" },
-              {
-                label: "Upcoming Events",
-                count: events.length,
-                color: "#6ee7b7",
-              },
-            ].map((s) => (
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div
-                key={s.label}
                 style={{
-                  flex: 1,
-                  background: "rgba(255,255,255,0.12)",
-                  borderRadius: 10,
-                  padding: "8px 10px",
-                  textAlign: "center",
+                  width: 46,
+                  height: 46,
+                  borderRadius: 14,
+                  background: "rgba(255,255,255,0.15)",
+                  border: "1.5px solid rgba(255,255,255,0.2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
                 }}
               >
-                <div style={{ fontSize: 20, fontWeight: 800, color: s.color }}>
-                  {s.count}
-                </div>
+                {businessInfo?.logoUrl ? (
+                  <img
+                    src={businessInfo.logoUrl}
+                    alt="logo"
+                    style={{ width: 30, height: 30, objectFit: "contain" }}
+                  />
+                ) : (
+                  <GraduationCap
+                    style={{ width: 22, height: 22, color: "#fff" }}
+                  />
+                )}
+              </div>
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: "#fff",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {schoolName}
+                </p>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 11,
+                    color: "rgba(255,255,255,0.6)",
+                    marginTop: 2,
+                  }}
+                >
+                  Parent Portal
+                </p>
+              </div>
+            </div>
+
+            {/* Verified chip OR "My Child" button */}
+            {verifiedStudent ? (
+              <button
+                onClick={() => {
+                  setVerifiedStudent(null);
+                  setActiveTab("homework");
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: "rgba(255,255,255,0.15)",
+                  border: "1.5px solid rgba(255,255,255,0.3)",
+                  borderRadius: 12,
+                  padding: "7px 12px",
+                  cursor: "pointer",
+                }}
+              >
                 <div
                   style={{
-                    fontSize: 9,
+                    width: 28,
+                    height: 28,
+                    borderRadius: 8,
+                    background: "rgba(255,255,255,0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <User style={{ width: 13, height: 13, color: "#fff" }} />
+                </div>
+                <div style={{ textAlign: "left" }}>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: "#fff",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {verifiedStudent.name}
+                  </p>
+                  <p
+                    style={{
+                      margin: "2px 0 0",
+                      fontSize: 10,
+                      color: "rgba(255,255,255,0.6)",
+                    }}
+                  >
+                    {verifiedStudent.grade} · Switch
+                  </p>
+                </div>
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowIdentityModal(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 7,
+                  background: "rgba(255,255,255,0.15)",
+                  border: "1.5px solid rgba(255,255,255,0.3)",
+                  borderRadius: 12,
+                  padding: "9px 14px",
+                  color: "#fff",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                <Lock style={{ width: 13, height: 13 }} />
+                My Child
+              </button>
+            )}
+          </div>
+
+          {/* Stats strip */}
+          <div style={{ display: "flex", gap: 10, paddingBottom: 20 }}>
+            {[
+              {
+                label: "Homework",
+                count: homework.length,
+                color: "#6ee7b7",
+                tab: "homework",
+              },
+              {
+                label: "Notices",
+                count: notices.length,
+                color: "#fcd34d",
+                tab: "notices",
+              },
+              {
+                label: "Events",
+                count: events.length,
+                color: "#93c5fd",
+                tab: "events",
+              },
+            ].map((s) => (
+              <button
+                key={s.tab}
+                onClick={() => {
+                  if (!verifiedStudent && s.tab === "homework") {
+                    setShowIdentityModal(true);
+                    return;
+                  }
+                  setActiveTab(s.tab);
+                }}
+                style={{
+                  flex: 1,
+                  background:
+                    activeTab === s.tab
+                      ? "rgba(255,255,255,0.22)"
+                      : "rgba(255,255,255,0.10)",
+                  border:
+                    activeTab === s.tab
+                      ? "1.5px solid rgba(255,255,255,0.35)"
+                      : "1.5px solid transparent",
+                  borderRadius: 13,
+                  padding: "10px 8px",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  transition: "all .2s",
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 22,
+                    fontWeight: 800,
+                    color: s.color,
+                    lineHeight: 1,
+                  }}
+                >
+                  {s.count}
+                </p>
+                <p
+                  style={{
+                    margin: "4px 0 0",
+                    fontSize: 10,
                     fontWeight: 600,
-                    color: "rgba(255,255,255,0.6)",
-                    marginTop: 1,
+                    color: "rgba(255,255,255,0.65)",
                   }}
                 >
                   {s.label}
-                </div>
-              </div>
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── TABS ──────────────────────────────────────────────────────────── */}
+        <div
+          style={{
+            background: T.surface,
+            maxWidth: 640,
+            margin: "0 auto",
+            overflowX: "auto",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              borderBottom: `1px solid ${T.border}`,
+              minWidth: "max-content",
+              width: "100%",
+            }}
+          >
+            {allTabs.map(({ id, label, icon: Icon, count, locked }) => (
+              <button
+                key={id}
+                onClick={() => {
+                  if (locked) {
+                    setShowIdentityModal(true);
+                    return;
+                  }
+                  setActiveTab(id);
+                }}
+                style={{
+                  flex: "1 0 auto",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 5,
+                  padding: "13px 10px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  border: "none",
+                  background: "none",
+                  cursor: "pointer",
+                  borderBottom:
+                    activeTab === id
+                      ? `2.5px solid ${T.primary}`
+                      : "2.5px solid transparent",
+                  color:
+                    activeTab === id
+                      ? T.primary
+                      : locked
+                        ? T.textFaint
+                        : T.textSoft,
+                  transition: "all .15s",
+                  position: "relative",
+                  top: 1,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {locked ? (
+                  <Lock style={{ width: 11, height: 11 }} />
+                ) : (
+                  <Icon style={{ width: 13, height: 13 }} />
+                )}
+                {label}
+                {(count ?? 0) > 0 && (
+                  <span
+                    style={{
+                      background: activeTab === id ? T.primary : T.border,
+                      color: activeTab === id ? "#fff" : T.textSoft,
+                      fontSize: 9,
+                      fontWeight: 800,
+                      padding: "1px 6px",
+                      borderRadius: 99,
+                      marginLeft: 2,
+                    }}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ── Tabs ────────────────────────────────────────────────────────── */}
-      <div
-        style={{
-          background: "#fff",
-          borderBottom: "1px solid #e2e8f0",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <div style={{ maxWidth: 640, margin: "0 auto", display: "flex" }}>
-          {[
-            { id: "homework", label: "Homework", icon: BookOpen },
-            { id: "notices", label: "Notices", icon: Megaphone },
-            { id: "events", label: "Events", icon: Calendar },
-          ].map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              style={{
-                flex: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 6,
-                padding: "13px 8px",
-                fontSize: 13,
-                fontWeight: 600,
-                border: "none",
-                background: "none",
-                cursor: "pointer",
-                borderBottom:
-                  activeTab === id
-                    ? "2.5px solid #4f46e5"
-                    : "2.5px solid transparent",
-                color: activeTab === id ? "#4f46e5" : "#94a3b8",
-                transition: "all .15s",
-              }}
-            >
-              <Icon style={{ width: 15, height: 15 }} />
-              {label}
-              {id === "homework" && homework.length > 0 && (
-                <span
-                  style={{
-                    background: "#4f46e5",
-                    color: "#fff",
-                    fontSize: 9,
-                    fontWeight: 700,
-                    padding: "1px 6px",
-                    borderRadius: 99,
-                  }}
-                >
-                  {homework.length}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Content ─────────────────────────────────────────────────────── */}
+      {/* ── CONTENT ─────────────────────────────────────────────────────────── */}
       <div
         style={{ maxWidth: 640, margin: "0 auto", padding: "16px 16px 40px" }}
       >
-        {/* ── HOMEWORK TAB ── */}
+        {/* ── HOMEWORK ──────────────────────────────────────────────────────── */}
         {activeTab === "homework" && (
-          <div>
-            {/* Grade filter */}
+          <div style={{ animation: "fadeUp .25s ease" }}>
             {grades.length > 1 && (
               <div
                 style={{
                   display: "flex",
                   gap: 8,
                   flexWrap: "wrap",
-                  marginBottom: 14,
+                  marginBottom: 16,
                 }}
               >
                 {grades.map((g) => (
@@ -388,14 +931,15 @@ export default function ParentPortal() {
                     key={g}
                     onClick={() => setGradeFilter(g)}
                     style={{
-                      padding: "5px 13px",
+                      padding: "6px 16px",
                       borderRadius: 99,
                       fontSize: 12,
                       fontWeight: 600,
                       border: "none",
                       cursor: "pointer",
-                      background: gradeFilter === g ? "#4f46e5" : "#f1f5f9",
-                      color: gradeFilter === g ? "#fff" : "#475569",
+                      background: gradeFilter === g ? T.primary : T.surface,
+                      color: gradeFilter === g ? "#fff" : T.textMid,
+                      boxShadow: T.shadow,
                       transition: "all .15s",
                     }}
                   >
@@ -404,14 +948,19 @@ export default function ParentPortal() {
                 ))}
               </div>
             )}
-
-            {filteredHomework.length === 0 ? (
-              <EmptyState icon={BookOpen} message="No homework assigned yet." />
+            {filteredHW.length === 0 ? (
+              <EmptyState
+                icon={BookOpen}
+                title="All caught up!"
+                message="No homework assigned yet."
+                color={T.primaryLight}
+                iconColor={T.primary}
+              />
             ) : (
               <div
-                style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
               >
-                {filteredHomework.map((hw) => {
+                {filteredHW.map((hw, i) => {
                   const p = priorityConfig[hw.priority] || priorityConfig.low;
                   const isOverdue =
                     hw.dueDate &&
@@ -420,113 +969,198 @@ export default function ParentPortal() {
                     <div
                       key={hw.id}
                       style={{
-                        background: "#fff",
-                        borderRadius: 14,
-                        border: "1px solid #e2e8f0",
-                        padding: "14px 16px",
-                        boxShadow: "0 1px 3px rgba(0,0,0,.05)",
+                        background: T.surface,
+                        borderRadius: T.radius,
+                        border: `1px solid ${T.border}`,
+                        overflow: "hidden",
+                        boxShadow: T.shadow,
+                        animation: `fadeUp .3s ease ${i * 0.05}s both`,
                       }}
                     >
                       <div
                         style={{
-                          display: "flex",
-                          alignItems: "flex-start",
-                          gap: 12,
+                          height: 4,
+                          background: isOverdue ? T.red : p.dot,
                         }}
-                      >
-                        {/* Subject icon */}
+                      />
+                      <div style={{ padding: "14px 16px" }}>
                         <div
                           style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 11,
-                            background: "#eef2ff",
                             display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flexShrink: 0,
+                            alignItems: "flex-start",
+                            gap: 12,
                           }}
                         >
-                          <BookOpen
-                            style={{ width: 18, height: 18, color: "#4f46e5" }}
-                          />
-                        </div>
-
-                        <div style={{ flex: 1, minWidth: 0 }}>
                           <div
                             style={{
-                              fontSize: 14,
-                              fontWeight: 700,
-                              color: "#0f172a",
-                              marginBottom: 3,
+                              width: 42,
+                              height: 42,
+                              borderRadius: 13,
+                              background: T.primaryLight,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
                             }}
                           >
-                            {hw.title}
-                          </div>
-                          <div style={{ fontSize: 12, color: "#64748b" }}>
-                            {hw.subject} · {hw.grade}
-                          </div>
-                          {hw.assignedBy && (
-                            <div
+                            <BookOpen
                               style={{
-                                fontSize: 11,
-                                color: "#94a3b8",
-                                marginTop: 2,
+                                width: 18,
+                                height: 18,
+                                color: T.primary,
+                              }}
+                            />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: 15,
+                                fontWeight: 700,
+                                color: T.text,
+                                lineHeight: 1.3,
                               }}
                             >
-                              Assigned by {hw.assignedBy}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Priority badge */}
-                        <span
-                          style={{
-                            fontSize: 10,
-                            fontWeight: 700,
-                            padding: "3px 9px",
-                            borderRadius: 99,
-                            background: p.bg,
-                            color: p.color,
-                            flexShrink: 0,
-                          }}
-                        >
-                          {p.label}
-                        </span>
-                      </div>
-
-                      {/* Due date */}
-                      {hw.dueDate && (
-                        <div
-                          style={{
-                            marginTop: 10,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 6,
-                            padding: "6px 10px",
-                            borderRadius: 8,
-                            background: isOverdue ? "#fee2e2" : "#f8fafc",
-                          }}
-                        >
-                          <Clock
-                            style={{
-                              width: 13,
-                              height: 13,
-                              color: isOverdue ? "#dc2626" : "#94a3b8",
-                            }}
-                          />
+                              {hw.title}
+                            </p>
+                            <p
+                              style={{
+                                margin: "4px 0 0",
+                                fontSize: 12,
+                                color: T.textSoft,
+                              }}
+                            >
+                              {[hw.subject, hw.grade]
+                                .filter(Boolean)
+                                .join(" · ")}
+                            </p>
+                            {hw.assignedBy && (
+                              <p
+                                style={{
+                                  margin: "2px 0 0",
+                                  fontSize: 11,
+                                  color: T.textFaint,
+                                }}
+                              >
+                                by {hw.assignedBy}
+                              </p>
+                            )}
+                          </div>
                           <span
                             style={{
-                              fontSize: 12,
-                              fontWeight: 600,
-                              color: isOverdue ? "#dc2626" : "#475569",
+                              fontSize: 10,
+                              fontWeight: 700,
+                              padding: "4px 10px",
+                              borderRadius: 99,
+                              background: p.bg,
+                              color: p.color,
+                              flexShrink: 0,
                             }}
                           >
-                            {isOverdue ? "Overdue · " : "Due · "}
-                            {hw.dueDate}
+                            {p.label}
                           </span>
                         </div>
-                      )}
+                        {hw.dueDate && (
+                          <div
+                            style={{
+                              marginTop: 12,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 7,
+                              padding: "8px 12px",
+                              borderRadius: 10,
+                              background: isOverdue ? "#fff0f0" : T.bg,
+                              border: `1px solid ${isOverdue ? "#fecaca" : T.border}`,
+                            }}
+                          >
+                            <Clock
+                              style={{
+                                width: 13,
+                                height: 13,
+                                color: isOverdue ? T.red : T.textSoft,
+                              }}
+                            />
+                            <span
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: isOverdue ? T.red : T.textMid,
+                              }}
+                            >
+                              {isOverdue ? "⚠ Overdue — " : "Due "}
+                              {formatDueDate(hw.dueDate)}
+                            </span>
+                          </div>
+                        )}
+                        {hw.attachmentUrl && (
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: 7,
+                              marginTop: 10,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <a
+                              href={hw.attachmentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 5,
+                                padding: "5px 12px",
+                                borderRadius: 99,
+                                background: T.blueLight,
+                                border: `1px solid #bfdbfe`,
+                                color: T.blue,
+                                fontSize: 11,
+                                fontWeight: 600,
+                                textDecoration: "none",
+                              }}
+                            >
+                              <ExternalLink style={{ width: 11, height: 11 }} />{" "}
+                              View
+                            </a>
+                            <a
+                              href={hw.attachmentUrl}
+                              download={hw.attachmentName || "homework.pdf"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 5,
+                                padding: "5px 12px",
+                                borderRadius: 99,
+                                background: "#f0fdf4",
+                                border: "1px solid #86efac",
+                                color: "#15803d",
+                                fontSize: 11,
+                                fontWeight: 600,
+                                textDecoration: "none",
+                              }}
+                            >
+                              <Download style={{ width: 11, height: 11 }} />{" "}
+                              Download
+                            </a>
+                            {hw.attachmentName && (
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 4,
+                                  fontSize: 11,
+                                  color: T.textFaint,
+                                }}
+                              >
+                                <FileText style={{ width: 11, height: 11 }} />
+                                {hw.attachmentName}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -535,79 +1169,133 @@ export default function ParentPortal() {
           </div>
         )}
 
-        {/* ── NOTICES TAB ── */}
+        {/* ── NOTICES ───────────────────────────────────────────────────────── */}
         {activeTab === "notices" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              animation: "fadeUp .25s ease",
+            }}
+          >
             {notices.length === 0 ? (
-              <EmptyState icon={Megaphone} message="No notices yet." />
+              <EmptyState
+                icon={Megaphone}
+                title="No notices"
+                message="No notices posted yet."
+                color={T.accentLight}
+                iconColor={T.accent}
+              />
             ) : (
-              notices.map((n) => {
-                const tc = noticeTypeConfig[n.type] || noticeTypeConfig.info;
+              notices.map((n, i) => {
+                const tc = noticeConfig[n.type] || noticeConfig.info;
                 const Icon = tc.icon;
+                const isExpanded = expandedNotice === n.id;
                 return (
                   <div
                     key={n.id}
                     style={{
-                      background: "#fff",
-                      borderRadius: 14,
-                      border: "1px solid #e2e8f0",
+                      background: T.surface,
+                      borderRadius: T.radius,
+                      border: `1px solid ${T.border}`,
                       borderLeft: `4px solid ${tc.color}`,
-                      padding: "14px 16px",
-                      boxShadow: "0 1px 3px rgba(0,0,0,.05)",
+                      boxShadow: T.shadow,
+                      animation: `fadeUp .3s ease ${i * 0.05}s both`,
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        marginBottom: 8,
-                      }}
-                    >
-                      <span
+                    <div style={{ padding: "14px 16px" }}>
+                      <div
                         style={{
-                          display: "inline-flex",
+                          display: "flex",
                           alignItems: "center",
-                          gap: 4,
-                          fontSize: 10,
-                          fontWeight: 700,
-                          padding: "2px 8px",
-                          borderRadius: 99,
-                          background: tc.bg,
-                          color: tc.color,
+                          gap: 8,
+                          marginBottom: 10,
                         }}
                       >
-                        <Icon style={{ width: 10, height: 10 }} />
-                        {tc.label}
-                      </span>
-                      <span
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 5,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: "3px 10px",
+                            borderRadius: 99,
+                            background: tc.bg,
+                            color: tc.color,
+                          }}
+                        >
+                          <Icon style={{ width: 10, height: 10 }} />
+                          {tc.label}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            color: T.textFaint,
+                            marginLeft: "auto",
+                          }}
+                        >
+                          {n.date}
+                        </span>
+                      </div>
+                      <p
                         style={{
-                          fontSize: 10,
-                          color: "#94a3b8",
-                          marginLeft: "auto",
+                          margin: 0,
+                          fontSize: 15,
+                          fontWeight: 700,
+                          color: T.text,
+                          marginBottom: 6,
                         }}
                       >
-                        {n.date}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 700,
-                        color: "#0f172a",
-                        marginBottom: 5,
-                      }}
-                    >
-                      {n.title}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 13,
-                        color: "#475569",
-                        lineHeight: 1.55,
-                      }}
-                    >
-                      {n.message}
+                        {n.title}
+                      </p>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 13,
+                          color: T.textMid,
+                          lineHeight: 1.65,
+                          display: "-webkit-box",
+                          WebkitLineClamp: isExpanded ? "unset" : 3,
+                          WebkitBoxOrient: "vertical",
+                          overflow: isExpanded ? "visible" : "hidden",
+                        }}
+                      >
+                        {n.message}
+                      </p>
+                      {n.message?.length > 120 && (
+                        <button
+                          onClick={() =>
+                            setExpandedNotice(isExpanded ? null : n.id)
+                          }
+                          style={{
+                            marginTop: 8,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: tc.color,
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: "2px 0",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
+                        >
+                          {isExpanded ? "Show less" : "Read more"}
+                          <ChevronRight
+                            style={{
+                              width: 13,
+                              height: 13,
+                              transform: isExpanded
+                                ? "rotate(90deg)"
+                                : "rotate(0deg)",
+                              transition: "transform .2s",
+                            }}
+                          />
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -616,151 +1304,749 @@ export default function ParentPortal() {
           </div>
         )}
 
-        {/* ── EVENTS TAB ── */}
+        {/* ── EVENTS ────────────────────────────────────────────────────────── */}
         {activeTab === "events" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              animation: "fadeUp .25s ease",
+            }}
+          >
             {events.length === 0 ? (
-              <EmptyState icon={Calendar} message="No upcoming events." />
+              <EmptyState
+                icon={Calendar}
+                title="Nothing coming up"
+                message="No events scheduled."
+                color="#ede9fe"
+                iconColor={T.purple}
+              />
             ) : (
-              events.map((ev) => {
-                const d = new Date(ev.date);
-                const daysAway = Math.round((d - new Date()) / 86400000);
+              events.map((ev, i) => {
+                const d = new Date(ev.date + "T00:00:00");
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const daysAway = Math.round((d - today) / 86400000);
+                const isClose = daysAway <= 3;
                 return (
                   <div
                     key={ev.id}
                     style={{
-                      background: "#fff",
-                      borderRadius: 14,
-                      border: "1px solid #e2e8f0",
-                      padding: "14px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 14,
-                      boxShadow: "0 1px 3px rgba(0,0,0,.05)",
+                      background: T.surface,
+                      borderRadius: T.radius,
+                      border: `1px solid ${T.border}`,
+                      boxShadow: T.shadow,
+                      animation: `fadeUp .3s ease ${i * 0.05}s both`,
                     }}
                   >
-                    {/* Date block */}
                     <div
                       style={{
-                        width: 48,
-                        height: 52,
-                        borderRadius: 12,
-                        background: "#eef2ff",
+                        padding: "14px 16px",
                         display: "flex",
-                        flexDirection: "column",
                         alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
+                        gap: 14,
                       }}
                     >
                       <div
                         style={{
-                          fontSize: 20,
-                          fontWeight: 800,
-                          color: "#4f46e5",
-                          lineHeight: 1,
+                          width: 52,
+                          height: 58,
+                          borderRadius: 14,
+                          background: isClose ? "#fff0f0" : T.primaryLight,
+                          border: `1.5px solid ${isClose ? "#fecaca" : "#c6e8d9"}`,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
                         }}
                       >
-                        {d.getDate()}
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: 22,
+                            fontWeight: 800,
+                            color: isClose ? T.red : T.primary,
+                            lineHeight: 1,
+                          }}
+                        >
+                          {d.getDate()}
+                        </p>
+                        <p
+                          style={{
+                            margin: "2px 0 0",
+                            fontSize: 9,
+                            fontWeight: 700,
+                            color: isClose ? "#fc8181" : "#52b98a",
+                            letterSpacing: ".08em",
+                          }}
+                        >
+                          {d
+                            .toLocaleDateString("en", { month: "short" })
+                            .toUpperCase()}
+                        </p>
                       </div>
-                      <div
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: 15,
+                            fontWeight: 700,
+                            color: T.text,
+                          }}
+                        >
+                          {ev.title}
+                        </p>
+                        <p
+                          style={{
+                            margin: "3px 0 0",
+                            fontSize: 12,
+                            color: T.textSoft,
+                          }}
+                        >
+                          {d.toLocaleDateString("en", { weekday: "long" })}
+                          {ev.time ? ` · ${ev.time}` : ""}
+                        </p>
+                        {ev.description && (
+                          <p
+                            style={{
+                              margin: "3px 0 0",
+                              fontSize: 12,
+                              color: T.textFaint,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {ev.description}
+                          </p>
+                        )}
+                      </div>
+                      <span
                         style={{
-                          fontSize: 9,
+                          fontSize: 10,
                           fontWeight: 700,
-                          color: "#818cf8",
-                          letterSpacing: ".06em",
+                          padding: "5px 11px",
+                          borderRadius: 99,
+                          background:
+                            daysAway === 0
+                              ? T.red
+                              : daysAway <= 3
+                                ? "#fff0f0"
+                                : T.bg,
+                          color:
+                            daysAway === 0
+                              ? "#fff"
+                              : daysAway <= 3
+                                ? T.red
+                                : T.textSoft,
+                          flexShrink: 0,
                         }}
                       >
-                        {d
-                          .toLocaleDateString("en", { month: "short" })
-                          .toUpperCase()}
-                      </div>
+                        {daysAway === 0
+                          ? "Today"
+                          : daysAway === 1
+                            ? "Tomorrow"
+                            : `${daysAway}d away`}
+                      </span>
                     </div>
-
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 700,
-                          color: "#0f172a",
-                        }}
-                      >
-                        {ev.title}
-                      </div>
-                      <div
-                        style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}
-                      >
-                        {ev.time && `${ev.time} · `}
-                        {ev.description}
-                      </div>
-                    </div>
-
-                    <span
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        padding: "4px 10px",
-                        borderRadius: 99,
-                        background: daysAway <= 2 ? "#fee2e2" : "#f1f5f9",
-                        color: daysAway <= 2 ? "#dc2626" : "#64748b",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {daysAway === 0
-                        ? "Today"
-                        : daysAway === 1
-                          ? "Tomorrow"
-                          : `In ${daysAway}d`}
-                    </span>
                   </div>
                 );
               })
             )}
           </div>
         )}
+
+        {/* ── FEES ──────────────────────────────────────────────────────────── */}
+        {activeTab === "fees" &&
+          verifiedStudent &&
+          (() => {
+            const fees = verifiedStudent.fees || {};
+            const paid = Number(fees.paid || 0);
+            const total = Number(fees.total || 0);
+            const balance = Math.max(0, total - paid);
+            const pct = total
+              ? Math.min(100, Math.round((paid / total) * 100))
+              : 0;
+            const status =
+              fees.status ||
+              (paid >= total && total > 0
+                ? "paid"
+                : paid > 0
+                  ? "partial"
+                  : "unpaid");
+            const sc = {
+              paid: {
+                label: "Paid Up",
+                bg: "#f0fdf4",
+                color: "#15803d",
+                bar: "#22c55e",
+              },
+              partial: {
+                label: "Partial",
+                bg: "#fffbeb",
+                color: "#b45309",
+                bar: "#f59e0b",
+              },
+              unpaid: {
+                label: "Outstanding",
+                bg: T.redLight,
+                color: T.red,
+                bar: T.red,
+              },
+            }[status] || {
+              label: "Unknown",
+              bg: T.bg,
+              color: T.textSoft,
+              bar: T.textFaint,
+            };
+
+            return (
+              <div style={{ animation: "fadeUp .25s ease" }}>
+                <SectionHeader
+                  name={verifiedStudent.name}
+                  grade={verifiedStudent.grade}
+                />
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 14 }}
+                >
+                  {/* Main fee card */}
+                  <div
+                    style={{
+                      background: T.surface,
+                      borderRadius: T.radius,
+                      border: `1px solid ${T.border}`,
+                      padding: 20,
+                      boxShadow: T.shadow,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: 18,
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: T.text,
+                        }}
+                      >
+                        Fee Account
+                      </p>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          padding: "5px 13px",
+                          borderRadius: 99,
+                          background: sc.bg,
+                          color: sc.color,
+                        }}
+                      >
+                        {sc.label}
+                      </span>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div style={{ marginBottom: 6 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: 6,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: T.textSoft,
+                          }}
+                        >
+                          Payment progress
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 700,
+                            color: sc.color,
+                          }}
+                        >
+                          {pct}%
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          height: 12,
+                          borderRadius: 99,
+                          background: T.bg,
+                          overflow: "hidden",
+                          border: `1px solid ${T.border}`,
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${pct}%`,
+                            background: sc.bar,
+                            borderRadius: 99,
+                            transition: "width .8s ease",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3 stat tiles */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr 1fr",
+                      gap: 10,
+                    }}
+                  >
+                    {[
+                      {
+                        label: "Total Fees",
+                        value: `R ${total.toLocaleString()}`,
+                        color: T.textMid,
+                        bg: T.surface,
+                      },
+                      {
+                        label: "Amount Paid",
+                        value: `R ${paid.toLocaleString()}`,
+                        color: "#15803d",
+                        bg: "#f0fdf4",
+                      },
+                      {
+                        label: "Balance Due",
+                        value: `R ${balance.toLocaleString()}`,
+                        color: balance > 0 ? T.red : T.textSoft,
+                        bg: balance > 0 ? T.redLight : T.surface,
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        style={{
+                          textAlign: "center",
+                          padding: "14px 8px",
+                          borderRadius: 14,
+                          background: item.bg,
+                          border: `1px solid ${T.border}`,
+                          boxShadow: T.shadow,
+                        }}
+                      >
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: 15,
+                            fontWeight: 800,
+                            color: item.color,
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {item.value}
+                        </p>
+                        <p
+                          style={{
+                            margin: "5px 0 0",
+                            fontSize: 10,
+                            fontWeight: 600,
+                            color: T.textFaint,
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          {item.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Contact note */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      padding: "12px 14px",
+                      borderRadius: 12,
+                      background: T.blueLight,
+                      border: `1px solid #bfdbfe`,
+                    }}
+                  >
+                    <Info
+                      style={{
+                        width: 16,
+                        height: 16,
+                        color: T.blue,
+                        flexShrink: 0,
+                        marginTop: 1,
+                      }}
+                    />
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 12,
+                        color: T.blue,
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      Questions about your fee account? Please contact the
+                      school office directly.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+        {/* ── ATTENDANCE ────────────────────────────────────────────────────── */}
+        {activeTab === "attendance" && verifiedStudent && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <SectionHeader
+              name={verifiedStudent.name}
+              grade={verifiedStudent.grade}
+            />
+            {studentAttendance.length === 0 ? (
+              <EmptyState
+                icon={UserCheck}
+                title="No records yet"
+                message="Attendance hasn't been recorded yet."
+                color={T.primaryLight}
+                iconColor={T.primary}
+              />
+            ) : (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                {/* Summary tiles */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr 1fr 1fr",
+                    gap: 8,
+                  }}
+                >
+                  {[
+                    {
+                      label: "Present",
+                      count: attStats.present,
+                      bg: "#f0fdf4",
+                      color: "#15803d",
+                    },
+                    {
+                      label: "Absent",
+                      count: attStats.absent,
+                      bg: T.redLight,
+                      color: T.red,
+                    },
+                    {
+                      label: "Late",
+                      count: attStats.late,
+                      bg: "#fffbeb",
+                      color: "#b45309",
+                    },
+                    {
+                      label: "Rate",
+                      count: attPercent != null ? `${attPercent}%` : "—",
+                      bg: T.primaryLight,
+                      color: T.primary,
+                    },
+                  ].map((s) => (
+                    <div
+                      key={s.label}
+                      style={{
+                        textAlign: "center",
+                        padding: "10px 4px",
+                        borderRadius: 12,
+                        background: s.bg,
+                        border: `1px solid ${T.border}`,
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 18,
+                          fontWeight: 800,
+                          color: s.color,
+                        }}
+                      >
+                        {s.count}
+                      </p>
+                      <p
+                        style={{
+                          margin: "3px 0 0",
+                          fontSize: 10,
+                          fontWeight: 600,
+                          color: T.textFaint,
+                        }}
+                      >
+                        {s.label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Record list */}
+                <div
+                  style={{
+                    background: T.surface,
+                    borderRadius: T.radius,
+                    border: `1px solid ${T.border}`,
+                    overflow: "hidden",
+                    boxShadow: T.shadow,
+                  }}
+                >
+                  {studentAttendance.map((rec, i) => {
+                    const cfg = {
+                      present: {
+                        label: "Present",
+                        bg: "#f0fdf4",
+                        color: "#15803d",
+                        dot: "#22c55e",
+                      },
+                      absent: {
+                        label: "Absent",
+                        bg: T.redLight,
+                        color: T.red,
+                        dot: T.red,
+                      },
+                      late: {
+                        label: "Late",
+                        bg: "#fffbeb",
+                        color: "#b45309",
+                        dot: "#f59e0b",
+                      },
+                    }[rec.status] || {
+                      label: rec.status,
+                      bg: T.bg,
+                      color: T.textSoft,
+                      dot: T.textFaint,
+                    };
+                    return (
+                      <div
+                        key={rec.id || i}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          padding: "12px 16px",
+                          borderBottom:
+                            i < studentAttendance.length - 1
+                              ? `1px solid ${T.border}`
+                              : "none",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            background: cfg.dot,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <p
+                          style={{
+                            margin: 0,
+                            flex: 1,
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: T.text,
+                          }}
+                        >
+                          {formatDate(rec.date)}
+                        </p>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 700,
+                            padding: "3px 10px",
+                            borderRadius: 99,
+                            background: cfg.bg,
+                            color: cfg.color,
+                          }}
+                        >
+                          {cfg.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p
+                  style={{
+                    fontSize: 11,
+                    color: T.textFaint,
+                    textAlign: "center",
+                    margin: 0,
+                  }}
+                >
+                  Showing last {studentAttendance.length} records
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      {/* ── FOOTER ──────────────────────────────────────────────────────────── */}
       <div
         style={{
           textAlign: "center",
-          padding: "16px",
-          fontSize: 11,
-          color: "#94a3b8",
-          borderTop: "1px solid #f1f5f9",
+          padding: "20px 16px calc(env(safe-area-inset-bottom,0px) + 20px)",
+          borderTop: `1px solid ${T.border}`,
+          background: T.surface,
         }}
       >
-        {businessInfo?.name || "School"} · Parent Portal
+        <p
+          style={{
+            margin: 0,
+            fontSize: 12,
+            color: T.textFaint,
+            fontWeight: 500,
+          }}
+        >
+          {schoolName} · Parent Portal
+        </p>
+        <p
+          style={{
+            margin: "4px 0 0",
+            fontSize: 10,
+            color: T.textFaint,
+            opacity: 0.6,
+          }}
+        >
+          Information is updated in real-time
+        </p>
       </div>
     </div>
   );
 }
 
-// ── Empty state helper ────────────────────────────────────────────────────────
-function EmptyState({ icon: Icon, message }) {
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function formatDueDate(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diff = Math.round((d - today) / 86400000);
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Tomorrow";
+  if (diff === -1) return "Yesterday";
+  if (diff < 0) return `${Math.abs(diff)} days ago`;
+  if (diff <= 7) return `In ${diff} days`;
+  return d.toLocaleDateString("en", { day: "numeric", month: "short" });
+}
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("en", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}
+function SectionHeader({ name, grade }) {
   return (
     <div
       style={{
-        textAlign: "center",
-        padding: "48px 20px",
-        color: "#94a3b8",
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        marginBottom: 14,
+        padding: "10px 14px",
+        background: "#fff",
+        borderRadius: 12,
+        border: "1px solid #e8ecf0",
       }}
     >
       <div
         style={{
-          width: 52,
-          height: 52,
-          borderRadius: 14,
-          background: "#f1f5f9",
+          width: 34,
+          height: 34,
+          borderRadius: 10,
+          background: "#e8f5ef",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          margin: "0 auto 12px",
         }}
       >
-        <Icon style={{ width: 22, height: 22, color: "#cbd5e1" }} />
+        <User style={{ width: 16, height: 16, color: "#1a6b4a" }} />
       </div>
-      <div style={{ fontSize: 13, fontWeight: 600 }}>{message}</div>
+      <div>
+        <p
+          style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#1a202c" }}
+        >
+          {name}
+        </p>
+        <p style={{ margin: 0, fontSize: 11, color: "#718096" }}>{grade}</p>
+      </div>
     </div>
   );
 }
+function EmptyState({ icon: Icon, title, message, color, iconColor }) {
+  return (
+    <div
+      style={{
+        textAlign: "center",
+        padding: "52px 24px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      <div
+        style={{
+          width: 60,
+          height: 60,
+          borderRadius: 18,
+          background: color,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: 4,
+        }}
+      >
+        <Icon style={{ width: 26, height: 26, color: iconColor }} />
+      </div>
+      <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a202c" }}>
+        {title}
+      </p>
+      <p
+        style={{
+          margin: 0,
+          fontSize: 13,
+          color: "#718096",
+          maxWidth: 240,
+          lineHeight: 1.6,
+        }}
+      >
+        {message}
+      </p>
+    </div>
+  );
+}
+
+const fonts = `
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  button { font-family:'Outfit',sans-serif; }
+`;
+const keyframes = `
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes slideUp {
+    from { transform:translateY(100%); }
+    to   { transform:translateY(0); }
+  }
+  @keyframes pulse {
+    0%,100% { opacity:.3; transform:scale(.9); }
+    50%      { opacity:1;  transform:scale(1.1); }
+  }
+`;

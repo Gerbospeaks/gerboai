@@ -16,7 +16,6 @@ import {
   UserCheck,
   GraduationCap,
   Bell,
-  Library,
   School,
   X,
   Clock,
@@ -39,7 +38,6 @@ function useDateInfo() {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function EducationSidebar({
-  // ── navigation ──────────────────────────────────────────────────
   navigate,
   user,
   activeView,
@@ -48,40 +46,33 @@ export default function EducationSidebar({
   setSidebarOpen,
   setShowSettings,
   handleLogout,
-
-  // ── firebase data ────────────────────────────────────────────────
   businessInfo,
   savedReports,
   savedStudents,
   showReportsList,
   setShowReportsList,
-
-  // ── modal openers — pass setState(true) for each modal ──────────
-  onOpenStudentModal, // () => void  — Add Student
-  onOpenStudentsListModal, // () => void  — All Students
-  onOpenNoticeModal, // () => void  — New Notice
-  onOpenHomeworkModal, // () => void  — Add Homework
-  onOpenAttendanceModal, // () => void  — Take Attendance
-  onOpenEventModal, // () => void  — Add Event
-  onOpenStaffModal, // () => void  — Add Staff
-  onOpenTimetableModal, // () => void  — Edit Timetable
+  onOpenStudentModal,
+  onOpenStudentsListModal,
+  onOpenNoticeModal,
+  onOpenHomeworkModal,
+  onOpenAttendanceModal,
+  onOpenEventModal,
+  onOpenStaffModal,
+  onOpenTimetableModal,
 }) {
   const [isReportCardsOpen, setIsReportCardsOpen] = useState(false);
   const [isStudentsOpen, setIsStudentsOpen] = useState(false);
-  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isAttendanceOpen, setIsAttendanceOpen] = useState(false);
   const [isNoticesOpen, setIsNoticesOpen] = useState(false);
   const [isStaffOpen, setIsStaffOpen] = useState(false);
 
   const { dayName, dateStr } = useDateInfo();
 
-  // close sidebar on mobile after navigating
   const goTo = (view) => {
     setActiveView(view);
     setSidebarOpen(false);
   };
 
-  // helper: close sidebar then open a modal
   const openModal = (fn) => {
     setSidebarOpen(false);
     fn?.();
@@ -155,23 +146,12 @@ export default function EducationSidebar({
       action: () => goTo("assessments"),
       color: "from-blue-600 to-blue-700",
     },
-    {
-      icon: BarChart3,
-      title: "Analytics",
-      action: () => goTo("analytics"),
-      color: "from-indigo-600 to-indigo-700",
-    },
+   
     {
       icon: Users,
       title: "Staff",
       action: () => goTo("staff"),
       color: "from-slate-600 to-slate-700",
-    },
-    {
-      icon: Library,
-      title: "Library",
-      action: () => goTo("library"),
-      color: "from-indigo-600 to-indigo-700",
     },
     {
       icon: Calendar,
@@ -413,9 +393,7 @@ export default function EducationSidebar({
                 label="Homework"
                 isOpen={false}
                 onToggle={() => openModal(onOpenHomeworkModal)}
-              >
-                {/* single-action accordion — toggle opens modal directly */}
-              </Accordion>
+              />
 
               {/* ── Staff ── */}
               <Accordion
@@ -431,7 +409,7 @@ export default function EducationSidebar({
                 <SubItem label="View All Staff" onClick={() => goTo("staff")} />
               </Accordion>
 
-              {/* ── Timetable / Curriculum ── */}
+              {/* ── Standalone items ── */}
               <NavItem
                 icon={Clock}
                 label="Timetable"
@@ -457,39 +435,6 @@ export default function EducationSidebar({
                 color="blue"
               />
 
-              {/* ── Analytics ── */}
-              <Accordion
-                icon={BarChart3}
-                label="Analytics"
-                isOpen={isAnalyticsOpen}
-                onToggle={() => setIsAnalyticsOpen((p) => !p)}
-              >
-                <SubItem
-                  label="Performance"
-                  onClick={() => goTo("analytics-performance")}
-                />
-                <SubItem
-                  label="Attendance Trends"
-                  onClick={() => goTo("analytics-attendance")}
-                />
-                <SubItem
-                  label="Grade Reports"
-                  onClick={() => goTo("analytics-grades")}
-                />
-              </Accordion>
-
-              <NavItem
-                icon={Library}
-                label="Library"
-                onClick={() => goTo("library")}
-                color="indigo"
-              />
-              <NavItem
-                icon={Bell}
-                label="Notices"
-                onClick={() => goTo("notices")}
-                color="blue"
-              />
             </div>
           </nav>
 

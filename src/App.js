@@ -56,6 +56,7 @@ import NotesView from './pages/mechanics/NotesView';
 import SignatureStamp from './pages/mechanics/SignatureStamp';
 import TemplateSelector from './pages/accounting/TemplateSelector';
 import ParentPortal from './pages/education/ParentPortal';
+import StaffPortal from './pages/education/StaffPortal';
 function App() {
 
    useEffect(() => {
@@ -449,6 +450,7 @@ function App() {
               } 
             />
             <Route path="/parents/:schoolSlug" element={<ParentPortal />} />
+            <Route path="/staff/:portalSlug" element={<StaffPortal />} />
           </Routes>
         </AdminProvider>
       </AuthProvider>

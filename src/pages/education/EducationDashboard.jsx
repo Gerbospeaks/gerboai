@@ -30,6 +30,7 @@ import { Printer, Download } from "lucide-react";
 import { db } from "../../firebase";
 import StudentsListModal from "./StudentsListModal";
 import SignatureStamp from "../SignatureStamp";
+import SchoolOverview from "./SchoolOverview";
 import {
   useNotices,
   useHomework,
@@ -240,7 +241,7 @@ const MOCK_STAFF = [
     subject: "ECD",
     phone: "061 333 4444",
     email: "thandi@school.com",
-    status: "absent",
+    status: "present",
     classes: ["Pre-School A", "Pre-School B"],
   },
   {
@@ -741,32 +742,34 @@ const EducationDashboard = () => {
     });
     setAttendance(init);
   }, []);
-useEffect(() => {
-  const loadSchoolInfo = async () => {
-    if (!user?.uid) return;
+  useEffect(() => {
+    const loadSchoolInfo = async () => {
+      if (!user?.uid) return;
 
-    // Load businessInfo (name, phone, address, logo etc.)
-    const bizSnap = await getDoc(doc(db, 'users', user.uid, 'settings', 'businessInfo'));
+      // Load businessInfo (name, phone, address, logo etc.)
+      const bizSnap = await getDoc(
+        doc(db, "users", user.uid, "settings", "businessInfo"),
+      );
 
-    // Load portalSlug from the user doc root
-    const userSnap = await getDoc(doc(db, 'users', user.uid));
+      // Load portalSlug from the user doc root
+      const userSnap = await getDoc(doc(db, "users", user.uid));
 
-    setBusinessInfo({
-      // from businessInfo
-      ...bizSnap.data(),
+      setBusinessInfo({
+        // from businessInfo
+        ...bizSnap.data(),
 
-      // readable name fields
-      name:    bizSnap.data()?.businessName || '',
-      tagline: bizSnap.data()?.tagline      || 'Learning Centre',
-      logoUrl: bizSnap.data()?.logoUrl      || '',
+        // readable name fields
+        name: bizSnap.data()?.businessName || "",
+        tagline: bizSnap.data()?.tagline || "Learning Centre",
+        logoUrl: bizSnap.data()?.logoUrl || "",
 
-      // portalSlug lives on the user doc root, not businessInfo
-      portalSlug: userSnap.data()?.portalSlug || null,
-    });
-  };
+        // portalSlug lives on the user doc root, not businessInfo
+        portalSlug: userSnap.data()?.portalSlug || null,
+      });
+    };
 
-  loadSchoolInfo();
-}, [user?.uid]);
+    loadSchoolInfo();
+  }, [user?.uid]);
   useEffect(() => {
     if (window.innerWidth < 1024) setSidebarOpen(false);
   }, []);
@@ -1399,9 +1402,10 @@ useEffect(() => {
             </div>
           )}
         </header>
-{showSettings && (
-            <BusinessSettingsModal onClose={() => setShowSettings(false)} />
-          )}
+        {showSettings && (
+          <BusinessSettingsModal onClose={() => setShowSettings(false)} />
+        )}
+        
         {/* Content */}
         <main className="flex-1 overflow-y-auto scrollbar-thin p-4 sm:p-6">
           {/* ── HOME ── */}
@@ -1424,7 +1428,17 @@ useEffect(() => {
               students={students}
             />
           )}
-
+          {activeView === "overview" && (
+            <SchoolOverview
+              students={savedStudents}
+              staff={staff}
+              attendance={attendance}
+              events={events}
+              homework={homework}
+              notices={notices}
+              businessInfo={businessInfo}
+            />
+          )}
           {/* ── ATTENDANCE ── */}
           {activeView === "attendance" && (
             <AttendanceView
@@ -1439,7 +1453,11 @@ useEffect(() => {
               dateStr={dateStr}
             />
           )}
-
+           {activeView === "templates" &&(
+            <div className="h-full overflow-y-auto p-6">
+            <Templates user={user} />
+            </div>
+            )}
           {/* ── TIMETABLE ── */}
           {activeView === "timetable" && (
             <TimetableView
@@ -1496,72 +1514,67 @@ useEffect(() => {
           {/* ── REPORTS ── */}
           {activeView === "reports" && (
             <>
-              <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {/* ── LEFT: Input Panel ── */}
                 <div
                   className={`${
                     showReportCard ? "hidden" : "block"
-                  } space-y-6 lg:block print:hidden max-h-[calc(100vh-120px)] ml-12`}
+                  } space-y-6 lg:block print:hidden overflow-y-auto`}
+                  style={{ maxHeight: "calc(100vh - 120px)" }}
                 >
                   <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
-                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
-                      <div className="flex border-b border-slate-200">
-                        <button
-                          onClick={() => setInputMode("manual")}
-                          className={`flex-1 px-2 sm:px-6 py-2 sm:py-4 font-semibold text-xs sm:text-base transition-all duration-200 ${inputMode === "manual" ? "bg-white text-blue-600 border-b-2 border-blue-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
-                        >
-                          <span className="flex items-center justify-center gap-1 sm:gap-2">
-                            <svg
-                              className="w-4 h-4 sm:w-5 sm:h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                              />
-                            </svg>
-                            <span className="hidden sm:inline">
-                              Manual Entry
-                            </span>
-                            <span className="sm:hidden">Manual</span>
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => setInputMode("ai")}
-                          className={`flex-1 px-2 sm:px-6 py-2 sm:py-4 font-semibold text-xs sm:text-base transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
-                        >
-                          <span className="flex items-center justify-center gap-1 sm:gap-2">
-                            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
-                            <span className="hidden sm:inline">
-                              AI Assistant
-                            </span>
-                            <span className="sm:hidden">AI</span>
-                          </span>
-                        </button>
-                      </div>
-                      <div className="p-3 sm:p-6">
-                        {inputMode === "ai" && (
-                          <AIInvoiceExtractor
-                            onDataExtracted={handleAIDataExtracted}
-                            documentType={documentType}
-                          />
-                        )}
-                      </div>
+                    <div className="flex border-b border-slate-200">
+                      <button
+                        onClick={() => setInputMode("manual")}
+                        className={`flex-1 px-2 sm:px-6 py-2 sm:py-4 font-semibold text-xs sm:text-base transition-all duration-200 ${
+                          inputMode === "manual"
+                            ? "bg-white text-blue-600 border-b-2 border-blue-600 shadow-sm"
+                            : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        }`}
+                      >
+                        <span className="flex items-center justify-center gap-1 sm:gap-2">
+                          <svg
+                            className="w-4 h-4 sm:w-5 sm:h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                          <span className="hidden sm:inline">Manual Entry</span>
+                          <span className="sm:hidden">Manual</span>
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setInputMode("ai")}
+                        className={`flex-1 px-2 sm:px-6 py-2 sm:py-4 font-semibold text-xs sm:text-base transition-all duration-200 ${
+                          inputMode === "ai"
+                            ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm"
+                            : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        }`}
+                      >
+                        <span className="flex items-center justify-center gap-1 sm:gap-2">
+                          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <span className="hidden sm:inline">AI Assistant</span>
+                          <span className="sm:hidden">AI</span>
+                        </span>
+                      </button>
                     </div>
-
-                    {/* Tab Content */}
-                    <div className="p-6">
-                      {inputMode === "ai" ? (
+                    <div className="p-3 sm:p-6">
+                      {inputMode === "ai" && (
                         <AIInvoiceExtractor
                           onDataExtracted={handleAIDataExtracted}
                           documentType={documentType}
                         />
-                      ) : null}
+                      )}
                     </div>
                   </div>
+
                   {inputMode === "manual" && (
                     <>
                       <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 flex items-center space-x-3">
@@ -1610,7 +1623,6 @@ useEffect(() => {
                             <span>Edit</span>
                           </button>
                         </div>
-
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <div className="text-sm text-gray-500">
@@ -1666,7 +1678,6 @@ useEffect(() => {
                             <span>Parent/Guardian Information</span>
                           </h2>
                         </div>
-
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <div className="text-sm text-gray-500">
@@ -1716,7 +1727,6 @@ useEffect(() => {
                             <span>Academic Period</span>
                           </h2>
                         </div>
-
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <div className="text-sm text-gray-500">Term</div>
@@ -1749,7 +1759,6 @@ useEffect(() => {
                         <h2 className="text-lg font-semibold mb-4">
                           Add Subject Grade
                         </h2>
-
                         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                           <input
                             type="text"
@@ -1763,7 +1772,6 @@ useEffect(() => {
                             }
                             className="px-4 py-2 border rounded"
                           />
-
                           <input
                             type="number"
                             placeholder="Mark (%)"
@@ -1778,7 +1786,6 @@ useEffect(() => {
                             }
                             className="px-4 py-2 border rounded"
                           />
-
                           <input
                             type="text"
                             placeholder="Comments (optional)"
@@ -1791,10 +1798,9 @@ useEffect(() => {
                             }
                             className="px-4 py-2 border rounded"
                           />
-
                           <button
                             onClick={handleAddSubject}
-                            className="bg-gray-500 text-gray-800 rounded-lg px-4 py-2 hover:bg-indigo-700 flex items-center justify-center gap-2"
+                            className="bg-indigo-600 text-white rounded-lg px-4 py-2 hover:bg-indigo-700 flex items-center justify-center gap-2"
                           >
                             <Plus className="w-4 h-4" />
                             Add
@@ -1806,7 +1812,6 @@ useEffect(() => {
                         <div className="flex items-center justify-between mb-4">
                           <h2 className="text-lg font-semibold">Attendance</h2>
                         </div>
-
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <div className="text-sm text-gray-500">
@@ -1843,7 +1848,6 @@ useEffect(() => {
                             Teacher Comments
                           </h2>
                         </div>
-
                         <textarea
                           value={teacherComments}
                           onChange={(e) => setTeacherComments(e.target.value)}
@@ -1856,47 +1860,87 @@ useEffect(() => {
                   )}
                 </div>
 
+                {/* ── RIGHT: Preview Panel ── */}
                 <div
-                  id="print-area"
-                  className={`${!showReportCard ? "hidden lg:block" : "block"} mx-auto bg-white print:block`}
-                  style={{ width: "210mm", minHeight: "297mm" }}
+                  className="hidden lg:flex flex-col lg:sticky lg:top-4 print:hidden"
+                  style={{ height: "calc(100vh - 140px)" }}
                 >
-                  {activeView === "reportCard" && (
-                    <>
-                      {/* Add Template Selector */}
-                      <div className="mb-4 print:hidden">
-                        <TemplateSelector
-                          user={user}
-                          selectedTemplate={selectedTemplate}
-                          onTemplateChange={setSelectedTemplate}
+                  {/* Template selector bar */}
+                  <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                    <span className="text-sm font-semibold text-gray-600">
+                      Preview
+                    </span>
+                    <TemplateSelector
+                      user={user}
+                      selectedTemplate={selectedTemplate}
+                      onTemplateChange={setSelectedTemplate}
+                    />
+                  </div>
+
+                  {/* Scaled preview container */}
+                  <div className="flex-1 overflow-hidden bg-gray-100 rounded-xl border border-gray-200 shadow-sm">
+                    <div
+                      className="overflow-y-auto overflow-x-hidden"
+                      style={{ height: "100%" }}
+                    >
+                      <div
+                        style={{
+                          transform: "scale(0.55)",
+                          transformOrigin: "top left",
+                          width: "calc(100% / 0.55)",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <TemplateRenderer
+                          templateId={selectedTemplate}
+                          businessInfo={businessInfo}
+                          loading={loading}
+                          reportCardNumber={reportNumber}
+                          term={term}
+                          academicYear={academicYear}
+                          studentName={studentName}
+                          studentId={studentId}
+                          gradeLevel={gradeLevel}
+                          dateOfBirth={dateOfBirth}
+                          parentName={parentName}
+                          parentPhone={parentPhone}
+                          parentEmail={parentEmail}
+                          subjects={subjects}
+                          attendanceDays={attendanceDays}
+                          attendancePresent={attendancePresent}
+                          teacherComments={teacherComments}
+                          calculateAverage={calculateAverage}
+                          documentType="reportCard"
                         />
                       </div>
-
-                      {/* Use Template Renderer instead of hardcoded report card */}
-                      <TemplateRenderer
-                        templateId={selectedTemplate}
-                        businessInfo={businessInfo}
-                        loading={loading}
-                        jobCardNumber={reportNumber}
-                        term={term}
-                        academicYear={academicYear}
-                        studentName={studentName}
-                        studentId={studentId}
-                        gradeLevel={gradeLevel}
-                        dateOfBirth={dateOfBirth}
-                        parentName={parentName}
-                        parentPhone={parentPhone}
-                        parentEmail={parentEmail}
-                        subjects={subjects}
-                        attendanceDays={attendanceDays}
-                        attendancePresent={attendancePresent}
-                        teacherComments={teacherComments}
-                        calculateAverage={calculateAverage}
-                        documentType="reportCard"
-                      />
-                    </>
-                  )}
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              {/* ── PRINT AREA (hidden on screen, used only for printing) ── */}
+              <div id="print-area" className="hidden print:block">
+                <TemplateRenderer
+                  templateId={selectedTemplate}
+                  businessInfo={businessInfo}
+                  loading={loading}
+                  reportCardNumber={reportNumber}
+                  term={term}
+                  academicYear={academicYear}
+                  studentName={studentName}
+                  studentId={studentId}
+                  gradeLevel={gradeLevel}
+                  dateOfBirth={dateOfBirth}
+                  parentName={parentName}
+                  parentPhone={parentPhone}
+                  parentEmail={parentEmail}
+                  subjects={subjects}
+                  attendanceDays={attendanceDays}
+                  attendancePresent={attendancePresent}
+                  teacherComments={teacherComments}
+                  calculateAverage={calculateAverage}
+                  documentType="reportCard"
+                />
               </div>
             </>
           )}
@@ -1967,7 +2011,6 @@ const HomeView = ({
   navigate,
   businessInfo,
   students,
-  
 }) => {
   const feePercent = Math.round((collectedFees / totalFees) * 100);
   const attendPercent = Math.round((presentCount / totalStudents) * 100);
@@ -2026,7 +2069,7 @@ const HomeView = ({
       {/* Greeting */}
       <div
         style={{
-          background: "linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%)",
+          background: "linear-gradient(15deg,#4ff5ed 0%,#7c3aed 100%)",
           borderRadius: 20,
           padding: "24px 28px",
           color: "#fff",
@@ -2062,161 +2105,337 @@ const HomeView = ({
             {absentStaff.length === 1 ? "is" : "are"} absent today
           </div>
         )}
-        
-{businessInfo?.portalSlug && (
-  <div
-    style={{
-      background: "linear-gradient(135deg, #eef2ff, #f5f3ff)",
-      border: "1.5px solid #c7d2fe",
-      borderRadius: 14,
-      padding: "14px 16px",
-    }}
-  >
-    {/* Header */}
-    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-      <div
-        style={{
-          width: 32,
-          height: 32,
-          borderRadius: 9,
-          background: "#4f46e5",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <GraduationCap style={{ width: 16, height: 16, color: "#fff" }} />
-      </div>
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: "#3730a3" }}>
-          Parent Portal
-        </div>
-        <div style={{ fontSize: 11, color: "#6366f1" }}>
-          Share this link with parents
-        </div>
-      </div>
-    </div>
 
-    {/* Link box */}
-    <div
-      style={{
-        background: "#fff",
-        border: "1px solid #c7d2fe",
-        borderRadius: 9,
-        padding: "8px 12px",
-        fontSize: 12,
-        fontWeight: 600,
-        color: "#4338ca",
-        wordBreak: "break-all",
-        marginBottom: 10,
-      }}
-    >
-      {window.location.origin}/parents/{businessInfo.portalSlug}
-    </div>
+        {businessInfo?.portalSlug && (
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            {/* ── Parent Portal ───────────────────────────────────────────── */}
+            <div
+              style={{
+                flex: 1,
+                minWidth: 220,
+                background: "linear-gradient(135deg, #eef2ff, #f5f3ff)",
+                border: "1.5px solid #c7d2fe",
+                borderRadius: 14,
+                padding: "14px 16px",
+              }}
+            >
+              {/* Header */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 10,
+                }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 9,
+                    background: "#4f46e5",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <GraduationCap
+                    style={{ width: 16, height: 16, color: "#fff" }}
+                  />
+                </div>
+                <div>
+                  <div
+                    style={{ fontSize: 13, fontWeight: 700, color: "#3730a3" }}
+                  >
+                    Parent Portal
+                  </div>
+                  <div style={{ fontSize: 11, color: "#6366f1" }}>
+                    Share with parents
+                  </div>
+                </div>
+              </div>
 
-    {/* Action buttons */}
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {/* Link */}
+              <div
+                style={{
+                  background: "#fff",
+                  border: "1px solid #c7d2fe",
+                  borderRadius: 9,
+                  padding: "8px 12px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "#4338ca",
+                  wordBreak: "break-all",
+                  marginBottom: 10,
+                }}
+              >
+                {window.location.origin}/parents/{businessInfo.portalSlug}
+              </div>
 
-      {/* Copy link */}
-      <button
-        onClick={() => {
-          navigator.clipboard.writeText(
-            `${window.location.origin}/parents/${businessInfo.portalSlug}`
-          );
-          alert("Link copied to clipboard!");
-        }}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "7px 14px",
-          borderRadius: 8,
-          background: "#4f46e5",
-          color: "#fff",
-          border: "none",
-          fontSize: 12,
-          fontWeight: 600,
-          cursor: "pointer",
-        }}
-      >
-        Copy Link
-      </button>
+              {/* Actions */}
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      `${window.location.origin}/parents/${businessInfo.portalSlug}`,
+                    );
+                    alert("Parent portal link copied!");
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "7px 14px",
+                    borderRadius: 8,
+                    background: "#4f46e5",
+                    color: "#fff",
+                    border: "none",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Copy Link
+                </button>
 
-      {/* Send via WhatsApp to all parents */}
-      <button
-        onClick={() => {
-          const portalUrl = `${window.location.origin}/parents/${businessInfo.portalSlug}`;
-          const msg = encodeURIComponent(
-            `👋 Hello! Here is the link to ${businessInfo?.name || "our school"}'s Parent Portal.\n\n` +
-            `📚 Check homework, notices and upcoming events anytime:\n${portalUrl}`
-          );
+                <button
+                  onClick={() => {
+                    const portalUrl = `${window.location.origin}/parents/${businessInfo.portalSlug}`;
+                    const msg = encodeURIComponent(
+                      `👋 Hello! Here is the link to ${businessInfo?.name || "our school"}'s Parent Portal.\n\n` +
+                        `📚 Check homework, notices and upcoming events anytime:\n${portalUrl}`,
+                    );
+                    const targets = students?.filter((s) => s.phone) || [];
+                    if (targets.length === 0) {
+                      window.open(`https://wa.me/?text=${msg}`, "_blank");
+                      return;
+                    }
+                    targets.forEach((student, index) => {
+                      setTimeout(() => {
+                        const cleaned = student.phone
+                          .replace(/\s+/g, "")
+                          .replace(/-/g, "")
+                          .replace(/^\+/, "")
+                          .replace(/^0/, "27");
+                        window.open(
+                          `https://wa.me/${cleaned}?text=${msg}`,
+                          "_blank",
+                        );
+                      }, index * 600);
+                    });
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "7px 14px",
+                    borderRadius: 8,
+                    background: "#16a34a",
+                    color: "#fff",
+                    border: "none",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  <svg
+                    style={{ width: 14, height: 14 }}
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.118.549 4.107 1.51 5.84L.057 23.902a.75.75 0 00.956.899l6.305-1.647A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.716 9.716 0 01-4.962-1.357l-.356-.211-3.688.964.981-3.595-.232-.37A9.718 9.718 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z" />
+                  </svg>
+                  WhatsApp
+                </button>
 
-          // Send to all parents who have a phone number saved
-          const targets = students?.filter((s) => s.phone) || [];
+                <button
+                  onClick={() =>
+                    window.open(`/parents/${businessInfo.portalSlug}`, "_blank")
+                  }
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "7px 14px",
+                    borderRadius: 8,
+                    background: "#fff",
+                    color: "#4f46e5",
+                    border: "1.5px solid #c7d2fe",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Preview
+                </button>
+              </div>
+            </div>
 
-          if (targets.length === 0) {
-            // No students saved yet — open a blank WhatsApp with the message
-            window.open(`https://wa.me/?text=${msg}`, "_blank");
-            return;
-          }
+            {/* ── Staff Portal ────────────────────────────────────────────── */}
+            <div
+              style={{
+                flex: 1,
+                minWidth: 220,
+                background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)",
+                border: "1.5px solid #86efac",
+                borderRadius: 14,
+                padding: "14px 16px",
+              }}
+            >
+              {/* Header */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 10,
+                }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 9,
+                    background: "#16a34a",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Users style={{ width: 16, height: 16, color: "#fff" }} />
+                </div>
+                <div>
+                  <div
+                    style={{ fontSize: 13, fontWeight: 700, color: "#14532d" }}
+                  >
+                    Staff Portal
+                  </div>
+                  <div style={{ fontSize: 11, color: "#16a34a" }}>
+                    Share with teachers
+                  </div>
+                </div>
+              </div>
 
-          targets.forEach((student, index) => {
-            setTimeout(() => {
-              const cleaned = student.phone
-                .replace(/\s+/g, "")
-                .replace(/-/g, "")
-                .replace(/^\+/, "")
-                .replace(/^0/, "27");
-              window.open(`https://wa.me/${cleaned}?text=${msg}`, "_blank");
-            }, index * 600);
-          });
-        }}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "7px 14px",
-          borderRadius: 8,
-          background: "#16a34a",
-          color: "#fff",
-          border: "none",
-          fontSize: 12,
-          fontWeight: 600,
-          cursor: "pointer",
-        }}
-      >
-        {/* WhatsApp icon */}
-        <svg style={{ width: 14, height: 14 }} fill="currentColor" viewBox="0 0 24 24">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.118.549 4.107 1.51 5.84L.057 23.902a.75.75 0 00.956.899l6.305-1.647A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.716 9.716 0 01-4.962-1.357l-.356-.211-3.688.964.981-3.595-.232-.37A9.718 9.718 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/>
-        </svg>
-        Share via WhatsApp
-      </button>
+              {/* Link */}
+              <div
+                style={{
+                  background: "#fff",
+                  border: "1px solid #86efac",
+                  borderRadius: 9,
+                  padding: "8px 12px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "#15803d",
+                  wordBreak: "break-all",
+                  marginBottom: 10,
+                }}
+              >
+                {window.location.origin}/staff/{businessInfo.portalSlug}
+              </div>
 
-      {/* Open portal in new tab to preview */}
-      <button
-        onClick={() =>
-          window.open(`/parents/${businessInfo.portalSlug}`, "_blank")
-        }
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "7px 14px",
-          borderRadius: 8,
-          background: "#fff",
-          color: "#4f46e5",
-          border: "1.5px solid #c7d2fe",
-          fontSize: 12,
-          fontWeight: 600,
-          cursor: "pointer",
-        }}
-      >
-        Preview Portal
-      </button>
-    </div>
-  </div>
-)}
+              {/* Actions */}
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      `${window.location.origin}/staff/${businessInfo.portalSlug}`,
+                    );
+                    alert("Staff portal link copied!");
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "7px 14px",
+                    borderRadius: 8,
+                    background: "#16a34a",
+                    color: "#fff",
+                    border: "none",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Copy Link
+                </button>
+
+                <button
+                  onClick={() => {
+                    const staffUrl = `${window.location.origin}/staff/${businessInfo.portalSlug}`;
+                    const msg = encodeURIComponent(
+                      `👋 Hi! Here is the link to ${businessInfo?.name || "our school"}'s Staff Portal.\n\n` +
+                        `📋 Mark attendance, set homework & manage your timetable:\n${staffUrl}\n\n` +
+                        `🔐 Use your assigned PIN to log in.`,
+                    );
+                    const targets = staff?.filter((s) => s.phone) || [];
+                    if (targets.length === 0) {
+                      window.open(`https://wa.me/?text=${msg}`, "_blank");
+                      return;
+                    }
+                    targets.forEach((member, index) => {
+                      setTimeout(() => {
+                        const cleaned = member.phone
+                          .replace(/\s+/g, "")
+                          .replace(/-/g, "")
+                          .replace(/^\+/, "")
+                          .replace(/^0/, "27");
+                        window.open(
+                          `https://wa.me/${cleaned}?text=${msg}`,
+                          "_blank",
+                        );
+                      }, index * 600);
+                    });
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "7px 14px",
+                    borderRadius: 8,
+                    background: "#15803d",
+                    color: "#fff",
+                    border: "none",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  <svg
+                    style={{ width: 14, height: 14 }}
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.118.549 4.107 1.51 5.84L.057 23.902a.75.75 0 00.956.899l6.305-1.647A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.716 9.716 0 01-4.962-1.357l-.356-.211-3.688.964.981-3.595-.232-.37A9.718 9.718 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z" />
+                  </svg>
+                  WhatsApp
+                </button>
+
+                <button
+                  onClick={() =>
+                    window.open(`/staff/${businessInfo.portalSlug}`, "_blank")
+                  }
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "7px 14px",
+                    borderRadius: 8,
+                    background: "#fff",
+                    color: "#16a34a",
+                    border: "1.5px solid #86efac",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Preview
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats */}
@@ -3303,7 +3522,7 @@ const NoticesView = ({
   setShowForm,
   noticeForm,
   setNoticeForm,
-  students,      
+  students,
   businessInfo,
 }) => {
   const handleSend = () => {
