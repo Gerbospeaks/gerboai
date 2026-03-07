@@ -3,6 +3,7 @@ import {
   collection,
   getDocs,
   query,
+  where,
   orderBy,
   doc,
   getDoc,
@@ -21,7 +22,6 @@ import {
   GraduationCap,
   School,
 } from "lucide-react";
-
 export default function ParentPortal() {
   const { schoolSlug } = useParams();
   const [homework, setHomework] = useState([]);
@@ -34,19 +34,24 @@ export default function ParentPortal() {
   const [gradeFilter, setGradeFilter] = useState("All");
 
   useEffect(() => {
-   const load = async () => {
+  const load = async () => {
   try {
-    // 1. Look up uid from slug
-    const slugDoc = await getDoc(doc(db, "schoolSlugs", schoolSlug));
-    if (!slugDoc.exists()) {
+    // 1. Find uid by matching portalSlug in users collection
+    const usersQuery = query(
+      collection(db, "users"),
+      where("portalSlug", "==", schoolSlug)
+    );
+    const usersSnap = await getDocs(usersQuery);
+
+    if (usersSnap.empty) {
       setNotFound(true);
       setLoading(false);
       return;
     }
 
-    const uid = slugDoc.data().uid;
+    const uid = usersSnap.docs[0].id; // document ID = uid
 
-    // 2. Load school info from settings/businessInfo ← FIXED PATH
+    // 2. Load school info from settings/businessInfo
     const bizDoc = await getDoc(
       doc(db, "users", uid, "settings", "businessInfo")
     );
@@ -59,10 +64,11 @@ export default function ParentPortal() {
         orderBy("createdAt", "desc")
       )
     );
-    const hwData = hwSnap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((d) => !d._placeholder);
-    setHomework(hwData);
+    setHomework(
+      hwSnap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .filter((d) => !d._placeholder)
+    );
 
     // 4. Load notices
     const nSnap = await getDocs(
@@ -71,20 +77,25 @@ export default function ParentPortal() {
         orderBy("createdAt", "desc")
       )
     );
-    const nData = nSnap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((d) => !d._placeholder);
-    setNotices(nData);
+    setNotices(
+      nSnap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .filter((d) => !d._placeholder)
+    );
 
     // 5. Load upcoming events
     const eSnap = await getDocs(
-      query(collection(db, "users", uid, "events"), orderBy("date", "asc"))
+      query(
+        collection(db, "users", uid, "events"),
+        orderBy("date", "asc")
+      )
     );
     const today = new Date().toISOString().split("T")[0];
-    const eData = eSnap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((d) => !d._placeholder && d.date >= today);
-    setEvents(eData);
+    setEvents(
+      eSnap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .filter((d) => !d._placeholder && d.date >= today)
+    );
 
   } catch (err) {
     console.error("Error loading portal:", err);
