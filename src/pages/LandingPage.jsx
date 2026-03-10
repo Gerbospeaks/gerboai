@@ -26,7 +26,6 @@ import instagram from "../assets/images/instagram.png";
 import facebook from "../assets/images/facebook.png";
 import twitter from "../assets/images/twitter.png";
 import linkedin from "../assets/images/linkedin.png";
-import greylogo from "../assets/images/grey-logo.png";
 import computer from "../assets/images/new_solidflo_bg_transp_text.png";
 
 // ─────────────────────────────────────────────────────────────────────────────
