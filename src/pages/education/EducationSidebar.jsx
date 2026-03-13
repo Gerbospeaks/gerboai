@@ -64,6 +64,7 @@ export default function EducationSidebar({
   const [isStudentsOpen, setIsStudentsOpen] = useState(false);
   const [isAttendanceOpen, setIsAttendanceOpen] = useState(false);
   const [isNoticesOpen, setIsNoticesOpen] = useState(false);
+  const [isHomeworkOpen, setIsHomeworkOpen] = useState(false);
   const [isStaffOpen, setIsStaffOpen] = useState(false);
 
   const { dayName, dateStr } = useDateInfo();
@@ -272,18 +273,7 @@ export default function EducationSidebar({
             </div>
           </div>
 
-          {/* Date chip */}
-          <div className="px-4 py-3 border-b border-slate-700/40">
-            <div className="bg-slate-800/80 rounded-xl px-3 py-2 border border-slate-700/50">
-              <div className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">
-                {dayName.toUpperCase()}
-              </div>
-              <div className="text-xs text-slate-300 font-semibold mt-0.5">
-                {dateStr}
-              </div>
-            </div>
-          </div>
-
+         
           {/* ── Nav ─────────────────────────────────────────────────────── */}
           <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
             <NavItem
@@ -391,9 +381,18 @@ export default function EducationSidebar({
               <Accordion
                 icon={BookMarked}
                 label="Homework"
-                isOpen={false}
-                onToggle={() => openModal(onOpenHomeworkModal)}
-              />
+                isOpen={isHomeworkOpen}
+                onToggle={() => setIsHomeworkOpen((p) => !p)}
+              >
+                 <SubItem
+                  label="Set Homework"
+                  onClick={() => openModal(onOpenHomeworkModal)}
+                />
+                <SubItem
+                  label="View Homework"
+                  onClick={() => goTo("homework")}
+                />
+              </Accordion>``
 
               {/* ── Staff ── */}
               <Accordion

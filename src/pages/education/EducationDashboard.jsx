@@ -2069,8 +2069,8 @@ const HomeView = ({
       {/* Greeting */}
       <div
         style={{
-          background: "linear-gradient(15deg,#4ff5ed 0%,#7c3aed 100%)",
-          borderRadius: 20,
+          background: "#7ca6ab",
+          borderRadius: 2,
           padding: "24px 28px",
           color: "#fff",
         }}

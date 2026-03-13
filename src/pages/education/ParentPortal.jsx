@@ -30,6 +30,11 @@ import {
   Lock,
   X,
   UserCheck,
+  ClipboardList,
+  TrendingUp,
+  Award,
+  BookMarked,
+  ChevronDown,
 } from "lucide-react";
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -56,6 +61,19 @@ const T = {
   shadow: "0 2px 12px rgba(0,0,0,0.07)",
 };
 
+// ── Grade colour helper (matches dashboard's calculateGrade) ──────────────────
+const gradeColor = (g) =>
+  ({ A: "#15803d", B: "#2563eb", C: "#b45309", D: "#9333ea", E: T.red })[g] ||
+  T.textSoft;
+const gradeBg = (g) =>
+  ({
+    A: "#f0fdf4",
+    B: "#eff6ff",
+    C: "#fffbeb",
+    D: "#faf5ff",
+    E: T.redLight,
+  })[g] || T.bg;
+
 export default function ParentPortal() {
   const { schoolSlug } = useParams();
 
@@ -66,12 +84,22 @@ export default function ParentPortal() {
   const [events, setEvents] = useState([]);
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState([]);
+  const [timetable, setTimetable] = useState(null); // NEW
+  const [reports, setReports] = useState([]); // NEW
 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [activeTab, setActiveTab] = useState("notices");
   const [gradeFilter, setGradeFilter] = useState("All");
   const [expandedNotice, setExpandedNotice] = useState(null);
+
+  // ── Timetable local filters ────────────────────────────────────────────────
+  const [ttGrade, setTtGrade] = useState("");
+  const [ttDay, setTtDay] = useState("Monday");
+  const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
+  // ── Report Cards local state ───────────────────────────────────────────────
+  const [expandedReport, setExpandedReport] = useState(null);
 
   // ── Identity gate ──────────────────────────────────────────────────────────
   const [showIdentityModal, setShowIdentityModal] = useState(false);
@@ -94,7 +122,7 @@ export default function ParentPortal() {
         }
         const uid = usersSnap.docs[0].id;
 
-        const [bizDoc, hwSnap, nSnap, eSnap, stuSnap, attSnap] =
+        const [bizDoc, hwSnap, nSnap, eSnap, stuSnap, attSnap, ttDoc, repSnap] =
           await Promise.all([
             getDoc(doc(db, "users", uid, "settings", "businessInfo")),
             getDocs(
@@ -117,6 +145,16 @@ export default function ParentPortal() {
             ),
             getDocs(collection(db, "users", uid, "students")),
             getDocs(collection(db, "users", uid, "attendance")),
+            // Timetable stored as a settings doc by saveTimetable hook
+            getDoc(doc(db, "users", uid, "settings", "timetable")),
+            // Reports collection (only completed/locked ones visible to parents)
+            getDocs(
+              query(
+                collection(db, "users", uid, "reports"),
+                where("locked", "==", true),
+                orderBy("createdAt", "desc"),
+              ),
+            ),
           ]);
 
         const today = new Date().toISOString().split("T")[0];
@@ -146,6 +184,14 @@ export default function ParentPortal() {
             .map((d) => ({ id: d.id, ...d.data() }))
             .filter((d) => !d._placeholder),
         );
+        // Timetable: stored as { "Grade 1": { Monday: [...], ... }, ... }
+        if (ttDoc.exists()) setTimetable(ttDoc.data());
+        // Reports
+        setReports(
+          repSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder),
+        );
       } catch (err) {
         console.error(err);
         setNotFound(true);
@@ -164,12 +210,10 @@ export default function ParentPortal() {
     }
     setVerifying(true);
     setIdentityError("");
-
     const normalize = (s) => s.trim().toLowerCase();
     const match = students.find(
       (s) => normalize(s.name) === normalize(childInput),
     );
-
     setTimeout(() => {
       setVerifying(false);
       if (match) {
@@ -195,7 +239,6 @@ export default function ParentPortal() {
         .sort((a, b) => (b.date > a.date ? 1 : -1))
         .slice(0, 30)
     : [];
-
   const attStats = {
     present: studentAttendance.filter((a) => a.status === "present").length,
     absent: studentAttendance.filter((a) => a.status === "absent").length,
@@ -205,6 +248,26 @@ export default function ParentPortal() {
   const attPercent = attTotal
     ? Math.round((attStats.present / attTotal) * 100)
     : null;
+
+  // ── Derived reports for verified student ──────────────────────────────────
+  const studentReports = verifiedStudent
+    ? reports.filter(
+        (r) =>
+          r.student?.name?.trim().toLowerCase() ===
+          verifiedStudent.name.trim().toLowerCase(),
+      )
+    : [];
+
+  // ── Timetable derived data ─────────────────────────────────────────────────
+  const ttGrades = timetable ? Object.keys(timetable) : [];
+  // Auto-select first grade when timetable loads
+  useEffect(() => {
+    if (ttGrades.length && !ttGrade) setTtGrade(ttGrades[0]);
+  }, [ttGrades.length]);
+  const ttPeriods =
+    timetable && ttGrade && timetable[ttGrade]
+      ? timetable[ttGrade][ttDay] || []
+      : [];
 
   // ── Configs ────────────────────────────────────────────────────────────────
   const noticeConfig = {
@@ -272,6 +335,20 @@ export default function ParentPortal() {
       count: events.length,
       locked: false,
     },
+    {
+      id: "timetable",
+      label: "Timetable",
+      icon: Clock,
+      count: null,
+      locked: false,
+    }, // NEW
+    {
+      id: "reports",
+      label: "Reports",
+      icon: ClipboardList,
+      count: studentReports.length || null,
+      locked: !verifiedStudent,
+    }, // NEW
     {
       id: "fees",
       label: "Fees",
@@ -363,7 +440,7 @@ export default function ParentPortal() {
           style={{
             width: 64,
             height: 64,
-            borderRadius: 20,
+            borderRadius: 2,
             background: T.redLight,
             display: "flex",
             alignItems: "center",
@@ -421,7 +498,6 @@ export default function ParentPortal() {
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "center",
-            padding: "0",
           }}
           onClick={() => {
             setShowIdentityModal(false);
@@ -429,7 +505,6 @@ export default function ParentPortal() {
             setChildInput("");
           }}
         >
-          {/* Bottom sheet on mobile */}
           <div
             style={{
               background: T.surface,
@@ -442,7 +517,6 @@ export default function ParentPortal() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Handle bar */}
             <div
               style={{
                 width: 40,
@@ -452,7 +526,6 @@ export default function ParentPortal() {
                 margin: "0 auto 20px",
               }}
             />
-
             <div
               style={{
                 display: "flex",
@@ -493,7 +566,6 @@ export default function ParentPortal() {
                 </p>
               </div>
             </div>
-
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div>
                 <label
@@ -520,7 +592,6 @@ export default function ParentPortal() {
                     boxSizing: "border-box",
                     color: T.text,
                     background: T.bg,
-                    transition: "border-color .15s",
                   }}
                   placeholder="e.g. Amara Dlamini"
                   value={childInput}
@@ -531,7 +602,6 @@ export default function ParentPortal() {
                   onKeyDown={(e) => e.key === "Enter" && handleVerify()}
                 />
               </div>
-
               {identityError && (
                 <div
                   style={{
@@ -540,7 +610,7 @@ export default function ParentPortal() {
                     padding: "10px 13px",
                     background: T.redLight,
                     borderRadius: 11,
-                    border: `1px solid #fecaca`,
+                    border: "1px solid #fecaca",
                   }}
                 >
                   <AlertCircle
@@ -565,7 +635,6 @@ export default function ParentPortal() {
                   </p>
                 </div>
               )}
-
               <button
                 onClick={handleVerify}
                 disabled={verifying}
@@ -583,14 +652,11 @@ export default function ParentPortal() {
                   justifyContent: "center",
                   gap: 8,
                   opacity: verifying ? 0.75 : 1,
-                  transition: "opacity .15s",
-                  marginTop: 2,
                 }}
               >
                 <Search style={{ width: 17, height: 17 }} />
                 {verifying ? "Searching…" : "View My Child's Info"}
               </button>
-
               <p
                 style={{
                   fontSize: 11,
@@ -677,12 +743,11 @@ export default function ParentPortal() {
               </div>
             </div>
 
-            {/* Verified chip OR "My Child" button */}
             {verifiedStudent ? (
               <button
                 onClick={() => {
                   setVerifiedStudent(null);
-                  setActiveTab("homework");
+                  setActiveTab("notices");
                 }}
                 style={{
                   display: "flex",
@@ -1112,7 +1177,7 @@ export default function ParentPortal() {
                                 padding: "5px 12px",
                                 borderRadius: 99,
                                 background: T.blueLight,
-                                border: `1px solid #bfdbfe`,
+                                border: "1px solid #bfdbfe",
                                 color: T.blue,
                                 fontSize: 11,
                                 fontWeight: 600,
@@ -1144,20 +1209,6 @@ export default function ParentPortal() {
                               <Download style={{ width: 11, height: 11 }} />{" "}
                               Download
                             </a>
-                            {hw.attachmentName && (
-                              <span
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: 4,
-                                  fontSize: 11,
-                                  color: T.textFaint,
-                                }}
-                              >
-                                <FileText style={{ width: 11, height: 11 }} />
-                                {hw.attachmentName}
-                              </span>
-                            )}
                           </div>
                         )}
                       </div>
@@ -1458,6 +1509,762 @@ export default function ParentPortal() {
           </div>
         )}
 
+        {/* ── TIMETABLE (NEW) ───────────────────────────────────────────────── */}
+        {activeTab === "timetable" && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            {!timetable || ttGrades.length === 0 ? (
+              <EmptyState
+                icon={Clock}
+                title="No timetable yet"
+                message="The school hasn't published a timetable yet."
+                color={T.blueLight}
+                iconColor={T.blue}
+              />
+            ) : (
+              <>
+                {/* Grade selector */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    flexWrap: "wrap",
+                    marginBottom: 14,
+                  }}
+                >
+                  {ttGrades.map((g) => (
+                    <button
+                      key={g}
+                      onClick={() => setTtGrade(g)}
+                      style={{
+                        padding: "6px 16px",
+                        borderRadius: 99,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        border: "none",
+                        cursor: "pointer",
+                        background: ttGrade === g ? T.primary : T.surface,
+                        color: ttGrade === g ? "#fff" : T.textMid,
+                        boxShadow: T.shadow,
+                        transition: "all .15s",
+                      }}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Day selector */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 6,
+                    overflowX: "auto",
+                    paddingBottom: 4,
+                    marginBottom: 14,
+                  }}
+                >
+                  {DAYS.map((day) => {
+                    const isToday =
+                      day ===
+                      new Date().toLocaleDateString("en", { weekday: "long" });
+                    return (
+                      <button
+                        key={day}
+                        onClick={() => setTtDay(day)}
+                        style={{
+                          flexShrink: 0,
+                          padding: "8px 14px",
+                          borderRadius: 12,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          border: "none",
+                          cursor: "pointer",
+                          background:
+                            ttDay === day
+                              ? T.primary
+                              : isToday
+                                ? T.primaryLight
+                                : T.surface,
+                          color:
+                            ttDay === day
+                              ? "#fff"
+                              : isToday
+                                ? T.primary
+                                : T.textMid,
+                          boxShadow: T.shadow,
+                          transition: "all .15s",
+                          position: "relative",
+                        }}
+                      >
+                        {day.slice(0, 3)}
+                        {isToday && (
+                          <span
+                            style={{
+                              position: "absolute",
+                              bottom: 4,
+                              left: "50%",
+                              transform: "translateX(-50%)",
+                              width: 4,
+                              height: 4,
+                              borderRadius: "50%",
+                              background:
+                                ttDay === day
+                                  ? "rgba(255,255,255,0.8)"
+                                  : T.primary,
+                            }}
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Periods */}
+                {ttPeriods.length === 0 ? (
+                  <EmptyState
+                    icon={Clock}
+                    title={`No classes on ${ttDay}`}
+                    message="Nothing scheduled for this day."
+                    color={T.bg}
+                    iconColor={T.textFaint}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 10,
+                    }}
+                  >
+                    {ttPeriods.map((period, i) => {
+                      // period may be a string or { subject, teacher, time, room }
+                      const isObj =
+                        typeof period === "object" && period !== null;
+                      const subject = isObj
+                        ? period.subject || period.name || String(period)
+                        : String(period);
+                      const teacher = isObj ? period.teacher : null;
+                      const time = isObj ? period.time : null;
+                      const room = isObj ? period.room : null;
+
+                      // Pick a consistent accent per subject index
+                      const accents = [
+                        { bg: T.primaryLight, color: T.primary },
+                        { bg: T.blueLight, color: T.blue },
+                        { bg: T.purpleLight, color: T.purple },
+                        { bg: T.accentLight, color: "#b45309" },
+                        { bg: "#fff0f0", color: T.red },
+                      ];
+                      const ac = accents[i % accents.length];
+
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            background: T.surface,
+                            borderRadius: T.radius,
+                            border: `1px solid ${T.border}`,
+                            boxShadow: T.shadow,
+                            overflow: "hidden",
+                            animation: `fadeUp .3s ease ${i * 0.05}s both`,
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 14,
+                              padding: "13px 16px",
+                            }}
+                          >
+                            {/* Period number bubble */}
+                            <div
+                              style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: 11,
+                                background: ac.bg,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: 13,
+                                  fontWeight: 800,
+                                  color: ac.color,
+                                }}
+                              >
+                                {i + 1}
+                              </span>
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 15,
+                                  fontWeight: 700,
+                                  color: T.text,
+                                }}
+                              >
+                                {subject || "—"}
+                              </p>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: 10,
+                                  marginTop: 3,
+                                  flexWrap: "wrap",
+                                }}
+                              >
+                                {teacher && (
+                                  <span
+                                    style={{ fontSize: 11, color: T.textSoft }}
+                                  >
+                                    {teacher}
+                                  </span>
+                                )}
+                                {room && (
+                                  <span
+                                    style={{ fontSize: 11, color: T.textFaint }}
+                                  >
+                                    Room {room}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            {time && (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 5,
+                                  padding: "5px 10px",
+                                  borderRadius: 99,
+                                  background: T.bg,
+                                  border: `1px solid ${T.border}`,
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <Clock
+                                  style={{
+                                    width: 11,
+                                    height: 11,
+                                    color: T.textSoft,
+                                  }}
+                                />
+                                <span
+                                  style={{
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    color: T.textMid,
+                                  }}
+                                >
+                                  {time}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── REPORT CARDS (NEW) ────────────────────────────────────────────── */}
+        {activeTab === "reports" && verifiedStudent && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <SectionHeader
+              name={verifiedStudent.name}
+              grade={verifiedStudent.grade}
+            />
+
+            {studentReports.length === 0 ? (
+              <EmptyState
+                icon={ClipboardList}
+                title="No reports yet"
+                message="No report cards have been published for your child yet."
+                color={T.purpleLight}
+                iconColor={T.purple}
+              />
+            ) : (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 14 }}
+              >
+                {studentReports.map((rep, i) => {
+                  const avg = rep.performance?.average ?? 0;
+                  const isExpanded = expandedReport === rep.id;
+                  const attPct = rep.attendance?.percentage
+                    ? parseFloat(rep.attendance.percentage)
+                    : rep.attendance?.days
+                      ? Math.round(
+                          (rep.attendance.present / rep.attendance.days) * 100,
+                        )
+                      : null;
+
+                  // Overall performance colour
+                  const perfColor =
+                    avg >= 80
+                      ? "#15803d"
+                      : avg >= 60
+                        ? T.blue
+                        : avg >= 50
+                          ? "#b45309"
+                          : T.red;
+                  const perfBg =
+                    avg >= 80
+                      ? "#f0fdf4"
+                      : avg >= 60
+                        ? T.blueLight
+                        : avg >= 50
+                          ? "#fffbeb"
+                          : T.redLight;
+
+                  return (
+                    <div
+                      key={rep.id}
+                      style={{
+                        background: T.surface,
+                        borderRadius: T.radius,
+                        border: `1px solid ${T.border}`,
+                        boxShadow: T.shadow,
+                        overflow: "hidden",
+                        animation: `fadeUp .3s ease ${i * 0.05}s both`,
+                      }}
+                    >
+                      {/* Colour accent bar */}
+                      <div style={{ height: 4, background: perfColor }} />
+
+                      {/* Report header */}
+                      <div style={{ padding: "16px 16px 14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 12,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 44,
+                              height: 44,
+                              borderRadius: 13,
+                              background: perfBg,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <Award
+                              style={{
+                                width: 20,
+                                height: 20,
+                                color: perfColor,
+                              }}
+                            />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: 15,
+                                fontWeight: 700,
+                                color: T.text,
+                              }}
+                            >
+                              {rep.academicInfo?.term || "Term"} ·{" "}
+                              {rep.academicInfo?.year || ""}
+                            </p>
+                            <p
+                              style={{
+                                margin: "3px 0 0",
+                                fontSize: 12,
+                                color: T.textSoft,
+                              }}
+                            >
+                              {rep.student?.gradeLevel || verifiedStudent.grade}
+                              {rep.reportNumber
+                                ? ` · #${rep.reportNumber}`
+                                : ""}
+                            </p>
+                          </div>
+                          {/* Average badge */}
+                          <div
+                            style={{
+                              textAlign: "center",
+                              padding: "8px 14px",
+                              borderRadius: 12,
+                              background: perfBg,
+                              flexShrink: 0,
+                            }}
+                          >
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: 20,
+                                fontWeight: 800,
+                                color: perfColor,
+                                lineHeight: 1,
+                              }}
+                            >
+                              {avg}%
+                            </p>
+                            <p
+                              style={{
+                                margin: "2px 0 0",
+                                fontSize: 9,
+                                fontWeight: 700,
+                                color: perfColor,
+                                opacity: 0.75,
+                              }}
+                            >
+                              AVERAGE
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Summary row */}
+                        <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+                          <div
+                            style={{
+                              flex: 1,
+                              padding: "9px 12px",
+                              borderRadius: 11,
+                              background: T.bg,
+                              border: `1px solid ${T.border}`,
+                              textAlign: "center",
+                            }}
+                          >
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: 16,
+                                fontWeight: 800,
+                                color: T.primary,
+                              }}
+                            >
+                              {rep.performance?.totalSubjects ??
+                                rep.subjects?.length ??
+                                0}
+                            </p>
+                            <p
+                              style={{
+                                margin: "2px 0 0",
+                                fontSize: 10,
+                                fontWeight: 600,
+                                color: T.textFaint,
+                              }}
+                            >
+                              Subjects
+                            </p>
+                          </div>
+                          <div
+                            style={{
+                              flex: 1,
+                              padding: "9px 12px",
+                              borderRadius: 11,
+                              background: T.bg,
+                              border: `1px solid ${T.border}`,
+                              textAlign: "center",
+                            }}
+                          >
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: 16,
+                                fontWeight: 800,
+                                color:
+                                  attPct >= 90
+                                    ? "#15803d"
+                                    : attPct >= 75
+                                      ? T.blue
+                                      : T.red,
+                              }}
+                            >
+                              {attPct != null ? `${attPct}%` : "—"}
+                            </p>
+                            <p
+                              style={{
+                                margin: "2px 0 0",
+                                fontSize: 10,
+                                fontWeight: 600,
+                                color: T.textFaint,
+                              }}
+                            >
+                              Attendance
+                            </p>
+                          </div>
+                          <div
+                            style={{
+                              flex: 1,
+                              padding: "9px 12px",
+                              borderRadius: 11,
+                              background: T.bg,
+                              border: `1px solid ${T.border}`,
+                              textAlign: "center",
+                            }}
+                          >
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: 16,
+                                fontWeight: 800,
+                                color: T.textMid,
+                              }}
+                            >
+                              {rep.attendance?.present ?? "—"}/
+                              {rep.attendance?.days ?? "—"}
+                            </p>
+                            <p
+                              style={{
+                                margin: "2px 0 0",
+                                fontSize: 10,
+                                fontWeight: 600,
+                                color: T.textFaint,
+                              }}
+                            >
+                              Days
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Expand/collapse */}
+                        <button
+                          onClick={() =>
+                            setExpandedReport(isExpanded ? null : rep.id)
+                          }
+                          style={{
+                            marginTop: 12,
+                            width: "100%",
+                            padding: "9px",
+                            borderRadius: 10,
+                            background: T.bg,
+                            border: `1px solid ${T.border}`,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: T.textMid,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <TrendingUp style={{ width: 13, height: 13 }} />
+                          {isExpanded ? "Hide details" : "View subject marks"}
+                          <ChevronDown
+                            style={{
+                              width: 13,
+                              height: 13,
+                              transform: isExpanded
+                                ? "rotate(180deg)"
+                                : "rotate(0deg)",
+                              transition: "transform .2s",
+                            }}
+                          />
+                        </button>
+                      </div>
+
+                      {/* Expanded: subject table + comments */}
+                      {isExpanded && (
+                        <div
+                          style={{
+                            borderTop: `1px solid ${T.border}`,
+                            padding: "14px 16px",
+                          }}
+                        >
+                          {/* Subjects */}
+                          {rep.subjects?.length > 0 && (
+                            <div style={{ marginBottom: 14 }}>
+                              <p
+                                style={{
+                                  margin: "0 0 10px",
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  color: T.textMid,
+                                  textTransform: "uppercase",
+                                  letterSpacing: ".06em",
+                                }}
+                              >
+                                Subject Results
+                              </p>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: 8,
+                                }}
+                              >
+                                {rep.subjects.map((subj, si) => {
+                                  const mark = Number(subj.mark) || 0;
+                                  const grade =
+                                    subj.grade ||
+                                    (mark >= 80
+                                      ? "A"
+                                      : mark >= 70
+                                        ? "B"
+                                        : mark >= 60
+                                          ? "C"
+                                          : mark >= 50
+                                            ? "D"
+                                            : "E");
+                                  return (
+                                    <div
+                                      key={si}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 10,
+                                        padding: "9px 12px",
+                                        borderRadius: 11,
+                                        background: T.bg,
+                                        border: `1px solid ${T.border}`,
+                                      }}
+                                    >
+                                      {/* Grade badge */}
+                                      <div
+                                        style={{
+                                          width: 32,
+                                          height: 32,
+                                          borderRadius: 9,
+                                          background: gradeBg(grade),
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          flexShrink: 0,
+                                        }}
+                                      >
+                                        <span
+                                          style={{
+                                            fontSize: 13,
+                                            fontWeight: 800,
+                                            color: gradeColor(grade),
+                                          }}
+                                        >
+                                          {grade}
+                                        </span>
+                                      </div>
+                                      <div style={{ flex: 1, minWidth: 0 }}>
+                                        <p
+                                          style={{
+                                            margin: 0,
+                                            fontSize: 13,
+                                            fontWeight: 700,
+                                            color: T.text,
+                                          }}
+                                        >
+                                          {subj.name}
+                                        </p>
+                                        {subj.comments && (
+                                          <p
+                                            style={{
+                                              margin: "2px 0 0",
+                                              fontSize: 11,
+                                              color: T.textSoft,
+                                              overflow: "hidden",
+                                              textOverflow: "ellipsis",
+                                              whiteSpace: "nowrap",
+                                            }}
+                                          >
+                                            {subj.comments}
+                                          </p>
+                                        )}
+                                      </div>
+                                      {/* Progress bar + mark */}
+                                      <div
+                                        style={{
+                                          flexShrink: 0,
+                                          textAlign: "right",
+                                        }}
+                                      >
+                                        <p
+                                          style={{
+                                            margin: 0,
+                                            fontSize: 14,
+                                            fontWeight: 800,
+                                            color: gradeColor(grade),
+                                          }}
+                                        >
+                                          {mark}%
+                                        </p>
+                                        <div
+                                          style={{
+                                            marginTop: 3,
+                                            width: 60,
+                                            height: 4,
+                                            borderRadius: 99,
+                                            background: T.border,
+                                            overflow: "hidden",
+                                          }}
+                                        >
+                                          <div
+                                            style={{
+                                              height: "100%",
+                                              width: `${mark}%`,
+                                              background: gradeColor(grade),
+                                              borderRadius: 99,
+                                            }}
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Teacher comments */}
+                          {rep.teacherComments && (
+                            <div
+                              style={{
+                                padding: "12px 14px",
+                                borderRadius: 12,
+                                background: T.primaryLight,
+                                border: `1px solid #c6e8d9`,
+                              }}
+                            >
+                              <p
+                                style={{
+                                  margin: "0 0 6px",
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  color: T.primary,
+                                  textTransform: "uppercase",
+                                  letterSpacing: ".06em",
+                                }}
+                              >
+                                Teacher's Comments
+                              </p>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 13,
+                                  color: T.textMid,
+                                  lineHeight: 1.65,
+                                }}
+                              >
+                                {rep.teacherComments}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── FEES ──────────────────────────────────────────────────────────── */}
         {activeTab === "fees" &&
           verifiedStudent &&
@@ -1511,7 +2318,6 @@ export default function ParentPortal() {
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 14 }}
                 >
-                  {/* Main fee card */}
                   <div
                     style={{
                       background: T.surface,
@@ -1552,9 +2358,7 @@ export default function ParentPortal() {
                         {sc.label}
                       </span>
                     </div>
-
-                    {/* Progress bar */}
-                    <div style={{ marginBottom: 6 }}>
+                    <div>
                       <div
                         style={{
                           display: "flex",
@@ -1602,8 +2406,6 @@ export default function ParentPortal() {
                       </div>
                     </div>
                   </div>
-
-                  {/* 3 stat tiles */}
                   <div
                     style={{
                       display: "grid",
@@ -1667,8 +2469,6 @@ export default function ParentPortal() {
                       </div>
                     ))}
                   </div>
-
-                  {/* Contact note */}
                   <div
                     style={{
                       display: "flex",
@@ -1676,7 +2476,7 @@ export default function ParentPortal() {
                       padding: "12px 14px",
                       borderRadius: 12,
                       background: T.blueLight,
-                      border: `1px solid #bfdbfe`,
+                      border: "1px solid #bfdbfe",
                     }}
                   >
                     <Info
@@ -1724,7 +2524,6 @@ export default function ParentPortal() {
               <div
                 style={{ display: "flex", flexDirection: "column", gap: 12 }}
               >
-                {/* Summary tiles */}
                 <div
                   style={{
                     display: "grid",
@@ -1791,8 +2590,6 @@ export default function ParentPortal() {
                     </div>
                   ))}
                 </div>
-
-                {/* Record list */}
                 <div
                   style={{
                     background: T.surface,
