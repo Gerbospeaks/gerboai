@@ -4,7 +4,6 @@ import { getDashboardRoute } from "../utils/dashboardRoutes";
 import { getDashboardActions } from "../utils/dashboardActions";
 import { useAuth } from "../contexts/AuthContext";
 import BusinessSettingsModal from "./BusinessSettingsModal";
-import AppHeader from "./AppHeader";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import {
   TrendingUp,
@@ -13,55 +12,385 @@ import {
   Receipt,
   TrendingDown,
   ArrowRight,
+  X,
+  Clock,
+  LayoutDashboard,
 } from "lucide-react";
 
-// ── All sidebar paths relative to src/pages/ ─────────────────────────────────
-const SIDEBAR_MAP = {
-  accounting: lazy(() => import("./accounting/AccountingSidebar")),
-  carpentry: lazy(() => import("./carpentry/CarpentrySidebar")),
-  cleaning: lazy(() => import("./cleaning/CleaningSidebar")),
-  construction: lazy(() => import("./construction/ConstructionSidebar")),
-  education: lazy(() => import("./education/EducationSidebar")),
-  electrical: lazy(() => import("./electrical/ElectricalSidebar")),
-  elctrical: lazy(() => import("./electrical/ElectricalSidebar")),
-  flooring: lazy(() => import("./flooring/FlooringSidebar")),
-  health: lazy(() => import("./health/HealthSidebar")),
-  hotel: lazy(() => import("./hotel/HotelSidebar")),
-  hvac: lazy(() => import("./hvac/HVACSidebar")),
-  landscaping: lazy(() => import("./landscaping/LandscapingSidebar")),
-  legal: lazy(() => import("./legal/LegalSidebar")),
-  logistics: lazy(() => import("./logistics/LogisticsSidebar")),
-  mechanics: lazy(() => import("./mechanics/MechanicsSidebar")),
-  painting: lazy(() => import("./painting/PaintingSidebar")),
-  pestcontrol: lazy(() => import("./pest-contrrol/PestcontrolSidebar")),
-  photography: lazy(() => import("./photography/PhotographySidebar")),
-  plumbing: lazy(() => import("./plumbing/PlumbingSidebar")),
-  poolservice: lazy(() => import("./pool-services/PoolservicesSidebar")),
-  realestate: lazy(() => import("./realEstate/RealEstateSidebar")),
-  restaurants: lazy(() => import("./restaurants/RestaurantsSidebar")),
-  retail: lazy(() => import("./retail/RetailSidebar")),
-  security: lazy(() => import("./security/SecuritySidebar")),
-  solar: lazy(() => import("./solar-installation/SolarSidebar")),
-  towing: lazy(() => import("./towing/TowingSidebar")),
-  welding: lazy(() => import("./welding/WeldingSidebar")),
-  windowrepair: lazy(() => import("./window-repair/WindowrepairSidebar")),
+/* ─── Zoho design tokens ─────────────────────────────────────────────────── */
+const Z = {
+  red: "#e8442a",
+  redHover: "#c73b24",
+  redLight: "#fdf2f0",
+  navy: "#1a2340",
+  navyMid: "#2d3a55",
+  blue: "#1b6ec2",
+  blueLight: "#e8f0fb",
+  green: "#1d8348",
+  greenLight: "#eafaf1",
+  amber: "#b45309",
+  amberLight: "#fffbeb",
+  border: "#d9dde6",
+  bg: "#f4f5f8",
+  white: "#ffffff",
+  text: "#1a2340",
+  textMid: "#4a5568",
+  textMuted: "#8a93a6",
+  panelHead: "#f0f2f6",
 };
 
-const buildSidebarProps = (props) => ({ ...props });
+const css = `
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap');
 
+  .zh * { font-family: 'Lato', sans-serif; box-sizing: border-box; }
+
+  /* ── Shell ── */
+  .zh-shell {
+    height: 100vh; width: 100%;
+    display: flex; flex-direction: column;
+    background: ${Z.bg};
+    overflow: hidden;
+  }
+
+  /* ── Top bar ── */
+  .zh-topbar {
+    background: ${Z.navy};
+    height: 52px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .zh-topbar-left  { display: flex; align-items: center; gap: 10px; }
+  .zh-topbar-icon  {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: ${Z.red};
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .zh-topbar-title { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: .01em; }
+  .zh-topbar-sub   { font-size: 11px; color: rgba(255,255,255,.4); margin-left: 8px; }
+
+  /* ── Body ── */
+  .zh-body {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    padding: 18px 20px 12px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .zh-body::-webkit-scrollbar { width: 6px; }
+  .zh-body::-webkit-scrollbar-track { background: transparent; }
+  .zh-body::-webkit-scrollbar-thumb { background: ${Z.border}; border-radius: 6px; }
+
+  /* ── Section label ── */
+  .zh-section {
+    font-size: 10px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: ${Z.textMuted};
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: -4px;
+  }
+  .zh-section::after { content:''; flex:1; height:1px; background:${Z.border}; }
+
+  /* ── KPI grid ── */
+  .zh-kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  }
+  @media (max-width: 900px) { .zh-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .zh-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .zh-kpi {
+    background: ${Z.white};
+    border: 1px solid ${Z.border};
+    border-radius: 4px;
+    padding: 12px 14px;
+    transition: box-shadow .15s;
+  }
+  .zh-kpi:hover { box-shadow: 0 2px 10px rgba(20,26,48,.08); }
+  .zh-kpi-top  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .zh-kpi-icon {
+    width: 30px; height: 30px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .zh-kpi-trend {
+    display: flex; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 700;
+    padding: 2px 6px; border-radius: 20px;
+  }
+  .zh-kpi-label { font-size: 10px; color: ${Z.textMuted}; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+  .zh-kpi-value { font-size: 20px; font-weight: 700; color: ${Z.text}; line-height: 1.15; }
+  .zh-kpi-sub   { font-size: 10px; color: ${Z.textMuted}; margin-top: 3px; }
+  .zh-kpi-skel  { height: 22px; background: #eef0f5; border-radius: 3px; animation: zh-pulse 1.4s ease infinite; }
+
+  /* ── Mid row ── */
+  .zh-mid-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  @media (max-width: 700px) { .zh-mid-row { grid-template-columns: 1fr; } }
+
+  /* Panel */
+  .zh-panel {
+    background: ${Z.white};
+    border: 1px solid ${Z.border};
+    border-radius: 4px; overflow: hidden;
+  }
+  .zh-panel-head {
+    background: ${Z.panelHead};
+    border-bottom: 1px solid ${Z.border};
+    padding: 8px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .zh-panel-head-title {
+    font-size: 11px; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; color: ${Z.text};
+  }
+  .zh-panel-body { padding: 14px; }
+
+  /* Pending payments banner */
+  .zh-pending {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .zh-pending-icon {
+    width: 36px; height: 36px; border-radius: 4px;
+    background: ${Z.amberLight};
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .zh-pending-label { font-size: 10px; color: ${Z.textMuted}; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px; }
+  .zh-pending-value { font-size: 22px; font-weight: 700; color: ${Z.amber}; line-height: 1; }
+  .zh-pending-sub   { font-size: 11px; color: ${Z.textMuted}; margin-top: 3px; }
+
+  /* Quick actions */
+  .zh-actions-list { display: flex; flex-direction: column; gap: 7px; }
+  .zh-action-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px;
+    border: 1px solid ${Z.border}; border-radius: 3px;
+    background: ${Z.white}; cursor: pointer;
+    transition: border-color .15s, background .15s;
+    width: 100%;
+  }
+  .zh-action-btn:hover { border-color: ${Z.blue}; background: ${Z.blueLight}; }
+  .zh-action-btn-left { display: flex; align-items: center; gap: 8px; }
+  .zh-action-icon {
+    width: 24px; height: 24px; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .zh-action-label { font-size: 12px; font-weight: 700; color: ${Z.text}; }
+  .zh-action-arrow { color: ${Z.textMuted}; transition: transform .15s; }
+  .zh-action-btn:hover .zh-action-arrow { transform: translateX(3px); color: ${Z.blue}; }
+
+  /* ── Invoice table panel ── */
+  .zh-invoices-panel {
+    background: ${Z.white};
+    border: 1px solid ${Z.border};
+    border-radius: 4px; overflow: hidden;
+    flex: 1; display: flex; flex-direction: column; min-height: 0;
+  }
+  .zh-invoices-head {
+    background: ${Z.panelHead};
+    border-bottom: 1px solid ${Z.border};
+    padding: 8px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .zh-view-all {
+    font-size: 11px; font-weight: 700; color: ${Z.blue};
+    background: none; border: none; cursor: pointer;
+    padding: 2px 8px; border-radius: 3px;
+    transition: background .15s;
+    font-family: 'Lato', sans-serif;
+  }
+  .zh-view-all:hover { background: ${Z.blueLight}; }
+
+  .zh-invoices-scroll { flex: 1; overflow-y: auto; min-height: 0; }
+  .zh-invoices-scroll::-webkit-scrollbar { width: 4px; }
+  .zh-invoices-scroll::-webkit-scrollbar-thumb { background: ${Z.border}; border-radius: 4px; }
+
+  /* Invoice table */
+  .zh-inv-table { width: 100%; border-collapse: collapse; }
+  .zh-inv-thead th {
+    background: #f9fafb;
+    border-bottom: 1px solid ${Z.border};
+    padding: 7px 14px;
+    text-align: left; font-size: 10px; font-weight: 700;
+    color: ${Z.textMid}; text-transform: uppercase; letter-spacing: .06em;
+    white-space: nowrap; position: sticky; top: 0; z-index: 1;
+  }
+  .zh-inv-thead th:last-child { text-align: right; }
+  .zh-inv-row { border-bottom: 1px solid ${Z.border}; transition: background .1s; cursor: pointer; }
+  .zh-inv-row:last-child { border-bottom: none; }
+  .zh-inv-row:hover { background: #f7f9fc; }
+  .zh-inv-row td { padding: 9px 14px; font-size: 12px; color: ${Z.textMid}; vertical-align: middle; }
+  .zh-inv-num   { font-weight: 700; color: ${Z.text}; white-space: nowrap; }
+  .zh-inv-client{ color: ${Z.textMid}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+  .zh-inv-amount{ font-weight: 700; color: ${Z.text}; text-align: right; white-space: nowrap; }
+
+  /* Status badge */
+  .zh-badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 20px;
+    font-size: 10px; font-weight: 700; white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .zh-badge-paid    { background: ${Z.greenLight}; color: ${Z.green}; border-color: #b7e4ca; }
+  .zh-badge-pending { background: ${Z.amberLight}; color: ${Z.amber}; border-color: #f5d49a; }
+  .zh-badge-overdue { background: ${Z.redLight};   color: ${Z.red};   border-color: #f5bdb4; }
+  .zh-badge-draft   { background: #eef0f5; color: ${Z.textMid}; border-color: ${Z.border}; }
+
+  /* ── Empty state ── */
+  .zh-empty {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 36px 16px; text-align: center;
+  }
+  .zh-empty-icon {
+    width: 48px; height: 48px; background: #eef0f5; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+  }
+  .zh-empty-title { font-size: 13px; font-weight: 700; color: ${Z.text}; margin-bottom: 4px; }
+  .zh-empty-sub   { font-size: 12px; color: ${Z.textMuted}; margin-bottom: 12px; }
+  .zh-empty-cta {
+    height: 32px; padding: 0 16px;
+    background: ${Z.red}; color: #fff;
+    border: none; border-radius: 3px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    transition: background .15s;
+  }
+  .zh-empty-cta:hover { background: ${Z.redHover}; }
+
+  /* ── Skeleton pulse ── */
+  @keyframes zh-pulse {
+    0%,100% { opacity: 1 } 50% { opacity: .45 }
+  }
+  .zh-skel-row {
+    height: 38px; background: #eef0f5; border-radius: 3px;
+    margin-bottom: 6px; animation: zh-pulse 1.4s ease infinite;
+  }
+  .zh-skel-row:last-child { margin-bottom: 0; }
+
+  /* ── Modal overlay ── */
+  .zh-overlay {
+    position: fixed; inset: 0; background: rgba(20,26,48,.55);
+    z-index: 9999; display: flex; align-items: center; justify-content: center;
+    padding: 16px; animation: zh-fade .18s ease;
+  }
+  .zh-modal {
+    background: ${Z.white}; border-radius: 6px;
+    box-shadow: 0 8px 40px rgba(20,26,48,.22);
+    width: 100%; max-width: 860px; max-height: 88vh;
+    display: flex; flex-direction: column;
+    animation: zh-up .2s ease; overflow: hidden;
+  }
+  .zh-modal-head {
+    background: ${Z.navy};
+    padding: 13px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .zh-modal-head-left { display: flex; align-items: center; gap: 10px; }
+  .zh-modal-icon { width: 28px; height: 28px; border-radius: 50%; background: ${Z.red}; display: flex; align-items: center; justify-content: center; }
+  .zh-modal-title { font-size: 14px; font-weight: 700; color: #fff; }
+  .zh-modal-sub   { font-size: 11px; color: rgba(255,255,255,.45); margin-top: 1px; }
+  .zh-modal-close {
+    background: transparent; border: none; cursor: pointer;
+    color: rgba(255,255,255,.6); padding: 4px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    transition: color .15s, background .15s;
+  }
+  .zh-modal-close:hover { color: #fff; background: rgba(255,255,255,.12); }
+
+  .zh-modal-body { flex: 1; overflow-y: auto; min-height: 0; }
+  .zh-modal-body::-webkit-scrollbar { width: 6px; }
+  .zh-modal-body::-webkit-scrollbar-thumb { background: ${Z.border}; border-radius: 6px; }
+
+  .zh-modal-footer {
+    padding: 10px 20px; border-top: 1px solid ${Z.border};
+    background: ${Z.white}; display: flex; justify-content: flex-end; flex-shrink: 0;
+  }
+  .zh-modal-footer-btn {
+    height: 32px; padding: 0 16px;
+    background: ${Z.white}; color: ${Z.textMid};
+    border: 1px solid ${Z.border}; border-radius: 3px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    transition: border-color .15s, color .15s;
+  }
+  .zh-modal-footer-btn:hover { border-color: ${Z.red}; color: ${Z.red}; }
+
+  /* ── Footer bar ── */
+  .zh-footer {
+    flex-shrink: 0;
+    padding: 6px 20px;
+    border-top: 1px solid ${Z.border};
+    background: ${Z.white};
+    font-size: 11px; color: ${Z.textMuted};
+    text-align: center;
+  }
+
+  @keyframes zh-fade { from { opacity:0 } to { opacity:1 } }
+  @keyframes zh-up   { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
+`;
+
+/* ─── Helpers ─────────────────────────────────────────────────────────────── */
+const fmtCurrency = (n) =>
+  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(
+    n,
+  );
+
+const badgeClass = (s) =>
+  s === "paid"
+    ? "zh-badge zh-badge-paid"
+    : s === "pending"
+      ? "zh-badge zh-badge-pending"
+      : s === "overdue"
+        ? "zh-badge zh-badge-overdue"
+        : "zh-badge zh-badge-draft";
+
+/* ─── KPI Card ────────────────────────────────────────────────────────────── */
+const KPI = ({
+  title,
+  value,
+  icon: Icon,
+  iconBg,
+  iconColor,
+  sub,
+  trend,
+  loading,
+}) => (
+  <div className="zh-kpi">
+    <div className="zh-kpi-top">
+      <div className="zh-kpi-icon" style={{ background: iconBg }}>
+        <Icon size={15} color={iconColor} />
+      </div>
+      {trend != null && (
+        <span
+          className="zh-kpi-trend"
+          style={{
+            background: trend >= 0 ? Z.greenLight : Z.redLight,
+            color: trend >= 0 ? Z.green : Z.red,
+          }}
+        >
+          {trend >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+          {Math.abs(trend)}%
+        </span>
+      )}
+    </div>
+    <div className="zh-kpi-label">{title}</div>
+    {loading ? (
+      <div className="zh-kpi-skel" />
+    ) : (
+      <div className="zh-kpi-value">{value}</div>
+    )}
+    {sub && <div className="zh-kpi-sub">{sub}</div>}
+  </div>
+);
+
+/* ─── Component ──────────────────────────────────────────────────────────── */
 export default function Home() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
-  const [activeView, setActiveView] = useState("home");
   const [invoices, setInvoices] = useState([]);
-  const [businessInfo, setBusinessInfo] = useState({ logoUrl: "" });
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
-
   const [stats, setStats] = useState({
     totalInvoices: 0,
     totalQuotes: 0,
@@ -71,24 +400,16 @@ export default function Home() {
     loading: true,
   });
 
-  const navigateToDashboard = (view) =>
+  const nav = (view) =>
     navigate(getDashboardRoute(user?.dashboardId), {
       state: { activeView: view },
     });
 
-  const handleNewInvoice = () => navigateToDashboard("invoice");
-  const handleNewQuote = () => navigateToDashboard("quote");
-  const handleNewEstimate = () => navigateToDashboard("estimate");
-  const handleNewInvoiceDoc = () => navigateToDashboard("invoiceDoc");
-  const handleNewJobcard = () => navigateToDashboard("jobcard");
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/login");
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const handleNewInvoice = () => nav("invoice");
+  const handleNewQuote = () => nav("quote");
+  const handleNewEstimate = () => nav("estimate");
+  const handleNewJobcard = () => nav("jobcard");
+  const handleNewInvoiceDoc = () => nav("invoiceDoc");
 
   const { actions } = getDashboardActions(user?.dashboardId, {
     handleNewInvoice,
@@ -98,62 +419,43 @@ export default function Home() {
     handleNewInvoiceDoc,
   });
 
-  // ── Resolve sidebar — log to help debug ──────────────────────────────────
-  const dashboardId = user?.dashboardId;
-  const DashboardSidebar = dashboardId
-    ? (SIDEBAR_MAP[dashboardId] ?? null)
-    : null;
-
-  // Uncomment to debug: console.log("dashboardId:", dashboardId, "sidebar found:", !!DashboardSidebar);
-
-  const sidebarProps = buildSidebarProps({
-    navigate,
-    user,
-    activeView,
-    setActiveView,
-    sidebarOpen,
-    setSidebarOpen,
-    showSettings,
-    setShowSettings,
-    handleNewInvoice,
-    handleNewQuote,
-    handleNewEstimate,
-    handleNewJobcard,
-    businessInfo,
-    savedQuotes,
-    savedCustomers,
-    handleLogout,
-  });
+  // Action icon colours — cycle through Zoho-brand palette
+  const actionPalette = [
+    { iconBg: Z.navy, iconColor: "#fff" },
+    { iconBg: Z.blue, iconColor: "#fff" },
+    { iconBg: Z.green, iconColor: "#fff" },
+    { iconBg: Z.amber, iconColor: "#fff" },
+  ];
 
   useEffect(() => {
-    if (user?.uid) fetchBusinessStats();
+    if (user?.uid) fetchStats();
   }, [user]);
 
-  const fetchBusinessStats = async () => {
+  const fetchStats = async () => {
     if (!user?.uid) return;
     try {
       const db = getFirestore();
-      const invoicesSnap = await getDocs(
+      const invSnap = await getDocs(
         collection(db, "users", user.uid, "invoices"),
       );
       let totalInvoiced = 0,
         pendingPayments = 0,
         invoiceCount = 0;
-      const invoicesList = [];
+      const invList = [];
 
-      invoicesSnap.forEach((doc) => {
+      invSnap.forEach((doc) => {
         const d = doc.data();
         invoiceCount++;
-        const amount = parseFloat(d.totals?.total || d.total || 0);
-        totalInvoiced += amount;
+        const amt = parseFloat(d.totals?.total || d.total || 0);
+        totalInvoiced += amt;
         if (["pending", "unpaid", "partially_paid"].includes(d.status))
           pendingPayments += parseFloat(
             d.totals?.due || d.totals?.total || d.total || 0,
           );
-        invoicesList.push({ id: doc.id, ...d });
+        invList.push({ id: doc.id, ...d });
       });
 
-      invoicesList.sort((a, b) => {
+      invList.sort((a, b) => {
         const t = (x) => {
           const v =
             x.dates?.invoiceDate ||
@@ -166,7 +468,7 @@ export default function Home() {
         };
         return t(b) - t(a);
       });
-      setInvoices(invoicesList);
+      setInvoices(invList);
 
       let quoteCount = 0;
       try {
@@ -205,366 +507,308 @@ export default function Home() {
     }
   };
 
-  const formatCurrency = (n) =>
-    new Intl.NumberFormat("en-ZA", {
-      style: "currency",
-      currency: "ZAR",
-    }).format(n);
-
-  const statusStyles = (s) =>
-    s === "paid"
-      ? "bg-emerald-100 text-emerald-700"
-      : s === "pending"
-        ? "bg-yellow-100 text-yellow-700"
-        : "bg-red-100 text-red-700";
-
-  const StatCard = ({
-    title,
-    value,
-    icon: Icon,
-    gradient,
-    subtitle,
-    loading,
-    trend,
-  }) => (
-    <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm border border-gray-200 flex flex-col justify-between">
-      <div className="flex items-center justify-between mb-2">
-        <div
-          className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center ${gradient}`}
-        >
-          <Icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
-        </div>
-        {trend && (
-          <div
-            className={`flex items-center gap-1 text-xs font-medium ${trend > 0 ? "text-green-600" : "text-red-600"}`}
-          >
-            {trend > 0 ? (
-              <TrendingUp className="w-3 h-3" />
-            ) : (
-              <TrendingDown className="w-3 h-3" />
-            )}
-            <span>{Math.abs(trend)}%</span>
-          </div>
-        )}
-      </div>
-      <div>
-        <p className="text-gray-500 text-xs mb-0.5">{title}</p>
-        {loading ? (
-          <div className="h-6 bg-gray-100 rounded animate-pulse" />
-        ) : (
-          <>
-            <p className="text-lg md:text-xl font-bold text-gray-900 leading-tight truncate">
-              {value}
-            </p>
-            {subtitle && (
-              <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
-
   return (
-    <div className="h-screen w-full overflow-hidden flex flex-col bg-gray-50">
-      <div className="flex-1 flex overflow-hidden min-h-0">
-        
-        {/* ── Main ── */}
-        <div className="flex-1 overflow-hidden flex flex-col px-2 md:px-4 py-2 md:py-4 gap-2 md:gap-3 min-h-0">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 flex-shrink-0">
-            <StatCard
+    <div className="zh">
+      <style>{css}</style>
+      <div className="zh-shell border">
+        {/* ── Top bar ── */}
+        <div className="zh-topbar">
+          <div className="zh-topbar-left">
+            <div className="zh-topbar-icon">
+              <LayoutDashboard size={14} color="#fff" />
+            </div>
+            <span className="zh-topbar-title">SolidFlo</span>
+            <span className="zh-topbar-sub">Home &rsaquo; Dashboard</span>
+          </div>
+        </div>
+
+        {/* ── Scrollable body ── */}
+        <div className="zh-body">
+          {/* KPIs */}
+          <div className="zh-section">Overview</div>
+          <div className="zh-kpi-grid">
+            <KPI
               title="Invoices"
               value={stats.totalInvoices}
               icon={FileText}
-              gradient="bg-gradient-to-br from-purple-600 to-purple-700"
-              subtitle="All time"
+              iconBg="#ede9fe"
+              iconColor="#6d28d9"
+              sub="All time"
               loading={stats.loading}
               trend={12}
             />
-            <StatCard
+            <KPI
               title="Quotes"
               value={stats.totalQuotes}
               icon={Receipt}
-              gradient="bg-gradient-to-br from-cyan-600 to-cyan-700"
-              subtitle="Generated"
+              iconBg={Z.blueLight}
+              iconColor={Z.blue}
+              sub="Generated"
               loading={stats.loading}
             />
-            <StatCard
+            <KPI
               title="Revenue"
-              value={formatCurrency(stats.totalInvoiced)}
+              value={fmtCurrency(stats.totalInvoiced)}
               icon={TrendingUp}
-              gradient="bg-gradient-to-br from-emerald-600 to-emerald-700"
-              subtitle="Total invoiced"
+              iconBg={Z.greenLight}
+              iconColor={Z.green}
+              sub="Total invoiced"
               loading={stats.loading}
               trend={8}
             />
-            <StatCard
+            <KPI
               title="Clients"
               value={stats.totalClients}
               icon={Users}
-              gradient="bg-gradient-to-br from-orange-600 to-orange-700"
-              subtitle="Active"
+              iconBg={Z.amberLight}
+              iconColor={Z.amber}
+              sub="Active"
               loading={stats.loading}
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 flex-shrink-0">
-            <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm border border-gray-200 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Receipt className="w-5 h-5 text-orange-600" />
+          {/* Mid row — pending + quick actions */}
+          <div className="zh-section">Actions</div>
+          <div className="zh-mid-row">
+            {/* Pending payments */}
+            <div className="zh-panel">
+              <div className="zh-panel-head">
+                <span className="zh-panel-head-title">Pending Payments</span>
+                <Clock size={13} color={Z.textMuted} />
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-gray-500 mb-0.5">Pending Payments</p>
+              <div className="zh-panel-body">
                 {stats.loading ? (
-                  <div className="h-6 bg-gray-100 rounded animate-pulse w-32" />
+                  <div className="zh-kpi-skel" style={{ height: 48 }} />
                 ) : (
-                  <>
-                    <p className="text-lg sm:text-xl md:text-2xl font-bold text-orange-600 leading-tight truncate">
-                      {formatCurrency(stats.pendingPayments)}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      Outstanding invoices
-                    </p>
-                  </>
+                  <div className="zh-pending">
+                    <div className="zh-pending-icon">
+                      <Receipt size={17} color={Z.amber} />
+                    </div>
+                    <div>
+                      <div className="zh-pending-label">
+                        Outstanding balance
+                      </div>
+                      <div className="zh-pending-value">
+                        {fmtCurrency(stats.pendingPayments)}
+                      </div>
+                      <div className="zh-pending-sub">
+                        Across unpaid invoices
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm border border-gray-200">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                Quick Actions
-              </p>
-              <div className="flex flex-col sm:flex-row gap-2">
-                {actions.map(({ label, icon: Icon, onClick }, i) => {
-                  const colors = [
+            {/* Quick actions */}
+            <div className="zh-panel">
+              <div className="zh-panel-head">
+                <span className="zh-panel-head-title">Quick Actions</span>
+                <ArrowRight size={13} color={Z.textMuted} />
+              </div>
+              <div className="zh-panel-body">
+                <div className="zh-actions-list">
+                  {[
+                    ...actions,
                     {
-                      bg: "bg-purple-50",
-                      hover: "hover:bg-purple-100",
-                      border: "border-purple-200",
-                      icon: "bg-purple-600",
-                      text: "text-purple-900",
-                      arrow: "text-purple-500",
+                      label: "Go to Dashboard",
+                      icon: LayoutDashboard,
+                      onClick: () =>
+                        navigate(getDashboardRoute(user?.dashboardId)),
                     },
-                    {
-                      bg: "bg-cyan-50",
-                      hover: "hover:bg-cyan-100",
-                      border: "border-cyan-200",
-                      icon: "bg-cyan-600",
-                      text: "text-cyan-900",
-                      arrow: "text-cyan-500",
-                    },
-                  ];
-                  const c = colors[i] ?? colors[0];
-                  return (
-                    <button
-                      key={label}
-                      onClick={onClick}
-                      className={`sm:flex-1 flex items-center justify-between px-3 py-2 ${c.bg} ${c.hover} border ${c.border} rounded-lg transition-all group w-full sm:w-auto`}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div
-                          className={`w-6 h-6 ${c.icon} rounded flex items-center justify-center flex-shrink-0`}
-                        >
-                          <Icon className="w-3 h-3 text-white" />
+                  ].map(({ label, icon: Icon, onClick }, i) => {
+                    const pal = actionPalette[i % actionPalette.length];
+                    return (
+                      <button
+                        key={label}
+                        className="zh-action-btn"
+                        onClick={onClick}
+                      >
+                        <div className="zh-action-btn-left">
+                          <div
+                            className="zh-action-icon"
+                            style={{ background: pal.iconBg }}
+                          >
+                            <Icon size={13} color={pal.iconColor} />
+                          </div>
+                          <span className="zh-action-label">{label}</span>
                         </div>
-                        <span
-                          className={`text-xs font-semibold ${c.text} truncate`}
-                        >
-                          {label}
-                        </span>
-                      </div>
-                      <ArrowRight
-                        className={`w-3 h-3 ${c.arrow} group-hover:translate-x-0.5 transition-transform flex-shrink-0`}
-                      />
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => navigate(getDashboardRoute(user?.dashboardId))}
-                  className="sm:flex-1 flex items-center justify-between px-3 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-all group w-full sm:w-auto"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-6 h-6 bg-emerald-600 rounded flex items-center justify-center flex-shrink-0">
-                      <Users className="w-3 h-3 text-white" />
-                    </div>
-                    <span className="text-xs font-semibold text-emerald-900 truncate">
-                      Dashboard
-                    </span>
-                  </div>
-                  <ArrowRight className="w-3 h-3 text-emerald-500 group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
-                </button>
+                        <ArrowRight size={13} className="zh-action-arrow" />
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
-              <h3 className="text-sm font-semibold text-gray-900">
-                Recent Invoices
-              </h3>
+          {/* Recent invoices */}
+          <div className="zh-section">Recent Invoices</div>
+          <div className="zh-invoices-panel">
+            <div className="zh-invoices-head">
+              <span className="zh-panel-head-title">Recent Invoices</span>
               <button
+                className="zh-view-all"
                 onClick={() => setShowInvoicesList(true)}
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
               >
-                View all
+                View all →
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
+            <div className="zh-invoices-scroll">
               {stats.loading ? (
-                [1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-12 bg-gray-100 rounded-lg animate-pulse"
-                  />
-                ))
+                <div style={{ padding: "10px 14px" }}>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="zh-skel-row" />
+                  ))}
+                </div>
               ) : invoices.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center py-6">
-                  <div className="w-12 h-12 mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-gray-400" />
+                <div className="zh-empty">
+                  <div className="zh-empty-icon">
+                    <FileText size={22} color={Z.textMuted} />
                   </div>
-                  <h4 className="text-gray-900 font-semibold text-sm mb-1">
-                    No invoices yet
-                  </h4>
-                  <p className="text-gray-500 text-xs mb-3">
+                  <div className="zh-empty-title">No invoices yet</div>
+                  <div className="zh-empty-sub">
                     Create your first invoice to get started
-                  </p>
-                  <button
-                    onClick={handleNewInvoice}
-                    className="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 transition-colors"
-                  >
+                  </div>
+                  <button className="zh-empty-cta" onClick={handleNewInvoice}>
                     Create Invoice
                   </button>
                 </div>
               ) : (
-                invoices.slice(0, 8).map((invoice) => (
-                  <div
-                    key={invoice.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer border border-gray-200"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-gray-900 truncate">
-                          {invoice.quoteNumber ||
-                            invoice.invoiceNumber ||
-                            invoice.id}
-                        </span>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${statusStyles(invoice.status)}`}
-                        >
-                          {invoice.status || "Draft"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
-                        <span className="flex items-center gap-1 truncate">
-                          <Users className="w-3 h-3 flex-shrink-0" />
-                          <span className="truncate">
-                            {invoice.customer?.name ||
-                              invoice.customerName ||
-                              "No customer"}
+                <table className="zh-inv-table">
+                  <thead className="zh-inv-thead">
+                    <tr>
+                      <th>Number</th>
+                      <th>Client</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoices.slice(0, 10).map((inv) => (
+                      <tr key={inv.id} className="zh-inv-row">
+                        <td className="zh-inv-num">
+                          {inv.quoteNumber || inv.invoiceNumber || inv.id}
+                        </td>
+                        <td className="zh-inv-client">
+                          {inv.customer?.name || inv.customerName || "—"}
+                        </td>
+                        <td>
+                          {inv.dates?.invoiceDate || inv.date
+                            ? new Date(
+                                inv.dates?.invoiceDate || inv.date,
+                              ).toLocaleDateString("en-ZA")
+                            : "—"}
+                        </td>
+                        <td>
+                          <span className={badgeClass(inv.status)}>
+                            {inv.status || "Draft"}
                           </span>
-                        </span>
-                        {(invoice.dates?.invoiceDate || invoice.date) && (
-                          <span className="flex-shrink-0">
-                            {new Date(
-                              invoice.dates?.invoiceDate || invoice.date,
-                            ).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right ml-4 flex-shrink-0">
-                      <div className="text-sm font-bold text-gray-900">
-                        {formatCurrency(
-                          invoice.totals?.total || invoice.total || 0,
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
+                        </td>
+                        <td className="zh-inv-amount">
+                          {fmtCurrency(inv.totals?.total || inv.total || 0)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
-
-          <div className="flex-shrink-0 text-center text-gray-400 text-xs pb-1">
-            © 2026 SolidFlo • Modern Invoicing & Billing
-          </div>
         </div>
-      </div>
 
-      {showSettings && (
-        <BusinessSettingsModal onClose={() => setShowSettings(false)} />
-      )}
+        {/* ── Footer ── */}
+        <div className="zh-footer">
+          © 2026 SolidFlo · Modern Invoicing &amp; Billing
+        </div>
 
-      {showInvoicesList && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between p-5 border-b border-gray-200 flex-shrink-0">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">
-                  All Invoices
-                </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {stats.totalInvoices}{" "}
-                  {stats.totalInvoices === 1 ? "invoice" : "invoices"} found
-                </p>
-              </div>
-              <button
-                onClick={() => setShowInvoicesList(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-5 space-y-3 min-h-0">
-              {invoices.map((invoice) => (
-                <div
-                  key={invoice.id}
-                  className="bg-gray-50 hover:bg-gray-100 rounded-xl p-4 border border-gray-200 transition-all cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-gray-900 font-semibold text-sm truncate">
-                          {invoice.quoteNumber ||
-                            invoice.invoiceNumber ||
-                            invoice.id}
-                        </span>
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${statusStyles(invoice.status)}`}
-                        >
-                          {invoice.status || "Draft"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3 h-3" />
-                          {invoice.customer?.name ||
-                            invoice.customerName ||
-                            "No customer"}
-                        </span>
-                        {(invoice.dates?.invoiceDate || invoice.date) && (
-                          <span>
-                            {new Date(
-                              invoice.dates?.invoiceDate || invoice.date,
-                            ).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right ml-4">
-                      <div className="text-base font-bold text-gray-900">
-                        {formatCurrency(
-                          invoice.totals?.total || invoice.total || 0,
-                        )}
-                      </div>
+        {/* ── Business settings ── */}
+        {showSettings && (
+          <BusinessSettingsModal onClose={() => setShowSettings(false)} />
+        )}
+
+        {/* ── All Invoices modal ── */}
+        {showInvoicesList && (
+          <div
+            className="zh-overlay"
+            onClick={() => setShowInvoicesList(false)}
+          >
+            <div className="zh-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="zh-modal-head">
+                <div className="zh-modal-head-left">
+                  <div className="zh-modal-icon">
+                    <FileText size={14} color="#fff" />
+                  </div>
+                  <div>
+                    <div className="zh-modal-title">All Invoices</div>
+                    <div className="zh-modal-sub">
+                      {stats.totalInvoices} record
+                      {stats.totalInvoices !== 1 ? "s" : ""}
                     </div>
                   </div>
                 </div>
-              ))}
+                <button
+                  className="zh-modal-close"
+                  onClick={() => setShowInvoicesList(false)}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="zh-modal-body">
+                <table className="zh-inv-table">
+                  <thead className="zh-inv-thead">
+                    <tr>
+                      <th>Number</th>
+                      <th>Client</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoices.map((inv) => (
+                      <tr key={inv.id} className="zh-inv-row">
+                        <td className="zh-inv-num">
+                          {inv.quoteNumber || inv.invoiceNumber || inv.id}
+                        </td>
+                        <td className="zh-inv-client">
+                          {inv.customer?.name || inv.customerName || "—"}
+                        </td>
+                        <td>
+                          {inv.dates?.invoiceDate || inv.date
+                            ? new Date(
+                                inv.dates?.invoiceDate || inv.date,
+                              ).toLocaleDateString("en-ZA")
+                            : "—"}
+                        </td>
+                        <td>
+                          <span className={badgeClass(inv.status)}>
+                            {inv.status || "Draft"}
+                          </span>
+                        </td>
+                        <td className="zh-inv-amount">
+                          {fmtCurrency(inv.totals?.total || inv.total || 0)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="zh-modal-footer">
+                <button
+                  className="zh-modal-footer-btn"
+                  onClick={() => setShowInvoicesList(false)}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

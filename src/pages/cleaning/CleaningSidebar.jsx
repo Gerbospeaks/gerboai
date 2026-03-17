@@ -15,6 +15,8 @@ import {
   Star,
   Menu,
   X,
+  FileText,
+  StickyNote,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -29,19 +31,20 @@ export default function CleaningSidebar({
   handleNewInvoice,
   handleNewQuote,
   businessInfo,
-  savedQuotes,
-  savedCustomers,
+  savedQuotes       = [],
+  savedCustomers    = [],
   handleLogout,
+  // FIX: all modal/list controls now wired up
   showQuotesList,
   setShowQuotesList,
   setShowCustomersListModal,
   handleAddNewCustomer,
-  documentType,
+  documentType      = "quote",
 }) {
   const [isQuotesInvoicesOpen, setIsQuotesInvoicesOpen] = useState(false);
-  const [isClientsOpen, setIsClientsOpen] = useState(false);
-  const [isJobsOpen, setIsJobsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isClientsOpen,        setIsClientsOpen]        = useState(false);
+  const [isJobsOpen,           setIsJobsOpen]           = useState(false);
+  const [isMobile,             setIsMobile]             = useState(window.innerWidth < 768);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -52,9 +55,7 @@ export default function CleaningSidebar({
   // Lock body scroll when mobile drawer is open
   useEffect(() => {
     document.body.style.overflow = isMobile && sidebarOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [isMobile, sidebarOpen]);
 
   const goTo = (view) => {
@@ -98,7 +99,7 @@ export default function CleaningSidebar({
           icon={Settings}
           label="Settings"
           onClick={() => {
-            setShowSettings(true);
+            setShowSettings?.(true);
             if (isMobile) setSidebarOpen(false);
           }}
         />
@@ -117,7 +118,7 @@ export default function CleaningSidebar({
           icon={Receipt}
           label="Quotes & Invoices"
           isOpen={isQuotesInvoicesOpen}
-          onToggle={() => setIsQuotesInvoicesOpen?.((p) => !p)}
+          onToggle={() => setIsQuotesInvoicesOpen((p) => !p)}
         >
           <SubItem
             dot="bg-[#2563eb]"
@@ -135,12 +136,13 @@ export default function CleaningSidebar({
               goTo("quote");
             }}
           />
+          {/* FIX: setShowQuotesList is now properly passed and invoked */}
           <SubItem
             dot="bg-[#7c3aed]"
-            label={`All ${documentType === "quote" ? "Quotes" : "Invoices"}`}
-            badge={savedQuotes?.length ?? 0}
+            label={`All ${documentType === "invoice" ? "Invoices" : "Quotes"}`}
+            badge={savedQuotes.length}
             onClick={() => {
-              setShowQuotesList(!showQuotesList);
+              setShowQuotesList?.((prev) => !prev);
               if (isMobile) setSidebarOpen(false);
             }}
           />
@@ -155,21 +157,9 @@ export default function CleaningSidebar({
           isOpen={isJobsOpen}
           onToggle={() => setIsJobsOpen((p) => !p)}
         >
-          <SubItem
-            dot="bg-[#0891b2]"
-            label="Active Jobs"
-            onClick={() => goTo("jobs")}
-          />
-          <SubItem
-            dot="bg-[#0d9488]"
-            label="Job Checklists"
-            onClick={() => goTo("checklists")}
-          />
-          <SubItem
-            dot="bg-[#059669]"
-            label="Service Areas"
-            onClick={() => goTo("service-areas")}
-          />
+          <SubItem dot="bg-[#0891b2]" label="Active Jobs"     onClick={() => goTo("jobs")} />
+          <SubItem dot="bg-[#0d9488]" label="Job Checklists"  onClick={() => goTo("checklists")} />
+          <SubItem dot="bg-[#059669]" label="Service Areas"   onClick={() => goTo("service-areas")} />
         </Accordion>
 
         {/* Clients */}
@@ -179,6 +169,7 @@ export default function CleaningSidebar({
           isOpen={isClientsOpen}
           onToggle={() => setIsClientsOpen((p) => !p)}
         >
+          {/* FIX: handleAddNewCustomer now wired */}
           <SubItem
             dot="bg-[#059669]"
             label="Add Client"
@@ -187,10 +178,11 @@ export default function CleaningSidebar({
               if (isMobile) setSidebarOpen(false);
             }}
           />
+          {/* FIX: setShowCustomersListModal now wired */}
           <SubItem
             dot="bg-[#2563eb]"
             label="All Clients"
-            badge={savedCustomers?.length ?? 0}
+            badge={savedCustomers.length}
             badgeBg="bg-[#7c3aed]"
             onClick={() => {
               setShowCustomersListModal?.(true);
@@ -201,6 +193,12 @@ export default function CleaningSidebar({
 
         <SectionLabel>Tools</SectionLabel>
 
+        <NavItem
+          icon={FileText}
+          label="Templates"
+          onClick={() => goTo("templates")}
+          active={activeView === "templates"}
+        />
         <NavItem
           icon={Star}
           label="Reviews"
@@ -219,6 +217,12 @@ export default function CleaningSidebar({
           onClick={() => goTo("reports")}
           active={activeView === "reports"}
         />
+        <NavItem
+          icon={StickyNote}
+          label="Notes"
+          onClick={() => goTo("notes-view")}
+          active={activeView === "notes-view"}
+        />
       </div>
 
       {/* Footer */}
@@ -226,18 +230,14 @@ export default function CleaningSidebar({
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-[#253347] rounded-full flex items-center justify-center ring-1 ring-[#334155] flex-shrink-0 overflow-hidden">
             {businessInfo?.logoUrl ? (
-              <img
-                src={businessInfo.logoUrl}
-                alt="biz"
-                className="w-5 h-5 object-contain"
-              />
+              <img src={businessInfo.logoUrl} alt="biz" className="w-5 h-5 object-contain" />
             ) : (
               <div className="w-4 h-4 bg-[#0891b2] rounded-full" />
             )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-semibold text-white truncate">
-              {user?.name || "User"}
+              {user?.displayName || user?.name || "User"}
             </p>
             <p className="text-xs text-[#64748b] truncate">
               {user?.email || "email@example.com"}
@@ -275,9 +275,7 @@ export default function CleaningSidebar({
         {/* Dim overlay */}
         <div
           className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
-            sidebarOpen
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
+            sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           }`}
           onClick={() => setSidebarOpen(false)}
         />
@@ -313,40 +311,14 @@ export default function CleaningSidebar({
 
             <div className="flex flex-col items-center gap-1 w-full px-2 mt-1">
               {[
-                { icon: Home, title: "Home", action: () => goTo("home") },
-                {
-                  icon: Settings,
-                  title: "Settings",
-                  action: () => setShowSettings(true),
-                },
-                {
-                  icon: TrendingUp,
-                  title: "Financial Dashboard",
-                  action: () => goTo("financial-overview"),
-                },
-                {
-                  icon: Receipt,
-                  title: "Quotes & Invoices",
-                  action: () => {
-                    handleNewInvoice?.();
-                    goTo("quote");
-                  },
-                },
-                {
-                  icon: Sparkles,
-                  title: "Cleaning Jobs",
-                  action: () => goTo("jobs"),
-                },
-                {
-                  icon: Users,
-                  title: "Clients",
-                  action: () => setShowCustomersListModal?.(true),
-                },
-                {
-                  icon: Calendar,
-                  title: "Schedule",
-                  action: () => goTo("schedule"),
-                },
+                { icon: Home,     title: "Home",              action: () => goTo("home") },
+                { icon: Settings, title: "Settings",          action: () => setShowSettings?.(true) },
+                { icon: TrendingUp, title: "Financial Dashboard", action: () => goTo("financial-overview") },
+                { icon: Receipt,  title: "Quotes & Invoices", action: () => { handleNewInvoice?.(); goTo("quote"); } },
+                { icon: Sparkles, title: "Cleaning Jobs",     action: () => goTo("jobs") },
+                { icon: Users,    title: "Clients",           action: () => setShowCustomersListModal?.(true) },
+                { icon: Calendar, title: "Schedule",          action: () => goTo("schedule") },
+                { icon: FileText, title: "Templates",         action: () => goTo("templates") },
               ].map(({ icon: Icon, title, action }) => (
                 <button
                   key={title}
@@ -362,11 +334,7 @@ export default function CleaningSidebar({
             <div className="mt-auto pb-2">
               <div className="w-9 h-9 bg-[#253347] rounded-full flex items-center justify-center ring-1 ring-[#334155] overflow-hidden">
                 {businessInfo?.logoUrl ? (
-                  <img
-                    src={businessInfo.logoUrl}
-                    className="w-5 h-5 object-contain"
-                    alt="biz"
-                  />
+                  <img src={businessInfo.logoUrl} className="w-5 h-5 object-contain" alt="biz" />
                 ) : (
                   <div className="w-4 h-4 bg-[#0891b2] rounded-full" />
                 )}
@@ -386,7 +354,7 @@ export default function CleaningSidebar({
   );
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// ── Sub-components ─────────────────────────────────────────────────────────────
 function SectionLabel({ children }) {
   return (
     <div className="pt-3 pb-1">
@@ -446,15 +414,11 @@ function SubItem({ label, dot, onClick, badge, badgeBg = "bg-[#2563eb]" }) {
       className="flex items-center justify-between px-2 py-2 text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg cursor-pointer transition-all text-sm"
     >
       <div className="flex items-center gap-2 min-w-0">
-        {dot && (
-          <div className={`w-1.5 h-1.5 rounded-full ${dot} flex-shrink-0`} />
-        )}
+        {dot && <div className={`w-1.5 h-1.5 rounded-full ${dot} flex-shrink-0`} />}
         <span className="truncate">{label}</span>
       </div>
-      {badge != null && (
-        <span
-          className={`${badgeBg} text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ml-2`}
-        >
+      {badge != null && badge > 0 && (
+        <span className={`${badgeBg} text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ml-2`}>
           {badge}
         </span>
       )}

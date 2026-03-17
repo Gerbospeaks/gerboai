@@ -1,8 +1,4 @@
-// SchoolOverview.jsx
-// Props: { uid, students, staff, attendance, events, homework, notices, businessInfo }
-// Usage: render when activeView === "overview"
-
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Users,
   DollarSign,
@@ -10,19 +6,13 @@ import {
   Calendar,
   BookOpen,
   Megaphone,
-  TrendingUp,
-  TrendingDown,
   AlertCircle,
   CheckCircle,
-  Clock,
-  ChevronRight,
-  Award,
   Activity,
 } from "lucide-react";
 
-// ── Design tokens ──────────────────────────────────────────────────────────────
 const T = {
-  bg: "#f8f7f4", // warm off-white
+  bg: "#f8f7f4",
   surface: "#ffffff",
   surfaceAlt: "#f1efe9",
   border: "#e8e4db",
@@ -30,7 +20,6 @@ const T = {
   textMid: "#5c5850",
   textSoft: "#9c9890",
   ink: "#2d2a26",
-  // accent palette — earthy, warm, professional
   indigo: "#4338ca",
   indigoL: "#eef2ff",
   green: "#15803d",
@@ -43,7 +32,6 @@ const T = {
   tealL: "#f0fdfa",
   radius: 16,
   shadow: "0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)",
-  shadowMd: "0 4px 24px rgba(0,0,0,0.09)",
 };
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');`;
@@ -62,6 +50,94 @@ const KEYFRAMES = `
   }
 `;
 
+// ── Responsive media queries injected as a CSS string ────────────────────────
+const RESPONSIVE_CSS = `
+  .so-page {
+    padding: 28px 24px 60px;
+  }
+  .so-h1 {
+    font-size: 34px;
+  }
+  .so-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+  .so-main-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  .so-card-wide {
+    grid-column: span 2;
+  }
+  .so-cal-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 640px) {
+    .so-page {
+      padding: 18px 14px 48px;
+    }
+    .so-h1 {
+      font-size: 26px;
+    }
+    /* 2-column stats on mobile */
+    .so-stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .so-stat-value {
+      font-size: 17px !important;
+    }
+    /* Single-column main grid */
+    .so-main-grid {
+      grid-template-columns: 1fr;
+    }
+    /* Wide card must NOT span 2 on mobile */
+    .so-card-wide {
+      grid-column: span 1;
+    }
+    /* Stack calendar mini-cal + list vertically */
+    .so-cal-inner {
+      grid-template-columns: 1fr;
+    }
+    /* Tighten card padding */
+    .so-card {
+      padding: 16px 14px 14px !important;
+    }
+    /* Staff "present / absent" mini-cards */
+    .so-staff-tiles {
+      gap: 8px;
+    }
+    /* Attendance bars — give a bit more height room */
+    .so-att-bars {
+      height: 80px;
+    }
+  }
+
+  @media (min-width: 641px) and (max-width: 900px) {
+    .so-stats-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .so-main-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    /* On tablet, wide card spans 2 only if 2-col fits */
+    .so-card-wide {
+      grid-column: span 2;
+    }
+  }
+`;
+
+// ── Hook: track window width ─────────────────────────────────────────────────
+function useWindowWidth() {
+  const [width, setWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1024,
+  );
+  useEffect(() => {
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handler, { passive: true });
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return width;
+}
+
 export default function SchoolOverview({
   uid,
   students,
@@ -72,7 +148,6 @@ export default function SchoolOverview({
   notices,
   businessInfo = {},
 }) {
-  // Normalise — guard every prop against objects/undefined being passed instead of arrays
   students = Array.isArray(students) ? students : Object.values(students || {});
   staff = Array.isArray(staff) ? staff : Object.values(staff || {});
   attendance = Array.isArray(attendance)
@@ -81,11 +156,16 @@ export default function SchoolOverview({
   events = Array.isArray(events) ? events : Object.values(events || {});
   homework = Array.isArray(homework) ? homework : Object.values(homework || {});
   notices = Array.isArray(notices) ? notices : Object.values(notices || {});
+
+  const winWidth = useWindowWidth();
+  const isMobile = winWidth <= 640;
+  const isTablet = winWidth > 640 && winWidth <= 900;
+
   const [calMonth, setCalMonth] = useState(() => new Date());
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
 
-  // ── Derived: students ──────────────────────────────────────────────────────
+  // ── Derived: students ───────────────────────────────────────────────────
   const totalStudents = students.filter((s) => !s._placeholder).length;
 
   const byGrade = useMemo(() => {
@@ -99,7 +179,7 @@ export default function SchoolOverview({
     return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
   }, [students]);
 
-  // ── Derived: fees ─────────────────────────────────────────────────────────
+  // ── Derived: fees ───────────────────────────────────────────────────────
   const feesData = useMemo(() => {
     let totalDue = 0,
       totalPaid = 0,
@@ -125,7 +205,7 @@ export default function SchoolOverview({
     };
   }, [students]);
 
-  // ── Derived: staff ────────────────────────────────────────────────────────
+  // ── Derived: staff ──────────────────────────────────────────────────────
   const activeStaff = staff.filter(
     (s) => !s._placeholder && s.status !== "absent",
   );
@@ -133,7 +213,7 @@ export default function SchoolOverview({
     (s) => !s._placeholder && s.status === "absent",
   );
 
-  // ── Derived: attendance ───────────────────────────────────────────────────
+  // ── Derived: attendance ─────────────────────────────────────────────────
   const attData = useMemo(() => {
     const last7 = Array.from({ length: 7 }, (_, i) => {
       const d = new Date(today);
@@ -163,7 +243,7 @@ export default function SchoolOverview({
     return Math.round(valid.reduce((s, d) => s + d.pct, 0) / valid.length);
   }, [attData]);
 
-  // ── Derived: events ───────────────────────────────────────────────────────
+  // ── Derived: events ─────────────────────────────────────────────────────
   const upcomingEvents = useMemo(
     () =>
       events
@@ -173,7 +253,7 @@ export default function SchoolOverview({
     [events],
   );
 
-  // ── Derived: homework ─────────────────────────────────────────────────────
+  // ── Derived: homework ───────────────────────────────────────────────────
   const hwThisWeek = useMemo(() => {
     const weekAgo = new Date(today);
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -183,7 +263,7 @@ export default function SchoolOverview({
     ).length;
   }, [homework]);
 
-  // ── Calendar helpers ──────────────────────────────────────────────────────
+  // ── Calendar helpers ────────────────────────────────────────────────────
   const calYear = calMonth.getFullYear();
   const calMon = calMonth.getMonth();
   const firstDay = new Date(calYear, calMon, 1).getDay();
@@ -198,25 +278,42 @@ export default function SchoolOverview({
     setCalMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1));
 
   const fmt = (n) =>
-    `R ${Number(n).toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    `R ${Number(n).toLocaleString("en-ZA", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
 
-  // ── Bar chart max ─────────────────────────────────────────────────────────
+  // Shorten currency on very small screens
+  const fmtShort = (n) => {
+    const v = Number(n);
+    if (!isMobile) return fmt(v);
+    if (v >= 1_000_000) return `R${(v / 1_000_000).toFixed(1)}M`;
+    if (v >= 1_000) return `R${(v / 1_000).toFixed(1)}k`;
+    return `R${v.toFixed(0)}`;
+  };
+
   const maxGrade = Math.max(...byGrade.map(([, c]) => c), 1);
 
   return (
     <div
+      className="so-page"
       style={{
         background: T.bg,
         minHeight: "100vh",
         fontFamily: "'Sora',sans-serif",
-        padding: "28px 24px 60px",
         WebkitFontSmoothing: "antialiased",
+        boxSizing: "border-box",
       }}
     >
-      <style>{FONTS + KEYFRAMES}</style>
+      <style>{FONTS + KEYFRAMES + RESPONSIVE_CSS}</style>
 
-      {/* ── Page header ───────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: 28, animation: "fadeUp .3s ease" }}>
+      {/* ── Page header ─────────────────────────────────────────────────── */}
+      <div
+        style={{
+          marginBottom: isMobile ? 18 : 28,
+          animation: "fadeUp .3s ease",
+        }}
+      >
         <p
           style={{
             margin: 0,
@@ -230,17 +327,17 @@ export default function SchoolOverview({
         >
           {businessInfo.name || "School"} ·{" "}
           {today.toLocaleDateString("en", {
-            weekday: "long",
+            weekday: isMobile ? "short" : "long",
             day: "numeric",
             month: "long",
             year: "numeric",
           })}
         </p>
         <h1
+          className="so-h1"
           style={{
             margin: 0,
             fontFamily: "'Crimson Pro',serif",
-            fontSize: 34,
             fontWeight: 600,
             color: T.ink,
             lineHeight: 1.1,
@@ -250,23 +347,22 @@ export default function SchoolOverview({
         </h1>
       </div>
 
-      {/* ── TOP STATS STRIP ───────────────────────────────────────────────── */}
+      {/* ── TOP STATS STRIP ─────────────────────────────────────────────── */}
       <div
+        className="so-stats-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))",
-          gap: 12,
-          marginBottom: 24,
+          gap: isMobile ? 8 : 12,
+          marginBottom: isMobile ? 16 : 24,
         }}
       >
         {[
           {
-            label: "Total Students",
+            label: "Students",
             value: totalStudents,
             icon: Users,
             color: T.indigo,
             bg: T.indigoL,
-            suffix: "",
           },
           {
             label: "Staff Present",
@@ -274,47 +370,42 @@ export default function SchoolOverview({
             icon: UserCheck,
             color: T.green,
             bg: T.greenL,
-            suffix: "",
           },
           {
             label: "Fees Collected",
-            value: fmt(feesData.totalPaid),
+            value: fmtShort(feesData.totalPaid),
             icon: DollarSign,
             color: T.teal,
             bg: T.tealL,
-            suffix: "",
           },
           {
             label: "Outstanding",
-            value: fmt(feesData.balance),
+            value: fmtShort(feesData.balance),
             icon: AlertCircle,
             color: feesData.balance > 0 ? T.red : T.green,
             bg: feesData.balance > 0 ? T.redL : T.greenL,
-            suffix: "",
           },
           {
-            label: "Attendance Today",
+            label: "Attendance",
             value: todayAtt?.pct != null ? `${todayAtt.pct}%` : "—",
             icon: Activity,
             color: T.amber,
             bg: T.amberL,
-            suffix: "",
           },
           {
             label: "HW This Week",
-            value: hwThisWeek,
+            value: `${hwThisWeek} tasks`,
             icon: BookOpen,
             color: T.indigo,
             bg: T.indigoL,
-            suffix: " tasks",
           },
-        ].map(({ label, value, icon: Icon, color, bg, suffix }, i) => (
+        ].map(({ label, value, icon: Icon, color, bg }, i) => (
           <div
             key={label}
             style={{
               background: T.surface,
               borderRadius: T.radius,
-              padding: "18px 18px 16px",
+              padding: isMobile ? "14px 12px 12px" : "18px 18px 16px",
               border: `1px solid ${T.border}`,
               boxShadow: T.shadow,
               animation: `fadeUp .3s ease ${i * 0.05}s both`,
@@ -325,65 +416,73 @@ export default function SchoolOverview({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                marginBottom: 10,
+                marginBottom: 8,
               }}
             >
               <p
                 style={{
                   margin: 0,
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: 600,
                   color: T.textSoft,
                   letterSpacing: ".04em",
+                  /* Truncate long labels on very small screens */
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  maxWidth: "calc(100% - 36px)",
                 }}
               >
                 {label.toUpperCase()}
               </p>
               <div
                 style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: 9,
+                  width: 28,
+                  height: 28,
+                  borderRadius: 8,
                   background: bg,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  flexShrink: 0,
                 }}
               >
-                <Icon style={{ width: 15, height: 15, color }} />
+                <Icon style={{ width: 14, height: 14, color }} />
               </div>
             </div>
             <p
+              className="so-stat-value"
               style={{
                 margin: 0,
-                fontSize: 22,
+                fontSize: isMobile ? 17 : 22,
                 fontWeight: 800,
                 color: T.ink,
                 animation: "countUp .4s ease",
                 letterSpacing: "-.02em",
+                lineHeight: 1.1,
+                /* Prevent overflow of long currency strings */
+                overflowWrap: "break-word",
+                wordBreak: "break-word",
               }}
             >
               {value}
-              {suffix}
             </p>
           </div>
         ))}
       </div>
 
-      {/* ── MAIN GRID ─────────────────────────────────────────────────────── */}
+      {/* ── MAIN GRID ────────────────────────────────────────────────────── */}
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))",
-          gap: 16,
-        }}
+        className="so-main-grid"
+        style={{ display: "grid", gap: isMobile ? 12 : 16 }}
       >
-        {/* ══ Students per class ══════════════════════════════════════════ */}
+        {/* ══ Students by class ══════════════════════════════════════════ */}
         <Card
           title="Students by Class"
           icon={Users}
           iconColor={T.indigo}
           iconBg={T.indigoL}
+          isMobile={isMobile}
         >
           {byGrade.length === 0 ? (
             <Empty msg="No students added yet" />
@@ -426,7 +525,6 @@ export default function SchoolOverview({
                       background: `linear-gradient(90deg,${T.indigo},#818cf8)`,
                       width: `${(count / maxGrade) * 100}%`,
                       animation: "barGrow .6s ease",
-                      transition: "width .4s ease",
                     }}
                   />
                 </div>
@@ -445,8 +543,8 @@ export default function SchoolOverview({
             <span style={{ fontSize: 12, color: T.textSoft, fontWeight: 600 }}>
               TOTAL
             </span>
-            <span style={{ fontSize: 14, fontWeight: 800, color: T.ink }}>
-              {totalStudents} students across {byGrade.length} class
+            <span style={{ fontSize: 13, fontWeight: 800, color: T.ink }}>
+              {totalStudents} students · {byGrade.length} class
               {byGrade.length !== 1 ? "es" : ""}
             </span>
           </div>
@@ -458,14 +556,14 @@ export default function SchoolOverview({
           icon={DollarSign}
           iconColor={T.teal}
           iconBg={T.tealL}
+          isMobile={isMobile}
         >
-          {/* Big progress ring substitute — horizontal progress */}
-          <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <div style={{ textAlign: "center", marginBottom: 16 }}>
             <p
               style={{
                 margin: 0,
                 fontFamily: "'Crimson Pro',serif",
-                fontSize: 42,
+                fontSize: isMobile ? 36 : 42,
                 fontWeight: 600,
                 color: T.ink,
               }}
@@ -489,7 +587,7 @@ export default function SchoolOverview({
               borderRadius: 99,
               background: T.surfaceAlt,
               overflow: "hidden",
-              marginBottom: 18,
+              marginBottom: 16,
             }}
           >
             <div
@@ -527,17 +625,36 @@ export default function SchoolOverview({
                 alignItems: "center",
                 padding: "9px 0",
                 borderBottom: `1px solid ${T.border}`,
+                gap: 8,
               }}
             >
-              <span style={{ fontSize: 13, color: T.textMid, fontWeight: 500 }}>
+              <span
+                style={{
+                  fontSize: 12,
+                  color: T.textMid,
+                  fontWeight: 500,
+                  flexShrink: 0,
+                }}
+              >
                 {r.label}
               </span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: r.color }}>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: r.color,
+                  textAlign: "right",
+                  overflowWrap: "break-word",
+                  wordBreak: "break-word",
+                }}
+              >
                 {r.value}
               </span>
             </div>
           ))}
-          <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+          <div
+            style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}
+          >
             <Pill
               label={`${feesData.fullyPaid} fully paid`}
               color={T.green}
@@ -551,12 +668,13 @@ export default function SchoolOverview({
           </div>
         </Card>
 
-        {/* ══ Attendance (7-day bar chart) ═════════════════════════════════ */}
+        {/* ══ Attendance 7-day chart ═══════════════════════════════════════ */}
         <Card
           title="Attendance — Last 7 Days"
           icon={Activity}
           iconColor={T.amber}
           iconBg={T.amberL}
+          isMobile={isMobile}
         >
           {weekPct != null && (
             <div
@@ -564,13 +682,13 @@ export default function SchoolOverview({
                 display: "flex",
                 alignItems: "baseline",
                 gap: 8,
-                marginBottom: 16,
+                marginBottom: 14,
               }}
             >
               <span
                 style={{
                   fontFamily: "'Crimson Pro',serif",
-                  fontSize: 36,
+                  fontSize: isMobile ? 28 : 36,
                   fontWeight: 600,
                   color: T.ink,
                 }}
@@ -585,10 +703,11 @@ export default function SchoolOverview({
             </div>
           )}
           <div
+            className="so-att-bars"
             style={{
               display: "flex",
               alignItems: "flex-end",
-              gap: 6,
+              gap: isMobile ? 4 : 6,
               height: 90,
               marginBottom: 8,
             }}
@@ -612,13 +731,13 @@ export default function SchoolOverview({
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: 4,
+                    gap: 3,
                   }}
                 >
                   {d.pct != null && (
                     <span
                       style={{
-                        fontSize: 9,
+                        fontSize: isMobile ? 8 : 9,
                         fontWeight: 700,
                         color: T.textSoft,
                       }}
@@ -640,7 +759,7 @@ export default function SchoolOverview({
                   />
                   <span
                     style={{
-                      fontSize: 10,
+                      fontSize: isMobile ? 9 : 10,
                       fontWeight: isToday ? 700 : 500,
                       color: isToday ? T.amber : T.textSoft,
                     }}
@@ -652,7 +771,7 @@ export default function SchoolOverview({
             })}
           </div>
           <div
-            style={{ display: "flex", gap: 10, marginTop: 8, flexWrap: "wrap" }}
+            style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}
           >
             <Pill label="≥80% good" color={T.green} bg={T.greenL} />
             <Pill label="60–79% fair" color={T.amber} bg={T.amberL} />
@@ -660,21 +779,25 @@ export default function SchoolOverview({
           </div>
         </Card>
 
-        {/* ══ Staff status ═════════════════════════════════════════════════ */}
+        {/* ══ Staff today ══════════════════════════════════════════════════ */}
         <Card
           title="Staff Today"
           icon={UserCheck}
           iconColor={T.green}
           iconBg={T.greenL}
+          isMobile={isMobile}
         >
-          <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+          <div
+            className="so-staff-tiles"
+            style={{ display: "flex", gap: 10, marginBottom: 16 }}
+          >
             <div
               style={{
                 flex: 1,
                 background: T.greenL,
                 borderRadius: 12,
                 padding: "12px 14px",
-                border: `1px solid #86efac`,
+                border: "1px solid #86efac",
               }}
             >
               <p
@@ -733,6 +856,7 @@ export default function SchoolOverview({
               </p>
             </div>
           </div>
+
           {absentStaff.length > 0 && (
             <>
               <p
@@ -798,6 +922,7 @@ export default function SchoolOverview({
               ))}
             </>
           )}
+
           {absentStaff.length === 0 && activeStaff.length > 0 && (
             <div
               style={{
@@ -807,7 +932,7 @@ export default function SchoolOverview({
                 padding: "10px 12px",
                 background: T.greenL,
                 borderRadius: 10,
-                border: `1px solid #86efac`,
+                border: "1px solid #86efac",
               }}
             >
               <CheckCircle
@@ -825,21 +950,29 @@ export default function SchoolOverview({
               </p>
             </div>
           )}
+
           {staff.filter((s) => !s._placeholder).length === 0 && (
             <Empty msg="No staff added yet" />
           )}
         </Card>
 
-        {/* ══ Upcoming events / calendar ═══════════════════════════════════ */}
+        {/* ══ School calendar (wide) ═══════════════════════════════════════ */}
         <Card
           title="School Calendar"
           icon={Calendar}
           iconColor={T.indigo}
           iconBg={T.indigoL}
           wide
+          isMobile={isMobile}
+          isTablet={isTablet}
         >
+          {/* Inner grid: side-by-side on ≥641 px, stacked on mobile */}
           <div
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}
+            className="so-cal-inner"
+            style={{
+              display: "grid",
+              gap: isMobile ? 20 : 20,
+            }}
           >
             {/* Mini calendar */}
             <div>
@@ -854,17 +987,18 @@ export default function SchoolOverview({
                 <button
                   onClick={prevMonth}
                   style={{
-                    width: 26,
-                    height: 26,
+                    width: 28,
+                    height: 28,
                     borderRadius: 8,
                     border: `1px solid ${T.border}`,
                     background: T.surface,
                     cursor: "pointer",
-                    fontSize: 14,
+                    fontSize: 16,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     color: T.textMid,
+                    touchAction: "manipulation",
                   }}
                 >
                   ‹
@@ -878,22 +1012,24 @@ export default function SchoolOverview({
                 <button
                   onClick={nextMonth}
                   style={{
-                    width: 26,
-                    height: 26,
+                    width: 28,
+                    height: 28,
                     borderRadius: 8,
                     border: `1px solid ${T.border}`,
                     background: T.surface,
                     cursor: "pointer",
-                    fontSize: 14,
+                    fontSize: 16,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     color: T.textMid,
+                    touchAction: "manipulation",
                   }}
                 >
                   ›
                 </button>
               </div>
+
               {/* Day headers */}
               <div
                 style={{
@@ -918,6 +1054,7 @@ export default function SchoolOverview({
                   </div>
                 ))}
               </div>
+
               {/* Days grid */}
               <div
                 style={{
@@ -939,16 +1076,22 @@ export default function SchoolOverview({
                       key={day}
                       style={{
                         textAlign: "center",
-                        padding: "4px 2px",
+                        padding: "5px 2px",
                         borderRadius: 7,
                         background: isToday ? T.indigo : "transparent",
                         position: "relative",
                         cursor: hasEvt ? "pointer" : "default",
+                        /* Bigger tap target on mobile */
+                        minHeight: isMobile ? 30 : "auto",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
                       <span
                         style={{
-                          fontSize: 11,
+                          fontSize: isMobile ? 12 : 11,
                           fontWeight: isToday ? 700 : hasEvt ? 600 : 400,
                           color: isToday
                             ? "#fff"
@@ -966,7 +1109,7 @@ export default function SchoolOverview({
                             height: 4,
                             borderRadius: "50%",
                             background: T.indigo,
-                            margin: "1px auto 0",
+                            marginTop: 1,
                           }}
                         />
                       )}
@@ -1085,6 +1228,7 @@ export default function SchoolOverview({
           icon={Megaphone}
           iconColor={T.amber}
           iconBg={T.amberL}
+          isMobile={isMobile}
         >
           {notices.filter((n) => !n._placeholder).length === 0 ? (
             <Empty msg="No notices yet" />
@@ -1128,6 +1272,7 @@ export default function SchoolOverview({
                           alignItems: "center",
                           gap: 6,
                           marginBottom: 3,
+                          flexWrap: "wrap",
                         }}
                       >
                         <p
@@ -1139,6 +1284,8 @@ export default function SchoolOverview({
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
+                            minWidth: 0,
+                            flex: 1,
                           }}
                         >
                           {n.title}
@@ -1183,17 +1330,28 @@ export default function SchoolOverview({
 }
 
 // ── Shared small components ───────────────────────────────────────────────────
-function Card({ title, icon: Icon, iconColor, iconBg, children, wide }) {
+function Card({
+  title,
+  icon: Icon,
+  iconColor,
+  iconBg,
+  children,
+  wide,
+  isMobile,
+  isTablet,
+}) {
   return (
     <div
+      className={`so-card ${wide ? "so-card-wide" : ""}`}
       style={{
         background: T.surface,
         borderRadius: T.radius + 2,
         border: `1px solid ${T.border}`,
         boxShadow: T.shadow,
         padding: "20px 20px 18px",
-        gridColumn: wide ? "span 2" : "span 1",
+        // JS fallback for wide: on desktop span 2, on mobile/tablet controlled by CSS class
         animation: "fadeUp .35s ease both",
+        minWidth: 0, // prevent grid blowout
       }}
     >
       <div

@@ -140,6 +140,11 @@ export default function AccountingSidebar({
             }}
           />
           <SubItem
+            dot="bg-[#dc2626]"
+            label="Credit Notes"
+            onClick={() => goTo("credit-notes")}
+          />
+          <SubItem
             dot="bg-[#7c3aed]"
             label="All Documents"
             badge={savedInvoices?.length ?? 0}

@@ -14,946 +14,722 @@ import {
 import {
   getFirestore,
   collection,
-  query,
-  where,
   getDocs,
-  orderBy,
 } from "firebase/firestore";
 
+/* ─── Zoho design tokens ─────────────────────────────────────────────────── */
+const Z = {
+  red:        "#e8442a",
+  redHover:   "#c73b24",
+  redLight:   "#fdf2f0",
+  navy:       "#1a2340",
+  navyMid:    "#2d3a55",
+  blue:       "#1b6ec2",
+  blueLight:  "#e8f0fb",
+  green:      "#1d8348",
+  greenLight: "#eafaf1",
+  amber:      "#b45309",
+  amberLight: "#fffbeb",
+  border:     "#d9dde6",
+  bg:         "#f4f5f8",
+  white:      "#ffffff",
+  text:       "#1a2340",
+  textMid:    "#4a5568",
+  textMuted:  "#8a93a6",
+  panelHead:  "#f0f2f6",
+};
+
+const css = `
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700&display=swap');
+
+  .zfo * { font-family: 'Lato', sans-serif; box-sizing: border-box; }
+
+  /* ── Page shell ── */
+  .zfo-page {
+    min-height: 100vh;
+    background: ${Z.bg};
+    padding: 0;
+  }
+
+  /* ── Top bar ── */
+  .zfo-topbar {
+    background: ${Z.navy};
+    padding: 0 24px;
+    height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    flex-shrink: 0;
+  }
+  .zfo-topbar-left { display: flex; align-items: center; gap: 10px; }
+  .zfo-topbar-icon {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: ${Z.red};
+    display: flex; align-items: center; justify-content: center;
+  }
+  .zfo-topbar-title { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: .01em; }
+  .zfo-topbar-sub   { font-size: 11px; color: rgba(255,255,255,.45); margin-left: 6px; }
+
+  /* Time-range toggle */
+  .zfo-range-group { display: flex; gap: 0; border: 1px solid rgba(255,255,255,.2); border-radius: 4px; overflow: hidden; }
+  .zfo-range-btn {
+    padding: 0 14px; height: 30px;
+    background: transparent; border: none; cursor: pointer;
+    font-size: 12px; font-weight: 600; color: rgba(255,255,255,.65);
+    transition: background .15s, color .15s;
+    font-family: 'Lato', sans-serif;
+  }
+  .zfo-range-btn:hover  { background: rgba(255,255,255,.1); color: #fff; }
+  .zfo-range-btn.active { background: ${Z.red}; color: #fff; }
+
+  /* ── Content area ── */
+  .zfo-content { padding: 20px 24px; }
+
+  /* ── Health banner ── */
+  .zfo-health {
+    background: ${Z.navy};
+    border-radius: 5px;
+    padding: 18px 24px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .zfo-health-score-wrap { display: flex; align-items: center; gap: 20px; }
+  .zfo-health-score {
+    font-size: 48px; font-weight: 700; color: #fff;
+    line-height: 1;
+  }
+  .zfo-health-label { font-size: 11px; color: rgba(255,255,255,.5); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }
+  .zfo-health-status { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; }
+  .zfo-health-status.good     { color: #4ade80; }
+  .zfo-health-status.warning  { color: #fbbf24; }
+  .zfo-health-status.bad      { color: #f87171; }
+  .zfo-health-desc { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 3px; }
+
+  .zfo-collection-ring {
+    width: 90px; height: 90px; border-radius: 50%;
+    border: 6px solid rgba(255,255,255,.15);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .zfo-collection-ring .val { font-size: 20px; font-weight: 700; color: #fff; line-height: 1; }
+  .zfo-collection-ring .lbl { font-size: 9px; color: rgba(255,255,255,.45); margin-top: 3px; text-align: center; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* ── Section title row ── */
+  .zfo-section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; color: ${Z.textMuted};
+    margin: 20px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .zfo-section-title::after { content:''; flex:1; height:1px; background:${Z.border}; }
+
+  /* ── KPI grid ── */
+  .zfo-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  @media (max-width: 900px) { .zfo-kpi-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 560px) { .zfo-kpi-grid { grid-template-columns: 1fr; } }
+
+  .zfo-kpi {
+    background: ${Z.white};
+    border: 1px solid ${Z.border};
+    border-radius: 4px;
+    padding: 14px 16px;
+    transition: box-shadow .15s;
+  }
+  .zfo-kpi:hover { box-shadow: 0 2px 12px rgba(20,26,48,.08); }
+  .zfo-kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .zfo-kpi-icon {
+    width: 34px; height: 34px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .zfo-kpi-badge {
+    display: flex; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 700; padding: 2px 7px;
+    border-radius: 20px;
+  }
+  .zfo-kpi-label { font-size: 11px; color: ${Z.textMuted}; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .zfo-kpi-value { font-size: 22px; font-weight: 700; color: ${Z.text}; line-height: 1.15; }
+  .zfo-kpi-sub   { font-size: 11px; color: ${Z.textMuted}; margin-top: 4px; }
+
+  /* ── Two-column chart row ── */
+  .zfo-chart-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-bottom: 12px;
+  }
+  @media (max-width: 800px) { .zfo-chart-row { grid-template-columns: 1fr; } }
+
+  /* ── Panel ── */
+  .zfo-panel {
+    background: ${Z.white};
+    border: 1px solid ${Z.border};
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .zfo-panel-head {
+    background: ${Z.panelHead};
+    border-bottom: 1px solid ${Z.border};
+    padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .zfo-panel-head-title { font-size: 12px; font-weight: 700; color: ${Z.text}; text-transform: uppercase; letter-spacing: .05em; }
+  .zfo-panel-body { padding: 16px; }
+
+  /* ── Bar chart ── */
+  .zfo-bar-row { margin-bottom: 12px; }
+  .zfo-bar-row:last-child { margin-bottom: 0; }
+  .zfo-bar-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .zfo-bar-month { font-size: 12px; font-weight: 600; color: ${Z.textMid}; }
+  .zfo-bar-vals  { font-size: 11px; }
+  .zfo-bar-track { height: 6px; background: #eef0f5; border-radius: 3px; overflow: hidden; margin-bottom: 3px; }
+  .zfo-bar-fill  { height: 100%; border-radius: 3px; transition: width .4s ease; }
+
+  /* ── Legend ── */
+  .zfo-legend { display: flex; gap: 16px; padding-top: 12px; border-top: 1px solid ${Z.border}; margin-top: 12px; }
+  .zfo-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: ${Z.textMid}; font-weight: 600; }
+  .zfo-legend-dot  { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── Activity list ── */
+  .zfo-activity-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid ${Z.border};
+  }
+  .zfo-activity-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .zfo-activity-icon {
+    width: 32px; height: 32px; border-radius: 4px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .zfo-activity-client  { font-size: 13px; font-weight: 600; color: ${Z.text}; }
+  .zfo-activity-meta    { font-size: 11px; color: ${Z.textMuted}; margin-top: 2px; }
+  .zfo-activity-amount  { font-size: 13px; font-weight: 700; color: ${Z.text}; white-space: nowrap; }
+  .zfo-activity-date    { font-size: 11px; color: ${Z.textMuted}; white-space: nowrap; margin-top: 2px; text-align: right; }
+  .zfo-activity-right   { text-align: right; flex-shrink: 0; }
+
+  /* ── Top clients ── */
+  .zfo-client-row { margin-bottom: 12px; }
+  .zfo-client-row:last-child { margin-bottom: 0; }
+  .zfo-client-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .zfo-client-left { display: flex; align-items: center; gap: 8px; }
+  .zfo-client-rank {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: ${Z.navy}; color: #fff;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .zfo-client-name    { font-size: 13px; font-weight: 600; color: ${Z.text}; }
+  .zfo-client-invoices{ font-size: 11px; color: ${Z.textMuted}; }
+  .zfo-client-revenue { font-size: 13px; font-weight: 700; color: ${Z.text}; }
+
+  /* ── Empty state ── */
+  .zfo-empty { text-align: center; padding: 32px 16px; }
+  .zfo-empty-icon { width: 48px; height: 48px; margin: 0 auto 10px; background: #eef0f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .zfo-empty-title { font-size: 13px; font-weight: 700; color: ${Z.textMid}; margin-bottom: 4px; }
+  .zfo-empty-sub   { font-size: 12px; color: ${Z.textMuted}; }
+
+  /* ── Spinner ── */
+  .zfo-loading {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 60vh; gap: 14px;
+  }
+  .zfo-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid ${Z.border};
+    border-top-color: ${Z.red};
+    border-radius: 50%;
+    animation: zfo-spin .7s linear infinite;
+  }
+  .zfo-loading-text { font-size: 13px; color: ${Z.textMuted}; font-family: 'Lato', sans-serif; }
+
+  @keyframes zfo-spin { to { transform: rotate(360deg) } }
+
+  /* ── Two-column bottom row ── */
+  .zfo-bottom-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  @media (max-width: 800px) { .zfo-bottom-row { grid-template-columns: 1fr; } }
+`;
+
+/* ─── Helpers ─────────────────────────────────────────────────────────────── */
+const fmt = (n) =>
+  `R ${Number(n).toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const KPICard = ({ icon, iconBg, iconColor, label, value, sub, badge, badgeColor }) => (
+  <div className="zfo-kpi">
+    <div className="zfo-kpi-top">
+      <div className="zfo-kpi-icon" style={{ background: iconBg }}>
+        {React.cloneElement(icon, { size: 16, color: iconColor })}
+      </div>
+      {badge && (
+        <span className="zfo-kpi-badge" style={{ background: badgeColor + "22", color: badgeColor }}>
+          {badge}
+        </span>
+      )}
+    </div>
+    <div className="zfo-kpi-label">{label}</div>
+    <div className="zfo-kpi-value">{value}</div>
+    {sub && <div className="zfo-kpi-sub">{sub}</div>}
+  </div>
+);
+
+/* ─── Component ──────────────────────────────────────────────────────────── */
 const FinancialOverview = ({ user }) => {
   const [timeRange, setTimeRange] = useState("month");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]   = useState(true);
   const [financialData, setFinancialData] = useState({
-    totalRevenue: 0,
-    avgInvoice: 0,
-    invoiceCount: 0,
-    outstanding: 0,
-    overdue: 0,
-    paidThisMonth: 0,
-    expenses: 0,
-    netProfit: 0,
-    revenueGrowth: 0,
-    collectionRate: 0,
-    healthScore: 0,
+    totalRevenue: 0, avgInvoice: 0, invoiceCount: 0,
+    outstanding: 0, overdue: 0, paidThisMonth: 0,
+    expenses: 0, netProfit: 0, revenueGrowth: 0,
+    collectionRate: 0, healthScore: 0,
   });
+  const [revenueData,       setRevenueData]       = useState([]);
+  const [expenseBreakdown,  setExpenseBreakdown]  = useState([]);
+  const [recentActivity,    setRecentActivity]    = useState([]);
+  const [topClients,        setTopClients]        = useState([]);
 
-  const [revenueData, setRevenueData] = useState([]);
-  const [expenseBreakdown, setExpenseBreakdown] = useState([]);
-  const [recentActivity, setRecentActivity] = useState([]);
-  const [topClients, setTopClients] = useState([]);
-
-  // Fetch financial data from Firebase
+  /* ── Data fetching (unchanged logic) ── */
   useEffect(() => {
     if (!user?.uid) return;
-
     const fetchFinancialData = async () => {
       setLoading(true);
       const db = getFirestore();
-
       try {
-        // Get date ranges based on timeRange
         const now = new Date();
         let startDate = new Date();
+        if (timeRange === "week")       startDate.setDate(now.getDate() - 7);
+        else if (timeRange === "month") startDate.setMonth(now.getMonth() - 1);
+        else                            startDate.setFullYear(now.getFullYear() - 1);
 
-        if (timeRange === "week") {
-          startDate.setDate(now.getDate() - 7);
-        } else if (timeRange === "month") {
-          startDate.setMonth(now.getMonth() - 1);
-        } else {
-          startDate.setFullYear(now.getFullYear() - 1);
-        }
-
-        // Fetch invoices from the current user
-        const invoicesRef = collection(db, "users", user.uid, "invoices");
-        const invoicesSnapshot = await getDocs(invoicesRef);
-
-        let totalRevenue = 0;
-        let totalOutstanding = 0;
-        let totalOverdue = 0;
-        let paidCount = 0;
+        const invoicesSnap = await getDocs(collection(db, "users", user.uid, "invoices"));
+        let totalRevenue = 0, totalOutstanding = 0, totalOverdue = 0, paidCount = 0;
         let invoicesList = [];
 
-        invoicesSnapshot.forEach((doc) => {
-          const invoice = doc.data();
-          invoicesList.push({ id: doc.id, ...invoice });
-
-          const invoiceDate = invoice.dates?.invoiceDate
-            ? new Date(invoice.dates.invoiceDate)
-            : invoice.dates?.quoteDate
-              ? new Date(invoice.dates.quoteDate)
-              : invoice.createdAt?.toDate
-                ? invoice.createdAt.toDate()
-                : null;
-          const dueDate = invoice.dates?.dueDate
-            ? new Date(invoice.dates.dueDate)
-            : invoice.dates?.validUntil
-              ? new Date(invoice.dates.validUntil)
-              : null;
-
+        const processDoc = (doc, isQuote = false) => {
+          const d = doc.data();
+          invoicesList.push({ id: doc.id, ...d, isQuote });
+          const invoiceDate = d.dates?.invoiceDate ? new Date(d.dates.invoiceDate)
+            : d.dates?.quoteDate ? new Date(d.dates.quoteDate)
+            : d.createdAt?.toDate ? d.createdAt.toDate() : null;
+          const dueDate = d.dates?.dueDate ? new Date(d.dates.dueDate)
+            : d.dates?.validUntil ? new Date(d.dates.validUntil) : null;
           if (invoiceDate && invoiceDate >= startDate) {
-            if (invoice.status === "paid") {
-              totalRevenue += invoice.totals?.total || 0;
-              paidCount++;
-            } else if (
-              invoice.status === "pending" ||
-              invoice.status === "partially_paid"
-            ) {
-              const due = invoice.totals?.due || invoice.totals?.total || 0;
+            if (d.status === "paid") { totalRevenue += d.totals?.total || 0; paidCount++; }
+            else if (d.status === "pending" || d.status === "partially_paid") {
+              const due = d.totals?.due || d.totals?.total || 0;
               totalOutstanding += due;
-
-              if (dueDate && dueDate < now) {
-                totalOverdue += due;
-              }
+              if (dueDate && dueDate < now) totalOverdue += due;
             }
           }
-        });
+        };
 
-        // Also fetch quotes if they exist
+        invoicesSnap.forEach((doc) => processDoc(doc));
         try {
-          const quotesRef = collection(db, "users", user.uid, "quotes");
-          const quotesSnapshot = await getDocs(quotesRef);
+          const quotesSnap = await getDocs(collection(db, "users", user.uid, "quotes"));
+          quotesSnap.forEach((doc) => processDoc(doc, true));
+        } catch {}
 
-          quotesSnapshot.forEach((doc) => {
-            const quote = doc.data();
-            invoicesList.push({ id: doc.id, ...quote, isQuote: true });
-
-            const quoteDate = quote.dates?.quoteDate
-              ? new Date(quote.dates.quoteDate)
-              : quote.createdAt?.toDate
-                ? quote.createdAt.toDate()
-                : null;
-            const dueDate = quote.dates?.validUntil
-              ? new Date(quote.dates.validUntil)
-              : null;
-
-            if (quoteDate && quoteDate >= startDate) {
-              if (quote.status === "paid") {
-                totalRevenue += quote.totals?.total || 0;
-                paidCount++;
-              } else if (
-                quote.status === "pending" ||
-                quote.status === "partially_paid"
-              ) {
-                const due = quote.totals?.due || quote.totals?.total || 0;
-                totalOutstanding += due;
-
-                if (dueDate && dueDate < now) {
-                  totalOverdue += due;
-                }
-              }
-            }
-          });
-        } catch (error) {
-          console.log("No quotes collection or error fetching quotes:", error);
-        }
-
-        // Calculate metrics
-        const invoiceCount = invoicesList.length;
-        const avgInvoice = paidCount > 0 ? totalRevenue / paidCount : 0;
-        const collectionRate =
-          invoiceCount > 0 ? (paidCount / invoiceCount) * 100 : 0;
-
-        // Fetch expenses (assuming you have an expenses collection)
         let totalExpenses = 0;
         try {
-          const expensesRef = collection(db, "users", user.uid, "expenses");
-          const expensesSnapshot = await getDocs(expensesRef);
-
-          expensesSnapshot.forEach((doc) => {
-            const expense = doc.data();
-            const expenseDate = expense.date
-              ? new Date(expense.date)
-              : expense.createdAt?.toDate
-                ? expense.createdAt.toDate()
-                : null;
-
-            if (expenseDate && expenseDate >= startDate) {
-              totalExpenses += expense.amount || 0;
-            }
+          const expSnap = await getDocs(collection(db, "users", user.uid, "expenses"));
+          expSnap.forEach((doc) => {
+            const e = doc.data();
+            const d = e.date ? new Date(e.date) : e.createdAt?.toDate ? e.createdAt.toDate() : null;
+            if (d && d >= startDate) totalExpenses += e.amount || 0;
           });
-        } catch (error) {
-          console.log("No expenses collection yet");
-        }
+        } catch {}
 
-        const netProfit = totalRevenue - totalExpenses;
-        const healthScore = calculateHealthScore(
-          collectionRate,
-          totalOverdue,
-          netProfit,
-          totalRevenue,
-        );
+        const invoiceCount   = invoicesList.length;
+        const avgInvoice     = paidCount > 0 ? totalRevenue / paidCount : 0;
+        const collectionRate = invoiceCount > 0 ? (paidCount / invoiceCount) * 100 : 0;
+        const netProfit      = totalRevenue - totalExpenses;
+        const healthScore    = calcHealth(collectionRate, totalOverdue, netProfit, totalRevenue);
 
-        // Calculate revenue growth (compare with previous period)
-        let previousRevenue = 0;
-        let previousStartDate = new Date(startDate);
-        let previousEndDate = new Date(startDate);
-
-        if (timeRange === "week") {
-          previousStartDate.setDate(previousStartDate.getDate() - 7);
-        } else if (timeRange === "month") {
-          previousStartDate.setMonth(previousStartDate.getMonth() - 1);
-        } else {
-          previousStartDate.setFullYear(previousStartDate.getFullYear() - 1);
-        }
-
-        invoicesList.forEach((invoice) => {
-          const invoiceDate = invoice.dates?.invoiceDate
-            ? new Date(invoice.dates.invoiceDate)
-            : invoice.dates?.quoteDate
-              ? new Date(invoice.dates.quoteDate)
-              : invoice.createdAt?.toDate
-                ? invoice.createdAt.toDate()
-                : null;
-
-          if (
-            invoiceDate &&
-            invoiceDate >= previousStartDate &&
-            invoiceDate < startDate &&
-            invoice.status === "paid"
-          ) {
-            previousRevenue += invoice.totals?.total || 0;
-          }
+        // Growth
+        let prevRevenue = 0;
+        let prevStart = new Date(startDate);
+        if (timeRange === "week")       prevStart.setDate(prevStart.getDate() - 7);
+        else if (timeRange === "month") prevStart.setMonth(prevStart.getMonth() - 1);
+        else                            prevStart.setFullYear(prevStart.getFullYear() - 1);
+        invoicesList.forEach((inv) => {
+          const d = inv.dates?.invoiceDate ? new Date(inv.dates.invoiceDate)
+            : inv.dates?.quoteDate ? new Date(inv.dates.quoteDate)
+            : inv.createdAt?.toDate ? inv.createdAt.toDate() : null;
+          if (d && d >= prevStart && d < startDate && inv.status === "paid")
+            prevRevenue += inv.totals?.total || 0;
         });
-
-        const revenueGrowth =
-          previousRevenue > 0
-            ? ((totalRevenue - previousRevenue) / previousRevenue) * 100
-            : 0;
+        const revenueGrowth = prevRevenue > 0 ? ((totalRevenue - prevRevenue) / prevRevenue) * 100 : 0;
 
         setFinancialData({
-          totalRevenue,
-          avgInvoice,
-          invoiceCount,
-          outstanding: totalOutstanding,
-          overdue: totalOverdue,
-          paidThisMonth: paidCount,
-          expenses: totalExpenses,
-          netProfit,
+          totalRevenue, avgInvoice, invoiceCount,
+          outstanding: totalOutstanding, overdue: totalOverdue,
+          paidThisMonth: paidCount, expenses: totalExpenses, netProfit,
           revenueGrowth: Math.round(revenueGrowth * 10) / 10,
           collectionRate: Math.round(collectionRate),
           healthScore,
         });
 
-        // Process revenue data for chart (last 6 months)
-        processRevenueData(invoicesList, startDate);
-
-        // Process recent activity
-        processRecentActivity(invoicesList);
-
-        // Process top clients
+        processRevenueData(invoicesList);
+        processRecentActivity(invoicesList, now);
         processTopClients(invoicesList);
-      } catch (error) {
-        console.error("Error fetching financial data:", error);
+      } catch (err) {
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchFinancialData();
   }, [user, timeRange]);
 
-  const calculateHealthScore = (
-    collectionRate,
-    overdue,
-    netProfit,
-    revenue,
-  ) => {
-    let score = 0;
-
-    // Collection rate (40 points)
-    score += (collectionRate / 100) * 40;
-
-    // Overdue ratio (30 points)
-    const overdueRatio = revenue > 0 ? overdue / revenue : 0;
-    score += Math.max(0, 30 - overdueRatio * 100);
-
-    // Profitability (30 points)
-    const profitMargin = revenue > 0 ? (netProfit / revenue) * 100 : 0;
-    score += Math.min(30, profitMargin);
-
-    return Math.round(Math.max(0, Math.min(100, score)));
+  const calcHealth = (cr, overdue, netProfit, revenue) => {
+    let s = (cr / 100) * 40;
+    s += Math.max(0, 30 - (revenue > 0 ? overdue / revenue : 0) * 100);
+    s += Math.min(30, revenue > 0 ? (netProfit / revenue) * 100 : 0);
+    return Math.round(Math.max(0, Math.min(100, s)));
   };
 
-  const processRevenueData = (invoices, startDate) => {
-    const months = [];
+  const processRevenueData = (invoices) => {
     const now = new Date();
-
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({
-        month: date.toLocaleDateString("en-US", { month: "short" }),
-        revenue: 0,
-        expenses: 0,
-      });
-    }
-
-    invoices.forEach((invoice) => {
-      const invoiceDate = invoice.dates?.invoiceDate
-        ? new Date(invoice.dates.invoiceDate)
-        : invoice.dates?.quoteDate
-          ? new Date(invoice.dates.quoteDate)
-          : invoice.createdAt?.toDate
-            ? invoice.createdAt.toDate()
-            : null;
-      if (!invoiceDate) return;
-
-      const monthDiff =
-        (now.getFullYear() - invoiceDate.getFullYear()) * 12 +
-        (now.getMonth() - invoiceDate.getMonth());
-      const monthIndex = 5 - monthDiff;
-
-      if (monthIndex >= 0 && monthIndex < 6 && invoice.status === "paid") {
-        months[monthIndex].revenue += invoice.totals?.total || 0;
-      }
+    const months = Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+      return { month: d.toLocaleDateString("en-US", { month: "short" }), revenue: 0, expenses: 0 };
     });
-
+    invoices.forEach((inv) => {
+      const d = inv.dates?.invoiceDate ? new Date(inv.dates.invoiceDate)
+        : inv.dates?.quoteDate ? new Date(inv.dates.quoteDate)
+        : inv.createdAt?.toDate ? inv.createdAt.toDate() : null;
+      if (!d) return;
+      const idx = 5 - ((now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
+      if (idx >= 0 && idx < 6 && inv.status === "paid") months[idx].revenue += inv.totals?.total || 0;
+    });
     setRevenueData(months);
   };
 
-  const processRecentActivity = (invoices) => {
+  const processRecentActivity = (invoices, now) => {
     const activity = invoices
-      .filter(
-        (inv) =>
-          inv.dates?.invoiceDate || inv.dates?.quoteDate || inv.createdAt,
-      )
+      .filter((i) => i.dates?.invoiceDate || i.dates?.quoteDate || i.createdAt)
       .sort((a, b) => {
-        const dateA = new Date(
-          a.dates?.invoiceDate || a.dates?.quoteDate || a.createdAt?.toDate(),
-        );
-        const dateB = new Date(
-          b.dates?.invoiceDate || b.dates?.quoteDate || b.createdAt?.toDate(),
-        );
-        return dateB - dateA;
+        const dA = new Date(a.dates?.invoiceDate || a.dates?.quoteDate || a.createdAt?.toDate?.());
+        const dB = new Date(b.dates?.invoiceDate || b.dates?.quoteDate || b.createdAt?.toDate?.());
+        return dB - dA;
       })
-      .slice(0, 4)
-      .map((invoice) => {
-        const invoiceDate = new Date(
-          invoice.dates?.invoiceDate ||
-            invoice.dates?.quoteDate ||
-            invoice.createdAt?.toDate(),
-        );
-        const now = new Date();
-        const diffTime = Math.abs(now - invoiceDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        let timeAgo = "";
-        if (diffDays === 0) timeAgo = "Today";
-        else if (diffDays === 1) timeAgo = "Yesterday";
-        else if (diffDays < 7) timeAgo = `${diffDays} days ago`;
-        else timeAgo = `${Math.floor(diffDays / 7)} weeks ago`;
-
-        let status = invoice.status || "pending";
-        let type = invoice.isQuote ? "quote" : "invoice";
-
-        if (status === "paid") {
-          type = "payment";
-          status = "received";
-        } else if (
-          invoice.dates?.dueDate &&
-          new Date(invoice.dates.dueDate) < now
-        ) {
-          type = "overdue";
-          status = "overdue";
-        } else if (
-          invoice.dates?.validUntil &&
-          new Date(invoice.dates.validUntil) < now
-        ) {
-          type = "overdue";
-          status = "overdue";
-        } else {
-          status = "sent";
-        }
-
-        return {
-          type,
-          client: invoice.customer?.name || "Unknown",
-          amount: invoice.totals?.total || 0,
-          date: timeAgo,
-          status,
-          documentNumber: invoice.quoteNumber || "N/A",
-        };
+      .slice(0, 5)
+      .map((inv) => {
+        const d    = new Date(inv.dates?.invoiceDate || inv.dates?.quoteDate || inv.createdAt?.toDate?.());
+        const diff = Math.ceil(Math.abs(now - d) / 86400000);
+        const timeAgo = diff === 0 ? "Today" : diff === 1 ? "Yesterday" : diff < 7 ? `${diff}d ago` : `${Math.floor(diff / 7)}w ago`;
+        let status = inv.status || "pending";
+        let type   = inv.isQuote ? "Quote" : "Invoice";
+        if (status === "paid") { type = "Payment"; status = "received"; }
+        else if ((inv.dates?.dueDate && new Date(inv.dates.dueDate) < now) ||
+                 (inv.dates?.validUntil && new Date(inv.dates.validUntil) < now))
+          { type = "Overdue"; status = "overdue"; }
+        else status = "sent";
+        return { type, client: inv.customer?.name || "Unknown", amount: inv.totals?.total || 0, date: timeAgo, status, documentNumber: inv.quoteNumber || "N/A" };
       });
-
     setRecentActivity(activity);
   };
 
   const processTopClients = (invoices) => {
-    const clientMap = new Map();
-
-    invoices.forEach((invoice) => {
-      if (invoice.status !== "paid") return;
-
-      const clientName = invoice.customer?.name || "Unknown";
-      const revenue = invoice.totals?.total || 0;
-
-      if (clientMap.has(clientName)) {
-        const client = clientMap.get(clientName);
-        client.revenue += revenue;
-        client.invoices += 1;
+    const map = new Map();
+    invoices.forEach((inv) => {
+      if (inv.status !== "paid") return;
+      const name = inv.customer?.name || "Unknown";
+      const r    = inv.totals?.total || 0;
+      if (map.has(name)) {
+        map.get(name).revenue += r;
+        map.get(name).invoices++;
       } else {
-        clientMap.set(clientName, {
-          name: clientName,
-          revenue,
-          invoices: 1,
-        });
+        map.set(name, { name, revenue: r, invoices: 1 });
       }
     });
-
-    const sortedClients = Array.from(clientMap.values())
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 4);
-
-    setTopClients(sortedClients);
+    setTopClients([...map.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 4));
   };
 
-  const formatCurrency = (amount) => {
-    return `R ${amount.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
+  /* ── Health status helpers ── */
+  const healthStatus = financialData.healthScore >= 80 ? "good"
+    : financialData.healthScore >= 60 ? "warning" : "bad";
+  const healthLabel  = financialData.healthScore >= 80 ? "Excellent"
+    : financialData.healthScore >= 60 ? "Good" : "Needs Attention";
+  const healthDesc   = financialData.healthScore >= 80 ? "Business is performing well"
+    : financialData.healthScore >= 60 ? "On track — monitor closely" : "Review cash flow immediately";
 
-  const getHealthColor = (score) => {
-    if (score >= 80) return "text-green-600 bg-green-50";
-    if (score >= 60) return "text-yellow-600 bg-yellow-50";
-    return "text-red-600 bg-red-50";
-  };
+  /* ── Chart max ── */
+  const chartMax = Math.max(...revenueData.map((d) => Math.max(d.revenue, d.expenses)), 1);
 
   return (
-    <div className="min-h-screen bg-gray-300 p-4 md:p-6">
-      {loading ? (
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading financial data...</p>
+    <div className="zfo">
+      <style>{css}</style>
+      <div className="zfo-page border ">
+
+        {/* ── Top bar ── */}
+        <div className="zfo-topbar">
+          <div className="zfo-topbar-left">
+            <div className="zfo-topbar-icon">
+              <BarChart3 size={14} color="#fff" />
+            </div>
+            <span className="zfo-topbar-title">Financial Overview</span>
+            <span className="zfo-topbar-sub">Analytics &rsaquo; Dashboard</span>
+          </div>
+
+          <div className="zfo-range-group">
+            {["week", "month", "year"].map((r) => (
+              <button
+                key={r}
+                className={`zfo-range-btn${timeRange === r ? " active" : ""}`}
+                onClick={() => setTimeRange(r)}
+              >
+                {r.charAt(0).toUpperCase() + r.slice(1)}
+              </button>
+            ))}
           </div>
         </div>
-      ) : (
-        <>
-          {/* Header */}
-          <div className="mb-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Financial Overview
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Monitor your business performance at a glance
-                </p>
-              </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setTimeRange("week")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    timeRange === "week"
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  Week
-                </button>
-                <button
-                  onClick={() => setTimeRange("month")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    timeRange === "month"
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  Month
-                </button>
-                <button
-                  onClick={() => setTimeRange("year")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    timeRange === "year"
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  Year
-                </button>
-              </div>
+        {/* ── Content ── */}
+        <div className="zfo-content">
+          {loading ? (
+            <div className="zfo-loading">
+              <div className="zfo-spinner" />
+              <span className="zfo-loading-text">Loading financial data…</span>
             </div>
-          </div>
+          ) : (
+            <>
+              {/* ── Health banner ── */}
+              <div className="zfo-health">
+                <div className="zfo-health-score-wrap">
+                  <div>
+                    <div className="zfo-health-label">Financial Health Score</div>
+                    <div className="zfo-health-score">{financialData.healthScore}</div>
+                  </div>
+                  <div>
+                    <div className={`zfo-health-status ${healthStatus}`}>
+                      {healthStatus !== "bad"
+                        ? <TrendingUp size={14} />
+                        : <TrendingDown size={14} />}
+                      {healthLabel}
+                    </div>
+                    <div className="zfo-health-desc">{healthDesc}</div>
+                  </div>
+                </div>
+                <div className="zfo-collection-ring">
+                  <span className="val">{financialData.collectionRate}%</span>
+                  <span className="lbl">Collection Rate</span>
+                </div>
+              </div>
 
-          {/* Financial Health Score */}
-          <div className="mb-6">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 mb-2">Financial Health Score</p>
-                  <div className="flex items-center gap-4">
-                    <span className="text-5xl font-bold">
-                      {financialData.healthScore}
-                    </span>
-                    <div className="text-sm">
-                      <div className="flex items-center gap-1 mb-1">
-                        {financialData.healthScore >= 80 ? (
-                          <>
-                            <TrendingUp className="w-4 h-4" />
-                            <span>Excellent</span>
-                          </>
-                        ) : financialData.healthScore >= 60 ? (
-                          <>
-                            <TrendingUp className="w-4 h-4" />
-                            <span>Good</span>
-                          </>
-                        ) : (
-                          <>
-                            <TrendingDown className="w-4 h-4" />
-                            <span>Needs Attention</span>
-                          </>
-                        )}
+              {/* ── KPI Grid ── */}
+              <div className="zfo-section-title">Key Metrics</div>
+              <div className="zfo-kpi-grid">
+                <KPICard
+                  icon={<DollarSign />} iconBg={Z.greenLight} iconColor={Z.green}
+                  label="Total Revenue" value={fmt(financialData.totalRevenue)}
+                  sub={`This ${timeRange}`}
+                  badge={`${financialData.revenueGrowth >= 0 ? "+" : ""}${financialData.revenueGrowth}%`}
+                  badgeColor={financialData.revenueGrowth >= 0 ? Z.green : Z.red}
+                />
+                <KPICard
+                  icon={<Clock />} iconBg={Z.amberLight} iconColor={Z.amber}
+                  label="Outstanding" value={fmt(financialData.outstanding)}
+                  sub={`${financialData.invoiceCount - financialData.paidThisMonth} unpaid invoices`}
+                  badge="Pending" badgeColor={Z.amber}
+                />
+                <KPICard
+                  icon={<AlertCircle />} iconBg={Z.redLight} iconColor={Z.red}
+                  label="Overdue" value={fmt(financialData.overdue)}
+                  sub="Requires immediate action"
+                  badge="Urgent" badgeColor={Z.red}
+                />
+                <KPICard
+                  icon={<TrendingUp />} iconBg={Z.blueLight} iconColor={Z.blue}
+                  label="Net Profit" value={fmt(financialData.netProfit)}
+                  sub="Revenue minus expenses"
+                />
+                <KPICard
+                  icon={<FileText />} iconBg="#f3f0ff" iconColor="#6d28d9"
+                  label="Average Invoice" value={fmt(financialData.avgInvoice)}
+                  sub="Per paid invoice"
+                />
+                <KPICard
+                  icon={<FileText />} iconBg="#eef0f5" iconColor={Z.navyMid}
+                  label="Total Invoices" value={financialData.invoiceCount}
+                  sub={`${financialData.paidThisMonth} paid this ${timeRange}`}
+                />
+              </div>
+
+              {/* ── Charts ── */}
+              <div className="zfo-section-title">Revenue Analysis</div>
+              <div className="zfo-chart-row">
+
+                {/* Bar chart */}
+                <div className="zfo-panel">
+                  <div className="zfo-panel-head">
+                    <span className="zfo-panel-head-title">Revenue vs Expenses</span>
+                    <BarChart3 size={13} color={Z.textMuted} />
+                  </div>
+                  <div className="zfo-panel-body">
+                    {revenueData.map((d, i) => (
+                      <div key={i} className="zfo-bar-row">
+                        <div className="zfo-bar-meta">
+                          <span className="zfo-bar-month">{d.month}</span>
+                          <span className="zfo-bar-vals">
+                            <span style={{ color: Z.green, fontWeight: 700 }}>R{(d.revenue / 1000).toFixed(0)}k</span>
+                            <span style={{ color: Z.textMuted }}> / </span>
+                            <span style={{ color: Z.red, fontWeight: 700 }}>R{(d.expenses / 1000).toFixed(0)}k</span>
+                          </span>
+                        </div>
+                        <div className="zfo-bar-track">
+                          <div className="zfo-bar-fill" style={{ width: `${(d.revenue / chartMax) * 100}%`, background: Z.green }} />
+                        </div>
+                        <div className="zfo-bar-track">
+                          <div className="zfo-bar-fill" style={{ width: `${(d.expenses / chartMax) * 100}%`, background: Z.red }} />
+                        </div>
                       </div>
-                      <p className="text-blue-100">
-                        {financialData.healthScore >= 80
-                          ? "Excellent financial health"
-                          : financialData.healthScore >= 60
-                            ? "Good financial health"
-                            : "Monitor cash flow closely"}
-                      </p>
+                    ))}
+                    <div className="zfo-legend">
+                      <div className="zfo-legend-item"><div className="zfo-legend-dot" style={{ background: Z.green }} />Revenue</div>
+                      <div className="zfo-legend-item"><div className="zfo-legend-dot" style={{ background: Z.red }} />Expenses</div>
                     </div>
                   </div>
                 </div>
-                <div className="hidden md:block">
-                  <div className="w-32 h-32 rounded-full border-8 border-white/30 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold">
-                        {financialData.collectionRate}%
-                      </div>
-                      <div className="text-xs text-blue-100">
-                        Collection Rate
-                      </div>
-                    </div>
+
+                {/* Pie / breakdown */}
+                <div className="zfo-panel">
+                  <div className="zfo-panel-head">
+                    <span className="zfo-panel-head-title">Expense Breakdown</span>
+                    <PieChart size={13} color={Z.textMuted} />
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Key Metrics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            {/* Total Revenue */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-green-600" />
-                </div>
-                <div className="flex items-center gap-1 text-green-600 text-sm font-medium">
-                  {financialData.revenueGrowth >= 0 ? (
-                    <>
-                      <TrendingUp className="w-4 h-4" />
-                      <span>+{financialData.revenueGrowth}%</span>
-                    </>
-                  ) : (
-                    <>
-                      <TrendingDown className="w-4 h-4" />
-                      <span>{financialData.revenueGrowth}%</span>
-                    </>
-                  )}
-                </div>
-              </div>
-              <h3 className="text-gray-600 text-sm mb-1">Total Revenue</h3>
-              <p className="text-3xl font-bold text-gray-900">
-                {formatCurrency(financialData.totalRevenue)}
-              </p>
-              <p className="text-xs text-gray-500 mt-2">This {timeRange}</p>
-            </div>
-
-            {/* Outstanding */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-yellow-600" />
-                </div>
-                <div className="flex items-center gap-1 text-yellow-600 text-sm font-medium">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>Pending</span>
-                </div>
-              </div>
-              <h3 className="text-gray-600 text-sm mb-1">Outstanding</h3>
-              <p className="text-3xl font-bold text-gray-900">
-                {formatCurrency(financialData.outstanding)}
-              </p>
-              <p className="text-xs text-gray-500 mt-2">
-                {financialData.invoiceCount - financialData.paidThisMonth}{" "}
-                unpaid invoices
-              </p>
-            </div>
-
-            {/* Overdue */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                  <AlertCircle className="w-6 h-6 text-red-600" />
-                </div>
-                <div className="flex items-center gap-1 text-red-600 text-sm font-medium">
-                  <TrendingDown className="w-4 h-4" />
-                  <span>Urgent</span>
-                </div>
-              </div>
-              <h3 className="text-gray-600 text-sm mb-1">Overdue</h3>
-              <p className="text-3xl font-bold text-gray-900">
-                {formatCurrency(financialData.overdue)}
-              </p>
-              <p className="text-xs text-gray-500 mt-2">
-                Requires immediate attention
-              </p>
-            </div>
-
-            {/* Net Profit */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-              <h3 className="text-gray-600 text-sm mb-1">Net Profit</h3>
-              <p className="text-3xl font-bold text-gray-900">
-                {formatCurrency(financialData.netProfit)}
-              </p>
-              <p className="text-xs text-gray-500 mt-2">
-                Revenue minus expenses
-              </p>
-            </div>
-
-            {/* Average Invoice */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-purple-600" />
-                </div>
-              </div>
-              <h3 className="text-gray-600 text-sm mb-1">Average Invoice</h3>
-              <p className="text-3xl font-bold text-gray-900">
-                {formatCurrency(financialData.avgInvoice)}
-              </p>
-              <p className="text-xs text-gray-500 mt-2">Per invoice</p>
-            </div>
-
-            {/* Invoice Count */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-indigo-600" />
-                </div>
-              </div>
-              <h3 className="text-gray-600 text-sm mb-1">Total Invoices</h3>
-              <p className="text-3xl font-bold text-gray-900">
-                {financialData.invoiceCount}
-              </p>
-              <p className="text-xs text-gray-500 mt-2">
-                {financialData.paidThisMonth} paid this {timeRange}
-              </p>
-            </div>
-          </div>
-
-          {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {/* Revenue vs Expenses Chart */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Revenue vs Expenses
-                </h2>
-                <BarChart3 className="w-5 h-5 text-gray-400" />
-              </div>
-
-              <div className="space-y-4">
-                {revenueData.map((data, index) => {
-                  const maxValue = Math.max(
-                    ...revenueData.map((d) => Math.max(d.revenue, d.expenses)),
-                  );
-                  const revenueWidth =
-                    maxValue > 0 ? (data.revenue / maxValue) * 100 : 0;
-                  const expenseWidth =
-                    maxValue > 0 ? (data.expenses / maxValue) * 100 : 0;
-
-                  return (
-                    <div key={index}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">
-                          {data.month}
-                        </span>
-                        <div className="text-xs text-gray-500">
-                          <span className="text-green-600 text-sm font-medium">
-                            R{(data.revenue / 1000).toFixed(0)}k
-                          </span>
-                          {" / "}
-                          <span className="text-red-600 text-sm font-medium">
-                            R{(data.expenses / 1000).toFixed(0)}k
-                          </span>
+                  <div className="zfo-panel-body">
+                    {expenseBreakdown.length > 0 ? (
+                      <>
+                        <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                          <div style={{ position: "relative", width: 140, height: 140 }}>
+                            <svg viewBox="0 0 200 200" style={{ transform: "rotate(-90deg)" }}>
+                              {expenseBreakdown.map((e, i) => {
+                                const total = expenseBreakdown.reduce((s, x) => s + x.amount, 0);
+                                const c = 2 * Math.PI * 80;
+                                const dash = `${(e.amount / total) * c} ${c}`;
+                                const offset = -expenseBreakdown.slice(0, i).reduce((s, x) => s + (x.amount / total) * c, 0);
+                                return <circle key={i} cx="100" cy="100" r="80" fill="none" stroke={e.color} strokeWidth="40" strokeDasharray={dash} strokeDashoffset={offset} />;
+                              })}
+                            </svg>
+                            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: Z.text }}>{fmt(expenseBreakdown.reduce((s, e) => s + e.amount, 0))}</div>
+                              <div style={{ fontSize: 10, color: Z.textMuted }}>Total</div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-green-500 rounded-full transition-all"
-                            style={{ width: `${revenueWidth}%` }}
-                          ></div>
-                        </div>
-                        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-red-500 rounded-full transition-all"
-                            style={{ width: `${expenseWidth}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="flex items-center gap-6 mt-6 pt-4 border-t">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded"></div>
-                  <span className="text-sm text-gray-600">Revenue</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-red-500 rounded"></div>
-                  <span className="text-sm text-gray-600">Expenses</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Expense Breakdown */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Expense Breakdown
-                </h2>
-                <PieChart className="w-5 h-5 text-gray-400" />
-              </div>
-
-              {expenseBreakdown.length > 0 ? (
-                <>
-                  <div className="flex items-center justify-center mb-6">
-                    <div className="relative w-48 h-48">
-                      <svg
-                        viewBox="0 0 200 200"
-                        className="transform -rotate-90"
-                      >
-                        {expenseBreakdown.map((expense, index) => {
-                          const total = expenseBreakdown.reduce(
-                            (sum, e) => sum + e.amount,
-                            0,
-                          );
-                          const percentage = (expense.amount / total) * 100;
-                          const circumference = 2 * Math.PI * 80;
-                          const offset = expenseBreakdown
-                            .slice(0, index)
-                            .reduce((sum, e) => {
-                              return sum + (e.amount / total) * circumference;
-                            }, 0);
-                          const dashArray = `${(percentage / 100) * circumference} ${circumference}`;
-
+                        {expenseBreakdown.map((e, i) => {
+                          const total = expenseBreakdown.reduce((s, x) => s + x.amount, 0);
                           return (
-                            <circle
-                              key={index}
-                              cx="100"
-                              cy="100"
-                              r="80"
-                              fill="none"
-                              stroke={expense.color}
-                              strokeWidth="40"
-                              strokeDasharray={dashArray}
-                              strokeDashoffset={-offset}
-                            />
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <div style={{ width: 10, height: 10, borderRadius: "50%", background: e.color }} />
+                                <span style={{ fontSize: 12, color: Z.textMid }}>{e.category}</span>
+                              </div>
+                              <div style={{ textAlign: "right" }}>
+                                <div style={{ fontSize: 12, fontWeight: 700, color: Z.text }}>{fmt(e.amount)}</div>
+                                <div style={{ fontSize: 10, color: Z.textMuted }}>{((e.amount / total) * 100).toFixed(1)}%</div>
+                              </div>
+                            </div>
                           );
                         })}
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-gray-900">
-                            {formatCurrency(
-                              expenseBreakdown.reduce(
-                                (sum, e) => sum + e.amount,
-                                0,
-                              ),
-                            )}
-                          </div>
-                          <div className="text-xs text-gray-500">Total</div>
-                        </div>
+                      </>
+                    ) : (
+                      <div className="zfo-empty">
+                        <div className="zfo-empty-icon"><PieChart size={22} color={Z.textMuted} /></div>
+                        <div className="zfo-empty-title">No expense data</div>
+                        <div className="zfo-empty-sub">Add expenses to see breakdown</div>
                       </div>
-                    </div>
+                    )}
                   </div>
+                </div>
+              </div>
 
-                  <div className="space-y-3">
-                    {expenseBreakdown.map((expense, index) => {
-                      const total = expenseBreakdown.reduce(
-                        (sum, e) => sum + e.amount,
-                        0,
-                      );
-                      const percentage = (
-                        (expense.amount / total) *
-                        100
-                      ).toFixed(1);
+              {/* ── Bottom: Activity + Top Clients ── */}
+              <div className="zfo-section-title">Activity</div>
+              <div className="zfo-bottom-row">
 
+                {/* Recent Activity */}
+                <div className="zfo-panel">
+                  <div className="zfo-panel-head">
+                    <span className="zfo-panel-head-title">Recent Activity</span>
+                    <Calendar size={13} color={Z.textMuted} />
+                  </div>
+                  <div className="zfo-panel-body">
+                    {recentActivity.length > 0 ? recentActivity.map((a, i) => {
+                      const iconBg    = a.status === "received" ? Z.greenLight : a.status === "sent" ? Z.blueLight : Z.redLight;
+                      const iconColor = a.status === "received" ? Z.green      : a.status === "sent" ? Z.blue      : Z.red;
+                      const Icon      = a.status === "received" ? DollarSign   : a.status === "sent" ? FileText    : AlertCircle;
                       return (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: expense.color }}
-                            ></div>
-                            <span className="text-sm text-gray-700">
-                              {expense.category}
-                            </span>
+                        <div key={i} className="zfo-activity-row">
+                          <div className="zfo-activity-icon" style={{ background: iconBg }}>
+                            <Icon size={14} color={iconColor} />
                           </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-gray-900">
-                              {formatCurrency(expense.amount)}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {percentage}%
-                            </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div className="zfo-activity-client">{a.client}</div>
+                            <div className="zfo-activity-meta">{a.type} · {a.documentNumber}</div>
+                          </div>
+                          <div className="zfo-activity-right">
+                            <div className="zfo-activity-amount">{fmt(a.amount)}</div>
+                            <div className="zfo-activity-date">{a.date}</div>
                           </div>
                         </div>
                       );
-                    })}
+                    }) : (
+                      <div className="zfo-empty">
+                        <div className="zfo-empty-icon"><Calendar size={22} color={Z.textMuted} /></div>
+                        <div className="zfo-empty-title">No recent activity</div>
+                        <div className="zfo-empty-sub">Create invoices to see activity</div>
+                      </div>
+                    )}
                   </div>
-                </>
-              ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <PieChart className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p>No expense data available</p>
-                  <p className="text-sm mt-1">Add expenses to see breakdown</p>
                 </div>
-              )}
-            </div>
-          </div>
 
-          {/* Bottom Section */}
-          <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12">
-            {/* Recent Activity */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Recent Activity
-                </h2>
-                <Calendar className="w-5 h-5 text-gray-400" />
-              </div>
-
-              {recentActivity.length > 0 ? (
-                <div className="space-y-4">
-                  {recentActivity.map((activity, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-4 pb-4 border-b last:border-0"
-                    >
-                      <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          activity.status === "received"
-                            ? "bg-green-100"
-                            : activity.status === "sent"
-                              ? "bg-blue-100"
-                              : "bg-red-100"
-                        }`}
-                      >
-                        {activity.status === "received" ? (
-                          <DollarSign className="w-5 h-5 text-green-600" />
-                        ) : activity.status === "sent" ? (
-                          <FileText className="w-5 h-5 text-blue-600" />
-                        ) : (
-                          <AlertCircle className="w-5 h-5 text-red-600" />
-                        )}
-                      </div>
-
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-gray-900">
-                            {activity.client}
-                          </span>
-                          <span className="font-semibold text-gray-900">
-                            {formatCurrency(activity.amount)}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-500 capitalize">
-                            {activity.type} • {activity.documentNumber}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {activity.date}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p>No recent activity</p>
-                  <p className="text-sm mt-1">
-                    Create invoices to see activity
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Top Clients */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Top Clients
-                </h2>
-                <Users className="w-5 h-5 text-gray-400" />
-              </div>
-
-              {topClients.length > 0 ? (
-                <div className="space-y-4">
-                  {topClients.map((client, index) => {
-                    const maxRevenue = Math.max(
-                      ...topClients.map((c) => c.revenue),
-                    );
-                    const width = (client.revenue / maxRevenue) * 100;
-
-                    return (
-                      <div key={index}>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                              {index + 1}
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {client.name}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {client.invoices} invoices
+                {/* Top Clients */}
+                <div className="zfo-panel">
+                  <div className="zfo-panel-head">
+                    <span className="zfo-panel-head-title">Top Clients</span>
+                    <Users size={13} color={Z.textMuted} />
+                  </div>
+                  <div className="zfo-panel-body">
+                    {topClients.length > 0 ? topClients.map((c, i) => {
+                      const maxRev = Math.max(...topClients.map((x) => x.revenue));
+                      return (
+                        <div key={i} className="zfo-client-row">
+                          <div className="zfo-client-meta">
+                            <div className="zfo-client-left">
+                              <div className="zfo-client-rank">{i + 1}</div>
+                              <div>
+                                <div className="zfo-client-name">{c.name}</div>
+                                <div className="zfo-client-invoices">{c.invoices} invoice{c.invoices !== 1 ? "s" : ""}</div>
                               </div>
                             </div>
+                            <div className="zfo-client-revenue">{fmt(c.revenue)}</div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-semibold text-gray-900">
-                              {formatCurrency(client.revenue)}
-                            </div>
+                          <div className="zfo-bar-track">
+                            <div className="zfo-bar-fill" style={{ width: `${(c.revenue / maxRev) * 100}%`, background: Z.navy }} />
                           </div>
                         </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all"
-                            style={{ width: `${width}%` }}
-                          ></div>
-                        </div>
+                      );
+                    }) : (
+                      <div className="zfo-empty">
+                        <div className="zfo-empty-icon"><Users size={22} color={Z.textMuted} /></div>
+                        <div className="zfo-empty-title">No client data yet</div>
+                        <div className="zfo-empty-sub">Add paid invoices to see top clients</div>
                       </div>
-                    );
-                  })}
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p>No client data yet</p>
-                  <p className="text-sm mt-1">
-                    Add paid invoices to see top clients
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </>
-      )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

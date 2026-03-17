@@ -109,30 +109,40 @@ const CleaningDashboard = () => {
   const [quoteNumber, setQuoteNumber] = useState("");
   const [quoteId, setQuoteId] = useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState("professional");
+  const [selectedTemplate, setSelectedTemplate] = useState("default");
 
   // ── Customer/client state ─────────────────────────────────────────────────
   const [customers, setCustomers] = useState([]);
-  const [savedCustomers, setSavedCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
+
+  // ── Quick create handler ──────────────────────────────────────────────────
   const handleQuickCreate = ({ view, action }) => {
-    if (action === "newInvoice")  { handleNewInvoice();       setActiveView("quote"); }
-    if (action === "newQuote")    { handleNewQuote();         setActiveView("quote"); }
-    if (action === "newCustomer") {  }
-    if (view && !action)          { setActiveView(view); }
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("quote"); }
+    if (action === "newQuote")    { handleNewQuote();    setActiveView("quote"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
   };
+
   // ── Form fields ───────────────────────────────────────────────────────────
-  const [customerName, setCustomerName] = useState("Johnson Residence");
-  const [customerEmail, setCustomerEmail] = useState("johnson@email.com");
-  const [customerPhone, setCustomerPhone] = useState("+27 82 123 4567");
+  const [customerName, setCustomerName]       = useState("Johnson Residence");
+  const [customerEmail, setCustomerEmail]     = useState("johnson@email.com");
+  const [customerPhone, setCustomerPhone]     = useState("+27 82 123 4567");
   const [propertyAddress, setPropertyAddress] = useState(
     "123 Sunset Avenue, Sandton, Johannesburg, 2196",
   );
-  const [propertyType, setPropertyType] = useState("Residential");
-  const [propertySize, setPropertySize] = useState("200");
-  const [rooms, setRooms] = useState("4");
-  const [bathrooms, setBathrooms] = useState("2");
+  const [propertyType, setPropertyType]   = useState("Residential");
+  const [propertySize, setPropertySize]   = useState("200");
+  const [rooms, setRooms]                 = useState("4");
+  const [bathrooms, setBathrooms]         = useState("2");
+
+  // ── Service scheduling fields ─────────────────────────────────────────────
+  const [serviceDate, setServiceDate]     = useState("");
+  const [serviceTime, setServiceTime]     = useState("09:00");
+  const [serviceFrequency, setServiceFrequency] = useState("One-time");
 
   // ── Items ─────────────────────────────────────────────────────────────────
   const [items, setItems] = useState([]);
@@ -151,20 +161,27 @@ const CleaningDashboard = () => {
     balanceDue: 0,
     status: "pending",
   });
- const [stampSettings, setStampSettings] = useState("");
-useEffect(() => {
-  const loadStampSettings = async () => {
-    if (!user?.uid) return;
-    const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-    const snap = await getDoc(docRef);
-    if (snap.exists() && snap.data().stampSettings) {
-      setStampSettings(snap.data().stampSettings);
-    } else {
-      setStampSettings("");
-    }
-  };
-  loadStampSettings();
-}, [user]);
+
+  // FIX: stampSettings was initialised as "" (string) but used as object
+  const [stampSettings, setStampSettings] = useState({
+    enabled: false,
+    text: "APPROVED",
+    color: "#d32f2f",
+    showDate: false,
+  });
+
+  useEffect(() => {
+    const loadStampSettings = async () => {
+      if (!user?.uid) return;
+      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+      const snap = await getDoc(docRef);
+      if (snap.exists() && snap.data().stampSettings) {
+        setStampSettings(snap.data().stampSettings);
+      }
+    };
+    loadStampSettings();
+  }, [user]);
+
   // ── Business info ─────────────────────────────────────────────────────────
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "SPARKLE CLEAN SERVICES",
@@ -179,6 +196,9 @@ useEffect(() => {
     registrationNumber: "2024/123456/07",
     vatNumber: "4123456789",
     logoUrl: "",
+    bankName: "",
+    accountNumber: "",
+    branchCode: "",
   });
   const [loading, setLoading] = useState(true);
 
@@ -193,14 +213,14 @@ useEffect(() => {
   // ── Derived totals ────────────────────────────────────────────────────────
   const subtotal = items.reduce((s, i) => s + i.amount, 0);
   const totalTax = items.reduce((s, i) => s + i.taxAmount, 0);
-  const total = subtotal + totalTax;
+  const total    = subtotal + totalTax;
 
   // ── Steps config ──────────────────────────────────────────────────────────
   const steps = [
     { number: 1, title: "Client Info", icon: Users },
-    { number: 2, title: "Property", icon: HomeIcon },
-    { number: 3, title: "Services", icon: ClipboardList },
-    { number: 4, title: "Schedule", icon: Calendar },
+    { number: 2, title: "Property",    icon: HomeIcon },
+    { number: 3, title: "Services",    icon: ClipboardList },
+    { number: 4, title: "Schedule",    icon: Calendar },
   ];
 
   // ── Effects ───────────────────────────────────────────────────────────────
@@ -251,7 +271,7 @@ useEffect(() => {
       );
       if (snap.exists()) {
         const d = snap.data();
-        setBusinessInfo(d);
+        setBusinessInfo((prev) => ({ ...prev, ...d }));
         if (d.stampSettings) setStampSettings(d.stampSettings);
       }
     } catch (e) {
@@ -298,9 +318,9 @@ useEffect(() => {
       if (snap.exists()) {
         const d = snap.data();
         setPaymentStatus({
-          totalPaid: d.totals?.paid || 0,
-          balanceDue: d.totals?.due || d.totals?.total || 0,
-          status: d.status || "pending",
+          totalPaid:  d.totals?.paid || 0,
+          balanceDue: d.totals?.due  || d.totals?.total || 0,
+          status:     d.status || "pending",
         });
       }
     } catch (e) {
@@ -309,21 +329,18 @@ useEffect(() => {
   };
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-  const handleNext = () => {
-    if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
-  };
-  const handlePrevious = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
-  };
+  const handleNext     = () => { if (currentStep < totalSteps) setCurrentStep(currentStep + 1); };
+  const handlePrevious = () => { if (currentStep > 1)          setCurrentStep(currentStep - 1); };
+
   const handleRemoveItem = (i) =>
     setItems((prev) => prev.filter((_, idx) => idx !== i));
 
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
-    const rate = Number(newItem.rate) || 0;
-    const qty = Number(newItem.qty);
-    const taxRate = Number(newItem.taxRate) || 0;
-    const amount = rate * qty;
+    const rate      = Number(newItem.rate)    || 0;
+    const qty       = Number(newItem.qty);
+    const taxRate   = Number(newItem.taxRate) || 0;
+    const amount    = rate * qty;
     const taxAmount = amount * (taxRate / 100);
     setItems((prev) => [
       ...prev,
@@ -350,10 +367,10 @@ useEffect(() => {
   };
 
   const handleAIDataExtracted = (data) => {
-    if (data.customer.name) setCustomerName(data.customer.name);
-    if (data.customer.email) setCustomerEmail(data.customer.email);
-    if (data.customer.phone) setCustomerPhone(data.customer.phone);
-    if (data.customer.address) setPropertyAddress(data.customer.address);
+    if (data.customer?.name)    setCustomerName(data.customer.name);
+    if (data.customer?.email)   setCustomerEmail(data.customer.email);
+    if (data.customer?.phone)   setCustomerPhone(data.customer.phone);
+    if (data.customer?.address) setPropertyAddress(data.customer.address);
     if (data.items?.length > 0) setItems(data.items);
     alert("✨ Data extracted and populated successfully!");
   };
@@ -364,20 +381,25 @@ useEffect(() => {
     status: "pending",
     documentType,
     dates: {
-      quoteDate: new Date().toISOString(),
+      quoteDate:  new Date().toISOString(),
       validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     },
     customer: {
-      name: customerName,
-      email: customerEmail,
-      phone: customerPhone,
+      name:    customerName,
+      email:   customerEmail,
+      phone:   customerPhone,
       address: propertyAddress,
     },
     propertyDetails: {
-      type: propertyType,
-      size: propertySize,
+      type:      propertyType,
+      size:      propertySize,
       rooms,
       bathrooms,
+    },
+    serviceSchedule: {
+      date:      serviceDate,
+      time:      serviceTime,
+      frequency: serviceFrequency,
     },
     items,
     totals: { subtotal, tax: totalTax, total, paid: 0, due: total },
@@ -394,20 +416,23 @@ useEffect(() => {
       setQuoteNumber(numberToUse);
     }
     const data = buildQuotePayload(numberToUse);
-    const col = documentType === "quote" ? "quotes" : "invoices";
-    if (quoteId) {
-      await updateDoc(doc(db, "users", user.uid, col, quoteId), {
-        ...data,
-        updatedAt: serverTimestamp(),
-      });
-    } else {
-      const ref = await addDoc(collection(db, "users", user.uid, col), data);
-      setQuoteId(ref.id);
+    const col  = documentType === "quote" ? "quotes" : "invoices";
+    try {
+      if (quoteId) {
+        await updateDoc(doc(db, "users", user.uid, col, quoteId), {
+          ...data,
+          updatedAt: serverTimestamp(),
+        });
+      } else {
+        const ref = await addDoc(collection(db, "users", user.uid, col), data);
+        setQuoteId(ref.id);
+      }
+      alert(`${documentType === "quote" ? "Quote" : "Invoice"} saved successfully`);
+      loadSavedQuotes();
+    } catch (e) {
+      console.error(e);
+      alert("Failed to save. Please try again.");
     }
-    alert(
-      `${documentType === "quote" ? "Quote" : "Invoice"} saved successfully`,
-    );
-    loadSavedQuotes();
   };
 
   const handleConvertToInvoice = async () => {
@@ -417,23 +442,23 @@ useEffect(() => {
     }
     if (!window.confirm("Convert this quote to an invoice?")) return;
     try {
-      const db = getFirestore();
+      const db        = getFirestore();
       const newNumber = await generateQuoteNumber(user.uid, "invoice");
-      const data = buildQuotePayload(newNumber);
-      data.documentType = "invoice";
-      data.convertedFromQuote = quoteId;
+      const data      = buildQuotePayload(newNumber);
+      data.documentType            = "invoice";
+      data.convertedFromQuote      = quoteId;
       data.convertedFromQuoteNumber = quoteNumber;
-      data.convertedAt = serverTimestamp();
+      data.convertedAt             = serverTimestamp();
       const ref = await addDoc(
         collection(db, "users", user.uid, "invoices"),
         data,
       );
       await updateDoc(doc(db, "users", user.uid, "quotes", quoteId), {
-        convertedToInvoice: true,
-        convertedToInvoiceId: ref.id,
+        convertedToInvoice:       true,
+        convertedToInvoiceId:     ref.id,
         convertedToInvoiceNumber: newNumber,
-        convertedAt: serverTimestamp(),
-        status: "converted",
+        convertedAt:              serverTimestamp(),
+        status:                   "converted",
       });
       setDocumentType("invoice");
       setQuoteId(ref.id);
@@ -441,6 +466,7 @@ useEffect(() => {
       alert(`Converted to Invoice ${newNumber}`);
       loadSavedQuotes();
     } catch (e) {
+      console.error(e);
       alert("Failed to convert quote to invoice");
     }
   };
@@ -456,27 +482,24 @@ useEffect(() => {
     setPropertySize("200");
     setRooms("4");
     setBathrooms("2");
+    setServiceDate("");
+    setServiceTime("09:00");
+    setServiceFrequency("One-time");
     setItems([]);
     setCurrentStep(1);
     if (user?.uid)
       generateQuoteNumber(user.uid, documentType).then(setQuoteNumber);
   };
 
-  const handleNewQuote = () => {
-    setDocumentType("quote");
-    handleNewDocument();
-  };
-  const handleNewInvoice = () => {
-    setDocumentType("invoice");
-    handleNewDocument();
-  };
+  const handleNewQuote   = () => { setDocumentType("quote");   handleNewDocument(); };
+  const handleNewInvoice = () => { setDocumentType("invoice"); handleNewDocument(); };
 
   const handleProcessPayment = async () => {
     if (!quoteId || !user?.uid) {
       alert("Please save the quote before processing payment");
       return;
     }
-    const col = documentType === "quote" ? "quotes" : "invoices";
+    const col  = documentType === "quote" ? "quotes" : "invoices";
     const snap = await getDoc(doc(db, "users", user.uid, col, quoteId));
     if (snap.exists()) {
       setSelectedQuoteForPayment({ id: quoteId, ...snap.data() });
@@ -492,39 +515,45 @@ useEffect(() => {
     setShowPaymentModal(false);
   };
 
+  // FIX: handler for adding a new customer from sidebar
+  const handleAddNewCustomer = () => {
+    setSelectedCustomer(null);
+    setShowCustomerModal(true);
+  };
+
   const loadQuote = (quote) => {
     setQuoteId(quote.id);
     setQuoteNumber(quote.quoteNumber || "");
-    setCustomerName(quote.customer?.name || "");
-    setCustomerEmail(quote.customer?.email || "");
-    setCustomerPhone(quote.customer?.phone || "");
+    setCustomerName(quote.customer?.name    || "");
+    setCustomerEmail(quote.customer?.email  || "");
+    setCustomerPhone(quote.customer?.phone  || "");
     setPropertyAddress(quote.customer?.address || "");
-    setPropertyType(quote.propertyDetails?.type || "");
-    setPropertySize(quote.propertyDetails?.size || "");
-    setRooms(quote.propertyDetails?.rooms || "");
-    setBathrooms(quote.propertyDetails?.bathrooms || "");
+    setPropertyType(quote.propertyDetails?.type      || "");
+    setPropertySize(quote.propertyDetails?.size      || "");
+    setRooms(quote.propertyDetails?.rooms            || "");
+    setBathrooms(quote.propertyDetails?.bathrooms    || "");
+    setServiceDate(quote.serviceSchedule?.date       || "");
+    setServiceTime(quote.serviceSchedule?.time       || "09:00");
+    setServiceFrequency(quote.serviceSchedule?.frequency || "One-time");
     setItems(quote.items || []);
     setShowQuotesList(false);
     setPaymentStatus({
-      totalPaid: quote.totals?.paid || 0,
-      balanceDue: quote.totals?.due || quote.totals?.total || 0,
-      status: quote.status || "pending",
+      totalPaid:  quote.totals?.paid  || 0,
+      balanceDue: quote.totals?.due   || quote.totals?.total || 0,
+      status:     quote.status || "pending",
     });
+    setActiveView("quote");
   };
 
   const loadCustomer = (c) => {
-    setCustomerName(c.name || "");
-    setCustomerEmail(c.email || "");
-    setCustomerPhone(c.phone || "");
+    setCustomerName(c.name    || "");
+    setCustomerEmail(c.email  || "");
+    setCustomerPhone(c.phone  || "");
     setPropertyAddress(c.address || "");
   };
 
   const handleLogout = async () => {
-    try {
-      await signOut(getAuth());
-    } catch (e) {
-      console.error(e);
-    }
+    try { await signOut(getAuth()); } catch (e) { console.error(e); }
   };
 
   const printStyles = `@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } html,body { margin:0!important;padding:0!important;width:210mm!important;background:white!important; } body * { visibility:hidden!important; } #print-area,#print-area * { visibility:visible!important; } #print-area { display:block!important;position:absolute!important;left:0!important;top:0!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;background:white!important; } @page { size:A4 portrait;margin:0; } }`;
@@ -542,12 +571,9 @@ useEffect(() => {
       alert(`Please save the ${documentType} before exporting PDF`);
       return;
     }
-    const col = documentType === "quote" ? "quotes" : "invoices";
+    const col  = documentType === "quote" ? "quotes" : "invoices";
     const snap = await getDoc(doc(db, "users", user.uid, col, quoteId));
-    if (!snap.exists()) {
-      alert("Please save first");
-      return;
-    }
+    if (!snap.exists()) { alert("Please save first"); return; }
     const saved = snap.data();
     setQuoteNumber(saved.quoteNumber);
     setItems(saved.items);
@@ -558,43 +584,54 @@ useEffect(() => {
     setTimeout(() => window.print(), 300);
   };
 
-  // ── Shared template props ─────────────────────────────────────────────────
+  // ── FIX: templateProps — aligned to what TemplateRenderer / template components expect ──
   const templateProps = {
-    templateId: selectedTemplate,
+    templateId:      selectedTemplate,
     businessInfo,
     loading,
-    invoiceNumber: quoteNumber,
+    // Templates use jobCardNumber, not invoiceNumber
+    jobCardNumber:   quoteNumber,
+    invoiceNumber:   quoteNumber,   // keep for any component that uses this name
     customerName,
-    billName: customerName,
-    billEmail: customerEmail,
-    billPhone: customerPhone,
-    billAddress: propertyAddress,
+    billName:        customerName,
+    billEmail:       customerEmail,
+    billPhone:       customerPhone,
+    billAddress:     propertyAddress,
     customerEmail,
     customerPhone,
     customerAddress: propertyAddress,
+    // Service detail props expected by templates
+    serviceLocation: propertyAddress,
+    serviceDate:     serviceDate || new Date().toLocaleDateString("en-ZA"),
+    serviceTime:     serviceTime || "09:00 AM",
+    squareFootage:   propertySize,
+    numberOfRooms:   rooms,
+    propertyType,
     taxId: "",
     items,
     subtotal,
+    // Templates use "vat", not "totalTax"
+    vat:      totalTax,
     totalTax,
     total,
     documentType,
-    stampText: stampSettings.text,
-    stampColor: stampSettings.color,
-    showStampDate: stampSettings.showDate,
-    showStamp: stampSettings.enabled,
+    // Stamp props — safe even if stampSettings is partially defined
+    stampText:    stampSettings?.text    || "APPROVED",
+    stampColor:   stampSettings?.color   || "#d32f2f",
+    showStampDate: stampSettings?.showDate ?? false,
+    showStamp:    stampSettings?.enabled ?? false,
     paymentStatus,
   };
 
   // ── Header actions ────────────────────────────────────────────────────────
   const headerActions = [
-    documentType === "quote" &&
-      quoteId && {
-        label: "Convert to Invoice",
-        icon: FileText,
-        onClick: handleConvertToInvoice,
-        className:
-          "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-      },
+    documentType === "quote" && quoteId && {
+      label: "Convert to Invoice",
+      icon: FileText,
+      onClick: handleConvertToInvoice,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
     {
       label: "Preview",
       icon: Eye,
@@ -635,7 +672,6 @@ useEffect(() => {
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    
   ].filter(Boolean);
 
   const mobileDashboardActions = [
@@ -692,6 +728,7 @@ useEffect(() => {
 
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar ───────────────────────────────────────────────────── */}
+        {/* FIX: All required props are now passed to CleaningSidebar */}
         <CleaningSidebar
           user={user}
           activeView={activeView}
@@ -703,8 +740,17 @@ useEffect(() => {
           handleNewQuote={handleNewQuote}
           businessInfo={businessInfo}
           savedQuotes={savedQuotes}
-          savedCustomers={savedCustomers}
+          // FIX: use customers state (was savedCustomers which was always empty)
+          savedCustomers={customers}
           handleLogout={handleLogout}
+          // FIX: pass showQuotesList controls so sidebar can open/toggle it
+          showQuotesList={showQuotesList}
+          setShowQuotesList={setShowQuotesList}
+          // FIX: pass customers modal controls
+          setShowCustomersListModal={setShowCustomersListModal}
+          handleAddNewCustomer={handleAddNewCustomer}
+          // FIX: pass documentType so sidebar label shows correct type
+          documentType={documentType}
         />
 
         {/* ── Main content ──────────────────────────────────────────────── */}
@@ -733,10 +779,7 @@ useEffect(() => {
               setSelectedCustomer(c);
               setShowCustomerModal(true);
             }}
-            onAddNewCustomer={() => {
-              setSelectedCustomer(null);
-              setShowCustomerModal(true);
-            }}
+            onAddNewCustomer={handleAddNewCustomer}
           />
           <CustomerModal
             showModal={showCustomerModal}
@@ -768,6 +811,7 @@ useEffect(() => {
                       {savedQuotes.length} records
                     </p>
                   </div>
+                  {/* FIX: was setShowQuotesList(true) — should be false to close */}
                   <button
                     onClick={() => setShowQuotesList(false)}
                     className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
@@ -811,16 +855,14 @@ useEffect(() => {
                               {q.customer?.name || "N/A"}
                             </td>
                             <td className="px-5 py-3 text-sm font-semibold text-[#1e293b]">
-                              R{Number(q.totals?.total).toFixed(2) || "0.00"}
+                              R{Number(q.totals?.total || 0).toFixed(2)}
                             </td>
                             <td className="px-5 py-3 text-sm text-[#059669] font-medium">
-                              R{Number(q.totals?.paid).toFixed(2) || "0.00"}
+                              R{Number(q.totals?.paid || 0).toFixed(2)}
                             </td>
                             <td className="px-5 py-3">
                               <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${statusBadge(
-                                  q.status,
-                                )}`}
+                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${statusBadge(q.status)}`}
                               >
                                 {q.status === "partially_paid"
                                   ? "Partial"
@@ -896,12 +938,12 @@ useEffect(() => {
               <FinancialOverview user={user} />
             </div>
           )}
-          {activeView === "history-view" && (
+          {activeView === "historyview" && (
             <div className="flex-1 overflow-y-auto p-4">
               <HistoryView user={user} />
             </div>
           )}
-          {activeView === "notes-view" && (
+          {activeView === "notesview" && (
             <div className="flex-1 overflow-y-auto p-4">
               <NotesView user={user} />
             </div>
@@ -938,65 +980,34 @@ useEffect(() => {
                         label: "Paid",
                         value: `R${paymentStatus.totalPaid.toFixed(2)}`,
                         icon: CheckSquare,
-                        iconBg:
-                          paymentStatus.totalPaid > 0
-                            ? "bg-[#dcfce7]"
-                            : "bg-[#f1f5f9]",
-                        iconColor:
-                          paymentStatus.totalPaid > 0
-                            ? "text-[#059669]"
-                            : "text-[#94a3b8]",
-                        textColor:
-                          paymentStatus.totalPaid > 0
-                            ? "text-[#059669]"
-                            : "text-[#1e293b]",
+                        iconBg:    paymentStatus.totalPaid > 0 ? "bg-[#dcfce7]" : "bg-[#f1f5f9]",
+                        iconColor: paymentStatus.totalPaid > 0 ? "text-[#059669]" : "text-[#94a3b8]",
+                        textColor: paymentStatus.totalPaid > 0 ? "text-[#059669]" : "text-[#1e293b]",
                       },
                       {
                         label: "Balance Due",
                         value: `R${paymentStatus.balanceDue.toFixed(2)}`,
                         icon: Wallet,
-                        iconBg:
-                          paymentStatus.balanceDue <= 0
-                            ? "bg-[#dcfce7]"
-                            : "bg-[#fef2f2]",
-                        iconColor:
-                          paymentStatus.balanceDue <= 0
-                            ? "text-[#059669]"
-                            : "text-[#dc2626]",
-                        textColor:
-                          paymentStatus.balanceDue <= 0
-                            ? "text-[#059669]"
-                            : "text-[#dc2626]",
+                        iconBg:    paymentStatus.balanceDue <= 0 ? "bg-[#dcfce7]" : "bg-[#fef2f2]",
+                        iconColor: paymentStatus.balanceDue <= 0 ? "text-[#059669]" : "text-[#dc2626]",
+                        textColor: paymentStatus.balanceDue <= 0 ? "text-[#059669]" : "text-[#dc2626]",
                       },
-                    ].map(
-                      ({
-                        label,
-                        value,
-                        icon: Icon,
-                        iconBg,
-                        iconColor,
-                        textColor,
-                      }) => (
-                        <div
-                          key={label}
-                          className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm"
-                        >
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">
-                              {label}
-                            </span>
-                            <div
-                              className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center`}
-                            >
-                              <Icon className={`w-4 h-4 ${iconColor}`} />
-                            </div>
-                          </div>
-                          <div className={`text-xl font-bold ${textColor}`}>
-                            {value}
+                    ].map(({ label, value, icon: Icon, iconBg, iconColor, textColor }) => (
+                      <div
+                        key={label}
+                        className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+                            {label}
+                          </span>
+                          <div className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center`}>
+                            <Icon className={`w-4 h-4 ${iconColor}`} />
                           </div>
                         </div>
-                      ),
-                    )}
+                        <div className={`text-xl font-bold ${textColor}`}>{value}</div>
+                      </div>
+                    ))}
                   </div>
 
                   {/* ── Payment status banner ──────────────────────────── */}
@@ -1040,18 +1051,10 @@ useEffect(() => {
                           }`}
                         >
                           {paymentStatus.status === "paid"
-                            ? `${
-                                documentType === "quote" ? "Quote" : "Invoice"
-                              } Fully Paid`
+                            ? `${documentType === "quote" ? "Quote" : "Invoice"} Fully Paid`
                             : paymentStatus.status === "partially_paid"
-                              ? `R${paymentStatus.totalPaid.toFixed(
-                                  2,
-                                )} paid · R${paymentStatus.balanceDue.toFixed(
-                                  2,
-                                )} remaining`
-                              : `Payment Pending — R${paymentStatus.balanceDue.toFixed(
-                                  2,
-                                )} due`}
+                              ? `R${paymentStatus.totalPaid.toFixed(2)} paid · R${paymentStatus.balanceDue.toFixed(2)} remaining`
+                              : `Payment Pending — R${paymentStatus.balanceDue.toFixed(2)} due`}
                         </div>
                       </div>
                       {paymentStatus.status !== "paid" && (
@@ -1078,18 +1081,8 @@ useEffect(() => {
                             : "border-transparent text-[#64748b] hover:text-[#374151]"
                         }`}
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                         Manual Entry
                       </button>
@@ -1132,9 +1125,7 @@ useEffect(() => {
                                           : "bg-[#e2e8f0] text-[#94a3b8]"
                                     }`}
                                   >
-                                    {currentStep > step.number
-                                      ? "✓"
-                                      : step.number}
+                                    {currentStep > step.number ? "✓" : step.number}
                                   </div>
                                   <span
                                     className={`text-xs font-medium hidden sm:block ${
@@ -1151,9 +1142,7 @@ useEffect(() => {
                                 {idx < steps.length - 1 && (
                                   <div
                                     className={`flex-1 h-px mx-2 ${
-                                      currentStep > step.number
-                                        ? "bg-[#059669]"
-                                        : "bg-[#e2e8f0]"
+                                      currentStep > step.number ? "bg-[#059669]" : "bg-[#e2e8f0]"
                                     }`}
                                   />
                                 )}
@@ -1172,84 +1161,48 @@ useEffect(() => {
                                   <Users className="w-5 h-5 text-[#0891b2]" />
                                 </div>
                                 <div>
-                                  <h2 className="text-base font-semibold text-[#1e293b]">
-                                    Client Information
-                                  </h2>
-                                  <p className="text-xs text-[#64748b]">
-                                    Enter client details for this {documentType}
-                                  </p>
+                                  <h2 className="text-base font-semibold text-[#1e293b]">Client Information</h2>
+                                  <p className="text-xs text-[#64748b]">Enter client details for this {documentType}</p>
                                 </div>
                               </div>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                  <label className={labelCls}>
-                                    Client Name{" "}
-                                    <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                      *
-                                    </span>
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={customerName}
-                                    onChange={(e) =>
-                                      setCustomerName(e.target.value)
-                                    }
-                                    placeholder="Johnson Residence"
-                                    className={inputCls}
-                                  />
+                                  <label className={labelCls}>Client Name <span className="text-[#dc2626] normal-case tracking-normal font-normal">*</span></label>
+                                  <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Johnson Residence" className={inputCls} />
                                 </div>
                                 <div>
-                                  <label className={labelCls}>
-                                    Email{" "}
-                                    <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                      *
-                                    </span>
-                                  </label>
-                                  <input
-                                    type="email"
-                                    value={customerEmail}
-                                    onChange={(e) =>
-                                      setCustomerEmail(e.target.value)
-                                    }
-                                    placeholder="contact@example.com"
-                                    className={inputCls}
-                                  />
+                                  <label className={labelCls}>Email <span className="text-[#dc2626] normal-case tracking-normal font-normal">*</span></label>
+                                  <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="contact@example.com" className={inputCls} />
                                 </div>
                                 <div>
-                                  <label className={labelCls}>
-                                    Phone{" "}
-                                    <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                      *
-                                    </span>
-                                  </label>
-                                  <input
-                                    type="tel"
-                                    value={customerPhone}
-                                    onChange={(e) =>
-                                      setCustomerPhone(e.target.value)
-                                    }
-                                    placeholder="+27 82 123 4567"
-                                    className={inputCls}
-                                  />
+                                  <label className={labelCls}>Phone <span className="text-[#dc2626] normal-case tracking-normal font-normal">*</span></label>
+                                  <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="+27 82 123 4567" className={inputCls} />
                                 </div>
                                 <div>
-                                  <label className={labelCls}>
-                                    Property Address{" "}
-                                    <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                      *
-                                    </span>
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={propertyAddress}
-                                    onChange={(e) =>
-                                      setPropertyAddress(e.target.value)
-                                    }
-                                    placeholder="123 Sunset Avenue, Sandton"
-                                    className={inputCls}
-                                  />
+                                  <label className={labelCls}>Property Address <span className="text-[#dc2626] normal-case tracking-normal font-normal">*</span></label>
+                                  <input type="text" value={propertyAddress} onChange={(e) => setPropertyAddress(e.target.value)} placeholder="123 Sunset Avenue, Sandton" className={inputCls} />
                                 </div>
                               </div>
+
+                              {/* Quick-fill from saved customers */}
+                              {customers.length > 0 && (
+                                <div className="mt-4">
+                                  <label className={labelCls}>Or select existing client</label>
+                                  <select
+                                    className={selectCls}
+                                    defaultValue=""
+                                    onChange={(e) => {
+                                      const c = customers.find((c) => c.id === e.target.value);
+                                      if (c) loadCustomer(c);
+                                    }}
+                                  >
+                                    <option value="" disabled>Choose a client…</option>
+                                    {customers.map((c) => (
+                                      <option key={c.id} value={c.id}>{c.name}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
                             </div>
                           )}
 
@@ -1261,26 +1214,14 @@ useEffect(() => {
                                   <HomeIcon className="w-5 h-5 text-[#059669]" />
                                 </div>
                                 <div>
-                                  <h2 className="text-base font-semibold text-[#1e293b]">
-                                    Property Details
-                                  </h2>
-                                  <p className="text-xs text-[#64748b]">
-                                    Enter property info for an accurate quote
-                                  </p>
+                                  <h2 className="text-base font-semibold text-[#1e293b]">Property Details</h2>
+                                  <p className="text-xs text-[#64748b]">Enter property info for an accurate quote</p>
                                 </div>
                               </div>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                  <label className={labelCls}>
-                                    Property Type
-                                  </label>
-                                  <select
-                                    value={propertyType}
-                                    onChange={(e) =>
-                                      setPropertyType(e.target.value)
-                                    }
-                                    className={selectCls}
-                                  >
+                                  <label className={labelCls}>Property Type</label>
+                                  <select value={propertyType} onChange={(e) => setPropertyType(e.target.value)} className={selectCls}>
                                     <option>Residential</option>
                                     <option>Commercial</option>
                                     <option>Office</option>
@@ -1289,42 +1230,16 @@ useEffect(() => {
                                   </select>
                                 </div>
                                 <div>
-                                  <label className={labelCls}>
-                                    Property Size (sqm)
-                                  </label>
-                                  <input
-                                    type="number"
-                                    value={propertySize}
-                                    onChange={(e) =>
-                                      setPropertySize(e.target.value)
-                                    }
-                                    placeholder="200"
-                                    className={inputCls}
-                                  />
+                                  <label className={labelCls}>Property Size (sqm)</label>
+                                  <input type="number" value={propertySize} onChange={(e) => setPropertySize(e.target.value)} placeholder="200" className={inputCls} />
                                 </div>
                                 <div>
-                                  <label className={labelCls}>
-                                    Number of Rooms
-                                  </label>
-                                  <input
-                                    type="number"
-                                    value={rooms}
-                                    onChange={(e) => setRooms(e.target.value)}
-                                    placeholder="4"
-                                    className={inputCls}
-                                  />
+                                  <label className={labelCls}>Number of Rooms</label>
+                                  <input type="number" value={rooms} onChange={(e) => setRooms(e.target.value)} placeholder="4" className={inputCls} />
                                 </div>
                                 <div>
                                   <label className={labelCls}>Bathrooms</label>
-                                  <input
-                                    type="number"
-                                    value={bathrooms}
-                                    onChange={(e) =>
-                                      setBathrooms(e.target.value)
-                                    }
-                                    placeholder="2"
-                                    className={inputCls}
-                                  />
+                                  <input type="number" value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} placeholder="2" className={inputCls} />
                                 </div>
                               </div>
 
@@ -1335,22 +1250,8 @@ useEffect(() => {
                                   Property Summary
                                 </div>
                                 <div className="text-xs text-[#0e7490] space-y-0.5">
-                                  <p>
-                                    <span className="font-semibold">Type:</span>{" "}
-                                    {propertyType}
-                                  </p>
-                                  <p>
-                                    <span className="font-semibold">Size:</span>{" "}
-                                    {propertySize} sqm ·{" "}
-                                    <span className="font-semibold">
-                                      Rooms:
-                                    </span>{" "}
-                                    {rooms} ·{" "}
-                                    <span className="font-semibold">
-                                      Bathrooms:
-                                    </span>{" "}
-                                    {bathrooms}
-                                  </p>
+                                  <p><span className="font-semibold">Type:</span> {propertyType}</p>
+                                  <p><span className="font-semibold">Size:</span> {propertySize} sqm · <span className="font-semibold">Rooms:</span> {rooms} · <span className="font-semibold">Bathrooms:</span> {bathrooms}</p>
                                 </div>
                               </div>
                             </div>
@@ -1364,12 +1265,8 @@ useEffect(() => {
                                   <ClipboardList className="w-5 h-5 text-[#7c3aed]" />
                                 </div>
                                 <div>
-                                  <h2 className="text-base font-semibold text-[#1e293b]">
-                                    Cleaning Services
-                                  </h2>
-                                  <p className="text-xs text-[#64748b]">
-                                    Add services to the {documentType}
-                                  </p>
+                                  <h2 className="text-base font-semibold text-[#1e293b]">Cleaning Services</h2>
+                                  <p className="text-xs text-[#64748b]">Add services to the {documentType}</p>
                                 </div>
                               </div>
 
@@ -1381,36 +1278,12 @@ useEffect(() => {
                                 </h3>
                                 <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
                                   <div className="sm:col-span-2">
-                                    <label className={labelCls}>
-                                      Description
-                                    </label>
-                                    <input
-                                      type="text"
-                                      placeholder="Service description / details"
-                                      value={newItem.description}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          description: e.target.value,
-                                        })
-                                      }
-                                      className={inputCls}
-                                    />
+                                    <label className={labelCls}>Description</label>
+                                    <input type="text" placeholder="Service description / details" value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className={inputCls} />
                                   </div>
                                   <div>
-                                    <label className={labelCls}>
-                                      Service Type
-                                    </label>
-                                    <select
-                                      value={newItem.serviceType}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          serviceType: e.target.value,
-                                        })
-                                      }
-                                      className={selectCls}
-                                    >
+                                    <label className={labelCls}>Service Type</label>
+                                    <select value={newItem.serviceType} onChange={(e) => setNewItem({ ...newItem, serviceType: e.target.value })} className={selectCls}>
                                       <option>Standard Cleaning</option>
                                       <option>Deep Cleaning</option>
                                       <option>Move In/Out Cleaning</option>
@@ -1422,19 +1295,8 @@ useEffect(() => {
                                     </select>
                                   </div>
                                   <div>
-                                    <label className={labelCls}>
-                                      Frequency
-                                    </label>
-                                    <select
-                                      value={newItem.frequency}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          frequency: e.target.value,
-                                        })
-                                      }
-                                      className={selectCls}
-                                    >
+                                    <label className={labelCls}>Frequency</label>
+                                    <select value={newItem.frequency} onChange={(e) => setNewItem({ ...newItem, frequency: e.target.value })} className={selectCls}>
                                       <option>One-time</option>
                                       <option>Weekly</option>
                                       <option>Bi-weekly</option>
@@ -1444,56 +1306,20 @@ useEffect(() => {
                                   </div>
                                   <div>
                                     <label className={labelCls}>Rate (R)</label>
-                                    <input
-                                      type="number"
-                                      placeholder="0.00"
-                                      value={newItem.rate}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          rate: e.target.value,
-                                        })
-                                      }
-                                      className={inputCls}
-                                    />
+                                    <input type="number" placeholder="0.00" value={newItem.rate} onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })} className={inputCls} />
                                   </div>
                                   <div>
                                     <label className={labelCls}>Qty</label>
-                                    <input
-                                      type="number"
-                                      placeholder="1"
-                                      value={newItem.qty}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          qty: e.target.value,
-                                        })
-                                      }
-                                      className={inputCls}
-                                    />
+                                    <input type="number" placeholder="1" value={newItem.qty} onChange={(e) => setNewItem({ ...newItem, qty: e.target.value })} className={inputCls} />
                                   </div>
                                 </div>
                                 <div className="mt-3 flex items-center gap-3">
                                   <div className="w-24">
                                     <label className={labelCls}>VAT %</label>
-                                    <input
-                                      type="number"
-                                      placeholder="15"
-                                      value={newItem.taxRate}
-                                      onChange={(e) =>
-                                        setNewItem({
-                                          ...newItem,
-                                          taxRate: e.target.value,
-                                        })
-                                      }
-                                      className={inputCls}
-                                    />
+                                    <input type="number" placeholder="15" value={newItem.taxRate} onChange={(e) => setNewItem({ ...newItem, taxRate: e.target.value })} className={inputCls} />
                                   </div>
                                   <div className="flex items-end pb-0.5">
-                                    <button
-                                      onClick={handleAddItem}
-                                      className="flex items-center gap-1.5 px-4 py-2 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors"
-                                    >
+                                    <button onClick={handleAddItem} className="flex items-center gap-1.5 px-4 py-2 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors">
                                       <Plus className="w-4 h-4" />
                                       Add Service
                                     </button>
@@ -1505,75 +1331,34 @@ useEffect(() => {
                               {items.length > 0 ? (
                                 <div className="border border-[#e2e8f0] rounded-xl overflow-hidden mb-5">
                                   <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center justify-between">
-                                    <span className="text-sm font-semibold text-[#374151]">
-                                      Services Added
-                                    </span>
-                                    <span className="text-xs text-[#64748b] bg-[#e2e8f0] px-2 py-0.5 rounded-full">
-                                      {items.length} items
-                                    </span>
+                                    <span className="text-sm font-semibold text-[#374151]">Services Added</span>
+                                    <span className="text-xs text-[#64748b] bg-[#e2e8f0] px-2 py-0.5 rounded-full">{items.length} items</span>
                                   </div>
                                   <div className="overflow-x-auto">
                                     <table className="w-full">
                                       <thead>
                                         <tr className="border-b border-[#e2e8f0]">
-                                          {[
-                                            "Description",
-                                            "Type",
-                                            "Freq.",
-                                            "Rate",
-                                            "Qty",
-                                            "VAT",
-                                            "Amount",
-                                            "",
-                                          ].map((h) => (
-                                            <th
-                                              key={h}
-                                              className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
-                                            >
-                                              {h}
-                                            </th>
+                                          {["Description", "Type", "Freq.", "Rate", "Qty", "VAT", "Amount", ""].map((h) => (
+                                            <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide">{h}</th>
                                           ))}
                                         </tr>
                                       </thead>
                                       <tbody>
                                         {items.map((item, i) => (
-                                          <tr
-                                            key={i}
-                                            className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
-                                          >
-                                            <td className="px-4 py-3 text-sm font-medium text-[#374151]">
-                                              {item.description}
+                                          <tr key={i} className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors">
+                                            <td className="px-4 py-3 text-sm font-medium text-[#374151]">{item.description}</td>
+                                            <td className="px-4 py-3">
+                                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#ecfeff] text-[#0e7490]">{item.serviceType || "Standard Cleaning"}</span>
                                             </td>
                                             <td className="px-4 py-3">
-                                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#ecfeff] text-[#0e7490]">
-                                                {item.serviceType ||
-                                                  "Standard Cleaning"}
-                                              </span>
+                                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#f0fdf4] text-[#166534]">{item.frequency || "One-time"}</span>
                                             </td>
+                                            <td className="px-4 py-3 text-sm text-[#374151]">R{Number(item.rate).toFixed(2)}</td>
+                                            <td className="px-4 py-3 text-sm text-[#374151]">{item.qty}</td>
+                                            <td className="px-4 py-3 text-sm text-[#374151]">R{Number(item.taxAmount).toFixed(2)}</td>
+                                            <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">R{Number(item.totalAmount).toFixed(2)}</td>
                                             <td className="px-4 py-3">
-                                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#f0fdf4] text-[#166534]">
-                                                {item.frequency || "One-time"}
-                                              </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-[#374151]">
-                                              R{item.rate.toFixed(2)}
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-[#374151]">
-                                              {item.qty}
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-[#374151]">
-                                              R{item.taxAmount.toFixed(2)}
-                                            </td>
-                                            <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
-                                              R{item.totalAmount.toFixed(2)}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                              <button
-                                                onClick={() =>
-                                                  handleRemoveItem(i)
-                                                }
-                                                className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all"
-                                              >
+                                              <button onClick={() => handleRemoveItem(i)} className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all">
                                                 <X className="w-3.5 h-3.5" />
                                               </button>
                                             </td>
@@ -1587,21 +1372,15 @@ useEffect(() => {
                                     <div className="flex flex-col items-end gap-1 text-sm">
                                       <div className="flex justify-between w-48 text-[#64748b]">
                                         <span>Subtotal</span>
-                                        <span className="font-medium text-[#374151]">
-                                          R{subtotal.toFixed(2)}
-                                        </span>
+                                        <span className="font-medium text-[#374151]">R{subtotal.toFixed(2)}</span>
                                       </div>
                                       <div className="flex justify-between w-48 text-[#64748b]">
                                         <span>VAT</span>
-                                        <span className="font-medium text-[#374151]">
-                                          R{totalTax.toFixed(2)}
-                                        </span>
+                                        <span className="font-medium text-[#374151]">R{totalTax.toFixed(2)}</span>
                                       </div>
                                       <div className="flex justify-between w-48 pt-2 border-t border-[#e2e8f0] font-semibold text-[#1e293b]">
                                         <span>Total</span>
-                                        <span className="text-[#0891b2]">
-                                          R{total.toFixed(2)}
-                                        </span>
+                                        <span className="text-[#0891b2]">R{total.toFixed(2)}</span>
                                       </div>
                                     </div>
                                   </div>
@@ -1609,12 +1388,8 @@ useEffect(() => {
                               ) : (
                                 <div className="border-2 border-dashed border-[#e2e8f0] rounded-xl py-12 text-center">
                                   <ClipboardList className="w-8 h-8 text-[#cbd5e1] mx-auto mb-3" />
-                                  <p className="text-sm font-medium text-[#94a3b8]">
-                                    No services added yet
-                                  </p>
-                                  <p className="text-xs text-[#cbd5e1] mt-1">
-                                    Use the form above to add cleaning services
-                                  </p>
+                                  <p className="text-sm font-medium text-[#94a3b8]">No services added yet</p>
+                                  <p className="text-xs text-[#cbd5e1] mt-1">Use the form above to add cleaning services</p>
                                 </div>
                               )}
                             </div>
@@ -1628,48 +1403,49 @@ useEffect(() => {
                                   <Calendar className="w-5 h-5 text-[#059669]" />
                                 </div>
                                 <div>
-                                  <h2 className="text-base font-semibold text-[#1e293b]">
-                                    Schedule & Payment Terms
-                                  </h2>
-                                  <p className="text-xs text-[#64748b]">
-                                    Review and process payment
-                                  </p>
+                                  <h2 className="text-base font-semibold text-[#1e293b]">Schedule & Payment Terms</h2>
+                                  <p className="text-xs text-[#64748b]">Review and process payment</p>
                                 </div>
                               </div>
+
+                              {/* Service schedule inputs */}
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+                                <div>
+                                  <label className={labelCls}>Service Date</label>
+                                  <input type="date" value={serviceDate} onChange={(e) => setServiceDate(e.target.value)} className={inputCls} />
+                                </div>
+                                <div>
+                                  <label className={labelCls}>Service Time</label>
+                                  <input type="time" value={serviceTime} onChange={(e) => setServiceTime(e.target.value)} className={inputCls} />
+                                </div>
+                                <div>
+                                  <label className={labelCls}>Frequency</label>
+                                  <select value={serviceFrequency} onChange={(e) => setServiceFrequency(e.target.value)} className={selectCls}>
+                                    <option>One-time</option>
+                                    <option>Weekly</option>
+                                    <option>Bi-weekly</option>
+                                    <option>Monthly</option>
+                                    <option>Quarterly</option>
+                                  </select>
+                                </div>
+                              </div>
+
                               {/* Payment info */}
                               <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm mb-5">
                                 <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
-                                  <span className="text-sm font-semibold text-[#374151]">
-                                    Payment Information
-                                  </span>
+                                  <span className="text-sm font-semibold text-[#374151]">Payment Information</span>
                                 </div>
                                 <div className="divide-y divide-[#f1f5f9]">
                                   {[
-                                    ["Payment Due", "Upon Completion"],
-                                    [
-                                      "Payment Methods",
-                                      "Bank Transfer, Card, Cash",
-                                    ],
+                                    ["Payment Due",     "Upon Completion"],
+                                    ["Payment Methods", "Bank Transfer, Card, Cash"],
                                     ["Quote Valid For", "30 Days"],
-                                    ["Currency", "ZAR (South African Rand)"],
-                                    ["Total Due", `R${total.toFixed(2)}`],
+                                    ["Currency",        "ZAR (South African Rand)"],
+                                    ["Total Due",       `R${total.toFixed(2)}`],
                                   ].map(([k, v]) => (
-                                    <div
-                                      key={k}
-                                      className="flex items-center justify-between px-5 py-3 text-sm"
-                                    >
-                                      <span className="text-[#64748b]">
-                                        {k}
-                                      </span>
-                                      <span
-                                        className={`font-semibold ${
-                                          k === "Total Due"
-                                            ? "text-[#0891b2]"
-                                            : "text-[#1e293b]"
-                                        }`}
-                                      >
-                                        {v}
-                                      </span>
+                                    <div key={k} className="flex items-center justify-between px-5 py-3 text-sm">
+                                      <span className="text-[#64748b]">{k}</span>
+                                      <span className={`font-semibold ${k === "Total Due" ? "text-[#0891b2]" : "text-[#1e293b]"}`}>{v}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -1677,62 +1453,27 @@ useEffect(() => {
 
                               {/* Quote summary */}
                               <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-5">
-                                <h3 className="text-sm font-semibold text-[#374151] mb-4">
-                                  Quote Summary
-                                </h3>
+                                <h3 className="text-sm font-semibold text-[#374151] mb-4">Quote Summary</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
                                   <div>
-                                    <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-2">
-                                      Client
-                                    </p>
-                                    <p className="font-semibold text-[#1e293b]">
-                                      {customerName}
-                                    </p>
-                                    <p className="text-[#64748b]">
-                                      {customerEmail}
-                                    </p>
-                                    <p className="text-[#64748b]">
-                                      {customerPhone}
-                                    </p>
+                                    <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-2">Client</p>
+                                    <p className="font-semibold text-[#1e293b]">{customerName}</p>
+                                    <p className="text-[#64748b]">{customerEmail}</p>
+                                    <p className="text-[#64748b]">{customerPhone}</p>
                                   </div>
                                   <div>
-                                    <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-2">
-                                      Property
-                                    </p>
-                                    <p className="font-semibold text-[#1e293b]">
-                                      {propertyAddress}
-                                    </p>
-                                    <p className="text-[#64748b]">
-                                      {propertyType} · {propertySize} sqm ·{" "}
-                                      {rooms} rooms · {bathrooms} bathrooms
-                                    </p>
+                                    <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-2">Property</p>
+                                    <p className="font-semibold text-[#1e293b]">{propertyAddress}</p>
+                                    <p className="text-[#64748b]">{propertyType} · {propertySize} sqm · {rooms} rooms · {bathrooms} bathrooms</p>
                                   </div>
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-[#e2e8f0] text-sm">
-                                  <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-2">
-                                    Quote Details
-                                  </p>
+                                  <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-2">Quote Details</p>
                                   <div className="flex flex-wrap gap-x-6 gap-y-1 text-[#64748b]">
-                                    <span>
-                                      <span className="font-semibold text-[#374151]">
-                                        Number:
-                                      </span>{" "}
-                                      {quoteNumber}
-                                    </span>
-                                    <span>
-                                      <span className="font-semibold text-[#374151]">
-                                        Date:
-                                      </span>{" "}
-                                      {new Date().toLocaleDateString()}
-                                    </span>
-                                    <span>
-                                      <span className="font-semibold text-[#374151]">
-                                        Type:
-                                      </span>{" "}
-                                      {documentType === "quote"
-                                        ? "Quote"
-                                        : "Invoice"}
-                                    </span>
+                                    <span><span className="font-semibold text-[#374151]">Number:</span> {quoteNumber}</span>
+                                    <span><span className="font-semibold text-[#374151]">Date:</span> {new Date().toLocaleDateString()}</span>
+                                    <span><span className="font-semibold text-[#374151]">Type:</span> {documentType === "quote" ? "Quote" : "Invoice"}</span>
+                                    {serviceDate && <span><span className="font-semibold text-[#374151]">Service Date:</span> {serviceDate}</span>}
                                   </div>
                                 </div>
                               </div>
@@ -1748,8 +1489,7 @@ useEffect(() => {
                               ) : (
                                 <div className="flex items-center gap-2 px-4 py-3 bg-[#fff7ed] border border-[#fed7aa] rounded-lg text-sm text-[#9a3412]">
                                   <Receipt className="w-4 h-4 flex-shrink-0" />
-                                  Save the {documentType} first to process
-                                  payment
+                                  Save the {documentType} first to process payment
                                 </div>
                               )}
                             </div>
@@ -1789,8 +1529,7 @@ useEffect(() => {
                               className="flex items-center gap-1.5 px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
                             >
                               <Save className="w-4 h-4" />
-                              Save{" "}
-                              {documentType === "quote" ? "Quote" : "Invoice"}
+                              Save {documentType === "quote" ? "Quote" : "Invoice"}
                             </button>
                           )}
                         </div>
@@ -1805,11 +1544,11 @@ useEffect(() => {
                 {/* Panel header */}
                 <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
                   <div className="flex items-center gap-2">
-                  <TemplateSelector
-                                     user={user}
-                                     selectedTemplate={selectedTemplate}
-                                     onTemplateChange={setSelectedTemplate}
-                                   />
+                    <TemplateSelector
+                      user={user}
+                      selectedTemplate={selectedTemplate}
+                      onTemplateChange={setSelectedTemplate}
+                    />
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button
