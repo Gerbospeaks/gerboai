@@ -10,6 +10,7 @@ import {
   Calendar,
   FileText,
   Stethoscope,
+  ShoppingBag,
   Pill,
   LogOut,
   Menu,
@@ -106,6 +107,9 @@ export default function HealthSidebar({
           onClick={() => goTo("practice-overview")}
           active={activeView === "practice-overview"}
         />
+        <NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
 
         {/* Invoices accordion */}
         <Accordion

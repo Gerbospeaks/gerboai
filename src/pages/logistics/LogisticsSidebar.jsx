@@ -7,6 +7,7 @@ import {
   ChevronRight,
   ChevronDown,
   Calendar,
+  ShoppingBag,
   LogOut,
   ClipboardList,
   FileText,
@@ -180,7 +181,9 @@ export default function LogisticsSidebar({
             onClick={() => goTo("invoices-overdue")}
           />
         </Accordion>
-
+          <NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
         <SectionLabel>Customers</SectionLabel>
 
         {/* Customers accordion */}

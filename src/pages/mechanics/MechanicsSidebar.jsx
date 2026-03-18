@@ -7,9 +7,9 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
+  ShoppingBag,
   FileText,
   ClipboardList,
-  ShoppingBag,
   Car,
   Package,
   LogOut,
@@ -110,12 +110,9 @@ export default function MechanicsSidebar({
           onClick={() => goTo("financial-overview")}
           active={activeView === "financial-overview"}
         />
-         <NavItem
-          icon={ShoppingBag}
-          label="Purchase Orders"
-          onClick={() => goTo("purchase-orders")}
-          active={activeView === "purchase-orders"}
-        />
+         <NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
         {/* Job Cards */}
         <Accordion
           icon={ClipboardList}

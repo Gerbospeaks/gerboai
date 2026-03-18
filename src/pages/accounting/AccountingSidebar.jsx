@@ -6,6 +6,7 @@ import {
   TrendingDown,
   Receipt,
   Users,
+  ShoppingBag,
   ChevronRight,
   ChevronLeft,
   ChevronDown,
@@ -153,7 +154,12 @@ export default function AccountingSidebar({
               if (isMobile) setSidebarOpen(false);
             }}
           />
+          <SubItem dot="bg-[#2563eb]" label="Recurring Invoices"
+  onClick={() => goTo("recurring")} />
         </Accordion>
+<NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
 
         {/* Expenses */}
         <NavItem
@@ -244,7 +250,7 @@ export default function AccountingSidebar({
             onClick={() => goTo("report-tax")}
           />
         </Accordion>
-
+        
         <NavItem
           icon={ClipboardList}
           label="Chart of Accounts"
@@ -257,6 +263,7 @@ export default function AccountingSidebar({
           onClick={() => goTo("payroll")}
           active={activeView === "payroll"}
         />
+         <SubItem dot="bg-[#dc2626]" label="Debtors Age Analysis" onClick={() => goTo("debtors-age")} />
       </div>
 
       {/* Footer */}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Templates from "./Templates";
+import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";

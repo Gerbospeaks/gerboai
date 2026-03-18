@@ -6,6 +6,7 @@ import AppHeader from "../AppHeader";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import Templates from "./Templates";
+import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
@@ -779,7 +780,11 @@ const LandscapingDashboard = () => {
           {activeView === "home" && <HomeViewLocal />}
           {activeView === "templates" && <div className="flex-1 overflow-y-auto p-4"><Templates user={user} /></div>}
           {activeView === "financial-overview" && <div className="flex-1 overflow-y-auto p-4"><FinancialOverview user={user} /></div>}
-
+           {activeView === "purchase-orders" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <PurchaseOrders user={user} />
+  </div>
+)}
           {/* ── Work order builder — split layout ──────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

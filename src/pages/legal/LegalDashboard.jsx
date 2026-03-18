@@ -8,6 +8,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
+import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
@@ -1441,7 +1442,11 @@ const LegalDashboard = () => {
               <FinancialOverview user={user} />
             </div>
           )}
-
+          {activeView === "purchase-orders" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <PurchaseOrders user={user} />
+  </div>
+)}
           {/* ── Invoice builder — split layout ──────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Calendar,
   FileText,
+  ShoppingBag,
   ClipboardList,
   Wind,
   Package,
@@ -165,7 +166,9 @@ export default function HVACSidebar({
             }}
           />
         </Accordion>
-
+           <NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
         <SectionLabel>Clients</SectionLabel>
 
         {/* Clients accordion */}

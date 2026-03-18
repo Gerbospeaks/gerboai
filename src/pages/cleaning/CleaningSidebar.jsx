@@ -4,6 +4,7 @@ import {
   Settings,
   TrendingUp,
   Receipt,
+  ShoppingBag,
   Users,
   ChevronRight,
   ChevronLeft,
@@ -147,7 +148,9 @@ export default function CleaningSidebar({
             }}
           />
         </Accordion>
-
+<NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
         <SectionLabel>Operations</SectionLabel>
 
         {/* Cleaning Jobs */}

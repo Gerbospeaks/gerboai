@@ -10,6 +10,7 @@ import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import CarpentrySidebar from "./CarpentrySidebar";
 import Templates from "./Templates";
+import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
@@ -509,7 +510,11 @@ const CarpentryDashboard = () => {
           {activeView === "notes-view" && <div className="flex-1 overflow-y-auto p-4"><NotesView user={user} /></div>}
           {activeView === "templates" && <div className="flex-1 overflow-y-auto p-4"><Templates user={user} /></div>}
           {activeView === "home" && <div className="flex-1 overflow-y-auto p-4"><HomeView user={user} /></div>}
-
+           {activeView === "purchase-orders" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <PurchaseOrders user={user} />
+  </div>
+)}
           {/* ── Quote/Invoice builder — split layout ───────────────────────── */}
           {activeView === "quote" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

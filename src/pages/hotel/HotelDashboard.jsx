@@ -28,6 +28,7 @@ import { db } from "../../firebase";
 import GuestModal from "./GuestModal";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
+import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import HotelAIExtractor from "./HotelAIExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
@@ -1196,7 +1197,11 @@ const HotelDashboard = () => {
               <HomeView user={user} />
             </div>
           )}
-
+           {activeView === "purchase-orders" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <PurchaseOrders user={user} />
+  </div>
+)}
           {/* Invoice split layout */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

@@ -27,6 +27,7 @@ import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import SignatureStamp from "../SignatureStamp";
 import Templates from "./Templates";
+import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import PlumbingMultiStepForm from "./PlumbingMultiStepForm";
 import AIInvoiceExtractor from "../AIInvoiceExtractor";

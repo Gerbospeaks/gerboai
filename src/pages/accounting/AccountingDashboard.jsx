@@ -12,11 +12,14 @@ import AccountingSidebar from "./AccountingSidebar";
 import ClientWorkspace from "./ClientWorkspace";
 import ExpensesView from "./ExpensesView";
 import CreditNotesView from "./CreditNotesView";
-import Templates from "./Templates";
 import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import DebtorsAgeAnalysis from "./DebtorsAgeAnalysis";
+import RecurringInvoices from "./RecurringInvoices";
+import Templates from "./Templates";
+import PurchaseOrders from "../PurchaseOrders";
 import {
   getFirestore,
   collection,
@@ -986,6 +989,21 @@ const AccountingDashboard = () => {
             activeView === "payroll") && (
             <ClientWorkspace user={user} defaultView={activeView} />
           )}
+          {activeView === "debtors-age" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <DebtorsAgeAnalysis user={user} />
+            </div>
+          )}
+          {activeView === "recurring" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <RecurringInvoices user={user} />
+            </div>
+          )}
+          {activeView === "purchase-orders" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <PurchaseOrders user={user} />
+  </div>
+)}
           {/* ── Invoice view — split layout ─────────────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

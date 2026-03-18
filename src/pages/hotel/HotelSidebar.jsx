@@ -13,6 +13,7 @@ import {
   FileText,
   FileBarChart,
   CreditCard,
+  ShoppingBag,
   Bed,
   DoorOpen,
   KeyRound,
@@ -148,7 +149,9 @@ export default function HotelSidebar({
             onClick={() => goTo("invoices-pending")}
           />
         </Accordion>
-
+          <NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
         <NavItem
           icon={FileText}
           label="Invoice Templates"

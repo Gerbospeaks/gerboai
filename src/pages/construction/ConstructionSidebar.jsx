@@ -11,6 +11,7 @@ import {
   BarChart3,
   LogOut,
   Menu,
+  ShoppingBag,
   X,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
@@ -135,7 +136,9 @@ export default function ConstructionSidebar({
             }}
           />
         </Accordion>
-
+<NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
         <SectionLabel>Operations</SectionLabel>
 
         {/* Clients accordion */}

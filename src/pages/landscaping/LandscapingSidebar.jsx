@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Calendar,
   BarChart3,
+  ShoppingBag,
   LogOut,
   ClipboardList,
   FileText,
@@ -106,6 +107,9 @@ export default function LandscapingSidebar({
             if (isMobile) setSidebarOpen(false);
           }}
         />
+        <NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
 
         <SectionLabel>Finance</SectionLabel>
 

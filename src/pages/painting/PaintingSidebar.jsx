@@ -8,6 +8,7 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
+  ShoppingBag,
   Calendar,
   BarChart3,
   LogOut,
@@ -259,7 +260,9 @@ export default function PaintingSidebar({
                     }}
                   />
                 </Accordion>
-
+<NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
                 {/* Paint Projects accordion */}
                 <Accordion
                   icon={Paintbrush}

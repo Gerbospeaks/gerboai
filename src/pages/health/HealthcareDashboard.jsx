@@ -8,6 +8,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
+import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import MedicalAIExtractor from "./MedicalAIExtractor";
 import MedicalMultiStepForm from "./MedicalMultiStepForm";
@@ -1201,7 +1202,11 @@ const HealthcareDashboard = () => {
               <HomeView onCreateNewInvoice={handleNewInvoice} user={user} />
             </div>
           )}
-
+          {activeView === "purchase-orders" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <PurchaseOrders user={user} />
+  </div>
+)}
           {/* ── Invoice view — split layout ────────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

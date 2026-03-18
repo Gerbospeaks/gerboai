@@ -10,6 +10,7 @@ import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import CleaningSidebar from "./CleaningSidebar";
 import Templates from "./Templates";
+import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
@@ -958,7 +959,11 @@ const CleaningDashboard = () => {
               <HomeView user={user} />
             </div>
           )}
-
+          {activeView === "purchase-orders" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <PurchaseOrders user={user} />
+  </div>
+)}
           {/* ── Quote/Invoice view — split layout ─────────────────────── */}
           {activeView === "quote" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

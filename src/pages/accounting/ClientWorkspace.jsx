@@ -11,6 +11,7 @@ import {
   Search,
   ChevronRight,
   X,
+  Scale,
   BookOpen,
   Landmark,
   BarChart3,
@@ -18,20 +19,26 @@ import {
   ArrowLeft,
   Building2,
   Mail,
+  Package,
   Phone,
   MapPin,
 } from "lucide-react";
 import ChartOfAccounts from "./ChartOfAccounts";
-import BankingView from "./BankingView"
+import BankingView from "./BankingView";
 import ReportsView from "./ReportsView";
 import PayrollView from "./PayrollView";
-
+import FixedAssetRegister from "./FixedAssetRegister";
+import TrialBalance from "./TrialBalance";
+import JournalEntries from "./JournalEntries";
 // ── Tab definitions ───────────────────────────────────────────────────────────
 const WORKSPACE_TABS = [
   { id: "chart-of-accounts", label: "Chart of Accounts", icon: BookOpen },
   { id: "banking", label: "Banking", icon: Landmark },
   { id: "reports", label: "Reports", icon: BarChart3 },
   { id: "payroll", label: "Payroll", icon: DollarSign },
+  { id: "fixed-assets", label: "Fixed Assets", icon: Package },
+  { id: "trial-balance", label: "Trial Balance", icon: Scale },
+   { id: "journals", label: "Journal Entries", icon: BookOpen }
 ];
 
 // Map sidebar activeView values → workspace tab + sub-tab
@@ -300,6 +307,33 @@ export default function ClientWorkspace({
             clientName={selectedClient.name}
           />
         )}
+        {activeTab === "fixed-assets" && (
+          <div className="flex-1 overflow-y-auto p-6">
+            <FixedAssetRegister
+              user={user}
+              clientId={selectedClient.id}
+              clientName={selectedClient.name}
+            />
+          </div>
+        )}
+        {activeTab === "trial-balance" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <TrialBalance
+      user={user}
+      clientId={selectedClient.id}
+      clientName={selectedClient.name}
+    />
+  </div>
+)}          
+        {activeTab === "journals" && (
+  <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+    <JournalEntries
+      user={user}
+      clientId={selectedClient.id}
+      clientName={selectedClient.name}
+    />
+  </div>
+)}
       </div>
     </div>
   );

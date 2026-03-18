@@ -11,6 +11,7 @@ import {
   BarChart3,
   LogOut,
   Hammer,
+  ShoppingBag,
   Package,
   Menu,
   X,
@@ -144,7 +145,9 @@ export default function CarpentrySidebar({
             }}
           />
         </Accordion>
-
+<NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
         <SectionLabel>Operations</SectionLabel>
 
         {/* Projects accordion */}

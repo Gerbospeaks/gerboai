@@ -29,6 +29,7 @@ import MechanicsSidebar from "./MechanicsSidebar";
 import NotesView from "./NotesView";
 import PartsInventory from "./PartsInventory";
 import Templates from "./Templates";
+import PurchaseOrders from "../PurchaseOrders";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import Vehicles from "./Vehicles";
 

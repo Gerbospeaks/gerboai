@@ -11,6 +11,7 @@ import Vehicles from "./Vehicles";
 import PartsInventory from "./PartsInventory";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
+import PurchaseOrders from "../PurchaseOrders";
 import { useNavigate, useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";

@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Calendar,
   BarChart3,
+  ShoppingBag,
   LogOut,
   Zap,
   Menu,
@@ -134,7 +135,9 @@ export default function ElectricalSidebar({
             onClick={() => goTo("quotes-list")}
           />
         </Accordion>
-
+<NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
         <SectionLabel>Operations</SectionLabel>
 
         {/* Clients accordion */}

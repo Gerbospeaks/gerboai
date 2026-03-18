@@ -11,6 +11,7 @@ import {
   BarChart3,
   LogOut,
   Layers,
+  ShoppingBag,
   Package,
   Truck,
   Menu,
@@ -146,7 +147,9 @@ export default function FlooringSidebar({
             }}
           />
         </Accordion>
-
+         <NavItem icon={ShoppingBag} label="Purchase Orders"
+  onClick={() => goTo("purchase-orders")}
+  active={activeView === "purchase-orders"} />
         <SectionLabel>Operations</SectionLabel>
 
         {/* Flooring Projects accordion */}
