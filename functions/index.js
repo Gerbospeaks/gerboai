@@ -82,7 +82,7 @@ exports.sendInvoiceEmail = functions.firestore
     .onUpdate(async (change, context) => {
       const newData = change.after.data();
       const previousData = change.before.data();
-      const {userId, invoiceId} = context.params;
+      const {invoiceId} = context.params;
 
       if (newData.status === "sent" && previousData.status !== "sent") {
         try {
