@@ -32,7 +32,6 @@ import {
   UserPlus,
 } from "lucide-react";
 
-
 const Z = {
   red: "#e8442a",
   redHover: "#c73b24",
@@ -61,7 +60,7 @@ const css = `
   /* ── Header bar ── */
   .zah-bar {
     position: sticky; top: 0; z-index: 40;
-    background: #8a93a6;
+    background: transparent;
     height: 52px;
     display: flex; align-items: center;
     padding: 0 10px;
@@ -904,7 +903,6 @@ const AppHeader = ({
           <div className="zah-logo-icon">
             <LayoutDashboard size={14} color="#fff" />
           </div>
-        
 
           {pageTitle && (
             <>
@@ -918,8 +916,6 @@ const AppHeader = ({
               {(planMeta[plan] ?? planMeta.pro).label}
             </span>
           )}
-
-          
         </div>
 
         <div className="zah-spacer" />
@@ -1003,9 +999,9 @@ const AppHeader = ({
                       : {
                           height: 30,
                           padding: "0 10px",
-                          background: "rgba(255,255,255,.08)",
-                          color: "rgba(255,255,255,.7)",
-                          border: "1px solid rgba(255,255,255,.15)",
+                          background: "#ffffff",
+                          color: Z.navy,
+                          border: `1px solid ${Z.navy}`,
                           borderRadius: 4,
                           fontSize: 12,
                           fontWeight: 700,

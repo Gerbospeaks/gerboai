@@ -218,7 +218,7 @@ const css = `
     background: var(--navy);
     min-height: 100vh;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 120px 24px 80px;
+    padding: 380px 24px 80px;
     position: relative; overflow: hidden;
     text-align: center;
   }

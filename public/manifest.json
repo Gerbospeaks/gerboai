@@ -1,6 +1,16 @@
 {
   "short_name": "Solidflo",
   "name": "SolidFlo Saas",
+  "description": "Professional accounting, invoicing and payroll for your clients",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "lang": "en-ZA",
+  "categories": ["finance", "business", "productivity"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "favicon.png",
@@ -10,16 +20,30 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": "/",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "shortcuts": [
+    {
+      "name": "New Invoice",
+      "short_name": "Invoice",
+      "description": "Create a new invoice",
+      "url": "/?action=newInvoice",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "New Estimate",
+      "short_name": "Estimate",
+      "description": "Create a new estimate",
+      "url": "/?action=newEstimate",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    }
+  ]
 }

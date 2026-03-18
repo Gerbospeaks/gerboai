@@ -1,9 +1,10 @@
 import React from 'react';
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider , useAuth } from './contexts/AuthContext';
 import { AdminProvider } from './contexts/AdminContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import PWAInstallPrompt from "./components/Pwainstallprompt";
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import LandingPage from './pages/LandingPage';
 import AboutPage from './pages/AboutPage';
@@ -57,6 +58,29 @@ import SignatureStamp from './pages/mechanics/SignatureStamp';
 import TemplateSelector from './pages/accounting/TemplateSelector';
 import ParentPortal from './pages/education/ParentPortal';
 import StaffPortal from './pages/education/StaffPortal';
+
+const PUBLIC_ROUTES = new Set([
+  "/", "/about", "/contact", "/blogs",
+  "/privacy", "/terms", "/login", "/register", "/auth-action"
+]);
+
+function PWAGate() {
+  const { loading } = useAuth();
+  const { pathname } = useLocation();
+
+  const isPublic = React.useMemo(() =>
+    PUBLIC_ROUTES.has(pathname) ||
+    pathname.startsWith("/parents/") ||
+    pathname.startsWith("/staff/"),
+    [pathname]
+  );
+
+  // Never render anything until auth is fully resolved
+  // and never render on public routes
+  if (loading || isPublic) return null;
+
+  return <PWAInstallPrompt appReady={true} />;
+}
 function App() {
  useEffect(() => {
     // Disable right-click
@@ -89,9 +113,11 @@ function App() {
   }, []);
   
   return (
+    
     <Router>
       <AuthProvider>
         <AdminProvider>
+         <PWAGate />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
