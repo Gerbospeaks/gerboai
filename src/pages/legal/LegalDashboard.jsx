@@ -10,7 +10,7 @@ import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import LegalMultiStepForm from "./LegalMultiStepForm";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
@@ -95,8 +95,7 @@ const LegalDashboard = () => {
   const [documentType, setDocumentType] = useState("invoice");
   const [activeView, setActiveView] = useState("home");
   const { user, authUser } = useAuth();
-
-  // Doc numbers & IDs
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceId, setInvoiceId] = useState(null);
 
@@ -967,7 +966,14 @@ const LegalDashboard = () => {
       >
         <TemplateRenderer {...templateProps} />
       </div>
-
+        {showAIWindow && (
+                <AIInvoiceWindow
+                  user={user}
+                  businessInfo={businessInfo}
+                  documentType={documentType}
+                  onExit={() => setShowAIWindow(false)}
+                />
+              )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar ───────────────────────────────────────────────────── */}
         {sidebarOpen && (
@@ -1553,22 +1559,15 @@ const LegalDashboard = () => {
                         Manual Entry
                       </button>
                       <button
-                        onClick={() => setInputMode("ai")}
+                        onClick={() => setShowAIWindow(true)}
                         className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "ai" ? "border-[#7c3aed] text-[#7c3aed] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
                       >
                         <Sparkles className="w-4 h-4" />
-                        AI Assistant
+                        AI Mode
                       </button>
                     </div>
 
-                    {inputMode === "ai" && (
-                      <div className="p-6 border-b border-[#e2e8f0]">
-                        <AIInvoiceExtractor
-                          onDataExtracted={handleAIDataExtracted}
-                          documentType={documentType}
-                        />
-                      </div>
-                    )}
+                    
 
                     {inputMode === "manual" && (
                       <div className="p-6">

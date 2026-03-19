@@ -1,7 +1,7 @@
 import React from "react";
 import { FileText, Check } from "lucide-react";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
 const getGradeFromMark = (mark) => {
   const m = Number(mark);
   if (m >= 80) return { code: "7", label: "Outstanding", color: "#15803d" };

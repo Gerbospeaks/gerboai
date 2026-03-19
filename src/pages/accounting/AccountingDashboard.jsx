@@ -39,7 +39,7 @@ import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import {
   ChevronLeft,
   ChevronRight,
@@ -94,6 +94,7 @@ const AccountingDashboard = () => {
   const [savedInvoices, setSavedInvoices] = useState([]);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [activeView, setActiveView] = useState("home");
   const handleQuickCreate = ({ view, action }) => {
     if (action === "newInvoice") {
@@ -159,23 +160,25 @@ const AccountingDashboard = () => {
     setItems((prev) => prev.filter((_, i) => i !== index));
 
   const handleAIDataExtracted = (extractedData) => {
-    if (extractedData.customer.name)
-      setCustomerName(extractedData.customer.name);
-    if (extractedData.customer.email)
-      setCustomerEmail(extractedData.customer.email);
-    if (extractedData.customer.phone)
-      setCustomerPhone(extractedData.customer.phone);
-    if (extractedData.customer.address)
-      setCustomerAddress(extractedData.customer.address);
-    if (extractedData.customer.tax_id) setTaxId(extractedData.customer.tax_id);
-    if (extractedData.billTo.name) setBillName(extractedData.billTo.name);
-    if (extractedData.billTo.email) setBillEmail(extractedData.billTo.email);
-    if (extractedData.billTo.phone) setBillPhone(extractedData.billTo.phone);
-    if (extractedData.billTo.address)
-      setBillAddress(extractedData.billTo.address);
-    if (extractedData.items?.length > 0) setItems(extractedData.items);
-    alert("✅ Data extracted and populated successfully!");
-  };
+  // Customer / sender fields
+  if (extractedData.customer?.name)    setCustomerName(extractedData.customer.name);
+  if (extractedData.customer?.email)   setCustomerEmail(extractedData.customer.email);
+  if (extractedData.customer?.phone)   setCustomerPhone(extractedData.customer.phone);
+  if (extractedData.customer?.address) setCustomerAddress(extractedData.customer.address);
+  if (extractedData.customer?.tax_id)  setTaxId(extractedData.customer.tax_id);
+ 
+  // Bill-to fields
+  if (extractedData.billTo?.name)      setBillName(extractedData.billTo.name);
+  if (extractedData.billTo?.email)     setBillEmail(extractedData.billTo.email);
+  if (extractedData.billTo?.phone)     setBillPhone(extractedData.billTo.phone);
+  if (extractedData.billTo?.address)   setBillAddress(extractedData.billTo.address);
+ 
+  // Line items — already formatted by AIInvoiceChat
+  if (extractedData.items?.length > 0) setItems(extractedData.items);
+ 
+  // Document type (invoice vs estimate)
+  if (extractedData.documentType)      setDocumentType(extractedData.documentType);
+};
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -722,7 +725,15 @@ const AccountingDashboard = () => {
       >
         <TemplateRenderer {...templateProps} />
       </div>
-
+ {showAIWindow && (
+  <AIInvoiceWindow
+    user={user}
+    businessInfo={businessInfo}
+    documentType={documentType}
+    onExit={() => setShowAIWindow(false)}
+    TemplateRenderer={TemplateRenderer}  
+  />
+)}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar */}
         <AccountingSidebar
@@ -953,6 +964,7 @@ const AccountingDashboard = () => {
               <FinancialOverview user={user} />
             </div>
           )}
+         
           {activeView === "history-view" && (
             <div className="flex-1 overflow-y-auto p-4">
               <HistoryView user={user} />
@@ -1145,22 +1157,15 @@ const AccountingDashboard = () => {
                         Manual Entry
                       </button>
                       <button
-                        onClick={() => setInputMode("ai")}
+                        onClick={() => setShowAIWindow(true)}
                         className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "ai" ? "border-[#7c3aed] text-[#7c3aed] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
                       >
                         <Sparkles className="w-4 h-4" />
-                        AI Assistant
+                        AI Mode
                       </button>
                     </div>
 
-                    {inputMode === "ai" && (
-                      <div className="p-6 border-b border-[#e2e8f0]">
-                        <AIInvoiceExtractor
-                          onDataExtracted={handleAIDataExtracted}
-                          documentType={documentType}
-                        />
-                      </div>
-                    )}
+                   
 
                     {inputMode === "manual" && (
                       <>

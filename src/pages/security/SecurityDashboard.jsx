@@ -13,6 +13,7 @@ import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getAuth, signOut } from "firebase/auth";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import {
   getFirestore,
   collection,
@@ -146,8 +147,7 @@ const SecurityDashboard = () => {
   const [activeView, setActiveView] = useState("home");
   const [showPreview, setShowPreview] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-
-  // ── Sidebar dropdowns ─────────────────────────────────────────────────────
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [isIncidentsOpen, setIsIncidentsOpen] = useState(false);
   const [isSchedulesOpen, setIsSchedulesOpen] = useState(false);
   const [isInvoicesOpen, setIsInvoicesOpen] = useState(false);
@@ -530,7 +530,14 @@ const SecurityDashboard = () => {
       <div id="print-area" className="hidden print:block bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
         <TemplateRenderer {...templateProps} />
       </div>
-
+        {showAIWindow && (
+                <AIInvoiceWindow
+                  user={user}
+                  businessInfo={businessInfo}
+                  documentType={documentType}
+                  onExit={() => setShowAIWindow(false)}
+                />
+              )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar backdrop (mobile) ─────────────────────────────────── */}
         {sidebarOpen && (

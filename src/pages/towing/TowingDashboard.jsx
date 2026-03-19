@@ -39,7 +39,7 @@ import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
 import { logHistory } from "./historyLogger";
 import SignatureStamp from "./SignatureStamp";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import {
   ChevronDown,
   ChevronLeft,
@@ -128,6 +128,7 @@ const TowingDashboard = () => {
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
     useState(null);
   const [towLocation, setTowLocation] = useState("");
@@ -1274,7 +1275,14 @@ const TowingDashboard = () => {
       >
         <TemplateRenderer {...templateProps} />
       </div>
-
+       {showAIWindow && (
+  <AIInvoiceWindow
+    user={user}
+    businessInfo={businessInfo}
+    documentType={documentType}
+    onExit={() => setShowAIWindow(false)}
+  />
+)}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar ─────────────────────────────────────────────────────── */}
         {/* Mobile backdrop */}
@@ -1958,21 +1966,14 @@ const TowingDashboard = () => {
                         Manual Entry
                       </button>
                       <button
-                        onClick={() => setInputMode("ai")}
+                        onClick={() => setShowAIWindow(true)}
                         className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "ai" ? "border-[#7c3aed] text-[#7c3aed] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
                       >
-                        <Sparkles className="w-4 h-4" /> AI Assistant
+                        <Sparkles className="w-4 h-4" /> AI Mode
                       </button>
                     </div>
 
-                    {inputMode === "ai" && (
-                      <div className="p-6 border-b border-[#e2e8f0]">
-                        <AIInvoiceExtractor
-                          onDataExtracted={handleAIDataExtracted}
-                          documentType={documentType}
-                        />
-                      </div>
-                    )}
+                    
 
                     {inputMode === "manual" && (
                       <>

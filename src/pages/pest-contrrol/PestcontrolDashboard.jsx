@@ -41,7 +41,7 @@ import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
 import SignatureStamp from "../SignatureStamp";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import {
   ChevronDown,
   ChevronLeft,
@@ -137,8 +137,7 @@ const PestcontrolDashboard = () => {
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-
-  // ── customers ────────────────────────────────────────────────────────────
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -1467,7 +1466,14 @@ const PestcontrolDashboard = () => {
             </div>
           </div>
         )}
-
+          {showAIWindow && (
+                  <AIInvoiceWindow
+                    user={user}
+                    businessInfo={businessInfo}
+                    documentType={documentType}
+                    onExit={() => setShowAIWindow(false)}
+                  />
+                )}
         {/* ── Main scrollable content ──────────────────────────────────── */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {/* ── Alternate Views ──────────────────────────────────────── */}
@@ -1516,23 +1522,16 @@ const PestcontrolDashboard = () => {
                         </span>
                       </button>
                       <button
-                        onClick={() => setInputMode("ai")}
+                        onClick={() => setShowAIWindow(true)}
                         className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
                       >
                         <span className="flex items-center justify-center gap-2">
                           <Sparkles className="w-5 h-5" />
-                          AI Assistant
+                          AI Mode
                         </span>
                       </button>
                     </div>
-                    {inputMode === "ai" && (
-                      <div className="p-6">
-                        <AIInvoiceExtractor
-                          onDataExtracted={handleAIDataExtracted}
-                          documentType={documentType}
-                        />
-                      </div>
-                    )}
+                    
                   </div>
 
                   {inputMode === "manual" && (

@@ -8,7 +8,7 @@ import {
   updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
-
+const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
 export const TemplateSelector = ({
   user,
   selectedTemplate,

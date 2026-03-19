@@ -9,7 +9,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-// ─── Friendly names for every template ID ────────────────────────────────────
+const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
 const TEMPLATE_NAMES = {
   default: "Default (Original)",
   classic: "Classic Workshop",
@@ -20,19 +20,7 @@ const TEMPLATE_NAMES = {
   diagnostic: "Diagnostic Specialist",
 };
 
-// ─── Template Selector Dropdown ───────────────────────────────────────────────
-/**
- * TemplateSelector
- *
- * Reads the user's purchased templates from Firestore and lets them pick one.
- * When a selection is made it persists the `active` field back to Firestore
- * and calls onTemplateChange so the parent can re-render the preview.
- *
- * Props:
- *   user             — Firebase auth user object
- *   selectedTemplate — controlled value (templateId string)
- *   onTemplateChange — (templateId: string) => void
- */
+
 export const TemplateSelector = ({
   user,
   selectedTemplate,
@@ -367,9 +355,9 @@ export const DefaultTemplate = ({
                 {item.description}
               </td>
               <td className="text-center px-2 py-2">{item.qty}</td>
-              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-2 py-2">R {sf(item.rate)}</td>
               <td className="text-right px-2 py-2">
-                R {item.amount.toFixed(2)}
+                R {sf(item.amount)}
               </td>
             </tr>
           ))}
@@ -381,15 +369,15 @@ export const DefaultTemplate = ({
       <div className="w-64 text-xs">
         <div className="flex justify-between py-1">
           <span>Subtotal:</span>
-          <span>R {subtotal.toFixed(2)}</span>
+          <span>R {sf(subtotal)}</span>
         </div>
         <div className="flex justify-between py-1">
           <span>VAT:</span>
-          <span>R {vat.toFixed(2)}</span>
+          <span>R {sf(vat)}</span>
         </div>
         <div className="flex justify-between py-2 font-bold bg-gray-50 text-black px-2">
           <span>TOTAL:</span>
-          <span>R {total.toFixed(2)}</span>
+          <span>R {sf(total)}</span>
         </div>
       </div>
     </div>
@@ -549,8 +537,8 @@ export const ClassicTemplate = (props) => (
           <tr key={i} className="border-b">
             <td className="px-2 py-2">{item.description}</td>
             <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
+            <td className="text-right px-2 py-2">R {sf(item.rate)}</td>
+            <td className="text-right px-2 py-2">R {sf(item.amount)}</td>
           </tr>
         ))}
       </tbody>
@@ -560,15 +548,15 @@ export const ClassicTemplate = (props) => (
       <div className="w-64 text-xs">
         <div className="flex justify-between py-1">
           <span>Subtotal:</span>
-          <span>R {props.subtotal.toFixed(2)}</span>
+          <span>R {sf(props.subtotal)}</span>
         </div>
         <div className="flex justify-between py-1">
           <span>VAT (15%):</span>
-          <span>R {props.vat.toFixed(2)}</span>
+          <span>R {sf(props.vat)}</span>
         </div>
         <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
           <span>TOTAL:</span>
-          <span>R {props.total.toFixed(2)}</span>
+          <span>R {sf(props.total)}</span>
         </div>
       </div>
     </div>
@@ -721,9 +709,9 @@ export const ModernTemplate = (props) => (
           <tr key={i} className="border-b hover:bg-gray-50">
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+            <td className="text-right px-4 py-3">R {sf(item.rate)}</td>
             <td className="text-right px-4 py-3 font-semibold">
-              R {item.amount.toFixed(2)}
+              R {sf(item.amount)}
             </td>
           </tr>
         ))}
@@ -734,15 +722,15 @@ export const ModernTemplate = (props) => (
       <div className="w-80 space-y-2">
         <div className="flex justify-between py-2 text-gray-600">
           <span>Subtotal:</span>
-          <span>R {props.subtotal.toFixed(2)}</span>
+          <span>R {sf(props.subtotal)}</span>
         </div>
         <div className="flex justify-between py-2 text-gray-600">
           <span>VAT (15%):</span>
-          <span>R {props.vat.toFixed(2)}</span>
+          <span>R {sf(props.vat)}</span>
         </div>
         <div className="flex justify-between py-3 text-xl font-bold bg-blue-500 text-white px-4 rounded-lg">
           <span>TOTAL:</span>
-          <span>R {props.total.toFixed(2)}</span>
+          <span>R {sf(props.total)}</span>
         </div>
       </div>
     </div>
@@ -863,8 +851,8 @@ export const ElegantTemplate = (props) => (
             <tr key={i} className="border-b border-gray-200">
               <td className="py-3">{item.description}</td>
               <td className="text-center py-3">{item.qty}</td>
-              <td className="text-right py-3">R {item.rate.toFixed(2)}</td>
-              <td className="text-right py-3">R {item.amount.toFixed(2)}</td>
+              <td className="text-right py-3">R {sf(item.rate)}</td>
+              <td className="text-right py-3">R {sf(item.amount)}</td>
             </tr>
           ))}
         </tbody>
@@ -874,15 +862,15 @@ export const ElegantTemplate = (props) => (
         <div className="w-64">
           <div className="flex justify-between py-2">
             <span>Subtotal:</span>
-            <span>R {props.subtotal.toFixed(2)}</span>
+            <span>R {sf(props.subtotal)}</span>
           </div>
           <div className="flex justify-between py-2">
             <span>VAT:</span>
-            <span>R {props.vat.toFixed(2)}</span>
+            <span>R {sf(props.vat)}</span>
           </div>
           <div className="flex justify-between py-3 font-bold text-lg bg-purple-900 text-white px-4">
             <span>TOTAL:</span>
-            <span>R {props.total.toFixed(2)}</span>
+            <span>R {sf(props.total)}</span>
           </div>
         </div>
       </div>
@@ -1006,9 +994,9 @@ export const SpeedTemplate = (props) => (
           <tr key={i} className="border-b border-gray-800">
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+            <td className="text-right px-4 py-3">R {sf(item.rate)}</td>
             <td className="text-right px-4 py-3 font-bold">
-              R {item.amount.toFixed(2)}
+              R {sf(item.amount)}
             </td>
           </tr>
         ))}
@@ -1019,15 +1007,15 @@ export const SpeedTemplate = (props) => (
       <div className="w-80">
         <div className="flex justify-between py-2 text-gray-400">
           <span>Subtotal:</span>
-          <span>R {props.subtotal.toFixed(2)}</span>
+          <span>R {sf(props.subtotal)}</span>
         </div>
         <div className="flex justify-between py-2 text-gray-400">
           <span>VAT:</span>
-          <span>R {props.vat.toFixed(2)}</span>
+          <span>R {sf(props.vat)}</span>
         </div>
         <div className="flex justify-between py-3 text-xl font-black bg-red-600 px-4 rounded">
           <span>TOTAL:</span>
-          <span>R {props.total.toFixed(2)}</span>
+          <span>R {sf(props.total)}</span>
         </div>
       </div>
     </div>
@@ -1190,9 +1178,9 @@ export const DiagnosticTemplate = (props) => (
             <tr key={i} className="border-b">
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
-              <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-4 py-3">R {sf(item.rate)}</td>
               <td className="text-right px-4 py-3 font-semibold">
-                R {item.amount.toFixed(2)}
+                R {sf(item.amount)}
               </td>
             </tr>
           ))}
@@ -1204,17 +1192,17 @@ export const DiagnosticTemplate = (props) => (
       <div className="w-80 border-2 border-green-600 p-4 rounded">
         <div className="flex justify-between py-2">
           <span>Subtotal:</span>
-          <span>R {props.subtotal.toFixed(2)}</span>
+          <span>R {sf(props.subtotal)}</span>
         </div>
         <div className="flex justify-between py-2">
           <span>VAT (15%):</span>
-          <span>R {props.vat.toFixed(2)}</span>
+          <span>R {sf(props.vat)}</span>
         </div>
         <div className="flex justify-between py-3 text-xl font-bold bg-green-600 text-white px-4 rounded">
           <span>
             {props.documentType === "quote" ? "QUOTE TOTAL:" : "TOTAL DUE:"}
           </span>
-          <span>R {props.total.toFixed(2)}</span>
+          <span>R {sf(props.total)}</span>
         </div>
       </div>
     </div>

@@ -33,7 +33,7 @@ import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import {
   ChevronDown,
   ChevronLeft,
@@ -92,20 +92,13 @@ const functions = getFunctions();
 
 const WeldingDashboard = () => {
   const navigate = useNavigate();
-
-  // ── step navigation ──────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
-
-  // ── layout / sidebar ─────────────────────────────────────────────────────
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-
-  // ── auth ─────────────────────────────────────────────────────────────────
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const { user, authUser } = useAuth();
-
-  // ── quote / invoice state ────────────────────────────────────────────────
   const [quoteNumber, setQuoteNumber] = useState("");
   const [quoteId, setQuoteId] = useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
@@ -1199,7 +1192,14 @@ const WeldingDashboard = () => {
       >
         <TemplateRenderer {...templateProps} />
       </div>
-
+       {showAIWindow && (
+  <AIInvoiceWindow
+    user={user}
+    businessInfo={businessInfo}
+    documentType={documentType}
+    onExit={() => setShowAIWindow(false)}
+  />
+)}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar ─────────────────────────────────────────────────────── */}
         {sidebarOpen && isMobile && (
@@ -1847,21 +1847,14 @@ const WeldingDashboard = () => {
                         <Edit className="w-4 h-4" /> Manual Entry
                       </button>
                       <button
-                        onClick={() => setInputMode("ai")}
+                        onClick={() => setShowAIWindow(true)}
                         className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "ai" ? "border-[#7c3aed] text-[#7c3aed] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
                       >
-                        <Sparkles className="w-4 h-4" /> AI Assistant
+                        <Sparkles className="w-4 h-4" /> AI Mode
                       </button>
                     </div>
 
-                    {inputMode === "ai" && (
-                      <div className="p-6 border-b border-[#e2e8f0]">
-                        <AIInvoiceExtractor
-                          onDataExtracted={handleAIDataExtracted}
-                          documentType={documentType}
-                        />
-                      </div>
-                    )}
+                    
 
                     {inputMode === "manual" && (
                       <>

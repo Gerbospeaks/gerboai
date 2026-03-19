@@ -8,7 +8,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import Templates from "./Templates";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getAuth, signOut } from "firebase/auth";
@@ -154,8 +154,7 @@ const RealEstateDashboard = () => {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-
-  // ── Customers ────────────────────────────────────────────────────────────
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -691,7 +690,14 @@ const RealEstateDashboard = () => {
       <div id="print-area" className="hidden print:block bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
         <TemplateRenderer {...templateProps} />
       </div>
-
+        {showAIWindow && (
+                <AIInvoiceWindow
+                  user={user}
+                  businessInfo={businessInfo}
+                  documentType={documentType}
+                  onExit={() => setShowAIWindow(false)}
+                />
+              )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar backdrop (mobile) ──────────────────────────────────── */}
         {sidebarOpen && (

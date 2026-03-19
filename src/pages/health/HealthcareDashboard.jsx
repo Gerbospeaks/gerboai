@@ -413,8 +413,7 @@ const HealthcareDashboard = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSickNoteModal, setShowSickNoteModal] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-
-  // ── Auth ───────────────────────────────────────────────────────────────────
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const { user, authUser } = useAuth();
   const location = useLocation();
 
@@ -949,7 +948,7 @@ const HealthcareDashboard = () => {
       >
         <TemplateRenderer {...templateProps} />
       </div>
-
+       
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar ────────────────────────────────────────────────────── */}
         <HealthcareSidebar
@@ -1376,7 +1375,7 @@ const HealthcareDashboard = () => {
                         Manual Entry
                       </button>
                       <button
-                        onClick={() => setInputMode("ai")}
+                        onClick={() => setShowAIWindow(true)}
                         className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${
                           inputMode === "ai"
                             ? "border-[#7c3aed] text-[#7c3aed] bg-white"
@@ -1384,7 +1383,7 @@ const HealthcareDashboard = () => {
                         }`}
                       >
                         <Sparkles className="w-4 h-4" />
-                        AI Assistant
+                        AI Mode
                       </button>
                     </div>
 

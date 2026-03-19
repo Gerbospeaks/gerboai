@@ -225,11 +225,26 @@ export const AuthProvider = ({ children }) => {
       }
       // ───────────────────────────────────────────────────────────────────
 
-      console.log("7. Committing batch...");
+       console.log("7. Seeding default template settings...");
+      const templateSettingsRef = doc(
+        db,
+        "users",
+        user.uid,
+        "settings",
+        "templateSettings",
+      );
+      batch.set(templateSettingsRef, {
+        purchased:      ["professional"],
+        activeTemplate: "professional",
+        createdAt:      serverTimestamp(),
+        updatedAt:      serverTimestamp(),
+      });
+
+      console.log("8. Committing batch...");
       await batch.commit();
       console.log("Batch committed successfully");
 
-      console.log("8. Signing out...");
+      console.log("9. Signing out...");
       await signOut(auth);
       console.log("Signed out successfully");
 

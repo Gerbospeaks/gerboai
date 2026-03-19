@@ -30,7 +30,7 @@ import Templates from "./Templates";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import PlumbingMultiStepForm from "./PlumbingMultiStepForm";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import {
@@ -119,6 +119,7 @@ const PlumbingDashboard = () => {
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -1206,7 +1207,14 @@ const PlumbingDashboard = () => {
                 </div>
               </div>
             )}
-
+             {showAIWindow && (
+                     <AIInvoiceWindow
+                       user={user}
+                       businessInfo={businessInfo}
+                       documentType={documentType}
+                       onExit={() => setShowAIWindow(false)}
+                     />
+                   )}
             {/* ── Alternate Views ──────────────────────────────────────── */}
             {activeView === "templates" && <Templates user={user} />}
             {activeView === "home" && <HomeView user={user} />}
@@ -1257,26 +1265,19 @@ const PlumbingDashboard = () => {
                           </span>
                         </button>
                         <button
-                          onClick={() => setInputMode("ai")}
+                          onClick={() => setShowAIWindow(true)}
                           className={`flex-1 px-2 sm:px-6 py-2 sm:py-4 font-semibold text-xs sm:text-base transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
                         >
                           <span className="flex items-center justify-center gap-1 sm:gap-2">
                             <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                             <span className="hidden sm:inline">
-                              AI Assistant
+                              AI Mode
                             </span>
                             <span className="sm:hidden">AI</span>
                           </span>
                         </button>
                       </div>
-                      <div className="p-3 sm:p-6">
-                        {inputMode === "ai" && (
-                          <AIInvoiceExtractor
-                            onDataExtracted={handleAIDataExtracted}
-                            documentType={documentType}
-                          />
-                        )}
-                      </div>
+                      
                     </div>
 
                     {inputMode === "manual" && (

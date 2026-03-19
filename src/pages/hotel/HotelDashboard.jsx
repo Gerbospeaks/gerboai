@@ -9,6 +9,7 @@ import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import HospitalityMultiStepForm from "./HospitalityMultiStepForm";
 import { getFunctions } from "firebase/functions";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import CheckInOutModal, { createCheckInFromInvoice } from "./CheckInOutModal";
 import {
   getFirestore,
@@ -432,7 +433,7 @@ const HotelDashboard = () => {
   const [invoiceId, setInvoiceId] = useState(null);
   const [savedInvoices, setSavedInvoices] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
-
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [guests, setGuests] = useState([]);
   const [savedGuests, setSavedGuests] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
@@ -968,7 +969,14 @@ const HotelDashboard = () => {
       >
         <TemplateRenderer {...templateProps} />
       </div>
-
+        {showAIWindow && (
+  <AIInvoiceWindow
+    user={user}
+    businessInfo={propertyInfo}
+    documentType={documentType}
+    onExit={() => setShowAIWindow(false)}
+  />
+)}
       <div className="flex-1 flex overflow-hidden min-h-0">
         <HotelSidebar
           user={user}
@@ -1342,11 +1350,11 @@ const HotelDashboard = () => {
                         Manual Entry
                       </button>
                       <button
-                        onClick={() => setInputMode("ai")}
+                        onClick={() => setShowAIWindow(true)}
                         className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "ai" ? "border-[#7c3aed] text-[#7c3aed] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
                       >
                         <Sparkles className="w-4 h-4" />
-                        AI Assistant
+                        AI Mode
                       </button>
                     </div>
 

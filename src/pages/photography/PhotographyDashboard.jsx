@@ -8,7 +8,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import Templates from "./Templates";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from "../SignatureStamp";
@@ -118,6 +118,7 @@ const PhotographyDashboard = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -979,7 +980,14 @@ const PhotographyDashboard = () => {
                 </div>
               </div>
             )}
-
+             {showAIWindow && (
+                     <AIInvoiceWindow
+                       user={user}
+                       businessInfo={businessInfo}
+                       documentType={documentType}
+                       onExit={() => setShowAIWindow(false)}
+                     />
+                   )}
             {/* ── Alternate Views ──────────────────────────────────────── */}
             {activeView === "templates" && <Templates user={user} />}
             {activeView === "home" && <HomeView user={user} />}
@@ -1009,23 +1017,14 @@ const PhotographyDashboard = () => {
                           📝 Manual Entry
                         </button>
                         <button
-                          onClick={() => setInputMode("ai")}
+                          onClick={() => setShowAIWindow(true)}
                           className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}
                         >
                           <Sparkles className="w-4 h-4" />
-                          AI Assistant
+                          AI Mode
                         </button>
                       </div>
-                      <div className="p-6">
-                        {inputMode === "ai" ? (
-                          <AIInvoiceExtractor
-                            onDataExtracted={handleAIDataExtracted}
-                            documentType={documentType}
-                          />
-                        ) : (
-                          <div className="text-sm text-gray-600">Fill out the forms below to create your invoice.</div>
-                        )}
-                      </div>
+                      
                     </div>
 
                     {inputMode === "manual" && (

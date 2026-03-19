@@ -33,7 +33,7 @@ import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import {
   ChevronDown,
   ChevronLeft,
@@ -193,18 +193,13 @@ const SolarDashboard = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [inputMode, setInputMode] = useState("manual");
-
-  // ── sidebar dropdowns ──────────────────────────────────────────────────────
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
-
-  // ── customers ──────────────────────────────────────────────────────────────
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
-
-  // ── payment ────────────────────────────────────────────────────────────────
   const [paymentStatus, setPaymentStatus] = useState({ totalPaid: 0, balanceDue: 0, status: "pending" });
 
   // ── stamp ──────────────────────────────────────────────────────────────────
@@ -763,7 +758,14 @@ const SolarDashboard = () => {
       <div id="print-area" className="hidden print:block bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
         <TemplateRenderer {...templateProps} />
       </div>
-
+        {showAIWindow && (
+  <AIInvoiceWindow
+    user={user}
+    businessInfo={businessInfo}
+    documentType={documentType}
+    onExit={() => setShowAIWindow(false)}
+  />
+)}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar backdrop ──────────────────────────────────────────────── */}
         {sidebarOpen && (
@@ -1050,15 +1052,11 @@ const SolarDashboard = () => {
                       <button onClick={() => setInputMode("manual")} className={`flex-1 px-5 py-3 text-sm font-semibold transition-all flex items-center justify-center gap-2 ${inputMode === "manual" ? "bg-white text-[#2563eb] border-b-2 border-[#2563eb]" : "bg-[#f8fafc] text-[#64748b] hover:text-[#374151]"}`}>
                         <Edit className="w-4 h-4" />Manual Entry
                       </button>
-                      <button onClick={() => setInputMode("ai")} className={`flex-1 px-5 py-3 text-sm font-semibold transition-all flex items-center justify-center gap-2 ${inputMode === "ai" ? "bg-white text-[#7c3aed] border-b-2 border-[#7c3aed]" : "bg-[#f8fafc] text-[#64748b] hover:text-[#374151]"}`}>
-                        <Sparkles className="w-4 h-4" />AI Assistant
+                      <button onClick={() => setShowAIWindow(true)} className={`flex-1 px-5 py-3 text-sm font-semibold transition-all flex items-center justify-center gap-2 ${inputMode === "ai" ? "bg-white text-[#7c3aed] border-b-2 border-[#7c3aed]" : "bg-[#f8fafc] text-[#64748b] hover:text-[#374151]"}`}>
+                        <Sparkles className="w-4 h-4" />AI Mode
                       </button>
                     </div>
-                    {inputMode === "ai" && (
-                      <div className="p-5">
-                        <AIInvoiceExtractor onDataExtracted={handleAIDataExtracted} documentType={documentType} />
-                      </div>
-                    )}
+                    
                   </div>
 
                   {/* Stepped form */}

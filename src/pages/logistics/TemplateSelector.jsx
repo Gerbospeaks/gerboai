@@ -9,7 +9,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-// Template Selector Dropdown Component
+const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
 export const TemplateSelector = ({
   user,
   selectedTemplate,

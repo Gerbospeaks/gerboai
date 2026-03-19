@@ -14,6 +14,7 @@ import HvacAIExtractor from "./HvacAIExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import HVACMultiStepForm from "./HVACMultiStepForm";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
@@ -114,15 +115,12 @@ const HvacDashboard = () => {
   const [quoteNumber, setQuoteNumber] = useState("");
   const [serviceId, setServiceId] = useState(null);
   const [quoteId, setQuoteId] = useState(null);
-
-  // Lists
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [savedServices, setSavedServices] = useState([]);
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [invoices, setInvoices] = useState([]);
-
-  // Modals
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
@@ -1049,7 +1047,14 @@ const HvacDashboard = () => {
       >
         <TemplateRenderer {...templateProps} />
       </div>
-
+      {showAIWindow && (
+        <AIInvoiceWindow
+          user={user}
+          businessInfo={businessInfo}
+          documentType={documentType}
+          onExit={() => setShowAIWindow(false)}
+        />
+      )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar ───────────────────────────────────────────────────── */}
         {sidebarOpen && (
@@ -1681,11 +1686,11 @@ const HvacDashboard = () => {
                         Manual Entry
                       </button>
                       <button
-                        onClick={() => setInputMode("ai")}
+                        onClick={() => setShowAIWindow(true)}
                         className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "ai" ? "border-[#7c3aed] text-[#7c3aed] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
                       >
                         <Sparkles className="w-4 h-4" />
-                        AI Assistant
+                        AI Mode
                       </button>
                     </div>
 

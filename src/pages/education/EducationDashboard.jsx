@@ -8,7 +8,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import Templates from "./Templates";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -622,6 +622,7 @@ const generateReportCardNumber = async (userId) => {
 const EducationDashboard = () => {
   const { user, authUser } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [activeView, setActiveView] = useState("home");
   const [documentType, setDocumentType] = useState("reports");
   const [showSettings, setShowSettings] = useState(false);
@@ -1612,7 +1613,7 @@ function ZField({ label, children, span2 }) {
           </button>
  
           <button
-            onClick={() => setInputMode("ai")}
+            onClick={() => setShowAIWindow(true)}
             className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold transition-all duration-150 border-b-2 border-l border-l-[#DDE3ED] ${
               inputMode === "ai"
                 ? "bg-white text-[#7B2FBE] border-[#7B2FBE]"
@@ -1620,20 +1621,13 @@ function ZField({ label, children, span2 }) {
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
-            <span className="hidden sm:inline">AI Assistant</span>
+            <span className="hidden sm:inline">AI Mode</span>
             <span className="sm:hidden">AI</span>
           </button>
         </div>
  
         {/* ── AI mode ─────────────────────────────────────────────────── */}
-        {inputMode === "ai" && (
-          <div className="bg-white border border-[#DDE3ED] rounded-md p-3.5 mb-2">
-            <AIInvoiceExtractor
-              onDataExtracted={handleAIDataExtracted}
-              documentType={documentType}
-            />
-          </div>
-        )}
+        
  
         {/* ── Manual mode ──────────────────────────────────────────────── */}
         {inputMode === "manual" && (

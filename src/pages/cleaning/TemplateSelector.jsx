@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FileText, Check } from "lucide-react";
 
-// ── Signature Stamp ────────────────────────────────────────────────────────────
+const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
 const SignatureStamp = ({ text, color, showDate, rotation, size }) => (
   <div
     style={{

@@ -7,7 +7,7 @@ import AppHeader from "../AppHeader";
 import Templates from "./Templates";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
-import AIInvoiceExtractor from "../AIInvoiceExtractor";
+import AIInvoiceWindow from '../AIInvoiceWindow';
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import logo from "../../assets/img/solidflo.png";
@@ -79,6 +79,7 @@ const RetailDashboard = () => {
   // Products state
   const [products, setProducts] = useState([]);
   const [invoiceId, setInvoiceId] = useState(null);
+  const [showAIWindow, setShowAIWindow] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState("professional");

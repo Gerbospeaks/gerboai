@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Check, Eye, X } from "lucide-react";
 import SignatureStamp from "../SignatureStamp";
 
-// Template Preview Modal Component
+const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
 const TemplatePreviewModal = ({ template, onClose, onSelect, isSelected }) => {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">

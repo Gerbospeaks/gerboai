@@ -9,7 +9,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-// Helper function to calculate due date based on payment terms
+const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
 const calculateDueDate = (terms) => {
   let daysToAdd = 30; // default
 
