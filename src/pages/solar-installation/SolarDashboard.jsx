@@ -1052,8 +1052,16 @@ const SolarDashboard = () => {
                       <button onClick={() => setInputMode("manual")} className={`flex-1 px-5 py-3 text-sm font-semibold transition-all flex items-center justify-center gap-2 ${inputMode === "manual" ? "bg-white text-[#2563eb] border-b-2 border-[#2563eb]" : "bg-[#f8fafc] text-[#64748b] hover:text-[#374151]"}`}>
                         <Edit className="w-4 h-4" />Manual Entry
                       </button>
-                      <button onClick={() => setShowAIWindow(true)} className={`flex-1 px-5 py-3 text-sm font-semibold transition-all flex items-center justify-center gap-2 ${inputMode === "ai" ? "bg-white text-[#7c3aed] border-b-2 border-[#7c3aed]" : "bg-[#f8fafc] text-[#64748b] hover:text-[#374151]"}`}>
-                        <Sparkles className="w-4 h-4" />AI Mode
+                      <button
+                        onClick={() => setShowAIWindow(true)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto
+    bg-gradient-to-r from-[#7c3aed] to-[#5b21b6]
+    text-white shadow-md shadow-[#7c3aed]/30
+    hover:shadow-lg hover:shadow-[#7c3aed]/40 hover:scale-[1.02]
+    active:scale-[0.98]"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        AI Mode
                       </button>
                     </div>
                     

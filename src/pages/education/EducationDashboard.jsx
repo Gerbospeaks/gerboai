@@ -1613,17 +1613,16 @@ function ZField({ label, children, span2 }) {
           </button>
  
           <button
-            onClick={() => setShowAIWindow(true)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold transition-all duration-150 border-b-2 border-l border-l-[#DDE3ED] ${
-              inputMode === "ai"
-                ? "bg-white text-[#7B2FBE] border-[#7B2FBE]"
-                : "bg-[#F0F3F9] text-[#4A5568] border-transparent hover:bg-[#EBF0FB]"
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
-            <span className="hidden sm:inline">AI Mode</span>
-            <span className="sm:hidden">AI</span>
-          </button>
+                        onClick={() => setShowAIWindow(true)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto
+    bg-gradient-to-r from-[#7c3aed] to-[#5b21b6]
+    text-white shadow-md shadow-[#7c3aed]/30
+    hover:shadow-lg hover:shadow-[#7c3aed]/40 hover:scale-[1.02]
+    active:scale-[0.98]"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        AI Mode
+                      </button>
         </div>
  
         {/* ── AI mode ─────────────────────────────────────────────────── */}

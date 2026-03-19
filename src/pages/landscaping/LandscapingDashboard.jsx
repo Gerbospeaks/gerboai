@@ -824,8 +824,16 @@ const LandscapingDashboard = () => {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                         Manual Entry
                       </button>
-                      <button onClick={() => setShowAIWindow(true)} className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "ai" ? "border-[#7c3aed] text-[#7c3aed] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}>
-                        <Sparkles className="w-4 h-4" />AI Mode
+                      <button
+                        onClick={() => setShowAIWindow(true)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto
+    bg-gradient-to-r from-[#7c3aed] to-[#5b21b6]
+    text-white shadow-md shadow-[#7c3aed]/30
+    hover:shadow-lg hover:shadow-[#7c3aed]/40 hover:scale-[1.02]
+    active:scale-[0.98]"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        AI Mode
                       </button>
                     </div>
 

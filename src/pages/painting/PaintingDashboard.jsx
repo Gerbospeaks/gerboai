@@ -1529,12 +1529,14 @@ const PaintingDashboard = () => {
                       </button>
                       <button
                         onClick={() => setShowAIWindow(true)}
-                        className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${inputMode === "ai" ? "bg-white text-purple-600 border-b-2 border-purple-600 shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto
+    bg-gradient-to-r from-[#7c3aed] to-[#5b21b6]
+    text-white shadow-md shadow-[#7c3aed]/30
+    hover:shadow-lg hover:shadow-[#7c3aed]/40 hover:scale-[1.02]
+    active:scale-[0.98]"
                       >
-                        <span className="flex items-center justify-center gap-2">
-                          <Sparkles className="w-5 h-5" />
-                          AI Mode
-                        </span>
+                        <Sparkles className="w-4 h-4" />
+                        AI Mode
                       </button>
                     </div>
                     
