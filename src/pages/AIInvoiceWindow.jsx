@@ -10,7 +10,7 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
-import { getAuth, signOut } from 'firebase/auth';
+import { getAuth, signOut } from "firebase/auth";
 import logo from "../assets/img/solidflo-logo.png";
 import {
   Sparkles,
@@ -33,6 +33,7 @@ import {
   ShoppingCart,
   ChevronRight,
   ChevronLeft,
+  LayoutDashboard, Users, List, BarChart2, Layers, Settings,
   Lightbulb,
 } from "lucide-react";
 import { callClaude } from "../utils/api";
@@ -375,137 +376,154 @@ function TypingDots() {
 /* ─────────────────────────────────────────────────────────────────
    SIDEBAR
 ───────────────────────────────────────────────────────────────────*/
-function DocSidebar({ activeType, onChange, collapsed, onToggle, businessInfo, user, onLogout }) {
-  return (
-    <div
-      style={{
-        width: collapsed ? 64 : 220,
-        flexShrink: 0,
-        background: "#0f172a",
-        display: "flex",
-        flexDirection: "column",
-        borderRight: "1px solid rgba(255,255,255,.07)",
-        transition: "width .25s ease",
-        overflow: "hidden",
-      }}
-    >
-      <div
+function DocSidebar({
+  activeType,
+  onChange,
+  collapsed,
+  onToggle,
+  businessInfo,
+  user,
+  onLogout,
+  userData,
+  onNavigate,
+}) {
+  // Compute stats from userData
+  const overdueCount = userData?.recentInvoices?.filter(inv => {
+    if (!inv.dueDate || inv.paymentStatus?.status === 'paid') return false;
+    return new Date(inv.dueDate.seconds ? inv.dueDate.seconds * 1000 : inv.dueDate) < new Date();
+  }).length || 0;
+
+  const draftsCount = userData?.recentInvoices?.filter(inv => inv.isDraft).length || 0;
+
+  const monthlyTotal = userData?.recentInvoices?.filter(inv => {
+    const d = inv.createdAt?.seconds ? new Date(inv.createdAt.seconds * 1000) : null;
+    return d && d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear();
+  }).reduce((sum, inv) => sum + (inv.total || 0), 0) || 0;
+
+  const firstOverdue = userData?.recentInvoices?.find(inv => {
+    if (!inv.dueDate || inv.paymentStatus?.status === 'paid') return false;
+    return new Date(inv.dueDate.seconds ? inv.dueDate.seconds * 1000 : inv.dueDate) < new Date();
+  });
+
+  const overdueDays = firstOverdue?.dueDate
+    ? Math.floor((new Date() - new Date(firstOverdue.dueDate.seconds ? firstOverdue.dueDate.seconds * 1000 : firstOverdue.dueDate)) / 86400000)
+    : 0;
+
+  const NAV_ITEMS = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'clients',   label: 'Clients',   icon: Users,          badge: userData?.clients?.length || null, badgeColor: '#93c5fd', badgeBg: 'rgba(22,85,224,.25)' },
+    { id: 'invoices',  label: 'All invoices', icon: List,         badge: overdueCount ? `${overdueCount} due` : null, badgeColor: '#fca5a5', badgeBg: 'rgba(239,68,68,.2)' },
+    { id: 'reports',   label: 'Reports',   icon: BarChart2 },
+  ];
+
+  const SETTING_ITEMS = [
+    { id: 'templates', label: 'Templates', icon: Layers },
+    { id: 'settings',  label: 'Settings',  icon: Settings },
+  ];
+
+  const SidebarItem = ({ item, onClick }) => {
+    const Icon = item.icon;
+    return (
+      <button
+        onClick={onClick}
+        title={collapsed ? item.label : undefined}
         style={{
-          height: 52,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: collapsed ? "center" : "space-between",
-          padding: collapsed ? 0 : "0 14px",
-          borderBottom: "1px solid rgba(255,255,255,.07)",
-          flexShrink: 0,
+          width: '100%', display: 'flex', alignItems: 'center',
+          gap: 10, padding: collapsed ? '10px 0' : '8px 12px',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          borderRadius: 9, border: '1px solid transparent',
+          background: 'transparent', cursor: 'pointer', transition: 'background .15s',
         }}
+        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.06)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
       >
+        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Icon size={14} color="rgba(255,255,255,.45)" />
+        </div>
         {!collapsed && (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 7,
-                background: "linear-gradient(135deg,#1655e0,#7c3aed)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-             <img src="{logo}" alt="SolidFlo" className="w-5 h-5" />
+          <>
+            <div style={{ flex: 1, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.65)', whiteSpace: 'nowrap', textAlign: 'left' }}>
+              {item.label}
             </div>
-            <span
-              style={{
-                fontSize: 12,
-                fontWeight: 700,
-                color: "#fff",
-                whiteSpace: "nowrap",
-              }}
-            >
-              SolidFlo AI
-            </span>
+            {item.badge && (
+              <div style={{ padding: '2px 7px', borderRadius: 10, fontSize: 10, fontWeight: 700, background: item.badgeBg, color: item.badgeColor, flexShrink: 0 }}>
+                {item.badge}
+              </div>
+            )}
+          </>
+        )}
+      </button>
+    );
+  };
+
+  return (
+    <div style={{
+      width: collapsed ? 64 : 220,
+      flexShrink: 0,
+      background: '#0f172a',
+      display: 'flex',
+      flexDirection: 'column',
+      borderRight: '1px solid rgba(255,255,255,.07)',
+      transition: 'width .25s ease',
+      overflow: 'hidden',
+    }}>
+
+      {/* ── Header ── */}
+      <div style={{
+        height: 52, display: 'flex', alignItems: 'center',
+        justifyContent: collapsed ? 'center' : 'space-between',
+        padding: collapsed ? 0 : '0 14px',
+        borderBottom: '1px solid rgba(255,255,255,.07)', flexShrink: 0,
+      }}>
+        {!collapsed && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 26, height: 26, borderRadius: 7, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src={logo} alt="SolidFlo" style={{ width: 16, height: 16 }} />
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>SolidFlo AI</span>
           </div>
         )}
-        <button
-          onClick={onToggle}
-          style={{
-            background: "rgba(255,255,255,.07)",
-            border: "1px solid rgba(255,255,255,.1)",
-            borderRadius: 7,
-            color: "rgba(255,255,255,.6)",
-            cursor: "pointer",
-            width: 28,
-            height: 28,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
+        <button onClick={onToggle} style={{ background: 'rgba(255,255,255,.07)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 7, color: 'rgba(255,255,255,.6)', cursor: 'pointer', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
         </button>
       </div>
 
+      {/* ── Account name ── */}
       {!collapsed && businessInfo?.businessName && (
-        <div
-          style={{
-            padding: "10px 14px 6px",
-            borderBottom: "1px solid rgba(255,255,255,.05)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-              color: "rgba(255,255,255,.3)",
-              letterSpacing: ".08em",
-              textTransform: "uppercase",
-              marginBottom: 3,
-            }}
-          >
-            Account
-          </div>
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "rgba(255,255,255,.7)",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
+        <div style={{ padding: '10px 14px 6px', borderBottom: '1px solid rgba(255,255,255,.05)' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.3)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 3 }}>Account</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.7)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {businessInfo.businessName}
           </div>
         </div>
       )}
 
+      {/* ── Stats strip ── */}
       {!collapsed && (
-        <div style={{ padding: "12px 14px 6px" }}>
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-              color: "rgba(255,255,255,.3)",
-              letterSpacing: ".08em",
-              textTransform: "uppercase",
-            }}
-          >
-            Document Type
-          </div>
+        <div style={{ display: 'flex', gap: 6, padding: '8px 14px' }}>
+          {[
+            { val: `R${monthlyTotal >= 1000 ? (monthlyTotal / 1000).toFixed(0) + 'k' : monthlyTotal.toFixed(0)}`, lbl: 'This month' },
+            { val: overdueCount, lbl: 'Overdue', alert: overdueCount > 0 },
+            { val: draftsCount, lbl: 'Drafts' },
+          ].map((s, i) => (
+            <div key={i} style={{ flex: 1, background: 'rgba(255,255,255,.05)', borderRadius: 8, padding: '7px 8px' }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: s.alert ? '#fca5a5' : '#fff' }}>{s.val}</div>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,.35)', fontWeight: 600, marginTop: 2, textTransform: 'uppercase', letterSpacing: '.05em' }}>{s.lbl}</div>
+            </div>
+          ))}
         </div>
       )}
 
-      <div
-        style={{
-          flex: 1,
-          padding: collapsed ? "12px 8px" : "0 8px 12px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 4,
-        }}
-      >
+      <div style={{ height: 1, background: 'rgba(255,255,255,.06)', margin: '4px 0' }} />
+
+      {/* ── Document type ── */}
+      {!collapsed && (
+        <div style={{ padding: '10px 14px 5px' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.3)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Document type</div>
+        </div>
+      )}
+
+      <div style={{ padding: collapsed ? '12px 8px' : '0 8px 8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
         {DOC_TYPES.map((item) => {
           const Icon = item.icon;
           const active = activeType === item.id;
@@ -515,85 +533,25 @@ function DocSidebar({ activeType, onChange, collapsed, onToggle, businessInfo, u
               onClick={() => onChange(item.id)}
               title={collapsed ? item.label : undefined}
               style={{
-                position: "relative",
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: collapsed ? "10px 0" : "10px 12px",
-                justifyContent: collapsed ? "center" : "flex-start",
-                borderRadius: 10,
-                border: active
-                  ? `1px solid ${item.color}40`
-                  : "1px solid transparent",
-                background: active ? `${item.color}20` : "transparent",
-                cursor: "pointer",
-                transition: "all .15s",
+                position: 'relative', width: '100%', display: 'flex', alignItems: 'center',
+                gap: 10, padding: collapsed ? '10px 0' : '9px 12px',
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                borderRadius: 10, border: active ? `1px solid ${item.color}40` : '1px solid transparent',
+                background: active ? `${item.color}20` : 'transparent', cursor: 'pointer', transition: 'all .15s',
               }}
-              onMouseEnter={(e) => {
-                if (!active)
-                  e.currentTarget.style.background = "rgba(255,255,255,.05)";
-              }}
-              onMouseLeave={(e) => {
-                if (!active)
-                  e.currentTarget.style.background = active
-                    ? `${item.color}20`
-                    : "transparent";
-              }}
+              onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,.05)'; }}
+              onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
             >
               {collapsed && active && (
-                <div
-                  style={{
-                    position: "absolute",
-                    left: 4,
-                    width: 3,
-                    height: 20,
-                    borderRadius: 2,
-                    background: item.color,
-                  }}
-                />
+                <div style={{ position: 'absolute', left: 4, width: 3, height: 20, borderRadius: 2, background: item.color }} />
               )}
-              <div
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 9,
-                  background: active ? item.color : "rgba(255,255,255,.08)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  transition: "background .15s",
-                }}
-              >
-                <Icon
-                  size={16}
-                  color={active ? "#fff" : "rgba(255,255,255,.5)"}
-                />
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: active ? item.color : 'rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background .15s' }}>
+                <Icon size={15} color={active ? '#fff' : 'rgba(255,255,255,.5)'} />
               </div>
               {!collapsed && (
-                <div style={{ textAlign: "left", minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 700,
-                      color: active ? "#fff" : "rgba(255,255,255,.65)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {item.label}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 10,
-                      color: active
-                        ? "rgba(255,255,255,.5)"
-                        : "rgba(255,255,255,.3)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {item.sublabel}
-                  </div>
+                <div style={{ textAlign: 'left', minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: active ? '#fff' : 'rgba(255,255,255,.65)', whiteSpace: 'nowrap' }}>{item.label}</div>
+                  <div style={{ fontSize: 10, color: active ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.3)', whiteSpace: 'nowrap' }}>{item.sublabel}</div>
                 </div>
               )}
             </button>
@@ -601,80 +559,79 @@ function DocSidebar({ activeType, onChange, collapsed, onToggle, businessInfo, u
         })}
       </div>
 
+      <div style={{ height: 1, background: 'rgba(255,255,255,.06)', margin: '4px 0' }} />
+
+      {/* ── Navigation ── */}
       {!collapsed && (
-  <div style={{
-    padding: '10px 14px 14px',
-    borderTop: '1px solid rgba(255,255,255,.08)',
-  }}>
-    {/* User info */}
-    <div style={{
-      display: 'flex', alignItems: 'center',
-      justifyContent: 'space-between', gap: 8,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-        {/* Avatar circle */}
-        <div style={{
-          width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-          background: 'linear-gradient(135deg,#1655e0,#7c3aed)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 11, fontWeight: 700, color: '#fff',
-        }}>
-          {(user?.name || user?.email || '?')[0].toUpperCase()}
+        <div style={{ padding: '8px 14px 4px' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.3)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Navigate</div>
         </div>
-        <div style={{ minWidth: 0 }}>
-          {user?.name && (
-            <div style={{
-              fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.8)',
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-              maxWidth: 120,
-            }}>
-              {user.name}
-            </div>
-          )}
-          <div style={{
-            fontSize: 10, color: 'rgba(255,255,255,.35)',
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-            maxWidth: 120,
-          }}>
-            {user?.email || 'Signed in'}
-          </div>
-        </div>
+      )}
+
+      <div style={{ padding: collapsed ? '4px 8px' : '0 8px 4px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {NAV_ITEMS.map(item => (
+          <SidebarItem key={item.id} item={item} onClick={() => onNavigate?.(item.id)} />
+        ))}
       </div>
 
-      {/* Logout button */}
-      <button
-        onClick={onLogout}
-        title="Sign out"
-        style={{
-          background: 'rgba(255,255,255,.06)',
-          border: '1px solid rgba(255,255,255,.1)',
-          borderRadius: 7, cursor: 'pointer',
-          width: 28, height: 28, flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'rgba(255,255,255,.4)',
-          transition: 'all .15s',
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.background = 'rgba(232,68,42,.2)';
-          e.currentTarget.style.borderColor = 'rgba(232,68,42,.4)';
-          e.currentTarget.style.color = '#f87171';
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.background = 'rgba(255,255,255,.06)';
-          e.currentTarget.style.borderColor = 'rgba(255,255,255,.1)';
-          e.currentTarget.style.color = 'rgba(255,255,255,.4)';
-        }}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-)}
+      <div style={{ height: 1, background: 'rgba(255,255,255,.06)', margin: '4px 0' }} />
+
+      {/* ── Overdue notification ── */}
+      {!collapsed && firstOverdue && (
+        <div style={{ margin: '0 8px 6px', padding: '7px 10px', borderRadius: 8, background: 'rgba(251,191,36,.08)', border: '1px solid rgba(251,191,36,.18)', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fbbf24', flexShrink: 0, marginTop: 3 }} />
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,.55)', lineHeight: 1.4 }}>
+            <span style={{ color: 'rgba(255,255,255,.8)', fontWeight: 700 }}>{firstOverdue.customer?.name || 'A client'}</span> invoice overdue by {overdueDays}d
+          </div>
+        </div>
+      )}
+
+      {/* ── Settings ── */}
+      {!collapsed && (
+        <div style={{ padding: '6px 14px 4px' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.3)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Settings</div>
+        </div>
+      )}
+
+      <div style={{ padding: collapsed ? '4px 8px' : '0 8px 6px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {SETTING_ITEMS.map(item => (
+          <SidebarItem key={item.id} item={item} onClick={() => onNavigate?.(item.id)} />
+        ))}
+      </div>
+
+      <div style={{ height: 1, background: 'rgba(255,255,255,.06)', margin: '4px 0' }} />
+
+      {/* ── User footer ── */}
+      {!collapsed && (
+        <div style={{ padding: '10px 14px 14px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg,#1655e0,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff' }}>
+                {(user?.name || user?.email || '?')[0].toUpperCase()}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                {user?.name && (
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.8)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>{user.name}</div>
+                )}
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>{user?.email || 'Signed in'}</div>
+              </div>
+            </div>
+            <button
+              onClick={onLogout}
+              title="Sign out"
+              style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 7, cursor: 'pointer', width: 28, height: 28, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.4)', transition: 'all .15s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,68,42,.2)'; e.currentTarget.style.borderColor = 'rgba(232,68,42,.4)'; e.currentTarget.style.color = '#f87171'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,.1)'; e.currentTarget.style.color = 'rgba(255,255,255,.4)'; }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -868,27 +825,27 @@ export default function AIInvoiceWindow({
 
     try {
       /* Step 1 — Client-side DB match */
-const mentionedClient = findClientInText(trimmed, userData?.clients);
-let appliedClient = null;
+      const mentionedClient = findClientInText(trimmed, userData?.clients);
+      let appliedClient = null;
 
-if (mentionedClient) {
-  // ✅ Found in DB — fill template immediately
-  applyClientFromDB(mentionedClient);
-  appliedClient = mentionedClient.name;
-} else {
- 
-  const isDocRequest = /invoice|bill|quote|estimate|purchase order|PO\b/i.test(trimmed);
-  // Also check if it contains a capitalised word (likely a name/company)
-  const hasName = /[A-Z][a-z]+/.test(trimmed);
+      if (mentionedClient) {
+        // ✅ Found in DB — fill template immediately
+        applyClientFromDB(mentionedClient);
+        appliedClient = mentionedClient.name;
+      } else {
+        const isDocRequest =
+          /invoice|bill|quote|estimate|purchase order|PO\b/i.test(trimmed);
+        // Also check if it contains a capitalised word (likely a name/company)
+        const hasName = /[A-Z][a-z]+/.test(trimmed);
 
-  if (isDocRequest || hasName) {
-    // Open CustomerModal immediately — don't wait for AI
-    setPendingNewClient(null);
-    setShowCustomerModal(true);
-    setLoading(false);
-    return; // stop here — don't call the AI yet
-  }
-}
+        if (isDocRequest || hasName) {
+          // Open CustomerModal immediately — don't wait for AI
+          setPendingNewClient(null);
+          setShowCustomerModal(true);
+          setLoading(false);
+          return; // stop here — don't call the AI yet
+        }
+      }
 
       /* Step 2 — Repeat last invoice */
       const isRepeat =
@@ -920,27 +877,27 @@ if (mentionedClient) {
       let appliedItems = 0;
 
       if (extracted) {
-  if (extracted.matchedClientId && !mentionedClient) {
-    const dbClient = userData?.clients?.find(
-      (c) => c.id === extracted.matchedClientId,
-    );
-    if (dbClient) {
-      applyClientFromDB(dbClient);
-      appliedClient = dbClient.name;
-    }
-  }
-  if (extracted.items?.length && !isRepeat) {
-    appliedItems = applyItems(extracted.items);
-  }
-  if (
-    extracted.repeatLastInvoice &&
-    userData?.recentInvoices?.length &&
-    !isRepeat
-  ) {
-    const last = userData.recentInvoices[0];
-    if (last.items?.length) appliedItems = applyItems(last.items);
-  }
-}
+        if (extracted.matchedClientId && !mentionedClient) {
+          const dbClient = userData?.clients?.find(
+            (c) => c.id === extracted.matchedClientId,
+          );
+          if (dbClient) {
+            applyClientFromDB(dbClient);
+            appliedClient = dbClient.name;
+          }
+        }
+        if (extracted.items?.length && !isRepeat) {
+          appliedItems = applyItems(extracted.items);
+        }
+        if (
+          extracted.repeatLastInvoice &&
+          userData?.recentInvoices?.length &&
+          !isRepeat
+        ) {
+          const last = userData.recentInvoices[0];
+          if (last.items?.length) appliedItems = applyItems(last.items);
+        }
+      }
 
       const msgId = `a-${++msgCounter.current}`;
       const aiMsg = {
@@ -957,7 +914,7 @@ if (mentionedClient) {
         ...historyRef.current,
         { role: "assistant", content: rawText },
       ];
-      await saveMsg({ ...aiMsg, showSavePrompt: false }); 
+      await saveMsg({ ...aiMsg, showSavePrompt: false });
     } catch (e) {
       setError(e.message || "Something went wrong. Check your connection.");
     } finally {
@@ -1123,7 +1080,7 @@ if (mentionedClient) {
           onToggle={() => setSidebarCollapsed((o) => !o)}
           businessInfo={bizInfo}
           user={user}
-  onLogout={() => signOut(getAuth())}
+          onLogout={() => signOut(getAuth())}
         />
 
         {/* CHAT */}
@@ -1138,67 +1095,113 @@ if (mentionedClient) {
             transition: "width .3s ease",
             flexShrink: 0,
           }}
-        > 
-        {/* Chat top bar — always visible */}
-<div style={{
-  height: 48,
-  background: '#0f172a',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: '0 14px',
-  flexShrink: 0,
-  borderBottom: '1px solid rgba(255,255,255,.07)',
-}}>
-  {/* Left — Back */}
-  <button onClick={onExit} style={{
-    display: 'flex', alignItems: 'center', gap: 6,
-    padding: '5px 12px', borderRadius: 8,
-    background: 'rgba(255,255,255,.07)',
-    border: '1px solid rgba(255,255,255,.12)',
-    color: 'rgba(255,255,255,.7)',
-    cursor: 'pointer', fontSize: 12, fontWeight: 600,
-  }}>
-    <ArrowLeft size={13} /> Back
-  </button>
+        >
+          {/* Chat top bar — always visible */}
+          <div
+            style={{
+              height: 48,
+              background: "#0f172a",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "0 14px",
+              flexShrink: 0,
+              borderBottom: "1px solid rgba(255,255,255,.07)",
+            }}
+          >
+            {/* Left — Back */}
+            <button
+              onClick={onExit}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "5px 12px",
+                borderRadius: 8,
+                background: "rgba(255,255,255,.07)",
+                border: "1px solid rgba(255,255,255,.12)",
+                color: "rgba(255,255,255,.7)",
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+            >
+              <ArrowLeft size={13} /> Back
+            </button>
 
-  {/* Right — show template button (only when preview is hidden) */}
-  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-    {hasContent && !previewOpen && (
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 5,
-        fontSize: 11, color: '#4ade80', fontWeight: 600,
-      }}>
-        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
-        Live
-      </div>
-    )}
-    <button
-      onClick={() => setPreviewOpen(o => !o)}
-      style={{
-        display: 'flex', alignItems: 'center', gap: 5,
-        padding: '5px 12px', borderRadius: 8,
-        background: previewOpen ? 'rgba(22,85,224,.3)' : '#1655e0',
-        border: `1px solid ${previewOpen ? 'rgba(22,85,224,.5)' : '#1655e0'}`,
-        color: '#fff',
-        cursor: 'pointer', fontSize: 12, fontWeight: 600,
-      }}>
-      {previewOpen
-        ? <><PanelRightClose size={13} /> Hide</>
-        : <><PanelRight size={13} /> Show Template</>}
-    </button>
-    <button
-      onClick={() => { if (window.confirm('Clear conversation?')) { setMessages([]); historyRef.current = []; }}}
-      style={{
-        background: 'none', border: '1px solid rgba(255,255,255,.1)',
-        borderRadius: 7, color: 'rgba(255,255,255,.4)',
-        cursor: 'pointer', padding: '5px 8px',
-        display: 'flex', alignItems: 'center',
-      }}>
-      <RotateCcw size={12} />
-    </button>
-  </div>
-</div>
+            {/* Right — show template button (only when preview is hidden) */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {hasContent && !previewOpen && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                    fontSize: 11,
+                    color: "#4ade80",
+                    fontWeight: 600,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: "#22c55e",
+                      display: "inline-block",
+                    }}
+                  />
+                  Live
+                </div>
+              )}
+              <button
+                onClick={() => setPreviewOpen((o) => !o)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  padding: "5px 12px",
+                  borderRadius: 8,
+                  background: previewOpen ? "rgba(22,85,224,.3)" : "#1655e0",
+                  border: `1px solid ${previewOpen ? "rgba(22,85,224,.5)" : "#1655e0"}`,
+                  color: "#fff",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 600,
+                }}
+              >
+                {previewOpen ? (
+                  <>
+                    <PanelRightClose size={13} /> Hide
+                  </>
+                ) : (
+                  <>
+                    <PanelRight size={13} /> Show Template
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  if (window.confirm("Clear conversation?")) {
+                    setMessages([]);
+                    historyRef.current = [];
+                  }
+                }}
+                style={{
+                  background: "none",
+                  border: "1px solid rgba(255,255,255,.1)",
+                  borderRadius: 7,
+                  color: "rgba(255,255,255,.4)",
+                  cursor: "pointer",
+                  padding: "5px 8px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <RotateCcw size={12} />
+              </button>
+            </div>
+          </div>
           <div
             ref={chatRef}
             style={{
@@ -1535,71 +1538,109 @@ if (mentionedClient) {
           >
             <div
               style={{
-                height: 44,
+                height: 48,
                 background: "#f8fafc",
                 borderBottom: "1px solid #e5e7eb",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "0 16px",
+                gap: 12,
                 flexShrink: 0,
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <activeDt.icon size={15} color={activeDt.color} />
-                <span
-                  style={{ fontSize: 13, fontWeight: 700, color: "#1e293b" }}
-                >
-                  {activeDt.label} Preview
-                </span>
-                {hasContent && (
+              {/* Left — doc type + status badges */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  minWidth: 0,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                  <activeDt.icon size={15} color={activeDt.color} />
                   <span
+                    style={{ fontSize: 13, fontWeight: 700, color: "#1e293b" }}
+                  >
+                    {activeDt.label} preview
+                  </span>
+                </div>
+
+                {hasContent && (
+                  <div
                     style={{
-                      padding: "2px 8px",
-                      borderRadius: 10,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 5,
+                      padding: "3px 9px",
+                      borderRadius: 20,
                       background: "#dcfce7",
                       border: "1px solid #bbf7d0",
-                      fontSize: 10,
-                      color: "#15803d",
-                      fontWeight: 700,
                     }}
                   >
-                    ● Live
-                  </span>
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: "#22c55e",
+                        display: "inline-block",
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: "#166534",
+                      }}
+                    >
+                      Live
+                    </span>
+                  </div>
+                )}
+
+                {userData?.activeTemplate && (
+                  <div
+                    style={{
+                      padding: "3px 9px",
+                      borderRadius: 20,
+                      background: `${activeDt.color}15`,
+                      border: `1px solid ${activeDt.color}30`,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: activeDt.color,
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      {userData.activeTemplate}
+                    </span>
+                  </div>
                 )}
               </div>
-              {/* TOP BAR */}
 
-  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-    <button onClick={onExit} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 8, background: 'rgba(0, 0, 0, 0.7)', border: '1px solid rgba(255,255,255,.12)', color: 'rgba(255,255,255,.7)', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
-      <ArrowLeft size={13} /> Back
-    </button>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '4px 12px', borderRadius: 20, background: `${activeDt.color}20`, border: `1px solid ${activeDt.color}40` }}>
-      <activeDt.icon size={12} color={activeDt.color} />
-      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: activeDt.color }}>{activeDt.label}</span>
-    </div>
-    {userData?.activeTemplate && (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: 'rgba(0, 0, 0, 0.7)', border: '1px solid rgba(255,255,255,.1)' }}>
-        <span style={{ fontSize: 10, color: 'rgba(255, 255, 255)' }}>Template:</span>
-        <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(160, 245, 255, 0.98)', textTransform: 'capitalize' }}>{userData.activeTemplate}</span>
-      </div>
-    )}
-    {hasContent && (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#35f904', fontWeight: 600 }}>
-        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} /> Live
-      </div>
-    )}
-  </div>
-  
-
-              <div style={{ display: "flex", gap: 6 }}>
+              {/* Right — actions */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  flexShrink: 0,
+                }}
+              >
                 <button
-                  onClick={handlePrint}
+                  onClick={() => {
+                    /* your save draft logic */
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 5,
-                    padding: "5px 12px",
+                    gap: 6,
+                    padding: "6px 14px",
                     borderRadius: 8,
                     background: "#fff",
                     border: "1px solid #e2e8f0",
@@ -1609,25 +1650,48 @@ if (mentionedClient) {
                     fontWeight: 600,
                   }}
                 >
-                  <Printer size={13} /> Print
+                  <FileText size={13} /> Save draft
                 </button>
+
                 <button
                   onClick={handlePrint}
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 5,
-                    padding: "5px 12px",
+                    gap: 6,
+                    padding: "6px 14px",
                     borderRadius: 8,
-                    background: "#059669",
-                    border: "none",
-                    color: "#fff",
+                    background: "#fff",
+                    border: "1px solid #e2e8f0",
+                    color: "#374151",
                     cursor: "pointer",
                     fontSize: 12,
                     fontWeight: 600,
                   }}
                 >
-                  <Download size={13} /> PDF
+                  <Download size={13} /> Download PDF
+                </button>
+
+                <button
+                  onClick={() => {
+                    /* your send logic — email, share, etc. */
+                  }}
+                  disabled={!hasContent}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "6px 16px",
+                    borderRadius: 8,
+                    background: hasContent ? "#1655e0" : "#94a3b8",
+                    border: "none",
+                    color: "#fff",
+                    cursor: hasContent ? "pointer" : "not-allowed",
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                >
+                  <Send size={13} /> Send {activeDt.label.toLowerCase()}
                 </button>
               </div>
             </div>
