@@ -13,6 +13,7 @@ import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import EducationSidebar from "./EducationSidebar";
+import DocumentsVault from "./DocumentsVault";
 import {
   getFirestore,
   collection,
@@ -214,6 +215,9 @@ const MOCK_STUDENTS = [
   },
 ];
 
+    
+      
+   
 const MOCK_STAFF = [
   {
     id: 1,
@@ -1283,6 +1287,7 @@ function ZField({ label, children, span2 }) {
       icon: Megaphone,
       badge: unreadNotices || null,
     },
+    { id: "documents", label: "Documents & Compliance", icon: Shield },
     { id: "fees", label: "Fee Tracking", icon: CreditCard },
     { id: "staff", label: "Staff", icon: Users },
     { id: "events", label: "Events & Calendar", icon: Calendar },
@@ -1507,6 +1512,19 @@ function ZField({ label, children, span2 }) {
               students={students}
             />
           )}
+          {activeView === "documents" && (
+  <div className="card p-6">
+    <div style={{ marginBottom: 16 }}>
+      <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: 0 }}>
+        Documents & Compliance
+      </h2>
+      <p style={{ fontSize: 13, color: "#64748b", marginTop: 4, marginBottom: 0 }}>
+        Track your SA ECD registration documents and access government portals.
+      </p>
+    </div>
+    <DocumentsVault user={user} />
+  </div>
+)}
           {activeView === "overview" && (
             <SchoolOverview
               students={savedStudents}

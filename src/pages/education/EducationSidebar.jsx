@@ -21,6 +21,7 @@ import {
   Clock,
   Megaphone,
   BookMarked,
+  Shield,
   Plus,
 } from "lucide-react";
 
@@ -160,6 +161,12 @@ export default function EducationSidebar({
       action: () => openModal(onOpenEventModal),
       color: "from-blue-600 to-blue-700",
     },
+    {
+      icon: Shield,
+      title: "Documents & Compliance",
+      action: () => goTo("documents"),
+      color: "from-teal-600 to-teal-700",
+    }, 
     {
       icon: Clock,
       title: "Timetable",
@@ -433,7 +440,12 @@ export default function EducationSidebar({
                 onClick={() => openModal(onOpenEventModal)}
                 color="blue"
               />
-
+                <NavItem
+                icon={Shield}
+                label="Documents & Compliance"
+                onClick={() => goTo("documents")}
+                color="teal"
+              />  
             </div>
           </nav>
 
