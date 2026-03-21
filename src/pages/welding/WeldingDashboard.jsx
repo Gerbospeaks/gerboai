@@ -105,8 +105,8 @@ const WeldingDashboard = () => {
   const [showQuotesList, setShowQuotesList] = useState(false);
   const [documentType, setDocumentType] = useState("quote");
   const [showPreview, setShowPreview] = useState(false);
-
-  // ── views / modals ───────────────────────────────────────────────────────
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const [showSettings, setShowSettings] = useState(false);
   const [activeView, setActiveView] = useState("home");
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
@@ -1198,6 +1198,10 @@ const WeldingDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    onNavigateTo={(view) => {
+    setAiWindowOpen(false);
+    setActiveView(view); 
+  }}
   />
 )}
       <div className="flex-1 flex overflow-hidden min-h-0">

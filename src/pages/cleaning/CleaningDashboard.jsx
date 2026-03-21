@@ -14,6 +14,23 @@ import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
+import JobsView              from "./JobsView";
+import JobCalendarView       from "./JobCalendarView";
+import RecurringJobsView     from "./RecurringJobsView";
+import ChecklistsView        from "./ChecklistsView";
+import ChecklistTemplatesView from "./ChecklistTemplatesView";
+import StaffView             from "./StaffView";
+import StaffScheduleView     from "./StaffScheduleView";
+import StaffAttendanceView   from "./StaffAttendanceView";
+import StaffPerformanceView  from "./StaffPerformanceView";
+import ServiceAreasView      from "./ServiceAreasView";
+import SuppliesView          from "./SuppliesView";
+import QualityControlView    from "./QualityControlView";
+import FleetView             from "./FleetView";
+import ScheduleView          from "./ScheduleView";
+import ReviewsView           from "./ReviewsView";
+import RemindersView         from "./RemindersView";
+import BankingView           from "./BankingView";
 import {
   getFirestore,
   collection,
@@ -99,7 +116,8 @@ const CleaningDashboard = () => {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [inputMode, setInputMode] = useState("manual");
   const [isMobile, setIsMobile] = useState(false);
-
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   // ── Auth ──────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
   const location = useLocation();
@@ -731,6 +749,10 @@ const CleaningDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    onNavigateTo={(view) => {
+    setAiWindowOpen(false);
+    setActiveView(view); 
+  }}
   />
 )}
       <div className="flex-1 flex overflow-hidden min-h-0">
@@ -970,6 +992,142 @@ const CleaningDashboard = () => {
     <PurchaseOrders user={user} />
   </div>
 )}
+
+          
+          {/* FIX: was "historyview" — corrected to "history-view" */}
+          {activeView === "history-view" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <HistoryView user={user} />
+            </div>
+          )}
+ 
+          {/* FIX: was "notesview" — corrected to "notes-view" */}
+          {activeView === "notes-view" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <NotesView user={user} />
+            </div>
+          )}
+ 
+          {activeView === "schedule" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <ScheduleView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
+ 
+          {activeView === "reviews" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ReviewsView user={user} />
+            </div>
+          )}
+ 
+          {activeView === "client-ratings" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ReviewsView user={user} />
+            </div>
+          )}
+ 
+          {activeView === "reminders" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <RemindersView user={user} />
+            </div>
+          )}
+ 
+          {/* ── Cleaning Operations views ──────────────────────────────── */}
+          {activeView === "jobs" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <JobsView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
+ 
+          {activeView === "job-new" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <JobsView user={user} businessInfo={businessInfo} openNew />
+            </div>
+          )}
+ 
+          {activeView === "job-calendar" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <JobCalendarView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
+            {activeView === "banking" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <BankingView user={user} />
+  </div>
+)}
+          {activeView === "recurring-jobs" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <RecurringJobsView user={user} />
+            </div>
+          )}
+ 
+          {activeView === "checklists" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ChecklistsView user={user} />
+            </div>
+          )}
+ 
+          {activeView === "checklist-templates" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ChecklistTemplatesView user={user} />
+            </div>
+          )}
+ 
+          {/* ── Staff views ────────────────────────────────────────────── */}
+          {activeView === "staff" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <StaffView user={user} />
+            </div>
+          )}
+ 
+          {activeView === "staff-new" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <StaffView user={user} openNew />
+            </div>
+          )}
+ 
+          {activeView === "staff-schedule" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <StaffScheduleView user={user} />
+            </div>
+          )}
+ 
+          {activeView === "staff-attendance" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <StaffAttendanceView user={user} />
+            </div>
+          )}
+ 
+          {activeView === "staff-performance" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <StaffPerformanceView user={user} />
+            </div>
+          )}
+ 
+          {/* ── Other operations views ─────────────────────────────────── */}
+          {activeView === "service-areas" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceAreasView user={user} />
+            </div>
+          )}
+ 
+          {activeView === "supplies" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <SuppliesView user={user} />
+            </div>
+          )}
+ 
+          {activeView === "quality-control" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <QualityControlView user={user} />
+            </div>
+          )}
+ 
+          {activeView === "fleet" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <FleetView user={user} />
+            </div>
+          )}
           {/* ── Quote/Invoice view — split layout ─────────────────────── */}
           {activeView === "quote" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

@@ -21,6 +21,7 @@ import BusinessSettingsModal from "../BusinessSettingsModal";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import FinancialOverview from "../FinancialOverview";
+import ReportsView from "./ReportsView";
 import {
   POTemplateRenderer
 } from "../Purchaseordertemplates";
@@ -101,6 +102,8 @@ const MechanicsDashboard = () => {
     pendingPayments: 0,
     loading: true,
   });
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const [showAIWindow, setShowAIWindow] = useState(false);
   const [poNumber, setPoNumber] = useState("");
   const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
@@ -1333,6 +1336,10 @@ const MechanicsDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    onNavigateTo={(view) => {
+    setAiWindowOpen(false);
+    setActiveView(view); 
+  }}
     TemplateRenderer={TemplateRenderer}   
   />
             )}
@@ -1600,7 +1607,11 @@ const MechanicsDashboard = () => {
               <Templates user={user} />
             </div>
           )}
-
+{activeView === "reports" && (
+  <div className="flex-1 overflow-y-auto p-4">
+    <ReportsView user={user} />
+  </div>
+)}
           {/* ── Invoice / Job Card Builder — split layout ──────────────────── */}
           {(activeView === "invoice" || activeView === "purchase-orders") && (
             <div className="flex-1 overflow-hidden flex min-h-0">

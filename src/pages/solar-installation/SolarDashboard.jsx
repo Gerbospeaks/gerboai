@@ -169,8 +169,8 @@ const SolarDashboard = () => {
   // ── step navigation ────────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
-
-  // ── layout / sidebar ──────────────────────────────────────────────────────
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -764,6 +764,10 @@ const SolarDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    onNavigateTo={(view) => {
+    setAiWindowOpen(false);
+    setActiveView(view); 
+  }}
   />
 )}
       <div className="flex-1 flex overflow-hidden min-h-0">

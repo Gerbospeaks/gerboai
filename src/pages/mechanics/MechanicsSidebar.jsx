@@ -14,6 +14,9 @@ import {
   Package,
   LogOut,
   Menu,
+   History,    
+  StickyNote, 
+  BarChart2,
   X,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
@@ -194,6 +197,24 @@ export default function MechanicsSidebar({
           onClick={() => goTo("parts-inventory")}
           active={activeView === "parts-inventory"}
         />
+        <NavItem
+  icon={History}
+  label="Job History"
+  onClick={() => goTo("history-view")}
+  active={activeView === "history-view"}
+/>
+<NavItem
+  icon={StickyNote}
+  label="Notes"
+  onClick={() => goTo("notes-view")}
+  active={activeView === "notes-view"}
+/>
+<NavItem
+  icon={BarChart2}
+  label="Reports & Analytics"
+  onClick={() => goTo("reports")}
+  active={activeView === "reports"}
+/>
       </div>
 
       {/* Footer */}
@@ -312,6 +333,9 @@ export default function MechanicsSidebar({
                   title: "Customers",
                   action: () => setShowCustomersListModal(true),
                 },
+                { icon: History,    title: "Job History",         action: () => goTo("history-view") },
+{ icon: StickyNote, title: "Notes",               action: () => goTo("notes-view")   },
+{ icon: BarChart2,  title: "Reports & Analytics", action: () => goTo("reports")      },
               ].map(({ icon: Icon, title, action }) => (
                 <button
                   key={title}

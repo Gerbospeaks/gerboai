@@ -129,6 +129,8 @@ const TowingDashboard = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
     useState(null);
   const [towLocation, setTowLocation] = useState("");
@@ -1281,6 +1283,10 @@ const TowingDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    onNavigateTo={(view) => {
+    setAiWindowOpen(false);
+    setActiveView(view); 
+  }}
   />
 )}
       <div className="flex-1 flex overflow-hidden min-h-0">

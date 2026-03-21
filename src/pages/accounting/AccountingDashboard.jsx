@@ -40,6 +40,7 @@ import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
 import AIInvoiceWindow from '../AIInvoiceWindow';
+import { getDashboardActions } from "../../utils/dashboardActions";
 import {
   ChevronLeft,
   ChevronRight,
@@ -82,7 +83,12 @@ const generateInvoiceNumber = async (userId, documentType) => {
 };
 
 const functions = getFunctions();
-
+const VIEW_TO_DOC_TYPE = {
+  invoice:  'invoice',
+  quote:    'estimate',
+  estimate: 'estimate',
+  jobcard:  'estimate',
+};
 const AccountingDashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
@@ -124,6 +130,8 @@ const AccountingDashboard = () => {
     useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [documentType, setDocumentType] = useState("invoice");
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const [stampSettings, setStampSettings] = useState({
     text: "PAID",
     color: "#22c55e",
@@ -135,7 +143,18 @@ const AccountingDashboard = () => {
     balanceDue: 0,
     status: "pending",
   });
+  const openAI = (activeView) => {
+    setAiDocType(VIEW_TO_DOC_TYPE[activeView] || 'invoice');
+    setAiWindowOpen(true);
+  };
 
+  // Wire up the handlers getDashboardActions expects
+  const actions = getDashboardActions( {
+    handleNewInvoice:  () => openAI('invoice'),
+    handleNewQuote:    () => openAI('quote'),
+    handleNewEstimate: () => openAI('estimate'),
+    handleNewJobcard:  () => openAI('jobcard'),
+  });
   const location = useLocation();
   useEffect(() => {
     if (location.state?.activeView) setActiveView(location.state.activeView);
@@ -731,6 +750,11 @@ const AccountingDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    onNavigateTo={(view) => {
+    setAiWindowOpen(false);
+    setActiveView(view); 
+  }}
+   
     TemplateRenderer={TemplateRenderer}  
   />
 )}

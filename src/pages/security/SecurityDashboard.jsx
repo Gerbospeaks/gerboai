@@ -134,8 +134,8 @@ const SecurityDashboard = () => {
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
-
-  // ── Incident state ────────────────────────────────────────────────────────
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const [documentType, setDocumentType] = useState("invoice");
   const [incidentNumber, setIncidentNumber] = useState("");
   const [incidentId, setIncidentId] = useState(null);

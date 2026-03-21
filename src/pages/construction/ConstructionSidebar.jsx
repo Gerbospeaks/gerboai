@@ -28,8 +28,13 @@ export default function ConstructionSidebar({
   handleNewQuote,
   businessInfo,
   savedQuotes,
-  savedCustomers,
+  savedCustomers, // ← populated from `customers` state in dashboard
   handleLogout,
+  // ── previously missing props ──────────────────────────────────────
+  documentType, // controls "All Quotes" vs "All Invoices" badge label
+  setShowQuotesList, // opens the quotes-list view
+  setShowCustomersListModal,
+  handleAddNewCustomer,
 }) {
   const [isQuotesOpen, setIsQuotesOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
@@ -41,7 +46,6 @@ export default function ConstructionSidebar({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // Lock body scroll when mobile drawer is open
   useEffect(() => {
     document.body.style.overflow = isMobile && sidebarOpen ? "hidden" : "";
     return () => {
@@ -54,7 +58,6 @@ export default function ConstructionSidebar({
     if (isMobile) setSidebarOpen(false);
   };
 
-  // ── Shared sidebar body ─────────────────────────────────────────────────────
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -78,7 +81,7 @@ export default function ConstructionSidebar({
         </button>
       </div>
 
-      {/* Scrollable nav */}
+      {/* Nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
         <NavItem
           icon={Home}
@@ -104,7 +107,7 @@ export default function ConstructionSidebar({
           active={activeView === "financial-overview"}
         />
 
-        {/* Quotes & Invoices accordion */}
+        {/* Quotes & Invoices */}
         <Accordion
           icon={Receipt}
           label="Quotes & Invoices"
@@ -124,24 +127,31 @@ export default function ConstructionSidebar({
             label="Create Invoice"
             onClick={() => {
               handleNewInvoice?.();
-              goTo("invoice");
+              goTo("quote");
             }}
           />
           <SubItem
             dot="bg-[#7c3aed]"
-            label="All Documents"
+            label={`All ${documentType === "invoice" ? "Invoices" : "Quotes"}`}
             badge={savedQuotes?.length ?? 0}
             onClick={() => {
+              // Navigate to the quotes-list view; also expose the modal toggle for flexibility
               goTo("quotes-list");
+              setShowQuotesList?.(true);
             }}
           />
         </Accordion>
-<NavItem icon={ShoppingBag} label="Purchase Orders"
-  onClick={() => goTo("purchase-orders")}
-  active={activeView === "purchase-orders"} />
+
+        <NavItem
+          icon={ShoppingBag}
+          label="Purchase Orders"
+          onClick={() => goTo("purchase-orders")}
+          active={activeView === "purchase-orders"}
+        />
+
         <SectionLabel>Operations</SectionLabel>
 
-        {/* Clients accordion */}
+        {/* Clients */}
         <Accordion
           icon={Users}
           label="Clients"
@@ -151,14 +161,20 @@ export default function ConstructionSidebar({
           <SubItem
             dot="bg-[#059669]"
             label="Add Client"
-            onClick={() => goTo("addClient")}
+            onClick={() => {
+              handleAddNewCustomer?.();
+              if (isMobile) setSidebarOpen(false);
+            }}
           />
           <SubItem
             dot="bg-[#2563eb]"
             label="All Clients"
             badge={savedCustomers?.length ?? 0}
             badgeBg="bg-[#7c3aed]"
-            onClick={() => goTo("clients")}
+            onClick={() => {
+              setShowCustomersListModal?.(true);
+              if (isMobile) setSidebarOpen(false);
+            }}
           />
         </Accordion>
 
@@ -214,11 +230,8 @@ export default function ConstructionSidebar({
 
   return (
     <>
-      {/* ════════════════════════════════════════════════════════════════
-          MOBILE — hamburger + slide-in drawer
-      ════════════════════════════════════════════════════════════════ */}
+      {/* MOBILE */}
       <div className="md:hidden print:hidden">
-        {/* Hamburger */}
         {!sidebarOpen && (
           <button
             onClick={() => setSidebarOpen(true)}
@@ -228,32 +241,20 @@ export default function ConstructionSidebar({
             <Menu className="w-4 h-4" />
           </button>
         )}
-
-        {/* Dim overlay */}
         <div
-          className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
-            sidebarOpen
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
-          }`}
+          className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
           onClick={() => setSidebarOpen(false)}
         />
-
-        {/* Drawer */}
         <div
-          className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#1c2130] shadow-2xl transform transition-transform duration-300 ease-in-out ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#1c2130] shadow-2xl transform transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
           <SidebarContent />
         </div>
       </div>
 
-      {/* ════════════════════════════════════════════════════════════════
-          DESKTOP — collapsed icon rail OR expanded panel
-      ════════════════════════════════════════════════════════════════ */}
+      {/* DESKTOP */}
       <div className="hidden md:flex print:hidden h-full">
-        {/* Collapsed icon rail */}
+        {/* Collapsed rail */}
         {!sidebarOpen && (
           <div className="flex flex-col flex-shrink-0 w-16 bg-[#1c2130] border-r border-[#2d3140] h-full items-center py-4 gap-2 z-30">
             <button
@@ -263,11 +264,9 @@ export default function ConstructionSidebar({
             >
               <ChevronRight className="w-5 h-5" />
             </button>
-
             <div className="w-9 h-9 bg-[#92400e] rounded-lg flex items-center justify-center my-1">
               <img src={logo} className="w-6 h-6 object-contain" alt="logo" />
             </div>
-
             <div className="flex flex-col items-center gap-1 w-full px-2 mt-1">
               {[
                 {
@@ -291,14 +290,17 @@ export default function ConstructionSidebar({
                 {
                   icon: Receipt,
                   title: "Quotes & Invoices",
-                  action: () => handleNewInvoice?.(),
-                  active: activeView === "quote" || activeView === "invoice",
+                  action: () => {
+                    handleNewInvoice?.();
+                    goTo("quote");
+                  },
+                  active: activeView === "quote",
                 },
                 {
                   icon: Users,
                   title: "Clients",
-                  action: () => goTo("clients"),
-                  active: activeView === "clients",
+                  action: () => setShowCustomersListModal?.(true),
+                  active: false,
                 },
                 {
                   icon: Calendar,
@@ -317,11 +319,7 @@ export default function ConstructionSidebar({
                   key={title}
                   onClick={action}
                   title={title}
-                  className={`relative w-10 h-10 flex items-center justify-center rounded-lg transition-all ${
-                    active
-                      ? "bg-[#2a1f0e] text-[#f59e0b]"
-                      : "text-[#64748b] hover:text-white hover:bg-[#2d3140]"
-                  }`}
+                  className={`relative w-10 h-10 flex items-center justify-center rounded-lg transition-all ${active ? "bg-[#2a1f0e] text-[#f59e0b]" : "text-[#64748b] hover:text-white hover:bg-[#2d3140]"}`}
                 >
                   {active && (
                     <span className="absolute left-0 top-[20%] h-[60%] w-[3px] bg-[#f59e0b] rounded-r-full" />
@@ -330,7 +328,6 @@ export default function ConstructionSidebar({
                 </button>
               ))}
             </div>
-
             <div className="mt-auto pb-2">
               <div className="w-9 h-9 bg-[#2d3140] rounded-full flex items-center justify-center ring-1 ring-[#3d4460] overflow-hidden">
                 {businessInfo?.logoUrl ? (
@@ -373,11 +370,7 @@ function NavItem({ icon: Icon, label, onClick, active = false }) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${
-        active
-          ? "bg-[#2d3140] text-white"
-          : "text-[#94a3b8] hover:bg-[#2d3140] hover:text-white"
-      }`}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${active ? "bg-[#2d3140] text-white" : "text-[#94a3b8] hover:bg-[#2d3140] hover:text-white"}`}
     >
       <Icon className="w-4 h-4 flex-shrink-0" />
       <span className="truncate">{label}</span>
@@ -401,9 +394,7 @@ function Accordion({ icon: Icon, label, isOpen, onToggle, children }) {
         />
       </button>
       <div
-        className={`ml-7 mt-0.5 space-y-0.5 overflow-hidden transition-all duration-200 ${
-          isOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
-        }`}
+        className={`ml-7 mt-0.5 space-y-0.5 overflow-hidden transition-all duration-200 ${isOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"}`}
       >
         {children}
       </div>

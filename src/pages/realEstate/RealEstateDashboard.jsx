@@ -139,8 +139,8 @@ const RealEstateDashboard = () => {
 
   // ── Auth ─────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
-
-  // ── Invoice state ─────────────────────────────────────────────────────────
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const [documentType, setDocumentType] = useState("invoice");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceId, setInvoiceId] = useState(null);

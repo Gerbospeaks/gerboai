@@ -34,6 +34,8 @@ import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
 import AIInvoiceWindow from '../AIInvoiceWindow';
+import ElectricalScheduleView from "./ElectricalScheduleView";
+import ElectricalReportsView  from "./ElectricalReportsView";
 import {
   ChevronLeft,
   ChevronRight,
@@ -76,13 +78,20 @@ const generateQuoteNumber = async (userId, documentType) => {
 };
 
 const functions = getFunctions();
-
+function AddClientRedirect({ onMount }) {
+  useEffect(() => { onMount(); }, []);
+  return (
+    <div className="flex-1 flex items-center justify-center text-sm text-[#94a3b8]">
+      Opening client form…
+    </div>
+  );
+}
 const ElectricalDashboard = () => {
   // ── Step state ────────────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
-
-  // ── UI state ──────────────────────────────────────────────────────────────
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeView, setActiveView] = useState("quote");
   const [showPreview, setShowPreview] = useState(false);
@@ -509,7 +518,10 @@ const ElectricalDashboard = () => {
       console.error(e);
     }
   };
-
+const handleAddNewCustomer = () => {
+  setSelectedCustomer(null);
+  setShowCustomerModal(true);
+};
   const printStyles = `@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } html,body { margin:0!important;padding:0!important;width:210mm!important;background:white!important; } body * { visibility:hidden!important; } #print-area,#print-area * { visibility:visible!important; } #print-area { display:block!important;position:absolute!important;left:0!important;top:0!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;background:white!important; } @page { size:A4 portrait;margin:0; } }`;
 
   const handlePrint = () => {
@@ -678,23 +690,31 @@ const ElectricalDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    onNavigateTo={(view) => {
+    setAiWindowOpen(false);
+    setActiveView(view); 
+  }}
   />
 )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar ───────────────────────────────────────────────────── */}
         <ElectricalSidebar
           user={user}
-          activeView={activeView}
-          setActiveView={setActiveView}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          setShowSettings={setShowSettings}
-          handleNewInvoice={handleNewInvoice}
-          handleNewQuote={handleNewQuote}
-          businessInfo={businessInfo}
-          savedQuotes={savedQuotes}
-          savedCustomers={savedCustomers}
-          handleLogout={handleLogout}
+  activeView={activeView}
+  setActiveView={setActiveView}
+  sidebarOpen={sidebarOpen}
+  setSidebarOpen={setSidebarOpen}
+  setShowSettings={setShowSettings}
+  handleNewInvoice={handleNewInvoice}
+  handleNewQuote={handleNewQuote}
+  businessInfo={businessInfo}
+  savedQuotes={savedQuotes}
+  savedCustomers={customers}
+  handleLogout={handleLogout}
+  documentType={documentType}
+  setShowQuotesList={setShowQuotesList}
+  setShowCustomersListModal={setShowCustomersListModal}
+  handleAddNewCustomer={handleAddNewCustomer}
         />
 
         {/* ── Main content ──────────────────────────────────────────────── */}
@@ -850,6 +870,155 @@ const ElectricalDashboard = () => {
   <div className="flex-1 overflow-y-auto p-6">
     <PurchaseOrders user={user} />
   </div>
+)}
+    {activeView === "schedule" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ElectricalScheduleView user={user} />
+  </div>
+)}
+ 
+{activeView === "reports" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ElectricalReportsView user={user} />
+  </div>
+)}
+ 
+{activeView === "quotes-list" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden max-w-5xl mx-auto">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
+        <div>
+          <h2 className="text-base font-semibold text-[#1e293b]">
+            All {documentType === "invoice" ? "Invoices" : "Quotes"}
+          </h2>
+          <p className="text-xs text-[#64748b] mt-0.5">{savedQuotes.length} records</p>
+        </div>
+        <button
+          onClick={() => { handleNewQuote(); setActiveView("quote"); }}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#d97706] hover:bg-[#b45309] text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          <Plus className="w-4 h-4" />New Quote
+        </button>
+      </div>
+      {savedQuotes.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Receipt className="w-10 h-10 text-[#cbd5e1] mb-3" />
+          <p className="text-sm text-[#94a3b8]">No records found</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                {["Number", "Client", "Property Type", "Power (A)", "Urgency", "Total", "Paid", "Status", "Date"].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {savedQuotes.map(q => {
+                const urgency = q.propertyDetails?.urgency || "Standard";
+                const urgencyCls =
+                  urgency === "Emergency" ? "bg-[#fef2f2] text-[#991b1b]"
+                  : urgency === "Urgent"  ? "bg-[#fff7ed] text-[#9a3412]"
+                  : "bg-[#f1f5f9] text-[#475569]";
+                return (
+                  <tr
+                    key={q.id}
+                    onClick={() => { loadQuote(q); setActiveView("quote"); }}
+                    className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] cursor-pointer transition-colors"
+                  >
+                    <td className="px-4 py-3 text-sm font-semibold text-[#d97706]">{q.quoteNumber || "N/A"}</td>
+                    <td className="px-4 py-3 text-sm text-[#374151]">{q.customer?.name || "N/A"}</td>
+                    <td className="px-4 py-3 text-xs text-[#64748b]">{q.propertyDetails?.type || "—"}</td>
+                    <td className="px-4 py-3 text-sm text-[#374151]">{q.propertyDetails?.powerRating ? `${q.propertyDetails.powerRating}A` : "—"}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold ${urgencyCls}`}>{urgency}</span>
+                    </td>
+                    <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">R{q.totals?.total?.toFixed(2) || "0.00"}</td>
+                    <td className="px-4 py-3 text-sm text-[#059669] font-medium">R{q.totals?.paid?.toFixed(2) || "0.00"}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold ${statusBadge(q.status)}`}>
+                        {q.status === "partially_paid" ? "Partial" : q.status || "Pending"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-[#64748b] whitespace-nowrap">
+                      {q.dates?.quoteDate ? new Date(q.dates.quoteDate).toLocaleDateString("en-ZA") : "—"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+ 
+{activeView === "clients" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden max-w-5xl mx-auto">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
+        <div>
+          <h2 className="text-base font-semibold text-[#1e293b]">All Clients</h2>
+          <p className="text-xs text-[#64748b] mt-0.5">{customers.length} clients</p>
+        </div>
+        <button
+          onClick={handleAddNewCustomer}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#d97706] hover:bg-[#b45309] text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          <Plus className="w-4 h-4" />Add Client
+        </button>
+      </div>
+      {customers.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Users className="w-10 h-10 text-[#cbd5e1] mb-3" />
+          <p className="text-sm text-[#94a3b8]">No clients yet</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                {["Name", "Email", "Phone", "Address", ""].map(h => (
+                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {customers.map(c => (
+                <tr key={c.id} className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors">
+                  <td className="px-5 py-3 text-sm font-semibold text-[#1e293b]">{c.name || "—"}</td>
+                  <td className="px-5 py-3 text-sm text-[#64748b]">{c.email || "—"}</td>
+                  <td className="px-5 py-3 text-sm text-[#64748b]">{c.phone || "—"}</td>
+                  <td className="px-5 py-3 text-sm text-[#64748b]">{c.address || "—"}</td>
+                  <td className="px-5 py-3">
+                    <button
+                      onClick={() => { setSelectedCustomer(c); setShowCustomerModal(true); }}
+                      className="text-xs text-[#d97706] hover:underline font-medium"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+ 
+{activeView === "addClient" && (
+  <AddClientRedirect
+    onMount={() => {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+      setActiveView("clients");
+    }}
+  />
 )}
           {/* ── Quote / Invoice view — split layout ─────────────────────── */}
           {activeView === "quote" && (

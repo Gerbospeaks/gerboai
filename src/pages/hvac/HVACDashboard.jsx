@@ -14,7 +14,7 @@ import HvacAIExtractor from "./HvacAIExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import HVACMultiStepForm from "./HVACMultiStepForm";
-import AIInvoiceWindow from '../AIInvoiceWindow';
+import AIInvoiceWindow from "../AIInvoiceWindow";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
@@ -33,6 +33,9 @@ import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import { Printer, Download } from "lucide-react";
+import HvacSystems from "./HvacSystems";
+import PartsInventory from "./PartsInventory";
+import MaintenanceSchedule from "./MaintenanceSchedule";
 import {
   ChevronDown,
   ChevronLeft,
@@ -109,8 +112,8 @@ const HvacDashboard = () => {
   const [documentType, setDocumentType] = useState("invoice");
   const [activeView, setActiveView] = useState("home");
   const { user, authUser } = useAuth();
-
-  // Doc numbers & IDs
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState("invoice");
   const [serviceNumber, setServiceNumber] = useState("");
   const [quoteNumber, setQuoteNumber] = useState("");
   const [serviceId, setServiceId] = useState(null);
@@ -671,7 +674,6 @@ const HvacDashboard = () => {
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    
   ].filter(Boolean);
 
   const mobileDashboardActions = [
@@ -733,7 +735,7 @@ const HvacDashboard = () => {
     templateId: selectedTemplate,
     businessInfo,
     loading,
-    jobCardNumber: serviceNumber,
+    jobCardNumber: documentType === "quote" ? quoteNumber : serviceNumber,
     customerName,
     customerEmail,
     customerPhone,
@@ -750,7 +752,7 @@ const HvacDashboard = () => {
     total,
     serviceCode: "HVAC-12345",
     serviceType: "HVAC",
-    documentType: "hvac",
+    documentType,
     paymentStatus,
   };
 
@@ -1102,9 +1104,21 @@ const HvacDashboard = () => {
               title: "Templates",
               action: () => setActiveView("templates"),
             },
-            { icon: Wind, title: "HVAC Systems" },
-            { icon: Package, title: "Parts Inventory" },
-            { icon: Calendar, title: "Maintenance" },
+            {
+              icon: Wind,
+              title: "HVAC Systems",
+              action: () => setActiveView("hvac-systems"),
+            },
+            {
+              icon: Package,
+              title: "Parts Inventory",
+              action: () => setActiveView("inventory"),
+            },
+            {
+              icon: Calendar,
+              title: "Maintenance",
+              action: () => setActiveView("maintenance"),
+            },
           ].map(({ icon: Icon, title, action }) => (
             <button
               key={title}
@@ -1314,9 +1328,21 @@ const HvacDashboard = () => {
                     icon: FileText,
                     action: () => setActiveView("templates"),
                   },
-                  { label: "HVAC Systems", icon: Wind },
-                  { label: "Parts Inventory", icon: Package },
-                  { label: "Maintenance Schedule", icon: Calendar },
+                  {
+                    label: "HVAC Systems",
+                    icon: Wind,
+                    action: () => setActiveView("hvac-systems"),
+                  },
+                  {
+                    label: "Parts Inventory",
+                    icon: Package,
+                    action: () => setActiveView("inventory"),
+                  },
+                  {
+                    label: "Maintenance Schedule",
+                    icon: Calendar,
+                    action: () => setActiveView("schedule"),
+                  },
                 ].map(({ label, icon: Icon, action }) => (
                   <div
                     key={label}
@@ -1372,12 +1398,10 @@ const HvacDashboard = () => {
             mobileActions={mobileDashboardActions}
             onSettingsOpen={() => setShowSettings(true)}
           />
-
           {/* ── Modals ─────────────────────────────────────────────────── */}
           {showSettings && (
             <BusinessSettingsModal onClose={() => setShowSettings(false)} />
           )}
-
           <CustomersListModal
             showModal={showCustomersListModal}
             setShowModal={setShowCustomersListModal}
@@ -1392,7 +1416,6 @@ const HvacDashboard = () => {
             existingCustomer={selectedCustomer}
             onCustomerSaved={handleCustomerSaved}
           />
-
           {/* Convert to invoice modal */}
           {showConvertModal && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1420,7 +1443,6 @@ const HvacDashboard = () => {
               </div>
             </div>
           )}
-
           {/* All invoices modal */}
           {showInvoicesList && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1509,7 +1531,6 @@ const HvacDashboard = () => {
               </div>
             </div>
           )}
-
           {/* Preview modal */}
           {showPreview && (
             <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
@@ -1562,7 +1583,6 @@ const HvacDashboard = () => {
               </div>
             </div>
           )}
-
           {/* ── Views ─────────────────────────────────────────────────── */}
           {activeView === "home" && <HomeViewLocal />}
           {activeView === "templates" && (
@@ -1576,10 +1596,25 @@ const HvacDashboard = () => {
             </div>
           )}
           {activeView === "purchase-orders" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <PurchaseOrders user={user} />
-  </div>
-)}
+            <div className="flex-1 overflow-y-auto p-6">
+              <PurchaseOrders user={user} />
+            </div>
+          )}{" "}
+          {activeView === "hvac-systems" && (
+            <div className="flex-1 overflow-y-auto p-4 md:p-6">
+              <HvacSystems user={user} />
+            </div>
+          )}
+          {activeView === "inventory" && (
+            <div className="flex-1 overflow-y-auto p-4 md:p-6">
+              <PartsInventory user={user} />
+            </div>
+          )}
+          {activeView === "schedule" && (
+            <div className="flex-1 overflow-y-auto p-4 md:p-6">
+              <MaintenanceSchedule user={user} />
+            </div>
+          )}
           {/* ── Invoice builder — split layout ─────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
@@ -1736,35 +1771,12 @@ const HvacDashboard = () => {
                           newItem={newItem}
                           setNewItem={setNewItem}
                           handleAddItem={handleAddItem}
+                          handleRemoveItem={handleRemoveItem}
+                          onSave={handleSaveQuote}
+                          documentType={documentType}
                         />
                       </div>
                     )}
-                  </div>
-
-                  {/* Payment terms card */}
-                  <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
-                    <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
-                      <span className="text-sm font-semibold text-[#374151]">
-                        Payment Terms
-                      </span>
-                    </div>
-                    <div className="divide-y divide-[#f1f5f9]">
-                      {[
-                        ["Payment Method", "Cash / Card / EFT"],
-                        ["Payment Terms", "Due on Completion"],
-                        ["Warranty", "12 Months Parts & Labor"],
-                      ].map(([k, v]) => (
-                        <div
-                          key={k}
-                          className="flex items-center justify-between px-5 py-3 text-sm"
-                        >
-                          <span className="text-[#64748b]">{k}</span>
-                          <span className="font-semibold text-[#1e293b]">
-                            {v}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </div>
               </div>

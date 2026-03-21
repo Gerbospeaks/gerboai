@@ -618,7 +618,12 @@ const generateReportCardNumber = async (userId) => {
   const nextNumber = lastNumber + 1;
   return `RC-${year}-T${term}-${String(nextNumber).padStart(4, "0")}`;
 };
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
+const VIEW_TO_DOC_TYPE = {
+  invoice:  'invoice',
+  quote:    'estimate',
+  estimate: 'estimate',
+  jobcard:  'estimate',
+};
 const EducationDashboard = () => {
   const { user, authUser } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -640,9 +645,15 @@ const EducationDashboard = () => {
   const { notices, setNotices, saveNotice, markNoticeRead, deleteNotice } =
     useNotices(user?.uid);
   const [showHomeworkForm, setShowHomeworkForm] = useState(false);
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const { homework, setHomework, saveHomework, deleteHomework } = useHomework(
     user?.uid,
   );
+  const openAI = (activeView) => {
+    setAiDocType(VIEW_TO_DOC_TYPE[activeView] || 'invoice');
+    setAiWindowOpen(true);
+  };
   const [newHomework, setNewHomework] = useState({
     subject: "",
     grade: "Grade 1",
@@ -1575,7 +1586,20 @@ function ZField({ label, children, span2 }) {
 
           {/* ── STAFF ── */}
           {activeView === "staff" && <StaffView staff={MOCK_STAFF} />}
-
+          {showAIWindow && (
+            <AIInvoiceWindow
+              user={user}
+              businessInfo={businessInfo}
+              documentType={documentType}
+              onExit={() => setShowAIWindow(false)}
+              onNavigateTo={(view) => {
+              setAiWindowOpen(false);
+              setActiveView(view); 
+            }}
+             
+              TemplateRenderer={TemplateRenderer}  
+            />
+          )}
           {/* ── EVENTS ── */}
           {activeView === "events" && <EventsView events={MOCK_EVENTS} />}
 

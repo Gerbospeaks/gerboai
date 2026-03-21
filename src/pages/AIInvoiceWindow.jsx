@@ -642,6 +642,7 @@ function DocSidebar({
 export default function AIInvoiceWindow({
   user,
   onExit,
+  onNavigateTo,
   documentType: initDocType = "invoice",
   TemplateRenderer,
 }) {
@@ -1076,6 +1077,10 @@ export default function AIInvoiceWindow({
               },
             ]);
           }}
+          onNavigate={(id) => {
+    onExit();            
+    onNavigateTo?.(id);     
+  }}
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed((o) => !o)}
           businessInfo={bizInfo}
@@ -1100,7 +1105,7 @@ export default function AIInvoiceWindow({
           <div
             style={{
               height: 48,
-              background: "#0f172a",
+              background: "#ffffff",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -1118,7 +1123,7 @@ export default function AIInvoiceWindow({
                 gap: 6,
                 padding: "5px 12px",
                 borderRadius: 8,
-                background: "rgba(255,255,255,.07)",
+                background: "rgb(77, 140, 191)",
                 border: "1px solid rgba(255,255,255,.12)",
                 color: "rgba(255,255,255,.7)",
                 cursor: "pointer",
@@ -1362,7 +1367,7 @@ export default function AIInvoiceWindow({
                 <span
                   style={{ fontSize: 10, color: "#15803d", fontWeight: 700 }}
                 >
-                  Firebase loaded
+                  Total loaded
                 </span>
                 {[
                   userData.clients.length &&

@@ -114,6 +114,8 @@ const WindowrepairDashboard = () => {
   const [isQuotesInvoicesOpen, setIsQuotesInvoicesOpen] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
   const [documentType, setDocumentType] = useState("quote");
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const [invoices, setInvoices] = useState([]);
   const [stats, setStats] = useState({
     totalInvoices: 0,
@@ -1021,6 +1023,10 @@ const WindowrepairDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    onNavigateTo={(view) => {
+    setAiWindowOpen(false);
+    setActiveView(view); 
+  }}
   />
 )}
       <div className="flex-1 flex overflow-hidden min-h-0">

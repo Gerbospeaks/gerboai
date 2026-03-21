@@ -34,6 +34,8 @@ import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
 import AIInvoiceWindow from '../AIInvoiceWindow';
+import ConstructionScheduleView from "./ConstructionScheduleView";
+import ConstructionReportsView  from "./ConstructionReportsView";
 import {
   ChevronLeft,
   ChevronRight,
@@ -92,6 +94,8 @@ const ConstructionDashboard = () => {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [inputMode, setInputMode] = useState("manual");
   const [isMobile, setIsMobile] = useState(false);
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
@@ -106,7 +110,6 @@ const ConstructionDashboard = () => {
 
   // ── Customer state ────────────────────────────────────────────────────────
   const [customers, setCustomers] = useState([]);
-  const [savedCustomers, setSavedCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
 
@@ -132,7 +135,11 @@ const ConstructionDashboard = () => {
     taxRate: "15",
     phase: "Phase 1",
   });
-
+const handleAddNewCustomer = () => {
+  setSelectedCustomer(null);
+  setShowCustomerModal(true);
+};
+ 
   // ── Payment / stamp ───────────────────────────────────────────────────────
   const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
@@ -671,23 +678,31 @@ const ConstructionDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    onNavigateTo={(view) => {
+    setAiWindowOpen(false);
+    setActiveView(view); 
+  }}
   />
 )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar ───────────────────────────────────────────────────── */}
         <ConstructionSidebar
-          user={user}
-          activeView={activeView}
-          setActiveView={setActiveView}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          setShowSettings={setShowSettings}
-          handleNewInvoice={handleNewInvoice}
-          handleNewQuote={handleNewQuote}
-          businessInfo={businessInfo}
-          savedQuotes={savedQuotes}
-          savedCustomers={savedCustomers}
-          handleLogout={handleLogout}
+         user={user}
+  activeView={activeView}
+  setActiveView={setActiveView}
+  sidebarOpen={sidebarOpen}
+  setSidebarOpen={setSidebarOpen}
+  setShowSettings={setShowSettings}
+  handleNewInvoice={handleNewInvoice}
+  handleNewQuote={handleNewQuote}
+  businessInfo={businessInfo}
+  savedQuotes={savedQuotes}
+  savedCustomers={customers}            
+  handleLogout={handleLogout}
+  documentType={documentType}           
+  setShowQuotesList={setShowQuotesList} 
+  setShowCustomersListModal={setShowCustomersListModal}  
+  handleAddNewCustomer={handleAddNewCustomer}  
         />
 
         {/* ── Main content ──────────────────────────────────────────────── */}
@@ -888,7 +903,174 @@ const ConstructionDashboard = () => {
   <div className="flex-1 overflow-y-auto p-6">
     <PurchaseOrders user={user} />
   </div>
+)}             {activeView === "schedule" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ConstructionScheduleView user={user} />
+  </div>
 )}
+ 
+{/* ── Quotes list as a full view (sidebar routes here via goTo) ─────── */}
+{activeView === "quotes-list" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden max-w-5xl mx-auto">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
+        <div>
+          <h2 className="text-base font-semibold text-[#1e293b]">
+            All {documentType === "invoice" ? "Invoices" : "Quotes"}
+          </h2>
+          <p className="text-xs text-[#64748b] mt-0.5">{savedQuotes.length} records</p>
+        </div>
+        <button
+          onClick={() => { handleNewQuote(); setActiveView("quote"); }}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          <Plus className="w-4 h-4" />New Quote
+        </button>
+      </div>
+      {savedQuotes.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Receipt className="w-10 h-10 text-[#cbd5e1] mb-3" />
+          <p className="text-sm text-[#94a3b8]">No records found</p>
+          <p className="text-xs text-[#cbd5e1] mt-1">Create your first quote to get started</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                {["Number", "Client", "Site", "Total", "Paid", "Status", "Date"].map(h => (
+                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {savedQuotes.map(q => (
+                <tr
+                  key={q.id}
+                  onClick={() => { loadQuote(q); setActiveView("quote"); }}
+                  className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] cursor-pointer transition-colors"
+                >
+                  <td className="px-5 py-3 text-sm font-semibold text-[#ea580c]">{q.quoteNumber || "N/A"}</td>
+                  <td className="px-5 py-3 text-sm text-[#374151]">{q.customer?.name || "N/A"}</td>
+                  <td className="px-5 py-3 text-sm text-[#64748b]">{q.siteDetails?.type || "—"}</td>
+                  <td className="px-5 py-3 text-sm font-semibold text-[#1e293b]">R{q.totals?.total?.toFixed(2) || "0.00"}</td>
+                  <td className="px-5 py-3 text-sm text-[#059669] font-medium">R{q.totals?.paid?.toFixed(2) || "0.00"}</td>
+                  <td className="px-5 py-3">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${statusBadge(q.status)}`}>
+                      {q.status === "partially_paid" ? "Partial" : q.status || "Pending"}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3 text-xs text-[#64748b] whitespace-nowrap">
+                    {q.dates?.quoteDate ? new Date(q.dates.quoteDate).toLocaleDateString() : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+ 
+{/* ── Clients list as a full view ──────────────────────────────────── */}
+{activeView === "clients" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden max-w-5xl mx-auto">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
+        <div>
+          <h2 className="text-base font-semibold text-[#1e293b]">All Clients</h2>
+          <p className="text-xs text-[#64748b] mt-0.5">{customers.length} clients</p>
+        </div>
+        <button
+          onClick={handleAddNewCustomer}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          <Plus className="w-4 h-4" />Add Client
+        </button>
+      </div>
+      {customers.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Users className="w-10 h-10 text-[#cbd5e1] mb-3" />
+          <p className="text-sm text-[#94a3b8]">No clients yet</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                {["Name", "Email", "Phone", "Address", ""].map(h => (
+                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {customers.map(c => (
+                <tr key={c.id} className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors">
+                  <td className="px-5 py-3 text-sm font-semibold text-[#1e293b]">{c.name || "—"}</td>
+                  <td className="px-5 py-3 text-sm text-[#64748b]">{c.email || "—"}</td>
+                  <td className="px-5 py-3 text-sm text-[#64748b]">{c.phone || "—"}</td>
+                  <td className="px-5 py-3 text-sm text-[#64748b]">{c.address || "—"}</td>
+                  <td className="px-5 py-3">
+                    <button
+                      onClick={() => { setSelectedCustomer(c); setShowCustomerModal(true); }}
+                      className="text-xs text-[#2563eb] hover:underline font-medium"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+ 
+{/* ── Add client — opens modal then returns to clients list ────────── */}
+{activeView === "addClient" && (() => {
+  // Open the modal immediately on mount, then go to clients list
+  if (!showCustomerModal) {
+    setSelectedCustomer(null);
+    setShowCustomerModal(true);
+    setActiveView("clients");
+  }
+  return (
+    <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex items-center justify-center py-24 text-[#64748b]">
+        <span className="text-sm">Opening client form…</span>
+      </div>
+    </div>
+  );
+})()}
+ 
+{/* ── Reports placeholder ───────────────────────────────────────────── */}
+{activeView === "reports" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <div className="max-w-5xl mx-auto">
+      <h1 className="text-lg font-bold text-[#1e293b] mb-1">Reports</h1>
+      <p className="text-xs text-[#64748b] mb-6">Financial and project reporting</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[
+          { label: "Total Quotes",   value: savedQuotes.filter(q => q.documentType === "quote").length,   color: "text-[#ea580c]", bg: "bg-[#fff7ed]" },
+          { label: "Total Invoices", value: savedQuotes.filter(q => q.documentType === "invoice").length, color: "text-[#2563eb]", bg: "bg-[#eff6ff]" },
+          { label: "Total Revenue",  value: `R${savedQuotes.filter(q => q.status === "paid").reduce((s, q) => s + (q.totals?.total || 0), 0).toLocaleString("en-ZA", { maximumFractionDigits: 0 })}`, color: "text-[#059669]", bg: "bg-[#f0fdf4]" },
+        ].map(({ label, value, color, bg }) => (
+          <div key={label} className={`${bg} border border-[#e2e8f0] rounded-xl p-5`}>
+            <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-2">{label}</p>
+            <p className={`text-2xl font-bold ${color}`}>{value}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-6 bg-white border border-[#e2e8f0] rounded-xl p-6 text-center text-sm text-[#94a3b8]">
+        Detailed reporting charts coming soon
+      </div>
+    </div>
+  </div>
+)}
+ 
           {/* ── Quote / Invoice view — split layout ─────────────────────── */}
           {activeView === "quote" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

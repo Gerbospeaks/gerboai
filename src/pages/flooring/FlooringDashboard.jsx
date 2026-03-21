@@ -34,6 +34,12 @@ import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
 import AIInvoiceWindow from '../AIInvoiceWindow';
+import FlooringSidebar       from "./FlooringSidebar";
+import FlooringProjectsView  from "./FlooringProjectsView";
+import FlooringInventoryView from "./FlooringInventoryView";
+import FlooringSuppliersView from "./FlooringSuppliersView";
+import { FlooringScheduleView, FlooringReportsView } from "./FlooringScheduleAndReports";
+
 import {
   ChevronDown,
   ChevronLeft,
@@ -97,330 +103,7 @@ const generateQuoteNumber = async (userId, documentType) => {
 
 const functions = getFunctions();
 
-// ---------------------------------------------------------------------------
-// Sidebar Component
-// ---------------------------------------------------------------------------
-const FlooringSidebar = ({
-  user,
-  activeView,
-  setActiveView,
-  sidebarOpen,
-  setSidebarOpen,
-  setShowSettings,
-  handleNewInvoice,
-  handleNewQuote,
-  businessInfo,
-  savedQuotes,
-  savedCustomers,
-  handleLogout,
-  setShowCustomersListModal,
-  handleAddNewCustomer,
-  setShowQuotesList,
-  documentType,
-  isMobile,
-}) => {
-  const [isQuotesOpen, setIsQuotesOpen] = useState(false);
-  const [isClientsOpen, setIsClientsOpen] = useState(false);
 
-  return (
-    <>
-      {/* Mobile backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* ── Collapsed icon rail ─────────────────────────────────────────
-          IMPORTANT: This is fixed-position and 64px (w-16) wide.
-          The main content wrapper must add md:ml-16 when this is visible
-          to prevent overlap. See the ml offset on the main content div. */}
-      <div
-        className={`${
-          sidebarOpen ? "hidden" : "hidden md:flex"
-        } fixed z-40 w-16 bg-[#1c1917] border-r border-[#292524] h-full print:hidden flex-col items-center py-4 space-y-4`}
-      >
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="p-2 text-[#a8a29e] hover:text-white hover:bg-[#292524] rounded-lg transition-all"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-        <div className="w-9 h-9 rounded-xl overflow-hidden">
-          <img src={logo} className="w-full h-full object-contain p-1" alt="" />
-        </div>
-        <div className="flex flex-col items-center gap-3 w-full px-2">
-          <button
-            onClick={() => setActiveView("home")}
-            title="Home"
-            className="group p-2 text-[#78716c] hover:text-white hover:bg-[#292524] rounded-lg transition-all w-10 h-10 flex items-center justify-center"
-          >
-            <Home className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => setShowSettings(true)}
-            title="Settings"
-            className="p-2 text-[#78716c] hover:text-white hover:bg-[#292524] rounded-lg transition-all w-10 h-10 flex items-center justify-center"
-          >
-            <Settings className="w-5 h-5" />
-          </button>
-          {!isMobile && (
-            <>
-              <button
-                onClick={() => setActiveView("financial-overview")}
-                title="Financials"
-                className="p-2 text-[#78716c] hover:text-white hover:bg-[#292524] rounded-lg transition-all w-10 h-10 flex items-center justify-center"
-              >
-                <TrendingUp className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => {
-                  handleNewInvoice();
-                  setActiveView("quote");
-                }}
-                title="Quotes & Invoices"
-                className="p-2 text-[#78716c] hover:text-white hover:bg-[#292524] rounded-lg transition-all w-10 h-10 flex items-center justify-center"
-              >
-                <Receipt className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setShowCustomersListModal(true)}
-                title="Clients"
-                className="p-2 text-[#78716c] hover:text-white hover:bg-[#292524] rounded-lg transition-all w-10 h-10 flex items-center justify-center"
-              >
-                <Users className="w-5 h-5" />
-              </button>
-            </>
-          )}
-        </div>
-        <div className="absolute bottom-5 left-0 right-0 flex justify-center">
-          <div className="w-9 h-9 bg-[#292524] rounded-full flex items-center justify-center ring-1 ring-[#44403c]">
-            <img
-              src={businessInfo.logoUrl}
-              className="w-5 h-5 object-contain"
-              alt=""
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Expanded sidebar (overlay) ──────────────────────────────────── */}
-      <div
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed z-50 w-64 bg-[#1c1917] border-r border-[#292524] transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto flex flex-col`}
-      >
-        <div className="p-4 flex-1">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg overflow-hidden">
-                <img
-                  src={logo}
-                  className="w-full h-full object-contain"
-                  alt=""
-                />
-              </div>
-              <span className="text-sm font-semibold text-white">SolidFlo</span>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1.5 text-[#78716c] hover:text-white hover:bg-[#292524] rounded-lg transition-all"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Nav */}
-          <nav className="space-y-1">
-            <div
-              onClick={() => {
-                setActiveView("home");
-                setSidebarOpen(false);
-              }}
-              className="flex items-center gap-2.5 px-3 py-2.5 text-[#a8a29e] hover:text-white hover:bg-[#292524] rounded-lg cursor-pointer transition-all text-sm font-medium"
-            >
-              <Home className="w-4 h-4 flex-shrink-0" />
-              Home
-            </div>
-            <div
-              onClick={() => {
-                setShowSettings(true);
-                setSidebarOpen(false);
-              }}
-              className="flex items-center gap-2.5 px-3 py-2.5 text-[#a8a29e] hover:text-white hover:bg-[#292524] rounded-lg cursor-pointer transition-all text-sm font-medium"
-            >
-              <Settings className="w-4 h-4 flex-shrink-0" />
-              Settings
-            </div>
-
-            <div className="pt-3 mt-3 border-t border-[#292524] space-y-1">
-              <div
-                onClick={() => {
-                  setActiveView("financial-overview");
-                  setSidebarOpen(false);
-                }}
-                className="flex items-center gap-2.5 px-3 py-2.5 text-[#a8a29e] hover:text-white hover:bg-[#292524] rounded-lg cursor-pointer transition-all text-sm font-medium"
-              >
-                <TrendingUp className="w-4 h-4 flex-shrink-0" />
-                Financial Dashboard
-              </div>
-
-              {/* Quotes & Invoices dropdown */}
-              <div>
-                <div
-                  onClick={() => setIsQuotesOpen(!isQuotesOpen)}
-                  className="flex items-center justify-between px-3 py-2.5 text-[#a8a29e] hover:text-white hover:bg-[#292524] rounded-lg cursor-pointer transition-all text-sm font-medium"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Receipt className="w-4 h-4 flex-shrink-0" />
-                    Quotes & Invoices
-                  </div>
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${isQuotesOpen ? "rotate-180" : ""}`}
-                  />
-                </div>
-                <div
-                  className={`ml-5 mt-1 space-y-0.5 border-l border-[#292524] pl-3 overflow-hidden transition-all duration-200 ${isQuotesOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
-                >
-                  <div
-                    onClick={() => {
-                      handleNewQuote();
-                      setActiveView("quote");
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="px-2 py-2 text-xs text-[#78716c] hover:text-white hover:bg-[#292524] rounded-md cursor-pointer transition-all flex items-center gap-2"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#d97706]" />
-                    Create Quote
-                  </div>
-                  <div
-                    onClick={() => {
-                      handleNewInvoice();
-                      setActiveView("quote");
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="px-2 py-2 text-xs text-[#78716c] hover:text-white hover:bg-[#292524] rounded-md cursor-pointer transition-all flex items-center gap-2"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#059669]" />
-                    Create Invoice
-                  </div>
-                  <div
-                    onClick={() => {
-                      setShowQuotesList(true);
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="px-2 py-2 text-xs text-[#78716c] hover:text-white hover:bg-[#292524] rounded-md cursor-pointer transition-all flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#7c3aed]" />
-                      All {documentType === "quote" ? "Quotes" : "Invoices"}
-                    </div>
-                    <span className="bg-[#d97706] text-white px-1.5 py-0.5 rounded text-xs font-bold">
-                      {savedQuotes.length}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Clients dropdown */}
-              <div>
-                <div
-                  onClick={() => setIsClientsOpen(!isClientsOpen)}
-                  className="flex items-center justify-between px-3 py-2.5 text-[#a8a29e] hover:text-white hover:bg-[#292524] rounded-lg cursor-pointer transition-all text-sm font-medium"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Users className="w-4 h-4 flex-shrink-0" />
-                    Clients
-                  </div>
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${isClientsOpen ? "rotate-180" : ""}`}
-                  />
-                </div>
-                <div
-                  className={`ml-5 mt-1 space-y-0.5 border-l border-[#292524] pl-3 overflow-hidden transition-all duration-200 ${isClientsOpen ? "max-h-32 opacity-100" : "max-h-0 opacity-0"}`}
-                >
-                  <div
-                    onClick={() => {
-                      handleAddNewCustomer();
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="px-2 py-2 text-xs text-[#78716c] hover:text-white hover:bg-[#292524] rounded-md cursor-pointer transition-all flex items-center gap-2"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#059669]" />
-                    Add Client
-                  </div>
-                  <div
-                    onClick={() => {
-                      setShowCustomersListModal(true);
-                      if (isMobile) setSidebarOpen(false);
-                    }}
-                    className="px-2 py-2 text-xs text-[#78716c] hover:text-white hover:bg-[#292524] rounded-md cursor-pointer transition-all flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#2563eb]" />
-                      All Clients
-                    </div>
-                    <span className="bg-[#2563eb] text-white px-1.5 py-0.5 rounded text-xs font-bold">
-                      {savedCustomers.length}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {!isMobile && (
-                <>
-                  <div
-                    onClick={() => setActiveView("schedule")}
-                    className="flex items-center gap-2.5 px-3 py-2.5 text-[#a8a29e] hover:text-white hover:bg-[#292524] rounded-lg cursor-pointer transition-all text-sm font-medium"
-                  >
-                    <Calendar className="w-4 h-4 flex-shrink-0" />
-                    Schedule
-                  </div>
-                  <div
-                    onClick={() => setActiveView("reports")}
-                    className="flex items-center gap-2.5 px-3 py-2.5 text-[#a8a29e] hover:text-white hover:bg-[#292524] rounded-lg cursor-pointer transition-all text-sm font-medium"
-                  >
-                    <BarChart3 className="w-4 h-4 flex-shrink-0" />
-                    Reports
-                  </div>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-[#292524]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-[#292524] rounded-full flex items-center justify-center ring-1 ring-[#44403c] flex-shrink-0">
-              <img
-                src={businessInfo.logoUrl}
-                alt=""
-                className="max-h-[65%] max-w-[65%] object-contain"
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-semibold text-white truncate">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-[#78716c] truncate">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="p-1.5 text-[#78716c] hover:text-[#ef4444] hover:bg-[#292524] rounded-lg transition-all"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-};
 
 // ---------------------------------------------------------------------------
 // Main Dashboard
@@ -454,7 +137,8 @@ const FlooringDashboard = () => {
 
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [inputMode, setInputMode] = useState("manual");
-
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
@@ -1063,30 +747,33 @@ const FlooringDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    onNavigateTo={(view) => {
+    setAiWindowOpen(false);
+    setActiveView(view); 
+  }}
   />
 )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-        <FlooringSidebar
-          user={user}
-          activeView={activeView}
-          setActiveView={setActiveView}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          setShowSettings={setShowSettings}
-          handleNewInvoice={handleNewInvoice}
-          handleNewQuote={handleNewQuote}
-          businessInfo={businessInfo}
-          savedQuotes={savedQuotes}
-          savedCustomers={savedCustomers}
-          handleLogout={handleLogout}
-          setShowCustomersListModal={setShowCustomersListModal}
-          handleAddNewCustomer={handleAddNewCustomer}
-          setShowQuotesList={setShowQuotesList}
-          documentType={documentType}
-          isMobile={isMobile}
-        />
-
+       <FlooringSidebar
+  user={user}
+  activeView={activeView}
+  setActiveView={setActiveView}
+  sidebarOpen={sidebarOpen}
+  setSidebarOpen={setSidebarOpen}
+  setShowSettings={setShowSettings}
+  handleNewInvoice={handleNewInvoice}
+  handleNewQuote={handleNewQuote}
+  businessInfo={businessInfo}
+  savedQuotes={savedQuotes}
+  savedCustomers={customers}
+  handleLogout={handleLogout}
+  setShowCustomersListModal={setShowCustomersListModal}
+  handleAddNewCustomer={handleAddNewCustomer}
+  setShowQuotesList={setShowQuotesList}
+  documentType={documentType}
+/>
+ 
         {/*
           ── Main content ───────────────────────────────────────────────────
           FIX: When the sidebar is collapsed it renders as a fixed w-16 (64px)
@@ -1099,7 +786,7 @@ const FlooringDashboard = () => {
         */}
         <div
           className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-[margin] duration-300 ${
-            sidebarOpen ? "md:ml-64" : "md:ml-16"
+            sidebarOpen ? "md:ml-2" : "md:ml-4"
           }`}
         >
           <AppHeader
@@ -1299,6 +986,36 @@ const FlooringDashboard = () => {
            {activeView === "purchase-orders" && (
   <div className="flex-1 overflow-y-auto p-6">
     <PurchaseOrders user={user} />
+  </div>
+)}
+{activeView === "schedule" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <FlooringScheduleView user={user} />
+  </div>
+)}
+ 
+{activeView === "reports" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <FlooringReportsView user={user} />
+  </div>
+)}
+ 
+{activeView === "inventory" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <FlooringInventoryView user={user} />
+  </div>
+)}
+ 
+{activeView === "suppliers" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <FlooringSuppliersView user={user} />
+  </div>
+)}
+ 
+{(activeView === "projects" || activeView === "measure" ||
+  activeView === "work-orders" || activeView === "installations") && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <FlooringProjectsView user={user} defaultTab={activeView} />
   </div>
 )}
           {/* ── Quote / Invoice view ──────────────────────────────────────── */}

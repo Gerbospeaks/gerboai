@@ -7,7 +7,6 @@ import {
   ShoppingBag,
   Users,
   ChevronRight,
-  ChevronLeft,
   ChevronDown,
   Calendar,
   BarChart3,
@@ -18,8 +17,23 @@ import {
   X,
   FileText,
   StickyNote,
+  History,
+  Bell,
+  CalendarDays,
+  UserCheck,
+  Package,
+  CheckSquare,
+  MapPin,
+  Truck,
+  Repeat,
+  ClipboardList,
+  LayoutTemplate,
+  TrendingDown,
+  Landmark,
+  DollarSign,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
+import AIInvoiceWindow from "../AIInvoiceWindow";
 
 export default function CleaningSidebar({
   navigate,
@@ -32,20 +46,25 @@ export default function CleaningSidebar({
   handleNewInvoice,
   handleNewQuote,
   businessInfo,
-  savedQuotes       = [],
-  savedCustomers    = [],
+  savedQuotes = [],
+  savedCustomers = [],
   handleLogout,
-  // FIX: all modal/list controls now wired up
   showQuotesList,
   setShowQuotesList,
   setShowCustomersListModal,
   handleAddNewCustomer,
-  documentType      = "quote",
+  documentType = "quote",
+  // AI window controls — accept both naming conventions
+  setShowAIWindow,
+  setAiWindowOpen,
 }) {
   const [isQuotesInvoicesOpen, setIsQuotesInvoicesOpen] = useState(false);
-  const [isClientsOpen,        setIsClientsOpen]        = useState(false);
-  const [isJobsOpen,           setIsJobsOpen]           = useState(false);
-  const [isMobile,             setIsMobile]             = useState(window.innerWidth < 768);
+  const [isClientsOpen, setIsClientsOpen] = useState(false);
+  const [isJobsOpen, setIsJobsOpen] = useState(false);
+  const [isStaffOpen, setIsStaffOpen] = useState(false);
+  const [isReportsOpen, setIsReportsOpen] = useState(false);
+  const [isFinanceOpen, setIsFinanceOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -56,11 +75,19 @@ export default function CleaningSidebar({
   // Lock body scroll when mobile drawer is open
   useEffect(() => {
     document.body.style.overflow = isMobile && sidebarOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isMobile, sidebarOpen]);
 
   const goTo = (view) => {
     setActiveView(view);
+    if (isMobile) setSidebarOpen(false);
+  };
+
+  const openAI = () => {
+    if (setShowAIWindow) setShowAIWindow(true);
+    else if (setAiWindowOpen) setAiWindowOpen(true);
     if (isMobile) setSidebarOpen(false);
   };
 
@@ -90,6 +117,8 @@ export default function CleaningSidebar({
 
       {/* Scrollable nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
+       
+
         <NavItem
           icon={Home}
           label="Home"
@@ -105,6 +134,7 @@ export default function CleaningSidebar({
           }}
         />
 
+        {/* ── FINANCE ── */}
         <SectionLabel>Finance</SectionLabel>
 
         <NavItem
@@ -124,6 +154,7 @@ export default function CleaningSidebar({
           <SubItem
             dot="bg-[#2563eb]"
             label="Create Quote"
+            active={activeView === "quote" && documentType === "quote"}
             onClick={() => {
               handleNewQuote?.();
               goTo("quote");
@@ -132,12 +163,12 @@ export default function CleaningSidebar({
           <SubItem
             dot="bg-[#059669]"
             label="Create Invoice"
+            active={activeView === "quote" && documentType === "invoice"}
             onClick={() => {
               handleNewInvoice?.();
               goTo("quote");
             }}
           />
-          {/* FIX: setShowQuotesList is now properly passed and invoked */}
           <SubItem
             dot="bg-[#7c3aed]"
             label={`All ${documentType === "invoice" ? "Invoices" : "Quotes"}`}
@@ -147,24 +178,26 @@ export default function CleaningSidebar({
               if (isMobile) setSidebarOpen(false);
             }}
           />
-        </Accordion>
-<NavItem icon={ShoppingBag} label="Purchase Orders"
-  onClick={() => goTo("purchase-orders")}
-  active={activeView === "purchase-orders"} />
-        <SectionLabel>Operations</SectionLabel>
-
-        {/* Cleaning Jobs */}
-        <Accordion
-          icon={Sparkles}
-          label="Cleaning Jobs"
-          isOpen={isJobsOpen}
-          onToggle={() => setIsJobsOpen((p) => !p)}
-        >
-          <SubItem dot="bg-[#0891b2]" label="Active Jobs"     onClick={() => goTo("jobs")} />
-          <SubItem dot="bg-[#0d9488]" label="Job Checklists"  onClick={() => goTo("checklists")} />
-          <SubItem dot="bg-[#059669]" label="Service Areas"   onClick={() => goTo("service-areas")} />
+          <SubItem
+            dot="bg-[#dc2626]"
+            label="Credit Notes"
+            onClick={() => goTo("credit-notes")}
+            active={activeView === "credit-notes"}
+          />
+          <SubItem
+            dot="bg-[#0891b2]"
+            label="Recurring Invoices"
+            onClick={() => goTo("recurring-invoices")}
+            active={activeView === "recurring-invoices"}
+          />
         </Accordion>
 
+        <NavItem
+          icon={ShoppingBag}
+          label="Purchase Orders"
+          onClick={() => goTo("purchase-orders")}
+          active={activeView === "purchase-orders"}
+        />
         {/* Clients */}
         <Accordion
           icon={Users}
@@ -172,7 +205,6 @@ export default function CleaningSidebar({
           isOpen={isClientsOpen}
           onToggle={() => setIsClientsOpen((p) => !p)}
         >
-          {/* FIX: handleAddNewCustomer now wired */}
           <SubItem
             dot="bg-[#059669]"
             label="Add Client"
@@ -181,7 +213,6 @@ export default function CleaningSidebar({
               if (isMobile) setSidebarOpen(false);
             }}
           />
-          {/* FIX: setShowCustomersListModal now wired */}
           <SubItem
             dot="bg-[#2563eb]"
             label="All Clients"
@@ -192,39 +223,172 @@ export default function CleaningSidebar({
               if (isMobile) setSidebarOpen(false);
             }}
           />
+          <SubItem
+            dot="bg-[#d97706]"
+            label="Client Ratings"
+            onClick={() => goTo("client-ratings")}
+            active={activeView === "client-ratings"}
+          />
         </Accordion>
 
+        {/* ── OPERATIONS ── */}
+        <SectionLabel>Operations</SectionLabel>
+
+        {/* Cleaning Jobs */}
+        <Accordion
+          icon={Sparkles}
+          label="Cleaning Jobs"
+          isOpen={isJobsOpen}
+          onToggle={() => setIsJobsOpen((p) => !p)}
+        >
+          <SubItem
+            dot="bg-[#059669]"
+            label="New Job"
+            onClick={() => goTo("job-new")}
+            active={activeView === "job-new"}
+          />
+          <SubItem
+            dot="bg-[#0891b2]"
+            label="All Jobs"
+            onClick={() => goTo("jobs")}
+            active={activeView === "jobs"}
+          />
+          <SubItem
+            dot="bg-[#2563eb]"
+            label="Job Calendar"
+            onClick={() => goTo("job-calendar")}
+            active={activeView === "job-calendar"}
+          />
+          <SubItem
+            dot="bg-[#d97706]"
+            label="Recurring Jobs"
+            onClick={() => goTo("recurring-jobs")}
+            active={activeView === "recurring-jobs"}
+          />
+          <SubItem
+            dot="bg-[#0d9488]"
+            label="Job Checklists"
+            onClick={() => goTo("checklists")}
+            active={activeView === "checklists"}
+          />
+          <SubItem
+            dot="bg-[#7c3aed]"
+            label="Checklist Templates"
+            onClick={() => goTo("checklist-templates")}
+            active={activeView === "checklist-templates"}
+          />
+        </Accordion>
+
+        {/* Staff */}
+        <Accordion
+          icon={UserCheck}
+          label="Staff"
+          isOpen={isStaffOpen}
+          onToggle={() => setIsStaffOpen((p) => !p)}
+        >
+          <SubItem
+            dot="bg-[#059669]"
+            label="Add Staff Member"
+            onClick={() => goTo("staff-new")}
+            active={activeView === "staff-new"}
+          />
+          <SubItem
+            dot="bg-[#2563eb]"
+            label="All Staff"
+            onClick={() => goTo("staff")}
+            active={activeView === "staff"}
+          />
+          <SubItem
+            dot="bg-[#7c3aed]"
+            label="Staff Schedule"
+            onClick={() => goTo("staff-schedule")}
+            active={activeView === "staff-schedule"}
+          />
+          <SubItem
+            dot="bg-[#d97706]"
+            label="Attendance & Hours"
+            onClick={() => goTo("staff-attendance")}
+            active={activeView === "staff-attendance"}
+          />
+          <SubItem
+            dot="bg-[#dc2626]"
+            label="Staff Performance"
+            onClick={() => goTo("staff-performance")}
+            active={activeView === "staff-performance"}
+          />
+        </Accordion>
+
+        <NavItem
+          icon={MapPin}
+          label="Service Areas"
+          onClick={() => goTo("service-areas")}
+          active={activeView === "service-areas"}
+        />
+
+        <NavItem
+          icon={Package}
+          label="Supplies & Inventory"
+          onClick={() => goTo("supplies")}
+          active={activeView === "supplies"}
+        />
+
+        <NavItem
+          icon={CheckSquare}
+          label="Quality Control"
+          onClick={() => goTo("quality-control")}
+          active={activeView === "quality-control"}
+        />
+
+        <NavItem
+          icon={Truck}
+          label="Fleet / Vehicles"
+          onClick={() => goTo("fleet")}
+          active={activeView === "fleet"}
+        />
+
+        {/* ── ACCOUNTING ── */}
+        <SectionLabel>Accounting</SectionLabel>
+        <NavItem
+          icon={Landmark}
+          label="Banking"
+          onClick={() => goTo("banking")}
+          active={activeView === "banking"}
+        />
+
+
+        {/* ── TOOLS ── */}
         <SectionLabel>Tools</SectionLabel>
 
         <NavItem
-          icon={FileText}
+          icon={CalendarDays}
+          label="Schedule"
+          onClick={() => goTo("schedule")}
+          active={activeView === "schedule"}
+        />
+        <NavItem
+          icon={LayoutTemplate}
           label="Templates"
           onClick={() => goTo("templates")}
           active={activeView === "templates"}
         />
         <NavItem
           icon={Star}
-          label="Reviews"
+          label="Client Reviews"
           onClick={() => goTo("reviews")}
           active={activeView === "reviews"}
         />
-        <NavItem
-          icon={Calendar}
-          label="Schedule"
-          onClick={() => goTo("schedule")}
-          active={activeView === "schedule"}
-        />
-        <NavItem
-          icon={BarChart3}
-          label="Reports"
-          onClick={() => goTo("reports")}
-          active={activeView === "reports"}
-        />
+        
         <NavItem
           icon={StickyNote}
           label="Notes"
           onClick={() => goTo("notes-view")}
           active={activeView === "notes-view"}
+        />
+        <NavItem
+          icon={Bell}
+          label="Reminders"
+          onClick={() => goTo("reminders")}
+          active={activeView === "reminders"}
         />
       </div>
 
@@ -233,7 +397,11 @@ export default function CleaningSidebar({
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-[#253347] rounded-full flex items-center justify-center ring-1 ring-[#334155] flex-shrink-0 overflow-hidden">
             {businessInfo?.logoUrl ? (
-              <img src={businessInfo.logoUrl} alt="biz" className="w-5 h-5 object-contain" />
+              <img
+                src={businessInfo.logoUrl}
+                alt="biz"
+                className="w-5 h-5 object-contain"
+              />
             ) : (
               <div className="w-4 h-4 bg-[#0891b2] rounded-full" />
             )}
@@ -278,7 +446,9 @@ export default function CleaningSidebar({
         {/* Dim overlay */}
         <div
           className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
-            sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            sidebarOpen
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
           }`}
           onClick={() => setSidebarOpen(false)}
         />
@@ -314,20 +484,82 @@ export default function CleaningSidebar({
 
             <div className="flex flex-col items-center gap-1 w-full px-2 mt-1">
               {[
-                { icon: Home,     title: "Home",              action: () => goTo("home") },
-                { icon: Settings, title: "Settings",          action: () => setShowSettings?.(true) },
-                { icon: TrendingUp, title: "Financial Dashboard", action: () => goTo("financial-overview") },
-                { icon: Receipt,  title: "Quotes & Invoices", action: () => { handleNewInvoice?.(); goTo("quote"); } },
-                { icon: Sparkles, title: "Cleaning Jobs",     action: () => goTo("jobs") },
-                { icon: Users,    title: "Clients",           action: () => setShowCustomersListModal?.(true) },
-                { icon: Calendar, title: "Schedule",          action: () => goTo("schedule") },
-                { icon: FileText, title: "Templates",         action: () => goTo("templates") },
-              ].map(({ icon: Icon, title, action }) => (
+                { icon: Home, title: "Home", action: () => goTo("home") },
+                {
+                  icon: Settings,
+                  title: "Settings",
+                  action: () => setShowSettings?.(true),
+                },
+                {
+                  icon: Sparkles,
+                  title: "AI Assistant",
+                  action: openAI,
+                  ai: true,
+                },
+                {
+                  icon: TrendingUp,
+                  title: "Financial Dashboard",
+                  action: () => goTo("financial-overview"),
+                },
+                {
+                  icon: Receipt,
+                  title: "Quotes & Invoices",
+                  action: () => {
+                    handleNewQuote?.();
+                    goTo("quote");
+                  },
+                },
+                {
+                  icon: Sparkles,
+                  title: "Cleaning Jobs",
+                  action: () => goTo("jobs"),
+                },
+                {
+                  icon: UserCheck,
+                  title: "Staff",
+                  action: () => goTo("staff"),
+                },
+                {
+                  icon: Users,
+                  title: "Clients",
+                  action: () => setShowCustomersListModal?.(true),
+                },
+                {
+                  icon: CalendarDays,
+                  title: "Schedule",
+                  action: () => goTo("schedule"),
+                },
+                {
+                  icon: Package,
+                  title: "Supplies",
+                  action: () => goTo("supplies"),
+                },
+                {
+                  icon: BarChart3,
+                  title: "Reports",
+                  action: () => goTo("report-pnl"),
+                },
+                {
+                  icon: LayoutTemplate,
+                  title: "Templates",
+                  action: () => goTo("templates"),
+                },
+                
+                {
+                  icon: StickyNote,
+                  title: "Notes",
+                  action: () => goTo("notes-view"),
+                },
+              ].map(({ icon: Icon, title, action, ai }) => (
                 <button
                   key={title}
                   onClick={action}
                   title={title}
-                  className="w-10 h-10 flex items-center justify-center text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg transition-all"
+                  className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all ${
+                    ai
+                      ? "text-[#a78bfa] hover:text-white hover:bg-[#7c3aed]"
+                      : "text-[#64748b] hover:text-white hover:bg-[#253347]"
+                  }`}
                 >
                   <Icon className="w-5 h-5" />
                 </button>
@@ -337,7 +569,11 @@ export default function CleaningSidebar({
             <div className="mt-auto pb-2">
               <div className="w-9 h-9 bg-[#253347] rounded-full flex items-center justify-center ring-1 ring-[#334155] overflow-hidden">
                 {businessInfo?.logoUrl ? (
-                  <img src={businessInfo.logoUrl} className="w-5 h-5 object-contain" alt="biz" />
+                  <img
+                    src={businessInfo.logoUrl}
+                    className="w-5 h-5 object-contain"
+                    alt="biz"
+                  />
                 ) : (
                   <div className="w-4 h-4 bg-[#0891b2] rounded-full" />
                 )}
@@ -401,7 +637,7 @@ function Accordion({ icon: Icon, label, isOpen, onToggle, children }) {
       </button>
       <div
         className={`ml-7 mt-0.5 space-y-0.5 overflow-hidden transition-all duration-200 ${
-          isOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+          isOpen ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         {children}
@@ -410,18 +646,33 @@ function Accordion({ icon: Icon, label, isOpen, onToggle, children }) {
   );
 }
 
-function SubItem({ label, dot, onClick, badge, badgeBg = "bg-[#2563eb]" }) {
+function SubItem({
+  label,
+  dot,
+  onClick,
+  badge,
+  badgeBg = "bg-[#2563eb]",
+  active = false,
+}) {
   return (
     <div
       onClick={onClick}
-      className="flex items-center justify-between px-2 py-2 text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg cursor-pointer transition-all text-sm"
+      className={`flex items-center justify-between px-2 py-2 rounded-lg cursor-pointer transition-all text-sm ${
+        active
+          ? "bg-[#253347] text-white"
+          : "text-[#64748b] hover:text-white hover:bg-[#253347]"
+      }`}
     >
       <div className="flex items-center gap-2 min-w-0">
-        {dot && <div className={`w-1.5 h-1.5 rounded-full ${dot} flex-shrink-0`} />}
+        {dot && (
+          <div className={`w-1.5 h-1.5 rounded-full ${dot} flex-shrink-0`} />
+        )}
         <span className="truncate">{label}</span>
       </div>
       {badge != null && badge > 0 && (
-        <span className={`${badgeBg} text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ml-2`}>
+        <span
+          className={`${badgeBg} text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ml-2`}
+        >
           {badge}
         </span>
       )}

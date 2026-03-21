@@ -35,6 +35,9 @@ import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
 import AIInvoiceWindow from '../AIInvoiceWindow';
+import InventoryView from "./InventoryView";
+import ScheduleView  from "./ScheduleView";
+import ProjectsView  from "./ProjectsView";
 import {
   ChevronLeft,
   ChevronRight,
@@ -102,7 +105,6 @@ const CarpentryDashboard = () => {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [customers, setCustomers] = useState([]);
-  const [savedCustomers, setSavedCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [inputMode, setInputMode] = useState("manual");
@@ -111,6 +113,8 @@ const CarpentryDashboard = () => {
   const [stampSettings, setStampSettings] = useState({ text: "PAID", color: "#22c55e", showDate: true, enabled: true });
   const [showAIWindow, setShowAIWindow] = useState(false);
   const location = useLocation();
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   useEffect(() => {
     if (location.state?.activeView) setActiveView(location.state.activeView);
   }, [location.state]);
@@ -407,17 +411,33 @@ const CarpentryDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    onNavigateTo={(view) => {
+    setAiWindowOpen(false);
+    setActiveView(view); 
+  }}
   />
 )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar */}
         <CarpentrySidebar
-          user={user} activeView={activeView} setActiveView={setActiveView}
-          sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}
-          setShowSettings={setShowSettings} handleNewInvoice={handleNewInvoice}
-          handleNewQuote={handleNewQuote} businessInfo={businessInfo}
-          savedQuotes={savedQuotes} savedCustomers={savedCustomers} handleLogout={handleLogout}
-        />
+  user={user}
+  activeView={activeView}
+  setActiveView={setActiveView}
+  sidebarOpen={sidebarOpen}
+  setSidebarOpen={setSidebarOpen}
+  setShowSettings={setShowSettings}
+  handleNewInvoice={handleNewInvoice}
+  handleNewQuote={handleNewQuote}
+  businessInfo={businessInfo}
+  savedQuotes={savedQuotes}
+  savedCustomers={customers}       
+  handleLogout={handleLogout}
+  showQuotesList={showQuotesList}   
+  setShowQuotesList={setShowQuotesList}   
+  setShowCustomersListModal={setShowCustomersListModal}  
+  handleAddNewCustomer={handleAddNewCustomer}  
+  documentType={documentType}       
+/>
 
         {/* Main content */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
@@ -521,6 +541,11 @@ const CarpentryDashboard = () => {
   <div className="flex-1 overflow-y-auto p-6">
     <PurchaseOrders user={user} />
   </div>
+)}
+{activeView === "inventory" && <div className="flex-1 overflow-y-auto p-6"><InventoryView user={user} /></div>}
+{activeView === "schedule"  && <div className="flex-1 overflow-y-auto p-6"><ScheduleView  user={user} /></div>}
+{(activeView === "projects" || activeView === "work-orders" || activeView === "materials") && (
+  <div className="flex-1 overflow-y-auto p-6"><ProjectsView user={user} defaultTab={activeView} /></div>
 )}
           {/* ── Quote/Invoice builder — split layout ───────────────────────── */}
           {activeView === "quote" && (

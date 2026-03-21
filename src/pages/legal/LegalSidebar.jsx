@@ -22,7 +22,6 @@ import {
 import logo from "../../assets/img/logo.png";
 
 export default function LegalSidebar({
-  navigate,
   user,
   activeView,
   setActiveView,
@@ -52,12 +51,9 @@ export default function LegalSidebar({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // Lock body scroll when mobile drawer is open
   useEffect(() => {
     document.body.style.overflow = isMobile && sidebarOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [isMobile, sidebarOpen]);
 
   const goTo = (view) => {
@@ -65,7 +61,7 @@ export default function LegalSidebar({
     if (isMobile) setSidebarOpen(false);
   };
 
-  // ── Shared sidebar body ─────────────────────────────────────────────────────
+  // ── Sidebar body ──────────────────────────────────────────────────────────
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -148,9 +144,14 @@ export default function LegalSidebar({
             }}
           />
         </Accordion>
-         <NavItem icon={ShoppingBag} label="Purchase Orders"
-  onClick={() => goTo("purchase-orders")}
-  active={activeView === "purchase-orders"} />
+
+        <NavItem
+          icon={ShoppingBag}
+          label="Purchase Orders"
+          onClick={() => goTo("purchase-orders")}
+          active={activeView === "purchase-orders"}
+        />
+
         <SectionLabel>Clients</SectionLabel>
 
         {/* Clients accordion */}
@@ -262,11 +263,8 @@ export default function LegalSidebar({
 
   return (
     <>
-      {/* ════════════════════════════════════════════════════════════════
-          MOBILE — hamburger + slide-in drawer
-      ════════════════════════════════════════════════════════════════ */}
+      {/* ── MOBILE — hamburger + slide-in drawer ──────────────────────────── */}
       <div className="md:hidden print:hidden">
-        {/* Hamburger */}
         {!sidebarOpen && (
           <button
             onClick={() => setSidebarOpen(true)}
@@ -277,7 +275,6 @@ export default function LegalSidebar({
           </button>
         )}
 
-        {/* Dim overlay */}
         <div
           className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
             sidebarOpen
@@ -287,7 +284,6 @@ export default function LegalSidebar({
           onClick={() => setSidebarOpen(false)}
         />
 
-        {/* Drawer */}
         <div
           className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#111320] shadow-2xl transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -297,9 +293,7 @@ export default function LegalSidebar({
         </div>
       </div>
 
-      {/* ════════════════════════════════════════════════════════════════
-          DESKTOP — collapsed icon rail OR expanded panel
-      ════════════════════════════════════════════════════════════════ */}
+      {/* ── DESKTOP — collapsed icon rail OR expanded panel ───────────────── */}
       <div className="hidden md:flex print:hidden h-full">
         {/* Collapsed icon rail */}
         {!sidebarOpen && (
@@ -344,6 +338,12 @@ export default function LegalSidebar({
                     goTo("invoice");
                   },
                   active: activeView === "invoice",
+                },
+                {
+                  icon: ShoppingBag,
+                  title: "Purchase Orders",
+                  action: () => goTo("purchase-orders"),
+                  active: activeView === "purchase-orders",
                 },
                 {
                   icon: Users,

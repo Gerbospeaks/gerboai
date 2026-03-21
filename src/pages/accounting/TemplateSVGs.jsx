@@ -1,4 +1,4 @@
-const ProfessionalInvoiceSVG = () => (
+export const ProfessionalInvoiceSVG = () => (
   <svg
     viewBox="0 0 400 500"
     xmlns="http://www.w3.org/2000/svg"
@@ -415,7 +415,7 @@ const ProfessionalInvoiceSVG = () => (
   </svg>
 );
 
-const CorporateInvoiceSVG = () => (
+export const CorporateInvoiceSVG = () => (
   <svg
     viewBox="0 0 400 500"
     xmlns="http://www.w3.org/2000/svg"
@@ -930,7 +930,7 @@ const CorporateInvoiceSVG = () => (
   </svg>
 );
 
-const ContemporaryInvoiceSVG = () => (
+export const ContemporaryInvoiceSVG = () => (
   <svg
     viewBox="0 0 400 500"
     xmlns="http://www.w3.org/2000/svg"
@@ -1407,7 +1407,7 @@ const ContemporaryInvoiceSVG = () => (
   </svg>
 );
 
-const ModernBizInvoiceSVG = () => (
+export const ModernBizInvoiceSVG = () => (
   <svg
     viewBox="0 0 400 500"
     xmlns="http://www.w3.org/2000/svg"
@@ -1817,7 +1817,7 @@ const ModernBizInvoiceSVG = () => (
   </svg>
 );
 
-const DetailedStatementSVG = () => (
+export const DetailedStatementSVG = () => (
   <svg
     viewBox="0 0 400 500"
     xmlns="http://www.w3.org/2000/svg"

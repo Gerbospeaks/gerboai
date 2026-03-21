@@ -130,7 +130,8 @@ const PestcontrolDashboard = () => {
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [showQuotesList, setShowQuotesList] = useState(false);
   const [documentType, setDocumentType] = useState("quote");
-
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   // ── views / modals ───────────────────────────────────────────────────────
   const [showSettings, setShowSettings] = useState(false);
   const [activeView, setActiveView] = useState("home");

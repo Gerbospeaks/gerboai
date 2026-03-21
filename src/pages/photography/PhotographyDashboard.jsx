@@ -125,7 +125,8 @@ const PhotographyDashboard = () => {
     showDate: false,
     enabled: false,
   });
-
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
     balanceDue: 0,

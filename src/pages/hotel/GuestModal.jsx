@@ -2,22 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  X,
-  Save,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  CreditCard,
-  Globe,
-} from "lucide-react";
-import { createCheckInFromGuest } from "./CheckInOutModal";
-import { useAuth } from "../../contexts/AuthContext";
-import HomeView from "../HomeView";
-import BusinessSettingsModal from "../BusinessSettingsModal";
-import AppHeader from "../AppHeader";
-import {
   getFirestore,
   collection,
   addDoc,
@@ -25,503 +9,221 @@ import {
   doc,
   serverTimestamp,
 } from "firebase/firestore";
-const GuestModal = ({
-  showModal,
-  setShowModal,
-  existingGuest,
-  onGuestSaved,
-  user,
-}) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    guestId: "",
-    dateOfBirth: "",
-    nationality: "",
-    idType: "ID Document",
-    idNumber: "",
-  });
+import { useAuth } from "../../contexts/AuthContext";
+import {
+  X, User, Phone, Mail, MapPin, Globe,
+  CreditCard, Save, AlertCircle, Key,
+} from "lucide-react";
 
-  const [createCheckIn, setCreateCheckIn] = useState(false);
-  const [bookingData, setBookingData] = useState({
-    roomNumber: "",
-    roomType: "Standard Double Room",
-    checkInDate: "",
-    checkOutDate: "",
-    numberOfGuests: "1",
-    notes: "",
-  });
+const ID_TYPES = ["ID Document", "Passport", "Driver's Licence", "Refugee Document", "Other"];
+const NATIONALITIES = [
+  "South African", "Zimbabwean", "Mozambican", "Botswanan", "Namibian",
+  "Zambian", "Malawian", "Nigerian", "Kenyan", "Ghanaian",
+  "British", "American", "German", "French", "Dutch",
+  "Australian", "Chinese", "Indian", "Brazilian", "Other",
+];
+
+const EMPTY = {
+  name: "", guestId: "", email: "", phone: "", address: "",
+  dateOfBirth: "", nationality: "South African",
+  idType: "ID Document", idNumber: "",
+  preferredRoom: "", dietaryRequirements: "",
+  loyaltyNumber: "", notes: "", vip: false,
+};
+
+export default function GuestModal({ showModal, setShowModal, existingGuest, onGuestSaved }) {
+  const { user } = useAuth();
+  const [form, setForm] = useState(EMPTY);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const db = getFirestore();
 
   useEffect(() => {
     if (existingGuest) {
-      setFormData(existingGuest);
-      setCreateCheckIn(false);
+      setForm({ ...EMPTY, ...existingGuest });
     } else {
-      // Reset form for new guest
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        address: "",
-        guestId: `GST-${Date.now()}`,
-        dateOfBirth: "",
-        nationality: "",
-        idType: "ID Document",
-        idNumber: "",
-      });
-      setCreateCheckIn(false);
-      setBookingData({
-        roomNumber: "",
-        roomType: "Standard Double Room",
-        checkInDate: "",
-        checkOutDate: "",
-        numberOfGuests: "1",
-        notes: "",
-      });
+      const year = new Date().getFullYear();
+      const rand = String(Math.floor(1000 + Math.random() * 9000));
+      setForm({ ...EMPTY, guestId: `GST-${year}-${rand}` });
     }
+    setError("");
   }, [existingGuest, showModal]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!formData.name || !formData.phone) {
-      alert("Please enter guest name and phone number");
-      return;
-    }
-
+  const handleSave = async () => {
+    if (!form.name.trim()) { setError("Guest name is required."); return; }
+    setSaving(true);
+    setError("");
     try {
-      const db = getFirestore();
-      const userId = user?.uid;
-
-      if (!userId) {
-        alert("User not authenticated");
-        return;
-      }
-
-      const guestDataToSave = {
-        ...formData,
-        updatedAt: serverTimestamp(),
-      };
-
+      const payload = { ...form, updatedAt: serverTimestamp() };
       if (existingGuest?.id) {
-        // Update existing guest
-        await updateDoc(
-          doc(db, "users", userId, "guests", existingGuest.id),
-          guestDataToSave,
-        );
-        alert("Guest updated successfully!");
+        await updateDoc(doc(db, "users", user.uid, "guests", existingGuest.id), payload);
       } else {
-        // Add new guest
-        await addDoc(collection(db, "users", userId, "guests"), {
-          ...guestDataToSave,
-          createdAt: serverTimestamp(),
+        await addDoc(collection(db, "users", user.uid, "guests"), {
+          ...payload, createdAt: serverTimestamp(),
         });
-
-        // Create check-in if requested
-        if (
-          createCheckIn &&
-          bookingData.roomNumber &&
-          bookingData.checkInDate
-        ) {
-          const checkInCreated = await createCheckInFromGuest(
-            userId,
-            formData,
-            bookingData,
-          );
-          if (checkInCreated) {
-            alert("Guest and check-in created successfully!");
-          } else {
-            alert("Guest saved but failed to create check-in");
-          }
-        } else {
-          alert("Guest saved successfully!");
-        }
       }
-
       onGuestSaved?.();
       setShowModal(false);
-    } catch (error) {
-      console.error("Error saving guest:", error);
-      alert("Failed to save guest");
+    } catch (e) {
+      console.error(e);
+      setError("Failed to save guest. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 
   if (!showModal) return null;
 
+  const inputCls = "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-lg bg-white text-[#1e293b] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:border-[#1d4ed8] transition-colors";
+  const labelCls = "block text-xs font-semibold text-[#374151] uppercase tracking-wide mb-1.5";
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-6 border-b flex items-center justify-between bg-blue-600 text-gray-800">
-          <h2 className="text-xl font-semibold">
-            {existingGuest ? "Edit Guest" : "Add New Guest"}
-          </h2>
-          <button
-            onClick={() => setShowModal(false)}
-            className="text-gray-800 hover:bg-blue-700 p-2 rounded-lg transition-colors"
-          >
-            <X className="w-6 h-6" />
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-[#e2e8f0]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc] rounded-t-2xl">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-[#dbeafe] rounded-xl flex items-center justify-center">
+              <User className="w-4 h-4 text-[#1d4ed8]" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-[#1e293b]">
+                {existingGuest ? "Edit Guest" : "New Guest"}
+              </h2>
+              <p className="text-xs text-[#64748b]">
+                {existingGuest ? `Updating ${existingGuest.name}` : "Register a new guest profile"}
+              </p>
+            </div>
+          </div>
+          <button onClick={() => setShowModal(false)} className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="overflow-auto p-6">
-          <div className="space-y-6">
-            {/* Guest Information Section */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Guest Information
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="John Smith"
-                  />
-                </div>
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {error && (
+            <div className="flex items-center gap-2 px-4 py-3 bg-[#fef2f2] border border-[#fecaca] rounded-xl text-sm text-[#991b1b]">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}
+            </div>
+          )}
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Guest ID
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.guestId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, guestId: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border rounded-lg bg-gray-50"
-                    placeholder="Auto-generated"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Email
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="john@example.com"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Phone *
-                  </label>
-                  <div className="relative">
-                    <Phone className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="tel"
-                      required
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                      className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="082 123 4567"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Date of Birth
-                  </label>
-                  <div className="relative">
-                    <Calendar className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="date"
-                      value={formData.dateOfBirth}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          dateOfBirth: e.target.value,
-                        })
-                      }
-                      className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-2">
-                    Address
-                  </label>
-                  <div className="relative">
-                    <MapPin className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
-                    <textarea
-                      value={formData.address}
-                      onChange={(e) =>
-                        setFormData({ ...formData, address: e.target.value })
-                      }
-                      rows="2"
-                      className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="123 Main Street, City, Postal Code"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Nationality
-                  </label>
-                  <div className="relative">
-                    <Globe className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      value={formData.nationality}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          nationality: e.target.value,
-                        })
-                      }
-                      className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="South African"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    ID Type
-                  </label>
-                  <select
-                    value={formData.idType}
-                    onChange={(e) =>
-                      setFormData({ ...formData, idType: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="ID Document">ID Document</option>
-                    <option value="Passport">Passport</option>
-                    <option value="Driver's License">Driver's License</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    ID Number
-                  </label>
-                  <div className="relative">
-                    <CreditCard className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      value={formData.idNumber}
-                      onChange={(e) =>
-                        setFormData({ ...formData, idNumber: e.target.value })
-                      }
-                      className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="ID/Passport Number"
-                    />
-                  </div>
-                </div>
+          {/* Personal */}
+          <Section icon={User} label="Personal Information" accent="text-[#1d4ed8]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>Full Name *</label>
+                <input className={inputCls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. John Smith" />
+              </div>
+              <div>
+                <label className={labelCls}>Guest ID</label>
+                <input className={inputCls} value={form.guestId} onChange={(e) => setForm({ ...form, guestId: e.target.value })} />
+              </div>
+              <div>
+                <label className={labelCls}>Date of Birth</label>
+                <input className={inputCls} type="date" value={form.dateOfBirth} onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })} />
+              </div>
+              <div>
+                <label className={labelCls}>Nationality</label>
+                <select className={inputCls} value={form.nationality} onChange={(e) => setForm({ ...form, nationality: e.target.value })}>
+                  {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </div>
+              <div className="sm:col-span-2 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="vip"
+                  checked={form.vip}
+                  onChange={(e) => setForm({ ...form, vip: e.target.checked })}
+                  className="w-4 h-4 accent-[#d97706]"
+                />
+                <label htmlFor="vip" className="text-sm text-[#374151] cursor-pointer font-medium">
+                  Mark as VIP guest ⭐
+                </label>
               </div>
             </div>
+          </Section>
 
-            {/* Quick Check-In Option (only for new guests) */}
-            {!existingGuest && (
-              <div className="border-t pt-6">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={createCheckIn}
-                      onChange={(e) => setCreateCheckIn(e.target.checked)}
-                      className="w-5 h-5 rounded"
-                    />
-                    <span className="font-semibold text-blue-900">
-                      Create Check-In for this guest
-                    </span>
-                  </label>
-                  <p className="text-xs text-blue-700 mt-1 ml-7">
-                    Save time by adding booking details now
-                  </p>
-                </div>
-
-                {createCheckIn && (
-                  <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-900">
-                      Booking Details
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Room Number *
-                        </label>
-                        <input
-                          type="text"
-                          required={createCheckIn}
-                          value={bookingData.roomNumber}
-                          onChange={(e) =>
-                            setBookingData({
-                              ...bookingData,
-                              roomNumber: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                          placeholder="205"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Room Type
-                        </label>
-                        <select
-                          value={bookingData.roomType}
-                          onChange={(e) =>
-                            setBookingData({
-                              ...bookingData,
-                              roomType: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="Standard Single Room">
-                            Standard Single Room
-                          </option>
-                          <option value="Standard Double Room">
-                            Standard Double Room
-                          </option>
-                          <option value="Deluxe Single Room">
-                            Deluxe Single Room
-                          </option>
-                          <option value="Deluxe Double Room">
-                            Deluxe Double Room
-                          </option>
-                          <option value="Executive Suite">
-                            Executive Suite
-                          </option>
-                          <option value="Presidential Suite">
-                            Presidential Suite
-                          </option>
-                          <option value="Family Room">Family Room</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Check-In Date *
-                        </label>
-                        <input
-                          type="date"
-                          required={createCheckIn}
-                          value={bookingData.checkInDate}
-                          onChange={(e) =>
-                            setBookingData({
-                              ...bookingData,
-                              checkInDate: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Check-Out Date *
-                        </label>
-                        <input
-                          type="date"
-                          required={createCheckIn}
-                          value={bookingData.checkOutDate}
-                          onChange={(e) =>
-                            setBookingData({
-                              ...bookingData,
-                              checkOutDate: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Number of Guests
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={bookingData.numberOfGuests}
-                          onChange={(e) =>
-                            setBookingData({
-                              ...bookingData,
-                              numberOfGuests: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div className="col-span-2">
-                        <label className="block text-sm font-medium mb-2">
-                          Notes / Special Requests
-                        </label>
-                        <textarea
-                          value={bookingData.notes}
-                          onChange={(e) =>
-                            setBookingData({
-                              ...bookingData,
-                              notes: e.target.value,
-                            })
-                          }
-                          rows="2"
-                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                          placeholder="Late check-in, dietary requirements, etc."
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
+          {/* Contact */}
+          <Section icon={Phone} label="Contact Details" accent="text-[#1d4ed8]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>Email</label>
+                <input className={inputCls} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="guest@email.com" />
               </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-4 pt-4">
-              <button
-                type="submit"
-                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-gray-800 py-3 rounded-lg hover:bg-blue-700 text-sm font-medium"
-              >
-                <Save className="w-5 h-5" />
-                {existingGuest
-                  ? "Update Guest"
-                  : createCheckIn
-                    ? "Save Guest & Create Check-In"
-                    : "Save Guest"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="flex-1 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 text-sm font-medium"
-              >
-                Cancel
-              </button>
+              <div>
+                <label className={labelCls}>Phone</label>
+                <input className={inputCls} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="082 xxx xxxx" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className={labelCls}>Home Address</label>
+                <input className={inputCls} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Street, City, Country" />
+              </div>
             </div>
-          </div>
-        </form>
+          </Section>
+
+          {/* ID */}
+          <Section icon={Key} label="Identification" accent="text-[#1d4ed8]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>ID Type</label>
+                <select className={inputCls} value={form.idType} onChange={(e) => setForm({ ...form, idType: e.target.value })}>
+                  {ID_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className={labelCls}>ID / Passport Number</label>
+                <input className={inputCls} value={form.idNumber} onChange={(e) => setForm({ ...form, idNumber: e.target.value })} placeholder="Number" />
+              </div>
+            </div>
+          </Section>
+
+          {/* Preferences */}
+          <Section icon={CreditCard} label="Preferences & Notes" accent="text-[#1d4ed8]">
+            <div className="space-y-4">
+              <div>
+                <label className={labelCls}>Preferred Room Type</label>
+                <input className={inputCls} value={form.preferredRoom} onChange={(e) => setForm({ ...form, preferredRoom: e.target.value })} placeholder="e.g. Sea-view Suite, Non-smoking" />
+              </div>
+              <div>
+                <label className={labelCls}>Dietary Requirements</label>
+                <input className={inputCls} value={form.dietaryRequirements} onChange={(e) => setForm({ ...form, dietaryRequirements: e.target.value })} placeholder="e.g. Vegetarian, Halal, Nut allergy" />
+              </div>
+              <div>
+                <label className={labelCls}>Loyalty / Rewards Number</label>
+                <input className={inputCls} value={form.loyaltyNumber} onChange={(e) => setForm({ ...form, loyaltyNumber: e.target.value })} placeholder="Membership number" />
+              </div>
+              <div>
+                <label className={labelCls}>Internal Notes</label>
+                <textarea className={`${inputCls} resize-none`} rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Staff notes about this guest..." />
+              </div>
+            </div>
+          </Section>
+        </div>
+
+        {/* Footer */}
+        <div className="flex gap-3 px-6 py-4 border-t border-[#e2e8f0] bg-[#f8fafc] rounded-b-2xl">
+          <button onClick={() => setShowModal(false)} className="flex-1 px-4 py-2.5 border border-[#e2e8f0] text-[#374151] text-sm font-medium rounded-xl hover:bg-white transition-colors">
+            Cancel
+          </button>
+          <button onClick={handleSave} disabled={saving} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1d4ed8] hover:bg-[#1e40af] disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors">
+            <Save className="w-4 h-4" />
+            {saving ? "Saving..." : existingGuest ? "Update Guest" : "Save Guest"}
+          </button>
+        </div>
       </div>
     </div>
   );
-};
+}
 
-export default GuestModal;
+function Section({ icon: Icon, label, accent = "text-[#1d4ed8]", children }) {
+  return (
+    <div>
+      <div className={`flex items-center gap-2 text-xs font-bold ${accent} uppercase tracking-widest mb-3 pb-2 border-b border-[#e2e8f0]`}>
+        <Icon className="w-3.5 h-3.5" /> {label}
+      </div>
+      {children}
+    </div>
+  );
+}

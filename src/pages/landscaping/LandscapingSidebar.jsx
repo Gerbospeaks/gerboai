@@ -233,55 +233,7 @@ export default function LandscapingSidebar({
           active={activeView === "equipment"}
         />
 
-        <SectionLabel>Insights</SectionLabel>
-
-        {/* Reports accordion */}
-        <Accordion
-          icon={FileBarChart}
-          label="Reports"
-          isOpen={isReportsOpen}
-          onToggle={() => setIsReportsOpen((p) => !p)}
-        >
-          <SubItem
-            dot="bg-[#4f46e5]"
-            label="Job Reports"
-            onClick={() => goTo("report-jobs")}
-          />
-          <SubItem
-            dot="bg-[#0891b2]"
-            label="Revenue Reports"
-            onClick={() => goTo("report-revenue")}
-          />
-          <SubItem
-            dot="bg-[#16a34a]"
-            label="Materials Usage"
-            onClick={() => goTo("report-materials")}
-          />
-        </Accordion>
-
-        {/* Analytics accordion */}
-        <Accordion
-          icon={BarChart3}
-          label="Analytics"
-          isOpen={isAnalyticsOpen}
-          onToggle={() => setIsAnalyticsOpen((p) => !p)}
-        >
-          <SubItem
-            dot="bg-[#4f46e5]"
-            label="Job Trends"
-            onClick={() => goTo("analytics-jobs")}
-          />
-          <SubItem
-            dot="bg-[#0891b2]"
-            label="Revenue Trends"
-            onClick={() => goTo("analytics-revenue")}
-          />
-          <SubItem
-            dot="bg-[#2563eb]"
-            label="Customer Insights"
-            onClick={() => goTo("analytics-customers")}
-          />
-        </Accordion>
+       
       </div>
 
       {/* Footer */}
@@ -457,18 +409,8 @@ export default function LandscapingSidebar({
                   action: () => goTo("equipment"),
                   active: activeView === "equipment",
                 },
-                {
-                  icon: FileBarChart,
-                  title: "Reports",
-                  action: () => goTo("report-jobs"),
-                  active: false,
-                },
-                {
-                  icon: BarChart3,
-                  title: "Analytics",
-                  action: () => goTo("analytics-jobs"),
-                  active: false,
-                },
+                
+               
               ].map(({ icon: Icon, title, action, active }) => (
                 <button
                   key={title}

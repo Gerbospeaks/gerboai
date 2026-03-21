@@ -137,7 +137,8 @@ const PaintingDashboard = () => {
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-
+  const [aiWindowOpen, setAiWindowOpen] = useState(false);
+  const [aiDocType, setAiDocType] = useState('invoice');
   // ── customers ────────────────────────────────────────────────────────────
   const [customers, setCustomers] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);

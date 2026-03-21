@@ -1,41 +1,32 @@
 // src/utils/api.js
-// ─────────────────────────────────────────────────────────────────
-// Central helper for calling the Anthropic proxy Cloud Function.
-// Import this instead of calling api.anthropic.com directly.
-// ─────────────────────────────────────────────────────────────────
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const MODEL = 'gemini-2.0-flash';
 
-// After you deploy the function, replace this URL with the one
-// Firebase prints:  "Function URL (anthropicProxy): https://..."
-const PROXY_URL = import.meta.env.VITE_ANTHROPIC_PROXY_URL
-  || 'https://us-central1-YOUR_PROJECT_ID.cloudfunctions.net/anthropicProxy';
+export async function callClaude({ system, messages, max_tokens = 1000 }) {
+  // Convert your existing message format to Gemini's format
+  const contents = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }],
+  }));
 
-/**
- * Send a message to Claude through the Firebase proxy.
- *
- * @param {object} options
- * @param {string}   options.system   - System prompt
- * @param {Array}    options.messages - Chat history array
- * @param {string}  [options.model]   - Defaults to claude-sonnet-4-20250514
- * @param {number}  [options.max_tokens] - Defaults to 1000
- * @returns {Promise<string>} The assistant's reply text
- */
-export async function callClaude({ system, messages, model, max_tokens = 1000 }) {
-  const res = await fetch(PROXY_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model:      model || 'claude-sonnet-4-20250514',
-      max_tokens,
-      system,
-      messages,
-    }),
-  });
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: system }] },
+        contents,
+        generationConfig: { maxOutputTokens: max_tokens },
+      }),
+    }
+  );
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `Proxy error ${res.status}`);
+    throw new Error(err.error?.message || `Gemini error ${res.status}`);
   }
 
   const data = await res.json();
-  return data.content?.[0]?.text || '';
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 }
