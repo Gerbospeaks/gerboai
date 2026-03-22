@@ -8,7 +8,6 @@ import {
   ChevronRight,
   ChevronDown,
   Calendar,
-  BarChart3,
   LogOut,
   Hammer,
   ShoppingBag,
@@ -215,12 +214,7 @@ export default function CarpentrySidebar({
           onClick={() => goTo("schedule")}
           active={activeView === "schedule"}
         />
-        <NavItem
-          icon={BarChart3}
-          label="Reports"
-          onClick={() => goTo("reports")}
-          active={activeView === "reports"}
-        />
+       
       </div>
 
       {/* Footer */}
@@ -366,12 +360,7 @@ export default function CarpentrySidebar({
                   action: () => goTo("schedule"),
                   active: activeView === "schedule",
                 },
-                {
-                  icon: BarChart3,
-                  title: "Reports",
-                  action: () => goTo("reports"),
-                  active: activeView === "reports",
-                },
+                
               ].map(({ icon: Icon, title, action, active }) => (
                 <button
                   key={title}

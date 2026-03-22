@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDashboardRoute } from "../utils/dashboardRoutes";
 import { getDashboardActions } from "../utils/dashboardActions";
@@ -15,6 +15,7 @@ import {
   X,
   Clock,
   LayoutDashboard,
+  Menu,
 } from "lucide-react";
 
 /* ─── Zoho design tokens ─────────────────────────────────────────────────── */
@@ -44,7 +45,6 @@ const css = `
 
   .zh * { font-family: 'Lato', sans-serif; box-sizing: border-box; }
 
-  /* ── Shell ── */
   .zh-shell {
     height: 100vh; width: 100%;
     display: flex; flex-direction: column;
@@ -52,7 +52,6 @@ const css = `
     overflow: hidden;
   }
 
-  /* ── Top bar ── */
   .zh-topbar {
     background: ${Z.navy};
     height: 52px; flex-shrink: 0;
@@ -69,7 +68,17 @@ const css = `
   .zh-topbar-title { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: .01em; }
   .zh-topbar-sub   { font-size: 11px; color: rgba(255,255,255,.4); margin-left: 8px; }
 
-  /* ── Body ── */
+  /* Sidebar toggle btn in topbar (only shown when embedded in a dashboard) */
+  .zh-topbar-sidebar-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 6px;
+    background: transparent; border: 1px solid rgba(255,255,255,.15);
+    color: rgba(255,255,255,.7); cursor: pointer;
+    transition: background .15s, color .15s;
+    margin-right: 8px;
+  }
+  .zh-topbar-sidebar-btn:hover { background: rgba(255,255,255,.1); color: #fff; }
+
   .zh-body {
     flex: 1; overflow-y: auto; overflow-x: hidden;
     padding: 18px 20px 12px;
@@ -79,7 +88,6 @@ const css = `
   .zh-body::-webkit-scrollbar-track { background: transparent; }
   .zh-body::-webkit-scrollbar-thumb { background: ${Z.border}; border-radius: 6px; }
 
-  /* ── Section label ── */
   .zh-section {
     font-size: 10px; font-weight: 700; letter-spacing: .08em;
     text-transform: uppercase; color: ${Z.textMuted};
@@ -88,7 +96,6 @@ const css = `
   }
   .zh-section::after { content:''; flex:1; height:1px; background:${Z.border}; }
 
-  /* ── KPI grid ── */
   .zh-kpi-grid {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
   }
@@ -118,13 +125,11 @@ const css = `
   .zh-kpi-sub   { font-size: 10px; color: ${Z.textMuted}; margin-top: 3px; }
   .zh-kpi-skel  { height: 22px; background: #eef0f5; border-radius: 3px; animation: zh-pulse 1.4s ease infinite; }
 
-  /* ── Mid row ── */
   .zh-mid-row {
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
   }
   @media (max-width: 700px) { .zh-mid-row { grid-template-columns: 1fr; } }
 
-  /* Panel */
   .zh-panel {
     background: ${Z.white};
     border: 1px solid ${Z.border};
@@ -142,7 +147,6 @@ const css = `
   }
   .zh-panel-body { padding: 14px; }
 
-  /* Pending payments banner */
   .zh-pending {
     display: flex; align-items: center; gap: 12px;
   }
@@ -155,7 +159,6 @@ const css = `
   .zh-pending-value { font-size: 22px; font-weight: 700; color: ${Z.amber}; line-height: 1; }
   .zh-pending-sub   { font-size: 11px; color: ${Z.textMuted}; margin-top: 3px; }
 
-  /* Quick actions */
   .zh-actions-list { display: flex; flex-direction: column; gap: 7px; }
   .zh-action-btn {
     display: flex; align-items: center; justify-content: space-between;
@@ -175,7 +178,6 @@ const css = `
   .zh-action-arrow { color: ${Z.textMuted}; transition: transform .15s; }
   .zh-action-btn:hover .zh-action-arrow { transform: translateX(3px); color: ${Z.blue}; }
 
-  /* ── Invoice table panel ── */
   .zh-invoices-panel {
     background: ${Z.white};
     border: 1px solid ${Z.border};
@@ -202,7 +204,6 @@ const css = `
   .zh-invoices-scroll::-webkit-scrollbar { width: 4px; }
   .zh-invoices-scroll::-webkit-scrollbar-thumb { background: ${Z.border}; border-radius: 4px; }
 
-  /* Invoice table */
   .zh-inv-table { width: 100%; border-collapse: collapse; }
   .zh-inv-thead th {
     background: #f9fafb;
@@ -221,7 +222,6 @@ const css = `
   .zh-inv-client{ color: ${Z.textMid}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
   .zh-inv-amount{ font-weight: 700; color: ${Z.text}; text-align: right; white-space: nowrap; }
 
-  /* Status badge */
   .zh-badge {
     display: inline-flex; align-items: center;
     padding: 2px 8px; border-radius: 20px;
@@ -233,7 +233,6 @@ const css = `
   .zh-badge-overdue { background: ${Z.redLight};   color: ${Z.red};   border-color: #f5bdb4; }
   .zh-badge-draft   { background: #eef0f5; color: ${Z.textMid}; border-color: ${Z.border}; }
 
-  /* ── Empty state ── */
   .zh-empty {
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; padding: 36px 16px; text-align: center;
@@ -254,7 +253,6 @@ const css = `
   }
   .zh-empty-cta:hover { background: ${Z.redHover}; }
 
-  /* ── Skeleton pulse ── */
   @keyframes zh-pulse {
     0%,100% { opacity: 1 } 50% { opacity: .45 }
   }
@@ -264,7 +262,6 @@ const css = `
   }
   .zh-skel-row:last-child { margin-bottom: 0; }
 
-  /* ── Modal overlay ── */
   .zh-overlay {
     position: fixed; inset: 0; background: rgba(20,26,48,.55);
     z-index: 9999; display: flex; align-items: center; justify-content: center;
@@ -313,7 +310,6 @@ const css = `
   }
   .zh-modal-footer-btn:hover { border-color: ${Z.red}; color: ${Z.red}; }
 
-  /* ── Footer bar ── */
   .zh-footer {
     flex-shrink: 0;
     padding: 6px 20px;
@@ -382,7 +378,33 @@ const KPI = ({
 );
 
 /* ─── Component ──────────────────────────────────────────────────────────── */
-export default function Home() {
+/**
+ * Props (all optional — used when Home is rendered inside a dashboard):
+ *
+ *   onNavigate(view, documentType?)
+ *     Called by Quick Actions instead of react-router navigate.
+ *     `view` matches the dashboard's setActiveView values: "invoice", "quote",
+ *     "estimate", "jobcard", etc.
+ *     `documentType` is passed so the dashboard can pre-set its document type
+ *     before switching views (e.g. "invoice" vs "quote" on the same view).
+ *
+ *   onGoToDashboard()
+ *     Called by the "Go to Dashboard" quick-action button.
+ *     If not provided, falls back to react-router navigate.
+ *
+ *   onSidebarToggle()
+ *     Called by the hamburger button in the top bar.
+ *     If not provided the button is hidden.
+ *
+ *   sidebarOpen (bool)
+ *     Current sidebar state — used only to show/hide the hamburger icon.
+ */
+export default function Home({
+  onNavigate,
+  onGoToDashboard,
+  onSidebarToggle,
+  sidebarOpen,
+}) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -400,26 +422,46 @@ export default function Home() {
     loading: true,
   });
 
-  const nav = (view) =>
-    navigate(getDashboardRoute(user?.dashboardId), {
-      state: { activeView: view },
-    });
+  // ── Navigation helper ────────────────────────────────────────────────────
+  // When embedded in a dashboard, call onNavigate(view, docType).
+  // When standalone (own route), use react-router state.
+  const nav = (view, documentType) => {
+    if (onNavigate) {
+      onNavigate(view, documentType);
+    } else {
+      navigate(getDashboardRoute(user?.dashboardId), {
+        state: { activeView: view },
+      });
+    }
+  };
 
-  const handleNewInvoice = () => nav("invoice");
-  const handleNewQuote = () => nav("quote");
-  const handleNewEstimate = () => nav("estimate");
-  const handleNewJobcard = () => nav("jobcard");
-  const handleNewInvoiceDoc = () => nav("invoiceDoc");
+  // ── "Go to Dashboard" helper ─────────────────────────────────────────────
+  const goToDashboard = () => {
+    if (onGoToDashboard) {
+      onGoToDashboard();
+    } else {
+      navigate(getDashboardRoute(user?.dashboardId));
+    }
+  };
+
+  // ── Document-type-aware action handlers ──────────────────────────────────
+  // These pass the documentType so the carpentry dashboard (or any other) can
+  // set its own documentType state BEFORE switching views.  The carpentry
+  // sidebar uses a single "quote" view for both quotes and invoices, toggled
+  // by documentType.
+  const handleNewInvoice = () => nav("quote", "invoice");
+  const handleNewQuote = () => nav("quote", "quote");
+  const handleNewEstimate = () => nav("estimate", "estimate");
+  const handleNewJobcard = () => nav("jobcard", "jobcard");
 
   const { actions } = getDashboardActions(user?.dashboardId, {
     handleNewInvoice,
     handleNewQuote,
     handleNewEstimate,
     handleNewJobcard,
-    handleNewInvoiceDoc,
+    handleNewInvoiceDoc: handleNewInvoice,
   });
 
-  // Action icon colours — cycle through Zoho-brand palette
   const actionPalette = [
     { iconBg: Z.navy, iconColor: "#fff" },
     { iconBg: Z.blue, iconColor: "#fff" },
@@ -514,6 +556,16 @@ export default function Home() {
         {/* ── Top bar ── */}
         <div className="zh-topbar">
           <div className="zh-topbar-left">
+            {/* Sidebar hamburger — only shown when embedded in a dashboard */}
+            {onSidebarToggle && !sidebarOpen && (
+              <button
+                className="zh-topbar-sidebar-btn"
+                onClick={onSidebarToggle}
+                title="Open sidebar"
+              >
+                <Menu size={15} />
+              </button>
+            )}
             <div className="zh-topbar-icon">
               <LayoutDashboard size={14} color="#fff" />
             </div>
@@ -567,7 +619,7 @@ export default function Home() {
             />
           </div>
 
-          {/* Mid row — pending + quick actions */}
+          {/* Mid row */}
           <div className="zh-section">Actions</div>
           <div className="zh-mid-row">
             {/* Pending payments */}
@@ -600,7 +652,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Quick actions */}
+            {/* Quick Actions */}
             <div className="zh-panel">
               <div className="zh-panel-head">
                 <span className="zh-panel-head-title">Quick Actions</span>
@@ -613,8 +665,7 @@ export default function Home() {
                     {
                       label: "Go to Dashboard",
                       icon: LayoutDashboard,
-                      onClick: () =>
-                        navigate(getDashboardRoute(user?.dashboardId)),
+                      onClick: goToDashboard,
                     },
                   ].map(({ label, icon: Icon, onClick }, i) => {
                     const pal = actionPalette[i % actionPalette.length];
@@ -755,7 +806,6 @@ export default function Home() {
                   <X size={18} />
                 </button>
               </div>
-
               <div className="zh-modal-body">
                 <table className="zh-inv-table">
                   <thead className="zh-inv-thead">
@@ -796,7 +846,6 @@ export default function Home() {
                   </tbody>
                 </table>
               </div>
-
               <div className="zh-modal-footer">
                 <button
                   className="zh-modal-footer-btn"

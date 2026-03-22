@@ -1007,7 +1007,20 @@ const SolarDashboard = () => {
           {activeView === "history-view" && <div className="flex-1 overflow-y-auto p-4"><HistoryView user={user} /></div>}
           {activeView === "notes-view" && <div className="flex-1 overflow-y-auto p-4"><NotesView user={user} /></div>}
           {activeView === "templates" && <div className="flex-1 overflow-y-auto p-4"><Templates user={user} /></div>}
-          {activeView === "home" && <HomeViewLocal />}
+          {activeView === "home" && (
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <HomeView
+                          user={user}
+                          onNavigate={(view, docType) => {
+                            if (docType) setDocumentType(docType);
+                            setActiveView(view);
+                          }}
+                          onGoToDashboard={() => setActiveView("quote")}
+                          onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                          sidebarOpen={sidebarOpen}
+                        />
+                      </div>
+                    )}
 
           {/* ── Quote / Invoice builder ───────────────────────────────────────── */}
           {activeView === "quote" && (

@@ -14,6 +14,7 @@ import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import LegalMultiStepForm from "./LegalMultiStepForm";
 import LegalSidebar from "./LegalSidebar";
 import { getFunctions } from "firebase/functions";
+import HomeView from "../HomeView";
 import {
   getFirestore,
   collection,
@@ -3608,7 +3609,7 @@ const LegalDashboard = () => {
         />
 
         <div
-          className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-64" : "ml-0 md:ml-16"}`}
+          className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "md:ml-2" : "md:ml-4"}`}
         >
           <AppHeader
             actions={headerActions}
@@ -3777,7 +3778,20 @@ const LegalDashboard = () => {
           )}
 
           {/* ── VIEWS ── */}
-          {activeView === "home" && <HomeViewLocal />}
+         {activeView === "home" && (
+                     <div className="flex-1 overflow-y-auto p-4">
+                       <HomeView
+                         user={user}
+                         onNavigate={(view, docType) => {
+                           if (docType) setDocumentType(docType);
+                           setActiveView(view);
+                         }}
+                         onGoToDashboard={() => setActiveView("quote")}
+                         onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                         sidebarOpen={sidebarOpen}
+                       />
+                     </div>
+                   )}
           {activeView === "templates" && (
             <div className="flex-1 overflow-y-auto p-4">
               <Templates user={user} />

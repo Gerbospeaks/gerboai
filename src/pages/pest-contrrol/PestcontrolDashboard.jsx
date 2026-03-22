@@ -1501,10 +1501,19 @@ const PestcontrolDashboard = () => {
             </div>
           )}
           {activeView === "home" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <HomeView user={user} />
-            </div>
-          )}
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <HomeView
+                          user={user}
+                          onNavigate={(view, docType) => {
+                            if (docType) setDocumentType(docType);
+                            setActiveView(view);
+                          }}
+                          onGoToDashboard={() => setActiveView("quote")}
+                          onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                          sidebarOpen={sidebarOpen}
+                        />
+                      </div>
+                    )}
 
           {/* ── Quote / Invoice Builder — split layout ──────────────── */}
           {activeView === "quote" && (

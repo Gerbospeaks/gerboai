@@ -15,6 +15,7 @@ import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { useAuth } from "../../contexts/AuthContext";
 import { db } from "../../firebase";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
+import HomeView from "../HomeView";
 import AIInvoiceWindow from '../AIInvoiceWindow';
 import AppHeader from "../AppHeader";
 import BusinessSettingsModal from "../BusinessSettingsModal";
@@ -1577,7 +1578,20 @@ const MechanicsDashboard = () => {
           )}
 
           {/* ── Views ──────────────────────────────────────────────────────── */}
-          {activeView === "home" && <HomeViewLocal />}
+          {activeView === "home" && (
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <HomeView
+                          user={user}
+                          onNavigate={(view, docType) => {
+                            if (docType) setDocumentType(docType);
+                            setActiveView(view);
+                          }}
+                          onGoToDashboard={() => setActiveView("quote")}
+                          onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                          sidebarOpen={sidebarOpen}
+                        />
+                      </div>
+                    )}
           {activeView === "financial-overview" && (
             <div className="flex-1 overflow-y-auto p-4">
               <FinancialOverview user={user} />

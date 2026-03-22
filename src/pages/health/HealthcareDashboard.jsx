@@ -110,6 +110,7 @@ const HealthcareDashboard = () => {
   const [patients, setPatients] = useState([]);
   const [savedPatients, setSavedPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [documentType, setDocumentType] = useState("quote");
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
 
   // ── Patient form fields ────────────────────────────────────────────────
@@ -724,10 +725,19 @@ const HealthcareDashboard = () => {
 
           {/* ── View router ───────────────────────────────────────────── */}
           {activeView === "home" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <HomeView onCreateNewInvoice={handleNewInvoice} user={user} />
-            </div>
-          )}
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <HomeView
+                          user={user}
+                          onNavigate={(view, docType) => {
+                            if (docType) setDocumentType(docType);
+                            setActiveView(view);
+                          }}
+                          onGoToDashboard={() => setActiveView("quote")}
+                          onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                          sidebarOpen={sidebarOpen}
+                        />
+                      </div>
+                    )}
           {activeView === "practice-overview" && (
             <div className="flex-1 overflow-y-auto p-4">
               <PracticeOverview onAddNewPatient={handleAddNewPatient} user={user} />

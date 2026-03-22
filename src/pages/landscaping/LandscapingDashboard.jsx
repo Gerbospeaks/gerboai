@@ -6,6 +6,7 @@ import { serverTimestamp } from "firebase/firestore";
 import Templates from "./Templates";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
+import HomeView from "../HomeView";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
@@ -1152,7 +1153,20 @@ const LandscapingDashboard = () => {
 
           {/* ── Views ─────────────────────────────────────────────── */}
 
-          {activeView === "home" && <HomeViewLocal />}
+          {activeView === "home" && (
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <HomeView
+                          user={user}
+                          onNavigate={(view, docType) => {
+                            if (docType) setDocumentType(docType);
+                            setActiveView(view);
+                          }}
+                          onGoToDashboard={() => setActiveView("quote")}
+                          onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                          sidebarOpen={sidebarOpen}
+                        />
+                      </div>
+                    )}
 
           {activeView === "templates" && (
             <div className="flex-1 overflow-y-auto p-4">

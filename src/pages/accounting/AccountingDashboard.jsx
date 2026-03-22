@@ -39,7 +39,7 @@ import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
-import AIInvoiceWindow from '../AIInvoiceWindow';
+import AIInvoiceWindow from "../AIInvoiceWindow";
 import { getDashboardActions } from "../../utils/dashboardActions";
 import {
   ChevronLeft,
@@ -84,10 +84,10 @@ const generateInvoiceNumber = async (userId, documentType) => {
 
 const functions = getFunctions();
 const VIEW_TO_DOC_TYPE = {
-  invoice:  'invoice',
-  quote:    'estimate',
-  estimate: 'estimate',
-  jobcard:  'estimate',
+  invoice: "invoice",
+  quote: "estimate",
+  estimate: "estimate",
+  jobcard: "estimate",
 };
 const AccountingDashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -131,7 +131,7 @@ const AccountingDashboard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [documentType, setDocumentType] = useState("invoice");
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
-  const [aiDocType, setAiDocType] = useState('invoice');
+  const [aiDocType, setAiDocType] = useState("invoice");
   const [stampSettings, setStampSettings] = useState({
     text: "PAID",
     color: "#22c55e",
@@ -144,16 +144,16 @@ const AccountingDashboard = () => {
     status: "pending",
   });
   const openAI = (activeView) => {
-    setAiDocType(VIEW_TO_DOC_TYPE[activeView] || 'invoice');
+    setAiDocType(VIEW_TO_DOC_TYPE[activeView] || "invoice");
     setAiWindowOpen(true);
   };
 
   // Wire up the handlers getDashboardActions expects
-  const actions = getDashboardActions( {
-    handleNewInvoice:  () => openAI('invoice'),
-    handleNewQuote:    () => openAI('quote'),
-    handleNewEstimate: () => openAI('estimate'),
-    handleNewJobcard:  () => openAI('jobcard'),
+  const actions = getDashboardActions({
+    handleNewInvoice: () => openAI("invoice"),
+    handleNewQuote: () => openAI("quote"),
+    handleNewEstimate: () => openAI("estimate"),
+    handleNewJobcard: () => openAI("jobcard"),
   });
   const location = useLocation();
   useEffect(() => {
@@ -179,25 +179,30 @@ const AccountingDashboard = () => {
     setItems((prev) => prev.filter((_, i) => i !== index));
 
   const handleAIDataExtracted = (extractedData) => {
-  // Customer / sender fields
-  if (extractedData.customer?.name)    setCustomerName(extractedData.customer.name);
-  if (extractedData.customer?.email)   setCustomerEmail(extractedData.customer.email);
-  if (extractedData.customer?.phone)   setCustomerPhone(extractedData.customer.phone);
-  if (extractedData.customer?.address) setCustomerAddress(extractedData.customer.address);
-  if (extractedData.customer?.tax_id)  setTaxId(extractedData.customer.tax_id);
- 
-  // Bill-to fields
-  if (extractedData.billTo?.name)      setBillName(extractedData.billTo.name);
-  if (extractedData.billTo?.email)     setBillEmail(extractedData.billTo.email);
-  if (extractedData.billTo?.phone)     setBillPhone(extractedData.billTo.phone);
-  if (extractedData.billTo?.address)   setBillAddress(extractedData.billTo.address);
- 
-  // Line items — already formatted by AIInvoiceChat
-  if (extractedData.items?.length > 0) setItems(extractedData.items);
- 
-  // Document type (invoice vs estimate)
-  if (extractedData.documentType)      setDocumentType(extractedData.documentType);
-};
+    // Customer / sender fields
+    if (extractedData.customer?.name)
+      setCustomerName(extractedData.customer.name);
+    if (extractedData.customer?.email)
+      setCustomerEmail(extractedData.customer.email);
+    if (extractedData.customer?.phone)
+      setCustomerPhone(extractedData.customer.phone);
+    if (extractedData.customer?.address)
+      setCustomerAddress(extractedData.customer.address);
+    if (extractedData.customer?.tax_id) setTaxId(extractedData.customer.tax_id);
+
+    // Bill-to fields
+    if (extractedData.billTo?.name) setBillName(extractedData.billTo.name);
+    if (extractedData.billTo?.email) setBillEmail(extractedData.billTo.email);
+    if (extractedData.billTo?.phone) setBillPhone(extractedData.billTo.phone);
+    if (extractedData.billTo?.address)
+      setBillAddress(extractedData.billTo.address);
+
+    // Line items — already formatted by AIInvoiceChat
+    if (extractedData.items?.length > 0) setItems(extractedData.items);
+
+    // Document type (invoice vs estimate)
+    if (extractedData.documentType) setDocumentType(extractedData.documentType);
+  };
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -744,21 +749,20 @@ const AccountingDashboard = () => {
       >
         <TemplateRenderer {...templateProps} />
       </div>
- {showAIWindow && (
-  <AIInvoiceWindow
-    user={user}
-    businessInfo={businessInfo}
-    documentType={documentType}
-    onExit={() => setShowAIWindow(false)}
-    industry="accounting"
-    onNavigateTo={(view) => {
-    setAiWindowOpen(false);
-    setActiveView(view); 
-  }}
-   
-    TemplateRenderer={TemplateRenderer}  
-  />
-)}
+      {showAIWindow && (
+        <AIInvoiceWindow
+          user={user}
+          businessInfo={businessInfo}
+          documentType={documentType}
+          onExit={() => setShowAIWindow(false)}
+          industry="accounting"
+          onNavigateTo={(view) => {
+            setAiWindowOpen(false);
+            setActiveView(view);
+          }}
+          TemplateRenderer={TemplateRenderer}
+        />
+      )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar */}
         <AccountingSidebar
@@ -989,7 +993,7 @@ const AccountingDashboard = () => {
               <FinancialOverview user={user} />
             </div>
           )}
-         
+
           {activeView === "history-view" && (
             <div className="flex-1 overflow-y-auto p-4">
               <HistoryView user={user} />
@@ -1012,7 +1016,16 @@ const AccountingDashboard = () => {
           )}
           {activeView === "home" && (
             <div className="flex-1 overflow-y-auto p-4">
-              <HomeView user={user} />
+              <HomeView
+                user={user}
+                onNavigate={(view, docType) => {
+                  if (docType) setDocumentType(docType);
+                  setActiveView(view);
+                }}
+                onGoToDashboard={() => setActiveView("quote")}
+                onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                sidebarOpen={sidebarOpen}
+              />
             </div>
           )}
           {(activeView === "chart-of-accounts" ||
@@ -1037,10 +1050,10 @@ const AccountingDashboard = () => {
             </div>
           )}
           {activeView === "purchase-orders" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <PurchaseOrders user={user} />
-  </div>
-)}
+            <div className="flex-1 overflow-y-auto p-6">
+              <PurchaseOrders user={user} />
+            </div>
+          )}
           {/* ── Invoice view — split layout ─────────────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
@@ -1193,8 +1206,6 @@ const AccountingDashboard = () => {
                         AI Mode
                       </button>
                     </div>
-
-                   
 
                     {inputMode === "manual" && (
                       <>

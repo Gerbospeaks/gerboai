@@ -980,11 +980,20 @@ const FlooringDashboard = () => {
               <Templates user={user} />
             </div>
           )}
-          {activeView === "home" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <HomeView user={user} />
-            </div>
-          )}
+         {activeView === "home" && (
+                     <div className="flex-1 overflow-y-auto p-4">
+                       <HomeView
+                         user={user}
+                         onNavigate={(view, docType) => {
+                           if (docType) setDocumentType(docType);
+                           setActiveView(view);
+                         }}
+                         onGoToDashboard={() => setActiveView("quote")}
+                         onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                         sidebarOpen={sidebarOpen}
+                       />
+                     </div>
+                   )}
            {activeView === "purchase-orders" && (
   <div className="flex-1 overflow-y-auto p-6">
     <PurchaseOrders user={user} />

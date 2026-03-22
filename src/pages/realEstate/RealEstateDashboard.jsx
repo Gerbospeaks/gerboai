@@ -935,7 +935,20 @@ const RealEstateDashboard = () => {
 
           {/* ── Views ─────────────────────────────────────────────────────── */}
           {activeView === "templates" && <div className="flex-1 overflow-y-auto p-4"><Templates user={user} /></div>}
-          {activeView === "home" && <HomeViewLocal />}
+         {activeView === "home" && (
+                     <div className="flex-1 overflow-y-auto p-4">
+                       <HomeView
+                         user={user}
+                         onNavigate={(view, docType) => {
+                           if (docType) setDocumentType(docType);
+                           setActiveView(view);
+                         }}
+                         onGoToDashboard={() => setActiveView("quote")}
+                         onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                         sidebarOpen={sidebarOpen}
+                       />
+                     </div>
+                   )}
 
           {/* ── Invoice builder ────────────────────────────────────────────── */}
           {activeView === "invoice" && (
@@ -999,25 +1012,7 @@ const RealEstateDashboard = () => {
                     />
                   </div>
 
-                  {/* Payment terms */}
-                  <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm">
-                    <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
-                      <span className="text-sm font-semibold text-[#374151]">Payment Terms</span>
-                    </div>
-                    <div className="divide-y divide-[#f1f5f9]">
-                      {[
-                        ["Payment Method", "Bank Transfer / Cheque"],
-                        ["Payment Terms", "Net 30 Days"],
-                        ["Late Fee", "2% per month"],
-                        ["Total Due", formatCurrency(total)],
-                      ].map(([k, v]) => (
-                        <div key={k} className="flex items-center justify-between px-5 py-3 text-sm">
-                          <span className="text-[#64748b]">{k}</span>
-                          <span className={`font-semibold ${k === "Total Due" ? "text-[#2563eb]" : "text-[#1e293b]"}`}>{v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                 
 
                   {invoiceId && (
                     <button onClick={handleProcessPayment} className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-medium transition-colors shadow-sm">

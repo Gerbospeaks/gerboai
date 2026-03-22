@@ -76,7 +76,7 @@ const HotelDashboard = () => {
   // ── UI state ───────────────────────────────────────────────────────────
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [inputMode, setInputMode] = useState("manual");
-  const [documentType] = useState("invoice");
+  const [documentType, setDocumentType] = useState("invoice");
   const [activeView, setActiveView] = useState("home");
   const [showPreview, setShowPreview] = useState(false);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
@@ -565,11 +565,20 @@ const HotelDashboard = () => {
           )}
 
           {/* ── View router ───────────────────────────────────────────── */}
-          {activeView === "home" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <HomeView user={user} />
-            </div>
-          )}
+         {activeView === "home" && (
+                     <div className="flex-1 overflow-y-auto p-4">
+                       <HomeView
+                         user={user}
+                         onNavigate={(view, docType) => {
+                           if (docType) setDocumentType(docType);
+                           setActiveView(view);
+                         }}
+                         onGoToDashboard={() => setActiveView("quote")}
+                         onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                         sidebarOpen={sidebarOpen}
+                       />
+                     </div>
+                   )}
           {activeView === "financial-overview" && (
             <div className="flex-1 overflow-y-auto p-4">
               <FinancialOverview user={user} />
