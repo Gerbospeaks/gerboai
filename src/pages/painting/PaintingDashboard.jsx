@@ -1473,6 +1473,7 @@ const PaintingDashboard = () => {
                   businessInfo={businessInfo}
                   documentType={documentType}
                   onExit={() => setShowAIWindow(false)}
+                  industry="painting"
                 />
               )}
         {/* ── Main scrollable content ──────────────────────────────────── */}

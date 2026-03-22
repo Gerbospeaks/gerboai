@@ -987,6 +987,7 @@ const PhotographyDashboard = () => {
                        businessInfo={businessInfo}
                        documentType={documentType}
                        onExit={() => setShowAIWindow(false)}
+                       industry="photography"
                      />
                    )}
             {/* ── Alternate Views ──────────────────────────────────────── */}

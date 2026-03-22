@@ -1055,6 +1055,7 @@ const HvacDashboard = () => {
           businessInfo={businessInfo}
           documentType={documentType}
           onExit={() => setShowAIWindow(false)}
+          industry="hvac"
         />
       )}
       <div className="flex-1 flex overflow-hidden min-h-0">

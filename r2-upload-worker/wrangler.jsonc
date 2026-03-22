@@ -18,6 +18,9 @@
       "bucket_name": "company-logos"  // your R2 bucket name
     }
   ],
+   "ai": {
+    "binding": "AI"
+  },
 	"vars": {
 	"R2_PUBLIC_DOMAIN": "pub-69fb6c18938046458efbd268503903d8.r2.dev"
 	}

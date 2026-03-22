@@ -1473,6 +1473,7 @@ const PestcontrolDashboard = () => {
                     businessInfo={businessInfo}
                     documentType={documentType}
                     onExit={() => setShowAIWindow(false)}
+                    industry="pest-control"
                   />
                 )}
         {/* ── Main scrollable content ──────────────────────────────────── */}

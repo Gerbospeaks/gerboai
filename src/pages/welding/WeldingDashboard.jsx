@@ -1198,6 +1198,7 @@ const WeldingDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    industry="welding"
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

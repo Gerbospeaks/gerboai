@@ -1105,6 +1105,7 @@ const LogisticsDashboard = () => {
             setAiWindowOpen(false);
             setActiveView(view);
           }}
+          industry="logistics"
           TemplateRenderer={TemplateRenderer}
         />
       )}

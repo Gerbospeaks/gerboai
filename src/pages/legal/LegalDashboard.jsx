@@ -3580,6 +3580,7 @@ const LegalDashboard = () => {
           businessInfo={businessInfo}
           documentType={documentType}
           onExit={() => setShowAIWindow(false)}
+          industry="legal"
         />
       )}
 

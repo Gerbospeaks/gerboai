@@ -1197,6 +1197,7 @@ const PoolServicesDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    industry="pool-services"
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

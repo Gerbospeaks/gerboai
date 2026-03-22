@@ -696,6 +696,7 @@ const RealEstateDashboard = () => {
                   businessInfo={businessInfo}
                   documentType={documentType}
                   onExit={() => setShowAIWindow(false)}
+                  industry="realestate"
                 />
               )}
       <div className="flex-1 flex overflow-hidden min-h-0">

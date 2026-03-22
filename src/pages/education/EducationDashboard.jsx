@@ -1610,6 +1610,7 @@ function ZField({ label, children, span2 }) {
               businessInfo={businessInfo}
               documentType={documentType}
               onExit={() => setShowAIWindow(false)}
+              industry="education"
               onNavigateTo={(view) => {
               setAiWindowOpen(false);
               setActiveView(view); 

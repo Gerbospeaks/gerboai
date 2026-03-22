@@ -1023,6 +1023,7 @@ const WindowrepairDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    industry="window-repair"
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import logo from "../assets/img/solidflo-logo.png";
+import { getIndustryConfig } from "../utils/industryConfig";
 import {
   Sparkles,
   Send,
@@ -33,7 +34,12 @@ import {
   ShoppingCart,
   ChevronRight,
   ChevronLeft,
-  LayoutDashboard, Users, List, BarChart2, Layers, Settings,
+  LayoutDashboard,
+  Users,
+  List,
+  BarChart2,
+  Layers,
+  Settings,
   Lightbulb,
 } from "lucide-react";
 import { callClaude } from "../utils/api";
@@ -161,40 +167,35 @@ const findClientInText = (text, clients) => {
 /* ─────────────────────────────────────────────────────────────────
    SYSTEM PROMPT
 ───────────────────────────────────────────────────────────────────*/
-const buildPrompt = (userData, documentType) => {
+const buildPrompt = (userData, documentType, industry = "default") => {
   const b = userData?.businessInfo;
   const inv = userData?.recentInvoices;
+  const config = getIndustryConfig(industry);
+
   const bizBlock = b
     ? `## YOUR BUSINESS\n- Name: ${b.businessName || "—"}\n- VAT: ${b.vatNumber || "—"}\n- Reg: ${b.registrationNumber || "—"}`
     : "## YOUR BUSINESS\nNot configured.";
   const clientList = userData?.clients?.length
     ? `## SAVED CLIENTS (${userData.clients.length})\n${userData.clients
         .slice(0, 30)
-        .map(
-          (c, i) =>
-            `${i + 1}. id:"${c.id}" name:"${c.name || ""}" email:${c.email || "—"}`,
-        )
+        .map((c, i) => `${i + 1}. id:"${c.id}" name:"${c.name || ""}" email:${c.email || "—"}`)
         .join("\n")}`
     : "## SAVED CLIENTS\nNone yet.";
   const invBlock = inv?.length
     ? `## RECENT INVOICES\n${inv
         .slice(0, 8)
-        .map(
-          (v, i) =>
-            `${i + 1}. #${v.invoiceNumber || "N/A"} client:"${v.customer?.name || "—"}" items:${JSON.stringify((v.items || []).slice(0, 3).map((it) => ({ d: it.description, r: it.rate, q: it.qty })))}`,
-        )
+        .map((v, i) => `${i + 1}. #${v.invoiceNumber || "N/A"} client:"${v.customer?.name || "—"}" items:${JSON.stringify((v.items || []).slice(0, 3).map((it) => ({ d: it.description, r: it.rate, q: it.qty })))}`)
         .join("\n")}`
     : "## RECENT INVOICES\nNone.";
   const docLabel =
-    documentType === "estimate"
-      ? "quotation"
-      : documentType === "purchase_order"
-        ? "purchase order"
-        : "invoice";
+    documentType === "estimate" ? "quotation"
+    : documentType === "purchase_order" ? "purchase order"
+    : "invoice";
 
-  return `You are SolidFlo AI — an expert ${docLabel} assistant.
+  return `You are SolidFlo AI — an expert ${docLabel} assistant for the ${industry} industry.
 
 NOTE: Client fields are auto-filled from Firebase when a client is matched. You only need to return clientNotInDB if the client is genuinely new.
+${config.promptHint ? `\nINDUSTRY HINT: ${config.promptHint}` : ""}
 
 ${bizBlock}
 ${clientList}
@@ -204,46 +205,53 @@ ${invBlock}
 
 ALWAYS respond with:
 1. 1–2 sentence friendly reply
-2. JSON block:
+2. A single valid JSON block like this:
 
 \`\`\`json
 {
-  "matchedClientId": string | null,
-  "clientNotInDB": {
-    "name": string | null,
-    "email": string | null,
-    "phone": string | null,
-    "address": string | null,
-    "taxId": string | null
-  } | null,
+  "matchedClientId": null,
+  "clientNotInDB": null,
   "documentType": "${documentType}",
-  "items": [{"description":string,"rate":number,"qty":number,"category":"Service"|"Product"|"Consulting"|"Labour"|"Material"|"Other","taxRate":number}] | null,
-  "notes": string | null,
-  "paymentTerms": string | null,
-  "dueInDays": number | null,
-  "repeatLastInvoice": boolean
+  ${config.jsonExtra}
+  "items": [{"description":"Service","rate":500,"qty":2,"category":"${config.itemCategories[0]}","taxRate":15}],
+  "notes": null,
+  "paymentTerms": null,
+  "dueInDays": null,
+  "repeatLastInvoice": false
 }
 \`\`\`
 
 RULES:
-- Matched saved client → matchedClientId = their id, clientNotInDB = null
-- New client not in list → matchedClientId = null, fill clientNotInDB with what user said
-- "repeat last invoice" → repeatLastInvoice: true
-- "5hrs at R350/hr" → {description:"...",rate:350,qty:5,category:"Service",taxRate:15}
+- matchedClientId: use the client id string if matched, otherwise null
+- clientNotInDB: only fill if client is new and not in the saved list, otherwise null
+- items: always an array, never null — use [] if no items
+- category must be one of: ${config.itemCategories.join(", ")}
+- "5hrs at R350/hr" → description:"Service", rate:350, qty:5, category:"${config.itemCategories[0]}", taxRate:15
 - "no VAT" → taxRate:0
 - taxRate defaults to 15
-- General chat → all nulls, repeatLastInvoice: false
-NEVER add markdown outside the json block.`;
+- repeatLastInvoice: true only if user says repeat/same as last
+- General chat → items:[], all others null, repeatLastInvoice:false
+- Return ONLY valid JSON inside the json block — no TypeScript types, no | null, no extra text
+- NEVER add markdown outside the json block`;
 };
 
 const parseResponse = (text) => {
   try {
     const m = text.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (!m) return { reply: text.trim(), data: null };
-    const data = JSON.parse(m[1].trim());
+
+   
+    const cleaned = m[1]
+      .trim()
+      .replace(/\|\s*null/g, "")        
+      .replace(/,\s*}/g, "}")           
+      .replace(/,\s*]/g, "]");          
+
+    const data = JSON.parse(cleaned);
     const reply = text.slice(0, text.indexOf("```")).trim();
     return { reply: reply || "Got it — I've updated your document.", data };
-  } catch {
+  } catch (e) {
+    console.error("parseResponse failed:", e.message);
     return { reply: text.trim(), data: null };
   }
 };
@@ -388,37 +396,77 @@ function DocSidebar({
   onNavigate,
 }) {
   // Compute stats from userData
-  const overdueCount = userData?.recentInvoices?.filter(inv => {
-    if (!inv.dueDate || inv.paymentStatus?.status === 'paid') return false;
-    return new Date(inv.dueDate.seconds ? inv.dueDate.seconds * 1000 : inv.dueDate) < new Date();
-  }).length || 0;
+  const overdueCount =
+    userData?.recentInvoices?.filter((inv) => {
+      if (!inv.dueDate || inv.paymentStatus?.status === "paid") return false;
+      return (
+        new Date(
+          inv.dueDate.seconds ? inv.dueDate.seconds * 1000 : inv.dueDate,
+        ) < new Date()
+      );
+    }).length || 0;
 
-  const draftsCount = userData?.recentInvoices?.filter(inv => inv.isDraft).length || 0;
+  const draftsCount =
+    userData?.recentInvoices?.filter((inv) => inv.isDraft).length || 0;
 
-  const monthlyTotal = userData?.recentInvoices?.filter(inv => {
-    const d = inv.createdAt?.seconds ? new Date(inv.createdAt.seconds * 1000) : null;
-    return d && d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear();
-  }).reduce((sum, inv) => sum + (inv.total || 0), 0) || 0;
+  const monthlyTotal =
+    userData?.recentInvoices
+      ?.filter((inv) => {
+        const d = inv.createdAt?.seconds
+          ? new Date(inv.createdAt.seconds * 1000)
+          : null;
+        return (
+          d &&
+          d.getMonth() === new Date().getMonth() &&
+          d.getFullYear() === new Date().getFullYear()
+        );
+      })
+      .reduce((sum, inv) => sum + (inv.total || 0), 0) || 0;
 
-  const firstOverdue = userData?.recentInvoices?.find(inv => {
-    if (!inv.dueDate || inv.paymentStatus?.status === 'paid') return false;
-    return new Date(inv.dueDate.seconds ? inv.dueDate.seconds * 1000 : inv.dueDate) < new Date();
+  const firstOverdue = userData?.recentInvoices?.find((inv) => {
+    if (!inv.dueDate || inv.paymentStatus?.status === "paid") return false;
+    return (
+      new Date(inv.dueDate.seconds ? inv.dueDate.seconds * 1000 : inv.dueDate) <
+      new Date()
+    );
   });
 
   const overdueDays = firstOverdue?.dueDate
-    ? Math.floor((new Date() - new Date(firstOverdue.dueDate.seconds ? firstOverdue.dueDate.seconds * 1000 : firstOverdue.dueDate)) / 86400000)
+    ? Math.floor(
+        (new Date() -
+          new Date(
+            firstOverdue.dueDate.seconds
+              ? firstOverdue.dueDate.seconds * 1000
+              : firstOverdue.dueDate,
+          )) /
+          86400000,
+      )
     : 0;
 
   const NAV_ITEMS = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'clients',   label: 'Clients',   icon: Users,          badge: userData?.clients?.length || null, badgeColor: '#93c5fd', badgeBg: 'rgba(22,85,224,.25)' },
-    { id: 'invoices',  label: 'All invoices', icon: List,         badge: overdueCount ? `${overdueCount} due` : null, badgeColor: '#fca5a5', badgeBg: 'rgba(239,68,68,.2)' },
-    { id: 'reports',   label: 'Reports',   icon: BarChart2 },
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    {
+      id: "clients",
+      label: "Clients",
+      icon: Users,
+      badge: userData?.clients?.length || null,
+      badgeColor: "#93c5fd",
+      badgeBg: "rgba(22,85,224,.25)",
+    },
+    {
+      id: "invoices",
+      label: "All invoices",
+      icon: List,
+      badge: overdueCount ? `${overdueCount} due` : null,
+      badgeColor: "#fca5a5",
+      badgeBg: "rgba(239,68,68,.2)",
+    },
+    { id: "reports", label: "Reports", icon: BarChart2 },
   ];
 
   const SETTING_ITEMS = [
-    { id: 'templates', label: 'Templates', icon: Layers },
-    { id: 'settings',  label: 'Settings',  icon: Settings },
+    { id: "templates", label: "Templates", icon: Layers },
+    { id: "settings", label: "Settings", icon: Settings },
   ];
 
   const SidebarItem = ({ item, onClick }) => {
@@ -428,25 +476,63 @@ function DocSidebar({
         onClick={onClick}
         title={collapsed ? item.label : undefined}
         style={{
-          width: '100%', display: 'flex', alignItems: 'center',
-          gap: 10, padding: collapsed ? '10px 0' : '8px 12px',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          borderRadius: 9, border: '1px solid transparent',
-          background: 'transparent', cursor: 'pointer', transition: 'background .15s',
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: collapsed ? "10px 0" : "8px 12px",
+          justifyContent: collapsed ? "center" : "flex-start",
+          borderRadius: 9,
+          border: "1px solid transparent",
+          background: "transparent",
+          cursor: "pointer",
+          transition: "background .15s",
         }}
-        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.06)'}
-        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.background = "rgba(255,255,255,.06)")
+        }
+        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
       >
-        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            background: "rgba(255,255,255,.08)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
           <Icon size={14} color="rgba(255,255,255,.45)" />
         </div>
         {!collapsed && (
           <>
-            <div style={{ flex: 1, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.65)', whiteSpace: 'nowrap', textAlign: 'left' }}>
+            <div
+              style={{
+                flex: 1,
+                fontSize: 12,
+                fontWeight: 700,
+                color: "rgba(255,255,255,.65)",
+                whiteSpace: "nowrap",
+                textAlign: "left",
+              }}
+            >
               {item.label}
             </div>
             {item.badge && (
-              <div style={{ padding: '2px 7px', borderRadius: 10, fontSize: 10, fontWeight: 700, background: item.badgeBg, color: item.badgeColor, flexShrink: 0 }}>
+              <div
+                style={{
+                  padding: "2px 7px",
+                  borderRadius: 10,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  background: item.badgeBg,
+                  color: item.badgeColor,
+                  flexShrink: 0,
+                }}
+              >
                 {item.badge}
               </div>
             )}
@@ -457,42 +543,111 @@ function DocSidebar({
   };
 
   return (
-    <div style={{
-      width: collapsed ? 64 : 220,
-      flexShrink: 0,
-      background: '#0f172a',
-      display: 'flex',
-      flexDirection: 'column',
-      borderRight: '1px solid rgba(255,255,255,.07)',
-      transition: 'width .25s ease',
-      overflow: 'hidden',
-    }}>
-
+    <div
+      style={{
+        width: collapsed ? 64 : 220,
+        flexShrink: 0,
+        background: "#0f172a",
+        display: "flex",
+        flexDirection: "column",
+        borderRight: "1px solid rgba(255,255,255,.07)",
+        transition: "width .25s ease",
+        overflow: "hidden",
+      }}
+    >
       {/* ── Header ── */}
-      <div style={{
-        height: 52, display: 'flex', alignItems: 'center',
-        justifyContent: collapsed ? 'center' : 'space-between',
-        padding: collapsed ? 0 : '0 14px',
-        borderBottom: '1px solid rgba(255,255,255,.07)', flexShrink: 0,
-      }}>
+      <div
+        style={{
+          height: 52,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: collapsed ? "center" : "space-between",
+          padding: collapsed ? 0 : "0 14px",
+          borderBottom: "1px solid rgba(255,255,255,.07)",
+          flexShrink: 0,
+        }}
+      >
         {!collapsed && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src={logo} alt="SolidFlo" style={{ width: 16, height: 16 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 7,
+                background: "transparent",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <img
+                src={logo}
+                alt="SolidFlo"
+                style={{ width: 16, height: 16 }}
+              />
             </div>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>SolidFlo AI</span>
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: "#fff",
+                whiteSpace: "nowrap",
+              }}
+            >
+              SolidFlo AI
+            </span>
           </div>
         )}
-        <button onClick={onToggle} style={{ background: 'rgba(255,255,255,.07)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 7, color: 'rgba(255,255,255,.6)', cursor: 'pointer', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <button
+          onClick={onToggle}
+          style={{
+            background: "rgba(255,255,255,.07)",
+            border: "1px solid rgba(255,255,255,.1)",
+            borderRadius: 7,
+            color: "rgba(255,255,255,.6)",
+            cursor: "pointer",
+            width: 28,
+            height: 28,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
           {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
         </button>
       </div>
 
       {/* ── Account name ── */}
       {!collapsed && businessInfo?.businessName && (
-        <div style={{ padding: '10px 14px 6px', borderBottom: '1px solid rgba(255,255,255,.05)' }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.3)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 3 }}>Account</div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.7)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div
+          style={{
+            padding: "10px 14px 6px",
+            borderBottom: "1px solid rgba(255,255,255,.05)",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              color: "rgba(255,255,255,.3)",
+              letterSpacing: ".08em",
+              textTransform: "uppercase",
+              marginBottom: 3,
+            }}
+          >
+            Account
+          </div>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: "rgba(255,255,255,.7)",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
             {businessInfo.businessName}
           </div>
         </div>
@@ -500,30 +655,83 @@ function DocSidebar({
 
       {/* ── Stats strip ── */}
       {!collapsed && (
-        <div style={{ display: 'flex', gap: 6, padding: '8px 14px' }}>
+        <div style={{ display: "flex", gap: 6, padding: "8px 14px" }}>
           {[
-            { val: `R${monthlyTotal >= 1000 ? (monthlyTotal / 1000).toFixed(0) + 'k' : monthlyTotal.toFixed(0)}`, lbl: 'This month' },
-            { val: overdueCount, lbl: 'Overdue', alert: overdueCount > 0 },
-            { val: draftsCount, lbl: 'Drafts' },
+            {
+              val: `R${monthlyTotal >= 1000 ? (monthlyTotal / 1000).toFixed(0) + "k" : monthlyTotal.toFixed(0)}`,
+              lbl: "This month",
+            },
+            { val: overdueCount, lbl: "Overdue", alert: overdueCount > 0 },
+            { val: draftsCount, lbl: "Drafts" },
           ].map((s, i) => (
-            <div key={i} style={{ flex: 1, background: 'rgba(255,255,255,.05)', borderRadius: 8, padding: '7px 8px' }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: s.alert ? '#fca5a5' : '#fff' }}>{s.val}</div>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,.35)', fontWeight: 600, marginTop: 2, textTransform: 'uppercase', letterSpacing: '.05em' }}>{s.lbl}</div>
+            <div
+              key={i}
+              style={{
+                flex: 1,
+                background: "rgba(255,255,255,.05)",
+                borderRadius: 8,
+                padding: "7px 8px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: s.alert ? "#fca5a5" : "#fff",
+                }}
+              >
+                {s.val}
+              </div>
+              <div
+                style={{
+                  fontSize: 9,
+                  color: "rgba(255,255,255,.35)",
+                  fontWeight: 600,
+                  marginTop: 2,
+                  textTransform: "uppercase",
+                  letterSpacing: ".05em",
+                }}
+              >
+                {s.lbl}
+              </div>
             </div>
           ))}
         </div>
       )}
 
-      <div style={{ height: 1, background: 'rgba(255,255,255,.06)', margin: '4px 0' }} />
+      <div
+        style={{
+          height: 1,
+          background: "rgba(255,255,255,.06)",
+          margin: "4px 0",
+        }}
+      />
 
       {/* ── Document type ── */}
       {!collapsed && (
-        <div style={{ padding: '10px 14px 5px' }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.3)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Document type</div>
+        <div style={{ padding: "10px 14px 5px" }}>
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              color: "rgba(255,255,255,.3)",
+              letterSpacing: ".08em",
+              textTransform: "uppercase",
+            }}
+          >
+            Document type
+          </div>
         </div>
       )}
 
-      <div style={{ padding: collapsed ? '12px 8px' : '0 8px 8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div
+        style={{
+          padding: collapsed ? "12px 8px" : "0 8px 8px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
         {DOC_TYPES.map((item) => {
           const Icon = item.icon;
           const active = activeType === item.id;
@@ -533,25 +741,82 @@ function DocSidebar({
               onClick={() => onChange(item.id)}
               title={collapsed ? item.label : undefined}
               style={{
-                position: 'relative', width: '100%', display: 'flex', alignItems: 'center',
-                gap: 10, padding: collapsed ? '10px 0' : '9px 12px',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                borderRadius: 10, border: active ? `1px solid ${item.color}40` : '1px solid transparent',
-                background: active ? `${item.color}20` : 'transparent', cursor: 'pointer', transition: 'all .15s',
+                position: "relative",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: collapsed ? "10px 0" : "9px 12px",
+                justifyContent: collapsed ? "center" : "flex-start",
+                borderRadius: 10,
+                border: active
+                  ? `1px solid ${item.color}40`
+                  : "1px solid transparent",
+                background: active ? `${item.color}20` : "transparent",
+                cursor: "pointer",
+                transition: "all .15s",
               }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,.05)'; }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                if (!active)
+                  e.currentTarget.style.background = "rgba(255,255,255,.05)";
+              }}
+              onMouseLeave={(e) => {
+                if (!active) e.currentTarget.style.background = "transparent";
+              }}
             >
               {collapsed && active && (
-                <div style={{ position: 'absolute', left: 4, width: 3, height: 20, borderRadius: 2, background: item.color }} />
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 4,
+                    width: 3,
+                    height: 20,
+                    borderRadius: 2,
+                    background: item.color,
+                  }}
+                />
               )}
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: active ? item.color : 'rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background .15s' }}>
-                <Icon size={15} color={active ? '#fff' : 'rgba(255,255,255,.5)'} />
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: active ? item.color : "rgba(255,255,255,.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  transition: "background .15s",
+                }}
+              >
+                <Icon
+                  size={15}
+                  color={active ? "#fff" : "rgba(255,255,255,.5)"}
+                />
               </div>
               {!collapsed && (
-                <div style={{ textAlign: 'left', minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: active ? '#fff' : 'rgba(255,255,255,.65)', whiteSpace: 'nowrap' }}>{item.label}</div>
-                  <div style={{ fontSize: 10, color: active ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.3)', whiteSpace: 'nowrap' }}>{item.sublabel}</div>
+                <div style={{ textAlign: "left", minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: active ? "#fff" : "rgba(255,255,255,.65)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {item.label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      color: active
+                        ? "rgba(255,255,255,.5)"
+                        : "rgba(255,255,255,.3)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {item.sublabel}
+                  </div>
                 </div>
               )}
             </button>
@@ -559,74 +824,249 @@ function DocSidebar({
         })}
       </div>
 
-      <div style={{ height: 1, background: 'rgba(255,255,255,.06)', margin: '4px 0' }} />
+      <div
+        style={{
+          height: 1,
+          background: "rgba(255,255,255,.06)",
+          margin: "4px 0",
+        }}
+      />
 
       {/* ── Navigation ── */}
       {!collapsed && (
-        <div style={{ padding: '8px 14px 4px' }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.3)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Navigate</div>
+        <div style={{ padding: "8px 14px 4px" }}>
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              color: "rgba(255,255,255,.3)",
+              letterSpacing: ".08em",
+              textTransform: "uppercase",
+            }}
+          >
+            Navigate
+          </div>
         </div>
       )}
 
-      <div style={{ padding: collapsed ? '4px 8px' : '0 8px 4px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {NAV_ITEMS.map(item => (
-          <SidebarItem key={item.id} item={item} onClick={() => onNavigate?.(item.id)} />
+      <div
+        style={{
+          padding: collapsed ? "4px 8px" : "0 8px 4px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        {NAV_ITEMS.map((item) => (
+          <SidebarItem
+            key={item.id}
+            item={item}
+            onClick={() => onNavigate?.(item.id)}
+          />
         ))}
       </div>
 
-      <div style={{ height: 1, background: 'rgba(255,255,255,.06)', margin: '4px 0' }} />
+      <div
+        style={{
+          height: 1,
+          background: "rgba(255,255,255,.06)",
+          margin: "4px 0",
+        }}
+      />
 
       {/* ── Overdue notification ── */}
       {!collapsed && firstOverdue && (
-        <div style={{ margin: '0 8px 6px', padding: '7px 10px', borderRadius: 8, background: 'rgba(251,191,36,.08)', border: '1px solid rgba(251,191,36,.18)', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fbbf24', flexShrink: 0, marginTop: 3 }} />
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,.55)', lineHeight: 1.4 }}>
-            <span style={{ color: 'rgba(255,255,255,.8)', fontWeight: 700 }}>{firstOverdue.customer?.name || 'A client'}</span> invoice overdue by {overdueDays}d
+        <div
+          style={{
+            margin: "0 8px 6px",
+            padding: "7px 10px",
+            borderRadius: 8,
+            background: "rgba(251,191,36,.08)",
+            border: "1px solid rgba(251,191,36,.18)",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 8,
+          }}
+        >
+          <div
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: "#fbbf24",
+              flexShrink: 0,
+              marginTop: 3,
+            }}
+          />
+          <div
+            style={{
+              fontSize: 11,
+              color: "rgba(255,255,255,.55)",
+              lineHeight: 1.4,
+            }}
+          >
+            <span style={{ color: "rgba(255,255,255,.8)", fontWeight: 700 }}>
+              {firstOverdue.customer?.name || "A client"}
+            </span>{" "}
+            invoice overdue by {overdueDays}d
           </div>
         </div>
       )}
 
       {/* ── Settings ── */}
       {!collapsed && (
-        <div style={{ padding: '6px 14px 4px' }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.3)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Settings</div>
+        <div style={{ padding: "6px 14px 4px" }}>
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              color: "rgba(255,255,255,.3)",
+              letterSpacing: ".08em",
+              textTransform: "uppercase",
+            }}
+          >
+            Settings
+          </div>
         </div>
       )}
 
-      <div style={{ padding: collapsed ? '4px 8px' : '0 8px 6px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {SETTING_ITEMS.map(item => (
-          <SidebarItem key={item.id} item={item} onClick={() => onNavigate?.(item.id)} />
+      <div
+        style={{
+          padding: collapsed ? "4px 8px" : "0 8px 6px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        {SETTING_ITEMS.map((item) => (
+          <SidebarItem
+            key={item.id}
+            item={item}
+            onClick={() => onNavigate?.(item.id)}
+          />
         ))}
       </div>
 
-      <div style={{ height: 1, background: 'rgba(255,255,255,.06)', margin: '4px 0' }} />
+      <div
+        style={{
+          height: 1,
+          background: "rgba(255,255,255,.06)",
+          margin: "4px 0",
+        }}
+      />
 
       {/* ── User footer ── */}
       {!collapsed && (
-        <div style={{ padding: '10px 14px 14px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg,#1655e0,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff' }}>
-                {(user?.name || user?.email || '?')[0].toUpperCase()}
+        <div
+          style={{
+            padding: "10px 14px 14px",
+            borderTop: "1px solid rgba(255,255,255,.08)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 8,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                minWidth: 0,
+              }}
+            >
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  flexShrink: 0,
+                  background: "linear-gradient(135deg,#1655e0,#7c3aed)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "#fff",
+                }}
+              >
+                {(user?.name || user?.email || "?")[0].toUpperCase()}
               </div>
               <div style={{ minWidth: 0 }}>
                 {user?.name && (
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.8)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>{user.name}</div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: "rgba(255,255,255,.8)",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxWidth: 120,
+                    }}
+                  >
+                    {user.name}
+                  </div>
                 )}
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>{user?.email || 'Signed in'}</div>
+                <div
+                  style={{
+                    fontSize: 10,
+                    color: "rgba(255,255,255,.35)",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    maxWidth: 120,
+                  }}
+                >
+                  {user?.email || "Signed in"}
+                </div>
               </div>
             </div>
             <button
               onClick={onLogout}
               title="Sign out"
-              style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 7, cursor: 'pointer', width: 28, height: 28, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.4)', transition: 'all .15s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,68,42,.2)'; e.currentTarget.style.borderColor = 'rgba(232,68,42,.4)'; e.currentTarget.style.color = '#f87171'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,.1)'; e.currentTarget.style.color = 'rgba(255,255,255,.4)'; }}
+              style={{
+                background: "rgba(255,255,255,.06)",
+                border: "1px solid rgba(255,255,255,.1)",
+                borderRadius: 7,
+                cursor: "pointer",
+                width: 28,
+                height: 28,
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "rgba(255,255,255,.4)",
+                transition: "all .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(232,68,42,.2)";
+                e.currentTarget.style.borderColor = "rgba(232,68,42,.4)";
+                e.currentTarget.style.color = "#f87171";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255,255,255,.06)";
+                e.currentTarget.style.borderColor = "rgba(255,255,255,.1)";
+                e.currentTarget.style.color = "rgba(255,255,255,.4)";
+              }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
               </svg>
             </button>
           </div>
@@ -645,8 +1085,10 @@ export default function AIInvoiceWindow({
   onNavigateTo,
   documentType: initDocType = "invoice",
   TemplateRenderer,
+  industry = "default",
 }) {
   const [userData, setUserData] = useState(null);
+  const [extraData, setExtraData] = useState({});
   const [dataLoading, setDataLoading] = useState(true);
   const [documentType, setDocumentType] = useState(initDocType);
   const [customerName, setCustomerName] = useState("");
@@ -825,30 +1267,16 @@ export default function AIInvoiceWindow({
     setLoading(true);
 
     try {
-      /* Step 1 — Client-side DB match */
+      // Step 1 — client-side DB match
       const mentionedClient = findClientInText(trimmed, userData?.clients);
       let appliedClient = null;
 
       if (mentionedClient) {
-        // ✅ Found in DB — fill template immediately
         applyClientFromDB(mentionedClient);
         appliedClient = mentionedClient.name;
-      } else {
-        const isDocRequest =
-          /invoice|bill|quote|estimate|purchase order|PO\b/i.test(trimmed);
-        // Also check if it contains a capitalised word (likely a name/company)
-        const hasName = /[A-Z][a-z]+/.test(trimmed);
-
-        if (isDocRequest || hasName) {
-          // Open CustomerModal immediately — don't wait for AI
-          setPendingNewClient(null);
-          setShowCustomerModal(true);
-          setLoading(false);
-          return; // stop here — don't call the AI yet
-        }
       }
 
-      /* Step 2 — Repeat last invoice */
+      // Step 2 — repeat last invoice
       const isRepeat =
         /repeat|same as last|last invoice|previous invoice/i.test(trimmed);
       if (isRepeat && userData?.recentInvoices?.length) {
@@ -868,16 +1296,24 @@ export default function AIInvoiceWindow({
         if (last.items?.length) applyItems(last.items);
       }
 
-      /* Step 3 — Call Claude via proxy */
+      // Step 3 — ALWAYS call AI to extract items
       const rawText = await callClaude({
-        system: buildPrompt(userData, documentType),
+        system: buildPrompt(userData, documentType, industry),
         messages: historyRef.current,
       });
-
+      console.log("RAW AI RESPONSE:", rawText)
       const { reply, data: extracted } = parseResponse(rawText);
+      console.log("REPLY:", reply);
+console.log("EXTRACTED:", extracted);
       let appliedItems = 0;
 
       if (extracted) {
+       const config = getIndustryConfig(industry);
+    Object.keys(config.extraFields).forEach((key) => {
+      if (extracted[key]) {
+        setExtraData((prev) => ({ ...prev, [key]: extracted[key] }));
+      }
+    });
         if (extracted.matchedClientId && !mentionedClient) {
           const dbClient = userData?.clients?.find(
             (c) => c.id === extracted.matchedClientId,
@@ -887,9 +1323,18 @@ export default function AIInvoiceWindow({
             appliedClient = dbClient.name;
           }
         }
+
+        // 👇 always apply items if AI extracted them
         if (extracted.items?.length && !isRepeat) {
           appliedItems = applyItems(extracted.items);
         }
+
+        // new client not in DB — show modal after AI responds
+        if (extracted.clientNotInDB?.name && !mentionedClient) {
+          setPendingNewClient(extracted.clientNotInDB);
+          setShowCustomerModal(true);
+        }
+
         if (
           extracted.repeatLastInvoice &&
           userData?.recentInvoices?.length &&
@@ -964,6 +1409,8 @@ export default function AIInvoiceWindow({
     documentType,
     showStamp: false,
     paymentStatus: { status: "pending" },
+    extraData, 
+    industry,
   };
 
   if (dataLoading)
@@ -1078,9 +1525,9 @@ export default function AIInvoiceWindow({
             ]);
           }}
           onNavigate={(id) => {
-    onExit();            
-    onNavigateTo?.(id);     
-  }}
+            onExit();
+            onNavigateTo?.(id);
+          }}
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed((o) => !o)}
           businessInfo={bizInfo}

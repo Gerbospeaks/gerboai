@@ -1283,6 +1283,7 @@ const TowingDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    industry="towing"
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

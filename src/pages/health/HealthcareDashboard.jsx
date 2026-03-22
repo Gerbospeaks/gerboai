@@ -500,6 +500,7 @@ const HealthcareDashboard = () => {
             businessInfo={facilityInfo}
             documentType={"medical"}
             onExit={() => setShowAIWindow(false)}
+            industry="healthcare"
             onNavigateTo={(view) => {
             setAiWindowOpen(false);
             setActiveView(view); 

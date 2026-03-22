@@ -404,7 +404,11 @@ const HotelDashboard = () => {
 
       {/* AI window */}
       {showAIWindow && (
-        <AIInvoiceWindow user={user} businessInfo={propertyInfo} documentType={documentType} onExit={() => setShowAIWindow(false)} />
+        <AIInvoiceWindow user={user} 
+        businessInfo={propertyInfo} 
+        documentType={documentType} 
+        onExit={() => setShowAIWindow(false)} 
+        industry="hotel"/>
       )}
 
       <div className="flex-1 flex overflow-hidden min-h-0">

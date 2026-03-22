@@ -951,6 +951,7 @@ const LandscapingDashboard = () => {
           businessInfo={businessInfo}
           documentType={documentType}
           onExit={() => setShowAIWindow(false)}
+          industry="landscaping"
         />
       )}
 

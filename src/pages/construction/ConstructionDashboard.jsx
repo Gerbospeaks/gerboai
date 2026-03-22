@@ -678,6 +678,7 @@ const handleAddNewCustomer = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    industry="construction"
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

@@ -1340,6 +1340,7 @@ const MechanicsDashboard = () => {
     setAiWindowOpen(false);
     setActiveView(view); 
   }}
+  industry="mechanics"
     TemplateRenderer={TemplateRenderer}   
   />
             )}

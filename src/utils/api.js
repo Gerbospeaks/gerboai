@@ -1,32 +1,35 @@
 // src/utils/api.js
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const MODEL = 'gemini-2.0-flash';
+const OLLAMA_BASE_URL = import.meta.env.VITE_OLLAMA_BASE_URL || 'http://localhost:11434';
+const MODEL = 'llama3.2:1b'; // or 'llama3.1', 'llama3', etc.
 
 export async function callClaude({ system, messages, max_tokens = 1000 }) {
-  // Convert your existing message format to Gemini's format
-  const contents = messages.map(m => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: m.content }],
-  }));
+  // Prepend system message into the messages array (Ollama uses role: 'system')
+  const ollamaMessages = [
+    { role: 'system', content: system },
+    ...messages.map(m => ({
+      role: m.role, // 'user' or 'assistant' — Ollama uses same names
+      content: m.content,
+    })),
+  ];
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: system }] },
-        contents,
-        generationConfig: { maxOutputTokens: max_tokens },
-      }),
-    }
-  );
+  const res = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: MODEL,
+      messages: ollamaMessages,
+      stream: false,
+      options: {
+        num_predict: max_tokens,
+      },
+    }),
+  });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `Gemini error ${res.status}`);
+    throw new Error(err.error || `Ollama error ${res.status}`);
   }
 
   const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return data.message?.content || '';
 }

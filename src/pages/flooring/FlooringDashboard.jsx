@@ -747,6 +747,7 @@ const FlooringDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    industry="flooring"
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

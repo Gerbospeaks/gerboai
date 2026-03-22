@@ -750,6 +750,7 @@ const AccountingDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    industry="accounting"
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

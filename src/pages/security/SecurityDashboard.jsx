@@ -536,6 +536,7 @@ const SecurityDashboard = () => {
                   businessInfo={businessInfo}
                   documentType={documentType}
                   onExit={() => setShowAIWindow(false)}
+                  industry="security"
                 />
               )}
       <div className="flex-1 flex overflow-hidden min-h-0">

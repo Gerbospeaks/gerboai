@@ -690,6 +690,7 @@ const handleAddNewCustomer = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    industry="electrical"
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

@@ -1215,6 +1215,7 @@ const PlumbingDashboard = () => {
                        businessInfo={businessInfo}
                        documentType={documentType}
                        onExit={() => setShowAIWindow(false)}
+                       industry="plumbing"
                      />
                    )}
             {/* ── Alternate Views ──────────────────────────────────────── */}

@@ -764,6 +764,7 @@ const SolarDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    industry="solar-installation"
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

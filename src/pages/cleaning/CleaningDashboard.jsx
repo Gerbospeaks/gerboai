@@ -749,6 +749,7 @@ const CleaningDashboard = () => {
     businessInfo={businessInfo}
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
+    industry="cleaning"
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 
