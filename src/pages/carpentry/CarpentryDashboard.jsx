@@ -416,6 +416,7 @@ const CarpentryDashboard = () => {
     setAiWindowOpen(false);
     setActiveView(view); 
   }}
+  TemplateRenderer={TemplateRenderer}
   />
 )}
       <div className="flex-1 flex overflow-hidden min-h-0">

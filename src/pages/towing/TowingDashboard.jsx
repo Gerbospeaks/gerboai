@@ -1284,6 +1284,7 @@ const TowingDashboard = () => {
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
     industry="towing"
+    TemplateRenderer={TemplateRenderer}
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

@@ -628,12 +628,9 @@ const CleaningDashboard = () => {
     taxId: "",
     items,
     subtotal,
-    // Templates use "vat", not "totalTax"
-    vat:      totalTax,
     totalTax,
     total,
     documentType,
-    // Stamp props — safe even if stampSettings is partially defined
     stampText:    stampSettings?.text    || "APPROVED",
     stampColor:   stampSettings?.color   || "#d32f2f",
     showStampDate: stampSettings?.showDate ?? false,
@@ -750,6 +747,7 @@ const CleaningDashboard = () => {
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
     industry="cleaning"
+    TemplateRenderer={TemplateRenderer}
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

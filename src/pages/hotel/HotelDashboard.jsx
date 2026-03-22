@@ -408,7 +408,9 @@ const HotelDashboard = () => {
         businessInfo={propertyInfo} 
         documentType={documentType} 
         onExit={() => setShowAIWindow(false)} 
-        industry="hotel"/>
+        industry="hotel"
+        TemplateRenderer={TemplateRenderer}
+        />
       )}
 
       <div className="flex-1 flex overflow-hidden min-h-0">

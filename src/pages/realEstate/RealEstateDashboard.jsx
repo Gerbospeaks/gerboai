@@ -697,6 +697,7 @@ const RealEstateDashboard = () => {
                   documentType={documentType}
                   onExit={() => setShowAIWindow(false)}
                   industry="realestate"
+                  TemplateRenderer={TemplateRenderer}
                 />
               )}
       <div className="flex-1 flex overflow-hidden min-h-0">

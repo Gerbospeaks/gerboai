@@ -1199,6 +1199,7 @@ const WeldingDashboard = () => {
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
     industry="welding"
+    TemplateRenderer={TemplateRenderer}
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

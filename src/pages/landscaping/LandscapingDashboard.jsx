@@ -952,6 +952,7 @@ const LandscapingDashboard = () => {
           documentType={documentType}
           onExit={() => setShowAIWindow(false)}
           industry="landscaping"
+          TemplateRenderer={TemplateRenderer}
         />
       )}
 

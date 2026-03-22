@@ -988,6 +988,7 @@ const PhotographyDashboard = () => {
                        documentType={documentType}
                        onExit={() => setShowAIWindow(false)}
                        industry="photography"
+                       TemplateRenderer={TemplateRenderer}
                      />
                    )}
             {/* ── Alternate Views ──────────────────────────────────────── */}

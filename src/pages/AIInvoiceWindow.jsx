@@ -41,9 +41,14 @@ import {
   Layers,
   Settings,
   Lightbulb,
+  MessageSquare,
+  Eye,
+  Menu,
+  X,
 } from "lucide-react";
 import { callClaude } from "../utils/api";
 import CustomerModal from "./CustomerModal";
+
 const DOC_TYPES = [
   {
     id: "invoice",
@@ -164,33 +169,37 @@ const findClientInText = (text, clients) => {
   return match || null;
 };
 
-/* ─────────────────────────────────────────────────────────────────
-   SYSTEM PROMPT
-───────────────────────────────────────────────────────────────────*/
 const buildPrompt = (userData, documentType, industry = "default") => {
   const b = userData?.businessInfo;
   const inv = userData?.recentInvoices;
   const config = getIndustryConfig(industry);
-
   const bizBlock = b
     ? `## YOUR BUSINESS\n- Name: ${b.businessName || "—"}\n- VAT: ${b.vatNumber || "—"}\n- Reg: ${b.registrationNumber || "—"}`
     : "## YOUR BUSINESS\nNot configured.";
   const clientList = userData?.clients?.length
     ? `## SAVED CLIENTS (${userData.clients.length})\n${userData.clients
         .slice(0, 30)
-        .map((c, i) => `${i + 1}. id:"${c.id}" name:"${c.name || ""}" email:${c.email || "—"}`)
+        .map(
+          (c, i) =>
+            `${i + 1}. id:"${c.id}" name:"${c.name || ""}" email:${c.email || "—"}`,
+        )
         .join("\n")}`
     : "## SAVED CLIENTS\nNone yet.";
   const invBlock = inv?.length
     ? `## RECENT INVOICES\n${inv
         .slice(0, 8)
-        .map((v, i) => `${i + 1}. #${v.invoiceNumber || "N/A"} client:"${v.customer?.name || "—"}" items:${JSON.stringify((v.items || []).slice(0, 3).map((it) => ({ d: it.description, r: it.rate, q: it.qty })))}`)
+        .map(
+          (v, i) =>
+            `${i + 1}. #${v.invoiceNumber || "N/A"} client:"${v.customer?.name || "—"}" items:${JSON.stringify((v.items || []).slice(0, 3).map((it) => ({ d: it.description, r: it.rate, q: it.qty })))}`,
+        )
         .join("\n")}`
     : "## RECENT INVOICES\nNone.";
   const docLabel =
-    documentType === "estimate" ? "quotation"
-    : documentType === "purchase_order" ? "purchase order"
-    : "invoice";
+    documentType === "estimate"
+      ? "quotation"
+      : documentType === "purchase_order"
+        ? "purchase order"
+        : "invoice";
 
   return `You are SolidFlo AI — an expert ${docLabel} assistant for the ${industry} industry.
 
@@ -239,14 +248,11 @@ const parseResponse = (text) => {
   try {
     const m = text.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (!m) return { reply: text.trim(), data: null };
-
-   
     const cleaned = m[1]
       .trim()
-      .replace(/\|\s*null/g, "")        
-      .replace(/,\s*}/g, "}")           
-      .replace(/,\s*]/g, "]");          
-
+      .replace(/\|\s*null/g, "")
+      .replace(/,\s*}/g, "}")
+      .replace(/,\s*]/g, "]");
     const data = JSON.parse(cleaned);
     const reply = text.slice(0, text.indexOf("```")).trim();
     return { reply: reply || "Got it — I've updated your document.", data };
@@ -258,13 +264,10 @@ const parseResponse = (text) => {
 
 const safeNum = (val) => Number(val) || 0;
 
-/* ─────────────────────────────────────────────────────────────────
-   MESSAGE BUBBLE
-───────────────────────────────────────────────────────────────────*/
+/* ── Message Bubble ── */
 function Bubble({ msg }) {
   const [copied, setCopied] = useState(false);
   const isUser = msg.role === "user";
-
   return (
     <div
       className={`flex gap-3 mb-5 ${isUser ? "flex-row-reverse" : "flex-row"}`}
@@ -278,28 +281,20 @@ function Bubble({ msg }) {
           <Sparkles size={14} className="text-white" />
         )}
       </div>
-
       <div
-        className={`flex flex-col gap-1.5 ${isUser ? "items-end" : "items-start"} w-full`}
-        style={{ maxWidth: "85%" }}
+        className={`flex flex-col gap-1.5 ${isUser ? "items-end" : "items-start"}`}
+        style={{ maxWidth: "85%", width: "100%" }}
       >
         <span
           className={`text-[10px] font-bold tracking-widest uppercase ${isUser ? "text-[#1655e0]" : "text-[#64748b]"}`}
         >
           {isUser ? "You" : "SolidFlo AI"}
         </span>
-
         <div
-          className={`px-4 py-3 text-[13.5px] leading-relaxed ${
-            isUser
-              ? "bg-[#1655e0] text-white rounded-[18px_4px_18px_18px] shadow-lg shadow-[#1655e0]/20"
-              : "bg-white text-[#1e293b] rounded-[4px_18px_18px_18px] border border-[#e5e7eb] shadow-sm"
-          }`}
+          className={`px-4 py-3 text-[13.5px] leading-relaxed ${isUser ? "bg-[#1655e0] text-white rounded-[18px_4px_18px_18px] shadow-lg shadow-[#1655e0]/20" : "bg-white text-[#1e293b] rounded-[4px_18px_18px_18px] border border-[#e5e7eb] shadow-sm"}`}
         >
           {msg.content}
         </div>
-
-        {/* Status badges */}
         {!isUser && (msg.appliedClient || msg.appliedItems) && (
           <div className="flex items-center gap-2 flex-wrap">
             {msg.appliedClient && (
@@ -329,8 +324,6 @@ function Bubble({ msg }) {
             </button>
           </div>
         )}
-
-        {/* Saved confirmation */}
         {!isUser && msg.clientSaved && (
           <div
             style={{
@@ -358,8 +351,8 @@ function Bubble({ msg }) {
 function TypingDots() {
   return (
     <div className="flex gap-3 mb-5">
-      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
-        <img src="/logo.png" alt="SolidFlo" className="w-5 h-5" />
+      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-[#0f172a]">
+        <img src={logo} alt="SolidFlo" style={{ width: 14, height: 14 }} />
       </div>
       <div className="flex flex-col gap-1.5">
         <span className="text-[10px] font-bold tracking-widest uppercase text-[#64748b]">
@@ -381,9 +374,7 @@ function TypingDots() {
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   SIDEBAR
-───────────────────────────────────────────────────────────────────*/
+/* ── Desktop Sidebar ── */
 function DocSidebar({
   activeType,
   onChange,
@@ -395,7 +386,6 @@ function DocSidebar({
   userData,
   onNavigate,
 }) {
-  // Compute stats from userData
   const overdueCount =
     userData?.recentInvoices?.filter((inv) => {
       if (!inv.dueDate || inv.paymentStatus?.status === "paid") return false;
@@ -405,10 +395,8 @@ function DocSidebar({
         ) < new Date()
       );
     }).length || 0;
-
   const draftsCount =
     userData?.recentInvoices?.filter((inv) => inv.isDraft).length || 0;
-
   const monthlyTotal =
     userData?.recentInvoices
       ?.filter((inv) => {
@@ -422,7 +410,6 @@ function DocSidebar({
         );
       })
       .reduce((sum, inv) => sum + (inv.total || 0), 0) || 0;
-
   const firstOverdue = userData?.recentInvoices?.find((inv) => {
     if (!inv.dueDate || inv.paymentStatus?.status === "paid") return false;
     return (
@@ -430,7 +417,6 @@ function DocSidebar({
       new Date()
     );
   });
-
   const overdueDays = firstOverdue?.dueDate
     ? Math.floor(
         (new Date() -
@@ -463,7 +449,6 @@ function DocSidebar({
     },
     { id: "reports", label: "Reports", icon: BarChart2 },
   ];
-
   const SETTING_ITEMS = [
     { id: "templates", label: "Templates", icon: Layers },
     { id: "settings", label: "Settings", icon: Settings },
@@ -555,7 +540,6 @@ function DocSidebar({
         overflow: "hidden",
       }}
     >
-      {/* ── Header ── */}
       <div
         style={{
           height: 52,
@@ -574,7 +558,6 @@ function DocSidebar({
                 width: 26,
                 height: 26,
                 borderRadius: 7,
-                background: "transparent",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -618,7 +601,6 @@ function DocSidebar({
         </button>
       </div>
 
-      {/* ── Account name ── */}
       {!collapsed && businessInfo?.businessName && (
         <div
           style={{
@@ -653,7 +635,6 @@ function DocSidebar({
         </div>
       )}
 
-      {/* ── Stats strip ── */}
       {!collapsed && (
         <div style={{ display: "flex", gap: 6, padding: "8px 14px" }}>
           {[
@@ -707,7 +688,6 @@ function DocSidebar({
         }}
       />
 
-      {/* ── Document type ── */}
       {!collapsed && (
         <div style={{ padding: "10px 14px 5px" }}>
           <div
@@ -832,7 +812,6 @@ function DocSidebar({
         }}
       />
 
-      {/* ── Navigation ── */}
       {!collapsed && (
         <div style={{ padding: "8px 14px 4px" }}>
           <div
@@ -848,7 +827,6 @@ function DocSidebar({
           </div>
         </div>
       )}
-
       <div
         style={{
           padding: collapsed ? "4px 8px" : "0 8px 4px",
@@ -874,7 +852,6 @@ function DocSidebar({
         }}
       />
 
-      {/* ── Overdue notification ── */}
       {!collapsed && firstOverdue && (
         <div
           style={{
@@ -913,7 +890,6 @@ function DocSidebar({
         </div>
       )}
 
-      {/* ── Settings ── */}
       {!collapsed && (
         <div style={{ padding: "6px 14px 4px" }}>
           <div
@@ -929,7 +905,6 @@ function DocSidebar({
           </div>
         </div>
       )}
-
       <div
         style={{
           padding: collapsed ? "4px 8px" : "0 8px 6px",
@@ -955,7 +930,6 @@ function DocSidebar({
         }}
       />
 
-      {/* ── User footer ── */}
       {!collapsed && (
         <div
           style={{
@@ -1076,9 +1050,306 @@ function DocSidebar({
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   MAIN COMPONENT
-───────────────────────────────────────────────────────────────────*/
+/* ── Mobile Menu Drawer ── */
+function MobileMenuDrawer({
+  open,
+  onClose,
+  documentType,
+  onChange,
+  userData,
+  onNavigate,
+  onLogout,
+  user,
+  businessInfo,
+}) {
+  if (!open) return null;
+  return (
+    <>
+      <div
+        onClick={onClose}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,.6)",
+          zIndex: 300,
+          backdropFilter: "blur(2px)",
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          bottom: 64,
+          left: 0,
+          right: 0,
+          zIndex: 301,
+          background: "#0f172a",
+          borderRadius: "20px 20px 0 0",
+          padding: "20px 16px 8px",
+          maxHeight: "70vh",
+          overflowY: "auto",
+        }}
+      >
+        {/* Handle */}
+        <div
+          style={{
+            width: 36,
+            height: 4,
+            background: "rgba(255,255,255,.2)",
+            borderRadius: 2,
+            margin: "0 auto 20px",
+          }}
+        />
+
+        {/* Business info */}
+        {businessInfo?.businessName && (
+          <div
+            style={{
+              padding: "10px 12px",
+              background: "rgba(255,255,255,.05)",
+              borderRadius: 10,
+              marginBottom: 16,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg,#1655e0,#7c3aed)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 13,
+                fontWeight: 700,
+                color: "#fff",
+                flexShrink: 0,
+              }}
+            >
+              {businessInfo.businessName[0]}
+            </div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#fff" }}>
+                {businessInfo.businessName}
+              </div>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,.4)" }}>
+                {user?.email}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Document type */}
+        <div
+          style={{
+            fontSize: 9,
+            fontWeight: 700,
+            color: "rgba(255,255,255,.3)",
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
+            marginBottom: 8,
+            paddingLeft: 4,
+          }}
+        >
+          Document Type
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            marginBottom: 16,
+          }}
+        >
+          {DOC_TYPES.map((item) => {
+            const Icon = item.icon;
+            const active = documentType === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  onChange(item.id);
+                  onClose();
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  border: active
+                    ? `1px solid ${item.color}40`
+                    : "1px solid rgba(255,255,255,.06)",
+                  background: active
+                    ? `${item.color}20`
+                    : "rgba(255,255,255,.03)",
+                  cursor: "pointer",
+                }}
+              >
+                <div
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 9,
+                    background: active ? item.color : "rgba(255,255,255,.08)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon
+                    size={16}
+                    color={active ? "#fff" : "rgba(255,255,255,.5)"}
+                  />
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: active ? "#fff" : "rgba(255,255,255,.7)",
+                      textAlign: "left",
+                    }}
+                  >
+                    {item.label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "rgba(255,255,255,.35)",
+                      textAlign: "left",
+                    }}
+                  >
+                    {item.sublabel}
+                  </div>
+                </div>
+                {active && (
+                  <div
+                    style={{
+                      marginLeft: "auto",
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      background: item.color,
+                    }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Navigation */}
+        <div
+          style={{
+            fontSize: 9,
+            fontWeight: 700,
+            color: "rgba(255,255,255,.3)",
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
+            marginBottom: 8,
+            paddingLeft: 4,
+          }}
+        >
+          Navigate
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 6,
+            marginBottom: 16,
+          }}
+        >
+          {[
+            { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+            { id: "clients", label: "Clients", icon: Users },
+            { id: "invoices", label: "Invoices", icon: List },
+            { id: "reports", label: "Reports", icon: BarChart2 },
+            { id: "templates", label: "Templates", icon: Layers },
+            { id: "settings", label: "Settings", icon: Settings },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  onNavigate?.(item.id);
+                  onClose();
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  border: "1px solid rgba(255,255,255,.06)",
+                  background: "rgba(255,255,255,.03)",
+                  cursor: "pointer",
+                }}
+              >
+                <Icon size={14} color="rgba(255,255,255,.45)" />
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "rgba(255,255,255,.6)",
+                  }}
+                >
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Sign out */}
+        <button
+          onClick={() => {
+            onLogout();
+            onClose();
+          }}
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            padding: "12px",
+            borderRadius: 10,
+            border: "1px solid rgba(239,68,68,.3)",
+            background: "rgba(239,68,68,.08)",
+            cursor: "pointer",
+            color: "#f87171",
+            fontSize: 13,
+            fontWeight: 600,
+            marginBottom: 8,
+          }}
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Sign Out
+        </button>
+      </div>
+    </>
+  );
+}
+
+/* ── MAIN COMPONENT ── */
 export default function AIInvoiceWindow({
   user,
   onExit,
@@ -1110,11 +1381,24 @@ export default function AIInvoiceWindow({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Mobile state
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileTab, setMobileTab] = useState("chat"); // "chat" | "preview" | "menu"
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const bottomRef = useRef(null);
   const chatRef = useRef(null);
   const inputRef = useRef(null);
   const historyRef = useRef([]);
   const msgCounter = useRef(0);
+
+  // Detect mobile
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const safeItems = items.map((item) => ({
     description: item.description || "",
@@ -1131,7 +1415,6 @@ export default function AIInvoiceWindow({
   const total = subtotal + totalTax;
   const invoiceNumber = `DRAFT-${Date.now().toString(36).toUpperCase()}`;
 
-  /* ── Load data ── */
   const loadData = useCallback(async () => {
     if (!user?.uid) return;
     setDataLoading(true);
@@ -1146,7 +1429,6 @@ export default function AIInvoiceWindow({
     loadData();
   }, [loadData]);
 
-  /* ── Chat history ── */
   useEffect(() => {
     if (!user?.uid) return;
     (async () => {
@@ -1170,7 +1452,7 @@ export default function AIInvoiceWindow({
               id: "welcome",
               role: "assistant",
               content:
-                "Hi! I'm SolidFlo AI. Choose a document type then describe what you need. When you mention a saved client I'll load their details from your database instantly. If you type a new client name I'll offer to save them to your contacts.",
+                "Hi! I'm SolidFlo AI. Choose a document type then describe what you need. When you mention a saved client I'll load their details from your database instantly.",
             },
           ]);
         }
@@ -1192,6 +1474,7 @@ export default function AIInvoiceWindow({
     setBillAddress("");
     setItems([]);
   }, [documentType]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
@@ -1223,11 +1506,11 @@ export default function AIInvoiceWindow({
   const applyItems = useCallback((rawItems) => {
     if (!rawItems?.length) return 0;
     const formatted = rawItems.map((item) => {
-      const rate = safeNum(item.rate);
-      const qty = safeNum(item.qty) || 1;
-      const taxR = safeNum(item.taxRate);
-      const amt = rate * qty;
-      const tax = amt * (taxR / 100);
+      const rate = safeNum(item.rate),
+        qty = safeNum(item.qty) || 1,
+        taxR = safeNum(item.taxRate);
+      const amt = rate * qty,
+        tax = amt * (taxR / 100);
       return {
         description: item.description || "",
         category: item.category || "Service",
@@ -1243,14 +1526,13 @@ export default function AIInvoiceWindow({
     return formatted.length;
   }, []);
 
-  /* ══════════════════════════════════════════════════════
-     SEND
-  ══════════════════════════════════════════════════════ */
   const send = async (override) => {
     const trimmed = (override || input).trim();
     if (!trimmed || loading) return;
     setInput("");
     setError("");
+    // Switch to chat tab on mobile when sending
+    if (isMobile) setMobileTab("chat");
 
     const userMsg = {
       id: `u-${++msgCounter.current}`,
@@ -1267,16 +1549,13 @@ export default function AIInvoiceWindow({
     setLoading(true);
 
     try {
-      // Step 1 — client-side DB match
       const mentionedClient = findClientInText(trimmed, userData?.clients);
       let appliedClient = null;
-
       if (mentionedClient) {
         applyClientFromDB(mentionedClient);
         appliedClient = mentionedClient.name;
       }
 
-      // Step 2 — repeat last invoice
       const isRepeat =
         /repeat|same as last|last invoice|previous invoice/i.test(trimmed);
       if (isRepeat && userData?.recentInvoices?.length) {
@@ -1296,24 +1575,19 @@ export default function AIInvoiceWindow({
         if (last.items?.length) applyItems(last.items);
       }
 
-      // Step 3 — ALWAYS call AI to extract items
       const rawText = await callClaude({
         system: buildPrompt(userData, documentType, industry),
         messages: historyRef.current,
       });
-      console.log("RAW AI RESPONSE:", rawText)
       const { reply, data: extracted } = parseResponse(rawText);
-      console.log("REPLY:", reply);
-console.log("EXTRACTED:", extracted);
       let appliedItems = 0;
 
       if (extracted) {
-       const config = getIndustryConfig(industry);
-    Object.keys(config.extraFields).forEach((key) => {
-      if (extracted[key]) {
-        setExtraData((prev) => ({ ...prev, [key]: extracted[key] }));
-      }
-    });
+        const config = getIndustryConfig(industry);
+        Object.keys(config.extraFields).forEach((key) => {
+          if (extracted[key])
+            setExtraData((prev) => ({ ...prev, [key]: extracted[key] }));
+        });
         if (extracted.matchedClientId && !mentionedClient) {
           const dbClient = userData?.clients?.find(
             (c) => c.id === extracted.matchedClientId,
@@ -1323,18 +1597,12 @@ console.log("EXTRACTED:", extracted);
             appliedClient = dbClient.name;
           }
         }
-
-        // 👇 always apply items if AI extracted them
-        if (extracted.items?.length && !isRepeat) {
+        if (extracted.items?.length && !isRepeat)
           appliedItems = applyItems(extracted.items);
-        }
-
-        // new client not in DB — show modal after AI responds
         if (extracted.clientNotInDB?.name && !mentionedClient) {
           setPendingNewClient(extracted.clientNotInDB);
           setShowCustomerModal(true);
         }
-
         if (
           extracted.repeatLastInvoice &&
           userData?.recentInvoices?.length &&
@@ -1345,16 +1613,14 @@ console.log("EXTRACTED:", extracted);
         }
       }
 
-      const msgId = `a-${++msgCounter.current}`;
       const aiMsg = {
-        id: msgId,
+        id: `a-${++msgCounter.current}`,
         role: "assistant",
         content: reply || "Got it — I've updated your document.",
         rawContent: rawText,
         appliedClient,
         appliedItems: appliedItems || null,
       };
-
       setMessages((prev) => [...prev, aiMsg]);
       historyRef.current = [
         ...historyRef.current,
@@ -1377,7 +1643,7 @@ console.log("EXTRACTED:", extracted);
 
   const handlePrint = () => {
     const s = document.createElement("style");
-    s.textContent = `@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}body *{visibility:hidden!important;}#ai-print-area,#ai-print-area *{visibility:visible!important;}#ai-print-area{position:absolute!important;left:0!important;top:0!important;width:210mm!important;}}`;
+    s.textContent = `@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } html,body { margin:0!important;padding:0!important;width:210mm!important;background:white!important; } body * { visibility:hidden!important; } #ai-print-area,#ai-print-area * { visibility:visible!important; } #ai-print-area { display:block!important;position:absolute!important;left:0!important;top:0!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;background:white!important; } @page { size:A4 portrait;margin:40px!important; } }`;
     document.head.appendChild(s);
     window.print();
     setTimeout(() => document.head.removeChild(s), 1000);
@@ -1409,7 +1675,7 @@ console.log("EXTRACTED:", extracted);
     documentType,
     showStamp: false,
     paymentStatus: { status: "pending" },
-    extraData, 
+    extraData,
     industry,
   };
 
@@ -1474,6 +1740,895 @@ console.log("EXTRACTED:", extracted);
       </div>
     );
 
+  /* ── Chat Panel ── */
+  const ChatPanel =  (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        background: "#f8fafc",
+      }}
+    >
+      {/* Desktop top bar — hidden on mobile (mobile uses bottom nav) */}
+      {!isMobile && (
+        <div
+          style={{
+            height: 48,
+            background: "#ffffff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 14px",
+            flexShrink: 0,
+            borderBottom: "1px solid #e5e7eb",
+          }}
+        >
+          <button
+            onClick={onExit}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "5px 12px",
+              borderRadius: 8,
+              background: "rgb(77,140,191)",
+              border: "1px solid rgba(255,255,255,.12)",
+              color: "rgba(255,255,255,.7)",
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: 600,
+            }}
+          >
+            <ArrowLeft size={13} /> Back
+          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {hasContent && !previewOpen && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: 11,
+                  color: "#4ade80",
+                  fontWeight: 600,
+                }}
+              >
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#22c55e",
+                    display: "inline-block",
+                  }}
+                />{" "}
+                Live
+              </div>
+            )}
+            <button
+              onClick={() => setPreviewOpen((o) => !o)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "5px 12px",
+                borderRadius: 8,
+                background: previewOpen ? "rgba(22,85,224,.3)" : "#1655e0",
+                border: `1px solid ${previewOpen ? "rgba(22,85,224,.5)" : "#1655e0"}`,
+                color: "#fff",
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+            >
+              {previewOpen ? (
+                <>
+                  <PanelRightClose size={13} /> Hide
+                </>
+              ) : (
+                <>
+                  <PanelRight size={13} /> Show Template
+                </>
+              )}
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm("Clear conversation?")) {
+                  setMessages([]);
+                  historyRef.current = [];
+                }
+              }}
+              style={{
+                background: "none",
+                border: "1px solid #e2e8f0",
+                borderRadius: 7,
+                color: "#94a3b8",
+                cursor: "pointer",
+                padding: "5px 8px",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <RotateCcw size={12} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile top bar */}
+      {isMobile && (
+        <div
+          style={{
+            height: 52,
+            background: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 14px",
+            flexShrink: 0,
+            borderBottom: "1px solid #e5e7eb",
+          }}
+        >
+          <button
+            onClick={onExit}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              padding: "6px 12px",
+              borderRadius: 8,
+              background: "rgba(22,85,224,.1)",
+              border: "none",
+              color: "#1655e0",
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: 700,
+            }}
+          >
+            <ArrowLeft size={14} /> Back
+          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>
+              SolidFlo AI
+            </div>
+            <div
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "#22c55e",
+              }}
+            />
+          </div>
+          <button
+            onClick={() => {
+              if (window.confirm("Clear conversation?")) {
+                setMessages([]);
+                historyRef.current = [];
+              }
+            }}
+            style={{
+              background: "none",
+              border: "1px solid #e2e8f0",
+              borderRadius: 7,
+              color: "#94a3b8",
+              cursor: "pointer",
+              padding: "6px 8px",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <RotateCcw size={13} />
+          </button>
+        </div>
+      )}
+
+      {/* Messages */}
+      <div
+        ref={chatRef}
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: isMobile ? "16px 14px 8px" : "20px 18px 8px",
+          scrollbarWidth: "thin",
+          scrollbarColor: "#e2e8f0 transparent",
+        }}
+      >
+        {messages.length <= 1 && (
+          <div style={{ marginBottom: 24 }}>
+            {userData?.clients?.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: "#64748b",
+                    letterSpacing: ".07em",
+                    textTransform: "uppercase",
+                    marginBottom: 8,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                  }}
+                >
+                  <Database size={11} color="#1655e0" /> Your saved clients
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {userData.clients.slice(0, isMobile ? 4 : 5).map((c) => (
+                    <button
+                      key={c.id}
+                      className="ai-sug"
+                      onClick={() => {
+                        applyClientFromDB(c);
+                        send(
+                          `${documentType === "purchase_order" ? "Purchase order from" : documentType === "estimate" ? "Quote for" : "Invoice"} ${c.name} for `,
+                        );
+                      }}
+                      style={{
+                        padding: "5px 12px",
+                        borderRadius: 20,
+                        background: "#fff",
+                        border: "1px solid #e5e7eb",
+                        cursor: "pointer",
+                        fontSize: 12,
+                        color: "#374151",
+                        fontFamily: "inherit",
+                        transition: "all .15s",
+                      }}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: "#64748b",
+                letterSpacing: ".07em",
+                textTransform: "uppercase",
+                marginBottom: 8,
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              <Lightbulb size={11} color="#f59e0b" /> Try one of these
+            </div>
+            {suggestions.map((s, i) => (
+              <button
+                key={i}
+                className="ai-sug"
+                onClick={() => send(s)}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "9px 13px",
+                  marginBottom: 6,
+                  background: "#fff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 12,
+                  cursor: "pointer",
+                  fontSize: isMobile ? 12 : 13,
+                  color: "#374151",
+                  fontFamily: "inherit",
+                  transition: "all .15s",
+                  lineHeight: 1.4,
+                }}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+        {messages.map((msg, i) => (
+          <div key={msg.id || i} className="ai-msg">
+            <Bubble msg={msg} />
+          </div>
+        ))}
+        {loading && <TypingDots />}
+        {error && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 8,
+              padding: "10px 14px",
+              borderRadius: 12,
+              marginBottom: 16,
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              color: "#dc2626",
+              fontSize: 12,
+            }}
+          >
+            <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />{" "}
+            {error}
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div
+        style={{
+          padding: isMobile ? "8px 12px 12px" : "10px 14px 14px",
+          background: "#fff",
+          borderTop: "1px solid #e5e7eb",
+          flexShrink: 0,
+        }}
+      >
+        {userData && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              marginBottom: 8,
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "#22c55e",
+                display: "inline-block",
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ fontSize: 10, color: "#15803d", fontWeight: 700 }}>
+              Loaded
+            </span>
+            {[
+              userData.clients.length && `${userData.clients.length} clients`,
+              userData.recentInvoices.length &&
+                `${userData.recentInvoices.length} invoices`,
+              !isMobile &&
+                userData.activeTemplate &&
+                `Template: ${userData.activeTemplate}`,
+            ]
+              .filter(Boolean)
+              .map((p, i) => (
+                <span
+                  key={i}
+                  style={{
+                    padding: "1px 7px",
+                    borderRadius: 10,
+                    background: "#dcfce7",
+                    border: "1px solid #bbf7d0",
+                    fontSize: 10,
+                    color: "#166534",
+                    fontWeight: 600,
+                  }}
+                >
+                  {p}
+                </span>
+              ))}
+            <button
+              onClick={loadData}
+              style={{
+                marginLeft: "auto",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#15803d",
+                display: "flex",
+                alignItems: "center",
+                gap: 3,
+                fontSize: 10,
+              }}
+            >
+              <RefreshCw size={10} />
+            </button>
+          </div>
+        )}
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            alignItems: "flex-end",
+            background: "#f8fafc",
+            border: "1.5px solid #d1d5db",
+            borderRadius: 16,
+            padding: "9px 9px 9px 14px",
+            boxShadow: "0 1px 3px rgba(0,0,0,.05)",
+          }}
+        >
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            placeholder={
+              userData?.clients?.length
+                ? `e.g. "Invoice ${userData.clients[0]?.name} for 5hrs at R750/hr"`
+                : "Describe your invoice in plain English…"
+            }
+            rows={isMobile ? 1 : 2}
+            style={{
+              flex: 1,
+              background: "none",
+              border: "none",
+              outline: "none",
+              resize: "none",
+              fontSize: isMobile ? 14 : 13.5,
+              color: "#0f172a",
+              fontFamily: "inherit",
+              lineHeight: 1.6,
+              maxHeight: 110,
+              overflowY: "auto",
+            }}
+          />
+          <button
+            className="ai-send"
+            onClick={() => send()}
+            disabled={!input.trim() || loading}
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              background: "#1655e0",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              transition: "background .15s",
+            }}
+          >
+            {loading ? (
+              <Loader2
+                size={16}
+                color="#fff"
+                style={{ animation: "spin 1s linear infinite" }}
+              />
+            ) : (
+              <Send size={16} color="#fff" />
+            )}
+          </button>
+        </div>
+        {!isMobile && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: 5,
+              padding: "0 2px",
+            }}
+          >
+            <span style={{ fontSize: 10, color: "#94a3b8" }}>
+              <kbd
+                style={{
+                  padding: "1px 5px",
+                  borderRadius: 4,
+                  background: "#f1f5f9",
+                  border: "1px solid #e2e8f0",
+                  fontSize: 10,
+                  color: "#64748b",
+                  fontFamily: "monospace",
+                }}
+              >
+                Enter
+              </kbd>{" "}
+              send ·{" "}
+              <kbd
+                style={{
+                  padding: "1px 5px",
+                  borderRadius: 4,
+                  background: "#f1f5f9",
+                  border: "1px solid #e2e8f0",
+                  fontSize: 10,
+                  color: "#64748b",
+                  fontFamily: "monospace",
+                }}
+              >
+                Shift+Enter
+              </kbd>{" "}
+              new line
+            </span>
+            <span
+              style={{
+                fontSize: 10,
+                color: "#e2e8f0",
+                fontFamily: "monospace",
+              }}
+            >
+              {user?.uid?.slice(0, 8)}…
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  /* ── Preview Panel ── */
+  const PreviewPanel =  (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        background: "#e2e8f0",
+      }}
+    >
+      <div
+        style={{
+          height: isMobile ? 52 : 48,
+          background: "#f8fafc",
+          borderBottom: "1px solid #e5e7eb",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 16px",
+          gap: 12,
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            minWidth: 0,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <activeDt.icon size={15} color={activeDt.color} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#1e293b" }}>
+              {activeDt.label} preview
+            </span>
+          </div>
+          {hasContent && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "3px 9px",
+                borderRadius: 20,
+                background: "#dcfce7",
+                border: "1px solid #bbf7d0",
+              }}
+            >
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "#22c55e",
+                  display: "inline-block",
+                }}
+              />
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#166534" }}>
+                Live
+              </span>
+            </div>
+          )}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            flexShrink: 0,
+          }}
+        >
+          <button
+            onClick={handlePrint}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 14px",
+              borderRadius: 8,
+              background: "#fff",
+              border: "1px solid #e2e8f0",
+              color: "#374151",
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: 600,
+            }}
+          >
+            <Download size={13} /> {isMobile ? "PDF" : "Download PDF"}
+          </button>
+          <button
+            onClick={() => {}}
+            disabled={!hasContent}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 16px",
+              borderRadius: 8,
+              background: hasContent ? "#1655e0" : "#94a3b8",
+              border: "none",
+              color: "#fff",
+              cursor: hasContent ? "pointer" : "not-allowed",
+              fontSize: 12,
+              fontWeight: 600,
+            }}
+          >
+            <Send size={13} /> Send
+          </button>
+        </div>
+      </div>
+
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: isMobile ? "16px 12px" : "24px 20px",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        {!hasContent ? (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              textAlign: "center",
+              gap: 16,
+              maxWidth: 320,
+            }}
+          >
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 16,
+                background: "#e5e7eb",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <activeDt.icon size={26} color="#d1d5db" />
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: "#374151",
+                  marginBottom: 6,
+                }}
+              >
+                Your {activeDt.label.toLowerCase()} will appear here
+              </div>
+              <div style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.6 }}>
+                {isMobile
+                  ? "Tap Chat and describe what you need"
+                  : userData?.clients?.length
+                    ? `Type a client name — I'll load their details from your ${userData.clients.length} saved contacts instantly`
+                    : "Describe who you're billing and what for"}
+              </div>
+            </div>
+            {isMobile && (
+              <button
+                onClick={() => setMobileTab("chat")}
+                style={{
+                  padding: "10px 24px",
+                  borderRadius: 10,
+                  background: "#1655e0",
+                  border: "none",
+                  color: "#fff",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Go to Chat
+              </button>
+            )}
+          </div>
+        ) : (
+          <div
+            id="ai-print-area"
+            style={{
+              width: "100%",
+              maxWidth: 760,
+              background: "#fff",
+              borderRadius: 8,
+              boxShadow: "0 4px 24px rgba(0,0,0,.1)",
+              overflow: "hidden",
+              animation: "slideUp .3s ease",
+            }}
+          >
+            {TemplateRenderer ? (
+              <TemplateRenderer {...templateProps} />
+            ) : (
+              <div
+                style={{
+                  padding: 40,
+                  textAlign: "center",
+                  color: "#94a3b8",
+                  fontSize: 14,
+                }}
+              >
+                Pass TemplateRenderer as a prop from your dashboard
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {hasContent && (
+        <div
+          style={{
+            height: 38,
+            background: "#f8fafc",
+            borderTop: "1px solid #e5e7eb",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "0 14px",
+            overflow: "hidden",
+            flexShrink: 0,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              color: "#9ca3af",
+              textTransform: "uppercase",
+              letterSpacing: ".06em",
+              whiteSpace: "nowrap",
+            }}
+          >
+            On template:
+          </span>
+          {[
+            customerName && { label: "Client", val: customerName },
+            safeItems.length && { label: "Items", val: `${safeItems.length}` },
+            total > 0 && { label: "Total", val: `R${total.toFixed(2)}` },
+          ]
+            .filter(Boolean)
+            .map((item, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: "2px 8px",
+                  background: "#fff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 6,
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                }}
+              >
+                <span
+                  style={{ fontSize: 10, color: "#6b7280", fontWeight: 700 }}
+                >
+                  {item.label}:{" "}
+                </span>
+                <span
+                  style={{ fontSize: 10, color: "#1e293b", fontWeight: 600 }}
+                >
+                  {item.val}
+                </span>
+              </div>
+            ))}
+        </div>
+      )}
+    </div>
+  );
+
+  /* ── Mobile Bottom Nav ── */
+  const MobileBottomNav =  (
+    <div
+      style={{
+        height: 64,
+        background: "#fff",
+        borderTop: "1px solid #e5e7eb",
+        display: "flex",
+        alignItems: "stretch",
+        flexShrink: 0,
+        boxShadow: "0 -4px 16px rgba(0,0,0,.06)",
+      }}
+    >
+      {[
+        {
+          id: "chat",
+          label: "Chat",
+          icon: MessageSquare,
+          badge: loading ? "•" : null,
+        },
+        {
+          id: "preview",
+          label: "Preview",
+          icon: Eye,
+          badge: hasContent ? "•" : null,
+        },
+        { id: "menu", label: "Menu", icon: Menu },
+      ].map((tab) => {
+        const Icon = tab.icon;
+        const active =
+          mobileTab === tab.id || (tab.id === "menu" && mobileMenuOpen);
+        return (
+          <button
+            key={tab.id}
+            onClick={() => {
+              if (tab.id === "menu") {
+                setMobileMenuOpen((o) => !o);
+              } else {
+                setMobileTab(tab.id);
+                setMobileMenuOpen(false);
+              }
+            }}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              position: "relative",
+              transition: "all .15s",
+            }}
+          >
+            {/* Active indicator */}
+            {active && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: "25%",
+                  right: "25%",
+                  height: 2,
+                  background: "#1655e0",
+                  borderRadius: "0 0 2px 2px",
+                }}
+              />
+            )}
+            <div style={{ position: "relative" }}>
+              <Icon size={20} color={active ? "#1655e0" : "#94a3b8"} />
+              {tab.badge && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: -3,
+                    right: -3,
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background:
+                      tab.id === "chat" && loading ? "#f59e0b" : "#22c55e",
+                    border: "1.5px solid #fff",
+                  }}
+                />
+              )}
+            </div>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: active ? "#1655e0" : "#94a3b8",
+                letterSpacing: ".02em",
+              }}
+            >
+              {tab.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  /* ── RENDER ── */
   return (
     <div
       style={{
@@ -1507,810 +2662,101 @@ console.log("EXTRACTED:", extracted);
         }}
       />
 
-      {/* BODY */}
-      <div
-        style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}
-      >
-        <DocSidebar
-          activeType={documentType}
-          onChange={(type) => {
-            setDocumentType(type);
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: `sys-${Date.now()}`,
-                role: "assistant",
-                content: `Switched to ${DOC_TYPES.find((d) => d.id === type)?.label}. What would you like to create?`,
-              },
-            ]);
-          }}
-          onNavigate={(id) => {
-            onExit();
-            onNavigateTo?.(id);
-          }}
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed((o) => !o)}
-          businessInfo={bizInfo}
-          user={user}
-          onLogout={() => signOut(getAuth())}
-        />
-
-        {/* CHAT */}
+      {/* ── MOBILE LAYOUT ── */}
+      {isMobile ? (
+        <>
+          <div style={{ flex: 1, overflow: "hidden", minHeight: 0 }}>
+            {mobileTab === "chat" && !mobileMenuOpen && ChatPanel}
+            {mobileTab === "preview" && !mobileMenuOpen && PreviewPanel}
+          </div>
+          {MobileBottomNav}
+          <MobileMenuDrawer
+            open={mobileMenuOpen}
+            onClose={() => setMobileMenuOpen(false)}
+            documentType={documentType}
+            onChange={(type) => {
+              setDocumentType(type);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: `sys-${Date.now()}`,
+                  role: "assistant",
+                  content: `Switched to ${DOC_TYPES.find((d) => d.id === type)?.label}. What would you like to create?`,
+                },
+              ]);
+            }}
+            userData={userData}
+            onNavigate={(id) => {
+              onExit();
+              onNavigateTo?.(id);
+            }}
+            onLogout={() => signOut(getAuth())}
+            user={user}
+            businessInfo={bizInfo}
+          />
+        </>
+      ) : (
+        /* ── DESKTOP LAYOUT ── */
         <div
-          style={{
-            width: previewOpen ? "42%" : "calc(100% - 64px)",
-            minWidth: 320,
-            display: "flex",
-            flexDirection: "column",
-            background: "#f8fafc",
-            borderRight: previewOpen ? "1px solid #e5e7eb" : "none",
-            transition: "width .3s ease",
-            flexShrink: 0,
-          }}
+          style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}
         >
-          {/* Chat top bar — always visible */}
-          <div
-            style={{
-              height: 48,
-              background: "#ffffff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "0 14px",
-              flexShrink: 0,
-              borderBottom: "1px solid rgba(255,255,255,.07)",
+          <DocSidebar
+            activeType={documentType}
+            onChange={(type) => {
+              setDocumentType(type);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: `sys-${Date.now()}`,
+                  role: "assistant",
+                  content: `Switched to ${DOC_TYPES.find((d) => d.id === type)?.label}. What would you like to create?`,
+                },
+              ]);
             }}
-          >
-            {/* Left — Back */}
-            <button
-              onClick={onExit}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "5px 12px",
-                borderRadius: 8,
-                background: "rgb(77, 140, 191)",
-                border: "1px solid rgba(255,255,255,.12)",
-                color: "rgba(255,255,255,.7)",
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: 600,
-              }}
-            >
-              <ArrowLeft size={13} /> Back
-            </button>
-
-            {/* Right — show template button (only when preview is hidden) */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {hasContent && !previewOpen && (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                    fontSize: 11,
-                    color: "#4ade80",
-                    fontWeight: 600,
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      background: "#22c55e",
-                      display: "inline-block",
-                    }}
-                  />
-                  Live
-                </div>
-              )}
-              <button
-                onClick={() => setPreviewOpen((o) => !o)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 5,
-                  padding: "5px 12px",
-                  borderRadius: 8,
-                  background: previewOpen ? "rgba(22,85,224,.3)" : "#1655e0",
-                  border: `1px solid ${previewOpen ? "rgba(22,85,224,.5)" : "#1655e0"}`,
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontSize: 12,
-                  fontWeight: 600,
-                }}
-              >
-                {previewOpen ? (
-                  <>
-                    <PanelRightClose size={13} /> Hide
-                  </>
-                ) : (
-                  <>
-                    <PanelRight size={13} /> Show Template
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() => {
-                  if (window.confirm("Clear conversation?")) {
-                    setMessages([]);
-                    historyRef.current = [];
-                  }
-                }}
-                style={{
-                  background: "none",
-                  border: "1px solid rgba(255,255,255,.1)",
-                  borderRadius: 7,
-                  color: "rgba(255,255,255,.4)",
-                  cursor: "pointer",
-                  padding: "5px 8px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <RotateCcw size={12} />
-              </button>
-            </div>
-          </div>
-          <div
-            ref={chatRef}
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              padding: "20px 18px 8px",
-              scrollbarWidth: "thin",
-              scrollbarColor: "#e2e8f0 transparent",
+            onNavigate={(id) => {
+              onExit();
+              onNavigateTo?.(id);
             }}
-          >
-            {messages.length <= 1 && (
-              <div style={{ marginBottom: 24 }}>
-                {userData?.clients?.length > 0 && (
-                  <div style={{ marginBottom: 16 }}>
-                    <div
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        color: "#64748b",
-                        letterSpacing: ".07em",
-                        textTransform: "uppercase",
-                        marginBottom: 8,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 5,
-                      }}
-                    >
-                      <Database size={11} color="#1655e0" /> Your saved clients
-                    </div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                      {userData.clients.slice(0, 5).map((c) => (
-                        <button
-                          key={c.id}
-                          className="ai-sug"
-                          onClick={() => {
-                            applyClientFromDB(c);
-                            send(
-                              `${documentType === "purchase_order" ? "Purchase order from" : documentType === "estimate" ? "Quote for" : "Invoice"} ${c.name} for `,
-                            );
-                          }}
-                          style={{
-                            padding: "5px 12px",
-                            borderRadius: 20,
-                            background: "#fff",
-                            border: "1px solid #e5e7eb",
-                            cursor: "pointer",
-                            fontSize: 12,
-                            color: "#374151",
-                            fontFamily: "inherit",
-                            transition: "all .15s",
-                          }}
-                        >
-                          {c.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: "#64748b",
-                    letterSpacing: ".07em",
-                    textTransform: "uppercase",
-                    marginBottom: 8,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                  }}
-                >
-                  <Lightbulb size={11} color="#f59e0b" /> Try one of these
-                </div>
-                {suggestions.map((s, i) => (
-                  <button
-                    key={i}
-                    className="ai-sug"
-                    onClick={() => send(s)}
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      textAlign: "left",
-                      padding: "9px 13px",
-                      marginBottom: 6,
-                      background: "#fff",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: 12,
-                      cursor: "pointer",
-                      fontSize: 13,
-                      color: "#374151",
-                      fontFamily: "inherit",
-                      transition: "all .15s",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed((o) => !o)}
+            businessInfo={bizInfo}
+            user={user}
+            onLogout={() => signOut(getAuth())}
+            userData={userData}
+          />
 
-            {messages.map((msg, i) => (
-              <div key={msg.id || i} className="ai-msg"></div>
-            ))}
-            {loading && <TypingDots />}
-            {error && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 8,
-                  padding: "10px 14px",
-                  borderRadius: 12,
-                  marginBottom: 16,
-                  background: "#fef2f2",
-                  border: "1px solid #fecaca",
-                  color: "#dc2626",
-                  fontSize: 12,
-                }}
-              >
-                <AlertCircle
-                  size={14}
-                  style={{ flexShrink: 0, marginTop: 1 }}
-                />{" "}
-                {error}
-              </div>
-            )}
-            <div ref={bottomRef} />
-          </div>
-
-          {/* INPUT */}
+          {/* Chat */}
           <div
             style={{
-              padding: "10px 14px 14px",
-              background: "#fff",
-              borderTop: "1px solid #e5e7eb",
-              flexShrink: 0,
-            }}
-          >
-            {userData && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 7,
-                  marginBottom: 8,
-                }}
-              >
-                <span
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: "#22c55e",
-                    display: "inline-block",
-                  }}
-                />
-                <span
-                  style={{ fontSize: 10, color: "#15803d", fontWeight: 700 }}
-                >
-                  Total loaded
-                </span>
-                {[
-                  userData.clients.length &&
-                    `${userData.clients.length} clients`,
-                  userData.recentInvoices.length &&
-                    `${userData.recentInvoices.length} invoices`,
-                  userData.activeTemplate &&
-                    `Template: ${userData.activeTemplate}`,
-                ]
-                  .filter(Boolean)
-                  .map((p, i) => (
-                    <span
-                      key={i}
-                      style={{
-                        padding: "1px 7px",
-                        borderRadius: 10,
-                        background: "#dcfce7",
-                        border: "1px solid #bbf7d0",
-                        fontSize: 10,
-                        color: "#166534",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {p}
-                    </span>
-                  ))}
-                <button
-                  onClick={loadData}
-                  style={{
-                    marginLeft: "auto",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#15803d",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 3,
-                    fontSize: 10,
-                  }}
-                >
-                  <RefreshCw size={10} />
-                </button>
-              </div>
-            )}
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                alignItems: "flex-end",
-                background: "#f8fafc",
-                border: "1.5px solid #d1d5db",
-                borderRadius: 16,
-                padding: "9px 9px 9px 14px",
-                boxShadow: "0 1px 3px rgba(0,0,0,.05)",
-              }}
-            >
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKey}
-                placeholder={
-                  userData?.clients?.length
-                    ? `e.g. "Invoice ${userData.clients[0]?.name} for 5hrs consulting at R750/hr"`
-                    : "Describe your invoice in plain English…"
-                }
-                rows={2}
-                style={{
-                  flex: 1,
-                  background: "none",
-                  border: "none",
-                  outline: "none",
-                  resize: "none",
-                  fontSize: 13.5,
-                  color: "#0f172a",
-                  fontFamily: "inherit",
-                  lineHeight: 1.6,
-                  maxHeight: 110,
-                  overflowY: "auto",
-                }}
-              />
-              <button
-                className="ai-send"
-                onClick={() => send()}
-                disabled={!input.trim() || loading}
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 12,
-                  background: "#1655e0",
-                  border: "none",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  transition: "background .15s",
-                }}
-              >
-                {loading ? (
-                  <Loader2
-                    size={16}
-                    color="#fff"
-                    style={{ animation: "spin 1s linear infinite" }}
-                  />
-                ) : (
-                  <Send size={16} color="#fff" />
-                )}
-              </button>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginTop: 5,
-                padding: "0 2px",
-              }}
-            >
-              <span style={{ fontSize: 10, color: "#94a3b8" }}>
-                <kbd
-                  style={{
-                    padding: "1px 5px",
-                    borderRadius: 4,
-                    background: "#f1f5f9",
-                    border: "1px solid #e2e8f0",
-                    fontSize: 10,
-                    color: "#64748b",
-                    fontFamily: "monospace",
-                  }}
-                >
-                  Enter
-                </kbd>{" "}
-                send ·{" "}
-                <kbd
-                  style={{
-                    padding: "1px 5px",
-                    borderRadius: 4,
-                    background: "#f1f5f9",
-                    border: "1px solid #e2e8f0",
-                    fontSize: 10,
-                    color: "#64748b",
-                    fontFamily: "monospace",
-                  }}
-                >
-                  Shift+Enter
-                </kbd>{" "}
-                new line
-              </span>
-              <span
-                style={{
-                  fontSize: 10,
-                  color: "#e2e8f0",
-                  fontFamily: "monospace",
-                }}
-              >
-                {user?.uid?.slice(0, 8)}…
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* TEMPLATE PREVIEW */}
-        {previewOpen && (
-          <div
-            style={{
-              flex: 1,
+              width: previewOpen ? "42%" : "calc(100% - 64px)",
+              minWidth: 320,
               display: "flex",
               flexDirection: "column",
-              background: "#e2e8f0",
+              borderRight: previewOpen ? "1px solid #e5e7eb" : "none",
+              transition: "width .3s ease",
+              flexShrink: 0,
               overflow: "hidden",
-              minWidth: 0,
             }}
           >
-            <div
-              style={{
-                height: 48,
-                background: "#f8fafc",
-                borderBottom: "1px solid #e5e7eb",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "0 16px",
-                gap: 12,
-                flexShrink: 0,
-              }}
-            >
-              {/* Left — doc type + status badges */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  minWidth: 0,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                  <activeDt.icon size={15} color={activeDt.color} />
-                  <span
-                    style={{ fontSize: 13, fontWeight: 700, color: "#1e293b" }}
-                  >
-                    {activeDt.label} preview
-                  </span>
-                </div>
+            {ChatPanel}
+          </div>
 
-                {hasContent && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 5,
-                      padding: "3px 9px",
-                      borderRadius: 20,
-                      background: "#dcfce7",
-                      border: "1px solid #bbf7d0",
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: "50%",
-                        background: "#22c55e",
-                        display: "inline-block",
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 700,
-                        color: "#166534",
-                      }}
-                    >
-                      Live
-                    </span>
-                  </div>
-                )}
-
-                {userData?.activeTemplate && (
-                  <div
-                    style={{
-                      padding: "3px 9px",
-                      borderRadius: 20,
-                      background: `${activeDt.color}15`,
-                      border: `1px solid ${activeDt.color}30`,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 700,
-                        color: activeDt.color,
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      {userData.activeTemplate}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Right — actions */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  flexShrink: 0,
-                }}
-              >
-                <button
-                  onClick={() => {
-                    /* your save draft logic */
-                  }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "6px 14px",
-                    borderRadius: 8,
-                    background: "#fff",
-                    border: "1px solid #e2e8f0",
-                    color: "#374151",
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                  }}
-                >
-                  <FileText size={13} /> Save draft
-                </button>
-
-                <button
-                  onClick={handlePrint}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "6px 14px",
-                    borderRadius: 8,
-                    background: "#fff",
-                    border: "1px solid #e2e8f0",
-                    color: "#374151",
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                  }}
-                >
-                  <Download size={13} /> Download PDF
-                </button>
-
-                <button
-                  onClick={() => {
-                    /* your send logic — email, share, etc. */
-                  }}
-                  disabled={!hasContent}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "6px 16px",
-                    borderRadius: 8,
-                    background: hasContent ? "#1655e0" : "#94a3b8",
-                    border: "none",
-                    color: "#fff",
-                    cursor: hasContent ? "pointer" : "not-allowed",
-                    fontSize: 12,
-                    fontWeight: 600,
-                  }}
-                >
-                  <Send size={13} /> Send {activeDt.label.toLowerCase()}
-                </button>
-              </div>
-            </div>
-
+          {/* Preview */}
+          {previewOpen && (
             <div
               style={{
                 flex: 1,
-                overflowY: "auto",
-                padding: "24px 20px",
                 display: "flex",
-                justifyContent: "center",
+                flexDirection: "column",
+                overflow: "hidden",
+                minWidth: 0,
               }}
             >
-              {!hasContent ? (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "100%",
-                    textAlign: "center",
-                    gap: 16,
-                    maxWidth: 360,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: 16,
-                      background: "#e5e7eb",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <activeDt.icon size={26} color="#d1d5db" />
-                  </div>
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 15,
-                        fontWeight: 600,
-                        color: "#374151",
-                        marginBottom: 6,
-                      }}
-                    >
-                      Your {activeDt.label.toLowerCase()} will appear here
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 13,
-                        color: "#94a3b8",
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      {userData?.clients?.length
-                        ? `Type a client name — I'll load their details from your ${userData.clients.length} saved contacts instantly`
-                        : "Describe who you're billing and what for"}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  id="ai-print-area"
-                  style={{
-                    width: "100%",
-                    maxWidth: 760,
-                    background: "#fff",
-                    borderRadius: 8,
-                    boxShadow: "0 4px 24px rgba(0,0,0,.1)",
-                    overflow: "hidden",
-                    animation: "slideUp .3s ease",
-                  }}
-                >
-                  {TemplateRenderer ? (
-                    <TemplateRenderer {...templateProps} />
-                  ) : (
-                    <div
-                      style={{
-                        padding: 40,
-                        textAlign: "center",
-                        color: "#94a3b8",
-                        fontSize: 14,
-                      }}
-                    >
-                      Pass TemplateRenderer as a prop from your dashboard
-                    </div>
-                  )}
-                </div>
-              )}
+              {PreviewPanel}
             </div>
-
-            {hasContent && (
-              <div
-                style={{
-                  height: 38,
-                  background: "#f8fafc",
-                  borderTop: "1px solid #e5e7eb",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "0 14px",
-                  overflow: "hidden",
-                  flexShrink: 0,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: "#9ca3af",
-                    textTransform: "uppercase",
-                    letterSpacing: ".06em",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  On template:
-                </span>
-                {[
-                  customerName && { label: "Client", val: customerName },
-                  safeItems.length && {
-                    label: "Items",
-                    val: `${safeItems.length}`,
-                  },
-                  total > 0 && { label: "Total", val: `R${total.toFixed(2)}` },
-                  customerEmail && { label: "Email", val: customerEmail },
-                ]
-                  .filter(Boolean)
-                  .map((item, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        padding: "2px 8px",
-                        background: "#fff",
-                        border: "1px solid #e5e7eb",
-                        borderRadius: 6,
-                        whiteSpace: "nowrap",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 10,
-                          color: "#6b7280",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {item.label}:{" "}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: 10,
-                          color: "#1e293b",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {item.val}
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

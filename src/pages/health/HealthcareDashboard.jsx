@@ -501,6 +501,7 @@ const HealthcareDashboard = () => {
             documentType={"medical"}
             onExit={() => setShowAIWindow(false)}
             industry="healthcare"
+            TemplateRenderer={TemplateRenderer}
             onNavigateTo={(view) => {
             setAiWindowOpen(false);
             setActiveView(view); 

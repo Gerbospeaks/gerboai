@@ -1216,6 +1216,7 @@ const PlumbingDashboard = () => {
                        documentType={documentType}
                        onExit={() => setShowAIWindow(false)}
                        industry="plumbing"
+                       TemplateRenderer={TemplateRenderer}
                      />
                    )}
             {/* ── Alternate Views ──────────────────────────────────────── */}

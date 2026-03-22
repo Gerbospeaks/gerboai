@@ -3581,6 +3581,7 @@ const LegalDashboard = () => {
           documentType={documentType}
           onExit={() => setShowAIWindow(false)}
           industry="legal"
+          TemplateRenderer={TemplateRenderer}
         />
       )}
 

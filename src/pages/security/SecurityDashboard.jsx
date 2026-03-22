@@ -537,6 +537,7 @@ const SecurityDashboard = () => {
                   documentType={documentType}
                   onExit={() => setShowAIWindow(false)}
                   industry="security"
+                  TemplateRenderer={TemplateRenderer}
                 />
               )}
       <div className="flex-1 flex overflow-hidden min-h-0">

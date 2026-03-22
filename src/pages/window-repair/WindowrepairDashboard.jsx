@@ -1024,6 +1024,7 @@ const WindowrepairDashboard = () => {
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
     industry="window-repair"
+    TemplateRenderer={TemplateRenderer}
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

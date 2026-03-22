@@ -1474,6 +1474,7 @@ const PestcontrolDashboard = () => {
                     documentType={documentType}
                     onExit={() => setShowAIWindow(false)}
                     industry="pest-control"
+                    TemplateRenderer={TemplateRenderer}
                   />
                 )}
         {/* ── Main scrollable content ──────────────────────────────────── */}

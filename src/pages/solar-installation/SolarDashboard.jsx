@@ -765,6 +765,7 @@ const SolarDashboard = () => {
     documentType={documentType}
     onExit={() => setShowAIWindow(false)}
     industry="solar-installation"
+    TemplateRenderer={TemplateRenderer}
     onNavigateTo={(view) => {
     setAiWindowOpen(false);
     setActiveView(view); 

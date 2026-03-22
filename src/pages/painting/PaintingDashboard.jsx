@@ -1474,6 +1474,7 @@ const PaintingDashboard = () => {
                   documentType={documentType}
                   onExit={() => setShowAIWindow(false)}
                   industry="painting"
+                  TemplateRenderer={TemplateRenderer}
                 />
               )}
         {/* ── Main scrollable content ──────────────────────────────────── */}
