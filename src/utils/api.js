@@ -1,6 +1,6 @@
 // src/utils/api.js
 const OLLAMA_BASE_URL = import.meta.env.VITE_OLLAMA_BASE_URL || 'http://localhost:11434';
-const MODEL = 'llama-3.3-70b-instruct-fp8-fast'; // or 'llama3.1', 'llama3', etc.
+const MODEL = 'llama3.2:1b'; // or 'llama3.1', 'llama3', etc.
 
 export async function callClaude({ system, messages, max_tokens = 1000 }) {
   // Prepend system message into the messages array (Ollama uses role: 'system')
