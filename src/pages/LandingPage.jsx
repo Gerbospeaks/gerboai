@@ -740,13 +740,34 @@ const LandingPage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [visible, setVisible] = useState({});
   const [cardsSwapped, setCardsSwapped] = useState(false);
-  const words = ["Smarter", "Faster", "Better"];
+  const words = ["Smarter", "Faster", "Simpler", "Powerful", "Professional"];
   const slides = [
     { id: 1, src: require("../assets/images/product1.png"), alt: "Dashboard" },
     { id: 2, src: require("../assets/images/product2.png"), alt: "Invoices" },
     { id: 3, src: require("../assets/images/product3.png"), alt: "Payments" },
   ];
-
+  const ROTATING = [
+    {
+      word: "Smarter",
+      sub: "AI-powered documents for every industry — invoices, quotes, bookings, reports and more.",
+    },
+    {
+      word: "Faster",
+      sub: "Create invoices, medical records, school reports and purchase orders in seconds, not hours.",
+    },
+    {
+      word: "Simpler",
+      sub: "From mechanics to educators, cleaners to accountants — one platform built for your business.",
+    },
+    {
+      word: "Powerful",
+      sub: "Manage clients, track payments, generate documents and run your business from one place.",
+    },
+    {
+      word: "Professional",
+      sub: "Beautiful templates for every industry — billing, healthcare, education, construction and more.",
+    },
+  ];
   const localPrice = (usd) => {
     if (currencyLoading) return null;
     if (usd === 0) return "Free";
@@ -810,7 +831,7 @@ const LandingPage = () => {
   /* ── Word rotation ── */
   useEffect(() => {
     const t = setInterval(
-      () => setCurrentWord((p) => (p + 1) % words.length),
+      () => setCurrentWord((p) => (p + 1) % ROTATING.length),
       2500,
     );
     return () => clearInterval(t);
@@ -836,10 +857,10 @@ const LandingPage = () => {
     window.addEventListener("scroll", h);
     return () => window.removeEventListener("scroll", h);
   }, []);
-useEffect(() => {
-  const t = setInterval(() => setCardsSwapped(p => !p), 3500);
-  return () => clearInterval(t);
-}, []);
+  useEffect(() => {
+    const t = setInterval(() => setCardsSwapped((p) => !p), 3500);
+    return () => clearInterval(t);
+  }, []);
   /* ── Intersection observer ── */
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -1117,102 +1138,16 @@ useEffect(() => {
 
         {/* ── Hero ── */}
         <section className="lp-hero">
-          <div className="lp-invoice-float">
-  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12,  left:  cardsSwapped ? 'auto' : '32px',
-  right: cardsSwapped ? '32px' : 'auto',
-  transition: 'left .6s ease, right .6s ease, transform .6s ease', }}>
-    <span style={{ color:'rgba(255,255,255,.45)', fontSize:10, fontWeight:700, letterSpacing:'.06em', textTransform:'uppercase' }}>
-      Invoice #SF-2024-087
-    </span>
-    <span className="lp-invoice-float-tag" style={{ background:'rgba(74,222,128,.12)', color:'#4ade80' }}>PAID</span>
-  </div>
-
-  <table style={{ width:'100%', borderCollapse:'collapse' }}>
-    <thead>
-      <tr>
-        {['Description','Qty','Unit Price','Amount'].map(h => (
-          <th key={h} style={{
-            color:'rgba(255,255,255,.3)', fontSize:9, fontWeight:700,
-            letterSpacing:'.05em', textTransform:'uppercase',
-            padding:'0 0 7px', textAlign: h==='Description' ? 'left' : 'right'
-          }}>{h}</th>
-        ))}
-      </tr>
-    </thead>
-    <tbody>
-      {[
-        { desc:'Web Design',      qty:3, price:450 },
-        { desc:'Monthly Retainer',qty:1, price:800 },
-        { desc:'Domain & Hosting',qty:2, price:45  },
-      ].map((row, i) => (
-        <tr key={i} style={{ borderTop:'1px solid rgba(255,255,255,.06)' }}>
-          <td style={{ color:'rgba(255,255,255,.72)', fontSize:11, padding:'5px 0' }}>{row.desc}</td>
-          <td style={{ color:'rgba(255,255,255,.4)', fontSize:11, padding:'5px 0', textAlign:'right' }}>{row.qty}</td>
-          <td style={{ color:'rgba(255,255,255,.4)', fontSize:11, padding:'5px 0', textAlign:'right' }}>
-            ${row.price.toLocaleString()}.00
-          </td>
-          <td style={{ color:'#fff', fontSize:11, padding:'5px 0', textAlign:'right', fontWeight:700 }}>
-            ${(row.qty * row.price).toLocaleString()}.00
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-
-  <div style={{ borderTop:'1px solid rgba(255,255,255,.12)', marginTop:8, paddingTop:10, display:'flex', flexDirection:'column', gap:5 }}>
-    {[
-      { label:'Subtotal',   value:'$2,240.00', color:'rgba(255,255,255,.45)' },
-      { label:'Tax (15%)',  value:'+ $336.00', color:'rgba(251,146,60,.8)' },
-    ].map(row => (
-      <div key={row.label} style={{ display:'flex', justifyContent:'space-between', fontSize:11 }}>
-        <span style={{ color:'rgba(255,255,255,.38)' }}>{row.label}</span>
-        <span style={{ color:row.color, fontWeight:600 }}>{row.value}</span>
-      </div>
-    ))}
-    <div style={{ display:'flex', justifyContent:'space-between', fontSize:13, fontWeight:700, marginTop:3 }}>
-      <span style={{ color:'#fff' }}>Total Due</span>
-      <span style={{ color:'var(--red)' }}>$2,576.00</span>
-    </div>
-  </div>
-</div>
-
-{/* ── Floating monthly summary card ── */}
-<div className="lp-invoice-float2">
-  <div style={{ fontSize:9, color:'rgba(255,255,255,.35)', fontWeight:700, letterSpacing:'.07em', textTransform:'uppercase', marginBottom:10,right: cardsSwapped ? 'auto' : '32px',
-  left:  cardsSwapped ? '32px' : 'auto',
-  transition: 'left .6s ease, right .6s ease, transform .6s ease', }}>
-    Monthly Summary
-  </div>
-  {[
-    { label:'Invoices Sent', value:'12',        color:'rgba(255,255,255,.8)' },
-    { label:'Paid',          value:'$8,450.00', color:'#4ade80' },
-    { label:'Pending',       value:'$2,576.00', color:'#fb923c' },
-    { label:'Overdue',       value:'$320.00',   color:'#f87171' },
-  ].map(item => (
-    <div key={item.label} style={{
-      display:'flex', justifyContent:'space-between',
-      padding:'6px 0', borderBottom:'1px solid rgba(255,255,255,.06)', fontSize:11
-    }}>
-      <span style={{ color:'rgba(255,255,255,.4)' }}>{item.label}</span>
-      <span style={{ color:item.color, fontWeight:700 }}>{item.value}</span>
-    </div>
-  ))}
-  <div style={{ marginTop:10, padding:'8px 10px', background:'rgba(232,68,42,.1)', border:'1px solid rgba(232,68,42,.2)', borderRadius:5 }}>
-    <div style={{ fontSize:9, color:'rgba(255,255,255,.4)', fontWeight:700, letterSpacing:'.05em', textTransform:'uppercase', marginBottom:3 }}>Net Collected</div>
-    <div style={{ fontSize:16, fontWeight:900, color:'#fff', fontFamily:"'DM Serif Display', serif" }}>$8,450.00</div>
-  </div>
-</div>
+          
           <div className="lp-hero-badge">
             <Sparkles size={12} />
             Trusted by 10,000+ businesses worldwide
           </div>
           <h1>
-            Invoicing Made <em key={currentWord}>{words[currentWord]}</em>
+            Business Management Made{" "}
+            <em key={currentWord}>{ROTATING[currentWord].word}</em>
           </h1>
-          <p className="lp-hero-sub">
-            Create professional invoices, get paid faster, and grow your
-            business with the most intuitive billing platform available.
-          </p>
+          <p className="lp-hero-sub">{ROTATING[currentWord].sub}</p>
           <div className="lp-hero-ctas">
             <button
               className="lp-hero-primary"
@@ -1314,7 +1249,37 @@ useEffect(() => {
         </section>
 
         {/* ── Globe ── */}
-        <section className="lp-globe">
+        <section
+  className="lp-globe"
+  style={{
+    position: "relative",
+    overflow: "hidden",
+  }}
+>
+  {/* Background image with radial fade */}
+  <div
+    style={{
+      position: "absolute",
+      inset: 0,
+      zIndex: 0,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    <img
+      src={globe}
+      alt="Global presence"
+      style={{
+        width: "70%",
+        height: "70%",
+        objectFit: "cover",
+        opacity: 0.18,
+        maskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%)",
+        WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%)",
+      }}
+    />
+  </div>
           <div
             className="lp-section-eyebrow"
             style={{
@@ -1331,7 +1296,245 @@ useEffect(() => {
           <p>
             Join thousands of businesses across 50+ countries using SolidFlo.
           </p>
-          <img src={globe} alt="Global presence" />
+          
+          <div className="lp-invoice-float">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 12,
+                left: cardsSwapped ? "auto" : "32px",
+                right: cardsSwapped ? "32px" : "auto",
+                transition: "left .6s ease, right .6s ease, transform .6s ease",
+              }}
+            >
+              <span
+                style={{
+                  color: "rgba(255,255,255,.45)",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: ".06em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Invoice #SF-2024-087
+              </span>
+              <span
+                className="lp-invoice-float-tag"
+                style={{ background: "rgba(74,222,128,.12)", color: "#4ade80" }}
+              >
+                PAID
+              </span>
+            </div>
+
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  {["Description", "Qty", "Unit Price", "Amount"].map((h) => (
+                    <th
+                      key={h}
+                      style={{
+                        color: "rgba(255,255,255,.3)",
+                        fontSize: 9,
+                        fontWeight: 700,
+                        letterSpacing: ".05em",
+                        textTransform: "uppercase",
+                        padding: "0 0 7px",
+                        textAlign: h === "Description" ? "left" : "right",
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { desc: "Web Design", qty: 3, price: 450 },
+                  { desc: "Monthly Retainer", qty: 1, price: 800 },
+                  { desc: "Domain & Hosting", qty: 2, price: 45 },
+                ].map((row, i) => (
+                  <tr
+                    key={i}
+                    style={{ borderTop: "1px solid rgba(255,255,255,.06)" }}
+                  >
+                    <td
+                      style={{
+                        color: "rgba(255,255,255,.72)",
+                        fontSize: 11,
+                        padding: "5px 0",
+                      }}
+                    >
+                      {row.desc}
+                    </td>
+                    <td
+                      style={{
+                        color: "rgba(255,255,255,.4)",
+                        fontSize: 11,
+                        padding: "5px 0",
+                        textAlign: "right",
+                      }}
+                    >
+                      {row.qty}
+                    </td>
+                    <td
+                      style={{
+                        color: "rgba(255,255,255,.4)",
+                        fontSize: 11,
+                        padding: "5px 0",
+                        textAlign: "right",
+                      }}
+                    >
+                      ${row.price.toLocaleString()}.00
+                    </td>
+                    <td
+                      style={{
+                        color: "#fff",
+                        fontSize: 11,
+                        padding: "5px 0",
+                        textAlign: "right",
+                        fontWeight: 700,
+                      }}
+                    >
+                      ${(row.qty * row.price).toLocaleString()}.00
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div
+              style={{
+                borderTop: "1px solid rgba(255,255,255,.12)",
+                marginTop: 8,
+                paddingTop: 10,
+                display: "flex",
+                flexDirection: "column",
+                gap: 5,
+              }}
+            >
+              {[
+                {
+                  label: "Subtotal",
+                  value: "$2,240.00",
+                  color: "rgba(255,255,255,.45)",
+                },
+                {
+                  label: "Tax (15%)",
+                  value: "+ $336.00",
+                  color: "rgba(251,146,60,.8)",
+                },
+              ].map((row) => (
+                <div
+                  key={row.label}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 11,
+                  }}
+                >
+                  <span style={{ color: "rgba(255,255,255,.38)" }}>
+                    {row.label}
+                  </span>
+                  <span style={{ color: row.color, fontWeight: 600 }}>
+                    {row.value}
+                  </span>
+                </div>
+              ))}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  marginTop: 3,
+                }}
+              >
+                <span style={{ color: "#fff" }}>Total Due</span>
+                <span style={{ color: "var(--red)" }}>$2,576.00</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Floating monthly summary card ── */}
+          <div className="lp-invoice-float2">
+            <div
+              style={{
+                fontSize: 9,
+                color: "rgba(255,255,255,.35)",
+                fontWeight: 700,
+                letterSpacing: ".07em",
+                textTransform: "uppercase",
+                marginBottom: 10,
+                right: cardsSwapped ? "auto" : "32px",
+                left: cardsSwapped ? "32px" : "auto",
+                transition: "left .6s ease, right .6s ease, transform .6s ease",
+              }}
+            >
+              Monthly Summary
+            </div>
+            {[
+              {
+                label: "Invoices Sent",
+                value: "12",
+                color: "rgba(255,255,255,.8)",
+              },
+              { label: "Paid", value: "$8,450.00", color: "#4ade80" },
+              { label: "Pending", value: "$2,576.00", color: "#fb923c" },
+              { label: "Overdue", value: "$320.00", color: "#f87171" },
+            ].map((item) => (
+              <div
+                key={item.label}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "6px 0",
+                  borderBottom: "1px solid rgba(255,255,255,.06)",
+                  fontSize: 11,
+                }}
+              >
+                <span style={{ color: "rgba(255,255,255,.4)" }}>
+                  {item.label}
+                </span>
+                <span style={{ color: item.color, fontWeight: 700 }}>
+                  {item.value}
+                </span>
+              </div>
+            ))}
+            <div
+              style={{
+                marginTop: 10,
+                padding: "8px 10px",
+                background: "rgba(232,68,42,.1)",
+                border: "1px solid rgba(232,68,42,.2)",
+                borderRadius: 5,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 9,
+                  color: "rgba(255,255,255,.4)",
+                  fontWeight: 700,
+                  letterSpacing: ".05em",
+                  textTransform: "uppercase",
+                  marginBottom: 3,
+                }}
+              >
+                Net Collected
+              </div>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 900,
+                  color: "#fff",
+                  fontFamily: "'DM Serif Display', serif",
+                }}
+              >
+                $8,450.00
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* ── Pricing ── */}

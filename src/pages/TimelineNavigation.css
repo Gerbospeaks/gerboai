@@ -1,6 +1,6 @@
 .stickyWrapper {
   --nav-viewport-padding: 1.25rem;
-  --nav-color-text: var(--color-f1-green-dark, #15151e);
+  --nav-color-text: var(--color-f1-green-dark, #ffffff);
   --nav-color-active: var(--color-f1-lime-green, #f85f18);
   --nav-height: 2.3465rem;
   --nav-viewport-height: 100svh;
