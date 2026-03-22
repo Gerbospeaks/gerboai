@@ -73,7 +73,6 @@ const css = `
   .zah-left {
     display: flex; align-items: center; gap: 6px;
     flex-shrink: 0; min-width: 0;
-    /* On mobile, cap the left section so it never crowds the right */
     max-width: calc(100vw - 180px);
     overflow: hidden;
   }
@@ -88,11 +87,16 @@ const css = `
   }
   .zah-hamburger:hover { background: rgba(255,255,255,.1); color: #fff; }
 
+  /* Logo icon — hidden on mobile, visible on sm+ */
   .zah-logo-icon {
     width: 28px; height: 28px; border-radius: 50%;
     background: ${Z.red};
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    display: none; align-items: center; justify-content: center; flex-shrink: 0;
   }
+  @media (min-width: 640px) {
+    .zah-logo-icon { display: flex; }
+  }
+
   .zah-brand {
     font-size: 14px; font-weight: 700; color: #fff; letter-spacing: .02em;
     white-space: nowrap; flex-shrink: 0;
@@ -101,7 +105,6 @@ const css = `
   .zah-page-title {
     font-size: 12px; color: rgba(255,255,255,.5); white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis;
-    /* Hide on very small screens to preserve space */
     display: none;
   }
   @media (min-width: 480px) {
@@ -161,9 +164,10 @@ const css = `
   }
   .zah-icon-btn:hover { background: rgb(255, 255, 255); color: #212a42; }
 
-  /* Search — icon-only on mobile, pill on sm+ */
+  /* Search pill — hidden on mobile, visible on sm+ */
   .zah-search-pill {
-    display: flex; align-items: center; justify-content: center;
+    display: none;
+    align-items: center; justify-content: center;
     width: 32px; height: 30px;
     background: rgb(2, 45, 65); border: 1px solid rgba(255,255,255,.12);
     border-radius: 4px; cursor: pointer; color: rgba(255,255,255,.6);
@@ -172,21 +176,21 @@ const css = `
     padding: 0;
     gap: 0;
   }
+  @media (min-width: 640px) {
+    .zah-search-pill {
+      display: flex;
+      width: auto; padding: 0 10px; gap: 6px;
+    }
+  }
   .zah-search-pill:hover {
     background: rgb(5, 41, 71); border-color: rgba(255,255,255,.22); color: rgba(255,255,255,.9);
   }
-  .zah-search-label { display: none; font-size: 12px; white-space: nowrap; }
+  .zah-search-label { font-size: 12px; white-space: nowrap; }
   .zah-kbd {
     padding: 1px 5px; background: rgba(255,255,255,.1);
     border: 1px solid rgba(255,255,255,.15);
     border-radius: 3px; font-size: 10px; font-family: monospace;
     color: rgb(255, 255, 255);
-    display: none;
-  }
-  @media (min-width: 640px) {
-    .zah-search-pill { width: auto; padding: 0 10px; gap: 6px; }
-    .zah-search-label { display: inline; }
-    .zah-kbd { display: inline; }
   }
 
   /* Create button — icon-only on mobile, with text on sm+ */
@@ -215,6 +219,14 @@ const css = `
     background: ${Z.red}; border: 2px solid ${Z.navy};
     font-size: 8px; font-weight: 700; color: #fff;
     display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Bell icon — hidden on mobile, visible on sm+ */
+  .zah-bell-btn {
+    display: none !important;
+  }
+  @media (min-width: 640px) {
+    .zah-bell-btn { display: flex !important; }
   }
 
   /* Help button — hidden on mobile */
@@ -267,7 +279,6 @@ const css = `
     box-shadow: 0 6px 24px rgba(20,26,48,.18);
     overflow: hidden;
     animation: zah-drop .15s ease;
-    /* Ensure it never clips off-screen on mobile */
     max-width: calc(100vw - 20px);
   }
   @keyframes zah-drop { from { opacity:0; transform:translateY(-4px) } to { opacity:1; transform:translateY(0) } }
@@ -695,12 +706,6 @@ const notifIcon = (type) => {
   );
 };
 
-/* ─── Responsive dropdown position helper ───────────────────────────────── */
-/**
- * Returns a `style` object for a dropdown.
- * On narrow viewports the dropdown stretches to fill the safe viewport width,
- * pinned to the right edge of the header padding.
- */
 const useDropStyle = (desiredWidth = 220) => {
   const getStyle = () => {
     const vw = window.innerWidth;
@@ -811,18 +816,6 @@ const AppHeader = ({
   const getUserDisplayName = () =>
     user?.name || user?.email?.split("@")[0] || "User";
 
-  const getNextDocNumber = () => {
-    const invoices = user?.invoices || {};
-    const nums = Object.keys(invoices)
-      .filter((k) => k !== "businessInfo")
-      .map((k) => {
-        const m = invoices[k]?.jobCardNumber?.match(/(\d+)$/);
-        return m ? parseInt(m[1], 10) : 0;
-      })
-      .filter(Number.isFinite);
-    return `JC-2026-${String((nums.length ? Math.max(...nums) : 0) + 1).padStart(4, "0")}`;
-  };
-
   const handleQuickCreateItem = (item) => {
     setShowQuickCreate(false);
     onQuickCreate({ view: item.view, action: item.action, label: item.label });
@@ -832,7 +825,7 @@ const AppHeader = ({
     <div className="zah">
       <style>{css}</style>
 
-      {/* ── Search overlay ── */}
+      {/* ── Search overlay (only opened via ⌘K on desktop) ── */}
       {showSearch && (
         <div
           className="zah-search-overlay"
@@ -900,6 +893,7 @@ const AppHeader = ({
             {sidebarOpen ? <X size={16} /> : <Menu size={16} />}
           </button>
 
+          {/* Logo icon hidden on mobile to avoid clutter next to hamburger */}
           <div className="zah-logo-icon">
             <LayoutDashboard size={14} color="#fff" />
           </div>
@@ -922,7 +916,7 @@ const AppHeader = ({
 
         {/* Right */}
         <div className="zah-right">
-          {/* Search */}
+          {/* Search — desktop only */}
           <button
             className="zah-search-pill"
             onClick={() => setShowSearch(true)}
@@ -1014,7 +1008,6 @@ const AppHeader = ({
                   }
                 >
                   {Icon && <Icon size={13} />}
-                  {/* Label visible only on sm+ */}
                   <span style={{ display: "none" }} id={`zah-action-${i}`}>
                     {label}
                   </span>
@@ -1023,7 +1016,7 @@ const AppHeader = ({
               ),
             )}
 
-          {/* Help — sm+ only */}
+          {/* Help — desktop only */}
           <button
             className="zah-icon-btn zah-help-btn"
             title="Help & Support"
@@ -1032,10 +1025,10 @@ const AppHeader = ({
             <HelpCircle size={16} />
           </button>
 
-          {/* Notifications */}
+          {/* Notifications — desktop only */}
           <div style={{ position: "relative" }} ref={notifRef}>
             <button
-              className="zah-icon-btn"
+              className="zah-icon-btn zah-bell-btn"
               onClick={() => setShowNotifications((p) => !p)}
               aria-label="Notifications"
             >
@@ -1150,7 +1143,6 @@ const AppHeader = ({
 
             {showUserMenu && (
               <div className="zah-dropdown" style={getUserMenuDropStyle()}>
-                {/* User card */}
                 <div className="zah-user-card">
                   <div className="zah-user-card-avatar">
                     {user?.photoURL ? (
