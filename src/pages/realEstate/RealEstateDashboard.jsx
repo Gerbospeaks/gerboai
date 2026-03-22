@@ -9,10 +9,16 @@ import Templates from "./Templates";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import AIInvoiceWindow from '../AIInvoiceWindow';
+import FinancialOverview from "../FinancialOverview";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getAuth, signOut } from "firebase/auth";
+import Properties from "./Properties";
+import Listings from "./Listings";
+import Commissions from "./Commissions";
+import Reports from "./Reports";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import RealEstateSidebar from "./RealEstateSidebar";
 import {
   getFirestore,
   collection,
@@ -701,159 +707,33 @@ const RealEstateDashboard = () => {
                 />
               )}
       <div className="flex-1 flex overflow-hidden min-h-0">
-        {/* ── Sidebar backdrop (mobile) ──────────────────────────────────── */}
-        {sidebarOpen && (
-          <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
-        )}
-
-        {/* ── Collapsed Sidebar ──────────────────────────────────────────── */}
-        <div className={`${sidebarOpen ? "hidden" : "hidden md:flex"} fixed z-40 w-16 bg-[#0f172a] border-r border-[#1e293b] h-full flex-col items-center py-4 space-y-3 print:hidden`}>
-          <button onClick={() => setSidebarOpen(true)} className="p-2 text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg transition-all">
-            <ChevronRight className="w-5 h-5" />
-          </button>
-          <div className="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center">
-            <img src={logo} className="w-full h-full object-contain" />
-          </div>
-          <div className="flex flex-col items-center space-y-2 w-full px-2 pt-2">
-            {[
-              { icon: Home, onClick: () => setActiveView("home"), title: "Home", color: "text-[#38bdf8]" },
-              { icon: Settings, onClick: () => setShowSettings(true), title: "Settings", color: "text-[#64748b]" },
-              { icon: TrendingUp, onClick: () => {}, title: "Overview", color: "text-[#64748b]" },
-              { icon: ClipboardList, onClick: () => { handleNewInvoice(); setActiveView("invoice"); }, title: "Invoices", color: "text-[#64748b]" },
-              { icon: Users, onClick: () => setShowCustomersListModal(true), title: "Clients", color: "text-[#64748b]" },
-              { icon: Building2, onClick: () => {}, title: "Properties", color: "text-[#64748b]" },
-              { icon: Key, onClick: () => {}, title: "Listings", color: "text-[#64748b]" },
-              { icon: Receipt, onClick: () => {}, title: "Transactions", color: "text-[#64748b]" },
-              { icon: FileBarChart, onClick: () => {}, title: "Reports", color: "text-[#64748b]" },
-            ].map(({ icon: Icon, onClick, title, color }) => (
-              <button key={title} onClick={onClick} title={title} className={`group p-2 ${color} hover:text-white hover:bg-[#1e293b] rounded-lg transition-all w-10 h-10 flex items-center justify-center`}>
-                <Icon className="w-5 h-5" />
-              </button>
-            ))}
-          </div>
-          <div className="absolute bottom-4">
-            <div className="w-9 h-9 bg-[#1e293b] rounded-full flex items-center justify-center ring-1 ring-[#334155]">
-              {businessInfo.logoUrl ? <img src={businessInfo.logoUrl} className="w-6 h-6 object-contain" /> : <Building2 className="w-4 h-4 text-[#64748b]" />}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Expanded Sidebar ───────────────────────────────────────────── */}
-        <div className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 bg-[#0f172a] border-r border-[#1e293b] transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto flex flex-col`}>
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[#1e293b]">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg overflow-hidden"><img src={logo} className="w-full h-full object-contain" /></div>
-              <span className="text-sm font-bold text-white truncate">{businessInfo.businessName || "Prime Property"}</span>
-            </div>
-            <button onClick={() => setSidebarOpen(false)} className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg transition-all">
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Nav */}
-          <nav className="flex-1 p-3 space-y-1">
-            {[
-              { label: "Home", icon: Home, view: "home", active: activeView === "home" },
-            ].map(({ label, icon: Icon, view, active }) => (
-              <div key={label} onClick={() => { setActiveView(view); setSidebarOpen(false); }}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${active ? "bg-[#1e3a5f] text-[#38bdf8]" : "text-[#94a3b8] hover:text-white hover:bg-[#1e293b]"}`}>
-                <Icon className="w-4 h-4 flex-shrink-0" />{label}
-              </div>
-            ))}
-
-            <div onClick={() => { setShowSettings(true); setSidebarOpen(false); }}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b]">
-              <Settings className="w-4 h-4 flex-shrink-0" />Settings
-            </div>
-
-            <div className="pt-3 border-t border-[#1e293b] space-y-1">
-              <div onClick={() => {}} className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b]">
-                <TrendingUp className="w-4 h-4 flex-shrink-0" />Business Overview
-              </div>
-
-              {/* Invoices dropdown */}
-              <div>
-                <div onClick={() => setIsInvoicingOpen(!isInvoicingOpen)}
-                  className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all text-sm font-medium">
-                  <div className="flex items-center gap-3"><ClipboardList className="w-4 h-4 flex-shrink-0" />Invoices</div>
-                  <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isInvoicingOpen ? "rotate-180" : ""}`} />
-                </div>
-                <div className={`ml-4 mt-1 space-y-0.5 border-l border-[#1e293b] pl-3 overflow-hidden transition-all duration-200 ${isInvoicingOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}>
-                  {[
-                    { label: "Create Invoice", dot: "bg-[#2563eb]", onClick: () => { handleNewInvoice(); setActiveView("invoice"); if (isMobile) setSidebarOpen(false); } },
-                    { label: "All Invoices", dot: "bg-[#7c3aed]", badge: savedInvoices.length, onClick: () => { setShowInvoicesList(!showInvoicesList); if (isMobile) setSidebarOpen(false); } },
-                    { label: "Pending Payment", dot: "bg-[#ea580c]", onClick: () => {} },
-                    { label: "Overdue", dot: "bg-[#dc2626]", onClick: () => {} },
-                  ].map(({ label, dot, badge, onClick }) => (
-                    <div key={label} onClick={onClick} className="flex items-center justify-between py-2 px-2 text-xs text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all">
-                      <div className="flex items-center gap-2"><div className={`w-1.5 h-1.5 rounded-full ${dot}`} />{label}</div>
-                      {badge !== undefined && <span className="bg-[#2563eb] text-white px-1.5 py-0.5 rounded text-xs font-bold">{badge}</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Clients dropdown */}
-              <div>
-                <div onClick={() => setIsClientsOpen(!isClientsOpen)}
-                  className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all text-sm font-medium">
-                  <div className="flex items-center gap-3"><Users className="w-4 h-4 flex-shrink-0" />Clients</div>
-                  <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isClientsOpen ? "rotate-180" : ""}`} />
-                </div>
-                <div className={`ml-4 mt-1 space-y-0.5 border-l border-[#1e293b] pl-3 overflow-hidden transition-all duration-200 ${isClientsOpen ? "max-h-32 opacity-100" : "max-h-0 opacity-0"}`}>
-                  {[
-                    { label: "Add Client", dot: "bg-[#059669]", onClick: () => { handleAddNewCustomer(); if (isMobile) setSidebarOpen(false); } },
-                    { label: "All Clients", dot: "bg-[#2563eb]", badge: savedCustomers.length, onClick: () => { setShowCustomersListModal(true); if (isMobile) setSidebarOpen(false); } },
-                  ].map(({ label, dot, badge, onClick }) => (
-                    <div key={label} onClick={onClick} className="flex items-center justify-between py-2 px-2 text-xs text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all">
-                      <div className="flex items-center gap-2"><div className={`w-1.5 h-1.5 rounded-full ${dot}`} />{label}</div>
-                      {badge !== undefined && <span className="bg-[#7c3aed] text-white px-1.5 py-0.5 rounded text-xs font-bold">{badge}</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Static nav items */}
-              {[
-                { label: "Properties", icon: Building2 },
-                { label: "Invoice Templates", icon: FileText, onClick: () => { setActiveView("templates"); setSidebarOpen(false); } },
-                { label: "Listings", icon: Key },
-                { label: "Transactions", icon: Receipt },
-                { label: "Commissions", icon: CreditCard },
-                { label: "Reports", icon: FileBarChart },
-              ].map(({ label, icon: Icon, onClick }) => (
-                <div key={label} onClick={onClick || (() => {})}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b] transition-all ${onClick ? "cursor-pointer" : "cursor-default opacity-60"}`}>
-                  <Icon className="w-4 h-4 flex-shrink-0" />{label}
-                </div>
-              ))}
-            </div>
-          </nav>
-
-          {/* Sidebar footer */}
-          <div className="p-4 border-t border-[#1e293b]">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-[#1e293b] rounded-full flex items-center justify-center ring-1 ring-[#334155] flex-shrink-0">
-                {businessInfo.logoUrl ? <img src={businessInfo.logoUrl} className="w-6 h-6 object-contain" /> : <Building2 className="w-4 h-4 text-[#64748b]" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold text-white truncate">{user?.name || "User"}</div>
-                <div className="text-xs text-[#64748b] truncate">{user?.email || "email@example.com"}</div>
-              </div>
-              <button onClick={handleLogout} className="p-1.5 text-[#64748b] hover:text-[#ef4444] hover:bg-[#1e293b] rounded-lg transition-all">
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+      <RealEstateSidebar
+  user={user}
+  activeView={activeView}
+  setActiveView={setActiveView}
+  sidebarOpen={sidebarOpen}
+  setSidebarOpen={setSidebarOpen}
+  stats={stats}
+  businessInfo={businessInfo}
+  savedInvoices={savedInvoices}
+  savedCustomers={savedCustomers}
+  showInvoicesList={showInvoicesList}
+  setShowInvoicesList={setShowInvoicesList}
+  setShowSettings={setShowSettings}
+  setShowCustomersListModal={setShowCustomersListModal}
+  handleNewInvoice={handleNewInvoice}
+  handleAddNewCustomer={handleAddNewCustomer}
+  handleLogout={handleLogout}   
+/>
 
         {/* ── Main content ──────────────────────────────────────────────────── */}
-        <div className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-64" : "ml-0 md:ml-16"}`}>
+        <div className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-4" : "ml-0 md:ml-8"}`}>
           <AppHeader actions={headerActions} mobileActions={mobileDashboardActions} onSettingsOpen={() => setShowSettings(true)} />
 
           {/* ── Modals ────────────────────────────────────────────────────── */}
-          {showSettings && <BusinessSettingsModal onClose={() => setShowSettings(false)} />}
+           {showSettings && (
+            <BusinessSettingsModal onClose={() => setShowSettings(false)} />
+          )}
           <CustomersListModal showModal={showCustomersListModal} setShowModal={setShowCustomersListModal} customers={customers} onLoadCustomer={loadCustomer} onEditCustomer={handleEditCustomer} onAddNewCustomer={handleAddNewCustomer} />
           <CustomerModal showModal={showCustomerModal} setShowModal={setShowCustomerModal} existingCustomer={selectedCustomer} onCustomerSaved={handleCustomerSaved} />
 
@@ -932,7 +812,11 @@ const RealEstateDashboard = () => {
               </div>
             </div>
           )}
-
+         {activeView === "financial-overview" && (
+                     <div className="flex-1 overflow-y-auto p-4">
+                       <FinancialOverview user={user} />
+                     </div>
+                   )}
           {/* ── Views ─────────────────────────────────────────────────────── */}
           {activeView === "templates" && <div className="flex-1 overflow-y-auto p-4"><Templates user={user} /></div>}
          {activeView === "home" && (
@@ -949,7 +833,10 @@ const RealEstateDashboard = () => {
                        />
                      </div>
                    )}
-
+ {activeView === "properties" && <Properties user={user} />}
+{activeView === "listings" && <Listings user={user} />}
+{activeView === "commissions" && <Commissions user={user} />}
+{activeView === "reports" && <Reports user={user} />}
           {/* ── Invoice builder ────────────────────────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
@@ -1012,7 +899,7 @@ const RealEstateDashboard = () => {
                     />
                   </div>
 
-                 
+                
 
                   {invoiceId && (
                     <button onClick={handleProcessPayment} className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-medium transition-colors shadow-sm">
