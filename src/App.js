@@ -475,7 +475,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route path="/parents/:schoolSlug" element={<ParentPortal />} />
+            <Route path="/parents/:portalSlug" element={<ParentPortal />} />
             <Route path="/staff/:portalSlug" element={<StaffPortal />} />
           </Routes>
         </AdminProvider>

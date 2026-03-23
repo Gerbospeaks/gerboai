@@ -35,6 +35,12 @@ import {
   Award,
   BookMarked,
   ChevronDown,
+  ShieldAlert,
+  BarChart2,
+  Heart,
+  Package,
+  Flag,
+  Star,
 } from "lucide-react";
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -50,6 +56,8 @@ const T = {
   blueLight: "#ebf8ff",
   purple: "#6b46c1",
   purpleLight: "#faf5ff",
+  teal: "#0d9488",
+  tealLight: "#f0fdfa",
   bg: "#f7f8f9",
   surface: "#ffffff",
   border: "#e8ecf0",
@@ -61,103 +69,151 @@ const T = {
   shadow: "0 2px 12px rgba(0,0,0,0.07)",
 };
 
-// ── Grade colour helper (matches dashboard's calculateGrade) ──────────────────
 const gradeColor = (g) =>
   ({ A: "#15803d", B: "#2563eb", C: "#b45309", D: "#9333ea", E: T.red })[g] ||
   T.textSoft;
 const gradeBg = (g) =>
-  ({
-    A: "#f0fdf4",
-    B: "#eff6ff",
-    C: "#fffbeb",
-    D: "#faf5ff",
-    E: T.redLight,
-  })[g] || T.bg;
+  ({ A: "#f0fdf4", B: "#eff6ff", C: "#fffbeb", D: "#faf5ff", E: T.redLight })[
+    g
+  ] || T.bg;
 
 export default function ParentPortal() {
-  const { schoolSlug } = useParams();
+  // supports both route shapes: /parents/:portalSlug and /parents/:schoolSlug
+  const params = useParams();
+  const schoolSlug = params.portalSlug ?? params.schoolSlug;
 
-  // ── School data ────────────────────────────────────────────────────────────
+  // ── school uid (resolved once) ─────────────────────────────────────────────
+  const [schoolUid, setSchoolUid] = useState(null);
+
+  // ── school data ────────────────────────────────────────────────────────────
   const [businessInfo, setBusinessInfo] = useState(null);
   const [homework, setHomework] = useState([]);
   const [notices, setNotices] = useState([]);
+  const [announcements, setAnnouncements] = useState([]); // from staff portal
   const [events, setEvents] = useState([]);
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState([]);
-  const [timetable, setTimetable] = useState(null); // NEW
-  const [reports, setReports] = useState([]); // NEW
+  const [timetable, setTimetable] = useState(null);
+  const [reports, setReports] = useState([]);
+  const [permEvents, setPermEvents] = useState([]); // permission slips
+  const [markbook, setMarkbook] = useState([]); // mark book entries
+  const [incidents, setIncidents] = useState([]); // behaviour log
 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [activeTab, setActiveTab] = useState("notices");
   const [gradeFilter, setGradeFilter] = useState("All");
   const [expandedNotice, setExpandedNotice] = useState(null);
+  const [expandedReport, setExpandedReport] = useState(null);
 
-  // ── Timetable local filters ────────────────────────────────────────────────
+  // ── timetable local filters ────────────────────────────────────────────────
   const [ttGrade, setTtGrade] = useState("");
   const [ttDay, setTtDay] = useState("Monday");
   const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-  // ── Report Cards local state ───────────────────────────────────────────────
-  const [expandedReport, setExpandedReport] = useState(null);
-
-  // ── Identity gate ──────────────────────────────────────────────────────────
+  // ── identity gate ──────────────────────────────────────────────────────────
   const [showIdentityModal, setShowIdentityModal] = useState(false);
   const [childInput, setChildInput] = useState("");
   const [identityError, setIdentityError] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [verifiedStudent, setVerifiedStudent] = useState(null);
 
-  // ── Load data ──────────────────────────────────────────────────────────────
+  // ── Load school data ───────────────────────────────────────────────────────
   useEffect(() => {
     const load = async () => {
       try {
-        const usersSnap = await getDocs(
+        // support both portalSlug and schoolSlug field names
+        let usersSnap = await getDocs(
           query(collection(db, "users"), where("portalSlug", "==", schoolSlug)),
         );
+        if (usersSnap.empty) {
+          usersSnap = await getDocs(
+            query(
+              collection(db, "users"),
+              where("schoolSlug", "==", schoolSlug),
+            ),
+          );
+        }
         if (usersSnap.empty) {
           setNotFound(true);
           setLoading(false);
           return;
         }
-        const uid = usersSnap.docs[0].id;
 
-        const [bizDoc, hwSnap, nSnap, eSnap, stuSnap, attSnap, ttDoc, repSnap] =
-          await Promise.all([
-            getDoc(doc(db, "users", uid, "settings", "businessInfo")),
-            getDocs(
-              query(
-                collection(db, "users", uid, "homework"),
-                orderBy("createdAt", "desc"),
-              ),
-            ),
-            getDocs(
-              query(
-                collection(db, "users", uid, "notices"),
-                orderBy("createdAt", "desc"),
-              ),
-            ),
-            getDocs(
-              query(
-                collection(db, "users", uid, "events"),
-                orderBy("date", "asc"),
-              ),
-            ),
-            getDocs(collection(db, "users", uid, "students")),
-            getDocs(collection(db, "users", uid, "attendance")),
-            // Timetable stored as a settings doc by saveTimetable hook
-            getDoc(doc(db, "users", uid, "settings", "timetable")),
-            // Reports collection (only completed/locked ones visible to parents)
-            getDocs(
-              query(
-                collection(db, "users", uid, "reports"),
-                where("locked", "==", true),
-                orderBy("createdAt", "desc"),
-              ),
-            ),
-          ]);
+        const uid = usersSnap.docs[0].id;
+        setSchoolUid(uid);
 
         const today = new Date().toISOString().split("T")[0];
+
+        const [
+          bizDoc,
+          hwSnap,
+          nSnap,
+          annSnap,
+          eSnap,
+          stuSnap,
+          attSnap,
+          ttDoc,
+          repSnap,
+          permSnap,
+          mbSnap,
+          incSnap,
+        ] = await Promise.all([
+          getDoc(doc(db, "users", uid, "settings", "businessInfo")),
+          getDocs(
+            query(
+              collection(db, "users", uid, "homework"),
+              orderBy("createdAt", "desc"),
+            ),
+          ),
+          getDocs(
+            query(
+              collection(db, "users", uid, "notices"),
+              orderBy("createdAt", "desc"),
+            ),
+          ),
+          getDocs(
+            query(
+              collection(db, "users", uid, "announcements"),
+              orderBy("createdAt", "desc"),
+            ),
+          ),
+          getDocs(
+            query(
+              collection(db, "users", uid, "events"),
+              orderBy("date", "asc"),
+            ),
+          ),
+          getDocs(collection(db, "users", uid, "students")),
+          getDocs(collection(db, "users", uid, "attendance")),
+          getDoc(doc(db, "users", uid, "settings", "timetable")),
+          getDocs(
+            query(
+              collection(db, "users", uid, "reports"),
+              where("locked", "==", true),
+              orderBy("createdAt", "desc"),
+            ),
+          ),
+          getDocs(
+            query(
+              collection(db, "users", uid, "permissionEvents"),
+              orderBy("createdAt", "desc"),
+            ),
+          ),
+          getDocs(
+            query(
+              collection(db, "users", uid, "markbook"),
+              orderBy("createdAt", "desc"),
+            ),
+          ),
+          getDocs(
+            query(
+              collection(db, "users", uid, "incidents"),
+              orderBy("createdAt", "desc"),
+            ),
+          ),
+        ]);
+
         setBusinessInfo(bizDoc.data());
         setHomework(
           hwSnap.docs
@@ -166,6 +222,11 @@ export default function ParentPortal() {
         );
         setNotices(
           nSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder),
+        );
+        setAnnouncements(
+          annSnap.docs
             .map((d) => ({ id: d.id, ...d.data() }))
             .filter((d) => !d._placeholder),
         );
@@ -184,11 +245,24 @@ export default function ParentPortal() {
             .map((d) => ({ id: d.id, ...d.data() }))
             .filter((d) => !d._placeholder),
         );
-        // Timetable: stored as { "Grade 1": { Monday: [...], ... }, ... }
         if (ttDoc.exists()) setTimetable(ttDoc.data());
-        // Reports
         setReports(
           repSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder),
+        );
+        setPermEvents(
+          permSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder),
+        );
+        setMarkbook(
+          mbSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder),
+        );
+        setIncidents(
+          incSnap.docs
             .map((d) => ({ id: d.id, ...d.data() }))
             .filter((d) => !d._placeholder),
         );
@@ -202,7 +276,7 @@ export default function ParentPortal() {
     load();
   }, [schoolSlug]);
 
-  // ── Verify child name only ─────────────────────────────────────────────────
+  // ── Verify child name ──────────────────────────────────────────────────────
   const handleVerify = () => {
     if (!childInput.trim()) {
       setIdentityError("Please enter your child's full name.");
@@ -210,10 +284,8 @@ export default function ParentPortal() {
     }
     setVerifying(true);
     setIdentityError("");
-    const normalize = (s) => s.trim().toLowerCase();
-    const match = students.find(
-      (s) => normalize(s.name) === normalize(childInput),
-    );
+    const norm = (s) => s.trim().toLowerCase();
+    const match = students.find((s) => norm(s.name) === norm(childInput));
     setTimeout(() => {
       setVerifying(false);
       if (match) {
@@ -228,7 +300,7 @@ export default function ParentPortal() {
     }, 500);
   };
 
-  // ── Derived attendance for verified student ────────────────────────────────
+  // ── Derived: attendance for verified student ───────────────────────────────
   const studentAttendance = verifiedStudent
     ? attendance
         .filter(
@@ -244,12 +316,11 @@ export default function ParentPortal() {
     absent: studentAttendance.filter((a) => a.status === "absent").length,
     late: studentAttendance.filter((a) => a.status === "late").length,
   };
-  const attTotal = studentAttendance.length;
-  const attPercent = attTotal
-    ? Math.round((attStats.present / attTotal) * 100)
+  const attPercent = studentAttendance.length
+    ? Math.round((attStats.present / studentAttendance.length) * 100)
     : null;
 
-  // ── Derived reports for verified student ──────────────────────────────────
+  // ── Derived: reports for verified student ─────────────────────────────────
   const studentReports = verifiedStudent
     ? reports.filter(
         (r) =>
@@ -258,9 +329,28 @@ export default function ParentPortal() {
       )
     : [];
 
-  // ── Timetable derived data ─────────────────────────────────────────────────
+  // ── Derived: permission slips for verified student ────────────────────────
+  const myPermEvents = verifiedStudent
+    ? permEvents.filter((e) => e.grade === verifiedStudent.grade)
+    : [];
+
+  // ── Derived: mark book for verified student ───────────────────────────────
+  const myMarkbook = verifiedStudent
+    ? markbook.filter((m) => m.grade === verifiedStudent.grade)
+    : [];
+
+  // ── Derived: incidents for verified student ────────────────────────────────
+  const myIncidents = verifiedStudent
+    ? incidents.filter(
+        (i) =>
+          i.studentId === verifiedStudent.id ||
+          i.studentName?.trim().toLowerCase() ===
+            verifiedStudent.name.trim().toLowerCase(),
+      )
+    : [];
+
+  // ── Timetable derived ──────────────────────────────────────────────────────
   const ttGrades = timetable ? Object.keys(timetable) : [];
-  // Auto-select first grade when timetable loads
   useEffect(() => {
     if (ttGrades.length && !ttGrade) setTtGrade(ttGrades[0]);
   }, [ttGrades.length]);
@@ -268,6 +358,20 @@ export default function ParentPortal() {
     timetable && ttGrade && timetable[ttGrade]
       ? timetable[ttGrade][ttDay] || []
       : [];
+
+  // ── Merged notices: school notices + staff announcements ──────────────────
+  const allNotices = [
+    ...notices.map((n) => ({ ...n, _source: "admin" })),
+    ...announcements.map((a) => ({
+      ...a,
+      _source: "teacher",
+      type: a.type || "info",
+    })),
+  ].sort((a, b) => {
+    const da = a.createdAt?.seconds || 0;
+    const db_ = b.createdAt?.seconds || 0;
+    return db_ - da;
+  });
 
   // ── Configs ────────────────────────────────────────────────────────────────
   const noticeConfig = {
@@ -313,20 +417,24 @@ export default function ParentPortal() {
   const schoolName =
     businessInfo?.name || businessInfo?.businessName || "School Portal";
 
+  // ── Tabs ───────────────────────────────────────────────────────────────────
+  const noticeBadge =
+    allNotices.filter((n) => !n.read).length || allNotices.length;
+
   const allTabs = [
+    {
+      id: "notices",
+      label: "Notices",
+      icon: Megaphone,
+      count: noticeBadge,
+      locked: false,
+    },
     {
       id: "homework",
       label: "Homework",
       icon: BookOpen,
       count: homework.length,
       locked: !verifiedStudent,
-    },
-    {
-      id: "notices",
-      label: "Notices",
-      icon: Megaphone,
-      count: notices.length,
-      locked: false,
     },
     {
       id: "events",
@@ -341,14 +449,35 @@ export default function ParentPortal() {
       icon: Clock,
       count: null,
       locked: false,
-    }, // NEW
+    },
     {
       id: "reports",
       label: "Reports",
       icon: ClipboardList,
       count: studentReports.length || null,
       locked: !verifiedStudent,
-    }, // NEW
+    },
+    {
+      id: "marks",
+      label: "Marks",
+      icon: BarChart2,
+      count: myMarkbook.length || null,
+      locked: !verifiedStudent,
+    },
+    {
+      id: "slips",
+      label: "Slips",
+      icon: Flag,
+      count: myPermEvents.length || null,
+      locked: !verifiedStudent,
+    },
+    {
+      id: "behaviour",
+      label: "Behaviour",
+      icon: ShieldAlert,
+      count: myIncidents.length || null,
+      locked: !verifiedStudent,
+    },
     {
       id: "fees",
       label: "Fees",
@@ -440,7 +569,7 @@ export default function ParentPortal() {
           style={{
             width: 64,
             height: 64,
-            borderRadius: 2,
+            borderRadius: 16,
             background: T.redLight,
             display: "flex",
             alignItems: "center",
@@ -487,7 +616,7 @@ export default function ParentPortal() {
     >
       <style>{fonts + keyframes}</style>
 
-      {/* ── IDENTITY MODAL ──────────────────────────────────────────────────── */}
+      {/* ── IDENTITY MODAL ────────────────────────────────────────────────── */}
       {showIdentityModal && (
         <div
           style={{
@@ -673,7 +802,7 @@ export default function ParentPortal() {
         </div>
       )}
 
-      {/* ── HEADER ──────────────────────────────────────────────────────────── */}
+      {/* ── HEADER ────────────────────────────────────────────────────────── */}
       <div
         style={{
           background: `linear-gradient(160deg,${T.primary} 0%,${T.primaryMid} 100%)`,
@@ -813,8 +942,7 @@ export default function ParentPortal() {
                   cursor: "pointer",
                 }}
               >
-                <Lock style={{ width: 13, height: 13 }} />
-                My Child
+                <Lock style={{ width: 13, height: 13 }} /> My Child
               </button>
             )}
           </div>
@@ -830,7 +958,7 @@ export default function ParentPortal() {
               },
               {
                 label: "Notices",
-                count: notices.length,
+                count: allNotices.length,
                 color: "#fcd34d",
                 tab: "notices",
               },
@@ -893,7 +1021,7 @@ export default function ParentPortal() {
           </div>
         </div>
 
-        {/* ── TABS ──────────────────────────────────────────────────────────── */}
+        {/* ── TABS ────────────────────────────────────────────────────────── */}
         <div
           style={{
             background: T.surface,
@@ -975,11 +1103,186 @@ export default function ParentPortal() {
         </div>
       </div>
 
-      {/* ── CONTENT ─────────────────────────────────────────────────────────── */}
+      {/* ── CONTENT ───────────────────────────────────────────────────────── */}
       <div
-        style={{ maxWidth: 640, margin: "0 auto", padding: "16px 16px 40px" }}
+        style={{ maxWidth: 640, margin: "0 auto", padding: "16px 16px 60px" }}
       >
-        {/* ── HOMEWORK ──────────────────────────────────────────────────────── */}
+        {/* ══ NOTICES (merged admin + teacher announcements) ════════════════ */}
+        {activeTab === "notices" && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              animation: "fadeUp .25s ease",
+            }}
+          >
+            {allNotices.length === 0 ? (
+              <EmptyState
+                icon={Megaphone}
+                title="No notices"
+                message="No notices posted yet."
+                color={T.accentLight}
+                iconColor={T.accent}
+              />
+            ) : (
+              allNotices.map((n, i) => {
+                const tc = noticeConfig[n.type] || noticeConfig.info;
+                const Icon = tc.icon;
+                const isExpanded = expandedNotice === n.id + (n._source || "");
+                const isTeacher = n._source === "teacher";
+                return (
+                  <div
+                    key={n.id + (n._source || "")}
+                    style={{
+                      background: T.surface,
+                      borderRadius: T.radius,
+                      border: `1px solid ${T.border}`,
+                      borderLeft: `4px solid ${isTeacher ? T.teal : tc.color}`,
+                      boxShadow: T.shadow,
+                      animation: `fadeUp .3s ease ${i * 0.04}s both`,
+                    }}
+                  >
+                    <div style={{ padding: "14px 16px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          marginBottom: 10,
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 5,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: "3px 10px",
+                            borderRadius: 99,
+                            background: isTeacher ? T.tealLight : tc.bg,
+                            color: isTeacher ? T.teal : tc.color,
+                          }}
+                        >
+                          <Icon style={{ width: 10, height: 10 }} />
+                          {isTeacher ? `Class Notice` : tc.label}
+                        </span>
+                        {isTeacher && n.grade && (
+                          <span
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              padding: "3px 10px",
+                              borderRadius: 99,
+                              background: T.primaryLight,
+                              color: T.primary,
+                            }}
+                          >
+                            {n.grade}
+                          </span>
+                        )}
+                        {n.pinned && (
+                          <span
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              padding: "3px 8px",
+                              borderRadius: 99,
+                              background: "#fffbeb",
+                              color: "#b45309",
+                            }}
+                          >
+                            📌 Pinned
+                          </span>
+                        )}
+                        <span
+                          style={{
+                            fontSize: 11,
+                            color: T.textFaint,
+                            marginLeft: "auto",
+                          }}
+                        >
+                          {n.date}
+                        </span>
+                      </div>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 15,
+                          fontWeight: 700,
+                          color: T.text,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {n.title}
+                      </p>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 13,
+                          color: T.textMid,
+                          lineHeight: 1.65,
+                          display: "-webkit-box",
+                          WebkitLineClamp: isExpanded ? "unset" : 3,
+                          WebkitBoxOrient: "vertical",
+                          overflow: isExpanded ? "visible" : "hidden",
+                        }}
+                      >
+                        {n.body || n.message}
+                      </p>
+                      {isTeacher && n.postedBy && (
+                        <p
+                          style={{
+                            margin: "6px 0 0",
+                            fontSize: 11,
+                            color: T.textFaint,
+                          }}
+                        >
+                          — {n.postedBy}
+                        </p>
+                      )}
+                      {(n.body || n.message)?.length > 120 && (
+                        <button
+                          onClick={() =>
+                            setExpandedNotice(
+                              isExpanded ? null : n.id + (n._source || ""),
+                            )
+                          }
+                          style={{
+                            marginTop: 8,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: isTeacher ? T.teal : tc.color,
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: "2px 0",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
+                        >
+                          {isExpanded ? "Show less" : "Read more"}
+                          <ChevronRight
+                            style={{
+                              width: 13,
+                              height: 13,
+                              transform: isExpanded ? "rotate(90deg)" : "none",
+                              transition: "transform .2s",
+                            }}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {/* ══ HOMEWORK ══════════════════════════════════════════════════════ */}
         {activeTab === "homework" && (
           <div style={{ animation: "fadeUp .25s ease" }}>
             {grades.length > 1 && (
@@ -1220,142 +1523,7 @@ export default function ParentPortal() {
           </div>
         )}
 
-        {/* ── NOTICES ───────────────────────────────────────────────────────── */}
-        {activeTab === "notices" && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              animation: "fadeUp .25s ease",
-            }}
-          >
-            {notices.length === 0 ? (
-              <EmptyState
-                icon={Megaphone}
-                title="No notices"
-                message="No notices posted yet."
-                color={T.accentLight}
-                iconColor={T.accent}
-              />
-            ) : (
-              notices.map((n, i) => {
-                const tc = noticeConfig[n.type] || noticeConfig.info;
-                const Icon = tc.icon;
-                const isExpanded = expandedNotice === n.id;
-                return (
-                  <div
-                    key={n.id}
-                    style={{
-                      background: T.surface,
-                      borderRadius: T.radius,
-                      border: `1px solid ${T.border}`,
-                      borderLeft: `4px solid ${tc.color}`,
-                      boxShadow: T.shadow,
-                      animation: `fadeUp .3s ease ${i * 0.05}s both`,
-                    }}
-                  >
-                    <div style={{ padding: "14px 16px" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                          marginBottom: 10,
-                        }}
-                      >
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 5,
-                            fontSize: 10,
-                            fontWeight: 700,
-                            padding: "3px 10px",
-                            borderRadius: 99,
-                            background: tc.bg,
-                            color: tc.color,
-                          }}
-                        >
-                          <Icon style={{ width: 10, height: 10 }} />
-                          {tc.label}
-                        </span>
-                        <span
-                          style={{
-                            fontSize: 11,
-                            color: T.textFaint,
-                            marginLeft: "auto",
-                          }}
-                        >
-                          {n.date}
-                        </span>
-                      </div>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: 15,
-                          fontWeight: 700,
-                          color: T.text,
-                          marginBottom: 6,
-                        }}
-                      >
-                        {n.title}
-                      </p>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: 13,
-                          color: T.textMid,
-                          lineHeight: 1.65,
-                          display: "-webkit-box",
-                          WebkitLineClamp: isExpanded ? "unset" : 3,
-                          WebkitBoxOrient: "vertical",
-                          overflow: isExpanded ? "visible" : "hidden",
-                        }}
-                      >
-                        {n.message}
-                      </p>
-                      {n.message?.length > 120 && (
-                        <button
-                          onClick={() =>
-                            setExpandedNotice(isExpanded ? null : n.id)
-                          }
-                          style={{
-                            marginTop: 8,
-                            fontSize: 12,
-                            fontWeight: 700,
-                            color: tc.color,
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            padding: "2px 0",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 4,
-                          }}
-                        >
-                          {isExpanded ? "Show less" : "Read more"}
-                          <ChevronRight
-                            style={{
-                              width: 13,
-                              height: 13,
-                              transform: isExpanded
-                                ? "rotate(90deg)"
-                                : "rotate(0deg)",
-                              transition: "transform .2s",
-                            }}
-                          />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        )}
-
-        {/* ── EVENTS ────────────────────────────────────────────────────────── */}
+        {/* ══ EVENTS ════════════════════════════════════════════════════════ */}
         {activeTab === "events" && (
           <div
             style={{
@@ -1509,7 +1677,7 @@ export default function ParentPortal() {
           </div>
         )}
 
-        {/* ── TIMETABLE (NEW) ───────────────────────────────────────────────── */}
+        {/* ══ TIMETABLE ═════════════════════════════════════════════════════ */}
         {activeTab === "timetable" && (
           <div style={{ animation: "fadeUp .25s ease" }}>
             {!timetable || ttGrades.length === 0 ? (
@@ -1522,7 +1690,6 @@ export default function ParentPortal() {
               />
             ) : (
               <>
-                {/* Grade selector */}
                 <div
                   style={{
                     display: "flex",
@@ -1552,8 +1719,6 @@ export default function ParentPortal() {
                     </button>
                   ))}
                 </div>
-
-                {/* Day selector */}
                 <div
                   style={{
                     display: "flex",
@@ -1618,8 +1783,6 @@ export default function ParentPortal() {
                     );
                   })}
                 </div>
-
-                {/* Periods */}
                 {ttPeriods.length === 0 ? (
                   <EmptyState
                     icon={Clock}
@@ -1637,7 +1800,6 @@ export default function ParentPortal() {
                     }}
                   >
                     {ttPeriods.map((period, i) => {
-                      // period may be a string or { subject, teacher, time, room }
                       const isObj =
                         typeof period === "object" && period !== null;
                       const subject = isObj
@@ -1646,8 +1808,6 @@ export default function ParentPortal() {
                       const teacher = isObj ? period.teacher : null;
                       const time = isObj ? period.time : null;
                       const room = isObj ? period.room : null;
-
-                      // Pick a consistent accent per subject index
                       const accents = [
                         { bg: T.primaryLight, color: T.primary },
                         { bg: T.blueLight, color: T.blue },
@@ -1656,7 +1816,6 @@ export default function ParentPortal() {
                         { bg: "#fff0f0", color: T.red },
                       ];
                       const ac = accents[i % accents.length];
-
                       return (
                         <div
                           key={i}
@@ -1677,7 +1836,6 @@ export default function ParentPortal() {
                               padding: "13px 16px",
                             }}
                           >
-                            {/* Period number bubble */}
                             <div
                               style={{
                                 width: 36,
@@ -1777,14 +1935,13 @@ export default function ParentPortal() {
           </div>
         )}
 
-        {/* ── REPORT CARDS (NEW) ────────────────────────────────────────────── */}
+        {/* ══ REPORTS ═══════════════════════════════════════════════════════ */}
         {activeTab === "reports" && verifiedStudent && (
           <div style={{ animation: "fadeUp .25s ease" }}>
             <SectionHeader
               name={verifiedStudent.name}
               grade={verifiedStudent.grade}
             />
-
             {studentReports.length === 0 ? (
               <EmptyState
                 icon={ClipboardList}
@@ -1807,8 +1964,6 @@ export default function ParentPortal() {
                           (rep.attendance.present / rep.attendance.days) * 100,
                         )
                       : null;
-
-                  // Overall performance colour
                   const perfColor =
                     avg >= 80
                       ? "#15803d"
@@ -1825,7 +1980,6 @@ export default function ParentPortal() {
                         : avg >= 50
                           ? "#fffbeb"
                           : T.redLight;
-
                   return (
                     <div
                       key={rep.id}
@@ -1838,10 +1992,7 @@ export default function ParentPortal() {
                         animation: `fadeUp .3s ease ${i * 0.05}s both`,
                       }}
                     >
-                      {/* Colour accent bar */}
                       <div style={{ height: 4, background: perfColor }} />
-
-                      {/* Report header */}
                       <div style={{ padding: "16px 16px 14px" }}>
                         <div
                           style={{
@@ -1895,7 +2046,6 @@ export default function ParentPortal() {
                                 : ""}
                             </p>
                           </div>
-                          {/* Average badge */}
                           <div
                             style={{
                               textAlign: "center",
@@ -1929,113 +2079,66 @@ export default function ParentPortal() {
                             </p>
                           </div>
                         </div>
-
-                        {/* Summary row */}
                         <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                          <div
-                            style={{
-                              flex: 1,
-                              padding: "9px 12px",
-                              borderRadius: 11,
-                              background: T.bg,
-                              border: `1px solid ${T.border}`,
-                              textAlign: "center",
-                            }}
-                          >
-                            <p
-                              style={{
-                                margin: 0,
-                                fontSize: 16,
-                                fontWeight: 800,
-                                color: T.primary,
-                              }}
-                            >
-                              {rep.performance?.totalSubjects ??
+                          {[
+                            {
+                              label: "Subjects",
+                              val:
+                                rep.performance?.totalSubjects ??
                                 rep.subjects?.length ??
-                                0}
-                            </p>
-                            <p
+                                0,
+                              color: T.primary,
+                            },
+                            {
+                              label: "Attendance",
+                              val: attPct != null ? `${attPct}%` : "—",
+                              color:
+                                attPct >= 90
+                                  ? "#15803d"
+                                  : attPct >= 75
+                                    ? T.blue
+                                    : T.red,
+                            },
+                            {
+                              label: "Days",
+                              val: `${rep.attendance?.present ?? "—"}/${rep.attendance?.days ?? "—"}`,
+                              color: T.textMid,
+                            },
+                          ].map(({ label, val, color }) => (
+                            <div
+                              key={label}
                               style={{
-                                margin: "2px 0 0",
-                                fontSize: 10,
-                                fontWeight: 600,
-                                color: T.textFaint,
+                                flex: 1,
+                                padding: "9px 12px",
+                                borderRadius: 11,
+                                background: T.bg,
+                                border: `1px solid ${T.border}`,
+                                textAlign: "center",
                               }}
                             >
-                              Subjects
-                            </p>
-                          </div>
-                          <div
-                            style={{
-                              flex: 1,
-                              padding: "9px 12px",
-                              borderRadius: 11,
-                              background: T.bg,
-                              border: `1px solid ${T.border}`,
-                              textAlign: "center",
-                            }}
-                          >
-                            <p
-                              style={{
-                                margin: 0,
-                                fontSize: 16,
-                                fontWeight: 800,
-                                color:
-                                  attPct >= 90
-                                    ? "#15803d"
-                                    : attPct >= 75
-                                      ? T.blue
-                                      : T.red,
-                              }}
-                            >
-                              {attPct != null ? `${attPct}%` : "—"}
-                            </p>
-                            <p
-                              style={{
-                                margin: "2px 0 0",
-                                fontSize: 10,
-                                fontWeight: 600,
-                                color: T.textFaint,
-                              }}
-                            >
-                              Attendance
-                            </p>
-                          </div>
-                          <div
-                            style={{
-                              flex: 1,
-                              padding: "9px 12px",
-                              borderRadius: 11,
-                              background: T.bg,
-                              border: `1px solid ${T.border}`,
-                              textAlign: "center",
-                            }}
-                          >
-                            <p
-                              style={{
-                                margin: 0,
-                                fontSize: 16,
-                                fontWeight: 800,
-                                color: T.textMid,
-                              }}
-                            >
-                              {rep.attendance?.present ?? "—"}/
-                              {rep.attendance?.days ?? "—"}
-                            </p>
-                            <p
-                              style={{
-                                margin: "2px 0 0",
-                                fontSize: 10,
-                                fontWeight: 600,
-                                color: T.textFaint,
-                              }}
-                            >
-                              Days
-                            </p>
-                          </div>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 16,
+                                  fontWeight: 800,
+                                  color,
+                                }}
+                              >
+                                {val}
+                              </p>
+                              <p
+                                style={{
+                                  margin: "2px 0 0",
+                                  fontSize: 10,
+                                  fontWeight: 600,
+                                  color: T.textFaint,
+                                }}
+                              >
+                                {label}
+                              </p>
+                            </div>
+                          ))}
                         </div>
-
-                        {/* Expand/collapse */}
                         <button
                           onClick={() =>
                             setExpandedReport(isExpanded ? null : rep.id)
@@ -2063,16 +2166,12 @@ export default function ParentPortal() {
                             style={{
                               width: 13,
                               height: 13,
-                              transform: isExpanded
-                                ? "rotate(180deg)"
-                                : "rotate(0deg)",
+                              transform: isExpanded ? "rotate(180deg)" : "none",
                               transition: "transform .2s",
                             }}
                           />
                         </button>
                       </div>
-
-                      {/* Expanded: subject table + comments */}
                       {isExpanded && (
                         <div
                           style={{
@@ -2080,7 +2179,6 @@ export default function ParentPortal() {
                             padding: "14px 16px",
                           }}
                         >
-                          {/* Subjects */}
                           {rep.subjects?.length > 0 && (
                             <div style={{ marginBottom: 14 }}>
                               <p
@@ -2128,7 +2226,6 @@ export default function ParentPortal() {
                                         border: `1px solid ${T.border}`,
                                       }}
                                     >
-                                      {/* Grade badge */}
                                       <div
                                         style={{
                                           width: 32,
@@ -2177,7 +2274,6 @@ export default function ParentPortal() {
                                           </p>
                                         )}
                                       </div>
-                                      {/* Progress bar + mark */}
                                       <div
                                         style={{
                                           flexShrink: 0,
@@ -2220,8 +2316,6 @@ export default function ParentPortal() {
                               </div>
                             </div>
                           )}
-
-                          {/* Teacher comments */}
                           {rep.teacherComments && (
                             <div
                               style={{
@@ -2265,7 +2359,573 @@ export default function ParentPortal() {
           </div>
         )}
 
-        {/* ── FEES ──────────────────────────────────────────────────────────── */}
+        {/* ══ MARKS (from mark book) ════════════════════════════════════════ */}
+        {activeTab === "marks" && verifiedStudent && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <SectionHeader
+              name={verifiedStudent.name}
+              grade={verifiedStudent.grade}
+            />
+            {myMarkbook.length === 0 ? (
+              <EmptyState
+                icon={BarChart2}
+                title="No marks yet"
+                message="No assessment results have been recorded for your child's class yet."
+                color={T.blueLight}
+                iconColor={T.blue}
+              />
+            ) : (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                {/* Subject summary cards */}
+                {(() => {
+                  const subjectMap = {};
+                  myMarkbook.forEach((entry) => {
+                    const sub = entry.subject;
+                    if (!subjectMap[sub]) subjectMap[sub] = [];
+                    const studentScore =
+                      entry.scores?.[verifiedStudent.id] ??
+                      entry.scores?.[verifiedStudent.name];
+                    if (studentScore !== undefined && studentScore !== "") {
+                      subjectMap[sub].push({
+                        assessment: entry.assessment,
+                        score: parseFloat(studentScore),
+                        total: parseFloat(entry.total || 100),
+                        date: entry.date,
+                      });
+                    }
+                  });
+                  return Object.entries(subjectMap).map(
+                    ([subject, results]) => {
+                      if (!results.length) return null;
+                      const avg =
+                        results.reduce(
+                          (a, r) => a + (r.score / r.total) * 100,
+                          0,
+                        ) / results.length;
+                      const avgColor =
+                        avg >= 75 ? "#15803d" : avg >= 50 ? "#b45309" : T.red;
+                      return (
+                        <div
+                          key={subject}
+                          style={{
+                            background: T.surface,
+                            borderRadius: T.radius,
+                            border: `1px solid ${T.border}`,
+                            overflow: "hidden",
+                            boxShadow: T.shadow,
+                          }}
+                        >
+                          <div
+                            style={{
+                              padding: "14px 16px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 12,
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 42,
+                                height: 42,
+                                borderRadius: 12,
+                                background: T.blueLight,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <BookOpen
+                                style={{ width: 18, height: 18, color: T.blue }}
+                              />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 15,
+                                  fontWeight: 800,
+                                  color: T.text,
+                                }}
+                              >
+                                {subject}
+                              </p>
+                              <p
+                                style={{
+                                  margin: "2px 0 0",
+                                  fontSize: 12,
+                                  color: T.textSoft,
+                                }}
+                              >
+                                {results.length} assessment
+                                {results.length !== 1 ? "s" : ""}
+                              </p>
+                            </div>
+                            <div style={{ textAlign: "right" }}>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 20,
+                                  fontWeight: 800,
+                                  color: avgColor,
+                                }}
+                              >
+                                {avg.toFixed(0)}%
+                              </p>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 10,
+                                  fontWeight: 600,
+                                  color: T.textFaint,
+                                }}
+                              >
+                                avg
+                              </p>
+                            </div>
+                          </div>
+                          <div style={{ borderTop: `1px solid ${T.border}` }}>
+                            {results.map((r, ri) => {
+                              const pct = (r.score / r.total) * 100;
+                              const col =
+                                pct >= 75
+                                  ? "#15803d"
+                                  : pct >= 50
+                                    ? "#b45309"
+                                    : T.red;
+                              return (
+                                <div
+                                  key={ri}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 10,
+                                    padding: "10px 16px",
+                                    borderBottom:
+                                      ri < results.length - 1
+                                        ? `1px solid ${T.border}`
+                                        : "none",
+                                    background: T.bg,
+                                  }}
+                                >
+                                  <div style={{ flex: 1 }}>
+                                    <p
+                                      style={{
+                                        margin: 0,
+                                        fontSize: 13,
+                                        fontWeight: 600,
+                                        color: T.text,
+                                      }}
+                                    >
+                                      {r.assessment}
+                                    </p>
+                                    <p
+                                      style={{
+                                        margin: "1px 0 0",
+                                        fontSize: 11,
+                                        color: T.textFaint,
+                                      }}
+                                    >
+                                      {r.date}
+                                    </p>
+                                  </div>
+                                  <div style={{ textAlign: "right" }}>
+                                    <p
+                                      style={{
+                                        margin: 0,
+                                        fontSize: 14,
+                                        fontWeight: 800,
+                                        color: col,
+                                      }}
+                                    >
+                                      {r.score}/{r.total}
+                                    </p>
+                                    <div
+                                      style={{
+                                        marginTop: 3,
+                                        width: 50,
+                                        height: 4,
+                                        borderRadius: 99,
+                                        background: T.border,
+                                        overflow: "hidden",
+                                        marginLeft: "auto",
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          height: "100%",
+                                          width: `${Math.min(100, pct)}%`,
+                                          background: col,
+                                          borderRadius: 99,
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    },
+                  );
+                })()}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══ PERMISSION SLIPS ══════════════════════════════════════════════ */}
+        {activeTab === "slips" && verifiedStudent && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <SectionHeader
+              name={verifiedStudent.name}
+              grade={verifiedStudent.grade}
+            />
+            {myPermEvents.length === 0 ? (
+              <EmptyState
+                icon={Flag}
+                title="No events"
+                message="No permission slip events for your child's class yet."
+                color={T.tealLight}
+                iconColor={T.teal}
+              />
+            ) : (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                {myPermEvents.map((evt, i) => {
+                  const myStatus =
+                    evt.slips?.[verifiedStudent.id] ||
+                    evt.slips?.[verifiedStudent.name] ||
+                    "pending";
+                  const statusCfg = {
+                    returned: {
+                      label: "✓ Slip Returned",
+                      bg: "#f0fdf4",
+                      color: "#15803d",
+                      border: "#86efac",
+                    },
+                    pending: {
+                      label: "⏳ Slip Pending",
+                      bg: "#fffbeb",
+                      color: "#b45309",
+                      border: "#fcd34d",
+                    },
+                    absent: {
+                      label: "⚠ Slip Missing",
+                      bg: T.redLight,
+                      color: T.red,
+                      border: "#fca5a5",
+                    },
+                  }[myStatus] || {
+                    label: "Pending",
+                    bg: "#fffbeb",
+                    color: "#b45309",
+                    border: "#fcd34d",
+                  };
+                  return (
+                    <div
+                      key={evt.id}
+                      style={{
+                        background: T.surface,
+                        borderRadius: T.radius,
+                        border: `1.5px solid ${statusCfg.border}`,
+                        boxShadow: T.shadow,
+                        overflow: "hidden",
+                        animation: `fadeUp .3s ease ${i * 0.05}s both`,
+                      }}
+                    >
+                      <div
+                        style={{
+                          padding: "14px 16px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 14,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 46,
+                            height: 46,
+                            borderRadius: 13,
+                            background: T.tealLight,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Flag
+                            style={{ width: 20, height: 20, color: T.teal }}
+                          />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: 15,
+                              fontWeight: 700,
+                              color: T.text,
+                            }}
+                          >
+                            {evt.eventName}
+                          </p>
+                          <p
+                            style={{
+                              margin: "3px 0 0",
+                              fontSize: 12,
+                              color: T.textSoft,
+                            }}
+                          >
+                            {evt.eventDate || "Date TBC"}
+                            {evt.description ? ` · ${evt.description}` : ""}
+                          </p>
+                        </div>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 700,
+                            padding: "6px 12px",
+                            borderRadius: 99,
+                            background: statusCfg.bg,
+                            color: statusCfg.color,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {statusCfg.label}
+                        </span>
+                      </div>
+                      {myStatus === "absent" && (
+                        <div
+                          style={{
+                            padding: "10px 16px",
+                            background: T.redLight,
+                            borderTop: `1px solid #fecaca`,
+                          }}
+                        >
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: 12,
+                              color: T.red,
+                              fontWeight: 500,
+                            }}
+                          >
+                            Please return the signed permission slip to your
+                            child's teacher as soon as possible.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══ BEHAVIOUR LOG ════════════════════════════════════════════════ */}
+        {activeTab === "behaviour" && verifiedStudent && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <SectionHeader
+              name={verifiedStudent.name}
+              grade={verifiedStudent.grade}
+            />
+
+            {/* Sensitive notice */}
+            <div
+              style={{
+                padding: "12px 14px",
+                background: T.blueLight,
+                borderRadius: 12,
+                border: "1px solid #bfdbfe",
+                marginBottom: 16,
+                display: "flex",
+                gap: 10,
+              }}
+            >
+              <Info
+                style={{
+                  width: 16,
+                  height: 16,
+                  color: T.blue,
+                  flexShrink: 0,
+                  marginTop: 1,
+                }}
+              />
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 12,
+                  color: T.blue,
+                  lineHeight: 1.6,
+                }}
+              >
+                This shows any behaviour incidents logged by your child's
+                teacher. Please contact the school if you have questions.
+              </p>
+            </div>
+
+            {myIncidents.length === 0 ? (
+              <EmptyState
+                icon={ShieldAlert}
+                title="No incidents"
+                message="No behaviour incidents have been recorded for your child."
+                color={T.primaryLight}
+                iconColor={T.primary}
+              />
+            ) : (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                {myIncidents.map((inc, i) => {
+                  const sc = {
+                    low: { label: "Minor", bg: "#fffbeb", color: "#b45309" },
+                    medium: { label: "Moderate", bg: T.redLight, color: T.red },
+                    high: { label: "Serious", bg: "#fee2e2", color: "#7f1d1d" },
+                  }[inc.severity] || {
+                    label: "Minor",
+                    bg: "#fffbeb",
+                    color: "#b45309",
+                  };
+                  return (
+                    <div
+                      key={inc.id}
+                      style={{
+                        background: T.surface,
+                        borderRadius: T.radius,
+                        border: `1px solid ${T.border}`,
+                        overflow: "hidden",
+                        boxShadow: T.shadow,
+                        animation: `fadeUp .3s ease ${i * 0.05}s both`,
+                      }}
+                    >
+                      <div style={{ height: 3, background: sc.color }} />
+                      <div style={{ padding: "14px 16px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            marginBottom: 8,
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 700,
+                              padding: "3px 10px",
+                              borderRadius: 99,
+                              background: sc.bg,
+                              color: sc.color,
+                            }}
+                          >
+                            {sc.label}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 600,
+                              color: T.textMid,
+                            }}
+                          >
+                            {inc.type}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 11,
+                              color: T.textFaint,
+                              marginLeft: "auto",
+                            }}
+                          >
+                            {inc.date}
+                          </span>
+                        </div>
+                        {inc.description && (
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: 13,
+                              color: T.textMid,
+                              lineHeight: 1.6,
+                            }}
+                          >
+                            {inc.description}
+                          </p>
+                        )}
+                        {inc.actionTaken && (
+                          <div
+                            style={{
+                              marginTop: 10,
+                              padding: "8px 12px",
+                              borderRadius: 9,
+                              background: T.primaryLight,
+                              border: `1px solid #c6e8d9`,
+                            }}
+                          >
+                            <p
+                              style={{
+                                margin: "0 0 3px",
+                                fontSize: 10,
+                                fontWeight: 700,
+                                color: T.primary,
+                                textTransform: "uppercase",
+                                letterSpacing: ".05em",
+                              }}
+                            >
+                              Action Taken
+                            </p>
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: 12,
+                                color: T.textMid,
+                              }}
+                            >
+                              {inc.actionTaken}
+                            </p>
+                          </div>
+                        )}
+                        {inc.parentNotified && (
+                          <div
+                            style={{
+                              marginTop: 8,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                            }}
+                          >
+                            <CheckCircle
+                              style={{
+                                width: 13,
+                                height: 13,
+                                color: "#15803d",
+                              }}
+                            />
+                            <span
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 600,
+                                color: "#15803d",
+                              }}
+                            >
+                              You were notified by the teacher
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══ FEES ══════════════════════════════════════════════════════════ */}
         {activeTab === "fees" &&
           verifiedStudent &&
           (() => {
@@ -2308,7 +2968,6 @@ export default function ParentPortal() {
               color: T.textSoft,
               bar: T.textFaint,
             };
-
             return (
               <div style={{ animation: "fadeUp .25s ease" }}>
                 <SectionHeader
@@ -2358,52 +3017,50 @@ export default function ParentPortal() {
                         {sc.label}
                       </span>
                     </div>
-                    <div>
-                      <div
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: 6,
+                      }}
+                    >
+                      <span
                         style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          marginBottom: 6,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: T.textSoft,
                         }}
                       >
-                        <span
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 600,
-                            color: T.textSoft,
-                          }}
-                        >
-                          Payment progress
-                        </span>
-                        <span
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 700,
-                            color: sc.color,
-                          }}
-                        >
-                          {pct}%
-                        </span>
-                      </div>
+                        Payment progress
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: sc.color,
+                        }}
+                      >
+                        {pct}%
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        height: 12,
+                        borderRadius: 99,
+                        background: T.bg,
+                        overflow: "hidden",
+                        border: `1px solid ${T.border}`,
+                      }}
+                    >
                       <div
                         style={{
-                          height: 12,
+                          height: "100%",
+                          width: `${pct}%`,
+                          background: sc.bar,
                           borderRadius: 99,
-                          background: T.bg,
-                          overflow: "hidden",
-                          border: `1px solid ${T.border}`,
+                          transition: "width .8s ease",
                         }}
-                      >
-                        <div
-                          style={{
-                            height: "100%",
-                            width: `${pct}%`,
-                            background: sc.bar,
-                            borderRadius: 99,
-                            transition: "width .8s ease",
-                          }}
-                        />
-                      </div>
+                      />
                     </div>
                   </div>
                   <div
@@ -2505,7 +3162,7 @@ export default function ParentPortal() {
             );
           })()}
 
-        {/* ── ATTENDANCE ────────────────────────────────────────────────────── */}
+        {/* ══ ATTENDANCE ════════════════════════════════════════════════════ */}
         {activeTab === "attendance" && verifiedStudent && (
           <div style={{ animation: "fadeUp .25s ease" }}>
             <SectionHeader
@@ -2691,7 +3348,7 @@ export default function ParentPortal() {
         )}
       </div>
 
-      {/* ── FOOTER ──────────────────────────────────────────────────────────── */}
+      {/* ── FOOTER ────────────────────────────────────────────────────────── */}
       <div
         style={{
           textAlign: "center",

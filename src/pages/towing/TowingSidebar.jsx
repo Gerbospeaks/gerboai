@@ -157,7 +157,7 @@ export default function TowingSidebar({
 
       {/* ── Expanded sidebar ──────────────────────────────────────────── */}
       {sidebarOpen && (
-        <div className="flex-shrink-0 w-64 md:w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 h-full print:hidden shadow-2xl overflow-y-auto z-50 md:relative fixed inset-y-0 left-0">
+        <div className="flex-shrink-0 w-64 md:w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 h-full print:hidden shadow-2xl overflow-y-auto z-50 fixed inset-y-0 left-0 lg:relative lg:inset-y-auto lg:left-auto">
           <div className="p-4 md:p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8">

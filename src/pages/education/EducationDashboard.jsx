@@ -15,6 +15,13 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import EducationSidebar from "./EducationSidebar";
 import DocumentsVault from "./DocumentsVault";
 import {
+  BehaviourLogView,
+  MarkBookView,
+  PermissionSlipView,
+  WelfareFlagsView,
+  ResourceRequestsView,
+} from "./StaffDataViews";
+import {
   getFirestore,
   collection,
   query,
@@ -61,6 +68,9 @@ import {
   BookOpen,
   Award,
   BarChart3,
+  ShieldAlert,
+  BarChart2,
+  Package,
   Menu,
   Plus,
   Send,
@@ -1292,6 +1302,11 @@ function ZField({ label, children, span2 }) {
     { id: "staff", label: "Staff", icon: Users },
     { id: "events", label: "Events & Calendar", icon: Calendar },
     { id: "reports", label: "Report Cards", icon: ClipboardList },
+    { id: "behaviour",  label: "Behaviour Log",     icon: ShieldAlert  },
+  { id: "markbook",   label: "Mark Book",          icon: BarChart2    },
+  { id: "slips",      label: "Permission Slips",   icon: ClipboardList},
+  { id: "welfare",    label: "Welfare Flags",      icon: Heart        },
+  { id: "resources",  label: "Resource Requests",  icon: Package      },
   ];
   const loadStudents = async () => {
     try {
@@ -1621,7 +1636,26 @@ function ZField({ label, children, span2 }) {
           )}
           {/* ── EVENTS ── */}
           {activeView === "events" && <EventsView events={MOCK_EVENTS} />}
-
+           {activeView === "behaviour" && (
+            <BehaviourLogView uid={user?.uid} />
+          )}
+ 
+          {activeView === "markbook" && (
+            <MarkBookView uid={user?.uid} />
+          )}
+ 
+          {activeView === "slips" && (
+            <PermissionSlipView uid={user?.uid} />
+          )}
+ 
+          {activeView === "welfare" && (
+            <WelfareFlagsView uid={user?.uid} />
+          )}
+ 
+          {activeView === "resources" && (
+            <ResourceRequestsView uid={user?.uid} />
+          )}
+ 
          {activeView === "reports" && (
   <>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">

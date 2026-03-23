@@ -32,14 +32,27 @@ import {
   Star,
   BookMarked,
   Calendar,
+  Megaphone,
+  ShieldAlert,
+  BarChart2,
+  ClipboardList,
+  Wrench,
+  Heart,
+  Flag,
+  Send,
+  FileText,
+  Users,
+  AlertTriangle,
+  CheckCircle,
+  Package,
 } from "lucide-react";
 
 // ── Tokens ────────────────────────────────────────────────────────────────────
 const C = {
-  dark: "#0f1923", // deep slate — professional, authoritative
+  dark: "#0f1923",
   darkMid: "#1a2635",
   darkLight: "#243040",
-  brand: "#3b82f6", // clear blue accent
+  brand: "#3b82f6",
   brandLight: "#eff6ff",
   brandMid: "#2563eb",
   green: "#10b981",
@@ -48,6 +61,12 @@ const C = {
   redLight: "#fef2f2",
   amber: "#f59e0b",
   amberLight: "#fffbeb",
+  purple: "#8b5cf6",
+  purpleLight: "#f5f3ff",
+  pink: "#ec4899",
+  pinkLight: "#fdf2f8",
+  teal: "#14b8a6",
+  tealLight: "#f0fdfa",
   surface: "#ffffff",
   bg: "#f1f5f9",
   border: "#e2e8f0",
@@ -68,41 +87,73 @@ const GRADES = [
   "Grade 2",
   "Grade 3",
 ];
-
-// ── PIN pad digits ─────────────────────────────────────────────────────────────
 const PAD = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"];
+
+const INCIDENT_TYPES = [
+  "Disruptive behaviour",
+  "Physical altercation",
+  "Bullying",
+  "Defiance / disrespect",
+  "Property damage",
+  "Inappropriate language",
+  "Unsafe behaviour",
+  "Other",
+];
+
+const INCIDENT_SEVERITY = [
+  { value: "low", label: "Minor", color: C.amber, bg: C.amberLight },
+  { value: "medium", label: "Moderate", color: C.red, bg: C.redLight },
+  { value: "high", label: "Serious", color: "#7f1d1d", bg: "#fee2e2" },
+];
+
+const WELFARE_CATEGORIES = [
+  "Emotional distress",
+  "Suspected hunger / neglect",
+  "Signs of abuse",
+  "Medical concern",
+  "Social isolation",
+  "Anxiety / withdrawal",
+  "Other safeguarding concern",
+];
+
+const RESOURCE_CATEGORIES = [
+  "Stationery & supplies",
+  "Printing / photocopying",
+  "Maintenance / repairs",
+  "IT / technology",
+  "Cleaning",
+  "Furniture",
+  "Other",
+];
 
 export default function StaffPortal() {
   const { portalSlug } = useParams();
 
-  // ── School / auth state ────────────────────────────────────────────────────
   const [uid, setUid] = useState(null);
   const [schoolName, setSchoolName] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [staffList, setStaffList] = useState([]);
-  const [teacher, setTeacher] = useState(null); // verified staff doc
-  const [students, setStudents] = useState([]); // ALL students
+  const [teacher, setTeacher] = useState(null);
+  const [students, setStudents] = useState([]);
   const [attendanceDocs, setAttendanceDocs] = useState([]);
   const [timetable, setTimetable] = useState({});
 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  // ── PIN entry ──────────────────────────────────────────────────────────────
   const [pin, setPin] = useState("");
   const [pinError, setPinError] = useState("");
   const [verifying, setVerifying] = useState(false);
 
-  // ── Active tab ─────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState("attendance");
 
-  // ── Attendance state ───────────────────────────────────────────────────────
+  // ── Attendance ─────────────────────────────────────────────────────────────
   const [selectedClass, setSelectedClass] = useState("");
-  const [attendanceMap, setAttendanceMap] = useState({}); // { studentId: status }
+  const [attendanceMap, setAttendanceMap] = useState({});
   const [savingAtt, setSavingAtt] = useState(false);
   const [attSaved, setAttSaved] = useState(false);
 
-  // ── Homework state ─────────────────────────────────────────────────────────
+  // ── Homework ───────────────────────────────────────────────────────────────
   const [hwForm, setHwForm] = useState({
     subject: "",
     grade: "",
@@ -116,11 +167,84 @@ export default function StaffPortal() {
   const [hwSaved, setHwSaved] = useState(false);
   const [hwError, setHwError] = useState("");
 
-  // ── Timetable state ────────────────────────────────────────────────────────
+  // ── Timetable ──────────────────────────────────────────────────────────────
   const [ttClass, setTtClass] = useState("");
   const [ttSchedule, setTtSchedule] = useState({});
   const [savingTt, setSavingTt] = useState(false);
   const [ttSaved, setTtSaved] = useState(false);
+
+  // ── Behaviour / incident log ───────────────────────────────────────────────
+  const [incForm, setIncForm] = useState({
+    studentId: "",
+    type: INCIDENT_TYPES[0],
+    severity: "low",
+    description: "",
+    actionTaken: "",
+    parentNotified: false,
+  });
+  const [savingInc, setSavingInc] = useState(false);
+  const [incSaved, setIncSaved] = useState(false);
+  const [incError, setIncError] = useState("");
+
+  // ── Class announcements ────────────────────────────────────────────────────
+  const [annForm, setAnnForm] = useState({
+    grade: "",
+    title: "",
+    body: "",
+    pinned: false,
+  });
+  const [savingAnn, setSavingAnn] = useState(false);
+  const [annSaved, setAnnSaved] = useState(false);
+  const [annError, setAnnError] = useState("");
+
+  // ── Mark book ─────────────────────────────────────────────────────────────
+  const [mbClass, setMbClass] = useState("");
+  const [mbSubject, setMbSubject] = useState("");
+  const [mbAssessment, setMbAssessment] = useState("");
+  const [mbTotal, setMbTotal] = useState("100");
+  const [mbScores, setMbScores] = useState({});
+  const [savingMb, setSavingMb] = useState(false);
+  const [mbSaved, setMbSaved] = useState(false);
+  const [mbError, setMbError] = useState("");
+
+  // ── Permission slips ───────────────────────────────────────────────────────
+  const [permEvents, setPermEvents] = useState([]);
+  const [permForm, setPermForm] = useState({
+    eventName: "",
+    grade: "",
+    eventDate: "",
+    description: "",
+  });
+  const [activePermEvent, setActivePermEvent] = useState(null);
+  const [permSlipMap, setPermSlipMap] = useState({});
+  const [savingPerm, setSavingPerm] = useState(false);
+  const [permSaved, setPermSaved] = useState(false);
+  const [permError, setPermError] = useState("");
+  const [creatingEvent, setCreatingEvent] = useState(false);
+
+  // ── Student welfare flags ──────────────────────────────────────────────────
+  const [welfareForm, setWelfareForm] = useState({
+    studentId: "",
+    category: WELFARE_CATEGORIES[0],
+    urgency: "moderate",
+    notes: "",
+    anonymous: false,
+  });
+  const [savingWelfare, setSavingWelfare] = useState(false);
+  const [welfareSaved, setWelfareSaved] = useState(false);
+  const [welfareError, setWelfareError] = useState("");
+
+  // ── Resource requests ──────────────────────────────────────────────────────
+  const [resForm, setResForm] = useState({
+    category: RESOURCE_CATEGORIES[0],
+    item: "",
+    quantity: "",
+    urgency: "normal",
+    notes: "",
+  });
+  const [savingRes, setSavingRes] = useState(false);
+  const [resSaved, setResSaved] = useState(false);
+  const [resError, setResError] = useState("");
 
   // ── Load school ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -137,13 +261,15 @@ export default function StaffPortal() {
         const schoolUid = snap.docs[0].id;
         setUid(schoolUid);
 
-        const [bizDoc, staffSnap, stuSnap, attSnap, ttDoc] = await Promise.all([
-          getDoc(doc(db, "users", schoolUid, "settings", "businessInfo")),
-          getDocs(collection(db, "users", schoolUid, "staff")),
-          getDocs(collection(db, "users", schoolUid, "students")),
-          getDocs(collection(db, "users", schoolUid, "attendance")),
-          getDoc(doc(db, "users", schoolUid, "settings", "timetable")),
-        ]);
+        const [bizDoc, staffSnap, stuSnap, attSnap, ttDoc, permSnap] =
+          await Promise.all([
+            getDoc(doc(db, "users", schoolUid, "settings", "businessInfo")),
+            getDocs(collection(db, "users", schoolUid, "staff")),
+            getDocs(collection(db, "users", schoolUid, "students")),
+            getDocs(collection(db, "users", schoolUid, "attendance")),
+            getDoc(doc(db, "users", schoolUid, "settings", "timetable")),
+            getDocs(collection(db, "users", schoolUid, "permissionEvents")),
+          ]);
 
         const biz = bizDoc.data() || {};
         setSchoolName(biz.name || biz.businessName || "School");
@@ -164,6 +290,11 @@ export default function StaffPortal() {
             .filter((d) => !d._placeholder),
         );
         setTimetable(ttDoc.exists() ? ttDoc.data() : {});
+        setPermEvents(
+          permSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder),
+        );
       } catch (e) {
         console.error(e);
         setNotFound(true);
@@ -174,7 +305,7 @@ export default function StaffPortal() {
     load();
   }, [portalSlug]);
 
-  // ── PIN pad handler ────────────────────────────────────────────────────────
+  // ── PIN ────────────────────────────────────────────────────────────────────
   const handlePadPress = (val) => {
     if (val === "⌫") {
       setPin((p) => p.slice(0, -1));
@@ -186,7 +317,6 @@ export default function StaffPortal() {
     setPin((p) => p + val);
   };
 
-  // auto-verify when PIN reaches expected length (try at 4+)
   useEffect(() => {
     if (pin.length >= 4) {
       const match = staffList.find((s) => s.pin === pin);
@@ -195,12 +325,13 @@ export default function StaffPortal() {
         setTimeout(() => {
           setTeacher(match);
           setVerifying(false);
-          // Pre-select first class
           const firstClass = match.classes?.[0] || GRADES[0];
           setSelectedClass(firstClass);
           setTtClass(firstClass);
+          setMbClass(firstClass);
           setHwForm((f) => ({ ...f, grade: firstClass }));
-          // Pre-fill timetable schedule
+          setAnnForm((f) => ({ ...f, grade: firstClass }));
+          setPermForm((f) => ({ ...f, grade: firstClass }));
           setTtSchedule(buildTtSchedule(timetable, firstClass));
         }, 400);
       } else if (pin.length === 6) {
@@ -223,19 +354,24 @@ export default function StaffPortal() {
     return existing ? { ...empty, ...existing } : empty;
   };
 
-  // ── Teacher's classes ──────────────────────────────────────────────────────
   const myClasses = teacher?.classes || [];
 
-  // Students in selected class
   const classStudents = students
     .filter((s) => s.grade === selectedClass)
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  // Initialise attendance map when class changes
+  const mbStudents = students
+    .filter((s) => s.grade === mbClass)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const allMyStudents = students
+    .filter((s) => myClasses.includes(s.grade))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  // ── Init attendance map ────────────────────────────────────────────────────
   useEffect(() => {
     if (!classStudents.length) return;
     const today = new Date().toISOString().split("T")[0];
-    // check if already marked today
     const existing = {};
     attendanceDocs
       .filter(
@@ -253,6 +389,19 @@ export default function StaffPortal() {
     setAttSaved(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClass, students]);
+
+  // ── Init perm slip map ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!activePermEvent) return;
+    const evtStudents = students.filter(
+      (s) => s.grade === activePermEvent.grade,
+    );
+    const map = {};
+    evtStudents.forEach((s) => {
+      map[s.id] = activePermEvent.slips?.[s.id] || "pending";
+    });
+    setPermSlipMap(map);
+  }, [activePermEvent, students]);
 
   // ── Save attendance ────────────────────────────────────────────────────────
   const saveAttendance = async () => {
@@ -346,6 +495,242 @@ export default function StaffPortal() {
     });
   };
 
+  // ── Save incident ──────────────────────────────────────────────────────────
+  const saveIncident = async () => {
+    if (!incForm.studentId) {
+      setIncError("Please select a student.");
+      return;
+    }
+    if (!incForm.description.trim()) {
+      setIncError("Please describe the incident.");
+      return;
+    }
+    setSavingInc(true);
+    setIncError("");
+    try {
+      const student = students.find((s) => s.id === incForm.studentId);
+      await addDoc(collection(db, "users", uid, "incidents"), {
+        ...incForm,
+        studentName: student?.name || "",
+        grade: student?.grade || "",
+        date: new Date().toISOString().split("T")[0],
+        recordedBy: teacher.name,
+        createdAt: serverTimestamp(),
+      });
+      setIncForm({
+        studentId: "",
+        type: INCIDENT_TYPES[0],
+        severity: "low",
+        description: "",
+        actionTaken: "",
+        parentNotified: false,
+      });
+      setIncSaved(true);
+      setTimeout(() => setIncSaved(false), 3000);
+    } catch (e) {
+      console.error(e);
+      setIncError("Failed to save. Please try again.");
+    } finally {
+      setSavingInc(false);
+    }
+  };
+
+  // ── Save announcement ──────────────────────────────────────────────────────
+  const saveAnnouncement = async () => {
+    if (!annForm.title.trim() || !annForm.body.trim()) {
+      setAnnError("Title and message are required.");
+      return;
+    }
+    setSavingAnn(true);
+    setAnnError("");
+    try {
+      await addDoc(collection(db, "users", uid, "announcements"), {
+        ...annForm,
+        postedBy: teacher.name,
+        createdAt: serverTimestamp(),
+      });
+      setAnnForm({
+        grade: myClasses[0] || "",
+        title: "",
+        body: "",
+        pinned: false,
+      });
+      setAnnSaved(true);
+      setTimeout(() => setAnnSaved(false), 3000);
+    } catch (e) {
+      console.error(e);
+      setAnnError("Failed to post. Please try again.");
+    } finally {
+      setSavingAnn(false);
+    }
+  };
+
+  // ── Save marks ─────────────────────────────────────────────────────────────
+  const saveMarks = async () => {
+    if (!mbSubject.trim() || !mbAssessment.trim()) {
+      setMbError("Subject and assessment name are required.");
+      return;
+    }
+    if (!mbStudents.length) {
+      setMbError("No students in this class.");
+      return;
+    }
+    setSavingMb(true);
+    setMbError("");
+    try {
+      await addDoc(collection(db, "users", uid, "markbook"), {
+        grade: mbClass,
+        subject: mbSubject,
+        assessment: mbAssessment,
+        total: parseFloat(mbTotal) || 100,
+        scores: mbScores,
+        recordedBy: teacher.name,
+        date: new Date().toISOString().split("T")[0],
+        createdAt: serverTimestamp(),
+      });
+      setMbScores({});
+      setMbAssessment("");
+      setMbSaved(true);
+      setTimeout(() => setMbSaved(false), 3000);
+    } catch (e) {
+      console.error(e);
+      setMbError("Failed to save. Please try again.");
+    } finally {
+      setSavingMb(false);
+    }
+  };
+
+  // ── Create permission event ────────────────────────────────────────────────
+  const createPermEvent = async () => {
+    if (!permForm.eventName.trim()) {
+      setPermError("Event name is required.");
+      return;
+    }
+    setSavingPerm(true);
+    setPermError("");
+    try {
+      const ref = await addDoc(
+        collection(db, "users", uid, "permissionEvents"),
+        {
+          ...permForm,
+          createdBy: teacher.name,
+          createdAt: serverTimestamp(),
+          slips: {},
+        },
+      );
+      const newEvent = {
+        id: ref.id,
+        ...permForm,
+        createdBy: teacher.name,
+        slips: {},
+      };
+      setPermEvents((prev) => [...prev, newEvent]);
+      setActivePermEvent(newEvent);
+      setCreatingEvent(false);
+      setPermSaved(true);
+      setTimeout(() => setPermSaved(false), 3000);
+    } catch (e) {
+      console.error(e);
+      setPermError("Failed to create event.");
+    } finally {
+      setSavingPerm(false);
+    }
+  };
+
+  // ── Save permission slip statuses ──────────────────────────────────────────
+  const savePermSlips = async () => {
+    if (!activePermEvent) return;
+    setSavingPerm(true);
+    try {
+      await setDoc(
+        doc(db, "users", uid, "permissionEvents", activePermEvent.id),
+        { slips: permSlipMap },
+        { merge: true },
+      );
+      setPermSaved(true);
+      setTimeout(() => setPermSaved(false), 3000);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSavingPerm(false);
+    }
+  };
+
+  // ── Save welfare flag ──────────────────────────────────────────────────────
+  const saveWelfareFlag = async () => {
+    if (!welfareForm.studentId) {
+      setWelfareError("Please select a student.");
+      return;
+    }
+    if (!welfareForm.notes.trim()) {
+      setWelfareError("Please provide some details.");
+      return;
+    }
+    setSavingWelfare(true);
+    setWelfareError("");
+    try {
+      const student = students.find((s) => s.id === welfareForm.studentId);
+      await addDoc(collection(db, "users", uid, "welfareFlags"), {
+        ...welfareForm,
+        studentName: welfareForm.anonymous ? "Anonymous" : student?.name || "",
+        grade: student?.grade || "",
+        flaggedBy: welfareForm.anonymous
+          ? "Anonymous staff member"
+          : teacher.name,
+        date: new Date().toISOString().split("T")[0],
+        status: "open",
+        createdAt: serverTimestamp(),
+      });
+      setWelfareForm({
+        studentId: "",
+        category: WELFARE_CATEGORIES[0],
+        urgency: "moderate",
+        notes: "",
+        anonymous: false,
+      });
+      setWelfareSaved(true);
+      setTimeout(() => setWelfareSaved(false), 3000);
+    } catch (e) {
+      console.error(e);
+      setWelfareError("Failed to submit. Please try again.");
+    } finally {
+      setSavingWelfare(false);
+    }
+  };
+
+  // ── Save resource request ──────────────────────────────────────────────────
+  const saveResourceRequest = async () => {
+    if (!resForm.item.trim()) {
+      setResError("Please describe what you need.");
+      return;
+    }
+    setSavingRes(true);
+    setResError("");
+    try {
+      await addDoc(collection(db, "users", uid, "resourceRequests"), {
+        ...resForm,
+        requestedBy: teacher.name,
+        date: new Date().toISOString().split("T")[0],
+        status: "pending",
+        createdAt: serverTimestamp(),
+      });
+      setResForm({
+        category: RESOURCE_CATEGORIES[0],
+        item: "",
+        quantity: "",
+        urgency: "normal",
+        notes: "",
+      });
+      setResSaved(true);
+      setTimeout(() => setResSaved(false), 3000);
+    } catch (e) {
+      console.error(e);
+      setResError("Failed to submit. Please try again.");
+    } finally {
+      setSavingRes(false);
+    }
+  };
+
   // ── Loading / not found ────────────────────────────────────────────────────
   if (loading)
     return (
@@ -422,7 +807,7 @@ export default function StaffPortal() {
       </Screen>
     );
 
-  // ── PIN ENTRY SCREEN ───────────────────────────────────────────────────────
+  // ── PIN SCREEN ─────────────────────────────────────────────────────────────
   if (!teacher)
     return (
       <div
@@ -438,8 +823,6 @@ export default function StaffPortal() {
         }}
       >
         <style>{fonts + keyframes}</style>
-
-        {/* School branding */}
         <div
           style={{
             display: "flex",
@@ -501,7 +884,6 @@ export default function StaffPortal() {
           </div>
         </div>
 
-        {/* PIN card */}
         <div
           style={{
             background: C.darkMid,
@@ -550,7 +932,6 @@ export default function StaffPortal() {
             </p>
           </div>
 
-          {/* PIN dots */}
           <div
             style={{
               display: "flex",
@@ -576,7 +957,6 @@ export default function StaffPortal() {
             ))}
           </div>
 
-          {/* Error */}
           {pinError && (
             <p
               style={{
@@ -605,7 +985,6 @@ export default function StaffPortal() {
             </p>
           )}
 
-          {/* Number pad */}
           <div
             style={{
               display: "grid",
@@ -659,10 +1038,16 @@ export default function StaffPortal() {
       </div>
     );
 
-  // ── STAFF DASHBOARD ────────────────────────────────────────────────────────
+  // ── DASHBOARD ──────────────────────────────────────────────────────────────
   const tabs = [
     { id: "attendance", label: "Attendance", icon: UserCheck },
     { id: "homework", label: "Homework", icon: BookOpen },
+    { id: "behaviour", label: "Behaviour", icon: ShieldAlert },
+    { id: "announcements", label: "Notices", icon: Megaphone },
+    { id: "markbook", label: "Marks", icon: BarChart2 },
+    { id: "permissions", label: "Slips", icon: ClipboardList },
+    { id: "welfare", label: "Welfare", icon: Heart },
+    { id: "resources", label: "Resources", icon: Package },
     { id: "timetable", label: "Timetable", icon: LayoutGrid },
     { id: "profile", label: "Profile", icon: User },
   ];
@@ -674,21 +1059,9 @@ export default function StaffPortal() {
   };
 
   const priorityOpts = [
-    {
-      value: "low",
-      label: "Low",
-      cl: "bg-emerald-50 border-emerald-300 text-emerald-700",
-    },
-    {
-      value: "medium",
-      label: "Medium",
-      cl: "bg-amber-50 border-amber-300 text-amber-700",
-    },
-    {
-      value: "high",
-      label: "Urgent",
-      cl: "bg-red-50 border-red-300 text-red-700",
-    },
+    { value: "low", label: "Low" },
+    { value: "medium", label: "Medium" },
+    { value: "high", label: "Urgent" },
   ];
 
   return (
@@ -702,7 +1075,7 @@ export default function StaffPortal() {
     >
       <style>{fonts + keyframes}</style>
 
-      {/* ── TOP BAR ─────────────────────────────────────────────────────────── */}
+      {/* TOP BAR */}
       <div
         style={{
           background: C.dark,
@@ -711,7 +1084,7 @@ export default function StaffPortal() {
       >
         <div
           style={{
-            maxWidth: 720,
+            maxWidth: 900,
             margin: "0 auto",
             padding: "16px 20px",
             display: "flex",
@@ -720,7 +1093,6 @@ export default function StaffPortal() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {/* Avatar */}
             <div
               style={{
                 width: 40,
@@ -791,7 +1163,7 @@ export default function StaffPortal() {
         </div>
 
         {/* Tabs */}
-        <div style={{ maxWidth: 720, margin: "0 auto", overflowX: "auto" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", overflowX: "auto" }}>
           <div
             style={{
               display: "flex",
@@ -810,8 +1182,8 @@ export default function StaffPortal() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 6,
-                  padding: "12px 16px",
-                  fontSize: 13,
+                  padding: "12px 14px",
+                  fontSize: 12,
                   fontWeight: 600,
                   border: "none",
                   background: "none",
@@ -827,7 +1199,7 @@ export default function StaffPortal() {
                   whiteSpace: "nowrap",
                 }}
               >
-                <Icon style={{ width: 14, height: 14 }} />
+                <Icon style={{ width: 13, height: 13 }} />
                 {label}
               </button>
             ))}
@@ -835,19 +1207,21 @@ export default function StaffPortal() {
         </div>
       </div>
 
-      {/* ── CONTENT ─────────────────────────────────────────────────────────── */}
+      {/* CONTENT */}
       <div
-        style={{ maxWidth: 720, margin: "0 auto", padding: "20px 16px 60px" }}
+        style={{ maxWidth: 900, margin: "0 auto", padding: "20px 16px 80px" }}
       >
-        {/* ══ ATTENDANCE TAB ════════════════════════════════════════════════ */}
+        {/* ══ ATTENDANCE ════════════════════════════════════════════════════ */}
         {activeTab === "attendance" && (
           <div style={{ animation: "fadeUp .25s ease" }}>
             <TabHeader
               title="Mark Attendance"
-              subtitle={`${new Date().toLocaleDateString("en", { weekday: "long", day: "numeric", month: "long" })}`}
+              subtitle={new Date().toLocaleDateString("en", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })}
             />
-
-            {/* Class selector */}
             <ClassPicker
               classes={myClasses}
               selected={selectedClass}
@@ -856,7 +1230,6 @@ export default function StaffPortal() {
                 setAttSaved(false);
               }}
             />
-
             {classStudents.length === 0 ? (
               <Empty
                 icon={UserCheck}
@@ -865,7 +1238,6 @@ export default function StaffPortal() {
               />
             ) : (
               <div>
-                {/* Summary pills */}
                 <div
                   style={{
                     display: "flex",
@@ -932,8 +1304,6 @@ export default function StaffPortal() {
                     </div>
                   ))}
                 </div>
-
-                {/* Student rows */}
                 <div
                   style={{
                     background: C.surface,
@@ -996,7 +1366,6 @@ export default function StaffPortal() {
                         >
                           {s.name}
                         </p>
-                        {/* Status toggle */}
                         <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                           {["present", "absent", "late"].map((st) => {
                             const sc = statusStyle[st];
@@ -1032,76 +1401,31 @@ export default function StaffPortal() {
                     );
                   })}
                 </div>
-
-                {/* Save button */}
-                <button
+                <SaveBtn
                   onClick={saveAttendance}
-                  disabled={savingAtt || attSaved}
-                  style={{
-                    width: "100%",
-                    padding: "14px",
-                    borderRadius: 13,
-                    background: attSaved ? C.green : C.brand,
-                    color: "#fff",
-                    fontSize: 15,
-                    fontWeight: 700,
-                    border: "none",
-                    cursor: savingAtt || attSaved ? "default" : "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8,
-                    transition: "background .2s",
-                  }}
-                >
-                  {attSaved ? (
-                    <>
-                      <Check style={{ width: 18, height: 18 }} /> Register
-                      Saved!
-                    </>
-                  ) : savingAtt ? (
-                    "Saving…"
-                  ) : (
-                    <>
-                      <Save style={{ width: 16, height: 16 }} /> Save Register
-                    </>
-                  )}
-                </button>
+                  saving={savingAtt}
+                  saved={attSaved}
+                  label="Save Register"
+                  savedLabel="Register Saved!"
+                />
                 {attSaved && (
-                  <p
-                    style={{
-                      fontSize: 12,
-                      color: C.green,
-                      textAlign: "center",
-                      marginTop: 8,
-                      fontWeight: 500,
-                    }}
-                  >
+                  <SuccessNote>
                     ✓ Attendance has been recorded and is visible to parents.
-                  </p>
+                  </SuccessNote>
                 )}
               </div>
             )}
           </div>
         )}
 
-        {/* ══ HOMEWORK TAB ═════════════════════════════════════════════════ */}
+        {/* ══ HOMEWORK ══════════════════════════════════════════════════════ */}
         {activeTab === "homework" && (
           <div style={{ animation: "fadeUp .25s ease" }}>
             <TabHeader
               title="Set Homework"
               subtitle="Assign tasks to your class"
             />
-
-            <div
-              style={{
-                background: C.surface,
-                borderRadius: C.radius,
-                border: `1px solid ${C.border}`,
-                padding: 20,
-                boxShadow: C.shadow,
-              }}
-            >
+            <Card>
               <div
                 style={{
                   display: "grid",
@@ -1134,7 +1458,6 @@ export default function StaffPortal() {
                   </select>
                 </Field>
               </div>
-
               <Field label="Task Description *">
                 <input
                   style={{ ...inputSt, width: "100%", boxSizing: "border-box" }}
@@ -1145,7 +1468,6 @@ export default function StaffPortal() {
                   }
                 />
               </Field>
-
               <div
                 style={{
                   display: "grid",
@@ -1166,7 +1488,7 @@ export default function StaffPortal() {
                 </Field>
                 <Field label="Priority">
                   <div style={{ display: "flex", gap: 6 }}>
-                    {priorityOpts.map(({ value, label, cl }) => (
+                    {priorityOpts.map(({ value, label }) => (
                       <button
                         key={value}
                         onClick={() =>
@@ -1178,7 +1500,7 @@ export default function StaffPortal() {
                           borderRadius: 10,
                           fontSize: 12,
                           fontWeight: 700,
-                          border: `1.5px solid ${hwForm.priority === value ? "currentColor" : "#e2e8f0"}`,
+                          border: `1.5px solid ${hwForm.priority === value ? (value === "low" ? "#059669" : value === "medium" ? "#b45309" : "#dc2626") : "#e2e8f0"}`,
                           cursor: "pointer",
                           transition: "all .12s",
                           background:
@@ -1205,8 +1527,6 @@ export default function StaffPortal() {
                   </div>
                 </Field>
               </div>
-
-              {/* Optional PDF URL */}
               <div style={{ marginTop: 14 }}>
                 <Field label="PDF / Document URL (optional)">
                   <input
@@ -1215,7 +1535,7 @@ export default function StaffPortal() {
                       width: "100%",
                       boxSizing: "border-box",
                     }}
-                    placeholder="https://drive.google.com/..."
+                    placeholder="https://drive.google.com/…"
                     value={hwForm.attachmentUrl}
                     onChange={(e) =>
                       setHwForm((f) => ({
@@ -1247,100 +1567,1460 @@ export default function StaffPortal() {
                   </div>
                 )}
               </div>
+              {hwError && <ErrorNote>{hwError}</ErrorNote>}
+              <SaveBtn
+                onClick={saveHomework}
+                saving={savingHw}
+                saved={hwSaved}
+                label="Assign Homework"
+                savedLabel="Homework Saved!"
+                icon={BookMarked}
+                style={{ marginTop: 18 }}
+              />
+              {hwSaved && (
+                <SuccessNote>
+                  ✓ Homework is now visible to parents on the portal.
+                </SuccessNote>
+              )}
+            </Card>
+          </div>
+        )}
 
-              {hwError && (
+        {/* ══ BEHAVIOUR LOG ════════════════════════════════════════════════ */}
+        {activeTab === "behaviour" && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <TabHeader
+              title="Behaviour Log"
+              subtitle="Record classroom incidents with a full paper trail"
+            />
+            <Card>
+              {/* Severity selector */}
+              <Field label="Severity *">
+                <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+                  {INCIDENT_SEVERITY.map(({ value, label, color, bg }) => (
+                    <button
+                      key={value}
+                      onClick={() =>
+                        setIncForm((f) => ({ ...f, severity: value }))
+                      }
+                      style={{
+                        flex: 1,
+                        padding: "10px 6px",
+                        borderRadius: 11,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        border: `1.5px solid ${incForm.severity === value ? color : C.border}`,
+                        background: incForm.severity === value ? bg : "#fff",
+                        color: incForm.severity === value ? color : C.textSoft,
+                        cursor: "pointer",
+                        transition: "all .12s",
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 14,
+                  marginTop: 14,
+                }}
+              >
+                <Field label="Student *">
+                  <select
+                    style={inputSt}
+                    value={incForm.studentId}
+                    onChange={(e) =>
+                      setIncForm((f) => ({ ...f, studentId: e.target.value }))
+                    }
+                  >
+                    <option value="">— Select student —</option>
+                    {allMyStudents.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} ({s.grade})
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Incident Type *">
+                  <select
+                    style={inputSt}
+                    value={incForm.type}
+                    onChange={(e) =>
+                      setIncForm((f) => ({ ...f, type: e.target.value }))
+                    }
+                  >
+                    {INCIDENT_TYPES.map((t) => (
+                      <option key={t}>{t}</option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
+
+              <div style={{ marginTop: 14 }}>
+                <Field label="Incident Description *">
+                  <textarea
+                    style={{
+                      ...inputSt,
+                      minHeight: 90,
+                      resize: "vertical",
+                      lineHeight: 1.6,
+                    }}
+                    placeholder="Describe what happened, when, and who was involved…"
+                    value={incForm.description}
+                    onChange={(e) =>
+                      setIncForm((f) => ({ ...f, description: e.target.value }))
+                    }
+                  />
+                </Field>
+              </div>
+
+              <div style={{ marginTop: 14 }}>
+                <Field label="Action Taken">
+                  <textarea
+                    style={{
+                      ...inputSt,
+                      minHeight: 70,
+                      resize: "vertical",
+                      lineHeight: 1.6,
+                    }}
+                    placeholder="e.g. Verbal warning given, student moved seats, time out…"
+                    value={incForm.actionTaken}
+                    onChange={(e) =>
+                      setIncForm((f) => ({ ...f, actionTaken: e.target.value }))
+                    }
+                  />
+                </Field>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "12px 14px",
+                  background: C.amberLight,
+                  borderRadius: 11,
+                  border: `1px solid #fde68a`,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  id="parentNotified"
+                  checked={incForm.parentNotified}
+                  onChange={(e) =>
+                    setIncForm((f) => ({
+                      ...f,
+                      parentNotified: e.target.checked,
+                    }))
+                  }
+                  style={{
+                    width: 18,
+                    height: 18,
+                    accentColor: C.amber,
+                    cursor: "pointer",
+                    flexShrink: 0,
+                  }}
+                />
+                <label
+                  htmlFor="parentNotified"
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "#92400e",
+                    cursor: "pointer",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Parent / Guardian has been notified about this incident
+                </label>
+              </div>
+
+              {incError && <ErrorNote>{incError}</ErrorNote>}
+              <SaveBtn
+                onClick={saveIncident}
+                saving={savingInc}
+                saved={incSaved}
+                label="Log Incident"
+                savedLabel="Incident Logged!"
+                icon={Flag}
+                style={{ marginTop: 18 }}
+              />
+              {incSaved && (
+                <SuccessNote>
+                  ✓ Incident recorded. It is visible to school management.
+                </SuccessNote>
+              )}
+            </Card>
+          </div>
+        )}
+
+        {/* ══ ANNOUNCEMENTS ════════════════════════════════════════════════ */}
+        {activeTab === "announcements" && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <TabHeader
+              title="Class Announcements"
+              subtitle="Send notices directly to parents in your class"
+            />
+            <Card>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 14,
+                  marginBottom: 14,
+                }}
+              >
+                <Field label="Class / Grade *">
+                  <select
+                    style={inputSt}
+                    value={annForm.grade}
+                    onChange={(e) =>
+                      setAnnForm((f) => ({ ...f, grade: e.target.value }))
+                    }
+                  >
+                    {myClasses.map((g) => (
+                      <option key={g}>{g}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Title *">
+                  <input
+                    style={inputSt}
+                    placeholder="e.g. Swimming on Friday"
+                    value={annForm.title}
+                    onChange={(e) =>
+                      setAnnForm((f) => ({ ...f, title: e.target.value }))
+                    }
+                  />
+                </Field>
+              </div>
+
+              <Field label="Message *">
+                <textarea
+                  style={{
+                    ...inputSt,
+                    minHeight: 110,
+                    resize: "vertical",
+                    lineHeight: 1.6,
+                  }}
+                  placeholder="Write your notice here… Be clear about dates, items to bring, and any actions parents need to take."
+                  value={annForm.body}
+                  onChange={(e) =>
+                    setAnnForm((f) => ({ ...f, body: e.target.value }))
+                  }
+                />
+              </Field>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "12px 14px",
+                  background: C.brandLight,
+                  borderRadius: 11,
+                  border: `1px solid #bfdbfe`,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  id="pinned"
+                  checked={annForm.pinned}
+                  onChange={(e) =>
+                    setAnnForm((f) => ({ ...f, pinned: e.target.checked }))
+                  }
+                  style={{
+                    width: 18,
+                    height: 18,
+                    accentColor: C.brand,
+                    cursor: "pointer",
+                    flexShrink: 0,
+                  }}
+                />
+                <label
+                  htmlFor="pinned"
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: C.brandMid,
+                    cursor: "pointer",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Pin this notice — keeps it at the top of the parent portal
+                </label>
+              </div>
+
+              {/* Preview */}
+              {(annForm.title || annForm.body) && (
+                <div
+                  style={{
+                    marginTop: 16,
+                    padding: "14px 16px",
+                    background: "#f8fafc",
+                    borderRadius: 12,
+                    border: `1px solid ${C.border}`,
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: "0 0 4px",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: C.textSoft,
+                      letterSpacing: ".05em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Preview
+                  </p>
+                  {annForm.title && (
+                    <p
+                      style={{
+                        margin: "0 0 6px",
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: C.text,
+                      }}
+                    >
+                      {annForm.title}
+                    </p>
+                  )}
+                  {annForm.body && (
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 13,
+                        color: C.textMid,
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {annForm.body}
+                    </p>
+                  )}
+                  <p
+                    style={{
+                      margin: "8px 0 0",
+                      fontSize: 11,
+                      color: C.textSoft,
+                    }}
+                  >
+                    — {teacher.name} · {annForm.grade}
+                  </p>
+                </div>
+              )}
+
+              {annError && <ErrorNote>{annError}</ErrorNote>}
+              <SaveBtn
+                onClick={saveAnnouncement}
+                saving={savingAnn}
+                saved={annSaved}
+                label="Post Notice"
+                savedLabel="Notice Posted!"
+                icon={Send}
+                style={{ marginTop: 18 }}
+              />
+              {annSaved && (
+                <SuccessNote>
+                  ✓ Notice is live and visible to parents in{" "}
+                  {annForm.grade || "your class"}.
+                </SuccessNote>
+              )}
+            </Card>
+          </div>
+        )}
+
+        {/* ══ MARK BOOK ════════════════════════════════════════════════════ */}
+        {activeTab === "markbook" && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <TabHeader
+              title="Quick Mark Book"
+              subtitle="Enter assessment scores for your class"
+            />
+
+            <ClassPicker
+              classes={myClasses}
+              selected={mbClass}
+              onChange={(cls) => {
+                setMbClass(cls);
+                setMbScores({});
+              }}
+            />
+
+            <Card style={{ marginBottom: 14 }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr 80px",
+                  gap: 14,
+                }}
+              >
+                <Field label="Subject *">
+                  <input
+                    style={inputSt}
+                    placeholder="e.g. English"
+                    value={mbSubject}
+                    onChange={(e) => setMbSubject(e.target.value)}
+                  />
+                </Field>
+                <Field label="Assessment Name *">
+                  <input
+                    style={inputSt}
+                    placeholder="e.g. Term 1 Test"
+                    value={mbAssessment}
+                    onChange={(e) => setMbAssessment(e.target.value)}
+                  />
+                </Field>
+                <Field label="Out of">
+                  <input
+                    style={inputSt}
+                    type="number"
+                    min="1"
+                    max="1000"
+                    value={mbTotal}
+                    onChange={(e) => setMbTotal(e.target.value)}
+                  />
+                </Field>
+              </div>
+            </Card>
+
+            {mbStudents.length === 0 ? (
+              <Empty
+                icon={BarChart2}
+                title="No students"
+                message="No students found in this class."
+              />
+            ) : (
+              <div
+                style={{
+                  background: C.surface,
+                  borderRadius: C.radius,
+                  border: `1px solid ${C.border}`,
+                  overflow: "hidden",
+                  boxShadow: C.shadow,
+                  marginBottom: 14,
+                }}
+              >
+                {/* Average banner */}
+                {Object.keys(mbScores).length > 0 &&
+                  (() => {
+                    const vals = Object.values(mbScores)
+                      .filter((v) => v !== "" && !isNaN(v))
+                      .map(Number);
+                    const avg = vals.length
+                      ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(
+                          1,
+                        )
+                      : null;
+                    const pct =
+                      avg && mbTotal
+                        ? ((avg / parseFloat(mbTotal)) * 100).toFixed(0)
+                        : null;
+                    return avg ? (
+                      <div
+                        style={{
+                          padding: "10px 16px",
+                          background: C.brandLight,
+                          borderBottom: `1px solid #bfdbfe`,
+                          display: "flex",
+                          gap: 16,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: C.brandMid,
+                          }}
+                        >
+                          Class avg: {avg}/{mbTotal}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: pct >= 50 ? C.green : C.red,
+                          }}
+                        >
+                          {pct}%
+                        </span>
+                        <span style={{ fontSize: 12, color: C.textSoft }}>
+                          {vals.length} entered
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
+
+                {mbStudents.map((s, i) => {
+                  const score = mbScores[s.id] ?? "";
+                  const pct =
+                    score !== "" && mbTotal
+                      ? (parseFloat(score) / parseFloat(mbTotal)) * 100
+                      : null;
+                  const scoreColor =
+                    pct === null
+                      ? C.textSoft
+                      : pct >= 75
+                        ? C.green
+                        : pct >= 50
+                          ? C.amber
+                          : C.red;
+                  return (
+                    <div
+                      key={s.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        padding: "10px 16px",
+                        borderBottom:
+                          i < mbStudents.length - 1
+                            ? `1px solid ${C.border}`
+                            : "none",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 34,
+                          height: 34,
+                          borderRadius: 10,
+                          background: `hsl(${s.id.charCodeAt?.(0) * 37 || 120},60%,88%)`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: `hsl(${s.id.charCodeAt?.(0) * 37 || 120},45%,35%)`,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {s.name
+                          .split(" ")
+                          .map((w) => w[0])
+                          .join("")
+                          .slice(0, 2)}
+                      </div>
+                      <p
+                        style={{
+                          margin: 0,
+                          flex: 1,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: C.text,
+                          minWidth: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {s.name}
+                      </p>
+                      {pct !== null && (
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 700,
+                            color: scoreColor,
+                            minWidth: 36,
+                            textAlign: "right",
+                          }}
+                        >
+                          {pct.toFixed(0)}%
+                        </span>
+                      )}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                          flexShrink: 0,
+                        }}
+                      >
+                        <input
+                          type="number"
+                          min="0"
+                          max={mbTotal}
+                          placeholder="—"
+                          style={{
+                            ...inputSt,
+                            width: 70,
+                            textAlign: "center",
+                            padding: "7px 8px",
+                            borderColor:
+                              pct !== null
+                                ? pct >= 75
+                                  ? "#6ee7b7"
+                                  : pct >= 50
+                                    ? "#fcd34d"
+                                    : "#fca5a5"
+                                : C.border,
+                          }}
+                          value={score}
+                          onChange={(e) =>
+                            setMbScores((m) => ({
+                              ...m,
+                              [s.id]: e.target.value,
+                            }))
+                          }
+                        />
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: C.textSoft,
+                            minWidth: 28,
+                          }}
+                        >
+                          /{mbTotal}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {mbError && <ErrorNote>{mbError}</ErrorNote>}
+            <SaveBtn
+              onClick={saveMarks}
+              saving={savingMb}
+              saved={mbSaved}
+              label="Save Marks"
+              savedLabel="Marks Saved!"
+              icon={BarChart2}
+            />
+            {mbSaved && (
+              <SuccessNote>
+                ✓ Assessment results saved to the mark book.
+              </SuccessNote>
+            )}
+          </div>
+        )}
+
+        {/* ══ PERMISSION SLIPS ═════════════════════════════════════════════ */}
+        {activeTab === "permissions" && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <TabHeader
+              title="Permission Slips"
+              subtitle="Track signed consent for outings and events"
+            />
+
+            {/* Event list or create */}
+            {!activePermEvent && !creatingEvent && (
+              <div>
+                {permEvents.filter((e) => myClasses.includes(e.grade))
+                  .length === 0 ? (
+                  <Empty
+                    icon={ClipboardList}
+                    title="No events yet"
+                    message="Create your first permission slip event below."
+                  />
+                ) : (
+                  <div style={{ marginBottom: 14 }}>
+                    {permEvents
+                      .filter((e) => myClasses.includes(e.grade))
+                      .map((evt) => {
+                        const evtStudents = students.filter(
+                          (s) => s.grade === evt.grade,
+                        );
+                        const returned = Object.values(evt.slips || {}).filter(
+                          (v) => v === "returned",
+                        ).length;
+                        return (
+                          <div
+                            key={evt.id}
+                            onClick={() => setActivePermEvent(evt)}
+                            style={{
+                              background: C.surface,
+                              borderRadius: C.radius,
+                              border: `1px solid ${C.border}`,
+                              padding: "14px 16px",
+                              marginBottom: 10,
+                              boxShadow: C.shadow,
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 14,
+                              transition: "box-shadow .15s",
+                            }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.boxShadow = C.shadowMd)
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.boxShadow = C.shadow)
+                            }
+                          >
+                            <div
+                              style={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: 13,
+                                background: C.tealLight,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <ClipboardList
+                                style={{ width: 20, height: 20, color: C.teal }}
+                              />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 14,
+                                  fontWeight: 700,
+                                  color: C.text,
+                                }}
+                              >
+                                {evt.eventName}
+                              </p>
+                              <p
+                                style={{
+                                  margin: "2px 0 0",
+                                  fontSize: 12,
+                                  color: C.textSoft,
+                                }}
+                              >
+                                {evt.grade} · {evt.eventDate || "No date set"}
+                              </p>
+                            </div>
+                            <div style={{ textAlign: "right", flexShrink: 0 }}>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 16,
+                                  fontWeight: 800,
+                                  color:
+                                    returned === evtStudents.length &&
+                                    evtStudents.length > 0
+                                      ? C.green
+                                      : C.text,
+                                }}
+                              >
+                                {returned}/{evtStudents.length}
+                              </p>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 10,
+                                  color: C.textSoft,
+                                  fontWeight: 600,
+                                }}
+                              >
+                                RETURNED
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+                <button
+                  onClick={() => setCreatingEvent(true)}
+                  style={{
+                    width: "100%",
+                    padding: "13px",
+                    borderRadius: 13,
+                    background: C.dark,
+                    color: "#fff",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    border: "none",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                  }}
+                >
+                  <Plus style={{ width: 16, height: 16 }} /> Create New Event
+                </button>
+              </div>
+            )}
+
+            {/* Create event form */}
+            {creatingEvent && (
+              <Card>
                 <div
                   style={{
                     display: "flex",
-                    gap: 8,
-                    padding: "10px 13px",
-                    background: C.redLight,
-                    borderRadius: 10,
-                    marginTop: 12,
-                    border: `1px solid #fecaca`,
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: 16,
                   }}
                 >
-                  <AlertCircle
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: C.text,
+                    }}
+                  >
+                    New Event
+                  </p>
+                  <button
+                    onClick={() => setCreatingEvent(false)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: C.textSoft,
+                    }}
+                  >
+                    <X style={{ width: 18, height: 18 }} />
+                  </button>
+                </div>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 14,
+                    marginBottom: 14,
+                  }}
+                >
+                  <Field label="Event Name *">
+                    <input
+                      style={inputSt}
+                      placeholder="e.g. Zoo Outing"
+                      value={permForm.eventName}
+                      onChange={(e) =>
+                        setPermForm((f) => ({
+                          ...f,
+                          eventName: e.target.value,
+                        }))
+                      }
+                    />
+                  </Field>
+                  <Field label="Grade *">
+                    <select
+                      style={inputSt}
+                      value={permForm.grade}
+                      onChange={(e) =>
+                        setPermForm((f) => ({ ...f, grade: e.target.value }))
+                      }
+                    >
+                      {myClasses.map((g) => (
+                        <option key={g}>{g}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 14,
+                    marginBottom: 14,
+                  }}
+                >
+                  <Field label="Event Date">
+                    <input
+                      type="date"
+                      style={inputSt}
+                      value={permForm.eventDate}
+                      onChange={(e) =>
+                        setPermForm((f) => ({
+                          ...f,
+                          eventDate: e.target.value,
+                        }))
+                      }
+                    />
+                  </Field>
+                  <Field label="Description">
+                    <input
+                      style={inputSt}
+                      placeholder="Brief description…"
+                      value={permForm.description}
+                      onChange={(e) =>
+                        setPermForm((f) => ({
+                          ...f,
+                          description: e.target.value,
+                        }))
+                      }
+                    />
+                  </Field>
+                </div>
+                {permError && <ErrorNote>{permError}</ErrorNote>}
+                <SaveBtn
+                  onClick={createPermEvent}
+                  saving={savingPerm}
+                  saved={false}
+                  label="Create Event"
+                  savedLabel="Created!"
+                  icon={Plus}
+                />
+              </Card>
+            )}
+
+            {/* Manage slip statuses for an event */}
+            {activePermEvent && (
+              <div>
+                <button
+                  onClick={() => setActivePermEvent(null)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "7px 12px",
+                    borderRadius: 10,
+                    background: "#fff",
+                    border: `1px solid ${C.border}`,
+                    color: C.textMid,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    marginBottom: 14,
+                  }}
+                >
+                  ← Back to events
+                </button>
+                <div
+                  style={{
+                    background: C.surface,
+                    borderRadius: C.radius,
+                    border: `1px solid ${C.border}`,
+                    overflow: "hidden",
+                    boxShadow: C.shadow,
+                    marginBottom: 14,
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "14px 16px",
+                      borderBottom: `1px solid ${C.border}`,
+                      background: "#f8fafc",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 15,
+                        fontWeight: 800,
+                        color: C.text,
+                      }}
+                    >
+                      {activePermEvent.eventName}
+                    </p>
+                    <p
+                      style={{
+                        margin: "3px 0 0",
+                        fontSize: 12,
+                        color: C.textSoft,
+                      }}
+                    >
+                      {activePermEvent.grade} · {activePermEvent.eventDate}
+                    </p>
+                  </div>
+                  {students
+                    .filter((s) => s.grade === activePermEvent.grade)
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((s, i, arr) => {
+                      const status = permSlipMap[s.id] || "pending";
+                      return (
+                        <div
+                          key={s.id}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 12,
+                            padding: "12px 16px",
+                            borderBottom:
+                              i < arr.length - 1
+                                ? `1px solid ${C.border}`
+                                : "none",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 34,
+                              height: 34,
+                              borderRadius: 10,
+                              background: `hsl(${s.id.charCodeAt?.(0) * 37 || 120},60%,88%)`,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: 11,
+                              fontWeight: 700,
+                              color: `hsl(${s.id.charCodeAt?.(0) * 37 || 120},45%,35%)`,
+                              flexShrink: 0,
+                            }}
+                          >
+                            {s.name
+                              .split(" ")
+                              .map((w) => w[0])
+                              .join("")
+                              .slice(0, 2)}
+                          </div>
+                          <p
+                            style={{
+                              margin: 0,
+                              flex: 1,
+                              fontSize: 13,
+                              fontWeight: 600,
+                              color: C.text,
+                            }}
+                          >
+                            {s.name}
+                          </p>
+                          <div
+                            style={{ display: "flex", gap: 6, flexShrink: 0 }}
+                          >
+                            {[
+                              {
+                                v: "returned",
+                                label: "✓ Returned",
+                                color: C.green,
+                                bg: C.greenLight,
+                                border: "#6ee7b7",
+                              },
+                              {
+                                v: "pending",
+                                label: "Pending",
+                                color: C.amber,
+                                bg: C.amberLight,
+                                border: "#fcd34d",
+                              },
+                              {
+                                v: "absent",
+                                label: "Missing",
+                                color: C.red,
+                                bg: C.redLight,
+                                border: "#fca5a5",
+                              },
+                            ].map(({ v, label, color, bg, border }) => {
+                              const active = status === v;
+                              return (
+                                <button
+                                  key={v}
+                                  onClick={() =>
+                                    setPermSlipMap((m) => ({ ...m, [s.id]: v }))
+                                  }
+                                  style={{
+                                    padding: "5px 10px",
+                                    borderRadius: 9,
+                                    border: `1.5px solid ${active ? border : C.border}`,
+                                    background: active ? bg : "#fff",
+                                    color: active ? color : C.textSoft,
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    cursor: "pointer",
+                                    transition: "all .12s",
+                                  }}
+                                >
+                                  {label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+                <SaveBtn
+                  onClick={savePermSlips}
+                  saving={savingPerm}
+                  saved={permSaved}
+                  label="Save Slip Status"
+                  savedLabel="Saved!"
+                />
+                {permSaved && (
+                  <SuccessNote>✓ Permission slip tracker updated.</SuccessNote>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══ WELFARE FLAGS ════════════════════════════════════════════════ */}
+        {activeTab === "welfare" && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <TabHeader
+              title="Student Welfare Flag"
+              subtitle="Discreetly report a concern to the school counsellor or management"
+            />
+
+            {/* Sensitive notice */}
+            <div
+              style={{
+                padding: "14px 16px",
+                background: C.pinkLight,
+                borderRadius: 12,
+                border: `1px solid #fbcfe8`,
+                marginBottom: 16,
+                display: "flex",
+                gap: 12,
+              }}
+            >
+              <Heart
+                style={{
+                  width: 18,
+                  height: 18,
+                  color: C.pink,
+                  flexShrink: 0,
+                  marginTop: 1,
+                }}
+              />
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "#9d174d",
+                  }}
+                >
+                  Confidential &amp; Sensitive
+                </p>
+                <p
+                  style={{
+                    margin: "4px 0 0",
+                    fontSize: 12,
+                    color: "#be185d",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  This report goes directly to the school principal/counsellor.
+                  It is not visible to other staff or parents. Use this for
+                  safeguarding concerns that require follow-up.
+                </p>
+              </div>
+            </div>
+
+            <Card>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 14,
+                  marginBottom: 14,
+                }}
+              >
+                <Field label="Student *">
+                  <select
+                    style={inputSt}
+                    value={welfareForm.studentId}
+                    onChange={(e) =>
+                      setWelfareForm((f) => ({
+                        ...f,
+                        studentId: e.target.value,
+                      }))
+                    }
+                  >
+                    <option value="">— Select student —</option>
+                    {allMyStudents.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} ({s.grade})
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Category *">
+                  <select
+                    style={inputSt}
+                    value={welfareForm.category}
+                    onChange={(e) =>
+                      setWelfareForm((f) => ({
+                        ...f,
+                        category: e.target.value,
+                      }))
+                    }
+                  >
+                    {WELFARE_CATEGORIES.map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
+
+              <Field label="Urgency *">
+                <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+                  {[
+                    {
+                      v: "low",
+                      label: "Monitor",
+                      color: C.green,
+                      bg: C.greenLight,
+                    },
+                    {
+                      v: "moderate",
+                      label: "Urgent",
+                      color: C.amber,
+                      bg: C.amberLight,
+                    },
+                    {
+                      v: "high",
+                      label: "Immediate",
+                      color: C.red,
+                      bg: C.redLight,
+                    },
+                  ].map(({ v, label, color, bg }) => (
+                    <button
+                      key={v}
+                      onClick={() =>
+                        setWelfareForm((f) => ({ ...f, urgency: v }))
+                      }
+                      style={{
+                        flex: 1,
+                        padding: "10px 6px",
+                        borderRadius: 11,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        border: `1.5px solid ${welfareForm.urgency === v ? color : C.border}`,
+                        background: welfareForm.urgency === v ? bg : "#fff",
+                        color: welfareForm.urgency === v ? color : C.textSoft,
+                        cursor: "pointer",
+                        transition: "all .12s",
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+
+              <div style={{ marginTop: 14 }}>
+                <Field label="Details / Observations *">
+                  <textarea
+                    style={{
+                      ...inputSt,
+                      minHeight: 100,
+                      resize: "vertical",
+                      lineHeight: 1.6,
+                    }}
+                    placeholder="Describe what you observed, what the student said, any physical signs, or changes in behaviour. Be as specific as possible."
+                    value={welfareForm.notes}
+                    onChange={(e) =>
+                      setWelfareForm((f) => ({ ...f, notes: e.target.value }))
+                    }
+                  />
+                </Field>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "12px 14px",
+                  background: "#f8fafc",
+                  borderRadius: 11,
+                  border: `1px solid ${C.border}`,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  id="anonymous"
+                  checked={welfareForm.anonymous}
+                  onChange={(e) =>
+                    setWelfareForm((f) => ({
+                      ...f,
+                      anonymous: e.target.checked,
+                    }))
+                  }
+                  style={{
+                    width: 18,
+                    height: 18,
+                    accentColor: C.pink,
+                    cursor: "pointer",
+                    flexShrink: 0,
+                  }}
+                />
+                <label
+                  htmlFor="anonymous"
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: C.textMid,
+                    cursor: "pointer",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Submit anonymously — your name will not be shown to management
+                </label>
+              </div>
+
+              {welfareError && <ErrorNote>{welfareError}</ErrorNote>}
+              <SaveBtn
+                onClick={saveWelfareFlag}
+                saving={savingWelfare}
+                saved={welfareSaved}
+                label="Submit Welfare Flag"
+                savedLabel="Flag Submitted"
+                icon={Heart}
+                style={{ marginTop: 18 }}
+              />
+              {welfareSaved && (
+                <SuccessNote>
+                  ✓ Your concern has been submitted confidentially to
+                  management.
+                </SuccessNote>
+              )}
+            </Card>
+          </div>
+        )}
+
+        {/* ══ RESOURCES ════════════════════════════════════════════════════ */}
+        {activeTab === "resources" && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <TabHeader
+              title="Resource Requests"
+              subtitle="Request supplies or report maintenance issues to admin"
+            />
+            <Card>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 14,
+                  marginBottom: 14,
+                }}
+              >
+                <Field label="Category *">
+                  <select
+                    style={inputSt}
+                    value={resForm.category}
+                    onChange={(e) =>
+                      setResForm((f) => ({ ...f, category: e.target.value }))
+                    }
+                  >
+                    {RESOURCE_CATEGORIES.map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Urgency">
+                  <select
+                    style={inputSt}
+                    value={resForm.urgency}
+                    onChange={(e) =>
+                      setResForm((f) => ({ ...f, urgency: e.target.value }))
+                    }
+                  >
+                    <option value="low">Low — when possible</option>
+                    <option value="normal">Normal — this week</option>
+                    <option value="urgent">Urgent — today</option>
+                  </select>
+                </Field>
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 120px",
+                  gap: 14,
+                  marginBottom: 14,
+                }}
+              >
+                <Field label="What do you need? *">
+                  <input
+                    style={inputSt}
+                    placeholder="e.g. A4 paper, whiteboard markers, projector bulb…"
+                    value={resForm.item}
+                    onChange={(e) =>
+                      setResForm((f) => ({ ...f, item: e.target.value }))
+                    }
+                  />
+                </Field>
+                <Field label="Quantity">
+                  <input
+                    style={inputSt}
+                    placeholder="e.g. 2 reams"
+                    value={resForm.quantity}
+                    onChange={(e) =>
+                      setResForm((f) => ({ ...f, quantity: e.target.value }))
+                    }
+                  />
+                </Field>
+              </div>
+
+              <Field label="Additional Notes">
+                <textarea
+                  style={{
+                    ...inputSt,
+                    minHeight: 80,
+                    resize: "vertical",
+                    lineHeight: 1.6,
+                  }}
+                  placeholder="Any extra context — room number, urgency reason, preferred brand, etc."
+                  value={resForm.notes}
+                  onChange={(e) =>
+                    setResForm((f) => ({ ...f, notes: e.target.value }))
+                  }
+                />
+              </Field>
+
+              {/* Urgency visual */}
+              {resForm.urgency === "urgent" && (
+                <div
+                  style={{
+                    marginTop: 12,
+                    padding: "10px 14px",
+                    background: C.redLight,
+                    borderRadius: 10,
+                    border: `1px solid #fecaca`,
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "center",
+                  }}
+                >
+                  <AlertTriangle
                     style={{
                       width: 15,
                       height: 15,
                       color: C.red,
                       flexShrink: 0,
-                      marginTop: 1,
                     }}
                   />
                   <p
                     style={{
                       margin: 0,
                       fontSize: 12,
+                      fontWeight: 600,
                       color: C.red,
-                      fontWeight: 500,
                     }}
                   >
-                    {hwError}
+                    Urgent requests are escalated immediately to the admin team.
                   </p>
                 </div>
               )}
 
-              <button
-                onClick={saveHomework}
-                disabled={savingHw || hwSaved}
-                style={{
-                  width: "100%",
-                  padding: "14px",
-                  borderRadius: 13,
-                  background: hwSaved ? C.green : C.brand,
-                  color: "#fff",
-                  fontSize: 15,
-                  fontWeight: 700,
-                  border: "none",
-                  cursor: savingHw || hwSaved ? "default" : "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  marginTop: 18,
-                  transition: "background .2s",
-                }}
-              >
-                {hwSaved ? (
-                  <>
-                    <Check style={{ width: 18, height: 18 }} /> Homework Saved!
-                  </>
-                ) : savingHw ? (
-                  "Saving…"
-                ) : (
-                  <>
-                    <BookMarked style={{ width: 16, height: 16 }} /> Assign
-                    Homework
-                  </>
-                )}
-              </button>
-              {hwSaved && (
-                <p
-                  style={{
-                    fontSize: 12,
-                    color: C.green,
-                    textAlign: "center",
-                    marginTop: 8,
-                    fontWeight: 500,
-                  }}
-                >
-                  ✓ Homework is now visible to parents on the portal.
-                </p>
+              {resError && <ErrorNote>{resError}</ErrorNote>}
+              <SaveBtn
+                onClick={saveResourceRequest}
+                saving={savingRes}
+                saved={resSaved}
+                label="Submit Request"
+                savedLabel="Request Sent!"
+                icon={Package}
+                style={{ marginTop: 18 }}
+              />
+              {resSaved && (
+                <SuccessNote>
+                  ✓ Your request has been sent to the admin team.
+                </SuccessNote>
               )}
-            </div>
+            </Card>
           </div>
         )}
 
-        {/* ══ TIMETABLE TAB ════════════════════════════════════════════════ */}
+        {/* ══ TIMETABLE ════════════════════════════════════════════════════ */}
         {activeTab === "timetable" && (
           <div style={{ animation: "fadeUp .25s ease" }}>
             <TabHeader
               title="Class Timetable"
               subtitle="Edit your weekly schedule"
             />
-
             <ClassPicker
               classes={myClasses}
               selected={ttClass}
@@ -1350,8 +3030,6 @@ export default function StaffPortal() {
                 setTtSaved(false);
               }}
             />
-
-            {/* Grid — scrolls horizontally on mobile */}
             <div
               style={{
                 background: C.surface,
@@ -1461,60 +3139,25 @@ export default function StaffPortal() {
                 </table>
               </div>
             </div>
-
-            <button
+            <SaveBtn
               onClick={saveTimetable}
-              disabled={savingTt || ttSaved}
-              style={{
-                width: "100%",
-                padding: "14px",
-                borderRadius: 13,
-                background: ttSaved ? C.green : C.brand,
-                color: "#fff",
-                fontSize: 15,
-                fontWeight: 700,
-                border: "none",
-                cursor: savingTt || ttSaved ? "default" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                transition: "background .2s",
-              }}
-            >
-              {ttSaved ? (
-                <>
-                  <Check style={{ width: 18, height: 18 }} /> Timetable Saved!
-                </>
-              ) : savingTt ? (
-                "Saving…"
-              ) : (
-                <>
-                  <Save style={{ width: 16, height: 16 }} /> Save Timetable
-                </>
-              )}
-            </button>
+              saving={savingTt}
+              saved={ttSaved}
+              label="Save Timetable"
+              savedLabel="Timetable Saved!"
+            />
             {ttSaved && (
-              <p
-                style={{
-                  fontSize: 12,
-                  color: C.green,
-                  textAlign: "center",
-                  marginTop: 8,
-                  fontWeight: 500,
-                }}
-              >
+              <SuccessNote>
                 ✓ Timetable updated and visible to parents.
-              </p>
+              </SuccessNote>
             )}
           </div>
         )}
 
-        {/* ══ PROFILE TAB ══════════════════════════════════════════════════ */}
+        {/* ══ PROFILE ══════════════════════════════════════════════════════ */}
         {activeTab === "profile" && (
           <div style={{ animation: "fadeUp .25s ease" }}>
             <TabHeader title="My Profile" subtitle="Your details on record" />
-
             <div
               style={{
                 background: C.surface,
@@ -1524,7 +3167,6 @@ export default function StaffPortal() {
                 boxShadow: C.shadow,
               }}
             >
-              {/* Avatar strip */}
               <div
                 style={{
                   background: C.dark,
@@ -1578,8 +3220,6 @@ export default function StaffPortal() {
                   </p>
                 </div>
               </div>
-
-              {/* Details list */}
               {[
                 { label: "Subject / Phase", value: teacher.subject },
                 { label: "Phone", value: teacher.phone },
@@ -1629,8 +3269,6 @@ export default function StaffPortal() {
                     </p>
                   </div>
                 ))}
-
-              {/* Classes */}
               <div
                 style={{
                   padding: "14px 20px",
@@ -1674,7 +3312,7 @@ export default function StaffPortal() {
   );
 }
 
-// ── Small shared components ───────────────────────────────────────────────────
+// ── Shared components ─────────────────────────────────────────────────────────
 function TabHeader({ title, subtitle }) {
   return (
     <div style={{ marginBottom: 18 }}>
@@ -1720,6 +3358,23 @@ function ClassPicker({ classes, selected, onChange }) {
   );
 }
 
+function Card({ children, style }) {
+  return (
+    <div
+      style={{
+        background: C.surface,
+        borderRadius: C.radius,
+        border: `1px solid ${C.border}`,
+        padding: 20,
+        boxShadow: C.shadow,
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function Field({ label, children }) {
   return (
     <div>
@@ -1735,6 +3390,97 @@ function Field({ label, children }) {
         {label}
       </label>
       {children}
+    </div>
+  );
+}
+
+function SaveBtn({
+  onClick,
+  saving,
+  saved,
+  label,
+  savedLabel,
+  icon: Icon,
+  style: extraStyle,
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={saving || saved}
+      style={{
+        width: "100%",
+        padding: "14px",
+        borderRadius: 13,
+        background: saved ? C.green : C.brand,
+        color: "#fff",
+        fontSize: 15,
+        fontWeight: 700,
+        border: "none",
+        cursor: saving || saved ? "default" : "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        transition: "background .2s",
+        ...extraStyle,
+      }}
+    >
+      {saved ? (
+        <>
+          <Check style={{ width: 18, height: 18 }} /> {savedLabel}
+        </>
+      ) : saving ? (
+        "Saving…"
+      ) : (
+        <>
+          {Icon && <Icon style={{ width: 16, height: 16 }} />} {label}
+        </>
+      )}
+    </button>
+  );
+}
+
+function SuccessNote({ children }) {
+  return (
+    <p
+      style={{
+        fontSize: 12,
+        color: C.green,
+        textAlign: "center",
+        marginTop: 8,
+        fontWeight: 500,
+      }}
+    >
+      {children}
+    </p>
+  );
+}
+
+function ErrorNote({ children }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: 8,
+        padding: "10px 13px",
+        background: C.redLight,
+        borderRadius: 10,
+        marginTop: 12,
+        border: `1px solid #fecaca`,
+      }}
+    >
+      <AlertCircle
+        style={{
+          width: 15,
+          height: 15,
+          color: C.red,
+          flexShrink: 0,
+          marginTop: 1,
+        }}
+      />
+      <p style={{ margin: 0, fontSize: 12, color: C.red, fontWeight: 500 }}>
+        {children}
+      </p>
     </div>
   );
 }
@@ -1823,7 +3569,6 @@ function Dots() {
   );
 }
 
-// ── Shared input style ────────────────────────────────────────────────────────
 const inputSt = {
   padding: "9px 12px",
   borderRadius: 10,
@@ -1838,7 +3583,6 @@ const inputSt = {
   transition: "border-color .15s",
 };
 
-// ── Styles ────────────────────────────────────────────────────────────────────
 const fonts = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
   * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
