@@ -36,6 +36,19 @@ import {
   deleteObject,
 } from "firebase/storage";
 
+// ─── RESPONSIVE HOOK ──────────────────────────────────────────────────────────
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 640 : false,
+  );
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return isMobile;
+};
+
 // ─── DOCUMENT DEFINITIONS ─────────────────────────────────────────────────────
 const DOCUMENT_CATEGORIES = [
   {
@@ -460,7 +473,6 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
           overflow: "hidden",
         }}
       >
-        {/* Header */}
         <div
           style={{
             padding: "16px 20px",
@@ -492,10 +504,7 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
             <X size={18} />
           </button>
         </div>
-
-        {/* Body */}
         <div style={{ padding: "16px 20px" }}>
-          {/* Drop zone */}
           <div
             onClick={() => fileRef.current?.click()}
             style={{
@@ -548,7 +557,6 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
               </>
             )}
           </div>
-
           {current?.uploaded && !file && (
             <div
               style={{
@@ -577,8 +585,6 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
               )}
             </div>
           )}
-
-          {/* Expiry date */}
           {docDef.hasExpiry && (
             <div style={{ marginBottom: 14 }}>
               <label
@@ -612,8 +618,6 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
               />
             </div>
           )}
-
-          {/* Notes */}
           <div>
             <label
               style={{
@@ -647,8 +651,6 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
             />
           </div>
         </div>
-
-        {/* Footer */}
         <div
           style={{
             padding: "12px 20px",
@@ -702,6 +704,7 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
 
 // ─── DOCUMENT ROW ──────────────────────────────────────────────────────────────
 const DocRow = ({ docDef, state, onUpload, onDelete }) => {
+  const isMobile = useIsMobile();
   const status = getDocStatus(state);
   const sc = STATUS_CONFIG[status];
   const daysLeft = state?.expiry ? getDaysUntilExpiry(state.expiry) : null;
@@ -709,10 +712,7 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        padding: "10px 14px",
+        padding: isMobile ? "10px 12px" : "10px 14px",
         borderBottom: "1px solid #F0F3F9",
         background: "#fff",
         transition: "background .1s",
@@ -720,95 +720,134 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
       onMouseEnter={(e) => (e.currentTarget.style.background = "#FAFBFD")}
       onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
     >
-      {/* Status dot */}
-      <span
-        style={{
-          width: 8,
-          height: 8,
-          borderRadius: "50%",
-          background: sc.dot,
-          flexShrink: 0,
-        }}
-      />
+      {/* Top row: dot + name + badge */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: sc.dot,
+            flexShrink: 0,
+            marginTop: 4,
+          }}
+        />
 
-      {/* Doc info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#1A2133" }}>
-            {docDef.name}
-          </span>
-          {docDef.required && (
+        {/* Doc info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              flexWrap: "wrap",
+            }}
+          >
             <span
               style={{
-                fontSize: 9,
-                fontWeight: 700,
-                background: "#FEF0EA",
-                color: "#E8601C",
-                padding: "1px 5px",
-                borderRadius: 4,
-                letterSpacing: ".04em",
+                fontSize: isMobile ? 12 : 13,
+                fontWeight: 600,
+                color: "#1A2133",
               }}
             >
-              REQUIRED
+              {docDef.name}
             </span>
+            {docDef.required && (
+              <span
+                style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  background: "#FEF0EA",
+                  color: "#E8601C",
+                  padding: "1px 5px",
+                  borderRadius: 4,
+                  letterSpacing: ".04em",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                REQUIRED
+              </span>
+            )}
+          </div>
+          <div
+            style={{
+              fontSize: 11,
+              color: "#8A97A8",
+              marginTop: 1,
+              lineHeight: 1.4,
+            }}
+          >
+            {docDef.sub}
+          </div>
+          {state?.notes && (
+            <div
+              style={{
+                fontSize: 11,
+                color: "#6B7A8D",
+                marginTop: 2,
+                fontStyle: "italic",
+              }}
+            >
+              {state.notes}
+            </div>
+          )}
+          {daysLeft !== null && status !== "missing" && (
+            <div
+              style={{
+                fontSize: 11,
+                color:
+                  daysLeft < 0
+                    ? "#C0392B"
+                    : daysLeft <= 30
+                      ? "#BA7517"
+                      : "#639922",
+                marginTop: 2,
+                fontWeight: 600,
+              }}
+            >
+              {daysLeft < 0
+                ? `Expired ${Math.abs(daysLeft)} days ago`
+                : daysLeft === 0
+                  ? "Expires today!"
+                  : `Expires in ${daysLeft} days — ${new Date(state.expiry).toLocaleDateString("en-ZA")}`}
+            </div>
           )}
         </div>
-        <div style={{ fontSize: 11, color: "#8A97A8", marginTop: 1 }}>
-          {docDef.sub}
-        </div>
-        {state?.notes && (
-          <div
-            style={{
-              fontSize: 11,
-              color: "#6B7A8D",
-              marginTop: 2,
-              fontStyle: "italic",
-            }}
-          >
-            {state.notes}
-          </div>
-        )}
-        {daysLeft !== null && status !== "missing" && (
-          <div
-            style={{
-              fontSize: 11,
-              color:
-                daysLeft < 0
-                  ? "#C0392B"
-                  : daysLeft <= 30
-                    ? "#BA7517"
-                    : "#639922",
-              marginTop: 2,
-              fontWeight: 600,
-            }}
-          >
-            {daysLeft < 0
-              ? `Expired ${Math.abs(daysLeft)} days ago`
-              : daysLeft === 0
-                ? "Expires today!"
-                : `Expires in ${daysLeft} days — ${new Date(state.expiry).toLocaleDateString("en-ZA")}`}
-          </div>
-        )}
+
+        {/* Status badge — always visible */}
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            background: sc.bg,
+            color: sc.color,
+            padding: "3px 8px",
+            borderRadius: 20,
+            flexShrink: 0,
+            whiteSpace: "nowrap",
+            alignSelf: "flex-start",
+          }}
+        >
+          {isMobile
+            ? status === "ok"
+              ? "✓"
+              : status === "expiring"
+                ? "⚠"
+                : "✗"
+            : sc.label}
+        </span>
       </div>
 
-      {/* Badge */}
-      <span
+      {/* Action buttons row — sits below on mobile */}
+      <div
         style={{
-          fontSize: 11,
-          fontWeight: 700,
-          background: sc.bg,
-          color: sc.color,
-          padding: "3px 9px",
-          borderRadius: 20,
-          flexShrink: 0,
-          whiteSpace: "nowrap",
+          display: "flex",
+          gap: 6,
+          marginTop: 8,
+          marginLeft: 16,
+          flexWrap: "wrap",
         }}
       >
-        {sc.label}
-      </span>
-
-      {/* Actions */}
-      <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
         {state?.fileUrl && (
           <a
             href={state.fileUrl}
@@ -816,18 +855,20 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
             rel="noreferrer"
             title="View document"
             style={{
-              width: 28,
               height: 28,
+              padding: "0 10px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
+              gap: 4,
               borderRadius: 6,
               border: "1px solid #DDE3ED",
               color: "#6B7A8D",
               textDecoration: "none",
+              fontSize: 11,
+              fontWeight: 600,
             }}
           >
-            <Eye size={13} />
+            <Eye size={12} /> {!isMobile && "View"}
           </a>
         )}
         {docDef.link && (
@@ -837,18 +878,20 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
             rel="noreferrer"
             title="Open portal"
             style={{
-              width: 28,
               height: 28,
+              padding: "0 10px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
+              gap: 4,
               borderRadius: 6,
               border: "1px solid #DDE3ED",
               color: "#6B7A8D",
               textDecoration: "none",
+              fontSize: 11,
+              fontWeight: 600,
             }}
           >
-            <ExternalLink size={13} />
+            <ExternalLink size={12} /> {!isMobile && "Portal"}
           </a>
         )}
         <button
@@ -856,7 +899,7 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
           title={state?.uploaded ? "Update document" : "Upload document"}
           style={{
             height: 28,
-            padding: "0 10px",
+            padding: "0 12px",
             borderRadius: 6,
             border: `1px solid ${state?.uploaded ? "#DDE3ED" : "#0D6EFD"}`,
             background: state?.uploaded ? "transparent" : "#E8F0FE",
@@ -901,7 +944,6 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
 const CategorySection = ({ category, docsState, onUpload, onDelete }) => {
   const [open, setOpen] = useState(true);
   const Icon = category.icon;
-
   const uploaded = category.docs.filter(
     (d) => getDocStatus(docsState[d.id]) !== "missing",
   ).length;
@@ -917,7 +959,6 @@ const CategorySection = ({ category, docsState, onUpload, onDelete }) => {
         marginBottom: 10,
       }}
     >
-      {/* Header */}
       <button
         onClick={() => setOpen((o) => !o)}
         style={{
@@ -955,7 +996,6 @@ const CategorySection = ({ category, docsState, onUpload, onDelete }) => {
             {uploaded} of {total} documents uploaded
           </div>
         </div>
-        {/* Progress pill */}
         <span
           style={{
             fontSize: 11,
@@ -984,8 +1024,6 @@ const CategorySection = ({ category, docsState, onUpload, onDelete }) => {
           <ChevronDown size={15} style={{ color: "#8A97A8" }} />
         )}
       </button>
-
-      {/* Rows */}
       {open && (
         <div>
           {category.docs.map((docDef) => (
@@ -1005,13 +1043,13 @@ const CategorySection = ({ category, docsState, onUpload, onDelete }) => {
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 const DocumentsVault = ({ user }) => {
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("documents");
   const [docsState, setDocsState] = useState({});
-  const [uploadTarget, setUploadTarget] = useState(null); // docDef being uploaded
+  const [uploadTarget, setUploadTarget] = useState(null);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Load saved state from Firestore
   useEffect(() => {
     const load = async () => {
       if (!user?.uid) return;
@@ -1024,7 +1062,6 @@ const DocumentsVault = ({ user }) => {
     load();
   }, [user?.uid]);
 
-  // Persist state to Firestore
   const persist = async (newState) => {
     if (!user?.uid) return;
     const db = getFirestore();
@@ -1035,15 +1072,11 @@ const DocumentsVault = ({ user }) => {
     );
   };
 
-  // Handle upload / update
   const handleSave = async ({ expiry, notes, file, existing }) => {
     if (!uploadTarget) return;
     setSaving(true);
-
     let fileUrl = existing?.fileUrl || null;
     let fileName = existing?.fileName || null;
-
-    // If a new file was selected, upload to Firebase Storage
     if (file && user?.uid) {
       try {
         const storage = getStorage();
@@ -1056,10 +1089,8 @@ const DocumentsVault = ({ user }) => {
         fileName = file.name;
       } catch (err) {
         console.error("Upload error:", err);
-        // Still save metadata even if upload fails
       }
     }
-
     const updated = {
       ...docsState,
       [uploadTarget.id]: {
@@ -1071,14 +1102,12 @@ const DocumentsVault = ({ user }) => {
         updatedAt: new Date().toISOString(),
       },
     };
-
     setDocsState(updated);
     await persist(updated);
     setSaving(false);
     setUploadTarget(null);
   };
 
-  // Handle delete
   const handleDelete = async (docId) => {
     if (!window.confirm("Remove this document record?")) return;
     const updated = { ...docsState };
@@ -1087,7 +1116,6 @@ const DocumentsVault = ({ user }) => {
     await persist(updated);
   };
 
-  // ── Summary stats ──────────────────────────────────────────────────────────
   const allDocs = DOCUMENT_CATEGORIES.flatMap((c) => c.docs);
   const uploaded = allDocs.filter(
     (d) => getDocStatus(docsState[d.id]) !== "missing",
@@ -1102,7 +1130,6 @@ const DocumentsVault = ({ user }) => {
     (d) => getDocStatus(docsState[d.id]) === "missing",
   ).length;
 
-  // ── Filter docs by search ─────────────────────────────────────────────────
   const filteredCategories = searchQuery
     ? DOCUMENT_CATEGORIES.map((cat) => ({
         ...cat,
@@ -1116,7 +1143,7 @@ const DocumentsVault = ({ user }) => {
 
   return (
     <div style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      {/* ── Tabs ──────────────────────────────────────────────────────────── */}
+      {/* ── Tabs ── */}
       <div
         style={{
           display: "flex",
@@ -1138,7 +1165,7 @@ const DocumentsVault = ({ user }) => {
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "8px 16px",
+                padding: isMobile ? "8px 12px" : "8px 16px",
                 borderRadius: "8px 8px 0 0",
                 border: "none",
                 borderBottom: `2px solid ${activeTab === tab.id ? "#0D6EFD" : "transparent"}`,
@@ -1156,15 +1183,17 @@ const DocumentsVault = ({ user }) => {
         })}
       </div>
 
-      {/* ── DOCUMENTS TAB ──────────────────────────────────────────────────── */}
+      {/* ── DOCUMENTS TAB ── */}
       {activeTab === "documents" && (
         <>
-          {/* Summary strip */}
+          {/* Summary strip — 2x2 on mobile, 4-col on desktop */}
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: 8,
+              gridTemplateColumns: isMobile
+                ? "repeat(2, 1fr)"
+                : "repeat(4, 1fr)",
+              gap: isMobile ? 6 : 8,
               marginBottom: 16,
             }}
           >
@@ -1199,12 +1228,12 @@ const DocumentsVault = ({ user }) => {
                 style={{
                   background: s.bg,
                   borderRadius: 8,
-                  padding: "10px 12px",
+                  padding: isMobile ? "10px 10px" : "10px 12px",
                 }}
               >
                 <div
                   style={{
-                    fontSize: 20,
+                    fontSize: isMobile ? 22 : 20,
                     fontWeight: 800,
                     color: s.color,
                     lineHeight: 1,
@@ -1214,7 +1243,7 @@ const DocumentsVault = ({ user }) => {
                 </div>
                 <div
                   style={{
-                    fontSize: 10,
+                    fontSize: isMobile ? 10 : 10,
                     color: s.color,
                     marginTop: 3,
                     opacity: 0.8,
@@ -1338,7 +1367,7 @@ const DocumentsVault = ({ user }) => {
         </>
       )}
 
-      {/* ── PORTALS TAB ────────────────────────────────────────────────────── */}
+      {/* ── PORTALS TAB ── */}
       {activeTab === "portals" && (
         <div>
           <p
@@ -1355,7 +1384,9 @@ const DocumentsVault = ({ user }) => {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+              gridTemplateColumns: isMobile
+                ? "1fr"
+                : "repeat(auto-fill, minmax(260px, 1fr))",
               gap: 8,
             }}
           >
@@ -1432,7 +1463,6 @@ const DocumentsVault = ({ user }) => {
         </div>
       )}
 
-      {/* Upload modal */}
       {uploadTarget && (
         <UploadModal
           doc={uploadTarget}

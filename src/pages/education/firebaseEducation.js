@@ -168,21 +168,15 @@ export function useAttendance(uid, dateStr) {
   }, [uid, dateStr]);
 
   useEffect(() => { load(); }, [load]);
-  const saveAttendance = async (studentId, status) => {
-    if (!uid || !dateStr) return;
-    try {
-      const recordDoc = doc(
-        db, "users", uid, "attendance", dateStr, "records", String(studentId)
-      );
-      await setDoc(recordDoc, {
-        status,
-        studentId: String(studentId),
-        updatedAt: serverTimestamp(),
-      });
-    } catch (e) {
-      console.error("Error saving attendance record:", e);
-    }
-  };
+  const saveAttendance = async (userId, studentId, date, status) => {
+     const db = getFirestore();
+     const docId = `${date}_${studentId}`;
+     await setDoc(
+       doc(db, "users", userId, "attendance", docId),
+       { studentId, date, status, updatedAt: serverTimestamp() },
+       { merge: true }
+     );
+   };
   const saveAllAttendance = async (attendanceMap) => {
     if (!uid || !dateStr) return;
     try {

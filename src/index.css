@@ -31,3 +31,23 @@ body {
     margin: 15mm;
   }
 }
+/* Width */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track (background) */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+  background: #475569; /* slate-600 */
+  border-radius: 999px;
+}
+
+/* Thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b; /* slate-500 */
+}

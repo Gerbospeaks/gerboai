@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import StudentMedicalSection, { MedicalAlert } from './StudentMedicalSection';
 import {
   getFirestore,
   collection,
@@ -24,6 +25,7 @@ const StudentModal = ({
   existingStudent,
   onStudentSaved,
 }) => {
+  const [medicalInfo, setMedicalInfo] = useState(existingStudent?.medicalInfo || {});
   const { user, authUser } = useAuth();
   const [loading, setLoading] = useState(false);
 
@@ -117,7 +119,7 @@ const StudentModal = ({
     try {
       const db = getFirestore();
       const studentData = {
-        ...formData,
+        ...formData, medicalInfo,
         updatedAt: serverTimestamp(),
       };
 
@@ -322,7 +324,10 @@ const StudentModal = ({
                 </div>
               </div>
             </div>
-
+            <StudentMedicalSection
+     data={medicalInfo}
+     onChange={setMedicalInfo}
+   />
             {/* Emergency Contact Section */}
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold mb-4 text-indigo-900 flex items-center gap-2">

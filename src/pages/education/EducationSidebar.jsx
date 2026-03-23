@@ -187,7 +187,7 @@ export default function EducationSidebar({
 
       {/* ── Collapsed rail (desktop only) ──────────────────────────────── */}
       {!sidebarOpen && (
-        <div className="hidden md:flex flex-col flex-shrink-0 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden shadow-xl z-30">
+        <div className="hidden md:flex flex-col flex-shrink-0 w-16 bg-gradient-to-b from-slate-900 to-slate-800 h-full print:hidden shadow-xl z-30">
           <div className="flex flex-col items-center py-4 space-y-3 flex-1 overflow-y-auto scrollbar-thin">
             {/* Expand toggle */}
             <button
@@ -248,7 +248,7 @@ export default function EducationSidebar({
 
       {/* ── Expanded sidebar ───────────────────────────────────────────── */}
       {sidebarOpen && (
-        <div className="flex-shrink-0 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden shadow-2xl overflow-y-auto z-50 md:relative fixed inset-y-0 left-0 flex flex-col">
+        <div className="flex-shrink-0 w-64 bg-gradient-to-b from-slate-900 to-slate-800 h-full print:hidden shadow-2xl overflow-y-auto z-50 md:relative fixed inset-y-0 left-0 flex flex-col">
           {/* Header */}
           <div className="p-5 border-b border-slate-700/60">
             <div className="flex items-center gap-3">

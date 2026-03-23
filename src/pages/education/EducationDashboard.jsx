@@ -12,8 +12,11 @@ import AIInvoiceWindow from '../AIInvoiceWindow';
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { useFeesFirebase } from '../../hooks/useFeesFirebase';
 import EducationSidebar from "./EducationSidebar";
+import AttendanceTrends from './AttendanceTrends';
 import DocumentsVault from "./DocumentsVault";
+import { MedicalAlert } from './StudentMedicalSection';
 import {
   BehaviourLogView,
   MarkBookView,
@@ -40,6 +43,7 @@ import { db } from "../../firebase";
 import StudentsListModal from "./StudentsListModal";
 import SignatureStamp from "../SignatureStamp";
 import SchoolOverview from "./SchoolOverview";
+import Reports from "./Reports";
 import {
   useNotices,
   useHomework,
@@ -59,6 +63,7 @@ import {
   StudentModal,
   TimetableModal,
 } from "./Educationmodals";
+import FeesViewFirebase from './FeesViewFirebase';
 import {
   Home,
   Settings,
@@ -146,83 +151,6 @@ const MOCK_STUDENTS = [
     fees: { paid: 1200, total: 1500, status: "partial" },
     photo: null,
   },
-  {
-    id: 2,
-    name: "Liam van der Berg",
-    grade: "Pre-School A",
-    age: 4,
-    parent: "Johan van der Berg",
-    phone: "082 345 6789",
-    email: "johan@email.com",
-    fees: { paid: 1500, total: 1500, status: "paid" },
-    photo: null,
-  },
-  {
-    id: 3,
-    name: "Zoe Mokoena",
-    grade: "Grade 1",
-    age: 6,
-    parent: "Thabo Mokoena",
-    phone: "073 456 7890",
-    email: "thabo@email.com",
-    fees: { paid: 0, total: 1500, status: "unpaid" },
-    photo: null,
-  },
-  {
-    id: 4,
-    name: "Ethan Patel",
-    grade: "Grade 3",
-    age: 8,
-    parent: "Priya Patel",
-    phone: "084 567 8901",
-    email: "priya@email.com",
-    fees: { paid: 1500, total: 1500, status: "paid" },
-    photo: null,
-  },
-  {
-    id: 5,
-    name: "Aisha Hendricks",
-    grade: "Pre-School B",
-    age: 3,
-    parent: "Fatima Hendricks",
-    phone: "061 678 9012",
-    email: "fatima@email.com",
-    fees: { paid: 800, total: 1200, status: "partial" },
-    photo: null,
-  },
-  {
-    id: 6,
-    name: "Noah Sithole",
-    grade: "Grade 2",
-    age: 7,
-    parent: "Bongani Sithole",
-    phone: "079 789 0123",
-    email: "bongani@email.com",
-    fees: { paid: 1500, total: 1500, status: "paid" },
-    photo: null,
-  },
-  {
-    id: 7,
-    name: "Mia Botha",
-    grade: "Grade 1",
-    age: 6,
-    parent: "Anri Botha",
-    phone: "082 890 1234",
-    email: "anri@email.com",
-    fees: { paid: 0, total: 1500, status: "unpaid" },
-    photo: null,
-  },
-  {
-    id: 8,
-    name: "Jayden Nkosi",
-    grade: "Grade 3",
-    age: 9,
-    parent: "Zanele Nkosi",
-    phone: "071 901 2345",
-    email: "zanele@email.com",
-    fees: { paid: 1500, total: 1500, status: "paid" },
-    photo: null,
-  },
 ];
 
     
@@ -239,46 +167,7 @@ const MOCK_STAFF = [
     status: "present",
     classes: ["Grade 1A", "Grade 1B"],
   },
-  {
-    id: 2,
-    name: "Mr. David Nkosi",
-    role: "Grade 2 Teacher",
-    subject: "Foundation Phase",
-    phone: "073 222 3333",
-    email: "david@school.com",
-    status: "present",
-    classes: ["Grade 2A"],
-  },
-  {
-    id: 3,
-    name: "Ms. Thandi Mthembu",
-    role: "Pre-School Teacher",
-    subject: "ECD",
-    phone: "061 333 4444",
-    email: "thandi@school.com",
-    status: "present",
-    classes: ["Pre-School A", "Pre-School B"],
-  },
-  {
-    id: 4,
-    name: "Mrs. Karen Olivier",
-    role: "Grade 3 Teacher",
-    subject: "Intermediate Phase",
-    phone: "084 444 5555",
-    email: "karen@school.com",
-    status: "present",
-    classes: ["Grade 3A"],
-  },
-  {
-    id: 5,
-    name: "Mr. James Petersen",
-    role: "Sports & PE",
-    subject: "Physical Education",
-    phone: "071 555 6666",
-    email: "james@school.com",
-    status: "present",
-    classes: ["All Grades"],
-  },
+ 
 ];
 
 const MOCK_EVENTS = [
@@ -291,51 +180,7 @@ const MOCK_EVENTS = [
     color: "emerald",
     description: "Annual inter-house sports competition",
   },
-  {
-    id: 2,
-    title: "Parent-Teacher Meeting",
-    date: "2026-03-20",
-    time: "14:00",
-    type: "meeting",
-    color: "blue",
-    description: "Term 1 progress discussion",
-  },
-  {
-    id: 3,
-    title: "Easter Concert",
-    date: "2026-03-27",
-    time: "10:00",
-    type: "concert",
-    color: "purple",
-    description: "Pre-school and Grade 1 performance",
-  },
-  {
-    id: 4,
-    title: "Fee Payment Deadline",
-    date: "2026-03-07",
-    time: "17:00",
-    type: "deadline",
-    color: "red",
-    description: "Term 1 fee payment due",
-  },
-  {
-    id: 5,
-    title: "Science Fair",
-    date: "2026-03-25",
-    time: "09:00",
-    type: "event",
-    color: "amber",
-    description: "Grade 2-3 science project exhibition",
-  },
-  {
-    id: 6,
-    title: "Staff Meeting",
-    date: "2026-03-10",
-    time: "13:30",
-    type: "meeting",
-    color: "slate",
-    description: "Monthly staff briefing",
-  },
+  
 ];
 
 const MOCK_TIMETABLE = {
@@ -655,6 +500,13 @@ const EducationDashboard = () => {
     recipient: "All Parents",
     type: "info",
   });
+  const {
+  students: feeStudents,
+  totalFees,
+  collectedFees,
+  recordPayment,
+  getStudentPayments,
+} = useFeesFirebase(user?.uid);
   const [showNoticeForm, setShowNoticeForm] = useState(false);
   const { notices, setNotices, saveNotice, markNoticeRead, deleteNotice } =
     useNotices(user?.uid);
@@ -683,7 +535,6 @@ const EducationDashboard = () => {
   const [showTimetableModal, setShowTimetableModal] = useState(false);
   const { attendance, setAttendance, saveAttendance, saveAllAttendance } =
     useAttendance(user?.uid, todayISO);
-  const [feeFilter, setFeeFilter] = useState("all");
   const today = new Date();
   const dayName = today.toLocaleDateString("en-ZA", { weekday: "long" });
   const dateStr = today.toLocaleDateString("en-ZA", {
@@ -691,7 +542,7 @@ const EducationDashboard = () => {
     month: "long",
     year: "numeric",
   });
-  const { updateFees } = useFees(user?.uid);
+ 
   const { timetable, saveTimetable } = useTimetable(user?.uid);
   const { events, saveEvent, deleteEvent } = useEvents(user?.uid);
   const { staff, updateStaff, saveStaff, deleteStaff } = useStaff(user?.uid);
@@ -829,8 +680,7 @@ const EducationDashboard = () => {
   const lateCount = Object.values(attendance).filter(
     (v) => v === "late",
   ).length;
-  const totalFees = MOCK_STUDENTS.reduce((s, st) => s + st.fees.total, 0);
-  const collectedFees = MOCK_STUDENTS.reduce((s, st) => s + st.fees.paid, 0);
+ 
   const unreadNotices = notices.filter((n) => !n.read).length;
   const handleAddNewStudent = () => {
     setSelectedStudent(null);
@@ -924,8 +774,7 @@ function ZField({ label, children, span2 }) {
   const handleAddEvent = (eventData) => saveEvent(eventData);
   const handleDeleteEvent = (id) => deleteEvent(id);
   const handleStaffStatusToggle = (id, status) => updateStaff(id, { status });
-  const handleFeeUpdate = (studentId, feesData) =>
-    updateFees(studentId, feesData);
+ 
   const handleSaveRegister = () => saveAllAttendance(attendance);
   const handleSaveReport = async () => {
     if (!user?.uid) return;
@@ -1307,6 +1156,7 @@ function ZField({ label, children, span2 }) {
   { id: "slips",      label: "Permission Slips",   icon: ClipboardList},
   { id: "welfare",    label: "Welfare Flags",      icon: Heart        },
   { id: "resources",  label: "Resource Requests",  icon: Package      },
+  { id: "trends", label: "Attendance Trends", icon: TrendingUp },
   ];
   const loadStudents = async () => {
     try {
@@ -1480,26 +1330,7 @@ function ZField({ label, children, span2 }) {
               )}
             </button>
           </div>
-          {activeView === "reports" && (
-            <div className="flex gap-2">
-              <button className="btn-ghost" onClick={handlePrint}>
-                <Printer className="w-4 h-4" />
-                Print
-              </button>
-              <button className="btn-ghost" onClick={handleSavePDF}>
-                <Download className="w-4 h-4" />
-                PDF
-              </button>
-              <button className="btn-primary" onClick={handleSaveReport}>
-                <Save className="w-4 h-4" />
-                Save
-              </button>
-              <button className="btn-primary" onClick={handleNewReport}>
-                <Plus className="w-4 h-4" />
-                New
-              </button>
-            </div>
-          )}
+         
         </header>
         {showSettings && (
           <BusinessSettingsModal onClose={() => setShowSettings(false)} />
@@ -1515,11 +1346,11 @@ function ZField({ label, children, span2 }) {
               absentCount={absentCount}
               lateCount={lateCount}
               totalStudents={MOCK_STUDENTS.length}
-              collectedFees={collectedFees}
-              totalFees={totalFees}
               unreadNotices={unreadNotices}
               notices={notices}
               events={MOCK_EVENTS}
+              collectedFees={collectedFees ?? 0}
+              totalFees={totalFees ?? 0}
               homework={homework}
               staff={MOCK_STAFF}
               navigate={navigate}
@@ -1527,6 +1358,11 @@ function ZField({ label, children, span2 }) {
               students={students}
             />
           )}
+          {activeView === "trends" && (
+     <AttendanceTrends
+       userId={user?.uid}
+       students={students}   />
+   )}
           {activeView === "documents" && (
   <div className="card p-6">
     <div style={{ marginBottom: 16 }}>
@@ -1607,15 +1443,11 @@ function ZField({ label, children, span2 }) {
           )}
 
           {/* ── FEES ── */}
-          {activeView === "fees" && (
-            <FeesView
-              students={MOCK_STUDENTS}
-              feeFilter={feeFilter}
-              setFeeFilter={setFeeFilter}
-              collectedFees={collectedFees}
-              totalFees={totalFees}
-            />
-          )}
+         {activeView === "fees" && (
+     <FeesViewFirebase
+       userId={user?.uid}
+       businessInfo={businessInfo}     />
+   )}
 
           {/* ── STAFF ── */}
           {activeView === "staff" && <StaffView staff={MOCK_STAFF} />}
@@ -1656,477 +1488,10 @@ function ZField({ label, children, span2 }) {
             <ResourceRequestsView uid={user?.uid} />
           )}
  
-         {activeView === "reports" && (
-  <>
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
- 
-      {/* ════════════════════════════════════════════════════════════════
-          LEFT — Input panel
-          Hidden on mobile when showReportCard is true
-      ════════════════════════════════════════════════════════════════ */}
-      <div
-        className={`${
-          showReportCard ? "hidden lg:block" : "block"
-        } print:hidden overflow-y-auto`}
-        style={{ maxHeight: "calc(100vh - 64px)" }}
-      >
- 
-        {/* ── Tab bar ─────────────────────────────────────────────────── */}
-        <div className="flex bg-white border border-[#DDE3ED] rounded-md overflow-hidden mb-2">
-          <button
-            onClick={() => setInputMode("manual")}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold transition-all duration-150 border-b-2 ${
-              inputMode === "manual"
-                ? "bg-white text-[#0D6EFD] border-[#0D6EFD]"
-                : "bg-[#F0F3F9] text-[#4A5568] border-transparent hover:bg-[#EBF0FB]"
-            }`}
-          >
-            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            <span className="hidden sm:inline">Manual Entry</span>
-            <span className="sm:hidden">Manual</span>
-          </button>
- 
-          <button
-                        onClick={() => setShowAIWindow(true)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto
-    bg-gradient-to-r from-[#7c3aed] to-[#5b21b6]
-    text-white shadow-md shadow-[#7c3aed]/30
-    hover:shadow-lg hover:shadow-[#7c3aed]/40 hover:scale-[1.02]
-    active:scale-[0.98]"
-                      >
-                        <Sparkles className="w-4 h-4" />
-                        AI Mode
-                      </button>
-        </div>
- 
-        {/* ── AI mode ─────────────────────────────────────────────────── */}
-        
- 
-        {/* ── Manual mode ──────────────────────────────────────────────── */}
-        {inputMode === "manual" && (
-          <>
-            {/* Term banner — wraps gracefully on narrow screens */}
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2 mb-2 bg-[#E8F0FE] border border-[#0D6EFD]/20 rounded">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#0D6EFD] flex-shrink-0" />
-              <span className="text-[12px] font-bold text-[#0D6EFD]">{term} · {academicYear}</span>
-              <span className="text-[12px] text-[#4A5568]">Academic Period</span>
-            </div>
- 
-            {/* Stat strip */}
-            <div className="grid grid-cols-3 gap-2 mb-2">
-              {[
-                { label: "Avg Grade",  value: `${calculateAverage()}%`, color: "#0D6EFD" },
-                { label: "Subjects",   value: subjects.length,           color: "#0F7B3F" },
-                { label: "Attendance", value: `${attendancePresent}/${attendanceDays}`, color: "#E8601C" },
-              ].map((s) => (
-                <div key={s.label} className="bg-white border border-[#DDE3ED] rounded-md px-2.5 py-2.5">
-                  <div className="text-[9px] sm:text-[10px] font-bold text-[#8A97A8] uppercase tracking-wide mb-1 truncate">
-                    {s.label}
-                  </div>
-                  <div
-                    className="text-[16px] sm:text-[20px] font-bold leading-none truncate"
-                    style={{ color: s.color }}
-                  >
-                    {s.value}
-                  </div>
-                </div>
-              ))}
-            </div>
- 
-            {/* ── Student Information ─────────────────────────────────── */}
-            <div className={sectionCls}>
-              <div className={sectionHeaderCls}>
-                <h2 className={sectionTitleCls}>
-                  <SectionIcon d="M16 7a4 4 0 11-8 0 4 4 0 018 0zm-4 7a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  Student Information
-                </h2>
-                <button className="flex items-center gap-1 text-[11px] font-bold text-[#0D6EFD] hover:text-[#0b5ed7]">
-                  <Edit className="w-3 h-3" />
-                  Edit
-                </button>
-              </div>
-              {/* 1-col on mobile, 2-col on sm+ */}
-              <div className={`${sectionBodyCls} grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2.5`}>
-                <ZField label="Student Name">
-                  <input type="text" value={studentName}
-                    onChange={(e) => setStudentName(e.target.value)} className={inputCls} />
-                </ZField>
-                <ZField label="Student ID">
-                  <input type="text" value={studentId}
-                    onChange={(e) => setStudentId(e.target.value)} className={inputCls} />
-                </ZField>
-                <ZField label="Grade Level">
-                  <input type="text" value={gradeLevel}
-                    onChange={(e) => setGradeLevel(e.target.value)} className={inputCls} />
-                </ZField>
-                <ZField label="Date of Birth">
-                  <input type="date" value={dateOfBirth}
-                    onChange={(e) => setDateOfBirth(e.target.value)} className={inputCls} />
-                </ZField>
-              </div>
-            </div>
- 
-            {/* ── Parent / Guardian ───────────────────────────────────── */}
-            <div className={sectionCls}>
-              <div className={sectionHeaderCls}>
-                <h2 className={sectionTitleCls}>
-                  <SectionIcon d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
-                  Parent / Guardian
-                </h2>
-              </div>
-              <div className={`${sectionBodyCls} grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2.5`}>
-                <ZField label="Parent Name">
-                  <input type="text" value={parentName}
-                    onChange={(e) => setParentName(e.target.value)} className={inputCls} />
-                </ZField>
-                <ZField label="Email">
-                  <input type="email" value={parentEmail}
-                    onChange={(e) => setParentEmail(e.target.value)} className={inputCls} />
-                </ZField>
-                <ZField label="Phone">
-                  <input type="tel" value={parentPhone}
-                    onChange={(e) => setParentPhone(e.target.value)} className={inputCls} />
-                </ZField>
-                {/* Address always spans full width */}
-                <ZField label="Address" span2>
-                  <input type="text" value={parentAddress}
-                    onChange={(e) => setParentAddress(e.target.value)} className={inputCls} />
-                </ZField>
-              </div>
-            </div>
- 
-            {/* ── Academic Period ─────────────────────────────────────── */}
-            <div className={sectionCls}>
-              <div className={sectionHeaderCls}>
-                <h2 className={sectionTitleCls}>
-                  <SectionIcon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  Academic Period
-                </h2>
-              </div>
-              <div className={`${sectionBodyCls} grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2.5`}>
-                <ZField label="Term">
-                  <div className="relative">
-                    <select
-                      value={term}
-                      onChange={(e) => setTerm(e.target.value)}
-                      className={`${inputCls} appearance-none pr-7`}
-                    >
-                      <option>Term 1</option>
-                      <option>Term 2</option>
-                      <option>Term 3</option>
-                      <option>Term 4</option>
-                    </select>
-                    <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#8A97A8]"
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </ZField>
-                <ZField label="Academic Year">
-                  <input type="text" value={academicYear}
-                    onChange={(e) => setAcademicYear(e.target.value)} className={inputCls} />
-                </ZField>
-              </div>
-            </div>
- 
-            {/* ── Subject Grades ──────────────────────────────────────── */}
-            <div className={sectionCls}>
-              <div className={sectionHeaderCls}>
-                <h2 className={sectionTitleCls}>
-                  <SectionIcon d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  Subject Grades
-                </h2>
-              </div>
-              <div className={sectionBodyCls}>
- 
-                {/* Add row — 2-col on mobile, 4-col on sm+ */}
-                <div className="grid grid-cols-2 sm:grid-cols-[1fr_80px_1fr_auto] gap-1.5 mb-3">
-                  <input
-                    type="text"
-                    placeholder="Subject Name"
-                    value={newSubject.name}
-                    onChange={(e) => setNewSubject({ ...newSubject, name: e.target.value })}
-                    className={inputCls}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Mark %"
-                    min="0"
-                    max="100"
-                    value={newSubject.mark}
-                    onChange={(e) => setNewSubject({ ...newSubject, mark: e.target.value })}
-                    className={inputCls}
-                  />
-                  {/* Comments field: hidden on mobile, visible on sm+ */}
-                  <input
-                    type="text"
-                    placeholder="Comments (optional)"
-                    value={newSubject.comments}
-                    onChange={(e) => setNewSubject({ ...newSubject, comments: e.target.value })}
-                    className={`${inputCls} hidden sm:block`}
-                  />
-                  <button
-                    onClick={handleAddSubject}
-                    className="col-span-2 sm:col-span-1 h-8 px-3.5 bg-[#E8601C] hover:bg-[#c9511a] text-white text-[12px] font-bold rounded flex items-center justify-center gap-1.5 transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Subject
-                  </button>
-                </div>
- 
-                {/* Comments shown below add row on mobile only */}
-                <div className="sm:hidden mb-3">
-                  <input
-                    type="text"
-                    placeholder="Comments (optional)"
-                    value={newSubject.comments}
-                    onChange={(e) => setNewSubject({ ...newSubject, comments: e.target.value })}
-                    className={inputCls}
-                  />
-                </div>
- 
-                {/* Subjects table */}
-                {subjects.length > 0 && (
-                  <div className="border border-[#E8ECF4] rounded overflow-hidden">
-                    <table className="w-full text-[12px] border-collapse">
-                      <thead>
-                        <tr className="bg-[#F0F3F9]">
-                          <th className="px-2.5 py-1.5 text-left text-[10px] font-bold text-[#6B7A8D] uppercase tracking-wide border-b border-[#E8ECF4]">
-                            Subject
-                          </th>
-                          <th className="px-2.5 py-1.5 text-left text-[10px] font-bold text-[#6B7A8D] uppercase tracking-wide border-b border-[#E8ECF4]">
-                            Mark
-                          </th>
-                          <th className="px-2.5 py-1.5 text-left text-[10px] font-bold text-[#6B7A8D] uppercase tracking-wide border-b border-[#E8ECF4]">
-                            Sym
-                          </th>
-                          {/* Comments column hidden on mobile */}
-                          <th className="hidden sm:table-cell px-2.5 py-1.5 text-left text-[10px] font-bold text-[#6B7A8D] uppercase tracking-wide border-b border-[#E8ECF4]">
-                            Comments
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {subjects.map((s, i) => {
-                          const m    = Number(s.mark);
-                          const sym  = m >= 80 ? "A" : m >= 70 ? "B" : m >= 60 ? "C" : m >= 50 ? "D" : "F";
-                          const scol = m >= 80 ? "#0F7B3F" : m >= 60 ? "#0D6EFD" : m >= 50 ? "#975A00" : "#C0392B";
-                          return (
-                            <tr
-                              key={i}
-                              className={`border-b border-[#E8ECF4] last:border-b-0 ${
-                                i % 2 !== 0 ? "bg-[#F5F6FA]" : "bg-white"
-                              }`}
-                            >
-                              <td className="px-2.5 py-1.5 font-semibold text-[#1A2133] max-w-[100px] truncate">
-                                {s.name}
-                              </td>
-                              <td className="px-2.5 py-1.5 text-[#4A5568] whitespace-nowrap">
-                                {s.mark}%
-                              </td>
-                              <td className="px-2.5 py-1.5">
-                                <span
-                                  className="inline-flex items-center justify-center w-5 h-5 rounded-[3px] text-[11px] font-bold"
-                                  style={{ background: scol + "1A", color: scol }}
-                                >
-                                  {sym}
-                                </span>
-                              </td>
-                              {/* Comments cell hidden on mobile */}
-                              <td className="hidden sm:table-cell px-2.5 py-1.5 text-[#8A97A8] max-w-[120px] truncate">
-                                {s.comments || "—"}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
- 
-            {/* ── Attendance ──────────────────────────────────────────── */}
-            <div className={sectionCls}>
-              <div className={sectionHeaderCls}>
-                <h2 className={sectionTitleCls}>
-                  <SectionIcon d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  Attendance
-                </h2>
-                {Number(attendanceDays) > 0 && (
-                  <span className="text-[11px] font-bold text-[#0D6EFD] bg-[#E8F0FE] px-2.5 py-0.5 rounded-full">
-                    {Math.round((Number(attendancePresent) / Number(attendanceDays)) * 100)}%
-                  </span>
-                )}
-              </div>
-              {/* Always 2-col — values are short numbers */}
-              <div className={`${sectionBodyCls} grid grid-cols-2 gap-x-3 gap-y-2.5`}>
-                <ZField label="Total Days">
-                  <input type="number" value={attendanceDays}
-                    onChange={(e) => setAttendanceDays(e.target.value)} className={inputCls} />
-                </ZField>
-                <ZField label="Days Present">
-                  <input type="number" value={attendancePresent}
-                    onChange={(e) => setAttendancePresent(e.target.value)} className={inputCls} />
-                </ZField>
-              </div>
-              {Number(attendanceDays) > 0 && (
-                <div className="px-3.5 pb-3">
-                  <div className="h-1.5 rounded-full bg-[#E8ECF4] overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-[#0D6EFD] transition-all duration-300"
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          Math.round((Number(attendancePresent) / Number(attendanceDays)) * 100)
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
- 
-            {/* ── Teacher Comments ─────────────────────────────────────── */}
-            <div className={sectionCls}>
-              <div className={sectionHeaderCls}>
-                <h2 className={sectionTitleCls}>
-                  <SectionIcon d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  Teacher Comments
-                </h2>
-              </div>
-              <div className={sectionBodyCls}>
-                <textarea
-                  value={teacherComments}
-                  onChange={(e) => setTeacherComments(e.target.value)}
-                  rows={4}
-                  placeholder="Enter teacher comments about the student's performance..."
-                  className="w-full px-2.5 py-2 text-[13px] text-[#1A2133] bg-white border border-[#DDE3ED] rounded resize-y leading-relaxed focus:outline-none focus:ring-1 focus:ring-[#0D6EFD] focus:border-[#0D6EFD]"
-                />
-              </div>
-            </div>
- 
-            {/* ── Mobile preview toggle (lg and above uses the side panel) ── */}
-            <div className="lg:hidden mb-4">
-              <button
-                onClick={() => setShowReportCard(true)}
-                className="w-full flex items-center justify-center gap-2 h-10 bg-[#0D6EFD] hover:bg-[#0b5ed7] text-white text-[13px] font-bold rounded-md transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                Preview Report Card
-              </button>
-            </div>
-          </>
-        )}
-      </div>
- 
-      {/* ════════════════════════════════════════════════════════════════
-          RIGHT — Preview panel
-          Mobile: full-screen when showReportCard === true
-          Desktop: always-visible sticky side panel
-      ════════════════════════════════════════════════════════════════ */}
-      <div
-        className={`${
-          showReportCard ? "flex" : "hidden lg:flex"
-        } flex-col lg:sticky lg:top-4 print:hidden`}
-        style={{ height: "calc(100vh - 64px)" }}
-      >
-        {/* Preview toolbar */}
-        <div className="flex items-center justify-between mb-2 px-3 py-2 bg-white border border-[#DDE3ED] rounded-md flex-shrink-0">
-          <div className="flex items-center gap-2">
-            {/* Back button — mobile only */}
-            <button
-              onClick={() => setShowReportCard(false)}
-              className="lg:hidden flex items-center gap-1 text-[11px] font-bold text-[#4A5568] hover:text-[#1A2133] mr-1"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back
-            </button>
-            <div className="w-2 h-2 rounded-full bg-[#E8601C] flex-shrink-0" />
-            <span className="text-[10px] font-bold text-[#6B7A8D] uppercase tracking-widest">
-              Preview
-            </span>
-          </div>
-          <TemplateSelector
-            user={user}
-            selectedTemplate={selectedTemplate}
-            onTemplateChange={setSelectedTemplate}
-          />
-        </div>
- 
-        {/* Scaled preview container */}
-        <div className="flex-1 overflow-hidden bg-[#F0F3F9] rounded-md border border-[#DDE3ED]">
-          <div className="overflow-y-auto overflow-x-hidden h-full">
-            <div
-              style={{
-                transform: "scale(0.55)",
-                transformOrigin: "top left",
-                width: "calc(100% / 0.55)",
-                pointerEvents: "none",
-              }}
-            >
-              <TemplateRenderer
-                templateId={selectedTemplate}
-                businessInfo={businessInfo}
-                loading={loading}
-                reportCardNumber={reportNumber}
-                term={term}
-                academicYear={academicYear}
-                studentName={studentName}
-                studentId={studentId}
-                gradeLevel={gradeLevel}
-                dateOfBirth={dateOfBirth}
-                parentName={parentName}
-                parentPhone={parentPhone}
-                parentEmail={parentEmail}
-                subjects={subjects}
-                attendanceDays={attendanceDays}
-                attendancePresent={attendancePresent}
-                teacherComments={teacherComments}
-                calculateAverage={calculateAverage}
-                documentType="reportCard"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
- 
-    {/* ── PRINT AREA (hidden on screen, used only for printing) ────────── */}
-    <div id="print-area" className="hidden print:block">
-      <TemplateRenderer
-        templateId={selectedTemplate}
-        businessInfo={businessInfo}
-        loading={loading}
-        reportCardNumber={reportNumber}
-        term={term}
-        academicYear={academicYear}
-        studentName={studentName}
-        studentId={studentId}
-        gradeLevel={gradeLevel}
-        dateOfBirth={dateOfBirth}
-        parentName={parentName}
-        parentPhone={parentPhone}
-        parentEmail={parentEmail}
-        subjects={subjects}
-        attendanceDays={attendanceDays}
-        attendancePresent={attendancePresent}
-        teacherComments={teacherComments}
-        calculateAverage={calculateAverage}
-        documentType="reportCard"
-      />
-    </div>
-  </>
+       {activeView === "reports" && (
+  <div style={{ margin: "-24px", height: "calc(100vh - 64px)" }}>
+    <Reports />
+  </div>
 )}
         </main>
       </div>
@@ -3109,6 +2474,7 @@ const AttendanceView = ({
                         >
                           {s.name}
                         </div>
+                        <MedicalAlert student={s} />
                         <div style={{ fontSize: 11, color: "#94a3b8" }}>
                           Age {s.age}
                         </div>
@@ -4173,294 +3539,6 @@ const NoticesView = ({
             </div>
           );
         })}
-      </div>
-    </div>
-  );
-};
-
-// ─── FEES VIEW ────────────────────────────────────────────────────────────────
-const FeesView = ({
-  students,
-  feeFilter,
-  setFeeFilter,
-  collectedFees,
-  totalFees,
-}) => {
-  const filters = ["all", "paid", "partial", "unpaid"];
-  const filtered =
-    feeFilter === "all"
-      ? students
-      : students.filter((s) => s.fees.status === feeFilter);
-  const outstanding = totalFees - collectedFees;
-
-  return (
-    <div className="space-y-5">
-      {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="card p-5">
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: "#94a3b8",
-              letterSpacing: ".07em",
-              textTransform: "uppercase",
-              marginBottom: 6,
-            }}
-          >
-            Total Collected
-          </div>
-          <div style={{ fontSize: 26, fontWeight: 800, color: "#10b981" }}>
-            R{collectedFees.toLocaleString()}
-          </div>
-          <div
-            style={{
-              marginTop: 8,
-              height: 6,
-              background: "#e2e8f0",
-              borderRadius: 99,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                width: `${Math.round((collectedFees / totalFees) * 100)}%`,
-                height: "100%",
-                background: "#10b981",
-                borderRadius: 99,
-              }}
-            />
-          </div>
-          <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
-            {Math.round((collectedFees / totalFees) * 100)}% of total
-          </div>
-        </div>
-        <div className="card p-5">
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: "#94a3b8",
-              letterSpacing: ".07em",
-              textTransform: "uppercase",
-              marginBottom: 6,
-            }}
-          >
-            Outstanding
-          </div>
-          <div style={{ fontSize: 26, fontWeight: 800, color: "#ef4444" }}>
-            R{outstanding.toLocaleString()}
-          </div>
-          <div style={{ fontSize: 12, color: "#64748b", marginTop: 6 }}>
-            {students.filter((s) => s.fees.status !== "paid").length} students
-            with balance
-          </div>
-        </div>
-        <div className="card p-5">
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: "#94a3b8",
-              letterSpacing: ".07em",
-              textTransform: "uppercase",
-              marginBottom: 6,
-            }}
-          >
-            Fully Paid
-          </div>
-          <div style={{ fontSize: 26, fontWeight: 800, color: "var(--brand)" }}>
-            {students.filter((s) => s.fees.status === "paid").length}
-          </div>
-          <div style={{ fontSize: 12, color: "#64748b", marginTop: 6 }}>
-            out of {students.length} students
-          </div>
-        </div>
-      </div>
-
-      {/* Filter bar */}
-      <div className="flex gap-2 flex-wrap">
-        {filters.map((f) => (
-          <button
-            key={f}
-            onClick={() => setFeeFilter(f)}
-            style={{
-              padding: "6px 16px",
-              borderRadius: 99,
-              fontSize: 12.5,
-              fontWeight: 600,
-              border: "none",
-              cursor: "pointer",
-              background: feeFilter === f ? "var(--brand)" : "#f1f5f9",
-              color: feeFilter === f ? "#fff" : "#475569",
-            }}
-          >
-            {f === "all"
-              ? "All Students"
-              : f.charAt(0).toUpperCase() + f.slice(1)}
-            <span style={{ marginLeft: 6, opacity: 0.7 }}>
-              (
-              {f === "all"
-                ? students.length
-                : students.filter((s) => s.fees.status === f).length}
-              )
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {/* Table */}
-      <div className="card overflow-x-auto">
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr
-              style={{
-                background: "#f8fafc",
-                borderBottom: "1px solid #e2e8f0",
-              }}
-            >
-              {[
-                "Student",
-                "Grade",
-                "Parent",
-                "Fees Due",
-                "Paid",
-                "Balance",
-                "Status",
-                "Action",
-              ].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    padding: "10px 14px",
-                    textAlign: "left",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: "#94a3b8",
-                    letterSpacing: ".06em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((s, i) => {
-              const balance = s.fees.total - s.fees.paid;
-              return (
-                <tr
-                  key={s.id}
-                  style={{
-                    borderBottom:
-                      i < filtered.length - 1 ? "1px solid #f1f5f9" : "none",
-                  }}
-                >
-                  <td style={{ padding: "12px 14px" }}>
-                    <div className="flex items-center gap-2">
-                      <div
-                        style={{
-                          width: 30,
-                          height: 30,
-                          borderRadius: 8,
-                          background: `hsl(${s.id * 47},70%,88%)`,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: 11,
-                          fontWeight: 700,
-                          color: `hsl(${s.id * 47},50%,35%)`,
-                          flexShrink: 0,
-                        }}
-                      >
-                        {s.name
-                          .split(" ")
-                          .map((w) => w[0])
-                          .join("")
-                          .slice(0, 2)}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: "#0f172a",
-                        }}
-                      >
-                        {s.name}
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    style={{
-                      padding: "12px 14px",
-                      fontSize: 12,
-                      color: "#475569",
-                    }}
-                  >
-                    {s.grade}
-                  </td>
-                  <td
-                    style={{
-                      padding: "12px 14px",
-                      fontSize: 12,
-                      color: "#64748b",
-                    }}
-                  >
-                    {s.parent}
-                  </td>
-                  <td
-                    style={{
-                      padding: "12px 14px",
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: "#0f172a",
-                    }}
-                  >
-                    R{s.fees.total.toLocaleString()}
-                  </td>
-                  <td
-                    style={{
-                      padding: "12px 14px",
-                      fontSize: 13,
-                      color: "#10b981",
-                      fontWeight: 600,
-                    }}
-                  >
-                    R{s.fees.paid.toLocaleString()}
-                  </td>
-                  <td
-                    style={{
-                      padding: "12px 14px",
-                      fontSize: 13,
-                      color: balance > 0 ? "#ef4444" : "#10b981",
-                      fontWeight: 700,
-                    }}
-                  >
-                    R{balance.toLocaleString()}
-                  </td>
-                  <td style={{ padding: "12px 14px" }}>
-                    <span className={`pill status-${s.fees.status}`}>
-                      {s.fees.status.charAt(0).toUpperCase() +
-                        s.fees.status.slice(1)}
-                    </span>
-                  </td>
-                  <td style={{ padding: "12px 14px" }}>
-                    {s.fees.status !== "paid" && (
-                      <button
-                        className="btn-ghost"
-                        style={{ padding: "4px 10px", fontSize: 11 }}
-                      >
-                        <Send className="w-3 h-3" />
-                        Remind
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
       </div>
     </div>
   );
