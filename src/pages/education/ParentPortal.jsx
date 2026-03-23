@@ -78,11 +78,7 @@ const gradeBg = (g) =>
   ] || T.bg;
 
 export default function ParentPortal() {
-  // supports both route shapes: /parents/:portalSlug and /parents/:schoolSlug
-  const params = useParams();
-  const schoolSlug = params.portalSlug ?? params.schoolSlug;
-
-  // ── school uid (resolved once) ─────────────────────────────────────────────
+const { portalSlug } = useParams();
   const [schoolUid, setSchoolUid] = useState(null);
 
   // ── school data ────────────────────────────────────────────────────────────
@@ -122,18 +118,10 @@ export default function ParentPortal() {
   useEffect(() => {
     const load = async () => {
       try {
-        // support both portalSlug and schoolSlug field names
-        let usersSnap = await getDocs(
-          query(collection(db, "users"), where("portalSlug", "==", schoolSlug)),
-        );
-        if (usersSnap.empty) {
-          usersSnap = await getDocs(
-            query(
-              collection(db, "users"),
-              where("schoolSlug", "==", schoolSlug),
-            ),
-          );
-        }
+       
+        const usersSnap = await getDocs(
+  query(collection(db, "users"), where("portalSlug", "==", portalSlug)),
+);
         if (usersSnap.empty) {
           setNotFound(true);
           setLoading(false);
@@ -274,7 +262,7 @@ export default function ParentPortal() {
       }
     };
     load();
-  }, [schoolSlug]);
+  }, [portalSlug]);
 
   // ── Verify child name ──────────────────────────────────────────────────────
   const handleVerify = () => {

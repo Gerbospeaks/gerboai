@@ -75,42 +75,13 @@ function PWAGate() {
     [pathname]
   );
 
-  // Never render anything until auth is fully resolved
-  // and never render on public routes
+
   if (loading || isPublic) return null;
 
   return <PWAInstallPrompt appReady={true} />;
 }
 function App() {
- useEffect(() => {
-    // Disable right-click
-    const handleContextMenu = (e) => e.preventDefault();
 
-    // Disable key shortcuts
-    const handleKeyDown = (e) => {
-      if (
-        e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-        (e.ctrlKey && e.shiftKey && e.key === 'J') ||
-        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
-        (e.ctrlKey && e.key === 'u') ||
-        (e.ctrlKey && e.key === 's') ||
-        (e.ctrlKey && e.key === 'c') ||
-        (e.ctrlKey && e.key === 'a')
-      ) {
-        e.preventDefault();
-      }
-    };
-
-    document.addEventListener('contextmenu', handleContextMenu);
-    document.addEventListener('keydown', handleKeyDown);
-
-    // Cleanup on unmount
-    return () => {
-      document.removeEventListener('contextmenu', handleContextMenu);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
   
   return (
     

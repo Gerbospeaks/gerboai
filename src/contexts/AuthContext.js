@@ -221,7 +221,7 @@ export const AuthProvider = ({ children }) => {
           const ref = doc(db, "users", user.uid, colName, "_init");
           batch.set(ref, { _placeholder: true, createdAt: serverTimestamp() });
         });
-        // NOTE: schoolSlugs entry is created later when school name is set in Settings
+  
       }
       // ───────────────────────────────────────────────────────────────────
 
