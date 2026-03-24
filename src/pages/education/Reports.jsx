@@ -11,8 +11,8 @@ import {
   where,
 } from "firebase/firestore";
 import { useAuth } from "../../contexts/AuthContext";
-
-// ── PRINT STYLES (injected once) ───────────────────────────────────────────
+import { buildGradeThemes } from "../../lib/gradeThemes";
+import { loadPaletteSelections } from "../../lib/themeService";
 const injectPrintStyles = () => {
   if (document.getElementById("report-print-styles")) return;
   const style = document.createElement("style");
@@ -131,14 +131,19 @@ const injectResponsiveStyles = () => {
         display: flex !important;
         flex-direction: column !important;
       }
-
+        .report-page-scaler {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
       /* Preview: shown by default */
       #report-preview {
-        display: none !important;
-        flex: 1 !important;
-        overflow-y: auto !important;
-        overflow-x: auto !important;
-        min-height: 0 !important;
+       display: none !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;   /* was overflow-x: auto */
+  min-height: 0 !important;
       }
       #report-preview.mobile-active {
         display: flex !important;
@@ -154,9 +159,7 @@ const injectResponsiveStyles = () => {
       }
 
       .report-page {
-        width: 100% !important;
-        min-width: 320px !important;
-        min-height: unset !important;
+         margin: 4px auto !important;
       }
     }
 
@@ -4310,6 +4313,7 @@ const TermPage = ({ t, td, data, businessName }) => {
 // ── FULL REPORT ───────────────────────────────────────────────────────────────
 const Report = ({ themeId, data, firebaseData, businessName, logoUrl }) => {
  const t = resolveTheme(themeId);
+ const [gradeThemes, setGradeThemes] = useState(null);
   const {
     studentAttendance = [],
     studentFees = null,
@@ -5762,7 +5766,51 @@ const MobileTabBar = ({ activeTab, onChange, savedCount }) => {
   );
 };
 
-// ── MAIN EXPORT ───────────────────────────────────────────────────────────────
+const ScaledReportContainer = ({ children }) => {
+  const containerRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const PAGE_WIDTH = 794; // 210mm at 96dpi
+
+    const updateScale = () => {
+      if (!containerRef.current) return;
+      const available = containerRef.current.offsetWidth - 16;
+      const newScale = Math.min(1, available / PAGE_WIDTH);
+      setScale(newScale);
+    };
+
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        flex: 1,
+        padding: "0 8px",
+        // Reserve vertical space so the scrollbar reflects actual content height
+        minHeight: 0,
+      }}
+    >
+      <div
+        style={{
+          transformOrigin: "top center",
+          transform: `scale(${scale})`,
+          // Compensate horizontal centering when scaled down
+          marginLeft: scale < 1 ? `calc((${scale} - 1) * 397px)` : 0,
+          // Collapse the extra vertical whitespace the scale creates
+          marginBottom: scale < 1 ? `calc((${scale} - 1) * 100%)` : 0,
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
 export default function Reports() {
   const { user } = useAuth();
   const db = getFirestore();
@@ -5959,6 +6007,7 @@ useEffect(() => {
     setSelected(GRADE_THEMES[gradeKey].id);
   }
 }, [data.grade]);
+
   useEffect(() => {
     injectFonts();
     injectPrintStyles();
@@ -6345,75 +6394,76 @@ useEffect(() => {
         />
 
         {/* ══ CENTRE — REPORT PREVIEW ═════════════════════════════════════════ */}
-        <div
-          id="report-preview"
-          className={mobileTab === "preview" ? "mobile-active" : ""}
-          style={{
-            flex: 1,
-            overflowY: "auto",
-            overflowX: "auto",
-            background: "#d4d8e0",
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            minWidth: 0,
-          }}
-        >
-          <ActionToolbar
-            data={data}
-            themeId={selected}
-            firebaseData={firebaseData}
-            onSave={handleSave}
-            onNew={handleNew}
-            isSaving={isSaving}
-            savedStudentIds={savedStudentIds}
-            activeStudentId={activeStudentId}
-          />
+     
+<div
+  id="report-preview"
+  className={mobileTab === "preview" ? "mobile-active" : ""}
+  style={{
+    flex: 1,
+    overflowY: "auto",
+    overflowX: "hidden",
+    background: "#d4d8e0",
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+    minWidth: 0,
+  }}
+>
+  <ActionToolbar
+    data={data}
+    themeId={selected}
+    firebaseData={firebaseData}
+    onSave={handleSave}
+    onNew={handleNew}
+    isSaving={isSaving}
+    savedStudentIds={savedStudentIds}
+    activeStudentId={activeStudentId}
+  />
 
-          {loadingFirebase && (
-            <div
-              style={{
-                position: "absolute",
-                top: 52,
-                left: "50%",
-                transform: "translateX(-50%)",
-                zIndex: 100,
-                background: "#1d3557",
-                color: "#fff",
-                padding: "8px 18px",
-                borderRadius: 99,
-                fontSize: 11,
-                fontWeight: 700,
-                boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <div
-                style={{
-                  width: 14,
-                  height: 14,
-                  border: "2px solid rgba(255,255,255,0.3)",
-                  borderTop: "2px solid #fff",
-                  borderRadius: "50%",
-                  animation: "spin 0.8s linear infinite",
-                }}
-              />
-              Loading student data from Firebase…
-            </div>
-          )}
+  {loadingFirebase && (
+    <div
+      style={{
+        position: "absolute",
+        top: 52,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 100,
+        background: "#1d3557",
+        color: "#fff",
+        padding: "8px 18px",
+        borderRadius: 99,
+        fontSize: 11,
+        fontWeight: 700,
+        boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+      }}
+    >
+      <div
+        style={{
+          width: 14,
+          height: 14,
+          border: "2px solid rgba(255,255,255,0.3)",
+          borderTop: "2px solid #fff",
+          borderRadius: "50%",
+          animation: "spin 0.8s linear infinite",
+        }}
+      />
+      Loading student data from Firebase…
+    </div>
+  )}
 
-          <div style={{ flex: 1 }}>
-            <Report
-              themeId={selected}
-              data={data}
-              firebaseData={firebaseData}
-              businessName={businessName}
-              logoUrl={businessInfo?.logoUrl}
-            />
-          </div>
-        </div>
+  <ScaledReportContainer>
+    <Report
+      themeId={selected}
+      data={data}
+      firebaseData={firebaseData}
+      businessName={businessName}
+      logoUrl={businessInfo?.logoUrl}
+    />
+  </ScaledReportContainer>
+</div>
 
         {/* ══ RIGHT — STUDENT LIST (desktop sidebar / mobile tab panel) ══════ */}
         <div

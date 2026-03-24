@@ -1,0 +1,68 @@
+export const PALETTES = [
+  {
+    id: "violet", name: "Violet",
+    p: "#6d28d9", lt: "#ede9fe", cream: "#faf5ff", bd: "#ddd6fe",
+    mu: "#5b21b6", fBg: "#6d28d9", hTxt: "#fff",
+    pgBorder: "4px solid #6d28d9",
+    accent1: "#ec4899", accent2: "#c084fc",
+    tb: ["linear-gradient(90deg,#6d28d9,#7c3aed)","linear-gradient(90deg,#1e40af,#3b82f6)","linear-gradient(90deg,#be185d,#ec4899)","linear-gradient(90deg,#7e22ce,#c084fc)"],
+  },
+  {
+    id: "rose", name: "Rose",
+    p: "#be185d", lt: "#fce7f3", cream: "#fdf2f8", bd: "#fbcfe8",
+    mu: "#9d174d", fBg: "#be185d", hTxt: "#fff",
+    pgBorder: "6px solid #be185d",
+    accent1: "#f97316", accent2: "#fcd34d",
+    tb: ["linear-gradient(90deg,#be185d,#ec4899)","linear-gradient(90deg,#065f46,#10b981)","linear-gradient(90deg,#7c2d12,#f97316)","linear-gradient(90deg,#78350f,#fcd34d)"],
+  },
+  {
+    id: "amber", name: "Amber",
+    p: "#b45309", lt: "#fef3c7", cream: "#fffbeb", bd: "#fde68a",
+    mu: "#92400e", fBg: "#b45309", hTxt: "#fff",
+    pgBorder: "6px solid #b45309",
+    accent1: "#ef4444", accent2: "#fbbf24",
+    tb: ["linear-gradient(90deg,#b45309,#d97706)","linear-gradient(90deg,#0d9488,#2dd4bf)","linear-gradient(90deg,#991b1b,#ef4444)","linear-gradient(90deg,#a16207,#fbbf24)"],
+  },
+  {
+    id: "sky", name: "Sky",
+    p: "#0369a1", lt: "#e0f2fe", cream: "#f0f9ff", bd: "#bae6fd",
+    mu: "#075985", fBg: "#0369a1", hTxt: "#fff",
+    pgBorder: "6px solid #0369a1",
+    accent1: "#0ea5e9", accent2: "#38bdf8",
+    tb: ["linear-gradient(90deg,#0369a1,#0ea5e9)","linear-gradient(90deg,#0e7490,#06b6d4)","linear-gradient(90deg,#1d4ed8,#60a5fa)","linear-gradient(90deg,#1e40af,#3b82f6)"],
+  },
+  {
+    id: "forest", name: "Forest",
+    p: "#15803d", lt: "#dcfce7", cream: "#f0fdf4", bd: "#bbf7d0",
+    mu: "#166534", fBg: "#15803d", hTxt: "#fff",
+    pgBorder: "6px solid #15803d",
+    accent1: "#16a34a", accent2: "#84cc16",
+    tb: ["linear-gradient(90deg,#15803d,#16a34a)","linear-gradient(90deg,#0d9488,#2dd4bf)","linear-gradient(90deg,#3f6212,#84cc16)","linear-gradient(90deg,#065f46,#10b981)"],
+  },
+  {
+    id: "slate", name: "Slate",
+    p: "#334155", lt: "#f1f5f9", cream: "#f8fafc", bd: "#e2e8f0",
+    mu: "#475569", fBg: "#334155", hTxt: "#fff",
+    pgBorder: "4px solid #334155",
+    accent1: "#0ea5e9", accent2: "#94a3b8",
+    tb: ["linear-gradient(90deg,#334155,#475569)","linear-gradient(90deg,#0369a1,#0ea5e9)","linear-gradient(90deg,#0f766e,#2dd4bf)","linear-gradient(90deg,#15803d,#4ade80)"],
+  },
+  {
+    id: "coral", name: "Coral",
+    p: "#9a3412", lt: "#ffedd5", cream: "#fff7ed", bd: "#fed7aa",
+    mu: "#7c2d12", fBg: "#9a3412", hTxt: "#fff",
+    pgBorder: "4px solid #9a3412",
+    accent1: "#c2410c", accent2: "#ea580c",
+    tb: ["linear-gradient(90deg,#9a3412,#c2410c)","linear-gradient(90deg,#0d9488,#2dd4bf)","linear-gradient(90deg,#78350f,#ea580c)","linear-gradient(90deg,#92400e,#f59e0b)"],
+  },
+  {
+    id: "teal", name: "Teal",
+    p: "#0f766e", lt: "#ccfbf1", cream: "#f0fdfa", bd: "#99f6e4",
+    mu: "#115e59", fBg: "#0f766e", hTxt: "#fff",
+    pgBorder: "4px solid #0f766e",
+    accent1: "#0d9488", accent2: "#2dd4bf",
+    tb: ["linear-gradient(90deg,#0f766e,#0d9488)","linear-gradient(90deg,#0369a1,#0ea5e9)","linear-gradient(90deg,#15803d,#4ade80)","linear-gradient(90deg,#6d28d9,#a78bfa)"],
+  },
+];
+
+export const DEFAULT_PALETTE_ID = "violet";
