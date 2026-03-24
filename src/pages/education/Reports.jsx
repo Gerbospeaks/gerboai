@@ -1,13 +1,61 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   getFirestore,
   collection,
   query,
   orderBy,
   getDocs,
+  doc,
+  getDoc,
+  setDoc,
   where,
 } from "firebase/firestore";
 import { useAuth } from "../../contexts/AuthContext";
+
+// ── PRINT STYLES (injected once) ───────────────────────────────────────────
+const injectPrintStyles = () => {
+  if (document.getElementById("report-print-styles")) return;
+  const style = document.createElement("style");
+  style.id = "report-print-styles";
+  style.textContent = `
+    @media print {
+      /* Hide everything except the preview pane */
+      body > * { display: none !important; }
+      #report-layout { display: block !important; }
+      #left-panel,
+      #theme-bar,
+      #student-list-panel,
+      .no-print { display: none !important; }
+      #report-preview {
+        display: block !important;
+        position: static !important;
+        overflow: visible !important;
+        background: white !important;
+        flex: none !important;
+        width: 100% !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+      .report-page {
+        width: 210mm !important;
+        min-height: 297mm !important;
+        max-height: 297mm !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        overflow: hidden !important;
+        box-shadow: none !important;
+        margin: 0 auto !important;
+      }
+      .report-page:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+};
 
 const injectFonts = () => {
   if (document.getElementById("rpt-gf")) return;
@@ -55,7 +103,7 @@ const fmt = (n) =>
 
 const pct = (a, b) => (b === 0 ? 0 : Math.round((a / b) * 100));
 
-// ── THEMES ───────────────────────────────────────────────────────────────────
+// ── THEMES ────────────────────────────────────────────────────────────────────
 const THEMES = {
   classic: {
     id: "classic",
@@ -368,6 +416,7 @@ const RTable = ({ t, cols, rows }) => (
 
 const PageShell = ({ t, children, noBorder }) => (
   <div
+    className="report-page"
     style={{
       width: "210mm",
       minHeight: "297mm",
@@ -403,7 +452,7 @@ const PageShell = ({ t, children, noBorder }) => (
   </div>
 );
 
-const PageHeader = ({ t, title, sub }) => (
+const PageHeader = ({ t, title, sub, businessName }) => (
   <div
     style={{
       display: "flex",
@@ -439,7 +488,7 @@ const PageHeader = ({ t, title, sub }) => (
         color: t.p,
       }}
     >
-      Smarties <span style={{ color: t.a }}>Daycare</span>
+      {businessName || "Solidflo Daycare"} 
     </div>
   </div>
 );
@@ -699,55 +748,8 @@ const TERM_DATA = [
   },
 ];
 
-// ── NEW: Firebase data pages ──────────────────────────────────────────────────
-
-const DataInfoRow = ({ t, label, value, highlight }) => (
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      padding: "1.5mm 0",
-      borderBottom: `1px solid ${t.bd}`,
-    }}
-  >
-    <label
-      style={{
-        fontFamily: t.hf,
-        fontWeight: 700,
-        fontSize: "8pt",
-        color: t.sky,
-        minWidth: "50mm",
-        textTransform: "uppercase",
-        letterSpacing: "0.4px",
-      }}
-    >
-      {label}
-    </label>
-    <div
-      style={{
-        flex: 1,
-        fontSize: "8.5pt",
-        color: highlight ? t.a : "#212529",
-        fontWeight: highlight ? 700 : 400,
-        fontFamily: t.bf,
-      }}
-    >
-      {value || "—"}
-    </div>
-  </div>
-);
-
-// ── ATTENDANCE PAGE (from AttendanceTrends Firebase data) ─────────────────────
-const AttendancePage = ({ t, data, studentAttendance }) => {
-  const byMonth = {};
-  studentAttendance.forEach((r) => {
-    const mo = r.date ? r.date.slice(0, 7) : "unknown";
-    if (!byMonth[mo])
-      byMonth[mo] = { present: 0, absent: 0, late: 0, total: 0 };
-    byMonth[mo][r.status] = (byMonth[mo][r.status] || 0) + 1;
-    byMonth[mo].total++;
-  });
-
+// ── ATTENDANCE PAGE ───────────────────────────────────────────────────────────
+const AttendancePage = ({ t, data, studentAttendance, businessName }) => {
   const totalPresent = studentAttendance.filter(
     (r) => r.status === "present",
   ).length;
@@ -758,7 +760,6 @@ const AttendancePage = ({ t, data, studentAttendance }) => {
   const total = studentAttendance.length;
   const overallPct = pct(totalPresent, total);
 
-  // Map months to terms (SA school year)
   const termMonthMap = {
     "2026-01": 1,
     "2026-02": 1,
@@ -773,7 +774,6 @@ const AttendancePage = ({ t, data, studentAttendance }) => {
     "2026-11": 4,
     "2026-12": 4,
   };
-
   const byTerm = {
     1: { present: 0, absent: 0, late: 0, total: 0 },
     2: { present: 0, absent: 0, late: 0, total: 0 },
@@ -791,21 +791,16 @@ const AttendancePage = ({ t, data, studentAttendance }) => {
 
   const rateColor = (rate) =>
     rate >= 90 ? "#15803d" : rate >= 75 ? "#a16207" : "#dc2626";
-
-  // Attendance dot calendar — last 60 days of records
   const sorted = [...studentAttendance]
     .sort((a, b) => (a.date || "").localeCompare(b.date || ""))
     .slice(-90);
 
   return (
     <PageShell t={t}>
-      <PageHeader
-        t={t}
-        title="Attendance Record"
-        sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
-      />
-
-      {/* Summary strip */}
+      <PageHeader t={t} title="Attendance Record"
+    sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
+    businessName={businessName}
+  />
       <div
         style={{
           display: "grid",
@@ -855,8 +850,6 @@ const AttendancePage = ({ t, data, studentAttendance }) => {
           </div>
         ))}
       </div>
-
-      {/* Overall rate bar */}
       <div
         style={{
           marginBottom: "4mm",
@@ -909,7 +902,6 @@ const AttendancePage = ({ t, data, studentAttendance }) => {
               background:
                 overallPct >= 90 ? t.teal : overallPct >= 75 ? t.gold : t.a,
               borderRadius: 99,
-              transition: "width 0.5s",
             }}
           />
         </div>
@@ -926,8 +918,6 @@ const AttendancePage = ({ t, data, studentAttendance }) => {
           </div>
         )}
       </div>
-
-      {/* Term breakdown table */}
       <SecTitle t={t} col={t.p}>
         Term-by-Term Attendance
       </SecTitle>
@@ -954,8 +944,6 @@ const AttendancePage = ({ t, data, studentAttendance }) => {
           ];
         })}
       />
-
-      {/* Monthly dot calendar */}
       {sorted.length > 0 && (
         <>
           <SecTitle t={t} col={t.teal}>
@@ -1031,7 +1019,6 @@ const AttendancePage = ({ t, data, studentAttendance }) => {
           </div>
         </>
       )}
-
       {sorted.length === 0 && (
         <div
           style={{
@@ -1047,36 +1034,30 @@ const AttendancePage = ({ t, data, studentAttendance }) => {
           No attendance records found for this student
         </div>
       )}
-
       <SigRow t={t} data={data} />
     </PageShell>
   );
 };
 
-// ── FEES PAGE (from FeesViewFirebase / useFeesFirebase Firebase data) ──────────
-const FeesPage = ({ t, data, studentFees, studentPayments }) => {
+// ── FEES PAGE ─────────────────────────────────────────────────────────────────
+const FeesPage = ({ t, data, studentFees, studentPayments, businessName }) => {
   const totalFees = studentFees?.total || 0;
   const paidFees = studentFees?.paid || 0;
   const balance = totalFees - paidFees;
   const status = studentFees?.status || "unpaid";
   const payPct = pct(paidFees, totalFees);
-
   const statusColors = {
     paid: { bg: "#dcfce7", color: "#15803d", label: "Paid in Full" },
     partial: { bg: "#fef9c3", color: "#a16207", label: "Partial Payment" },
     unpaid: { bg: "#fee2e2", color: "#dc2626", label: "Outstanding" },
   };
   const sc = statusColors[status] || statusColors.unpaid;
-
   return (
     <PageShell t={t}>
-      <PageHeader
-        t={t}
-        title="Fee Statement"
-        sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
-      />
-
-      {/* Fee summary cards */}
+      <PageHeader t={t} title="Fee Statement"
+    sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
+    businessName={businessName}
+  />
       <div
         style={{
           display: "grid",
@@ -1127,8 +1108,6 @@ const FeesPage = ({ t, data, studentFees, studentPayments }) => {
           </div>
         ))}
       </div>
-
-      {/* Status + progress */}
       <div
         style={{
           padding: "3mm 4mm",
@@ -1197,8 +1176,6 @@ const FeesPage = ({ t, data, studentFees, studentPayments }) => {
           {payPct}% paid
         </div>
       </div>
-
-      {/* Payment history */}
       <SecTitle t={t} col={t.p}>
         Payment History
       </SecTitle>
@@ -1248,8 +1225,6 @@ const FeesPage = ({ t, data, studentFees, studentPayments }) => {
           No payment records found for this student
         </div>
       )}
-
-      {/* Billing note */}
       <div
         style={{
           marginTop: "4mm",
@@ -1266,35 +1241,29 @@ const FeesPage = ({ t, data, studentFees, studentPayments }) => {
           ? `⚠ Outstanding balance of ${fmt(balance)} remains. Please arrange payment to avoid interruption of schooling.`
           : `✓ All fees have been paid in full. Thank you for your prompt payment.`}
       </div>
-
       <SigRow t={t} data={data} />
     </PageShell>
   );
 };
 
-// ── BEHAVIOUR & WELFARE PAGE (from StaffDataViews Firebase data) ───────────────
-const BehaviourWelfarePage = ({ t, data, incidents, welfareFlags }) => {
+// ── BEHAVIOUR & WELFARE PAGE ──────────────────────────────────────────────────
+const BehaviourWelfarePage = ({ t, data, incidents, welfareFlags, businessName }) => {
   const severityConfig = {
     low: { label: "Minor", color: "#a16207", bg: "#fef9c3" },
     medium: { label: "Moderate", color: "#dc2626", bg: "#fee2e2" },
     high: { label: "Serious", color: "#7f1d1d", bg: "#fee2e2" },
   };
-
   const urgencyConfig = {
     low: { label: "Monitor", color: "#15803d" },
     moderate: { label: "Urgent", color: "#a16207" },
     high: { label: "Immediate", color: "#dc2626" },
   };
-
   return (
     <PageShell t={t}>
-      <PageHeader
-        t={t}
-        title="Behaviour & Welfare"
-        sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"} — CONFIDENTIAL`}
-      />
-
-      {/* Behaviour summary */}
+      <PageHeader t={t} title="Behaviour & Welfare"
+    sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"} — CONFIDENTIAL`}
+    businessName={businessName}
+  />
       <div
         style={{
           display: "grid",
@@ -1351,7 +1320,6 @@ const BehaviourWelfarePage = ({ t, data, incidents, welfareFlags }) => {
           </div>
         ))}
       </div>
-
       <SecTitle t={t} col={t.p}>
         Behaviour Incident Log
       </SecTitle>
@@ -1391,8 +1359,6 @@ const BehaviourWelfarePage = ({ t, data, incidents, welfareFlags }) => {
           ✓ No behaviour incidents recorded — excellent conduct
         </div>
       )}
-
-      {/* Welfare flags — confidential */}
       <SecTitle t={t} col={t.a}>
         Welfare Flags (Confidential)
       </SecTitle>
@@ -1454,20 +1420,16 @@ const BehaviourWelfarePage = ({ t, data, incidents, welfareFlags }) => {
           ✓ No welfare concerns on record
         </div>
       )}
-
       <SigRow t={t} data={data} />
     </PageShell>
   );
 };
 
-// ── MARKS PAGE (from StaffDataViews / markbook Firebase data) ─────────────────
-const MarksPage = ({ t, data, markbookEntries }) => {
-  // Entries where this student appears in scores
+// ── MARKS PAGE ────────────────────────────────────────────────────────────────
+const MarksPage = ({ t, data, markbookEntries, businessName }) => {
   const studentName = `${data.firstName} ${data.surname}`.trim();
-
   const getScore = (entry) => {
     const scores = entry.scores || {};
-    // Try match by full name, first name, or student ID
     return (
       scores[studentName] ??
       scores[data.firstName] ??
@@ -1475,18 +1437,15 @@ const MarksPage = ({ t, data, markbookEntries }) => {
       null
     );
   };
-
   const relevantEntries = markbookEntries.filter(
     (e) => getScore(e) !== null && getScore(e) !== undefined,
   );
-
   const bySubject = {};
   relevantEntries.forEach((e) => {
     const subj = e.subject || "General";
     if (!bySubject[subj]) bySubject[subj] = [];
     bySubject[subj].push(e);
   });
-
   const getAvgPct = (entries) => {
     const vals = entries
       .map((e) => {
@@ -1499,7 +1458,6 @@ const MarksPage = ({ t, data, markbookEntries }) => {
     if (!vals.length) return null;
     return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
   };
-
   const capsCode = (pct) => {
     if (pct >= 80) return { code: 7, label: "Outstanding" };
     if (pct >= 70) return { code: 6, label: "Meritorious" };
@@ -1509,16 +1467,12 @@ const MarksPage = ({ t, data, markbookEntries }) => {
     if (pct >= 30) return { code: 2, label: "Elementary" };
     return { code: 1, label: "Not Achieved" };
   };
-
   return (
     <PageShell t={t}>
-      <PageHeader
-        t={t}
-        title="Academic Assessment"
-        sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
-      />
-
-      {/* Subject summary */}
+      <PageHeader t={t} title="Academic Assessment"
+    sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
+    businessName={businessName}
+  />
       {Object.keys(bySubject).length > 0 && (
         <div
           style={{
@@ -1582,8 +1536,6 @@ const MarksPage = ({ t, data, markbookEntries }) => {
           })}
         </div>
       )}
-
-      {/* Detailed assessments by subject */}
       {Object.entries(bySubject).map(([subj, entries]) => (
         <div key={subj}>
           <SecTitle t={t} col={t.p}>
@@ -1618,7 +1570,6 @@ const MarksPage = ({ t, data, markbookEntries }) => {
           />
         </div>
       ))}
-
       {relevantEntries.length === 0 && (
         <div
           style={{
@@ -1634,8 +1585,6 @@ const MarksPage = ({ t, data, markbookEntries }) => {
           No academic assessment records found for this student
         </div>
       )}
-
-      {/* CAPS legend */}
       <SecTitle t={t} col={t.teal}>
         Assessment Code Reference
       </SecTitle>
@@ -1652,14 +1601,13 @@ const MarksPage = ({ t, data, markbookEntries }) => {
           ["1", "Not Achieved", "0–29%"],
         ]}
       />
-
       <SigRow t={t} data={data} />
     </PageShell>
   );
 };
 
-// ── COVER PAGE ─────────────────────────────────────────────────────────────────
-const CoverPage = ({ t, data }) => (
+// ── COVER PAGE ────────────────────────────────────────────────────────────────
+const CoverPage = ({ t, data, businessName }) => (
   <PageShell t={t} noBorder>
     {t.id === "playful" ? (
       <div
@@ -1690,7 +1638,7 @@ const CoverPage = ({ t, data }) => (
             textTransform: "uppercase",
           }}
         >
-          Smarties Daycare &amp; Pre School
+          {businessName || "Solidflo Pre School"} 
         </span>
       </div>
     )}
@@ -1715,7 +1663,7 @@ const CoverPage = ({ t, data }) => (
             textTransform: "uppercase",
           }}
         >
-          🌟 Smarties Daycare &amp; Pre School 🌟
+         {businessName || "Solidflo Pre School"} 
         </span>
       </div>
     )}
@@ -1888,23 +1836,14 @@ const CoverPage = ({ t, data }) => (
         justifyContent: "center",
       }}
     >
-      <p
-        style={{
-          fontFamily: t.hf,
-          fontWeight: 700,
-          fontSize: "8.5pt",
-          color: "#fff",
-          letterSpacing: "0.5px",
-        }}
-      >
-        {data.address || "Ext 36, Olivienhoutsbosch"} &nbsp;|&nbsp; Smarties
-        Daycare &amp; Pre School &nbsp;|&nbsp; {data.schoolYear || "2026"}
-      </p>
+      <p style={{ fontFamily: t.hf, fontWeight: 700, fontSize: "8pt", letterSpacing: "0.5px" }}>
+  {data.address || "Ext 36, Olivienhoutsbosch"} &nbsp;|&nbsp; {businessName || "Solidflo Pre School"} &nbsp;|&nbsp; {data.schoolYear || "2026"}
+</p>
     </div>
   </PageShell>
 );
 
-const KeyPage = ({ t, data }) => {
+const KeyPage = ({ t, data, businessName }) => {
   const capsLevels = [
     { code: 7, label: "Outstanding", range: "80–100%", bg: "#2a9d8f" },
     { code: 6, label: "Meritorious", range: "70–79%", bg: "#57cc99" },
@@ -1937,11 +1876,10 @@ const KeyPage = ({ t, data }) => {
   ];
   return (
     <PageShell t={t}>
-      <PageHeader
-        t={t}
-        title="Assessment Key & Attendance"
-        sub={`Smarties Daycare & Pre School · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
-      />
+      <PageHeader t={t} title="Assessment Key & Attendance" 
+    sub={`${businessName || "Solidflo Saas School"} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
+    businessName={businessName}
+  />
       <div style={{ flex: 1 }}>
         <SecTitle t={t} col={t.p}>
           Assessment Key (CAPS Codes)
@@ -2053,13 +1991,20 @@ const KeyPage = ({ t, data }) => {
             </div>
           ))}
         </div>
-        
       </div>
     </PageShell>
   );
 };
-
-const TermPage = ({ t, td, data }) => {
+const loadScript = (src) =>
+  new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+const TermPage = ({ t, td, data, businessName }) => {
   const isT4 = td.num === 4;
   const comments = data[`comments${td.num}`] || "";
   return (
@@ -2232,18 +2177,9 @@ const TermPage = ({ t, td, data }) => {
               textAlign: "center",
             }}
           >
-            <p
-              style={{
-                fontFamily: t.hf,
-                fontWeight: 700,
-                fontSize: "8pt",
-                letterSpacing: "0.5px",
-              }}
-            >
-              Smarties Daycare &amp; Pre School ·{" "}
-              {data.address || "Ext 36, Olivienhoutsbosch"} · Grade{" "}
-              {data.grade || "1"} Progress Report {data.schoolYear || "2026"}
-            </p>
+            <p style={{ fontFamily: t.hf, fontWeight: 700, fontSize: "8pt", letterSpacing: "0.5px" }}>
+  {businessName || "Solidflo Pre School"} · {data.address || "Ext 36, Olivienhoutsbosch"} · Grade {data.grade || "1"} Progress Report {data.schoolYear || "2026"}
+</p>
           </div>
         )}
       </div>
@@ -2252,39 +2188,204 @@ const TermPage = ({ t, td, data }) => {
 };
 
 // ── FULL REPORT ───────────────────────────────────────────────────────────────
-const Report = ({ themeId, data, firebaseData }) => {
+const Report = ({ themeId, data, firebaseData, businessName }) => {
   const t = THEMES[themeId];
-  const {
-    studentAttendance = [],
-    studentFees = null,
-    studentPayments = [],
-    incidents = [],
-    welfareFlags = [],
-    markbookEntries = [],
-  } = firebaseData || {};
+  const { studentAttendance = [], studentFees = null, studentPayments = [],
+    incidents = [], welfareFlags = [], markbookEntries = [] } = firebaseData || {};
+  return (
+    <div style={{ background: "#d4d8e0", padding: "10px 0", minHeight: "100%" }}>
+      <CoverPage t={t} data={data} businessName={businessName} />
+      <KeyPage t={t} data={data} businessName={businessName} />
+      <AttendancePage t={t} data={data} studentAttendance={studentAttendance} businessName={businessName} />
+      <FeesPage t={t} data={data} studentFees={studentFees} studentPayments={studentPayments} businessName={businessName} />
+      <MarksPage t={t} data={data} markbookEntries={markbookEntries} businessName={businessName} />
+      <BehaviourWelfarePage t={t} data={data} incidents={incidents} welfareFlags={welfareFlags} businessName={businessName} />
+      {TERM_DATA.map((td) => (
+        <TermPage key={td.num} t={t} td={td} data={data} businessName={businessName} />
+      ))}
+    </div>
+  );
+};
+
+// ── ACTION TOOLBAR ────────────────────────────────────────────────────────────
+const ActionToolbar = ({
+  data,
+  themeId,
+  firebaseData,
+  onSave,
+  onNew,
+  isSaving,
+  savedStudentIds,
+  activeStudentId,
+}) => {
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleSaveAsPDF = async () => {
+  setPdfLoading(true);
+  try {
+    // Load via script tags (works in all bundler environments)
+    await Promise.all([
+      loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"),
+      loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"),
+    ]);
+
+    const html2canvas = window.html2canvas;
+    const { jsPDF } = window.jspdf;
+
+    if (!html2canvas || !jsPDF) {
+      window.print();
+      return;
+    }
+
+    const pages = document.querySelectorAll(".report-page");
+    if (!pages.length) { window.print(); return; }
+
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const A4_W = 210, A4_H = 297;
+
+    for (let i = 0; i < pages.length; i++) {
+      const canvas = await html2canvas(pages[i], {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        width: pages[i].offsetWidth,
+        height: pages[i].offsetHeight,
+      });
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const imgW = A4_W;
+      const imgH = (canvas.height * A4_W) / canvas.width;
+      if (i > 0) pdf.addPage();
+      pdf.addImage(imgData, "JPEG", 0, 0, imgW, Math.min(imgH, A4_H));
+    }
+
+    const filename = `${data.firstName || "Learner"}_${data.surname || ""}_Report_${data.schoolYear || "2026"}.pdf`
+      .replace(/\s+/g, "_");
+    pdf.save(filename);
+  } catch (err) {
+    console.error("PDF generation failed:", err);
+    window.print();
+  } finally {
+    setPdfLoading(false);
+  }
+};
+
+  const btnBase = {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "8px 14px",
+    borderRadius: 8,
+    border: "none",
+    cursor: "pointer",
+    fontFamily: "system-ui,sans-serif",
+    fontSize: 13,
+    fontWeight: 700,
+    transition: "all 0.15s",
+    flexShrink: 0,
+  };
+
   return (
     <div
-      style={{ background: "#d4d8e0", padding: "10px 0", minHeight: "100%" }}
+      className="no-print"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "8px 14px",
+        background: "#1d3557",
+        borderBottom: "1px solid #0f2240",
+        flexWrap: "wrap",
+      }}
     >
-      <CoverPage t={t} data={data} />
-      <KeyPage t={t} data={data} />
-      <AttendancePage t={t} data={data} studentAttendance={studentAttendance} />
-      <FeesPage
-        t={t}
-        data={data}
-        studentFees={studentFees}
-        studentPayments={studentPayments}
-      />
-      <MarksPage t={t} data={data} markbookEntries={markbookEntries} />
-      <BehaviourWelfarePage
-        t={t}
-        data={data}
-        incidents={incidents}
-        welfareFlags={welfareFlags}
-      />
-      {TERM_DATA.map((td) => (
-        <TermPage key={td.num} t={t} td={td} data={data} />
-      ))}
+      <span
+        style={{
+          color: "#a8dadc",
+          fontSize: 12,
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          marginRight: 4,
+        }}
+      >
+        Report Actions
+      </span>
+
+      {/* Print */}
+      <button
+        onClick={handlePrint}
+        style={{ ...btnBase, background: "#fff", color: "#1d3557" }}
+        title="Print report"
+      >
+        🖨️ Print
+      </button>
+
+      {/* Save as PDF */}
+      <button
+        onClick={handleSaveAsPDF}
+        disabled={pdfLoading}
+        style={{
+          ...btnBase,
+          background: pdfLoading ? "#6c757d" : "#e63946",
+          color: "#fff",
+          opacity: pdfLoading ? 0.7 : 1,
+        }}
+        title="Save as PDF to your device"
+      >
+        {pdfLoading ? "⏳ Generating…" : "📄 Save as PDF"}
+      </button>
+
+      {/* Save to Firebase */}
+      <button
+        onClick={onSave}
+        disabled={isSaving}
+        style={{
+          ...btnBase,
+          background: isSaving ? "#6c757d" : "#2a9d8f",
+          color: "#fff",
+          opacity: isSaving ? 0.7 : 1,
+        }}
+        title="Save report to Firebase"
+      >
+        {isSaving ? "⏳ Saving…" : "💾 Save Report"}
+      </button>
+
+      {/* New Report */}
+      <button
+        onClick={onNew}
+        style={{ ...btnBase, background: "#f4a261", color: "#fff" }}
+        title="Start a new blank report"
+      >
+        ✨ New Report
+      </button>
+
+      {activeStudentId && savedStudentIds.has(activeStudentId) && (
+        <span
+          style={{
+            marginLeft: 8,
+            padding: "4px 10px",
+            background: "#dcfce7",
+            color: "#15803d",
+            borderRadius: 99,
+            fontSize: 12,
+            fontWeight: 700,
+          }}
+        >
+          ✓ Saved
+        </span>
+      )}
+
+      <div style={{ flex: 1 }} />
+      <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 11 }}>
+        {data.firstName
+          ? `${data.firstName} ${data.surname}`
+          : "No student selected"}{" "}
+        · Theme: {THEMES[themeId]?.name}
+      </span>
     </div>
   );
 };
@@ -2296,7 +2397,12 @@ const SECTIONS = [
     label: "Learner Details",
     icon: "👤",
     fields: [
-      { key: "firstName", label: "First Name", placeholder: "e.g. Amahle" },
+      {
+        key: "firstName",
+        label: "First Name",
+        placeholder: "e.g. Amahle",
+        isName: true,
+      },
       { key: "surname", label: "Surname", placeholder: "e.g. Dlamini" },
       {
         key: "dob",
@@ -2373,6 +2479,152 @@ const SECTIONS = [
     ],
   },
 ];
+
+// ── NAME AUTOCOMPLETE INPUT ───────────────────────────────────────────────────
+const NameAutocomplete = ({
+  value,
+  onChange,
+  students,
+  onStudentSelect,
+  placeholder,
+}) => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState(value || "");
+  const ref = useRef(null);
+
+  useEffect(() => {
+    setQuery(value || "");
+  }, [value]);
+
+  const filtered =
+    query.length >= 1
+      ? students
+          .filter((s) =>
+            String(s.name || "")
+              .toLowerCase()
+              .includes(query.toLowerCase()),
+          )
+          .slice(0, 8)
+      : [];
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const handleChange = (e) => {
+    setQuery(e.target.value);
+    onChange(e.target.value);
+    setOpen(true);
+  };
+
+  const handleSelect = (student) => {
+    const parts = String(student.name || "")
+      .trim()
+      .split(/\s+/);
+    setQuery(parts[0] || "");
+    setOpen(false);
+    onStudentSelect(student);
+  };
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <input
+        type="text"
+        value={query}
+        onChange={handleChange}
+        onFocus={() => setOpen(true)}
+        placeholder={placeholder}
+        style={{
+          width: "100%",
+          padding: "6px 8px",
+          fontSize: 12,
+          border: "1px solid #ced4da",
+          borderRadius: 6,
+          outline: "none",
+          fontFamily: "inherit",
+          boxSizing: "border-box",
+        }}
+      />
+      {open && filtered.length > 0 && (
+        <div
+          style={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+            background: "#fff",
+            border: "1px solid #ced4da",
+            borderRadius: 6,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+            maxHeight: 220,
+            overflowY: "auto",
+          }}
+        >
+          {filtered.map((s) => {
+            const [bg, fg] = avatarColor(s.id || s.name);
+            return (
+              <button
+                key={s.id}
+                onMouseDown={() => handleSelect(s)}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "8px 10px",
+                  border: "none",
+                  background: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  borderBottom: "1px solid #f3f4f6",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "#f0f9ff")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "none")
+                }
+              >
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 8,
+                    background: bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 10,
+                    fontWeight: 800,
+                    color: fg,
+                    flexShrink: 0,
+                  }}
+                >
+                  {initials(s.name)}
+                </div>
+                <div>
+                  <div
+                    style={{ fontSize: 12, fontWeight: 600, color: "#111827" }}
+                  >
+                    {s.name}
+                  </div>
+                  <div style={{ fontSize: 10, color: "#9ca3af" }}>
+                    {s.gradeLevel || "—"}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ── TEMPLATE THUMBNAIL ────────────────────────────────────────────────────────
 const TemplateThumbnail = ({ theme, selected, onClick }) => (
@@ -2461,6 +2713,9 @@ const StudentListPanel = ({
   loadingStudents,
   activeStudentId,
   onSelect,
+  savedStudentIds,
+  visible,
+  onClose,
 }) => {
   const currentGrade = normaliseGrade(grade);
   const gradeStudents = currentGrade
@@ -2477,241 +2732,300 @@ const StudentListPanel = ({
     });
 
   return (
-    <div
-      style={{
-        width: 220,
-        minWidth: 200,
-        maxWidth: 240,
-        display: "flex",
-        flexDirection: "column",
-        background: "#fff",
-        borderLeft: "1px solid #e5e7eb",
-        overflow: "hidden",
-        flexShrink: 0,
-      }}
-    >
+    <>
+      {/* Overlay on mobile */}
+      {visible && (
+        <div
+          onClick={onClose}
+          className="no-print"
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            zIndex: 299,
+            display: "none",
+          }}
+          id="student-panel-overlay"
+        />
+      )}
       <div
+        className="no-print"
+        id="student-list-panel"
         style={{
-          padding: "13px 14px 10px",
-          borderBottom: "1px solid #e5e7eb",
-          background: "#f9fafb",
+          width: 220,
+          minWidth: 200,
+          maxWidth: 240,
+          display: "flex",
+          flexDirection: "column",
+          background: "#fff",
+          borderLeft: "1px solid #e5e7eb",
+          overflow: "hidden",
           flexShrink: 0,
         }}
       >
         <div
           style={{
-            fontSize: 11,
-            fontWeight: 800,
-            color: "#111827",
-            textTransform: "uppercase",
-            letterSpacing: "0.8px",
-            marginBottom: 4,
-          }}
-        >
-          🎓 Class List
-        </div>
-        {currentGrade ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: "#6366f1",
-                flexShrink: 0,
-              }}
-            />
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#4f46e5" }}>
-              Grade {currentGrade}
-            </span>
-            <span
-              style={{ fontSize: 11, color: "#9ca3af", marginLeft: "auto" }}
-            >
-              {gradeStudents.length} learners
-            </span>
-          </div>
-        ) : (
-          <div style={{ fontSize: 11, color: "#9ca3af" }}>
-            Enter a grade to filter
-          </div>
-        )}
-      </div>
-      {allGrades.length > 0 && (
-        <div
-          style={{
-            padding: "8px 10px",
-            borderBottom: "1px solid #f3f4f6",
-            display: "flex",
-            gap: 4,
-            flexWrap: "wrap",
+            padding: "13px 14px 10px",
+            borderBottom: "1px solid #e5e7eb",
+            background: "#f9fafb",
             flexShrink: 0,
-            background: "#fafafa",
           }}
         >
-          {allGrades.map((g) => (
-            <span
-              key={g}
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                padding: "2px 8px",
-                borderRadius: 99,
-                background: currentGrade === g ? "#4f46e5" : "#ede9fe",
-                color: currentGrade === g ? "#fff" : "#4f46e5",
-              }}
-            >
-              Gr {g}
-            </span>
-          ))}
-        </div>
-      )}
-      <div style={{ flex: 1, overflowY: "auto" }}>
-        {loadingStudents ? (
-          <div style={{ padding: "24px 14px", textAlign: "center" }}>
-            <div
-              style={{
-                width: 24,
-                height: 24,
-                border: "3px solid #e0e7ff",
-                borderTop: "3px solid #4f46e5",
-                borderRadius: "50%",
-                margin: "0 auto 10px",
-                animation: "spin 0.8s linear infinite",
-              }}
-            />
-            <div style={{ fontSize: 11, color: "#9ca3af" }}>
-              Loading learners…
-            </div>
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              color: "#111827",
+              textTransform: "uppercase",
+              letterSpacing: "0.8px",
+              marginBottom: 4,
+            }}
+          >
+            🎓 Class List
           </div>
-        ) : gradeStudents.length === 0 ? (
-          <div style={{ padding: "20px 14px", textAlign: "center" }}>
-            <div style={{ fontSize: 28, marginBottom: 8 }}>🏫</div>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "#6b7280",
-                marginBottom: 4,
-              }}
-            >
-              {currentGrade
-                ? `No learners in Grade ${currentGrade}`
-                : "No learners found"}
-            </div>
-          </div>
-        ) : (
-          gradeStudents.map((s, idx) => {
-            const isActive = s.id === activeStudentId;
-            const [bg, fg] = avatarColor(s.id || idx);
-            return (
-              <button
-                key={s.id}
-                onClick={() => onSelect(s)}
+          {currentGrade ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div
                 style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "9px 12px",
-                  border: "none",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  background: isActive ? "#eef2ff" : "transparent",
-                  borderLeft: isActive
-                    ? "3px solid #4f46e5"
-                    : "3px solid transparent",
-                  borderBottom: "1px solid #f3f4f6",
-                  transition: "background 0.12s",
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: "#6366f1",
+                  flexShrink: 0,
                 }}
-                onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.background = "#f9fafb";
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive)
-                    e.currentTarget.style.background = "transparent";
+              />
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#4f46e5" }}>
+                Grade {currentGrade}
+              </span>
+              <span
+                style={{ fontSize: 11, color: "#9ca3af", marginLeft: "auto" }}
+              >
+                {gradeStudents.length} learners
+              </span>
+            </div>
+          ) : (
+            <div style={{ fontSize: 11, color: "#9ca3af" }}>
+              Enter a grade to filter
+            </div>
+          )}
+        </div>
+        {allGrades.length > 0 && (
+          <div
+            style={{
+              padding: "8px 10px",
+              borderBottom: "1px solid #f3f4f6",
+              display: "flex",
+              gap: 4,
+              flexWrap: "wrap",
+              flexShrink: 0,
+              background: "#fafafa",
+            }}
+          >
+            {allGrades.map((g) => (
+              <span
+                key={g}
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: "2px 8px",
+                  borderRadius: 99,
+                  background: currentGrade === g ? "#4f46e5" : "#ede9fe",
+                  color: currentGrade === g ? "#fff" : "#4f46e5",
                 }}
               >
-                <div
+                Gr {g}
+              </span>
+            ))}
+          </div>
+        )}
+        <div style={{ flex: 1, overflowY: "auto" }}>
+          {loadingStudents ? (
+            <div style={{ padding: "24px 14px", textAlign: "center" }}>
+              <div
+                style={{
+                  width: 24,
+                  height: 24,
+                  border: "3px solid #e0e7ff",
+                  borderTop: "3px solid #4f46e5",
+                  borderRadius: "50%",
+                  margin: "0 auto 10px",
+                  animation: "spin 0.8s linear infinite",
+                }}
+              />
+              <div style={{ fontSize: 11, color: "#9ca3af" }}>
+                Loading learners…
+              </div>
+              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
+          ) : gradeStudents.length === 0 ? (
+            <div style={{ padding: "20px 14px", textAlign: "center" }}>
+              <div style={{ fontSize: 28, marginBottom: 8 }}>🏫</div>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "#6b7280",
+                  marginBottom: 4,
+                }}
+              >
+                {currentGrade
+                  ? `No learners in Grade ${currentGrade}`
+                  : "No learners found"}
+              </div>
+            </div>
+          ) : (
+            gradeStudents.map((s, idx) => {
+              const isActive = s.id === activeStudentId;
+              const isSaved = savedStudentIds.has(s.id);
+              const [bg, fg] = avatarColor(s.id || idx);
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => {
+                    onSelect(s);
+                    onClose && onClose();
+                  }}
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 10,
-                    background: bg,
+                    width: "100%",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 11,
-                    fontWeight: 800,
-                    color: fg,
-                    flexShrink: 0,
-                    border: isActive
-                      ? `2px solid ${fg}33`
-                      : "2px solid transparent",
+                    gap: 10,
+                    padding: "9px 12px",
+                    border: "none",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    background: isActive ? "#eef2ff" : "transparent",
+                    borderLeft: isActive
+                      ? "3px solid #4f46e5"
+                      : "3px solid transparent",
+                    borderBottom: "1px solid #f3f4f6",
+                    transition: "background 0.12s",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.background = "#f9fafb";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive)
+                      e.currentTarget.style.background = "transparent";
                   }}
                 >
-                  {initials(s.name)}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
                   <div
                     style={{
-                      fontSize: 12,
-                      fontWeight: isActive ? 700 : 500,
-                      color: isActive ? "#1e1b4b" : "#111827",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
+                      width: 32,
+                      height: 32,
+                      borderRadius: 10,
+                      background: bg,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: fg,
+                      flexShrink: 0,
+                      border: isActive
+                        ? `2px solid ${fg}33`
+                        : "2px solid transparent",
+                      position: "relative",
                     }}
                   >
-                    {s.name}
+                    {initials(s.name)}
+                    {isSaved && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: -3,
+                          right: -3,
+                          width: 12,
+                          height: 12,
+                          borderRadius: "50%",
+                          background: "#15803d",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 7,
+                          color: "#fff",
+                          border: "1.5px solid #fff",
+                        }}
+                      >
+                        ✓
+                      </div>
+                    )}
                   </div>
-                  <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 1 }}>
-                    {s.gradeLevel || "—"}{" "}
-                    {s.parentPhone ? `· ${s.parentPhone}` : ""}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        fontWeight: isActive ? 700 : 500,
+                        color: isActive ? "#1e1b4b" : "#111827",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {s.name}
+                    </div>
+                    <div
+                      style={{ fontSize: 10, color: "#9ca3af", marginTop: 1 }}
+                    >
+                      {s.gradeLevel || "—"}{" "}
+                      {s.parentPhone ? `· ${s.parentPhone}` : ""}
+                      {isSaved && (
+                        <span
+                          style={{
+                            marginLeft: 4,
+                            color: "#15803d",
+                            fontWeight: 700,
+                          }}
+                        >
+                          · Saved ✓
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-                {isActive && (
-                  <div
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      background: "#4f46e5",
-                      flexShrink: 0,
-                    }}
-                  />
-                )}
-              </button>
-            );
-          })
-        )}
-      </div>
-      <div
-        style={{
-          padding: "8px 12px",
-          borderTop: "1px solid #e5e7eb",
-          background: "#f9fafb",
-          flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ fontSize: 10, color: "#9ca3af" }}>
-          {students.length} total learners
+                  {isActive && (
+                    <div
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: "#4f46e5",
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
+                </button>
+              );
+            })
+          )}
         </div>
-        <div style={{ fontSize: 10, color: "#9ca3af" }}>
-          Click to auto-fill →
+        <div
+          style={{
+            padding: "8px 12px",
+            borderTop: "1px solid #e5e7eb",
+            background: "#f9fafb",
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ fontSize: 10, color: "#9ca3af" }}>
+            {students.length} total learners
+          </div>
+          <div style={{ fontSize: 10, color: "#9ca3af" }}>
+            Click to auto-fill →
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
 const TemplateSelectorBar = ({ selected, onSelect }) => (
   <div
+    className="no-print"
     style={{
-      width: 200,
+      width: 100,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -2752,7 +3066,6 @@ const TemplateSelectorBar = ({ selected, onSelect }) => (
 // ── DATA STATUS INDICATOR ─────────────────────────────────────────────────────
 const DataStatusBar = ({ loading, firebaseData, activeStudentId }) => {
   if (!activeStudentId) return null;
-
   const sources = [
     { label: "Profile", ok: true, icon: "👤" },
     {
@@ -2786,7 +3099,6 @@ const DataStatusBar = ({ loading, firebaseData, activeStudentId }) => {
       icon: "🔒",
     },
   ];
-
   return (
     <div
       style={{
@@ -2836,15 +3148,67 @@ const DataStatusBar = ({ loading, firebaseData, activeStudentId }) => {
   );
 };
 
+// ── MOBILE RESPONSIVE STYLES ──────────────────────────────────────────────────
+const injectResponsiveStyles = () => {
+  if (document.getElementById("report-responsive-styles")) return;
+  const style = document.createElement("style");
+  style.id = "report-responsive-styles";
+  style.textContent = `
+    /* Mobile: hide student list by default, show as drawer */
+    @media (max-width: 900px) {
+      #report-layout { flex-direction: column !important; }
+      #left-panel { width: 100% !important; min-width: unset !important; max-height: 50vh; border-right: none !important; border-bottom: 1px solid #dee2e6; }
+      #theme-bar { display: none !important; }
+      #report-preview { min-height: 50vh; }
+      #student-list-panel { 
+        position: fixed !important; 
+        top: 0; right: 0; bottom: 0; 
+        z-index: 300 !important; 
+        width: 280px !important; 
+        max-width: 90vw !important;
+        box-shadow: -4px 0 24px rgba(0,0,0,0.25);
+        transform: translateX(100%);
+        transition: transform 0.25s ease;
+      }
+      #student-list-panel.open { transform: translateX(0) !important; }
+      #student-panel-overlay { display: block !important; }
+      .report-page { 
+        width: 100% !important; 
+        min-height: unset !important;
+        transform-origin: top left;
+      }
+      #report-preview { overflow-x: auto; }
+    }
+    
+  `;
+  document.head.appendChild(style);
+};
+
 // ── MAIN EXPORT ───────────────────────────────────────────────────────────────
 export default function Reports() {
   const { user } = useAuth();
   const db = getFirestore();
 
-  // ── Students ──────────────────────────────────────────────────────────────
   const [students, setStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
-
+  const [savedStudentIds, setSavedStudentIds] = useState(new Set());
+  const [isSaving, setIsSaving] = useState(false);
+  const [studentPanelOpen, setStudentPanelOpen] = useState(false);
+const [businessName, setBusinessName] = useState("Solidflo Saas School");
+useEffect(() => {
+  const loadBusiness = async () => {
+    if (!user?.uid) return;
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid, "settings", "businessInfo"));
+      if (snap.exists() && snap.data().businessName) {
+        setBusinessName(snap.data().businessName);
+      }
+    } catch (err) {
+      console.error("Failed to load business info", err);
+    }
+  };
+  loadBusiness();
+}, [user?.uid]);
   useEffect(() => {
     const fetchStudents = async () => {
       if (!user?.uid) {
@@ -2867,16 +3231,29 @@ export default function Reports() {
     fetchStudents();
   }, [user?.uid]);
 
-  // ── Per-student Firebase data ─────────────────────────────────────────────
+  // Load previously saved reports to show checkmarks
+  useEffect(() => {
+    const fetchSavedReports = async () => {
+      if (!user?.uid) return;
+      try {
+        const snap = await getDocs(
+          collection(db, "users", user.uid, "savedReports"),
+        );
+        setSavedStudentIds(
+          new Set(snap.docs.map((d) => d.data().studentId).filter(Boolean)),
+        );
+      } catch (_) {}
+    };
+    fetchSavedReports();
+  }, [user?.uid]);
+
   const [firebaseData, setFirebaseData] = useState({});
   const [loadingFirebase, setLoadingFirebase] = useState(false);
 
   const fetchStudentFirebaseData = async (studentId, studentName) => {
     if (!user?.uid || !studentId) return;
     setLoadingFirebase(true);
-
     try {
-      // 1. Attendance (AttendanceTrends saves to users/{uid}/attendance with studentId field)
       const attSnap = await getDocs(
         query(
           collection(db, "users", user.uid, "attendance"),
@@ -2887,13 +3264,10 @@ export default function Reports() {
         id: d.id,
         ...d.data(),
       }));
-      // Filter by studentId — AttendanceTrends matches r.studentId === student.id OR id starts with studentId
       const studentAttendance = allAttendance.filter(
         (r) => r.studentId === studentId || r.id?.startsWith(studentId),
       );
 
-      // 2. Fees — from users/{uid}/students/{studentId} fees sub-field (useFeesFirebase stores fees on the student doc)
-      //    AND payments from users/{uid}/payments
       const studentsSnap = await getDocs(
         collection(db, "users", user.uid, "students"),
       );
@@ -2912,7 +3286,6 @@ export default function Reports() {
           (p) => p.studentId === studentId || p.studentName === studentName,
         );
 
-      // 3. Incidents (BehaviourLogView from StaffDataViews)
       const incidentsSnap = await getDocs(
         query(
           collection(db, "users", user.uid, "incidents"),
@@ -2925,7 +3298,6 @@ export default function Reports() {
           (i) => i.studentId === studentId || i.studentName === studentName,
         );
 
-      // 4. Welfare flags (WelfareFlagsView from StaffDataViews)
       const welfareFlagsSnap = await getDocs(
         query(
           collection(db, "users", user.uid, "welfareFlags"),
@@ -2938,14 +3310,12 @@ export default function Reports() {
           (f) => f.studentId === studentId || f.studentName === studentName,
         );
 
-      // 5. Markbook (MarkBookView from StaffDataViews — scores keyed by student name/id)
       const markbookSnap = await getDocs(
         query(
           collection(db, "users", user.uid, "markbook"),
           orderBy("createdAt", "desc"),
         ),
       );
-      // Include entries where this student appears in scores object
       const markbookEntries = markbookSnap.docs
         .map((d) => ({ id: d.id, ...d.data() }))
         .filter((e) => {
@@ -2987,14 +3357,11 @@ export default function Reports() {
     schoolYear: "2026",
     reportDate: "",
     address: "",
-    // Parent info auto-populated from StudentModal
     parentName: "",
     parentPhone: "",
     parentEmail: "",
-    // Medical auto-populated
     allergies: "",
     medicalInfo: "",
-    // Comments
     comments1: "",
     comments2: "",
     comments3: "",
@@ -3003,13 +3370,14 @@ export default function Reports() {
 
   useEffect(() => {
     injectFonts();
+    injectPrintStyles();
+    injectResponsiveStyles();
   }, []);
 
   const update = (key, val) => setData((d) => ({ ...d, [key]: val }));
 
   const handleStudentSelect = (student) => {
     setActiveStudentId(student.id);
-
     const nameParts = String(student.name || "")
       .trim()
       .split(/\s+/);
@@ -3017,7 +3385,6 @@ export default function Reports() {
     const surname = nameParts.slice(1).join(" ") || "";
     const gradeRaw = normaliseGrade(student.gradeLevel);
     const fullName = `${firstName} ${surname}`.trim();
-
     setData((d) => ({
       ...d,
       firstName,
@@ -3026,310 +3393,471 @@ export default function Reports() {
       classGrade: student.gradeLevel || d.classGrade,
       dob: student.dateOfBirth ? student.dateOfBirth : d.dob,
       emisNo: student.studentId || d.emisNo,
-      // From StudentModal: parent info
       parentName: student.parentName || d.parentName,
       parentPhone: student.parentPhone || d.parentPhone,
       parentEmail: student.parentEmail || d.parentEmail,
-      // Medical
       allergies: student.allergies || d.allergies,
       medicalInfo:
         typeof student.medicalInfo === "string"
           ? student.medicalInfo
           : d.medicalInfo,
     }));
-
     setActiveSection("learner");
-
-    // Fetch all Firebase data for this student
     fetchStudentFirebaseData(student.id, fullName);
+  };
+
+  const handleSave = async () => {
+    if (!user?.uid || !activeStudentId) return;
+    setIsSaving(true);
+    try {
+      await setDoc(
+        doc(db, "users", user.uid, "savedReports", activeStudentId),
+        {
+          studentId: activeStudentId,
+          studentName: `${data.firstName} ${data.surname}`.trim(),
+          themeId: selected,
+          reportData: data,
+          savedAt: new Date().toISOString(),
+          schoolYear: data.schoolYear || "2026",
+        },
+      );
+      setSavedStudentIds((prev) => new Set([...prev, activeStudentId]));
+    } catch (err) {
+      console.error("Save failed:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleNew = () => {
+    setActiveStudentId(null);
+    setFirebaseData({});
+    setData({
+      firstName: "",
+      surname: "",
+      dob: "",
+      emisNo: "",
+      grade: "1",
+      classGrade: "",
+      teacher: "",
+      principal: "",
+      schoolYear: "2026",
+      reportDate: "",
+      address: "",
+      parentName: "",
+      parentPhone: "",
+      parentEmail: "",
+      allergies: "",
+      medicalInfo: "",
+      comments1: "",
+      comments2: "",
+      comments3: "",
+      comments4: "",
+    });
+    setActiveSection("learner");
   };
 
   const currentSection = SECTIONS.find((s) => s.id === activeSection);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        fontFamily: "system-ui, sans-serif",
-        background: "#e9ecef",
-        overflow: "hidden",
-      }}
-    >
-      {/* ══ LEFT — INPUT PANEL ══════════════════════════════════════════════ */}
+    <>
+      {/* Responsive overlay for student panel */}
+      {studentPanelOpen && (
+        <div
+          onClick={() => setStudentPanelOpen(false)}
+          className="no-print"
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            zIndex: 299,
+          }}
+        />
+      )}
+
       <div
+        id="report-layout"
         style={{
-          width: 300,
-          minWidth: 280,
           display: "flex",
-          flexDirection: "column",
-          background: "#fff",
-          borderRight: "1px solid #dee2e6",
+          height: "100vh",
+          fontFamily: "system-ui, sans-serif",
+          background: "#e9ecef",
           overflow: "hidden",
-          flexShrink: 0,
+          flexDirection: "row",
         }}
       >
-        {/* Header */}
+        {/* ══ LEFT — INPUT PANEL ══════════════════════════════════════════════ */}
         <div
+          id="left-panel"
           style={{
-            padding: "13px 14px 10px",
-            borderBottom: "1px solid #dee2e6",
-            background: "#fff",
-            flexShrink: 0,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: "#1d3557",
-              marginBottom: 3,
-            }}
-          >
-            📝 Report Editor
-          </div>
-          <div style={{ fontSize: 11, color: "#6c757d" }}>
-            Fill in details · preview updates live
-          </div>
-        </div>
-
-        {/* Section tabs */}
-        <div
-          style={{
+            width: 280,
+            minWidth: 260,
             display: "flex",
-            borderBottom: "1px solid #dee2e6",
-            background: "#f8f9fa",
+            flexDirection: "column",
+            background: "#fff",
+            borderRight: "1px solid #dee2e6",
+            overflow: "hidden",
             flexShrink: 0,
           }}
         >
-          {SECTIONS.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setActiveSection(s.id)}
-              style={{
-                flex: 1,
-                padding: "8px 2px",
-                fontSize: 9.5,
-                fontWeight: activeSection === s.id ? 700 : 400,
-                color: activeSection === s.id ? "#1d3557" : "#6c757d",
-                background: activeSection === s.id ? "#fff" : "transparent",
-                border: "none",
-                borderBottom:
-                  activeSection === s.id
-                    ? "2px solid #1d3557"
-                    : "2px solid transparent",
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              <span style={{ fontSize: 13 }}>{s.icon}</span>
-              <span style={{ lineHeight: 1.2, textAlign: "center" }}>
-                {s.label.split(" ").map((w, i) =>
-                  i === 0 ? (
-                    w
-                  ) : (
-                    <span key={i}>
-                      <br />
-                      {w}
-                    </span>
-                  ),
-                )}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Fields */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "12px 14px" }}>
+          {/* Header */}
           <div
             style={{
-              fontSize: 12,
-              fontWeight: 700,
-              color: "#1d3557",
-              marginBottom: 10,
+              padding: "10px 14px 8px",
+              borderBottom: "1px solid #dee2e6",
+              background: "#fff",
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            {currentSection.icon} {currentSection.label}
-          </div>
-          {currentSection.fields.map((f) => (
-            <div key={f.key} style={{ marginBottom: 10 }}>
-              <label
+            <div>
+              <div
                 style={{
-                  display: "block",
-                  fontSize: 10.5,
-                  fontWeight: 600,
-                  color: "#495057",
-                  marginBottom: 4,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.3px",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "#1d3557",
+                  marginBottom: 2,
                 }}
               >
-                {f.label}
-              </label>
-              {f.type === "textarea" ? (
-                <textarea
-                  value={data[f.key]}
-                  onChange={(e) => update(f.key, e.target.value)}
-                  placeholder={f.placeholder}
-                  rows={3}
-                  style={{
-                    width: "100%",
-                    padding: "6px 8px",
-                    fontSize: 12,
-                    border: "1px solid #ced4da",
-                    borderRadius: 6,
-                    outline: "none",
-                    fontFamily: "inherit",
-                    resize: "vertical",
-                    boxSizing: "border-box",
-                    lineHeight: 1.5,
-                  }}
-                />
-              ) : (
-                <input
-                  type={f.type || "text"}
-                  value={data[f.key]}
-                  onChange={(e) => update(f.key, e.target.value)}
-                  placeholder={f.placeholder}
-                  style={{
-                    width: "100%",
-                    padding: "6px 8px",
-                    fontSize: 12,
-                    border: "1px solid #ced4da",
-                    borderRadius: 6,
-                    outline: "none",
-                    fontFamily: "inherit",
-                    boxSizing: "border-box",
-                  }}
-                />
-              )}
+                📝 Report Editor
+              </div>
+              <div style={{ fontSize: 10, color: "#6c757d" }}>
+                Fill in details · preview updates live
+              </div>
             </div>
-          ))}
+            {/* Mobile: toggle student list */}
+            <button
+              onClick={() => setStudentPanelOpen((v) => !v)}
+              className="no-print"
+              style={{
+                display: "none",
+                padding: "6px 10px",
+                borderRadius: 8,
+                border: "1px solid #dee2e6",
+                background: "#f8f9fa",
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 700,
+                color: "#1d3557",
+              }}
+              id="student-toggle-btn"
+            >
+              👥
+            </button>
+          </div>
 
-          {/* Quick info summary when student is selected */}
-          {activeStudentId && activeSection === "learner" && (
+          {/* Section tabs */}
+          <div
+            style={{
+              display: "flex",
+              borderBottom: "1px solid #dee2e6",
+              background: "#f8f9fa",
+              flexShrink: 0,
+            }}
+          >
+            {SECTIONS.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setActiveSection(s.id)}
+                style={{
+                  flex: 1,
+                  padding: "7px 2px",
+                  fontSize: 9,
+                  fontWeight: activeSection === s.id ? 700 : 400,
+                  color: activeSection === s.id ? "#1d3557" : "#6c757d",
+                  background: activeSection === s.id ? "#fff" : "transparent",
+                  border: "none",
+                  borderBottom:
+                    activeSection === s.id
+                      ? "2px solid #1d3557"
+                      : "2px solid transparent",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                <span style={{ fontSize: 12 }}>{s.icon}</span>
+                <span style={{ lineHeight: 1.2, textAlign: "center" }}>
+                  {s.label.split(" ").map((w, i) =>
+                    i === 0 ? (
+                      w
+                    ) : (
+                      <span key={i}>
+                        <br />
+                        {w}
+                      </span>
+                    ),
+                  )}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Fields */}
+          <div style={{ flex: 1, overflowY: "auto", padding: "10px 14px" }}>
             <div
               style={{
-                marginTop: 12,
-                padding: "10px 12px",
-                background: "#f0f9ff",
-                borderRadius: 8,
-                border: "1px solid #bae6fd",
+                fontSize: 12,
+                fontWeight: 700,
+                color: "#1d3557",
+                marginBottom: 8,
+              }}
+            >
+              {currentSection.icon} {currentSection.label}
+            </div>
+            {currentSection.fields.map((f) => (
+              <div key={f.key} style={{ marginBottom: 10 }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: "#495057",
+                    marginBottom: 3,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.3px",
+                  }}
+                >
+                  {f.label}
+                </label>
+                {f.isName ? (
+                  <NameAutocomplete
+                    value={data[f.key]}
+                    onChange={(val) => update(f.key, val)}
+                    students={students}
+                    onStudentSelect={handleStudentSelect}
+                    placeholder={f.placeholder}
+                  />
+                ) : f.type === "textarea" ? (
+                  <textarea
+                    value={data[f.key]}
+                    onChange={(e) => update(f.key, e.target.value)}
+                    placeholder={f.placeholder}
+                    rows={3}
+                    style={{
+                      width: "100%",
+                      padding: "6px 8px",
+                      fontSize: 12,
+                      border: "1px solid #ced4da",
+                      borderRadius: 6,
+                      outline: "none",
+                      fontFamily: "inherit",
+                      resize: "vertical",
+                      boxSizing: "border-box",
+                      lineHeight: 1.5,
+                    }}
+                  />
+                ) : (
+                  <input
+                    type={f.type || "text"}
+                    value={data[f.key]}
+                    onChange={(e) => update(f.key, e.target.value)}
+                    placeholder={f.placeholder}
+                    style={{
+                      width: "100%",
+                      padding: "6px 8px",
+                      fontSize: 12,
+                      border: "1px solid #ced4da",
+                      borderRadius: 6,
+                      outline: "none",
+                      fontFamily: "inherit",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+            {activeStudentId && activeSection === "learner" && (
+              <div
+                style={{
+                  marginTop: 10,
+                  padding: "8px 10px",
+                  background: "#f0f9ff",
+                  borderRadius: 8,
+                  border: "1px solid #bae6fd",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: "#0369a1",
+                    marginBottom: 4,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Auto-filled from Firebase
+                </div>
+                {[
+                  ["Parent", data.parentName],
+                  ["Phone", data.parentPhone],
+                  ["Allergies", data.allergies],
+                ]
+                  .filter(([, v]) => v)
+                  .map(([lbl, val]) => (
+                    <div
+                      key={lbl}
+                      style={{
+                        fontSize: 10,
+                        color: "#0c4a6e",
+                        marginBottom: 2,
+                      }}
+                    >
+                      <strong>{lbl}:</strong> {val}
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+
+          <DataStatusBar
+            loading={loadingFirebase}
+            firebaseData={firebaseData}
+            activeStudentId={activeStudentId}
+          />
+
+          <div
+            style={{
+              padding: "6px 14px",
+              borderTop: "1px solid #dee2e6",
+              background: "#f8f9fa",
+              fontSize: 9,
+              color: "#6c757d",
+              textAlign: "center",
+              flexShrink: 0,
+            }}
+          >
+            Changes appear instantly in the preview →
+          </div>
+        </div>
+
+        {/* ══ CENTRE-LEFT — TEMPLATE STYLE PICKER ════════════════════════════ */}
+        <div id="theme-bar">
+          <TemplateSelectorBar selected={selected} onSelect={setSelected} />
+        </div>
+
+        {/* ══ CENTRE — REPORT PREVIEW ═════════════════════════════════════════ */}
+        <div
+          id="report-preview"
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            overflowX: "auto",
+            background: "#d4d8e0",
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            minWidth: 0,
+          }}
+        >
+          {/* Action toolbar */}
+          <ActionToolbar
+            data={data}
+            themeId={selected}
+            firebaseData={firebaseData}
+            onSave={handleSave}
+            onNew={handleNew}
+            isSaving={isSaving}
+            savedStudentIds={savedStudentIds}
+            activeStudentId={activeStudentId}
+          />
+
+          {loadingFirebase && (
+            <div
+              style={{
+                position: "absolute",
+                top: 52,
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 100,
+                background: "#1d3557",
+                color: "#fff",
+                padding: "8px 18px",
+                borderRadius: 99,
+                fontSize: 11,
+                fontWeight: 700,
+                boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
               }}
             >
               <div
                 style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: "#0369a1",
-                  marginBottom: 6,
-                  textTransform: "uppercase",
+                  width: 14,
+                  height: 14,
+                  border: "2px solid rgba(255,255,255,0.3)",
+                  borderTop: "2px solid #fff",
+                  borderRadius: "50%",
+                  animation: "spin 0.8s linear infinite",
                 }}
-              >
-                Auto-filled from Firebase
-              </div>
-              {[
-                ["Parent", data.parentName],
-                ["Phone", data.parentPhone],
-                ["Allergies", data.allergies],
-              ]
-                .filter(([, v]) => v)
-                .map(([lbl, val]) => (
-                  <div
-                    key={lbl}
-                    style={{ fontSize: 10, color: "#0c4a6e", marginBottom: 2 }}
-                  >
-                    <strong>{lbl}:</strong> {val}
-                  </div>
-                ))}
+              />
+              Loading student data from Firebase…
             </div>
           )}
-        </div>
 
-        {/* Data status */}
-        <DataStatusBar
-          loading={loadingFirebase}
-          firebaseData={firebaseData}
-          activeStudentId={activeStudentId}
-        />
-
-        {/* Footer */}
-        <div
-          style={{
-            padding: "8px 14px",
-            borderTop: "1px solid #dee2e6",
-            background: "#f8f9fa",
-            fontSize: 10,
-            color: "#6c757d",
-            textAlign: "center",
-            flexShrink: 0,
-          }}
-        >
-          Changes appear instantly in the preview →
-        </div>
-      </div>
-
-      {/* ══ CENTRE-LEFT — TEMPLATE STYLE PICKER ════════════════════════════ */}
-      <TemplateSelectorBar selected={selected} onSelect={setSelected} />
-
-      {/* ══ CENTRE — REPORT PREVIEW ═════════════════════════════════════════ */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          overflowX: "auto",
-          background: "#d4d8e0",
-          position: "relative",
-        }}
-      >
-        {loadingFirebase && (
-          <div
-            style={{
-              position: "absolute",
-              top: 12,
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 100,
-              background: "#1d3557",
-              color: "#fff",
-              padding: "8px 18px",
-              borderRadius: 99,
-              fontSize: 11,
-              fontWeight: 700,
-              boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <div
-              style={{
-                width: 14,
-                height: 14,
-                border: "2px solid rgba(255,255,255,0.3)",
-                borderTop: "2px solid #fff",
-                borderRadius: "50%",
-                animation: "spin 0.8s linear infinite",
-              }}
+          <div style={{ flex: 1 }}>
+            <Report
+              themeId={selected}
+              data={data}
+              firebaseData={firebaseData}
+              businessName={businessName}
             />
-            Loading student data from Firebase…
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
-        )}
-        <Report themeId={selected} data={data} firebaseData={firebaseData} />
+        </div>
+
+        {/* ══ RIGHT — STUDENT LIST ════════════════════════════════════════════ */}
+        <div id="student-list-panel" className={studentPanelOpen ? "open" : ""}>
+          <StudentListPanel
+            grade={data.grade}
+            students={students}
+            loadingStudents={loadingStudents}
+            activeStudentId={activeStudentId}
+            onSelect={handleStudentSelect}
+            savedStudentIds={savedStudentIds}
+            visible={studentPanelOpen}
+            onClose={() => setStudentPanelOpen(false)}
+          />
+        </div>
       </div>
 
-      {/* ══ RIGHT — STUDENT LIST ════════════════════════════════════════════ */}
-      <StudentListPanel
-        grade={data.grade}
-        students={students}
-        loadingStudents={loadingStudents}
-        activeStudentId={activeStudentId}
-        onSelect={handleStudentSelect}
-      />
-    </div>
+      {/* Mobile responsive override */}
+      <style>{`
+        @media (max-width: 900px) {
+          #report-layout { flex-direction: column !important; height: auto !important; min-height: 100vh; }
+          #left-panel { width: 100% !important; min-width: unset !important; max-width: unset !important; max-height: 45vh; border-right: none !important; }
+          #theme-bar { display: none !important; }
+          #student-toggle-btn { display: flex !important; }
+          #student-list-panel { 
+            position: fixed !important; 
+            top: 0 !important; right: 0 !important; bottom: 0 !important; left: auto !important;
+            width: 280px !important; 
+            max-width: 90vw !important;
+            box-shadow: -4px 0 24px rgba(0,0,0,0.25) !important;
+            transform: translateX(110%) !important;
+            transition: transform 0.25s ease !important;
+            z-index: 300 !important;
+            height: 100vh !important;
+            border-left: 1px solid #e5e7eb !important;
+          }
+          #student-list-panel.open { transform: translateX(0) !important; }
+          #report-preview { min-height: 60vh; overflow-x: auto; }
+          .report-page { 
+            width: 100% !important; 
+            min-width: 320px !important;
+          }
+        }
+        @media print {
+          body > * { display: none !important; }
+          #report-preview { display: block !important; position: static !important; overflow: visible !important; background: white !important; }
+          .no-print, #left-panel, #theme-bar, #student-list-panel { display: none !important; }
+          .report-page { box-shadow: none !important; margin: 0 !important; page-break-after: always !important; }
+        }
+      `}</style>
+    </>
   );
 }
