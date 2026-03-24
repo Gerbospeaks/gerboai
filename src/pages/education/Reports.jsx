@@ -19,12 +19,12 @@ const injectPrintStyles = () => {
   style.id = "report-print-styles";
   style.textContent = `
     @media print {
-      /* Hide everything except the preview pane */
       body > * { display: none !important; }
       #report-layout { display: block !important; }
       #left-panel,
       #theme-bar,
       #student-list-panel,
+      #mobile-tab-bar,
       .no-print { display: none !important; }
       #report-preview {
         display: block !important;
@@ -65,6 +65,106 @@ const injectFonts = () => {
   l.href =
     "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;700&display=swap";
   document.head.appendChild(l);
+};
+
+const injectResponsiveStyles = () => {
+  if (document.getElementById("report-responsive-styles")) return;
+  const style = document.createElement("style");
+  style.id = "report-responsive-styles";
+  style.textContent = `
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── DESKTOP (>= 901px) ── */
+    @media (min-width: 901px) {
+      #mobile-tab-bar { display: none !important; }
+      #mobile-panel-preview,
+      #mobile-panel-inputs,
+      #mobile-panel-classlist { display: contents !important; }
+      /* Reset any mobile-forced styles */
+      #left-panel { display: flex !important; }
+      #theme-bar  { display: flex !important; }
+      #student-list-panel { display: flex !important; }
+    }
+
+    /* ── MOBILE (<= 900px) ── */
+    @media (max-width: 900px) {
+      #report-layout {
+        flex-direction: column !important;
+        height: 100dvh !important;
+        overflow: hidden !important;
+      }
+
+      /* Theme bar hidden on mobile */
+      #theme-bar { display: none !important; }
+
+      /* Left panel (inputs) hidden by default; shown when inputs tab active */
+      #left-panel {
+        display: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: unset !important;
+        border-right: none !important;
+        border-bottom: 1px solid #dee2e6;
+        flex: 1 !important;
+        overflow-y: auto !important;
+      }
+      #left-panel.mobile-active {
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      /* Student list panel: hidden by default; shown when classlist tab active */
+      #student-list-panel {
+        position: static !important;
+        transform: none !important;
+        box-shadow: none !important;
+        display: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        flex: 1 !important;
+        border-left: none !important;
+        border-top: 1px solid #e5e7eb !important;
+        overflow-y: auto !important;
+      }
+      #student-list-panel.mobile-active {
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      /* Preview: shown by default */
+      #report-preview {
+        display: none !important;
+        flex: 1 !important;
+        overflow-y: auto !important;
+        overflow-x: auto !important;
+        min-height: 0 !important;
+      }
+      #report-preview.mobile-active {
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      /* Bottom tab bar */
+      #mobile-tab-bar {
+        display: flex !important;
+        height: 62px !important;
+        min-height: 62px !important;
+        flex-shrink: 0 !important;
+      }
+
+      .report-page {
+        width: 100% !important;
+        min-width: 320px !important;
+        min-height: unset !important;
+      }
+    }
+
+    @media print {
+      #mobile-tab-bar { display: none !important; }
+    }
+  `;
+  document.head.appendChild(style);
 };
 
 const normaliseGrade = (g) =>
@@ -488,7 +588,7 @@ const PageHeader = ({ t, title, sub, businessName }) => (
         color: t.p,
       }}
     >
-      {businessName || "Solidflo Daycare"} 
+      {businessName || "Solidflo Daycare"}
     </div>
   </div>
 );
@@ -797,10 +897,12 @@ const AttendancePage = ({ t, data, studentAttendance, businessName }) => {
 
   return (
     <PageShell t={t}>
-      <PageHeader t={t} title="Attendance Record"
-    sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
-    businessName={businessName}
-  />
+      <PageHeader
+        t={t}
+        title="Attendance Record"
+        sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
+        businessName={businessName}
+      />
       <div
         style={{
           display: "grid",
@@ -1054,10 +1156,12 @@ const FeesPage = ({ t, data, studentFees, studentPayments, businessName }) => {
   const sc = statusColors[status] || statusColors.unpaid;
   return (
     <PageShell t={t}>
-      <PageHeader t={t} title="Fee Statement"
-    sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
-    businessName={businessName}
-  />
+      <PageHeader
+        t={t}
+        title="Fee Statement"
+        sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
+        businessName={businessName}
+      />
       <div
         style={{
           display: "grid",
@@ -1247,7 +1351,13 @@ const FeesPage = ({ t, data, studentFees, studentPayments, businessName }) => {
 };
 
 // ── BEHAVIOUR & WELFARE PAGE ──────────────────────────────────────────────────
-const BehaviourWelfarePage = ({ t, data, incidents, welfareFlags, businessName }) => {
+const BehaviourWelfarePage = ({
+  t,
+  data,
+  incidents,
+  welfareFlags,
+  businessName,
+}) => {
   const severityConfig = {
     low: { label: "Minor", color: "#a16207", bg: "#fef9c3" },
     medium: { label: "Moderate", color: "#dc2626", bg: "#fee2e2" },
@@ -1260,10 +1370,12 @@ const BehaviourWelfarePage = ({ t, data, incidents, welfareFlags, businessName }
   };
   return (
     <PageShell t={t}>
-      <PageHeader t={t} title="Behaviour & Welfare"
-    sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"} — CONFIDENTIAL`}
-    businessName={businessName}
-  />
+      <PageHeader
+        t={t}
+        title="Behaviour & Welfare"
+        sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"} — CONFIDENTIAL`}
+        businessName={businessName}
+      />
       <div
         style={{
           display: "grid",
@@ -1469,10 +1581,12 @@ const MarksPage = ({ t, data, markbookEntries, businessName }) => {
   };
   return (
     <PageShell t={t}>
-      <PageHeader t={t} title="Academic Assessment"
-    sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
-    businessName={businessName}
-  />
+      <PageHeader
+        t={t}
+        title="Academic Assessment"
+        sub={`${data.firstName} ${data.surname} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
+        businessName={businessName}
+      />
       {Object.keys(bySubject).length > 0 && (
         <div
           style={{
@@ -1607,7 +1721,7 @@ const MarksPage = ({ t, data, markbookEntries, businessName }) => {
 };
 
 // ── COVER PAGE ────────────────────────────────────────────────────────────────
-const CoverPage = ({ t, data, businessName }) => (
+const CoverPage = ({ t, data, businessName, logoUrl }) => (
   <PageShell t={t} noBorder>
     {t.id === "playful" ? (
       <div
@@ -1638,7 +1752,7 @@ const CoverPage = ({ t, data, businessName }) => (
             textTransform: "uppercase",
           }}
         >
-          {businessName || "Solidflo Pre School"} 
+          {businessName || "Solidflo Pre School"}
         </span>
       </div>
     )}
@@ -1663,7 +1777,7 @@ const CoverPage = ({ t, data, businessName }) => (
             textTransform: "uppercase",
           }}
         >
-         {businessName || "Solidflo Pre School"} 
+          {businessName || "Solidflo Pre School"}
         </span>
       </div>
     )}
@@ -1836,9 +1950,19 @@ const CoverPage = ({ t, data, businessName }) => (
         justifyContent: "center",
       }}
     >
-      <p style={{ fontFamily: t.hf, fontWeight: 700, fontSize: "8pt", letterSpacing: "0.5px" }}>
-  {data.address || "Ext 36, Olivienhoutsbosch"} &nbsp;|&nbsp; {businessName || "Solidflo Pre School"} &nbsp;|&nbsp; {data.schoolYear || "2026"}
-</p>
+      <p
+        style={{
+          fontFamily: t.hf,
+          fontWeight: 700,
+          fontSize: "8pt",
+          letterSpacing: "0.5px",
+          color: "#fff",
+        }}
+      >
+        {data.address || "Ext 36, Olivienhoutsbosch"} &nbsp;|&nbsp;{" "}
+        {businessName || "Solidflo Pre School"} &nbsp;|&nbsp;{" "}
+        {data.schoolYear || "2026"}
+      </p>
     </div>
   </PageShell>
 );
@@ -1876,10 +2000,12 @@ const KeyPage = ({ t, data, businessName }) => {
   ];
   return (
     <PageShell t={t}>
-      <PageHeader t={t} title="Assessment Key & Attendance" 
-    sub={`${businessName || "Solidflo Saas School"} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
-    businessName={businessName}
-  />
+      <PageHeader
+        t={t}
+        title="Assessment Key & Attendance"
+        sub={`${businessName || "Solidflo Saas School"} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
+        businessName={businessName}
+      />
       <div style={{ flex: 1 }}>
         <SecTitle t={t} col={t.p}>
           Assessment Key (CAPS Codes)
@@ -1995,6 +2121,7 @@ const KeyPage = ({ t, data, businessName }) => {
     </PageShell>
   );
 };
+
 const loadScript = (src) =>
   new Promise((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) return resolve();
@@ -2004,6 +2131,7 @@ const loadScript = (src) =>
     s.onerror = reject;
     document.head.appendChild(s);
   });
+
 const TermPage = ({ t, td, data, businessName }) => {
   const isT4 = td.num === 4;
   const comments = data[`comments${td.num}`] || "";
@@ -2177,9 +2305,18 @@ const TermPage = ({ t, td, data, businessName }) => {
               textAlign: "center",
             }}
           >
-            <p style={{ fontFamily: t.hf, fontWeight: 700, fontSize: "8pt", letterSpacing: "0.5px" }}>
-  {businessName || "Solidflo Pre School"} · {data.address || "Ext 36, Olivienhoutsbosch"} · Grade {data.grade || "1"} Progress Report {data.schoolYear || "2026"}
-</p>
+            <p
+              style={{
+                fontFamily: t.hf,
+                fontWeight: 700,
+                fontSize: "8pt",
+                letterSpacing: "0.5px",
+              }}
+            >
+              {businessName || "Solidflo Pre School"} ·{" "}
+              {data.address || "Ext 36, Olivienhoutsbosch"} · Grade{" "}
+              {data.grade || "1"} Progress Report {data.schoolYear || "2026"}
+            </p>
           </div>
         )}
       </div>
@@ -2188,20 +2325,61 @@ const TermPage = ({ t, td, data, businessName }) => {
 };
 
 // ── FULL REPORT ───────────────────────────────────────────────────────────────
-const Report = ({ themeId, data, firebaseData, businessName }) => {
+const Report = ({ themeId, data, firebaseData, businessName, logoUrl }) => {
   const t = THEMES[themeId];
-  const { studentAttendance = [], studentFees = null, studentPayments = [],
-    incidents = [], welfareFlags = [], markbookEntries = [] } = firebaseData || {};
+  const {
+    studentAttendance = [],
+    studentFees = null,
+    studentPayments = [],
+    incidents = [],
+    welfareFlags = [],
+    markbookEntries = [],
+  } = firebaseData || {};
   return (
-    <div style={{ background: "#d4d8e0", padding: "10px 0", minHeight: "100%" }}>
-      <CoverPage t={t} data={data} businessName={businessName} />
+    <div
+      style={{ background: "#d4d8e0", padding: "10px 0", minHeight: "100%" }}
+    >
+      <CoverPage
+        t={t}
+        data={data}
+        businessName={businessName}
+        logoUrl={logoUrl}
+      />
       <KeyPage t={t} data={data} businessName={businessName} />
-      <AttendancePage t={t} data={data} studentAttendance={studentAttendance} businessName={businessName} />
-      <FeesPage t={t} data={data} studentFees={studentFees} studentPayments={studentPayments} businessName={businessName} />
-      <MarksPage t={t} data={data} markbookEntries={markbookEntries} businessName={businessName} />
-      <BehaviourWelfarePage t={t} data={data} incidents={incidents} welfareFlags={welfareFlags} businessName={businessName} />
+      <AttendancePage
+        t={t}
+        data={data}
+        studentAttendance={studentAttendance}
+        businessName={businessName}
+      />
+      <FeesPage
+        t={t}
+        data={data}
+        studentFees={studentFees}
+        studentPayments={studentPayments}
+        businessName={businessName}
+      />
+      <MarksPage
+        t={t}
+        data={data}
+        markbookEntries={markbookEntries}
+        businessName={businessName}
+      />
+      <BehaviourWelfarePage
+        t={t}
+        data={data}
+        incidents={incidents}
+        welfareFlags={welfareFlags}
+        businessName={businessName}
+      />
       {TERM_DATA.map((td) => (
-        <TermPage key={td.num} t={t} td={td} data={data} businessName={businessName} />
+        <TermPage
+          key={td.num}
+          t={t}
+          td={td}
+          data={data}
+          businessName={businessName}
+        />
       ))}
     </div>
   );
@@ -2220,59 +2398,65 @@ const ActionToolbar = ({
 }) => {
   const [pdfLoading, setPdfLoading] = useState(false);
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handlePrint = () => window.print();
 
   const handleSaveAsPDF = async () => {
-  setPdfLoading(true);
-  try {
-    // Load via script tags (works in all bundler environments)
-    await Promise.all([
-      loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"),
-      loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"),
-    ]);
-
-    const html2canvas = window.html2canvas;
-    const { jsPDF } = window.jspdf;
-
-    if (!html2canvas || !jsPDF) {
-      window.print();
-      return;
-    }
-
-    const pages = document.querySelectorAll(".report-page");
-    if (!pages.length) { window.print(); return; }
-
-    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    const A4_W = 210, A4_H = 297;
-
-    for (let i = 0; i < pages.length; i++) {
-      const canvas = await html2canvas(pages[i], {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        width: pages[i].offsetWidth,
-        height: pages[i].offsetHeight,
+    setPdfLoading(true);
+    try {
+      await Promise.all([
+        loadScript(
+          "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
+        ),
+        loadScript(
+          "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+        ),
+      ]);
+      const html2canvas = window.html2canvas;
+      const { jsPDF } = window.jspdf;
+      if (!html2canvas || !jsPDF) {
+        window.print();
+        return;
+      }
+      const pages = document.querySelectorAll(".report-page");
+      if (!pages.length) {
+        window.print();
+        return;
+      }
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
       });
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      const imgW = A4_W;
-      const imgH = (canvas.height * A4_W) / canvas.width;
-      if (i > 0) pdf.addPage();
-      pdf.addImage(imgData, "JPEG", 0, 0, imgW, Math.min(imgH, A4_H));
+      const A4_W = 210,
+        A4_H = 297;
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await html2canvas(pages[i], {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: "#ffffff",
+          width: pages[i].offsetWidth,
+          height: pages[i].offsetHeight,
+        });
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const imgW = A4_W;
+        const imgH = (canvas.height * A4_W) / canvas.width;
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, 0, imgW, Math.min(imgH, A4_H));
+      }
+      const filename =
+        `${data.firstName || "Learner"}_${data.surname || ""}_Report_${data.schoolYear || "2026"}.pdf`.replace(
+          /\s+/g,
+          "_",
+        );
+      pdf.save(filename);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      window.print();
+    } finally {
+      setPdfLoading(false);
     }
-
-    const filename = `${data.firstName || "Learner"}_${data.surname || ""}_Report_${data.schoolYear || "2026"}.pdf`
-      .replace(/\s+/g, "_");
-    pdf.save(filename);
-  } catch (err) {
-    console.error("PDF generation failed:", err);
-    window.print();
-  } finally {
-    setPdfLoading(false);
-  }
-};
+  };
 
   const btnBase = {
     display: "flex",
@@ -2314,8 +2498,6 @@ const ActionToolbar = ({
       >
         Report Actions
       </span>
-
-      {/* Print */}
       <button
         onClick={handlePrint}
         style={{ ...btnBase, background: "#fff", color: "#1d3557" }}
@@ -2323,8 +2505,6 @@ const ActionToolbar = ({
       >
         🖨️ Print
       </button>
-
-      {/* Save as PDF */}
       <button
         onClick={handleSaveAsPDF}
         disabled={pdfLoading}
@@ -2334,12 +2514,9 @@ const ActionToolbar = ({
           color: "#fff",
           opacity: pdfLoading ? 0.7 : 1,
         }}
-        title="Save as PDF to your device"
       >
         {pdfLoading ? "⏳ Generating…" : "📄 Save as PDF"}
       </button>
-
-      {/* Save to Firebase */}
       <button
         onClick={onSave}
         disabled={isSaving}
@@ -2349,20 +2526,15 @@ const ActionToolbar = ({
           color: "#fff",
           opacity: isSaving ? 0.7 : 1,
         }}
-        title="Save report to Firebase"
       >
         {isSaving ? "⏳ Saving…" : "💾 Save Report"}
       </button>
-
-      {/* New Report */}
       <button
         onClick={onNew}
         style={{ ...btnBase, background: "#f4a261", color: "#fff" }}
-        title="Start a new blank report"
       >
         ✨ New Report
       </button>
-
       {activeStudentId && savedStudentIds.has(activeStudentId) && (
         <span
           style={{
@@ -2378,7 +2550,6 @@ const ActionToolbar = ({
           ✓ Saved
         </span>
       )}
-
       <div style={{ flex: 1 }} />
       <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 11 }}>
         {data.firstName
@@ -2520,7 +2691,6 @@ const NameAutocomplete = ({
     onChange(e.target.value);
     setOpen(true);
   };
-
   const handleSelect = (student) => {
     const parts = String(student.name || "")
       .trim()
@@ -2714,8 +2884,6 @@ const StudentListPanel = ({
   activeStudentId,
   onSelect,
   savedStudentIds,
-  visible,
-  onClose,
 }) => {
   const currentGrade = normaliseGrade(grade);
   const gradeStudents = currentGrade
@@ -2732,298 +2900,273 @@ const StudentListPanel = ({
     });
 
   return (
-    <>
-      {/* Overlay on mobile */}
-      {visible && (
-        <div
-          onClick={onClose}
-          className="no-print"
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            zIndex: 299,
-            display: "none",
-          }}
-          id="student-panel-overlay"
-        />
-      )}
+    <div
+      id="student-list-panel"
+      style={{
+        width: 220,
+        minWidth: 200,
+        maxWidth: 240,
+        display: "flex",
+        flexDirection: "column",
+        background: "#fff",
+        borderLeft: "1px solid #e5e7eb",
+        overflow: "hidden",
+        flexShrink: 0,
+      }}
+    >
       <div
-        className="no-print"
-        id="student-list-panel"
         style={{
-          width: 220,
-          minWidth: 200,
-          maxWidth: 240,
-          display: "flex",
-          flexDirection: "column",
-          background: "#fff",
-          borderLeft: "1px solid #e5e7eb",
-          overflow: "hidden",
+          padding: "13px 14px 10px",
+          borderBottom: "1px solid #e5e7eb",
+          background: "#f9fafb",
           flexShrink: 0,
         }}
       >
         <div
           style={{
-            padding: "13px 14px 10px",
-            borderBottom: "1px solid #e5e7eb",
-            background: "#f9fafb",
-            flexShrink: 0,
+            fontSize: 11,
+            fontWeight: 800,
+            color: "#111827",
+            textTransform: "uppercase",
+            letterSpacing: "0.8px",
+            marginBottom: 4,
           }}
         >
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 800,
-              color: "#111827",
-              textTransform: "uppercase",
-              letterSpacing: "0.8px",
-              marginBottom: 4,
-            }}
-          >
-            🎓 Class List
-          </div>
-          {currentGrade ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <div
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: "#6366f1",
-                  flexShrink: 0,
-                }}
-              />
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#4f46e5" }}>
-                Grade {currentGrade}
-              </span>
-              <span
-                style={{ fontSize: 11, color: "#9ca3af", marginLeft: "auto" }}
-              >
-                {gradeStudents.length} learners
-              </span>
-            </div>
-          ) : (
-            <div style={{ fontSize: 11, color: "#9ca3af" }}>
-              Enter a grade to filter
-            </div>
-          )}
+          🎓 Class List
         </div>
-        {allGrades.length > 0 && (
-          <div
-            style={{
-              padding: "8px 10px",
-              borderBottom: "1px solid #f3f4f6",
-              display: "flex",
-              gap: 4,
-              flexWrap: "wrap",
-              flexShrink: 0,
-              background: "#fafafa",
-            }}
-          >
-            {allGrades.map((g) => (
-              <span
-                key={g}
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  padding: "2px 8px",
-                  borderRadius: 99,
-                  background: currentGrade === g ? "#4f46e5" : "#ede9fe",
-                  color: currentGrade === g ? "#fff" : "#4f46e5",
-                }}
-              >
-                Gr {g}
-              </span>
-            ))}
+        {currentGrade ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: "#6366f1",
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#4f46e5" }}>
+              Grade {currentGrade}
+            </span>
+            <span
+              style={{ fontSize: 11, color: "#9ca3af", marginLeft: "auto" }}
+            >
+              {gradeStudents.length} learners
+            </span>
+          </div>
+        ) : (
+          <div style={{ fontSize: 11, color: "#9ca3af" }}>
+            Enter a grade to filter
           </div>
         )}
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          {loadingStudents ? (
-            <div style={{ padding: "24px 14px", textAlign: "center" }}>
-              <div
-                style={{
-                  width: 24,
-                  height: 24,
-                  border: "3px solid #e0e7ff",
-                  borderTop: "3px solid #4f46e5",
-                  borderRadius: "50%",
-                  margin: "0 auto 10px",
-                  animation: "spin 0.8s linear infinite",
-                }}
-              />
-              <div style={{ fontSize: 11, color: "#9ca3af" }}>
-                Loading learners…
-              </div>
-              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-            </div>
-          ) : gradeStudents.length === 0 ? (
-            <div style={{ padding: "20px 14px", textAlign: "center" }}>
-              <div style={{ fontSize: 28, marginBottom: 8 }}>🏫</div>
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "#6b7280",
-                  marginBottom: 4,
-                }}
-              >
-                {currentGrade
-                  ? `No learners in Grade ${currentGrade}`
-                  : "No learners found"}
-              </div>
-            </div>
-          ) : (
-            gradeStudents.map((s, idx) => {
-              const isActive = s.id === activeStudentId;
-              const isSaved = savedStudentIds.has(s.id);
-              const [bg, fg] = avatarColor(s.id || idx);
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => {
-                    onSelect(s);
-                    onClose && onClose();
-                  }}
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "9px 12px",
-                    border: "none",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    background: isActive ? "#eef2ff" : "transparent",
-                    borderLeft: isActive
-                      ? "3px solid #4f46e5"
-                      : "3px solid transparent",
-                    borderBottom: "1px solid #f3f4f6",
-                    transition: "background 0.12s",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.background = "#f9fafb";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive)
-                      e.currentTarget.style.background = "transparent";
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 10,
-                      background: bg,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 11,
-                      fontWeight: 800,
-                      color: fg,
-                      flexShrink: 0,
-                      border: isActive
-                        ? `2px solid ${fg}33`
-                        : "2px solid transparent",
-                      position: "relative",
-                    }}
-                  >
-                    {initials(s.name)}
-                    {isSaved && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          bottom: -3,
-                          right: -3,
-                          width: 12,
-                          height: 12,
-                          borderRadius: "50%",
-                          background: "#15803d",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: 7,
-                          color: "#fff",
-                          border: "1.5px solid #fff",
-                        }}
-                      >
-                        ✓
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 12,
-                        fontWeight: isActive ? 700 : 500,
-                        color: isActive ? "#1e1b4b" : "#111827",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {s.name}
-                    </div>
-                    <div
-                      style={{ fontSize: 10, color: "#9ca3af", marginTop: 1 }}
-                    >
-                      {s.gradeLevel || "—"}{" "}
-                      {s.parentPhone ? `· ${s.parentPhone}` : ""}
-                      {isSaved && (
-                        <span
-                          style={{
-                            marginLeft: 4,
-                            color: "#15803d",
-                            fontWeight: 700,
-                          }}
-                        >
-                          · Saved ✓
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {isActive && (
-                    <div
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: "50%",
-                        background: "#4f46e5",
-                        flexShrink: 0,
-                      }}
-                    />
-                  )}
-                </button>
-              );
-            })
-          )}
-        </div>
+      </div>
+      {allGrades.length > 0 && (
         <div
           style={{
-            padding: "8px 12px",
-            borderTop: "1px solid #e5e7eb",
-            background: "#f9fafb",
-            flexShrink: 0,
+            padding: "8px 10px",
+            borderBottom: "1px solid #f3f4f6",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            gap: 4,
+            flexWrap: "wrap",
+            flexShrink: 0,
+            background: "#fafafa",
           }}
         >
-          <div style={{ fontSize: 10, color: "#9ca3af" }}>
-            {students.length} total learners
-          </div>
-          <div style={{ fontSize: 10, color: "#9ca3af" }}>
-            Click to auto-fill →
-          </div>
+          {allGrades.map((g) => (
+            <span
+              key={g}
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                padding: "2px 8px",
+                borderRadius: 99,
+                background: currentGrade === g ? "#4f46e5" : "#ede9fe",
+                color: currentGrade === g ? "#fff" : "#4f46e5",
+              }}
+            >
+              Gr {g}
+            </span>
+          ))}
         </div>
+      )}
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        {loadingStudents ? (
+          <div style={{ padding: "24px 14px", textAlign: "center" }}>
+            <div
+              style={{
+                width: 24,
+                height: 24,
+                border: "3px solid #e0e7ff",
+                borderTop: "3px solid #4f46e5",
+                borderRadius: "50%",
+                margin: "0 auto 10px",
+                animation: "spin 0.8s linear infinite",
+              }}
+            />
+            <div style={{ fontSize: 11, color: "#9ca3af" }}>
+              Loading learners…
+            </div>
+          </div>
+        ) : gradeStudents.length === 0 ? (
+          <div style={{ padding: "20px 14px", textAlign: "center" }}>
+            <div style={{ fontSize: 28, marginBottom: 8 }}>🏫</div>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "#6b7280",
+                marginBottom: 4,
+              }}
+            >
+              {currentGrade
+                ? `No learners in Grade ${currentGrade}`
+                : "No learners found"}
+            </div>
+          </div>
+        ) : (
+          gradeStudents.map((s, idx) => {
+            const isActive = s.id === activeStudentId;
+            const isSaved = savedStudentIds.has(s.id);
+            const [bg, fg] = avatarColor(s.id || idx);
+            return (
+              <button
+                key={s.id}
+                onClick={() => onSelect(s)}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "9px 12px",
+                  border: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  background: isActive ? "#eef2ff" : "transparent",
+                  borderLeft: isActive
+                    ? "3px solid #4f46e5"
+                    : "3px solid transparent",
+                  borderBottom: "1px solid #f3f4f6",
+                  transition: "background 0.12s",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) e.currentTarget.style.background = "#f9fafb";
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive)
+                    e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    background: bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 11,
+                    fontWeight: 800,
+                    color: fg,
+                    flexShrink: 0,
+                    border: isActive
+                      ? `2px solid ${fg}33`
+                      : "2px solid transparent",
+                    position: "relative",
+                  }}
+                >
+                  {initials(s.name)}
+                  {isSaved && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: -3,
+                        right: -3,
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        background: "#15803d",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 7,
+                        color: "#fff",
+                        border: "1.5px solid #fff",
+                      }}
+                    >
+                      ✓
+                    </div>
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? "#1e1b4b" : "#111827",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {s.name}
+                  </div>
+                  <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 1 }}>
+                    {s.gradeLevel || "—"}
+                    {s.parentPhone ? ` · ${s.parentPhone}` : ""}
+                    {isSaved && (
+                      <span
+                        style={{
+                          marginLeft: 4,
+                          color: "#15803d",
+                          fontWeight: 700,
+                        }}
+                      >
+                        · Saved ✓
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {isActive && (
+                  <div
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: "#4f46e5",
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
+              </button>
+            );
+          })
+        )}
       </div>
-    </>
+      <div
+        style={{
+          padding: "8px 12px",
+          borderTop: "1px solid #e5e7eb",
+          background: "#f9fafb",
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <div style={{ fontSize: 10, color: "#9ca3af" }}>
+          {students.length} total learners
+        </div>
+        <div style={{ fontSize: 10, color: "#9ca3af" }}>Tap to auto-fill</div>
+      </div>
+    </div>
   );
 };
 
 const TemplateSelectorBar = ({ selected, onSelect }) => (
   <div
     className="no-print"
+    id="theme-bar"
     style={{
       width: 100,
       display: "flex",
@@ -3148,40 +3291,103 @@ const DataStatusBar = ({ loading, firebaseData, activeStudentId }) => {
   );
 };
 
-// ── MOBILE RESPONSIVE STYLES ──────────────────────────────────────────────────
-const injectResponsiveStyles = () => {
-  if (document.getElementById("report-responsive-styles")) return;
-  const style = document.createElement("style");
-  style.id = "report-responsive-styles";
-  style.textContent = `
-    /* Mobile: hide student list by default, show as drawer */
-    @media (max-width: 900px) {
-      #report-layout { flex-direction: column !important; }
-      #left-panel { width: 100% !important; min-width: unset !important; max-height: 50vh; border-right: none !important; border-bottom: 1px solid #dee2e6; }
-      #theme-bar { display: none !important; }
-      #report-preview { min-height: 50vh; }
-      #student-list-panel { 
-        position: fixed !important; 
-        top: 0; right: 0; bottom: 0; 
-        z-index: 300 !important; 
-        width: 280px !important; 
-        max-width: 90vw !important;
-        box-shadow: -4px 0 24px rgba(0,0,0,0.25);
-        transform: translateX(100%);
-        transition: transform 0.25s ease;
-      }
-      #student-list-panel.open { transform: translateX(0) !important; }
-      #student-panel-overlay { display: block !important; }
-      .report-page { 
-        width: 100% !important; 
-        min-height: unset !important;
-        transform-origin: top left;
-      }
-      #report-preview { overflow-x: auto; }
-    }
-    
-  `;
-  document.head.appendChild(style);
+// ── MOBILE BOTTOM TAB BAR ─────────────────────────────────────────────────────
+const MobileTabBar = ({ activeTab, onChange, savedCount }) => {
+  const tabs = [
+    { id: "preview", label: "Preview", icon: "👁️" },
+    { id: "inputs", label: "Edit", icon: "✏️" },
+    {
+      id: "classlist",
+      label: "Class",
+      icon: "👥",
+      badge: savedCount > 0 ? savedCount : null,
+    },
+  ];
+  return (
+    <div
+      id="mobile-tab-bar"
+      className="no-print"
+      style={{
+        display: "none", // overridden by CSS on mobile
+        position: "relative",
+        zIndex: 200,
+        background: "#fff",
+        borderTop: "1px solid #e5e7eb",
+        flexShrink: 0,
+      }}
+    >
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => onChange(tab.id)}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 3,
+              padding: "8px 0 10px",
+              border: "none",
+              cursor: "pointer",
+              background: "transparent",
+              color: isActive ? "#1d3557" : "#9ca3af",
+              position: "relative",
+              transition: "color 0.15s",
+            }}
+          >
+            {/* Active indicator bar */}
+            {isActive && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: "20%",
+                  right: "20%",
+                  height: 2,
+                  background: "#1d3557",
+                  borderRadius: "0 0 2px 2px",
+                }}
+              />
+            )}
+            <span style={{ fontSize: 20, lineHeight: 1 }}>{tab.icon}</span>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: isActive ? 700 : 500,
+                letterSpacing: "0.3px",
+              }}
+            >
+              {tab.label}
+            </span>
+            {tab.badge && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 6,
+                  right: "calc(50% - 18px)",
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  background: "#e63946",
+                  color: "#fff",
+                  fontSize: 9,
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {tab.badge}
+              </div>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
 };
 
 // ── MAIN EXPORT ───────────────────────────────────────────────────────────────
@@ -3193,22 +3399,31 @@ export default function Reports() {
   const [loadingStudents, setLoadingStudents] = useState(true);
   const [savedStudentIds, setSavedStudentIds] = useState(new Set());
   const [isSaving, setIsSaving] = useState(false);
-  const [studentPanelOpen, setStudentPanelOpen] = useState(false);
-const [businessName, setBusinessName] = useState("Solidflo Saas School");
-useEffect(() => {
-  const loadBusiness = async () => {
-    if (!user?.uid) return;
-    try {
-      const snap = await getDoc(doc(db, "users", user.uid, "settings", "businessInfo"));
-      if (snap.exists() && snap.data().businessName) {
-        setBusinessName(snap.data().businessName);
+  const [businessInfo, setBusinessInfo] = useState(null);
+  const [businessName, setBusinessName] = useState("Solidflo Saas School");
+
+  // Mobile tab state — "preview" | "inputs" | "classlist"
+  const [mobileTab, setMobileTab] = useState("preview");
+
+  useEffect(() => {
+    const loadBusiness = async () => {
+      if (!user?.uid) return;
+      try {
+        const snap = await getDoc(
+          doc(db, "users", user.uid, "settings", "businessInfo"),
+        );
+        if (snap.exists()) {
+          const biz = snap.data();
+          setBusinessInfo(biz);
+          if (biz.businessName) setBusinessName(biz.businessName);
+        }
+      } catch (err) {
+        console.error("Failed to load business info", err);
       }
-    } catch (err) {
-      console.error("Failed to load business info", err);
-    }
-  };
-  loadBusiness();
-}, [user?.uid]);
+    };
+    loadBusiness();
+  }, [user?.uid]);
+
   useEffect(() => {
     const fetchStudents = async () => {
       if (!user?.uid) {
@@ -3231,7 +3446,6 @@ useEffect(() => {
     fetchStudents();
   }, [user?.uid]);
 
-  // Load previously saved reports to show checkmarks
   useEffect(() => {
     const fetchSavedReports = async () => {
       if (!user?.uid) return;
@@ -3404,6 +3618,8 @@ useEffect(() => {
     }));
     setActiveSection("learner");
     fetchStudentFirebaseData(student.id, fullName);
+    // Switch to preview after selecting a student on mobile
+    setMobileTab("preview");
   };
 
   const handleSave = async () => {
@@ -3461,20 +3677,6 @@ useEffect(() => {
 
   return (
     <>
-      {/* Responsive overlay for student panel */}
-      {studentPanelOpen && (
-        <div
-          onClick={() => setStudentPanelOpen(false)}
-          className="no-print"
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            zIndex: 299,
-          }}
-        />
-      )}
-
       <div
         id="report-layout"
         style={{
@@ -3489,6 +3691,7 @@ useEffect(() => {
         {/* ══ LEFT — INPUT PANEL ══════════════════════════════════════════════ */}
         <div
           id="left-panel"
+          className={mobileTab === "inputs" ? "mobile-active" : ""}
           style={{
             width: 280,
             minWidth: 260,
@@ -3507,45 +3710,21 @@ useEffect(() => {
               borderBottom: "1px solid #dee2e6",
               background: "#fff",
               flexShrink: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
             }}
           >
-            <div>
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: "#1d3557",
-                  marginBottom: 2,
-                }}
-              >
-                📝 Report Editor
-              </div>
-              <div style={{ fontSize: 10, color: "#6c757d" }}>
-                Fill in details · preview updates live
-              </div>
-            </div>
-            {/* Mobile: toggle student list */}
-            <button
-              onClick={() => setStudentPanelOpen((v) => !v)}
-              className="no-print"
+            <div
               style={{
-                display: "none",
-                padding: "6px 10px",
-                borderRadius: 8,
-                border: "1px solid #dee2e6",
-                background: "#f8f9fa",
-                cursor: "pointer",
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: 700,
                 color: "#1d3557",
+                marginBottom: 2,
               }}
-              id="student-toggle-btn"
             >
-              👥
-            </button>
+              📝 Report Editor
+            </div>
+            <div style={{ fontSize: 10, color: "#6c757d" }}>
+              Fill in details · preview updates live
+            </div>
           </div>
 
           {/* Section tabs */}
@@ -3712,6 +3891,53 @@ useEffect(() => {
                   ))}
               </div>
             )}
+
+            {/* Theme selector — shown inside inputs panel on mobile */}
+            <div
+              style={{
+                marginTop: 16,
+                borderTop: "1px solid #f3f4f6",
+                paddingTop: 12,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: "#6c757d",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  marginBottom: 8,
+                }}
+              >
+                Report Style
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {Object.values(THEMES).map((theme) => (
+                  <button
+                    key={theme.id}
+                    onClick={() => setSelected(theme.id)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "6px 10px",
+                      borderRadius: 8,
+                      border: `2px solid ${selected === theme.id ? theme.p : "#e5e7eb"}`,
+                      background:
+                        selected === theme.id ? theme.cream : "#f9fafb",
+                      cursor: "pointer",
+                      fontSize: 11,
+                      fontWeight: selected === theme.id ? 700 : 400,
+                      color: selected === theme.id ? theme.p : "#374151",
+                    }}
+                  >
+                    <span>{theme.icon}</span>
+                    <span>{theme.name.split(" ")[0]}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <DataStatusBar
@@ -3719,7 +3945,6 @@ useEffect(() => {
             firebaseData={firebaseData}
             activeStudentId={activeStudentId}
           />
-
           <div
             style={{
               padding: "6px 14px",
@@ -3735,14 +3960,13 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* ══ CENTRE-LEFT — TEMPLATE STYLE PICKER ════════════════════════════ */}
-        <div id="theme-bar">
-          <TemplateSelectorBar selected={selected} onSelect={setSelected} />
-        </div>
+        {/* ══ CENTRE-LEFT — TEMPLATE STYLE PICKER (desktop only) ═════════════ */}
+        <TemplateSelectorBar selected={selected} onSelect={setSelected} />
 
         {/* ══ CENTRE — REPORT PREVIEW ═════════════════════════════════════════ */}
         <div
           id="report-preview"
+          className={mobileTab === "preview" ? "mobile-active" : ""}
           style={{
             flex: 1,
             overflowY: "auto",
@@ -3754,7 +3978,6 @@ useEffect(() => {
             minWidth: 0,
           }}
         >
-          {/* Action toolbar */}
           <ActionToolbar
             data={data}
             themeId={selected}
@@ -3806,12 +4029,27 @@ useEffect(() => {
               data={data}
               firebaseData={firebaseData}
               businessName={businessName}
+              logoUrl={businessInfo?.logoUrl}
             />
           </div>
         </div>
 
-        {/* ══ RIGHT — STUDENT LIST ════════════════════════════════════════════ */}
-        <div id="student-list-panel" className={studentPanelOpen ? "open" : ""}>
+        {/* ══ RIGHT — STUDENT LIST (desktop sidebar / mobile tab panel) ══════ */}
+        <div
+          id="student-list-panel"
+          className={mobileTab === "classlist" ? "mobile-active" : ""}
+          style={{
+            width: 220,
+            minWidth: 200,
+            maxWidth: 240,
+            display: "flex",
+            flexDirection: "column",
+            background: "#fff",
+            borderLeft: "1px solid #e5e7eb",
+            overflow: "hidden",
+            flexShrink: 0,
+          }}
+        >
           <StudentListPanel
             grade={data.grade}
             students={students}
@@ -3819,39 +4057,20 @@ useEffect(() => {
             activeStudentId={activeStudentId}
             onSelect={handleStudentSelect}
             savedStudentIds={savedStudentIds}
-            visible={studentPanelOpen}
-            onClose={() => setStudentPanelOpen(false)}
           />
         </div>
       </div>
 
-      {/* Mobile responsive override */}
+      {/* ══ MOBILE BOTTOM TAB BAR ═══════════════════════════════════════════ */}
+      <MobileTabBar
+        activeTab={mobileTab}
+        onChange={setMobileTab}
+        savedCount={savedStudentIds.size}
+      />
+
       <style>{`
-        @media (max-width: 900px) {
-          #report-layout { flex-direction: column !important; height: auto !important; min-height: 100vh; }
-          #left-panel { width: 100% !important; min-width: unset !important; max-width: unset !important; max-height: 45vh; border-right: none !important; }
-          #theme-bar { display: none !important; }
-          #student-toggle-btn { display: flex !important; }
-          #student-list-panel { 
-            position: fixed !important; 
-            top: 0 !important; right: 0 !important; bottom: 0 !important; left: auto !important;
-            width: 280px !important; 
-            max-width: 90vw !important;
-            box-shadow: -4px 0 24px rgba(0,0,0,0.25) !important;
-            transform: translateX(110%) !important;
-            transition: transform 0.25s ease !important;
-            z-index: 300 !important;
-            height: 100vh !important;
-            border-left: 1px solid #e5e7eb !important;
-          }
-          #student-list-panel.open { transform: translateX(0) !important; }
-          #report-preview { min-height: 60vh; overflow-x: auto; }
-          .report-page { 
-            width: 100% !important; 
-            min-width: 320px !important;
-          }
-        }
         @media print {
+          #mobile-tab-bar { display: none !important; }
           body > * { display: none !important; }
           #report-preview { display: block !important; position: static !important; overflow: visible !important; background: white !important; }
           .no-print, #left-panel, #theme-bar, #student-list-panel { display: none !important; }
