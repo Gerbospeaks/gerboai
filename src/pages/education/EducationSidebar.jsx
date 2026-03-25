@@ -199,7 +199,7 @@ export default function EducationSidebar({
             </button>
 
             {/* School logo */}
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
               {businessInfo?.logoUrl ? (
                 <img
                   src={businessInfo.logoUrl}
@@ -231,7 +231,7 @@ export default function EducationSidebar({
 
           {/* Bottom school avatar */}
           <div className="flex justify-center pb-4">
-            <div className="w-10 h-10 bg-white rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center overflow-hidden">
+            <div className="w-10 h-10 shadow-lg flex items-center justify-center overflow-hidden">
               {businessInfo?.logoUrl ? (
                 <img
                   src={businessInfo.logoUrl}
@@ -252,7 +252,7 @@ export default function EducationSidebar({
           {/* Header */}
           <div className="p-5 border-b border-slate-700/60">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                 {businessInfo?.logoUrl ? (
                   <img
                     src={businessInfo.logoUrl}
@@ -265,7 +265,7 @@ export default function EducationSidebar({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-bold text-white truncate leading-tight">
-                  {businessInfo?.name || "Sunshine"}
+                  {businessInfo?.name || "Solidflo"}
                 </div>
                 <div className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase truncate">
                   {businessInfo?.tagline || "Learning Centre"}
@@ -288,15 +288,6 @@ export default function EducationSidebar({
               label="Home"
               onClick={() => goTo("home")}
               color="cyan"
-            />
-            <NavItem
-              icon={Settings}
-              label="Settings"
-              onClick={() => {
-                setShowSettings(true);
-                setSidebarOpen(false);
-              }}
-              color="blue"
             />
             <NavItem
               icon={TrendingUp}
@@ -322,7 +313,7 @@ export default function EducationSidebar({
                   badge={savedReports?.length ?? 0}
                   onClick={() => {
                     setShowReportsList?.((p) => !p);
-                    setSidebarOpen(false);
+                    setSidebarOpen(true);
                   }}
                 />
               </Accordion>
@@ -471,7 +462,7 @@ export default function EducationSidebar({
 
             {/* User identity chip */}
             <div className="flex items-center gap-2.5 mt-2 px-2 pt-2 border-t border-slate-700/40">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
                 {businessInfo?.logoUrl ? (
                   <img
                     src={businessInfo.logoUrl}

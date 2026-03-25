@@ -420,12 +420,19 @@ const GRADE_THEMES = {
     ],
     sv: "pill",
     tableHeader: (p, bd) => ({
-      background: "#faf5ff", color: p, fontWeight: 700, fontSize: "7.5pt",
-      padding: "1.5mm 2mm", border: `1.5px solid ${bd}`, textAlign: "center",
+      background: "#faf5ff",
+      color: p,
+      fontWeight: 700,
+      fontSize: "7.5pt",
+      padding: "1.5mm 2mm",
+      border: `1.5px solid ${bd}`,
+      textAlign: "center",
     }),
     tableCell: (bd, even) => ({
-      padding: "1.4mm 2mm", border: `1.5px solid ${bd}`,
-      background: even ? "#faf5ff" : "#fff", verticalAlign: "middle",
+      padding: "1.4mm 2mm",
+      border: `1.5px solid ${bd}`,
+      background: even ? "#faf5ff" : "#fff",
+      verticalAlign: "middle",
     }),
   },
   0: {
@@ -459,12 +466,19 @@ const GRADE_THEMES = {
     ],
     sv: "pill",
     tableHeader: (p, bd) => ({
-      background: "#fdf2f8", color: p, fontWeight: 700, fontSize: "7.5pt",
-      padding: "1.5mm 2mm", border: `1.5px solid ${bd}`, textAlign: "center",
+      background: "#fdf2f8",
+      color: p,
+      fontWeight: 700,
+      fontSize: "7.5pt",
+      padding: "1.5mm 2mm",
+      border: `1.5px solid ${bd}`,
+      textAlign: "center",
     }),
     tableCell: (bd, even) => ({
-      padding: "1.4mm 2mm", border: `1.5px solid ${bd}`,
-      background: even ? "#fdf2f8" : "#fff", verticalAlign: "middle",
+      padding: "1.4mm 2mm",
+      border: `1.5px solid ${bd}`,
+      background: even ? "#fdf2f8" : "#fff",
+      verticalAlign: "middle",
     }),
   },
   1: {
@@ -498,12 +512,19 @@ const GRADE_THEMES = {
     ],
     sv: "filled",
     tableHeader: (p, bd, cream) => ({
-      background: cream, color: p, fontWeight: 700, fontSize: "7.5pt",
-      padding: "1.5mm 2mm", border: `1px solid ${bd}`, textAlign: "center",
+      background: cream,
+      color: p,
+      fontWeight: 700,
+      fontSize: "7.5pt",
+      padding: "1.5mm 2mm",
+      border: `1px solid ${bd}`,
+      textAlign: "center",
     }),
     tableCell: (bd, even) => ({
-      padding: "1.4mm 2mm", border: `1px solid ${bd}`,
-      background: even ? "#fffbeb" : "#fff", verticalAlign: "middle",
+      padding: "1.4mm 2mm",
+      border: `1px solid ${bd}`,
+      background: even ? "#fffbeb" : "#fff",
+      verticalAlign: "middle",
     }),
   },
   2: {
@@ -537,14 +558,25 @@ const GRADE_THEMES = {
     ],
     sv: "outlined",
     tableHeader: (p, bd) => ({
-      background: "#f0f9ff", color: p, fontWeight: 600, fontSize: "7.5pt",
-      padding: "1.5mm 2mm", borderBottom: `2px solid ${p}`,
-      borderRight: "none", borderLeft: "none", borderTop: "none", textAlign: "center",
+      background: "#f0f9ff",
+      color: p,
+      fontWeight: 600,
+      fontSize: "7.5pt",
+      padding: "1.5mm 2mm",
+      borderBottom: `2px solid ${p}`,
+      borderRight: "none",
+      borderLeft: "none",
+      borderTop: "none",
+      textAlign: "center",
     }),
     tableCell: (bd, even) => ({
-      padding: "1.6mm 2mm", borderBottom: `1px solid ${bd}`,
-      borderLeft: "none", borderRight: "none", borderTop: "none",
-      background: even ? "#f0f9ff" : "#fff", verticalAlign: "middle",
+      padding: "1.6mm 2mm",
+      borderBottom: `1px solid ${bd}`,
+      borderLeft: "none",
+      borderRight: "none",
+      borderTop: "none",
+      background: even ? "#f0f9ff" : "#fff",
+      verticalAlign: "middle",
     }),
   },
   3: {
@@ -578,12 +610,19 @@ const GRADE_THEMES = {
     ],
     sv: "filled",
     tableHeader: (p, bd, cream) => ({
-      background: cream, color: p, fontWeight: 700, fontSize: "7.5pt",
-      padding: "1.5mm 2mm", border: `1px solid ${bd}`, textAlign: "center",
+      background: cream,
+      color: p,
+      fontWeight: 700,
+      fontSize: "7.5pt",
+      padding: "1.5mm 2mm",
+      border: `1px solid ${bd}`,
+      textAlign: "center",
     }),
     tableCell: (bd, even) => ({
-      padding: "1.4mm 2mm", border: `1px solid ${bd}`,
-      background: even ? "#f0fdf4" : "#fff", verticalAlign: "middle",
+      padding: "1.4mm 2mm",
+      border: `1px solid ${bd}`,
+      background: even ? "#f0fdf4" : "#fff",
+      verticalAlign: "middle",
     }),
   },
   4: {
@@ -617,14 +656,25 @@ const GRADE_THEMES = {
     ],
     sv: "outlined",
     tableHeader: (p, bd) => ({
-      background: "#faf5ff", color: p, fontWeight: 600, fontSize: "7.5pt",
-      padding: "1.5mm 2mm", borderBottom: `2px solid ${p}`,
-      borderRight: "none", borderLeft: "none", borderTop: "none", textAlign: "center",
+      background: "#faf5ff",
+      color: p,
+      fontWeight: 600,
+      fontSize: "7.5pt",
+      padding: "1.5mm 2mm",
+      borderBottom: `2px solid ${p}`,
+      borderRight: "none",
+      borderLeft: "none",
+      borderTop: "none",
+      textAlign: "center",
     }),
     tableCell: (bd, even) => ({
-      padding: "1.6mm 2mm", borderBottom: `1px solid ${bd}`,
-      borderLeft: "none", borderRight: "none", borderTop: "none",
-      background: even ? "#faf5ff" : "#fff", verticalAlign: "middle",
+      padding: "1.6mm 2mm",
+      borderBottom: `1px solid ${bd}`,
+      borderLeft: "none",
+      borderRight: "none",
+      borderTop: "none",
+      background: even ? "#faf5ff" : "#fff",
+      verticalAlign: "middle",
     }),
   },
   5: {
@@ -658,14 +708,25 @@ const GRADE_THEMES = {
     ],
     sv: "outlined",
     tableHeader: (p, bd) => ({
-      background: "#fff7ed", color: p, fontWeight: 600, fontSize: "7.5pt",
-      padding: "1.5mm 2mm", borderBottom: `2px solid ${p}`,
-      borderRight: "none", borderLeft: "none", borderTop: "none", textAlign: "center",
+      background: "#fff7ed",
+      color: p,
+      fontWeight: 600,
+      fontSize: "7.5pt",
+      padding: "1.5mm 2mm",
+      borderBottom: `2px solid ${p}`,
+      borderRight: "none",
+      borderLeft: "none",
+      borderTop: "none",
+      textAlign: "center",
     }),
     tableCell: (bd, even) => ({
-      padding: "1.6mm 2mm", borderBottom: `1px solid ${bd}`,
-      borderLeft: "none", borderRight: "none", borderTop: "none",
-      background: even ? "#fff7ed" : "#fff", verticalAlign: "middle",
+      padding: "1.6mm 2mm",
+      borderBottom: `1px solid ${bd}`,
+      borderLeft: "none",
+      borderRight: "none",
+      borderTop: "none",
+      background: even ? "#fff7ed" : "#fff",
+      verticalAlign: "middle",
     }),
   },
   6: {
@@ -699,12 +760,19 @@ const GRADE_THEMES = {
     ],
     sv: "underlined",
     tableHeader: (p, bd) => ({
-      background: p, color: "#fff", fontWeight: 700, fontSize: "7.5pt",
-      padding: "1.5mm 2mm", border: `1px solid ${p}`, textAlign: "center",
+      background: p,
+      color: "#fff",
+      fontWeight: 700,
+      fontSize: "7.5pt",
+      padding: "1.5mm 2mm",
+      border: `1px solid ${p}`,
+      textAlign: "center",
     }),
     tableCell: (bd, even) => ({
-      padding: "1.4mm 2mm", border: `1px solid ${bd}`,
-      background: even ? "#f0f9ff" : "#fff", verticalAlign: "middle",
+      padding: "1.4mm 2mm",
+      border: `1px solid ${bd}`,
+      background: even ? "#f0f9ff" : "#fff",
+      verticalAlign: "middle",
     }),
   },
   7: {
@@ -738,19 +806,27 @@ const GRADE_THEMES = {
     ],
     sv: "underlined",
     tableHeader: (p, bd) => ({
-      background: p, color: "#fff", fontWeight: 700, fontSize: "7.5pt",
-      padding: "1.5mm 2mm", border: `1px solid ${p}`, textAlign: "center",
+      background: p,
+      color: "#fff",
+      fontWeight: 700,
+      fontSize: "7.5pt",
+      padding: "1.5mm 2mm",
+      border: `1px solid ${p}`,
+      textAlign: "center",
     }),
     tableCell: (bd, even) => ({
-      padding: "1.4mm 2mm", border: `1px solid ${bd}`,
-      background: even ? "#fafaf9" : "#fff", verticalAlign: "middle",
+      padding: "1.4mm 2mm",
+      border: `1px solid ${bd}`,
+      background: even ? "#fafaf9" : "#fff",
+      verticalAlign: "middle",
     }),
   },
 };
 
-
 const resolveTheme = (themeId) =>
-  THEMES[themeId] || Object.values(GRADE_THEMES).find((t) => t.id === themeId) || THEMES.classic;
+  THEMES[themeId] ||
+  Object.values(GRADE_THEMES).find((t) => t.id === themeId) ||
+  THEMES.classic;
 
 const SecTitle = ({ t, col, children }) => {
   const c = col || t.p;
@@ -1071,10 +1147,13 @@ const SigRow = ({ t, data }) => (
 const GRADE_TERM_DATA = {
   R: [
     {
-      num: 1, period: "January – March",
+      num: 1,
+      period: "January – March",
       subjects: [
         {
-          name: "Language & Emergent Literacy", col: "p", wide: true,
+          name: "Language & Emergent Literacy",
+          col: "p",
+          wide: true,
           items: [
             "Listens attentively during story time and circle activities",
             "Follows simple one-step oral instructions",
@@ -1087,7 +1166,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics & Numeracy", col: "teal",
+          name: "Mathematics & Numeracy",
+          col: "teal",
           items: [
             "Counts objects 1–5 with one-to-one correspondence",
             "Recognises numerals 1–5",
@@ -1098,7 +1178,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills & Well-being", col: "sky",
+          name: "Life Skills & Well-being",
+          col: "sky",
           items: [
             "Manages personal hygiene independently (washing hands, toileting)",
             "Participates in morning routine and transitions",
@@ -1109,7 +1190,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Social & Emotional Development", col: "a",
+        title: "Social & Emotional Development",
+        col: "a",
         items: [
           "Separates from caregiver with growing confidence",
           "Takes turns and shares materials",
@@ -1120,10 +1202,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 2, period: "April – June",
+      num: 2,
+      period: "April – June",
       subjects: [
         {
-          name: "Language & Emergent Literacy", col: "p", wide: true,
+          name: "Language & Emergent Literacy",
+          col: "p",
+          wide: true,
           items: [
             "Listens to and retells a simple story with key details",
             "Speaks in 3–5 word sentences; expanding vocabulary",
@@ -1136,7 +1221,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics & Numeracy", col: "teal",
+          name: "Mathematics & Numeracy",
+          col: "teal",
           items: [
             "Counts objects 1–10 reliably",
             "Writes numerals 1–10 with correct formation",
@@ -1147,7 +1233,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills & Well-being", col: "sky",
+          name: "Life Skills & Well-being",
+          col: "sky",
           items: [
             "Identifies family members and community helpers",
             "Participates in creative arts (painting, collage, music, dance)",
@@ -1158,7 +1245,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Fine Motor Development", col: "a",
+        title: "Fine Motor Development",
+        col: "a",
         items: [
           "Holds scissors correctly; cuts along a straight line",
           "Threads large beads in sequence",
@@ -1169,10 +1257,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 3, period: "July – September",
+      num: 3,
+      period: "July – September",
       subjects: [
         {
-          name: "Language & Emergent Literacy", col: "p", wide: true,
+          name: "Language & Emergent Literacy",
+          col: "p",
+          wide: true,
           items: [
             "Listens to longer stories and answers simple questions",
             "Speaks clearly in full sentences; uses descriptive words",
@@ -1185,7 +1276,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics & Numeracy", col: "teal",
+          name: "Mathematics & Numeracy",
+          col: "teal",
           items: [
             "Counts and represents numbers 1–15",
             "Adds groups of objects to 10 (concrete)",
@@ -1196,7 +1288,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills & Well-being", col: "sky",
+          name: "Life Skills & Well-being",
+          col: "sky",
           items: [
             "Explores the natural world (plants, animals, weather)",
             "Creates artwork using mixed media",
@@ -1207,7 +1300,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Cognitive Development", col: "gold",
+        title: "Cognitive Development",
+        col: "gold",
         items: [
           "Matches, sorts and classifies by two attributes",
           "Recalls and sequences events in a story",
@@ -1218,10 +1312,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 4, period: "October – December",
+      num: 4,
+      period: "October – December",
       subjects: [
         {
-          name: "Language & Emergent Literacy", col: "p", wide: true,
+          name: "Language & Emergent Literacy",
+          col: "p",
+          wide: true,
           items: [
             "Listens critically and responds appropriately to discussions",
             "Speaks with growing confidence in group settings",
@@ -1233,7 +1330,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics & Numeracy", col: "teal",
+          name: "Mathematics & Numeracy",
+          col: "teal",
           items: [
             "Counts and represents numbers 1–20",
             "Adds and subtracts using concrete objects to 10",
@@ -1243,7 +1341,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills & Well-being", col: "sky",
+          name: "Life Skills & Well-being",
+          col: "sky",
           items: [
             "Shows understanding of cultural diversity and heritage",
             "Performs in a year-end creative arts presentation",
@@ -1257,10 +1356,13 @@ const GRADE_TERM_DATA = {
 
   0: [
     {
-      num: 1, period: "January – March",
+      num: 1,
+      period: "January – March",
       subjects: [
         {
-          name: "Early Language & Communication", col: "p", wide: true,
+          name: "Early Language & Communication",
+          col: "p",
+          wide: true,
           items: [
             "Responds to and follows simple verbal instructions",
             "Uses 2–4 word sentences to communicate needs",
@@ -1271,7 +1373,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Early Numeracy", col: "teal",
+          name: "Early Numeracy",
+          col: "teal",
           items: [
             "Counts 1–5 using fingers and objects",
             "Matches quantity to numeral 1–5",
@@ -1281,7 +1384,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Personal & Social Development", col: "sky",
+          name: "Personal & Social Development",
+          col: "sky",
           items: [
             "Manages basic self-care (dressing, toileting)",
             "Interacts positively with peers in play",
@@ -1291,7 +1395,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Play & Exploration", col: "a",
+        title: "Play & Exploration",
+        col: "a",
         items: [
           "Engages in sensory and exploratory play",
           "Uses blocks and construction toys purposefully",
@@ -1302,10 +1407,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 2, period: "April – June",
+      num: 2,
+      period: "April – June",
       subjects: [
         {
-          name: "Early Language & Communication", col: "p", wide: true,
+          name: "Early Language & Communication",
+          col: "p",
+          wide: true,
           items: [
             "Listens to and retells a 3-event story",
             "Uses 4–6 word sentences; vocabulary is expanding",
@@ -1316,7 +1424,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Early Numeracy", col: "teal",
+          name: "Early Numeracy",
+          col: "teal",
           items: [
             "Counts and matches objects 1–8",
             "Compares groups: more/less/same",
@@ -1326,7 +1435,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Personal & Social Development", col: "sky",
+          name: "Personal & Social Development",
+          col: "sky",
           items: [
             "Shows increasing independence in daily tasks",
             "Works cooperatively in small group activities",
@@ -1336,7 +1446,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Creative Arts & Motor Skills", col: "gold",
+        title: "Creative Arts & Motor Skills",
+        col: "gold",
         items: [
           "Holds crayon with functional grip",
           "Cuts along a straight line",
@@ -1347,10 +1458,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 3, period: "July – September",
+      num: 3,
+      period: "July – September",
       subjects: [
         {
-          name: "Early Language & Communication", col: "p", wide: true,
+          name: "Early Language & Communication",
+          col: "p",
+          wide: true,
           items: [
             "Recalls and sequences a story using pictures",
             "Speaks in full sentences; uses adjectives and verbs",
@@ -1361,7 +1475,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Early Numeracy", col: "teal",
+          name: "Early Numeracy",
+          col: "teal",
           items: [
             "Counts objects 1–12 reliably",
             "Writes numerals 1–10",
@@ -1371,7 +1486,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Personal & Social Development", col: "sky",
+          name: "Personal & Social Development",
+          col: "sky",
           items: [
             "Shows awareness of community and environment",
             "Participates in group projects and discussions",
@@ -1381,7 +1497,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Physical Development", col: "a",
+        title: "Physical Development",
+        col: "a",
         items: [
           "Runs, hops, skips with coordination",
           "Catches a large ball with two hands",
@@ -1392,10 +1509,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 4, period: "October – December",
+      num: 4,
+      period: "October – December",
       subjects: [
         {
-          name: "Early Language & Communication", col: "p", wide: true,
+          name: "Early Language & Communication",
+          col: "p",
+          wide: true,
           items: [
             "Participates confidently in group discussions",
             "Uses descriptive language in storytelling",
@@ -1405,7 +1525,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Early Numeracy", col: "teal",
+          name: "Early Numeracy",
+          col: "teal",
           items: [
             "Counts to 15 and represents the quantity",
             "Adds and subtracts to 8 using objects",
@@ -1414,7 +1535,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Personal & Social Development", col: "sky",
+          name: "Personal & Social Development",
+          col: "sky",
           items: [
             "Shows growth in social and emotional maturity",
             "Participates in end-of-year performance",
@@ -1428,10 +1550,13 @@ const GRADE_TERM_DATA = {
 
   1: [
     {
-      num: 1, period: "January – March",
+      num: 1,
+      period: "January – March",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Listens attentively and follows oral instructions",
             "Speaks clearly and communicates ideas in sentences",
@@ -1444,7 +1569,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Counts to 20 and beyond (number concept)",
             "Recognises and writes numbers 1–20",
@@ -1456,7 +1582,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "Beginning Knowledge — self & environment",
             "Creative Arts — participates in art/music",
@@ -1466,7 +1593,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Social Development", col: "a",
+        title: "Social Development",
+        col: "a",
         items: [
           "Settles into class routine confidently",
           "Works cooperatively with peers",
@@ -1477,10 +1605,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 2, period: "April – June",
+      num: 2,
+      period: "April – June",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Listens and follows two-step oral instructions",
             "Retells a story in sequence using key vocabulary",
@@ -1493,7 +1624,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Number concept and counting to 50",
             "Addition and subtraction within 20",
@@ -1505,7 +1637,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "My community and cultural awareness",
             "Creative Arts — drawing/craft/movement",
@@ -1515,7 +1648,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Fine Motor & Handwriting", col: "a",
+        title: "Fine Motor & Handwriting",
+        col: "a",
         items: [
           "Holds pencil/crayon with correct grip",
           "Forms letters correctly (letter formation)",
@@ -1526,10 +1660,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 3, period: "July – September",
+      num: 3,
+      period: "July – September",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Listens critically and responds to discussions",
             "Speaks in complete sentences; uses descriptive language",
@@ -1542,7 +1679,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Number concept to 75",
             "Addition and subtraction within 30",
@@ -1554,7 +1692,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "Natural environment and weather/seasons",
             "Creative Arts — music, drama, visual arts",
@@ -1564,7 +1703,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Cognitive Development", col: "gold",
+        title: "Cognitive Development",
+        col: "gold",
         items: [
           "Follows multi-step instructions",
           "Solves problems creatively",
@@ -1575,10 +1715,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 4, period: "October – December",
+      num: 4,
+      period: "October – December",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Reads independently with fluency and expression",
             "Demonstrates strong reading comprehension skills",
@@ -1588,7 +1731,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Number concept to 100",
             "Addition and subtraction within 50",
@@ -1599,7 +1743,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "Heritage, culture and society",
             "Creative Arts — end-of-year performance/project",
@@ -1613,10 +1758,13 @@ const GRADE_TERM_DATA = {
 
   2: [
     {
-      num: 1, period: "January – March",
+      num: 1,
+      period: "January – March",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Listens to and recalls main ideas from oral texts",
             "Speaks in full sentences using expanded vocabulary",
@@ -1629,7 +1777,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Number concept to 99 (place value: tens and units)",
             "Addition and subtraction within 50",
@@ -1641,7 +1790,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "The local community and its services",
             "Creative Arts — visual arts and craft",
@@ -1651,7 +1801,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Language Development", col: "a",
+        title: "Language Development",
+        col: "a",
         items: [
           "Understands and follows 3-step instructions",
           "Uses adjectives and adverbs in sentences",
@@ -1662,10 +1813,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 2, period: "April – June",
+      num: 2,
+      period: "April – June",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Listens to discussions and identifies the main point",
             "Presents a short oral recount or description",
@@ -1677,7 +1831,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Numbers to 150 — ordering and comparing",
             "Addition and subtraction within 99",
@@ -1689,7 +1844,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "The environment and sustainability",
             "Creative Arts — music, singing and drama",
@@ -1699,7 +1855,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Numeracy Skills", col: "gold",
+        title: "Numeracy Skills",
+        col: "gold",
         items: [
           "Solves word problems with two steps",
           "Reads and interprets bar graphs",
@@ -1710,10 +1867,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 3, period: "July – September",
+      num: 3,
+      period: "July – September",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Listens to and summarises a short informational text",
             "Engages in structured class discussions and debates",
@@ -1725,7 +1885,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Numbers to 200",
             "Addition and subtraction within 150",
@@ -1737,7 +1898,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "History of the local area",
             "Creative Arts — integrated performance project",
@@ -1747,7 +1909,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Reading Comprehension", col: "a",
+        title: "Reading Comprehension",
+        col: "a",
         items: [
           "Identifies main idea and supporting details",
           "Makes predictions before and during reading",
@@ -1758,10 +1921,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 4, period: "October – December",
+      num: 4,
+      period: "October – December",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Reads a variety of texts independently with understanding",
             "Delivers a short prepared oral presentation",
@@ -1771,7 +1937,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Number concept to 200",
             "All four operations within appropriate ranges",
@@ -1781,7 +1948,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "Cultural diversity and South African heritage",
             "Creative Arts — year-end showcase/performance",
@@ -1795,10 +1963,13 @@ const GRADE_TERM_DATA = {
 
   3: [
     {
-      num: 1, period: "January – March",
+      num: 1,
+      period: "January – March",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Listens to and evaluates oral presentations",
             "Speaks clearly using complex sentences",
@@ -1811,7 +1982,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Number concept to 500 (place value to hundreds)",
             "Addition and subtraction within 300",
@@ -1823,7 +1995,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "The school and community environment",
             "Creative Arts — drawing, painting, collage",
@@ -1833,7 +2006,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Writing Skills", col: "a",
+        title: "Writing Skills",
+        col: "a",
         items: [
           "Plans writing using mind maps or lists",
           "Writes topic sentences with supporting details",
@@ -1844,10 +2018,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 2, period: "April – June",
+      num: 2,
+      period: "April – June",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Participates in drama and role-play activities",
             "Uses context clues to understand unfamiliar vocabulary",
@@ -1859,7 +2036,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Numbers to 999",
             "Addition and subtraction within 500",
@@ -1871,7 +2049,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "Maps and the local environment (Beginning Knowledge)",
             "Creative Arts — music, singing and instruments",
@@ -1881,7 +2060,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Mathematical Reasoning", col: "gold",
+        title: "Mathematical Reasoning",
+        col: "gold",
         items: [
           "Solves multi-step word problems",
           "Explains own reasoning in words",
@@ -1892,10 +2072,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 3, period: "July – September",
+      num: 3,
+      period: "July – September",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Evaluates the purpose and audience of a text",
             "Reads poetry and identifies rhyme, rhythm and mood",
@@ -1907,7 +2090,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Number concept to 1 000",
             "All four operations within 999",
@@ -1919,7 +2103,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "South African history: key events and figures",
             "Creative Arts — drama and visual arts project",
@@ -1929,7 +2114,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Study Skills", col: "a",
+        title: "Study Skills",
+        col: "a",
         items: [
           "Uses a contents page and index in a book",
           "Takes simple notes from a text",
@@ -1940,10 +2126,13 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 4, period: "October – December",
+      num: 4,
+      period: "October – December",
       subjects: [
         {
-          name: "Home Language", col: "p", wide: true,
+          name: "Home Language",
+          col: "p",
+          wide: true,
           items: [
             "Reads a full class novel with comprehension",
             "Writes a well-structured multi-genre text",
@@ -1953,7 +2142,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Consolidation of all four operations to 1 000",
             "Fractions, decimals and percentages (basic)",
@@ -1963,7 +2153,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Life Skills", col: "sky",
+          name: "Life Skills",
+          col: "sky",
           items: [
             "Heritage, culture and citizenship",
             "End-of-year creative arts performance",
@@ -1977,10 +2168,12 @@ const GRADE_TERM_DATA = {
 
   4: [
     {
-      num: 1, period: "January – March",
+      num: 1,
+      period: "January – March",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Listens to and summarises informational texts",
             "Participates in formal and informal discussions",
@@ -1992,7 +2185,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Listens and responds to basic instructions",
             "Reads and comprehends simple passages",
@@ -2002,7 +2196,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Whole numbers to 100 000 (place value, ordering)",
             "Addition and subtraction within 100 000",
@@ -2014,7 +2209,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences & Technology", col: "gold",
+          name: "Natural Sciences & Technology",
+          col: "gold",
           items: [
             "Structure and function of plant and animal cells",
             "Food webs and ecosystems",
@@ -2024,7 +2220,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Social Sciences", col: "a",
+        title: "Social Sciences",
+        col: "a",
         items: [
           "History: ancient civilisations (Egypt, Greece)",
           "Geography: map skills, compass directions",
@@ -2035,10 +2232,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 2, period: "April – June",
+      num: 2,
+      period: "April – June",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Oral: debate and argumentative speaking",
             "Reading comprehension: inference and evaluation",
@@ -2049,7 +2248,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Comprehension of longer passages",
             "Letter and email writing",
@@ -2058,7 +2258,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Whole numbers to 100 000 — all operations",
             "Multiples and factors; prime numbers",
@@ -2070,7 +2271,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences & Technology", col: "gold",
+          name: "Natural Sciences & Technology",
+          col: "gold",
           items: [
             "The solar system and space exploration",
             "Electrical circuits: conductors and insulators",
@@ -2080,7 +2282,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Social Sciences", col: "a",
+        title: "Social Sciences",
+        col: "a",
         items: [
           "History: colonisation and slave trade",
           "Geography: rivers, valleys, mountains in SA",
@@ -2091,10 +2294,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 3, period: "July – September",
+      num: 3,
+      period: "July – September",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Oral: prepared speech on a current topic",
             "Reading: novel study — character analysis",
@@ -2104,7 +2309,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Reading and analysing a short story",
             "Writing a personal recount",
@@ -2113,7 +2319,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Common fractions: operations (addition, subtraction)",
             "Decimal fractions: multiplication and division",
@@ -2123,7 +2330,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences & Technology", col: "gold",
+          name: "Natural Sciences & Technology",
+          col: "gold",
           items: [
             "The human body: skeletal and muscular systems",
             "Healthy living: diet, exercise, disease prevention",
@@ -2133,7 +2341,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Social Sciences", col: "a",
+        title: "Social Sciences",
+        col: "a",
         items: [
           "History: Great Trek and Battle of Blood River",
           "Geography: settlement patterns in SA",
@@ -2143,10 +2352,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 4, period: "October – December",
+      num: 4,
+      period: "October – December",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Reading and responding to poetry",
             "Writes a creative narrative and personal essay",
@@ -2155,7 +2366,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Reading comprehension: main idea and inference",
             "Writing a formal letter or essay",
@@ -2164,7 +2376,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Consolidation: all operations with whole numbers",
             "Fractions, decimals and percentages",
@@ -2174,7 +2387,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences & Technology", col: "gold",
+          name: "Natural Sciences & Technology",
+          col: "gold",
           items: [
             "Energy: forms and transfers",
             "Ecosystems: food webs and energy flow",
@@ -2188,10 +2402,12 @@ const GRADE_TERM_DATA = {
 
   5: [
     {
-      num: 1, period: "January – March",
+      num: 1,
+      period: "January – March",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Oral: structured debate using evidence",
             "Reading: literary analysis of short stories",
@@ -2202,7 +2418,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Reading comprehension passages with inference questions",
             "Formal and informal letter writing",
@@ -2211,7 +2428,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Whole numbers to 1 000 000",
             "All four operations with large numbers",
@@ -2223,7 +2441,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences & Technology", col: "gold",
+          name: "Natural Sciences & Technology",
+          col: "gold",
           items: [
             "Life processes: photosynthesis and respiration",
             "Biomes of South Africa",
@@ -2233,7 +2452,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Social Sciences", col: "a",
+        title: "Social Sciences",
+        col: "a",
         items: [
           "History: pre-colonial kingdoms of southern Africa",
           "Geography: climate and biomes of SA",
@@ -2244,10 +2464,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 2, period: "April – June",
+      num: 2,
+      period: "April – June",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Oral: dramatic monologue",
             "Reading: poetry — sound devices and imagery",
@@ -2257,7 +2479,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Newspaper report reading and analysis",
             "Writing a newspaper article",
@@ -2266,7 +2489,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Integers: introduction (positive and negative)",
             "Decimal fractions: all operations",
@@ -2277,7 +2501,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences & Technology", col: "gold",
+          name: "Natural Sciences & Technology",
+          col: "gold",
           items: [
             "Energy: electricity, heat and sound",
             "Electrical circuits: series and parallel",
@@ -2287,7 +2512,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Social Sciences", col: "a",
+        title: "Social Sciences",
+        col: "a",
         items: [
           "History: colonisation and resistance in SA",
           "Geography: climate change and global warming",
@@ -2298,10 +2524,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 3, period: "July – September",
+      num: 3,
+      period: "July – September",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Novel study: theme, setting and point of view",
             "Oral: group research presentation",
@@ -2311,7 +2539,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Reading and analysing a short play",
             "Creative writing: dialogue and script",
@@ -2320,7 +2549,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Algebraic expressions: collecting like terms",
             "Equations: solving one-step equations",
@@ -2330,7 +2560,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences & Technology", col: "gold",
+          name: "Natural Sciences & Technology",
+          col: "gold",
           items: [
             "The solar system: gravity and forces",
             "Newton's Laws of Motion (introduction)",
@@ -2340,7 +2571,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Social Sciences", col: "a",
+        title: "Social Sciences",
+        col: "a",
         items: [
           "History: the mineral revolution in SA",
           "Geography: map projections and world regions",
@@ -2351,10 +2583,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 4, period: "October – December",
+      num: 4,
+      period: "October – December",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Reads and critically evaluates media texts",
             "Writes a polished multi-genre portfolio",
@@ -2363,7 +2597,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Reads and interprets varied text types",
             "Writes a structured essay",
@@ -2372,7 +2607,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Algebra: expressions and equations",
             "Geometry: angles and constructions",
@@ -2381,7 +2617,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences & Technology", col: "gold",
+          name: "Natural Sciences & Technology",
+          col: "gold",
           items: [
             "Revision: life sciences and physical sciences themes",
             "Technology: final design and build project",
@@ -2394,10 +2631,12 @@ const GRADE_TERM_DATA = {
 
   6: [
     {
-      num: 1, period: "January – March",
+      num: 1,
+      period: "January – March",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Oral: formal speech with rhetorical devices",
             "Reading: critical analysis of a literary text",
@@ -2408,7 +2647,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Reading comprehension: literary and non-literary texts",
             "Essay writing: descriptive and narrative",
@@ -2417,7 +2657,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Integers: all operations on the number line",
             "Rational numbers and irrational numbers",
@@ -2428,7 +2669,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences", col: "gold",
+          name: "Natural Sciences",
+          col: "gold",
           items: [
             "Cells: plant vs animal; microscopy",
             "Reproduction: asexual and sexual (plants and animals)",
@@ -2438,7 +2680,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Social Sciences & EMS", col: "a",
+        title: "Social Sciences & EMS",
+        col: "a",
         items: [
           "History: SA under apartheid (1948–1990)",
           "Geography: development indicators (HDI, GNP)",
@@ -2449,10 +2692,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 2, period: "April – June",
+      num: 2,
+      period: "April – June",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Oral: prepared debate with rebuttal",
             "Novel study: critical reading and analysis",
@@ -2462,7 +2707,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Formal letter and email conventions",
             "Reading: newspaper and magazine articles",
@@ -2471,7 +2717,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Algebraic equations: linear and simultaneous (intro)",
             "Graphs: Cartesian plane; linear functions",
@@ -2481,7 +2728,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences", col: "gold",
+          name: "Natural Sciences",
+          col: "gold",
           items: [
             "Forces: Newton's Laws in action",
             "Energy: kinetic, potential, mechanical energy",
@@ -2491,7 +2739,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Social Sciences & EMS", col: "a",
+        title: "Social Sciences & EMS",
+        col: "a",
         items: [
           "History: transition to democracy (1990–1994)",
           "Geography: globalisation and its impacts",
@@ -2502,10 +2751,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 3, period: "July – September",
+      num: 3,
+      period: "July – September",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Poetry analysis: form, structure and effect",
             "Oral: group discussion with facilitation",
@@ -2515,7 +2766,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Shakespearean or classic text adapted excerpts",
             "Analytical writing: character comparison",
@@ -2524,7 +2776,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Patterns, sequences and series (arithmetic)",
             "Financial mathematics: interest, tax, budgets",
@@ -2534,7 +2787,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences", col: "gold",
+          name: "Natural Sciences",
+          col: "gold",
           items: [
             "Ecosystems: population dynamics and biodiversity",
             "Human impact on the environment",
@@ -2544,7 +2798,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Social Sciences & EMS", col: "a",
+        title: "Social Sciences & EMS",
+        col: "a",
         items: [
           "History: post-apartheid SA — the new democracy",
           "Geography: urban growth and challenges",
@@ -2555,10 +2810,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 4, period: "October – December",
+      num: 4,
+      period: "October – December",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Reads and evaluates a range of texts critically",
             "Writes a polished written portfolio",
@@ -2567,7 +2824,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Comprehensive reading comprehension",
             "Extended writing: essay or article",
@@ -2576,7 +2834,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Algebra and functions consolidation",
             "Trigonometry: solving right-angled triangles",
@@ -2585,7 +2844,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences", col: "gold",
+          name: "Natural Sciences",
+          col: "gold",
           items: [
             "Revision of life and physical sciences themes",
             "Technology: end-of-year design challenge",
@@ -2598,10 +2858,12 @@ const GRADE_TERM_DATA = {
 
   7: [
     {
-      num: 1, period: "January – March",
+      num: 1,
+      period: "January – March",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Oral: structured debate with counter-arguments",
             "Reading: in-depth literary analysis (prose, poetry, drama)",
@@ -2612,7 +2874,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Reads and critically analyses literary texts",
             "Writes formal and creative essays",
@@ -2621,7 +2884,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "The real number system: rational and irrational numbers",
             "Exponents: laws and applications",
@@ -2633,7 +2897,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences", col: "gold",
+          name: "Natural Sciences",
+          col: "gold",
           items: [
             "Life Sciences: cell biology and genetics",
             "Physical Sciences: mechanics — motion and forces",
@@ -2643,7 +2908,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Humanities & Applied Subjects", col: "a",
+        title: "Humanities & Applied Subjects",
+        col: "a",
         items: [
           "History: World War II and Cold War",
           "Geography: geomorphology; rivers and coasts",
@@ -2654,10 +2920,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 2, period: "April – June",
+      num: 2,
+      period: "April – June",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Oral: panel discussion on a social issue",
             "Novel study: comparing themes and perspectives",
@@ -2667,7 +2935,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Reading: non-fiction — speeches, manifestos",
             "Writing: formal report and discursive essay",
@@ -2676,7 +2945,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Functions: linear, quadratic, exponential (graphs)",
             "Simultaneous equations",
@@ -2687,7 +2957,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences", col: "gold",
+          name: "Natural Sciences",
+          col: "gold",
           items: [
             "Life Sciences: ecosystems and biodiversity",
             "Physical Sciences: electricity and magnetism",
@@ -2697,7 +2968,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Humanities & Applied Subjects", col: "a",
+        title: "Humanities & Applied Subjects",
+        col: "a",
         items: [
           "History: decolonisation and African independence",
           "Geography: development disparities; aid and trade",
@@ -2708,10 +2980,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 3, period: "July – September",
+      num: 3,
+      period: "July – September",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Drama: staging and performing an excerpt",
             "Oral: individual research presentation with Q&A",
@@ -2721,7 +2995,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Poetry: close reading and appreciation",
             "Extended writing: creative or analytical essay",
@@ -2730,7 +3005,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Probability: addition and multiplication rules",
             "Statistics: standard deviation; normal distribution",
@@ -2740,7 +3016,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences", col: "gold",
+          name: "Natural Sciences",
+          col: "gold",
           items: [
             "Life Sciences: human biology — reproduction, immunity",
             "Physical Sciences: waves, sound and light",
@@ -2750,7 +3027,8 @@ const GRADE_TERM_DATA = {
         },
       ],
       side: {
-        title: "Humanities & Applied Subjects", col: "a",
+        title: "Humanities & Applied Subjects",
+        col: "a",
         items: [
           "History: globalisation and 21st century challenges",
           "Geography: urban management and sustainability",
@@ -2761,10 +3039,12 @@ const GRADE_TERM_DATA = {
       },
     },
     {
-      num: 4, period: "October – December",
+      num: 4,
+      period: "October – December",
       subjects: [
         {
-          name: "Home Language", col: "p",
+          name: "Home Language",
+          col: "p",
           items: [
             "Reading and critically evaluating a range of genres",
             "Writes a polished writing portfolio — multiple genres",
@@ -2773,7 +3053,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "First Additional Language", col: "sky",
+          name: "First Additional Language",
+          col: "sky",
           items: [
             "Comprehensive reading and comprehension portfolio",
             "Extended essay: analytical or creative",
@@ -2782,7 +3063,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Mathematics", col: "teal",
+          name: "Mathematics",
+          col: "teal",
           items: [
             "Algebra: full revision — expressions, equations, functions",
             "Geometry: theorems and proof portfolios",
@@ -2792,7 +3074,8 @@ const GRADE_TERM_DATA = {
           ],
         },
         {
-          name: "Natural Sciences", col: "gold",
+          name: "Natural Sciences",
+          col: "gold",
           items: [
             "Life and Physical Sciences comprehensive revision",
             "Independent research investigation report",
@@ -3754,38 +4037,38 @@ const CoverPage = ({ t, data, businessName, logoUrl }) => (
         background: t.cBg,
       }}
     >
-    <div
-  style={{
-    width: 100,
-    height: 100,
-    borderRadius: t.id === "playful" ? 20 : 12,
-    background: logoUrl
-      ? "#ffffff00"
-      : t.id === "professional"
-        ? "#ffffff00"
-        : `linear-gradient(135deg,${t.p},${t.sky})`,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: 38,
-    overflow: "hidden",
-  }}
->
-  {logoUrl ? (
-    <img
-      src={logoUrl}
-      alt="School logo"
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "contain",
-        padding: 1,
-      }}
-    />
-  ) : (
-  <span>🏫</span>
-)}
-</div>
+      <div
+        style={{
+          width: 100,
+          height: 100,
+          borderRadius: t.id === "playful" ? 20 : 12,
+          background: logoUrl
+            ? "#ffffff00"
+            : t.id === "professional"
+              ? "#ffffff00"
+              : `linear-gradient(135deg,${t.p},${t.sky})`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 38,
+          overflow: "hidden",
+        }}
+      >
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt="School logo"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              padding: 1,
+            }}
+          />
+        ) : (
+          <span>🏫</span>
+        )}
+      </div>
       <div style={{ textAlign: "center" }}>
         <div
           style={{
@@ -4125,8 +4408,13 @@ const TermPage = ({ t, td, data, businessName }) => {
   // Map colour key string → theme colour value
   const themeCol = (key) => {
     const map = {
-      p: t.p, a: t.a, teal: t.teal, sky: t.sky, gold: t.gold,
-      mu: t.mu, lt: t.lt,
+      p: t.p,
+      a: t.a,
+      teal: t.teal,
+      sky: t.sky,
+      gold: t.gold,
+      mu: t.mu,
+      lt: t.lt,
     };
     return map[key] || t.p;
   };
@@ -4138,14 +4426,20 @@ const TermPage = ({ t, td, data, businessName }) => {
       {/* Wide (full-width) subjects */}
       {wideSubjects.map((subj) => (
         <div key={subj.name}>
-          <SecTitle t={t} col={themeCol(subj.col)}>{subj.name}</SecTitle>
+          <SecTitle t={t} col={themeCol(subj.col)}>
+            {subj.name}
+          </SecTitle>
           <RTable
             t={t}
             cols={[{ label: "Skill / Outcome" }, { label: "Mark", w: "12%" }]}
             rows={[
               ...subj.items.map((item) => [item, ""]),
               [
-                { v: `${subj.name} Overall Mark (1–7)`, bold: true, total: true },
+                {
+                  v: `${subj.name} Overall Mark (1–7)`,
+                  bold: true,
+                  total: true,
+                },
                 { v: "", bold: true, total: true },
               ],
             ]}
@@ -4155,17 +4449,30 @@ const TermPage = ({ t, td, data, businessName }) => {
 
       {/* Paired regular subjects in 2-column layout */}
       {pairs.map((pair, pIdx) => (
-        <div key={pIdx} style={{ display: "flex", gap: "4mm", marginTop: pIdx === 0 && wideSubjects.length === 0 ? 0 : "2mm" }}>
+        <div
+          key={pIdx}
+          style={{
+            display: "flex",
+            gap: "4mm",
+            marginTop: pIdx === 0 && wideSubjects.length === 0 ? 0 : "2mm",
+          }}
+        >
           {pair.map((subj) => (
             <div key={subj.name} style={{ flex: 1, minWidth: 0 }}>
-              <SecTitle t={t} col={themeCol(subj.col)}>{subj.name}</SecTitle>
+              <SecTitle t={t} col={themeCol(subj.col)}>
+                {subj.name}
+              </SecTitle>
               <RTable
                 t={t}
                 cols={[{ label: "Outcome" }, { label: "Mark", w: "15%" }]}
                 rows={[
                   ...subj.items.map((item) => [item, ""]),
                   [
-                    { v: `${subj.name} Overall (1–7)`, bold: true, total: true },
+                    {
+                      v: `${subj.name} Overall (1–7)`,
+                      bold: true,
+                      total: true,
+                    },
                     { v: "", bold: true, total: true },
                   ],
                 ]}
@@ -4175,7 +4482,9 @@ const TermPage = ({ t, td, data, businessName }) => {
           {/* If odd number in pair, fill remaining space */}
           {pair.length === 1 && td.side && pIdx === pairs.length - 1 && (
             <div style={{ flex: 1, minWidth: 0 }}>
-              <SecTitle t={t} col={themeCol(td.side.col)}>{td.side.title}</SecTitle>
+              <SecTitle t={t} col={themeCol(td.side.col)}>
+                {td.side.title}
+              </SecTitle>
               <RTable
                 t={t}
                 cols={[{ label: "Skill" }, { label: "E/M/D/B", w: "15%" }]}
@@ -4189,7 +4498,9 @@ const TermPage = ({ t, td, data, businessName }) => {
       {/* Side section when subjects are even (side goes full-width below) */}
       {td.side && pairs.length > 0 && pairs[pairs.length - 1].length === 2 && (
         <div style={{ marginTop: "2mm" }}>
-          <SecTitle t={t} col={themeCol(td.side.col)}>{td.side.title}</SecTitle>
+          <SecTitle t={t} col={themeCol(td.side.col)}>
+            {td.side.title}
+          </SecTitle>
           <RTable
             t={t}
             cols={[{ label: "Skill" }, { label: "E/M/D/B", w: "12%" }]}
@@ -4201,7 +4512,9 @@ const TermPage = ({ t, td, data, businessName }) => {
       {/* Side section when there are no pairs at all */}
       {td.side && pairs.length === 0 && (
         <div style={{ marginTop: "2mm" }}>
-          <SecTitle t={t} col={themeCol(td.side.col)}>{td.side.title}</SecTitle>
+          <SecTitle t={t} col={themeCol(td.side.col)}>
+            {td.side.title}
+          </SecTitle>
           <RTable
             t={t}
             cols={[{ label: "Skill" }, { label: "E/M/D/B", w: "12%" }]}
@@ -4213,7 +4526,9 @@ const TermPage = ({ t, td, data, businessName }) => {
       {/* Year-end summary for Term 4 */}
       {isT4 && (
         <div style={{ marginTop: "2mm" }}>
-          <SecTitle t={t} col={t.a}>Year-End Summary</SecTitle>
+          <SecTitle t={t} col={t.a}>
+            Year-End Summary
+          </SecTitle>
           <RTable
             t={t}
             cols={[
@@ -4226,7 +4541,10 @@ const TermPage = ({ t, td, data, businessName }) => {
             ]}
             rows={subjects.map((subj) => [
               subj.name,
-              "", "", "", "",
+              "",
+              "",
+              "",
+              "",
               { v: "", total: true },
             ])}
           />
@@ -4254,8 +4572,14 @@ const TermPage = ({ t, td, data, businessName }) => {
             </div>
             <div style={{ display: "flex", gap: "3mm", flexWrap: "wrap" }}>
               {[
-                [`☐ Promoted to Grade ${(parseInt(normaliseGrade(data.grade)) || 0) + 1}`, t.teal],
-                [`☐ Retained in Grade ${normaliseGrade(data.grade) || "1"}`, t.a],
+                [
+                  `☐ Promoted to Grade ${(parseInt(normaliseGrade(data.grade)) || 0) + 1}`,
+                  t.teal,
+                ],
+                [
+                  `☐ Retained in Grade ${normaliseGrade(data.grade) || "1"}`,
+                  t.a,
+                ],
                 ["☐ Conditional Promotion", t.gold],
               ].map(([lbl, col]) => (
                 <div
@@ -4279,7 +4603,9 @@ const TermPage = ({ t, td, data, businessName }) => {
 
       {/* Comments & Signatures */}
       <div style={{ marginTop: "auto", paddingTop: "3mm" }}>
-        <SecTitle t={t} col={t.gold}>Teacher Comments — Term {td.num}</SecTitle>
+        <SecTitle t={t} col={t.gold}>
+          Teacher Comments — Term {td.num}
+        </SecTitle>
         <CommentsBox t={t} value={comments} />
         <SigRow t={t} data={data} />
         {isT4 && (
@@ -4301,7 +4627,10 @@ const TermPage = ({ t, td, data, businessName }) => {
                 letterSpacing: "0.5px",
               }}
             >
-              {businessName || "Solidflo Pre School"} · {data.address || "Ext 36, Olivienhoutsbosch"} · Grade {normaliseGrade(data.grade) || "1"} Progress Report {data.schoolYear || "2026"}
+              {businessName || "Solidflo Pre School"} ·{" "}
+              {data.address || "Ext 36, Olivienhoutsbosch"} · Grade{" "}
+              {normaliseGrade(data.grade) || "1"} Progress Report{" "}
+              {data.schoolYear || "2026"}
             </p>
           </div>
         )}
@@ -4312,8 +4641,8 @@ const TermPage = ({ t, td, data, businessName }) => {
 
 // ── FULL REPORT ───────────────────────────────────────────────────────────────
 const Report = ({ themeId, data, firebaseData, businessName, logoUrl }) => {
- const t = resolveTheme(themeId);
- const [gradeThemes, setGradeThemes] = useState(null);
+  const t = resolveTheme(themeId);
+  const [gradeThemes, setGradeThemes] = useState(null);
   const {
     studentAttendance = [],
     studentFees = null,
@@ -4359,9 +4688,15 @@ const Report = ({ themeId, data, firebaseData, businessName, logoUrl }) => {
         welfareFlags={welfareFlags}
         businessName={businessName}
       />
-     {getTermData(data.grade).map((td) => (
-  <TermPage key={td.num} t={t} td={td} data={data} businessName={businessName} />
-))}
+      {getTermData(data.grade).map((td) => (
+        <TermPage
+          key={td.num}
+          t={t}
+          td={td}
+          data={data}
+          businessName={businessName}
+        />
+      ))}
     </div>
   );
 };
@@ -4369,7 +4704,11 @@ const GradeThemePage = ({ currentGrade, selected, onSelect, onClose }) => {
   const gradeOrder = ["R", "0", "1", "2", "3", "4", "5", "6", "7"];
 
   const previewColors = (theme) => [
-    theme.p, theme.a, theme.teal, theme.sky, theme.gold,
+    theme.p,
+    theme.a,
+    theme.teal,
+    theme.sky,
+    theme.gold,
   ];
 
   return (
@@ -4423,8 +4762,15 @@ const GradeThemePage = ({ currentGrade, selected, onSelect, onClose }) => {
             >
               🎨 Grade-Specific Themes
             </div>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", marginTop: 2 }}>
-              Each grade has its own personality — select a theme or let it auto-apply from the student's grade
+            <div
+              style={{
+                fontSize: 12,
+                color: "rgba(255,255,255,0.65)",
+                marginTop: 2,
+              }}
+            >
+              Each grade has its own personality — select a theme or let it
+              auto-apply from the student's grade
             </div>
           </div>
           <button
@@ -4467,16 +4813,18 @@ const GradeThemePage = ({ currentGrade, selected, onSelect, onClose }) => {
           >
             <span>💡</span>
             <span>
-              Current student is Grade{" "}
-              <strong>{currentGrade}</strong> — the matching theme is
-              highlighted below.
+              Current student is Grade <strong>{currentGrade}</strong> — the
+              matching theme is highlighted below.
             </span>
             <button
               onClick={() => {
                 const gt = Object.values(GRADE_THEMES).find(
                   (t) => String(t.grade) === String(currentGrade),
                 );
-                if (gt) { onSelect(gt.id); onClose(); }
+                if (gt) {
+                  onSelect(gt.id);
+                  onClose();
+                }
               }}
               style={{
                 marginLeft: "auto",
@@ -4510,14 +4858,16 @@ const GradeThemePage = ({ currentGrade, selected, onSelect, onClose }) => {
             if (!theme) return null;
             const isSelected = selected === theme.id;
             const isCurrentGrade =
-              currentGrade &&
-              String(currentGrade) === String(theme.grade);
+              currentGrade && String(currentGrade) === String(theme.grade);
             const colors = previewColors(theme);
 
             return (
               <button
                 key={gradeKey}
-                onClick={() => { onSelect(theme.id); onClose(); }}
+                onClick={() => {
+                  onSelect(theme.id);
+                  onClose();
+                }}
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -4528,8 +4878,8 @@ const GradeThemePage = ({ currentGrade, selected, onSelect, onClose }) => {
                   border: isSelected
                     ? `3px solid ${theme.p}`
                     : isCurrentGrade
-                    ? `2px dashed ${theme.p}`
-                    : "2px solid #e5e7eb",
+                      ? `2px dashed ${theme.p}`
+                      : "2px solid #e5e7eb",
                   background: "#fff",
                   outline: "none",
                   overflow: "hidden",
@@ -4611,7 +4961,9 @@ const GradeThemePage = ({ currentGrade, selected, onSelect, onClose }) => {
                             height: 3,
                             borderRadius: 1,
                             background:
-                              i === 0 ? "rgba(255,255,255,0.7)" : theme.mu + "44",
+                              i === 0
+                                ? "rgba(255,255,255,0.7)"
+                                : theme.mu + "44",
                           }}
                         />
                         <div
@@ -4620,7 +4972,9 @@ const GradeThemePage = ({ currentGrade, selected, onSelect, onClose }) => {
                             height: 3,
                             borderRadius: 1,
                             background:
-                              i === 0 ? "rgba(255,255,255,0.5)" : theme.a + "66",
+                              i === 0
+                                ? "rgba(255,255,255,0.5)"
+                                : theme.a + "66",
                           }}
                         />
                       </div>
@@ -4630,7 +4984,14 @@ const GradeThemePage = ({ currentGrade, selected, onSelect, onClose }) => {
 
                 {/* Label */}
                 <div style={{ padding: "10px 12px 12px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      marginBottom: 3,
+                    }}
+                  >
                     <span style={{ fontSize: 16 }}>{theme.emoji}</span>
                     <span
                       style={{
@@ -4717,7 +5078,8 @@ const GradeThemePage = ({ currentGrade, selected, onSelect, onClose }) => {
           }}
         >
           <span style={{ fontSize: 11, color: "#9ca3af" }}>
-            Manual styles (Classic, Modern, Academic, Playful) are in the side panel
+            Manual styles (Classic, Modern, Academic, Playful) are in the side
+            panel
           </span>
           <button
             onClick={onClose}
@@ -4752,7 +5114,36 @@ const ActionToolbar = ({
 }) => {
   const [pdfLoading, setPdfLoading] = useState(false);
 
-  const handlePrint = () => window.print();
+  const handlePrint = async () => {
+    const pages = document.querySelectorAll(".report-page");
+    if (!pages.length) {
+      window.print();
+      return;
+    }
+
+    await loadScript(
+      "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
+    );
+
+    const canvases = await Promise.all(
+      [...pages].map((p) =>
+        window.html2canvas(p, { scale: 2, backgroundColor: "#ffffff" }),
+      ),
+    );
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write("<html><body style='margin:0'>");
+    canvases.forEach((c) => {
+      printWindow.document.write(
+        `<img src="${c.toDataURL()}" style="width:100%;display:block;page-break-after:always"/>`,
+      );
+    });
+    printWindow.document.write("</body></html>");
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
 
   const handleSaveAsPDF = async () => {
     setPdfLoading(true);
@@ -4940,7 +5331,7 @@ const SECTIONS = [
         label: "EMIS / Learner No.",
         placeholder: "e.g. 200-012345",
       },
-      { key: "grade", label: "Grade", placeholder: "e.g. 1" },
+      { key: "grade", label: "Grade", placeholder: "e.g. 1", type: "select" },
       { key: "classGrade", label: "Class Name", placeholder: "e.g. Grade 1B" },
     ],
   },
@@ -5550,27 +5941,29 @@ const TemplateSelectorBar = ({ selected, onSelect, onGradeThemes }) => (
       Style
     </div>
     <button
-  onClick={onGradeThemes}
-  style={{
-    width: "100%",
-    padding: "6px 4px",
-    borderRadius: 8,
-    border: "2px solid #6366f1",
-    background: "#eef2ff",
-    color: "#4338ca",
-    fontSize: 9,
-    fontWeight: 800,
-    cursor: "pointer",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
-    marginBottom: 8,
-    lineHeight: 1.3,
-  }}
->
-  🎓
-  <br/>Grade
-  <br/>Themes
-</button>
+      onClick={onGradeThemes}
+      style={{
+        width: "100%",
+        padding: "6px 4px",
+        borderRadius: 8,
+        border: "2px solid #6366f1",
+        background: "#eef2ff",
+        color: "#4338ca",
+        fontSize: 9,
+        fontWeight: 800,
+        cursor: "pointer",
+        textTransform: "uppercase",
+        letterSpacing: "0.5px",
+        marginBottom: 8,
+        lineHeight: 1.3,
+      }}
+    >
+      🎓
+      <br />
+      Grade
+      <br />
+      Themes
+    </button>
     {Object.values(THEMES).map((theme) => (
       <TemplateThumbnail
         key={theme.id}
@@ -6001,13 +6394,13 @@ export default function Reports() {
     comments3: "",
     comments4: "",
   });
-  
-useEffect(() => {
-  const gradeKey = normaliseGrade(data.grade);
-  if (gradeKey && GRADE_THEMES[gradeKey]) {
-    setSelected(GRADE_THEMES[gradeKey].id);
-  }
-}, [data.grade]);
+
+  useEffect(() => {
+    const gradeKey = normaliseGrade(data.grade);
+    if (gradeKey && GRADE_THEMES[gradeKey]) {
+      setSelected(GRADE_THEMES[gradeKey].id);
+    }
+  }, [data.grade]);
 
   useEffect(() => {
     injectFonts();
@@ -6257,6 +6650,42 @@ useEffect(() => {
                       lineHeight: 1.5,
                     }}
                   />
+                ) : f.type === "select" ? (
+                  <select
+                    value={data[f.key] || ""}
+                    onChange={(e) => update(f.key, e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "6px 8px",
+                      fontSize: 12,
+                      border: "1px solid #ced4da",
+                      borderRadius: 6,
+                      outline: "none",
+                      fontFamily: "inherit",
+                      boxSizing: "border-box",
+                      background: "#fff",
+                      cursor: "pointer",
+                      color: data[f.key] ? "#212529" : "#9ca3af",
+                    }}
+                  >
+                    <option value="">Select grade…</option>
+                    {[
+                      ...new Set(
+                        students.map((s) => normaliseGrade(s.gradeLevel)),
+                      ),
+                    ]
+                      .filter(Boolean)
+                      .sort((a, b) => {
+                        if (a === "R") return -1;
+                        if (b === "R") return 1;
+                        return (parseInt(a) || 0) - (parseInt(b) || 0);
+                      })
+                      .map((g) => (
+                        <option key={g} value={g}>
+                          Grade {g}
+                        </option>
+                      ))}
+                  </select>
                 ) : (
                   <input
                     type={f.type || "text"}
@@ -6388,83 +6817,83 @@ useEffect(() => {
         </div>
 
         {/* ══ CENTRE-LEFT — TEMPLATE STYLE PICKER (desktop only) ═════════════ */}
-        <TemplateSelectorBar 
-        selected={selected} 
-        onSelect={setSelected} 
-        onGradeThemes={() => setShowGradeThemes(true)}
+        <TemplateSelectorBar
+          selected={selected}
+          onSelect={setSelected}
+          onGradeThemes={() => setShowGradeThemes(true)}
         />
 
         {/* ══ CENTRE — REPORT PREVIEW ═════════════════════════════════════════ */}
-     
-<div
-  id="report-preview"
-  className={mobileTab === "preview" ? "mobile-active" : ""}
-  style={{
-    flex: 1,
-    overflowY: "auto",
-    overflowX: "hidden",
-    background: "#d4d8e0",
-    position: "relative",
-    display: "flex",
-    flexDirection: "column",
-    minWidth: 0,
-  }}
->
-  <ActionToolbar
-    data={data}
-    themeId={selected}
-    firebaseData={firebaseData}
-    onSave={handleSave}
-    onNew={handleNew}
-    isSaving={isSaving}
-    savedStudentIds={savedStudentIds}
-    activeStudentId={activeStudentId}
-  />
 
-  {loadingFirebase && (
-    <div
-      style={{
-        position: "absolute",
-        top: 52,
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 100,
-        background: "#1d3557",
-        color: "#fff",
-        padding: "8px 18px",
-        borderRadius: 99,
-        fontSize: 11,
-        fontWeight: 700,
-        boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-      }}
-    >
-      <div
-        style={{
-          width: 14,
-          height: 14,
-          border: "2px solid rgba(255,255,255,0.3)",
-          borderTop: "2px solid #fff",
-          borderRadius: "50%",
-          animation: "spin 0.8s linear infinite",
-        }}
-      />
-      Loading student data from Firebase…
-    </div>
-  )}
+        <div
+          id="report-preview"
+          className={mobileTab === "preview" ? "mobile-active" : ""}
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+            background: "#d4d8e0",
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            minWidth: 0,
+          }}
+        >
+          <ActionToolbar
+            data={data}
+            themeId={selected}
+            firebaseData={firebaseData}
+            onSave={handleSave}
+            onNew={handleNew}
+            isSaving={isSaving}
+            savedStudentIds={savedStudentIds}
+            activeStudentId={activeStudentId}
+          />
 
-  <ScaledReportContainer>
-    <Report
-      themeId={selected}
-      data={data}
-      firebaseData={firebaseData}
-      businessName={businessName}
-      logoUrl={businessInfo?.logoUrl}
-    />
-  </ScaledReportContainer>
-</div>
+          {loadingFirebase && (
+            <div
+              style={{
+                position: "absolute",
+                top: 52,
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 100,
+                background: "#1d3557",
+                color: "#fff",
+                padding: "8px 18px",
+                borderRadius: 99,
+                fontSize: 11,
+                fontWeight: 700,
+                boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <div
+                style={{
+                  width: 14,
+                  height: 14,
+                  border: "2px solid rgba(255,255,255,0.3)",
+                  borderTop: "2px solid #fff",
+                  borderRadius: "50%",
+                  animation: "spin 0.8s linear infinite",
+                }}
+              />
+              Loading student data from Firebase…
+            </div>
+          )}
+
+          <ScaledReportContainer>
+            <Report
+              themeId={selected}
+              data={data}
+              firebaseData={firebaseData}
+              businessName={businessName}
+              logoUrl={businessInfo?.logoUrl}
+            />
+          </ScaledReportContainer>
+        </div>
 
         {/* ══ RIGHT — STUDENT LIST (desktop sidebar / mobile tab panel) ══════ */}
         <div
@@ -6499,14 +6928,14 @@ useEffect(() => {
         onChange={setMobileTab}
         savedCount={savedStudentIds.size}
       />
-{showGradeThemes && (
-  <GradeThemePage
-    currentGrade={normaliseGrade(data.grade)}
-    selected={selected}
-    onSelect={setSelected}
-    onClose={() => setShowGradeThemes(false)}
-  />
-)}
+      {showGradeThemes && (
+        <GradeThemePage
+          currentGrade={normaliseGrade(data.grade)}
+          selected={selected}
+          onSelect={setSelected}
+          onClose={() => setShowGradeThemes(false)}
+        />
+      )}
       <style>{`
         @media print {
           #mobile-tab-bar { display: none !important; }

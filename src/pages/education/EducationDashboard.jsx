@@ -17,6 +17,8 @@ import EducationSidebar from "./EducationSidebar";
 import AttendanceTrends from './AttendanceTrends';
 import DocumentsVault from "./DocumentsVault";
 import { MedicalAlert } from './StudentMedicalSection';
+import Assessments from "./Assessment"
+import Curriculum from "./Curriculum";
 import {
   BehaviourLogView,
   MarkBookView,
@@ -1150,6 +1152,8 @@ function ZField({ label, children, span2 }) {
     { id: "fees", label: "Fee Tracking", icon: CreditCard },
     { id: "staff", label: "Staff", icon: Users },
     { id: "events", label: "Events & Calendar", icon: Calendar },
+    { id: "curriculum", label: "Curriculum", icon: BookOpen },
+    { id: "assessment", label: "Assessments", icon: Award },
     { id: "reports", label: "Report Cards", icon: ClipboardList },
     { id: "behaviour",  label: "Behaviour Log",     icon: ShieldAlert  },
   { id: "markbook",   label: "Mark Book",          icon: BarChart2    },
@@ -1451,6 +1455,8 @@ function ZField({ label, children, span2 }) {
 
           {/* ── STAFF ── */}
           {activeView === "staff" && <StaffView staff={MOCK_STAFF} />}
+          {activeView === "assessments" && <Assessments />}
+          {activeView === "curriculum" && <Curriculum />}
           {showAIWindow && (
             <AIInvoiceWindow
               user={user}
