@@ -78,7 +78,7 @@ const gradeBg = (g) =>
   ] || T.bg;
 
 export default function ParentPortal() {
-const { portalSlug } = useParams();
+  const { portalSlug } = useParams();
   const [schoolUid, setSchoolUid] = useState(null);
 
   // ── school data ────────────────────────────────────────────────────────────
@@ -118,10 +118,9 @@ const { portalSlug } = useParams();
   useEffect(() => {
     const load = async () => {
       try {
-       
         const usersSnap = await getDocs(
-  query(collection(db, "users"), where("portalSlug", "==", portalSlug)),
-);
+          query(collection(db, "users"), where("portalSlug", "==", portalSlug)),
+        );
         if (usersSnap.empty) {
           setNotFound(true);
           setLoading(false);
@@ -177,9 +176,8 @@ const { portalSlug } = useParams();
           getDoc(doc(db, "users", uid, "settings", "timetable")),
           getDocs(
             query(
-              collection(db, "users", uid, "reports"),
-              where("locked", "==", true),
-              orderBy("createdAt", "desc"),
+              collection(db, "users", uid, "savedReports"),
+              orderBy("savedAt", "desc"),
             ),
           ),
           getDocs(
@@ -235,10 +233,10 @@ const { portalSlug } = useParams();
         );
         if (ttDoc.exists()) setTimetable(ttDoc.data());
         setReports(
-          repSnap.docs
-            .map((d) => ({ id: d.id, ...d.data() }))
-            .filter((d) => !d._placeholder),
-        );
+  repSnap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .filter((d) => !d._placeholder && d.studentName),
+);
         setPermEvents(
           permSnap.docs
             .map((d) => ({ id: d.id, ...d.data() }))
@@ -309,13 +307,13 @@ const { portalSlug } = useParams();
     : null;
 
   // ── Derived: reports for verified student ─────────────────────────────────
-  const studentReports = verifiedStudent
-    ? reports.filter(
-        (r) =>
-          r.student?.name?.trim().toLowerCase() ===
-          verifiedStudent.name.trim().toLowerCase(),
-      )
-    : [];
+ const studentReports = verifiedStudent
+  ? reports.filter(
+      (r) =>
+        r.studentName?.trim().toLowerCase() ===
+        verifiedStudent.name.trim().toLowerCase(),
+    )
+  : [];
 
   // ── Derived: permission slips for verified student ────────────────────────
   const myPermEvents = verifiedStudent
@@ -1924,428 +1922,333 @@ const { portalSlug } = useParams();
         )}
 
         {/* ══ REPORTS ═══════════════════════════════════════════════════════ */}
-        {activeTab === "reports" && verifiedStudent && (
-          <div style={{ animation: "fadeUp .25s ease" }}>
-            <SectionHeader
-              name={verifiedStudent.name}
-              grade={verifiedStudent.grade}
-            />
-            {studentReports.length === 0 ? (
-              <EmptyState
-                icon={ClipboardList}
-                title="No reports yet"
-                message="No report cards have been published for your child yet."
-                color={T.purpleLight}
-                iconColor={T.purple}
-              />
-            ) : (
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 14 }}
-              >
-                {studentReports.map((rep, i) => {
-                  const avg = rep.performance?.average ?? 0;
-                  const isExpanded = expandedReport === rep.id;
-                  const attPct = rep.attendance?.percentage
-                    ? parseFloat(rep.attendance.percentage)
-                    : rep.attendance?.days
-                      ? Math.round(
-                          (rep.attendance.present / rep.attendance.days) * 100,
-                        )
-                      : null;
-                  const perfColor =
-                    avg >= 80
-                      ? "#15803d"
-                      : avg >= 60
-                        ? T.blue
-                        : avg >= 50
-                          ? "#b45309"
-                          : T.red;
-                  const perfBg =
-                    avg >= 80
-                      ? "#f0fdf4"
-                      : avg >= 60
-                        ? T.blueLight
-                        : avg >= 50
-                          ? "#fffbeb"
-                          : T.redLight;
-                  return (
-                    <div
-                      key={rep.id}
+{activeTab === "reports" && verifiedStudent && (
+  <div style={{ animation: "fadeUp .25s ease" }}>
+    <SectionHeader
+      name={verifiedStudent.name}
+      grade={verifiedStudent.grade}
+    />
+
+    {studentReports.length === 0 ? (
+      <EmptyState
+        icon={ClipboardList}
+        title="No reports yet"
+        message="No report cards have been saved for your child yet."
+        color={T.purpleLight}
+        iconColor={T.purple}
+      />
+    ) : (
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {studentReports.map((rep, i) => {
+          const isExpanded = expandedReport === rep.id;
+          const rd = rep.reportData || {};
+
+          // Pull comments
+          const comments = [1, 2, 3, 4]
+            .map((n) => ({ term: n, text: rd[`comments${n}`] }))
+            .filter((c) => c.text?.trim());
+
+          // Derive theme colour for accent bar
+          const themeAccents = {
+            classic: "#1d3557", modern: "#1e3a8a",
+            professional: "#111827", playful: "#7c3aed",
+            gradeR: "#7c3aed", grade0: "#db2777", grade1: "#b45309",
+            grade2: "#0369a1", grade3: "#15803d", grade4: "#6d28d9",
+            grade5: "#9a3412", grade6: "#0f4c75", grade7: "#111827",
+          };
+          const accentColor = themeAccents[rep.themeId] || T.primary;
+
+          return (
+            <div
+              key={rep.id}
+              style={{
+                background: T.surface,
+                borderRadius: T.radius,
+                border: `1px solid ${T.border}`,
+                boxShadow: T.shadow,
+                overflow: "hidden",
+                animation: `fadeUp .3s ease ${i * 0.05}s both`,
+              }}
+            >
+              {/* Colour bar matching the report theme */}
+              <div style={{ height: 5, background: accentColor }} />
+
+              <div style={{ padding: "16px 16px 14px" }}>
+                {/* Header row */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 12,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: 13,
+                      background: T.primaryLight,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <FileText
+                      style={{ width: 20, height: 20, color: accentColor }}
+                    />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p
                       style={{
-                        background: T.surface,
-                        borderRadius: T.radius,
-                        border: `1px solid ${T.border}`,
-                        boxShadow: T.shadow,
-                        overflow: "hidden",
-                        animation: `fadeUp .3s ease ${i * 0.05}s both`,
+                        margin: 0,
+                        fontSize: 15,
+                        fontWeight: 700,
+                        color: T.text,
                       }}
                     >
-                      <div style={{ height: 4, background: perfColor }} />
-                      <div style={{ padding: "16px 16px 14px" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: 12,
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: 44,
-                              height: 44,
-                              borderRadius: 13,
-                              background: perfBg,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexShrink: 0,
-                            }}
-                          >
-                            <Award
-                              style={{
-                                width: 20,
-                                height: 20,
-                                color: perfColor,
-                              }}
-                            />
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p
-                              style={{
-                                margin: 0,
-                                fontSize: 15,
-                                fontWeight: 700,
-                                color: T.text,
-                              }}
-                            >
-                              {rep.academicInfo?.term || "Term"} ·{" "}
-                              {rep.academicInfo?.year || ""}
-                            </p>
-                            <p
-                              style={{
-                                margin: "3px 0 0",
-                                fontSize: 12,
-                                color: T.textSoft,
-                              }}
-                            >
-                              {rep.student?.gradeLevel || verifiedStudent.grade}
-                              {rep.reportNumber
-                                ? ` · #${rep.reportNumber}`
-                                : ""}
-                            </p>
-                          </div>
-                          <div
-                            style={{
-                              textAlign: "center",
-                              padding: "8px 14px",
-                              borderRadius: 12,
-                              background: perfBg,
-                              flexShrink: 0,
-                            }}
-                          >
-                            <p
-                              style={{
-                                margin: 0,
-                                fontSize: 20,
-                                fontWeight: 800,
-                                color: perfColor,
-                                lineHeight: 1,
-                              }}
-                            >
-                              {avg}%
-                            </p>
-                            <p
-                              style={{
-                                margin: "2px 0 0",
-                                fontSize: 9,
-                                fontWeight: 700,
-                                color: perfColor,
-                                opacity: 0.75,
-                              }}
-                            >
-                              AVERAGE
-                            </p>
-                          </div>
-                        </div>
-                        <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                          {[
-                            {
-                              label: "Subjects",
-                              val:
-                                rep.performance?.totalSubjects ??
-                                rep.subjects?.length ??
-                                0,
-                              color: T.primary,
-                            },
-                            {
-                              label: "Attendance",
-                              val: attPct != null ? `${attPct}%` : "—",
-                              color:
-                                attPct >= 90
-                                  ? "#15803d"
-                                  : attPct >= 75
-                                    ? T.blue
-                                    : T.red,
-                            },
-                            {
-                              label: "Days",
-                              val: `${rep.attendance?.present ?? "—"}/${rep.attendance?.days ?? "—"}`,
-                              color: T.textMid,
-                            },
-                          ].map(({ label, val, color }) => (
-                            <div
-                              key={label}
-                              style={{
-                                flex: 1,
-                                padding: "9px 12px",
-                                borderRadius: 11,
-                                background: T.bg,
-                                border: `1px solid ${T.border}`,
-                                textAlign: "center",
-                              }}
-                            >
-                              <p
-                                style={{
-                                  margin: 0,
-                                  fontSize: 16,
-                                  fontWeight: 800,
-                                  color,
-                                }}
-                              >
-                                {val}
-                              </p>
-                              <p
-                                style={{
-                                  margin: "2px 0 0",
-                                  fontSize: 10,
-                                  fontWeight: 600,
-                                  color: T.textFaint,
-                                }}
-                              >
-                                {label}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                        <button
-                          onClick={() =>
-                            setExpandedReport(isExpanded ? null : rep.id)
-                          }
-                          style={{
-                            marginTop: 12,
-                            width: "100%",
-                            padding: "9px",
-                            borderRadius: 10,
-                            background: T.bg,
-                            border: `1px solid ${T.border}`,
-                            fontSize: 12,
-                            fontWeight: 700,
-                            color: T.textMid,
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 6,
-                          }}
-                        >
-                          <TrendingUp style={{ width: 13, height: 13 }} />
-                          {isExpanded ? "Hide details" : "View subject marks"}
-                          <ChevronDown
-                            style={{
-                              width: 13,
-                              height: 13,
-                              transform: isExpanded ? "rotate(180deg)" : "none",
-                              transition: "transform .2s",
-                            }}
-                          />
-                        </button>
-                      </div>
-                      {isExpanded && (
-                        <div
-                          style={{
-                            borderTop: `1px solid ${T.border}`,
-                            padding: "14px 16px",
-                          }}
-                        >
-                          {rep.subjects?.length > 0 && (
-                            <div style={{ marginBottom: 14 }}>
-                              <p
-                                style={{
-                                  margin: "0 0 10px",
-                                  fontSize: 12,
-                                  fontWeight: 700,
-                                  color: T.textMid,
-                                  textTransform: "uppercase",
-                                  letterSpacing: ".06em",
-                                }}
-                              >
-                                Subject Results
-                              </p>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: 8,
-                                }}
-                              >
-                                {rep.subjects.map((subj, si) => {
-                                  const mark = Number(subj.mark) || 0;
-                                  const grade =
-                                    subj.grade ||
-                                    (mark >= 80
-                                      ? "A"
-                                      : mark >= 70
-                                        ? "B"
-                                        : mark >= 60
-                                          ? "C"
-                                          : mark >= 50
-                                            ? "D"
-                                            : "E");
-                                  return (
-                                    <div
-                                      key={si}
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 10,
-                                        padding: "9px 12px",
-                                        borderRadius: 11,
-                                        background: T.bg,
-                                        border: `1px solid ${T.border}`,
-                                      }}
-                                    >
-                                      <div
-                                        style={{
-                                          width: 32,
-                                          height: 32,
-                                          borderRadius: 9,
-                                          background: gradeBg(grade),
-                                          display: "flex",
-                                          alignItems: "center",
-                                          justifyContent: "center",
-                                          flexShrink: 0,
-                                        }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontSize: 13,
-                                            fontWeight: 800,
-                                            color: gradeColor(grade),
-                                          }}
-                                        >
-                                          {grade}
-                                        </span>
-                                      </div>
-                                      <div style={{ flex: 1, minWidth: 0 }}>
-                                        <p
-                                          style={{
-                                            margin: 0,
-                                            fontSize: 13,
-                                            fontWeight: 700,
-                                            color: T.text,
-                                          }}
-                                        >
-                                          {subj.name}
-                                        </p>
-                                        {subj.comments && (
-                                          <p
-                                            style={{
-                                              margin: "2px 0 0",
-                                              fontSize: 11,
-                                              color: T.textSoft,
-                                              overflow: "hidden",
-                                              textOverflow: "ellipsis",
-                                              whiteSpace: "nowrap",
-                                            }}
-                                          >
-                                            {subj.comments}
-                                          </p>
-                                        )}
-                                      </div>
-                                      <div
-                                        style={{
-                                          flexShrink: 0,
-                                          textAlign: "right",
-                                        }}
-                                      >
-                                        <p
-                                          style={{
-                                            margin: 0,
-                                            fontSize: 14,
-                                            fontWeight: 800,
-                                            color: gradeColor(grade),
-                                          }}
-                                        >
-                                          {mark}%
-                                        </p>
-                                        <div
-                                          style={{
-                                            marginTop: 3,
-                                            width: 60,
-                                            height: 4,
-                                            borderRadius: 99,
-                                            background: T.border,
-                                            overflow: "hidden",
-                                          }}
-                                        >
-                                          <div
-                                            style={{
-                                              height: "100%",
-                                              width: `${mark}%`,
-                                              background: gradeColor(grade),
-                                              borderRadius: 99,
-                                            }}
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-                          {rep.teacherComments && (
-                            <div
-                              style={{
-                                padding: "12px 14px",
-                                borderRadius: 12,
-                                background: T.primaryLight,
-                                border: `1px solid #c6e8d9`,
-                              }}
-                            >
-                              <p
-                                style={{
-                                  margin: "0 0 6px",
-                                  fontSize: 11,
-                                  fontWeight: 700,
-                                  color: T.primary,
-                                  textTransform: "uppercase",
-                                  letterSpacing: ".06em",
-                                }}
-                              >
-                                Teacher's Comments
-                              </p>
-                              <p
-                                style={{
-                                  margin: 0,
-                                  fontSize: 13,
-                                  color: T.textMid,
-                                  lineHeight: 1.65,
-                                }}
-                              >
-                                {rep.teacherComments}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      Progress Report
+                    </p>
+                    <p
+                      style={{
+                        margin: "3px 0 0",
+                        fontSize: 12,
+                        color: T.textSoft,
+                      }}
+                    >
+                      Grade {rd.grade || verifiedStudent.grade}
+                      {rd.schoolYear ? ` · ${rd.schoolYear}` : ""}
+                      {rd.classGrade ? ` · ${rd.classGrade}` : ""}
+                    </p>
+                    {rd.teacher && (
+                      <p
+                        style={{
+                          margin: "2px 0 0",
+                          fontSize: 11,
+                          color: T.textFaint,
+                        }}
+                      >
+                        Teacher: {rd.teacher}
+                      </p>
+                    )}
+                  </div>
+                  {/* Year badge */}
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      padding: "5px 12px",
+                      borderRadius: 99,
+                      background: T.primaryLight,
+                      color: accentColor,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {rd.schoolYear || "2026"}
+                  </span>
+                </div>
+
+                {/* Info pills */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 8,
+                    marginTop: 14,
+                  }}
+                >
+                  {[
+                    rd.reportDate && { label: "📅 " + rd.reportDate },
+                    rd.principal && { label: "🏫 " + rd.principal },
+                    rd.emisNo && { label: "ID: " + rd.emisNo },
+                  ]
+                    .filter(Boolean)
+                    .map(({ label }) => (
+                      <span
+                        key={label}
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          padding: "4px 11px",
+                          borderRadius: 99,
+                          background: T.bg,
+                          color: T.textMid,
+                          border: `1px solid ${T.border}`,
+                        }}
+                      >
+                        {label}
+                      </span>
+                    ))}
+                </div>
+
+                {/* Expand / collapse toggle */}
+                <button
+                  onClick={() =>
+                    setExpandedReport(isExpanded ? null : rep.id)
+                  }
+                  style={{
+                    marginTop: 12,
+                    width: "100%",
+                    padding: "9px",
+                    borderRadius: 10,
+                    background: T.bg,
+                    border: `1px solid ${T.border}`,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: T.textMid,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                  }}
+                >
+                  <ClipboardList style={{ width: 13, height: 13 }} />
+                  {isExpanded ? "Hide comments" : "View teacher comments"}
+                  <ChevronDown
+                    style={{
+                      width: 13,
+                      height: 13,
+                      transform: isExpanded ? "rotate(180deg)" : "none",
+                      transition: "transform .2s",
+                    }}
+                  />
+                </button>
               </div>
-            )}
-          </div>
-        )}
+
+              {/* Expanded: teacher comments per term */}
+              {isExpanded && (
+                <div
+                  style={{
+                    borderTop: `1px solid ${T.border}`,
+                    padding: "14px 16px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
+                  }}
+                >
+                  {/* Learner info summary */}
+                  <div
+                    style={{
+                      padding: "12px 14px",
+                      borderRadius: 12,
+                      background: T.bg,
+                      border: `1px solid ${T.border}`,
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "8px 16px",
+                    }}
+                  >
+                    {[
+                      ["Date of Birth", rd.dob],
+                      ["EMIS No.", rd.emisNo],
+                      ["Class", rd.classGrade],
+                      ["Principal", rd.principal],
+                      ["Report Date", rd.reportDate],
+                      ["School Year", rd.schoolYear],
+                    ]
+                      .filter(([, v]) => v)
+                      .map(([label, value]) => (
+                        <div key={label}>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: 9,
+                              fontWeight: 700,
+                              color: T.textFaint,
+                              textTransform: "uppercase",
+                              letterSpacing: ".05em",
+                            }}
+                          >
+                            {label}
+                          </p>
+                          <p
+                            style={{
+                              margin: "1px 0 0",
+                              fontSize: 12,
+                              fontWeight: 600,
+                              color: T.text,
+                            }}
+                          >
+                            {value}
+                          </p>
+                        </div>
+                      ))}
+                  </div>
+
+                  {/* Term comments */}
+                  {comments.length > 0 ? (
+                    <>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          color: T.textMid,
+                          textTransform: "uppercase",
+                          letterSpacing: ".06em",
+                        }}
+                      >
+                        Teacher Comments
+                      </p>
+                      {comments.map(({ term, text }) => (
+                        <div
+                          key={term}
+                          style={{
+                            padding: "12px 14px",
+                            borderRadius: 12,
+                            background: T.primaryLight,
+                            border: `1px solid #c6e8d9`,
+                          }}
+                        >
+                          <p
+                            style={{
+                              margin: "0 0 6px",
+                              fontSize: 11,
+                              fontWeight: 700,
+                              color: accentColor,
+                              textTransform: "uppercase",
+                              letterSpacing: ".06em",
+                            }}
+                          >
+                            Term {term}
+                          </p>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: 13,
+                              color: T.textMid,
+                              lineHeight: 1.65,
+                            }}
+                          >
+                            {text}
+                          </p>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div
+                      style={{
+                        padding: "16px",
+                        textAlign: "center",
+                        color: T.textFaint,
+                        fontSize: 13,
+                        border: `1.5px dashed ${T.border}`,
+                        borderRadius: 12,
+                      }}
+                    >
+                      No teacher comments recorded yet
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </div>
+)}
 
         {/* ══ MARKS (from mark book) ════════════════════════════════════════ */}
         {activeTab === "marks" && verifiedStudent && (

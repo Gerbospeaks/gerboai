@@ -28,13 +28,10 @@ import {
   setDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import {
-  getStorage,
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
+import { getAuth } from "firebase/auth";
+
+// ─── CLOUDFLARE WORKER URL ────────────────────────────────────────────────────
+const WORKER_URL = "https://r2-upload-worker.v8-auto.workers.dev";
 
 // ─── RESPONSIVE HOOK ──────────────────────────────────────────────────────────
 const useIsMobile = () => {
@@ -398,7 +395,7 @@ const ONLINE_PORTALS = [
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 const getDaysUntilExpiry = (expiryDate) => {
   if (!expiryDate) return null;
-  const diff = new Date(expiryDate) - new Date();
+  const diff = new Date(expiryDate).getTime() - new Date().getTime();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 };
 
@@ -406,32 +403,47 @@ const getDocStatus = (docState) => {
   if (!docState?.uploaded) return "missing";
   if (docState.expiry) {
     const days = getDaysUntilExpiry(docState.expiry);
-    if (days < 0) return "expired";
-    if (days <= 60) return "expiring";
+    if (days !== null && days < 0) return "expired";
+    if (days !== null && days <= 60) return "expiring";
   }
   return "ok";
 };
 
 const STATUS_CONFIG = {
-  ok: { label: "Uploaded", bg: "#EAF3DE", color: "#27500A", dot: "#639922" },
-  expiring: {
-    label: "Expiring soon",
-    bg: "#FAEEDA",
-    color: "#633806",
-    dot: "#EF9F27",
-  },
-  expired: {
-    label: "Expired",
-    bg: "#FCEBEB",
-    color: "#791F1F",
-    dot: "#E24B4A",
-  },
-  missing: {
-    label: "Missing",
-    bg: "#FCEBEB",
-    color: "#791F1F",
-    dot: "#E24B4A",
-  },
+  ok:       { label: "Uploaded",      bg: "#EAF3DE", color: "#27500A", dot: "#639922" },
+  expiring: { label: "Expiring soon", bg: "#FAEEDA", color: "#633806", dot: "#EF9F27" },
+  expired:  { label: "Expired",       bg: "#FCEBEB", color: "#791F1F", dot: "#E24B4A" },
+  missing:  { label: "Missing",       bg: "#FCEBEB", color: "#791F1F", dot: "#E24B4A" },
+};
+
+// ─── CLOUDFLARE UPLOAD ────────────────────────────────────────────────────────
+/**
+ * Uploads a document file to Cloudflare R2 via the Worker's /upload-pdf endpoint.
+ * The Worker stores it under users/{userId}/ and returns { publicUrl, key }.
+ */
+const uploadToCloudflare = async (file) => {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error("No authenticated user");
+
+  const idToken = await currentUser.getIdToken();
+
+  const res = await fetch(`${WORKER_URL}/upload-pdf`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+      "Content-Type": file.type || "application/octet-stream",
+      "X-File-Name": file.name,
+    },
+    body: await file.arrayBuffer(),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || "Upload failed");
+  }
+
+  return res.json();
 };
 
 // ─── UPLOAD MODAL ─────────────────────────────────────────────────────────────
@@ -440,13 +452,20 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
   const [notes, setNotes] = useState(current?.notes || "");
   const [file, setFile] = useState(null);
   const [saving, setSaving] = useState(false);
-  const fileRef = useRef();
+  const [uploadError, setUploadError] = useState("");
+  const fileRef = useRef(null);
 
   const handleSave = async () => {
     setSaving(true);
-    await onSave({ expiry, notes, file, existing: current });
-    setSaving(false);
-    onClose();
+    setUploadError("");
+    try {
+      await onSave({ expiry, notes, file, existing: current });
+      onClose();
+    } catch (err) {
+      setUploadError(err.message || "Upload failed. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -473,6 +492,7 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
           overflow: "hidden",
         }}
       >
+        {/* Header */}
         <div
           style={{
             padding: "16px 20px",
@@ -493,18 +513,15 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            style={{
-              border: "none",
-              background: "none",
-              cursor: "pointer",
-              color: "#8A97A8",
-              padding: 4,
-            }}
+            style={{ border: "none", background: "none", cursor: "pointer", color: "#8A97A8", padding: 4 }}
           >
             <X size={18} />
           </button>
         </div>
+
+        {/* Body */}
         <div style={{ padding: "16px 20px" }}>
+          {/* Drop zone */}
           <div
             onClick={() => fileRef.current?.click()}
             style={{
@@ -523,40 +540,29 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
               type="file"
               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
               style={{ display: "none" }}
-              onChange={(e) => setFile(e.target.files[0])}
+              onChange={(e) => {
+                setUploadError("");
+                setFile(e.target.files?.[0] ?? null);
+              }}
             />
             {file ? (
               <>
-                <CheckCircle
-                  size={22}
-                  style={{ color: "#0F7B3F", marginBottom: 6 }}
-                />
-                <div
-                  style={{ fontSize: 13, fontWeight: 600, color: "#0F7B3F" }}
-                >
-                  {file.name}
-                </div>
+                <CheckCircle size={22} style={{ color: "#0F7B3F", marginBottom: 6 }} />
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#0F7B3F" }}>{file.name}</div>
                 <div style={{ fontSize: 11, color: "#8A97A8", marginTop: 2 }}>
                   {(file.size / 1024).toFixed(0)} KB — click to change
                 </div>
               </>
             ) : (
               <>
-                <Upload
-                  size={22}
-                  style={{ color: "#8A97A8", marginBottom: 6 }}
-                />
-                <div
-                  style={{ fontSize: 13, fontWeight: 600, color: "#4A5568" }}
-                >
-                  Click to upload
-                </div>
-                <div style={{ fontSize: 11, color: "#8A97A8", marginTop: 2 }}>
-                  PDF, JPG, PNG, DOC supported
-                </div>
+                <Upload size={22} style={{ color: "#8A97A8", marginBottom: 6 }} />
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#4A5568" }}>Click to upload</div>
+                <div style={{ fontSize: 11, color: "#8A97A8", marginTop: 2 }}>PDF, JPG, PNG, DOC supported</div>
               </>
             )}
           </div>
+
+          {/* Current file indicator */}
           {current?.uploaded && !file && (
             <div
               style={{
@@ -585,6 +591,28 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
               )}
             </div>
           )}
+
+          {/* Upload error */}
+          {uploadError && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 12px",
+                background: "#FCEBEB",
+                borderRadius: 8,
+                marginBottom: 14,
+                fontSize: 12,
+                color: "#791F1F",
+              }}
+            >
+              <AlertCircle size={13} />
+              {uploadError}
+            </div>
+          )}
+
+          {/* Expiry */}
           {docDef.hasExpiry && (
             <div style={{ marginBottom: 14 }}>
               <label
@@ -618,6 +646,8 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
               />
             </div>
           )}
+
+          {/* Notes */}
           <div>
             <label
               style={{
@@ -651,6 +681,8 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
             />
           </div>
         </div>
+
+        {/* Footer */}
         <div
           style={{
             padding: "12px 20px",
@@ -682,22 +714,34 @@ const UploadModal = ({ doc: docDef, current, onSave, onClose }) => {
               padding: "7px 18px",
               borderRadius: 8,
               border: "none",
-              background:
-                saving || (!file && !current?.uploaded) ? "#DDE3ED" : "#0D6EFD",
+              background: saving || (!file && !current?.uploaded) ? "#DDE3ED" : "#0D6EFD",
               fontSize: 13,
               fontWeight: 700,
-              color:
-                saving || (!file && !current?.uploaded) ? "#8A97A8" : "#fff",
-              cursor:
-                saving || (!file && !current?.uploaded)
-                  ? "not-allowed"
-                  : "pointer",
+              color: saving || (!file && !current?.uploaded) ? "#8A97A8" : "#fff",
+              cursor: saving || (!file && !current?.uploaded) ? "not-allowed" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
             }}
           >
-            {saving ? "Saving…" : current?.uploaded ? "Update" : "Save"}
+            {saving && (
+              <span
+                style={{
+                  width: 12,
+                  height: 12,
+                  border: "2px solid rgba(255,255,255,.4)",
+                  borderTopColor: "#fff",
+                  borderRadius: "50%",
+                  display: "inline-block",
+                  animation: "spin .7s linear infinite",
+                }}
+              />
+            )}
+            {saving ? "Uploading…" : current?.uploaded ? "Update" : "Save"}
           </button>
         </div>
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };
@@ -717,10 +761,9 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
         background: "#fff",
         transition: "background .1s",
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "#FAFBFD")}
-      onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+      onMouseEnter={(e) => ((e.currentTarget).style.background = "#FAFBFD")}
+      onMouseLeave={(e) => ((e.currentTarget).style.background = "#fff")}
     >
-      {/* Top row: dot + name + badge */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
         <span
           style={{
@@ -732,24 +775,9 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
             marginTop: 4,
           }}
         />
-
-        {/* Doc info */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              flexWrap: "wrap",
-            }}
-          >
-            <span
-              style={{
-                fontSize: isMobile ? 12 : 13,
-                fontWeight: 600,
-                color: "#1A2133",
-              }}
-            >
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+            <span style={{ fontSize: isMobile ? 12 : 13, fontWeight: 600, color: "#1A2133" }}>
               {docDef.name}
             </span>
             {docDef.required && (
@@ -769,25 +797,11 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
               </span>
             )}
           </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: "#8A97A8",
-              marginTop: 1,
-              lineHeight: 1.4,
-            }}
-          >
+          <div style={{ fontSize: 11, color: "#8A97A8", marginTop: 1, lineHeight: 1.4 }}>
             {docDef.sub}
           </div>
           {state?.notes && (
-            <div
-              style={{
-                fontSize: 11,
-                color: "#6B7A8D",
-                marginTop: 2,
-                fontStyle: "italic",
-              }}
-            >
+            <div style={{ fontSize: 11, color: "#6B7A8D", marginTop: 2, fontStyle: "italic" }}>
               {state.notes}
             </div>
           )}
@@ -795,12 +809,7 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
             <div
               style={{
                 fontSize: 11,
-                color:
-                  daysLeft < 0
-                    ? "#C0392B"
-                    : daysLeft <= 30
-                      ? "#BA7517"
-                      : "#639922",
+                color: daysLeft < 0 ? "#C0392B" : daysLeft <= 30 ? "#BA7517" : "#639922",
                 marginTop: 2,
                 fontWeight: 600,
               }}
@@ -813,8 +822,6 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
             </div>
           )}
         </div>
-
-        {/* Status badge — always visible */}
         <span
           style={{
             fontSize: 10,
@@ -829,25 +836,12 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
           }}
         >
           {isMobile
-            ? status === "ok"
-              ? "✓"
-              : status === "expiring"
-                ? "⚠"
-                : "✗"
+            ? status === "ok" ? "✓" : status === "expiring" ? "⚠" : "✗"
             : sc.label}
         </span>
       </div>
 
-      {/* Action buttons row — sits below on mobile */}
-      <div
-        style={{
-          display: "flex",
-          gap: 6,
-          marginTop: 8,
-          marginLeft: 16,
-          flexWrap: "wrap",
-        }}
-      >
+      <div style={{ display: "flex", gap: 6, marginTop: 8, marginLeft: 16, flexWrap: "wrap" }}>
         {state?.fileUrl && (
           <a
             href={state.fileUrl}
@@ -944,9 +938,7 @@ const DocRow = ({ docDef, state, onUpload, onDelete }) => {
 const CategorySection = ({ category, docsState, onUpload, onDelete }) => {
   const [open, setOpen] = useState(true);
   const Icon = category.icon;
-  const uploaded = category.docs.filter(
-    (d) => getDocStatus(docsState[d.id]) !== "missing",
-  ).length;
+  const uploaded = category.docs.filter((d) => getDocStatus(docsState[d.id]) !== "missing").length;
   const total = category.docs.length;
 
   return (
@@ -989,12 +981,8 @@ const CategorySection = ({ category, docsState, onUpload, onDelete }) => {
           <Icon size={15} style={{ color: category.color }} />
         </span>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#1A2133" }}>
-            {category.label}
-          </div>
-          <div style={{ fontSize: 11, color: "#8A97A8" }}>
-            {uploaded} of {total} documents uploaded
-          </div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#1A2133" }}>{category.label}</div>
+          <div style={{ fontSize: 11, color: "#8A97A8" }}>{uploaded} of {total} documents uploaded</div>
         </div>
         <span
           style={{
@@ -1002,27 +990,13 @@ const CategorySection = ({ category, docsState, onUpload, onDelete }) => {
             fontWeight: 700,
             padding: "3px 10px",
             borderRadius: 20,
-            background:
-              uploaded === total
-                ? "#EAF3DE"
-                : uploaded === 0
-                  ? "#FCEBEB"
-                  : "#FAEEDA",
-            color:
-              uploaded === total
-                ? "#27500A"
-                : uploaded === 0
-                  ? "#791F1F"
-                  : "#633806",
+            background: uploaded === total ? "#EAF3DE" : uploaded === 0 ? "#FCEBEB" : "#FAEEDA",
+            color: uploaded === total ? "#27500A" : uploaded === 0 ? "#791F1F" : "#633806",
           }}
         >
           {uploaded}/{total}
         </span>
-        {open ? (
-          <ChevronUp size={15} style={{ color: "#8A97A8" }} />
-        ) : (
-          <ChevronDown size={15} style={{ color: "#8A97A8" }} />
-        )}
+        {open ? <ChevronUp size={15} style={{ color: "#8A97A8" }} /> : <ChevronDown size={15} style={{ color: "#8A97A8" }} />}
       </button>
       {open && (
         <div>
@@ -1047,16 +1021,13 @@ const DocumentsVault = ({ user }) => {
   const [activeTab, setActiveTab] = useState("documents");
   const [docsState, setDocsState] = useState({});
   const [uploadTarget, setUploadTarget] = useState(null);
-  const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const load = async () => {
       if (!user?.uid) return;
       const db = getFirestore();
-      const snap = await getDoc(
-        doc(db, "users", user.uid, "settings", "documentsVault"),
-      );
+      const snap = await getDoc(doc(db, "users", user.uid, "settings", "documentsVault"));
       if (snap.exists()) setDocsState(snap.data());
     };
     load();
@@ -1072,25 +1043,27 @@ const DocumentsVault = ({ user }) => {
     );
   };
 
-  const handleSave = async ({ expiry, notes, file, existing }) => {
+  // ── Upload handler: sends file to Cloudflare R2, saves URL in Firestore ──
+  const handleSave = async ({
+    expiry,
+    notes,
+    file,
+    existing,
+  }) => {
     if (!uploadTarget) return;
-    setSaving(true);
-    let fileUrl = existing?.fileUrl || null;
-    let fileName = existing?.fileName || null;
-    if (file && user?.uid) {
-      try {
-        const storage = getStorage();
-        const storageRef = ref(
-          storage,
-          `users/${user.uid}/documents/${uploadTarget.id}_${Date.now()}_${file.name}`,
-        );
-        await uploadBytes(storageRef, file);
-        fileUrl = await getDownloadURL(storageRef);
-        fileName = file.name;
-      } catch (err) {
-        console.error("Upload error:", err);
-      }
+
+    let fileUrl = existing?.fileUrl ?? null;
+    let fileKey = existing?.fileKey ?? null;
+    let fileName = existing?.fileName ?? null;
+
+    if (file) {
+      // Upload to Cloudflare R2 via Worker
+      const result = await uploadToCloudflare(file);
+      fileUrl  = result.publicUrl;
+      fileKey  = result.key;
+      fileName = file.name;
     }
+
     const updated = {
       ...docsState,
       [uploadTarget.id]: {
@@ -1098,18 +1071,21 @@ const DocumentsVault = ({ user }) => {
         expiry: expiry || null,
         notes: notes || "",
         fileUrl,
+        fileKey,   // R2 object key — useful for deletion later
         fileName,
         updatedAt: new Date().toISOString(),
       },
     };
+
     setDocsState(updated);
     await persist(updated);
-    setSaving(false);
-    setUploadTarget(null);
   };
 
   const handleDelete = async (docId) => {
     if (!window.confirm("Remove this document record?")) return;
+
+    // Note: to also delete the file from R2, add a DELETE /delete-document
+    // endpoint to your Worker that calls DOCUMENTS_BUCKET.delete(key)
     const updated = { ...docsState };
     delete updated[docId];
     setDocsState(updated);
@@ -1117,18 +1093,10 @@ const DocumentsVault = ({ user }) => {
   };
 
   const allDocs = DOCUMENT_CATEGORIES.flatMap((c) => c.docs);
-  const uploaded = allDocs.filter(
-    (d) => getDocStatus(docsState[d.id]) !== "missing",
-  ).length;
-  const expiring = allDocs.filter(
-    (d) => getDocStatus(docsState[d.id]) === "expiring",
-  ).length;
-  const expired = allDocs.filter(
-    (d) => getDocStatus(docsState[d.id]) === "expired",
-  ).length;
-  const missing = allDocs.filter(
-    (d) => getDocStatus(docsState[d.id]) === "missing",
-  ).length;
+  const uploaded = allDocs.filter((d) => getDocStatus(docsState[d.id]) !== "missing").length;
+  const expiring = allDocs.filter((d) => getDocStatus(docsState[d.id]) === "expiring").length;
+  const expired  = allDocs.filter((d) => getDocStatus(docsState[d.id]) === "expired").length;
+  const missing  = allDocs.filter((d) => getDocStatus(docsState[d.id]) === "missing").length;
 
   const filteredCategories = searchQuery
     ? DOCUMENT_CATEGORIES.map((cat) => ({
@@ -1144,17 +1112,10 @@ const DocumentsVault = ({ user }) => {
   return (
     <div style={{ fontFamily: "'DM Sans', sans-serif" }}>
       {/* ── Tabs ── */}
-      <div
-        style={{
-          display: "flex",
-          gap: 2,
-          borderBottom: "1px solid #DDE3ED",
-          marginBottom: 16,
-        }}
-      >
+      <div style={{ display: "flex", gap: 2, borderBottom: "1px solid #DDE3ED", marginBottom: 16 }}>
         {[
           { id: "documents", label: "Documents", icon: Shield },
-          { id: "portals", label: "Online Portals", icon: Globe },
+          { id: "portals",   label: "Online Portals", icon: Globe },
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -1186,69 +1147,26 @@ const DocumentsVault = ({ user }) => {
       {/* ── DOCUMENTS TAB ── */}
       {activeTab === "documents" && (
         <>
-          {/* Summary strip — 2x2 on mobile, 4-col on desktop */}
+          {/* Summary strip */}
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: isMobile
-                ? "repeat(2, 1fr)"
-                : "repeat(4, 1fr)",
+              gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
               gap: isMobile ? 6 : 8,
               marginBottom: 16,
             }}
           >
             {[
-              {
-                label: "Uploaded",
-                value: uploaded,
-                bg: "#EAF3DE",
-                color: "#27500A",
-              },
-              {
-                label: "Expiring soon",
-                value: expiring,
-                bg: "#FAEEDA",
-                color: "#633806",
-              },
-              {
-                label: "Expired",
-                value: expired,
-                bg: "#FCEBEB",
-                color: "#791F1F",
-              },
-              {
-                label: "Missing",
-                value: missing,
-                bg: "#F0F3F9",
-                color: "#1A2133",
-              },
+              { label: "Uploaded",      value: uploaded, bg: "#EAF3DE", color: "#27500A" },
+              { label: "Expiring soon", value: expiring, bg: "#FAEEDA", color: "#633806" },
+              { label: "Expired",       value: expired,  bg: "#FCEBEB", color: "#791F1F" },
+              { label: "Missing",       value: missing,  bg: "#F0F3F9", color: "#1A2133" },
             ].map((s) => (
-              <div
-                key={s.label}
-                style={{
-                  background: s.bg,
-                  borderRadius: 8,
-                  padding: isMobile ? "10px 10px" : "10px 12px",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: isMobile ? 22 : 20,
-                    fontWeight: 800,
-                    color: s.color,
-                    lineHeight: 1,
-                  }}
-                >
+              <div key={s.label} style={{ background: s.bg, borderRadius: 8, padding: isMobile ? "10px 10px" : "10px 12px" }}>
+                <div style={{ fontSize: isMobile ? 22 : 20, fontWeight: 800, color: s.color, lineHeight: 1 }}>
                   {s.value}
                 </div>
-                <div
-                  style={{
-                    fontSize: isMobile ? 10 : 10,
-                    color: s.color,
-                    marginTop: 3,
-                    opacity: 0.8,
-                  }}
-                >
+                <div style={{ fontSize: 10, color: s.color, marginTop: 3, opacity: 0.8 }}>
                   {s.label}
                 </div>
               </div>
@@ -1257,38 +1175,18 @@ const DocumentsVault = ({ user }) => {
 
           {/* Progress bar */}
           <div style={{ marginBottom: 16 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: 11,
-                color: "#8A97A8",
-                marginBottom: 5,
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#8A97A8", marginBottom: 5 }}>
               <span>Compliance progress</span>
-              <span style={{ fontWeight: 700, color: "#1A2133" }}>
-                {uploaded}/{allDocs.length} documents
-              </span>
+              <span style={{ fontWeight: 700, color: "#1A2133" }}>{uploaded}/{allDocs.length} documents</span>
             </div>
-            <div
-              style={{
-                height: 6,
-                background: "#DDE3ED",
-                borderRadius: 99,
-                overflow: "hidden",
-              }}
-            >
+            <div style={{ height: 6, background: "#DDE3ED", borderRadius: 99, overflow: "hidden" }}>
               <div
                 style={{
                   height: "100%",
                   width: `${(uploaded / allDocs.length) * 100}%`,
                   background:
-                    uploaded === allDocs.length
-                      ? "#639922"
-                      : uploaded / allDocs.length > 0.6
-                        ? "#0D6EFD"
-                        : "#E8601C",
+                    uploaded === allDocs.length ? "#639922" :
+                    uploaded / allDocs.length > 0.6 ? "#0D6EFD" : "#E8601C",
                   borderRadius: 99,
                   transition: "width .4s ease",
                 }}
@@ -1328,20 +1226,13 @@ const DocumentsVault = ({ user }) => {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                style={{
-                  border: "none",
-                  background: "none",
-                  cursor: "pointer",
-                  color: "#8A97A8",
-                  padding: 0,
-                }}
+                style={{ border: "none", background: "none", cursor: "pointer", color: "#8A97A8", padding: 0 }}
               >
                 <X size={13} />
               </button>
             )}
           </div>
 
-          {/* Category sections */}
           {filteredCategories.map((cat) => (
             <CategorySection
               key={cat.id}
@@ -1353,14 +1244,7 @@ const DocumentsVault = ({ user }) => {
           ))}
 
           {filteredCategories.length === 0 && (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "32px 16px",
-                color: "#8A97A8",
-                fontSize: 13,
-              }}
-            >
+            <div style={{ textAlign: "center", padding: "32px 16px", color: "#8A97A8", fontSize: 13 }}>
               No documents match "{searchQuery}"
             </div>
           )}
@@ -1370,23 +1254,14 @@ const DocumentsVault = ({ user }) => {
       {/* ── PORTALS TAB ── */}
       {activeTab === "portals" && (
         <div>
-          <p
-            style={{
-              fontSize: 13,
-              color: "#6B7A8D",
-              marginBottom: 14,
-              lineHeight: 1.6,
-            }}
-          >
+          <p style={{ fontSize: 13, color: "#6B7A8D", marginBottom: 14, lineHeight: 1.6 }}>
             Quick access to the official South African government portals and
             resources you need for ECD registration and compliance.
           </p>
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: isMobile
-                ? "1fr"
-                : "repeat(auto-fill, minmax(260px, 1fr))",
+              gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(260px, 1fr))",
               gap: 8,
             }}
           >
@@ -1408,12 +1283,12 @@ const DocumentsVault = ({ user }) => {
                   transition: "all .15s",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#F5F6FA";
-                  e.currentTarget.style.borderColor = "#B4B2A9";
+                  (e.currentTarget).style.background = "#F5F6FA";
+                  (e.currentTarget).style.borderColor = "#B4B2A9";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "#fff";
-                  e.currentTarget.style.borderColor = "#DDE3ED";
+                  (e.currentTarget).style.background = "#fff";
+                  (e.currentTarget).style.borderColor = "#DDE3ED";
                 }}
               >
                 <span
@@ -1432,31 +1307,14 @@ const DocumentsVault = ({ user }) => {
                   {portal.icon}
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 700,
-                      color: "#1A2133",
-                      lineHeight: 1.3,
-                    }}
-                  >
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#1A2133", lineHeight: 1.3 }}>
                     {portal.name}
                   </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "#8A97A8",
-                      marginTop: 2,
-                      lineHeight: 1.3,
-                    }}
-                  >
+                  <div style={{ fontSize: 11, color: "#8A97A8", marginTop: 2, lineHeight: 1.3 }}>
                     {portal.desc}
                   </div>
                 </div>
-                <ExternalLink
-                  size={13}
-                  style={{ color: "#B4B2A9", flexShrink: 0 }}
-                />
+                <ExternalLink size={13} style={{ color: "#B4B2A9", flexShrink: 0 }} />
               </a>
             ))}
           </div>

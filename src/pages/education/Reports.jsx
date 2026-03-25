@@ -6001,6 +6001,7 @@ export default function Reports() {
     comments3: "",
     comments4: "",
   });
+  
 useEffect(() => {
   const gradeKey = normaliseGrade(data.grade);
   if (gradeKey && GRADE_THEMES[gradeKey]) {

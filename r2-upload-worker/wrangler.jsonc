@@ -10,12 +10,17 @@
     {
       "binding": "LOGOS_BUCKET",
       "bucket_name": "company-logos"
+    },
+    {
+      "binding": "DOCUMENTS_BUCKET",
+      "bucket_name": "documents"
     }
   ],
   "ai": {
     "binding": "AI"
   },
   "vars": {
-    "R2_PUBLIC_DOMAIN": "pub-69fb6c18938046458efbd268503903d8.r2.dev"
+    "R2_PUBLIC_DOMAIN": "pub-69fb6c18938046458efbd268503903d8.r2.dev",
+    "DOCUMENTS_PUBLIC_DOMAIN": "pub-4e1973e713064e3fa5c7930751295d5a.r2.dev"
   }
 }
