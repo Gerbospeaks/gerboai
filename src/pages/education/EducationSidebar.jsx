@@ -316,6 +316,10 @@ export default function EducationSidebar({
                     setSidebarOpen(true);
                   }}
                 />
+                <SubItem
+                  label="Certificates"
+                  onClick={() => goTo("templates")}
+                />
               </Accordion>
 
               <NavItem

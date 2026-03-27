@@ -43,30 +43,33 @@ import {
   Star,
 } from "lucide-react";
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
+// ── Design tokens — warm editorial palette from SchoolOverview ─────────────
 const T = {
   primary: "#1a6b4a",
   primaryLight: "#e8f5ef",
   primaryMid: "#2d8a62",
   accent: "#f59e0b",
   accentLight: "#fef3c7",
-  red: "#e53e3e",
-  redLight: "#fff5f5",
-  blue: "#2b6cb0",
-  blueLight: "#ebf8ff",
+  red: "#dc2626",
+  redLight: "#fef2f2",
+  blue: "#2563eb",
+  blueLight: "#eff6ff",
   purple: "#6b46c1",
   purpleLight: "#faf5ff",
-  teal: "#0d9488",
+  teal: "#0f766e",
   tealLight: "#f0fdfa",
-  bg: "#f7f8f9",
+  // ── Warm palette from SchoolOverview ──
+  bg: "#f8f7f4",
   surface: "#ffffff",
-  border: "#e8ecf0",
-  text: "#1a202c",
-  textMid: "#4a5568",
-  textSoft: "#718096",
-  textFaint: "#a0aec0",
+  surfaceAlt: "#f1efe9",
+  border: "#e8e4db",
+  text: "#1a1814",
+  textMid: "#5c5850",
+  textSoft: "#9c9890",
+  textFaint: "#c4c0b8",
+  ink: "#2d2a26",
   radius: 16,
-  shadow: "0 2px 12px rgba(0,0,0,0.07)",
+  shadow: "0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)",
 };
 
 const gradeColor = (g) =>
@@ -81,19 +84,18 @@ export default function ParentPortal() {
   const { portalSlug } = useParams();
   const [schoolUid, setSchoolUid] = useState(null);
 
-  // ── school data ────────────────────────────────────────────────────────────
   const [businessInfo, setBusinessInfo] = useState(null);
   const [homework, setHomework] = useState([]);
   const [notices, setNotices] = useState([]);
-  const [announcements, setAnnouncements] = useState([]); // from staff portal
+  const [announcements, setAnnouncements] = useState([]);
   const [events, setEvents] = useState([]);
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState([]);
   const [timetable, setTimetable] = useState(null);
   const [reports, setReports] = useState([]);
-  const [permEvents, setPermEvents] = useState([]); // permission slips
-  const [markbook, setMarkbook] = useState([]); // mark book entries
-  const [incidents, setIncidents] = useState([]); // behaviour log
+  const [permEvents, setPermEvents] = useState([]);
+  const [markbook, setMarkbook] = useState([]);
+  const [incidents, setIncidents] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -102,19 +104,16 @@ export default function ParentPortal() {
   const [expandedNotice, setExpandedNotice] = useState(null);
   const [expandedReport, setExpandedReport] = useState(null);
 
-  // ── timetable local filters ────────────────────────────────────────────────
   const [ttGrade, setTtGrade] = useState("");
   const [ttDay, setTtDay] = useState("Monday");
   const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-  // ── identity gate ──────────────────────────────────────────────────────────
   const [showIdentityModal, setShowIdentityModal] = useState(false);
   const [childInput, setChildInput] = useState("");
   const [identityError, setIdentityError] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [verifiedStudent, setVerifiedStudent] = useState(null);
 
-  // ── Load school data ───────────────────────────────────────────────────────
   useEffect(() => {
     const load = async () => {
       try {
@@ -233,10 +232,10 @@ export default function ParentPortal() {
         );
         if (ttDoc.exists()) setTimetable(ttDoc.data());
         setReports(
-  repSnap.docs
-    .map((d) => ({ id: d.id, ...d.data() }))
-    .filter((d) => !d._placeholder && d.studentName),
-);
+          repSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .filter((d) => !d._placeholder && d.studentName),
+        );
         setPermEvents(
           permSnap.docs
             .map((d) => ({ id: d.id, ...d.data() }))
@@ -262,7 +261,6 @@ export default function ParentPortal() {
     load();
   }, [portalSlug]);
 
-  // ── Verify child name ──────────────────────────────────────────────────────
   const handleVerify = () => {
     if (!childInput.trim()) {
       setIdentityError("Please enter your child's full name.");
@@ -286,7 +284,6 @@ export default function ParentPortal() {
     }, 500);
   };
 
-  // ── Derived: attendance for verified student ───────────────────────────────
   const studentAttendance = verifiedStudent
     ? attendance
         .filter(
@@ -306,26 +303,22 @@ export default function ParentPortal() {
     ? Math.round((attStats.present / studentAttendance.length) * 100)
     : null;
 
-  // ── Derived: reports for verified student ─────────────────────────────────
- const studentReports = verifiedStudent
-  ? reports.filter(
-      (r) =>
-        r.studentName?.trim().toLowerCase() ===
-        verifiedStudent.name.trim().toLowerCase(),
-    )
-  : [];
+  const studentReports = verifiedStudent
+    ? reports.filter(
+        (r) =>
+          r.studentName?.trim().toLowerCase() ===
+          verifiedStudent.name.trim().toLowerCase(),
+      )
+    : [];
 
-  // ── Derived: permission slips for verified student ────────────────────────
   const myPermEvents = verifiedStudent
     ? permEvents.filter((e) => e.grade === verifiedStudent.grade)
     : [];
 
-  // ── Derived: mark book for verified student ───────────────────────────────
   const myMarkbook = verifiedStudent
     ? markbook.filter((m) => m.grade === verifiedStudent.grade)
     : [];
 
-  // ── Derived: incidents for verified student ────────────────────────────────
   const myIncidents = verifiedStudent
     ? incidents.filter(
         (i) =>
@@ -335,7 +328,6 @@ export default function ParentPortal() {
       )
     : [];
 
-  // ── Timetable derived ──────────────────────────────────────────────────────
   const ttGrades = timetable ? Object.keys(timetable) : [];
   useEffect(() => {
     if (ttGrades.length && !ttGrade) setTtGrade(ttGrades[0]);
@@ -345,7 +337,6 @@ export default function ParentPortal() {
       ? timetable[ttGrade][ttDay] || []
       : [];
 
-  // ── Merged notices: school notices + staff announcements ──────────────────
   const allNotices = [
     ...notices.map((n) => ({ ...n, _source: "admin" })),
     ...announcements.map((a) => ({
@@ -359,7 +350,6 @@ export default function ParentPortal() {
     return db_ - da;
   });
 
-  // ── Configs ────────────────────────────────────────────────────────────────
   const noticeConfig = {
     important: {
       icon: AlertCircle,
@@ -403,7 +393,6 @@ export default function ParentPortal() {
   const schoolName =
     businessInfo?.name || businessInfo?.businessName || "School Portal";
 
-  // ── Tabs ───────────────────────────────────────────────────────────────────
   const noticeBadge =
     allNotices.filter((n) => !n.read).length || allNotices.length;
 
@@ -480,7 +469,7 @@ export default function ParentPortal() {
     },
   ];
 
-  // ── Loading ────────────────────────────────────────────────────────────────
+  // ── Loading ──────────────────────────────────────────────────────────────
   if (loading)
     return (
       <div
@@ -525,7 +514,7 @@ export default function ParentPortal() {
         </div>
         <p
           style={{
-            fontFamily: "'Outfit',sans-serif",
+            fontFamily: "'Sora',sans-serif",
             fontSize: 13,
             color: T.textSoft,
           }}
@@ -566,10 +555,10 @@ export default function ParentPortal() {
         </div>
         <p
           style={{
-            fontFamily: "'Outfit',sans-serif",
-            fontSize: 18,
-            fontWeight: 700,
-            color: T.text,
+            fontFamily: "'Crimson Pro',serif",
+            fontSize: 22,
+            fontWeight: 600,
+            color: T.ink,
             margin: 0,
           }}
         >
@@ -577,8 +566,8 @@ export default function ParentPortal() {
         </p>
         <p
           style={{
-            fontFamily: "'Outfit',sans-serif",
-            fontSize: 14,
+            fontFamily: "'Sora',sans-serif",
+            fontSize: 13,
             color: T.textSoft,
             maxWidth: 280,
             lineHeight: 1.6,
@@ -596,7 +585,7 @@ export default function ParentPortal() {
       style={{
         minHeight: "100svh",
         background: T.bg,
-        fontFamily: "'Outfit',sans-serif",
+        fontFamily: "'Sora',sans-serif",
         WebkitFontSmoothing: "antialiased",
       }}
     >
@@ -608,7 +597,7 @@ export default function ParentPortal() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.55)",
+            background: "rgba(26,24,20,0.55)",
             zIndex: 100,
             display: "flex",
             alignItems: "flex-end",
@@ -627,8 +616,10 @@ export default function ParentPortal() {
               width: "100%",
               maxWidth: 480,
               padding: "24px 24px calc(env(safe-area-inset-bottom,0px) + 24px)",
-              boxShadow: "0 -8px 40px rgba(0,0,0,0.18)",
+              boxShadow: "0 -8px 48px rgba(26,24,20,0.16)",
               animation: "slideUp .25s ease",
+              border: `1px solid ${T.border}`,
+              borderBottom: "none",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -659,6 +650,7 @@ export default function ParentPortal() {
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
+                  border: `1px solid ${T.border}`,
                 }}
               >
                 <User style={{ width: 20, height: 20, color: T.primary }} />
@@ -667,9 +659,11 @@ export default function ParentPortal() {
                 <p
                   style={{
                     margin: 0,
-                    fontSize: 16,
-                    fontWeight: 800,
-                    color: T.text,
+                    fontFamily: "'Crimson Pro',serif",
+                    fontSize: 20,
+                    fontWeight: 600,
+                    color: T.ink,
+                    lineHeight: 1.2,
                   }}
                 >
                   Find your child
@@ -685,9 +679,11 @@ export default function ParentPortal() {
               <div>
                 <label
                   style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: T.textMid,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: T.textSoft,
+                    letterSpacing: ".06em",
+                    textTransform: "uppercase",
                     display: "block",
                     marginBottom: 7,
                   }}
@@ -702,7 +698,7 @@ export default function ParentPortal() {
                     borderRadius: 13,
                     border: `1.5px solid ${identityError ? T.red : T.border}`,
                     fontSize: 15,
-                    fontFamily: "'Outfit',sans-serif",
+                    fontFamily: "'Sora',sans-serif",
                     outline: "none",
                     boxSizing: "border-box",
                     color: T.text,
@@ -758,7 +754,7 @@ export default function ParentPortal() {
                   borderRadius: 13,
                   background: T.primary,
                   color: "#fff",
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: 700,
                   border: "none",
                   cursor: verifying ? "not-allowed" : "pointer",
@@ -767,6 +763,8 @@ export default function ParentPortal() {
                   justifyContent: "center",
                   gap: 8,
                   opacity: verifying ? 0.75 : 1,
+                  fontFamily: "'Sora',sans-serif",
+                  letterSpacing: ".01em",
                 }}
               >
                 <Search style={{ width: 17, height: 17 }} />
@@ -837,8 +835,9 @@ export default function ParentPortal() {
                 <p
                   style={{
                     margin: 0,
-                    fontSize: 16,
-                    fontWeight: 700,
+                    fontFamily: "'Crimson Pro',serif",
+                    fontSize: 19,
+                    fontWeight: 600,
                     color: "#fff",
                     lineHeight: 1.2,
                   }}
@@ -848,8 +847,11 @@ export default function ParentPortal() {
                 <p
                   style={{
                     margin: 0,
-                    fontSize: 11,
-                    color: "rgba(255,255,255,0.6)",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    letterSpacing: ".08em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.55)",
                     marginTop: 2,
                   }}
                 >
@@ -873,6 +875,7 @@ export default function ParentPortal() {
                   borderRadius: 12,
                   padding: "7px 12px",
                   cursor: "pointer",
+                  fontFamily: "'Sora',sans-serif",
                 }}
               >
                 <div
@@ -926,6 +929,7 @@ export default function ParentPortal() {
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: "pointer",
+                  fontFamily: "'Sora',sans-serif",
                 }}
               >
                 <Lock style={{ width: 13, height: 13 }} /> My Child
@@ -979,13 +983,15 @@ export default function ParentPortal() {
                   textAlign: "center",
                   cursor: "pointer",
                   transition: "all .2s",
+                  fontFamily: "'Sora',sans-serif",
                 }}
               >
                 <p
                   style={{
                     margin: 0,
-                    fontSize: 22,
-                    fontWeight: 800,
+                    fontFamily: "'Crimson Pro',serif",
+                    fontSize: 26,
+                    fontWeight: 600,
                     color: s.color,
                     lineHeight: 1,
                   }}
@@ -997,7 +1003,9 @@ export default function ParentPortal() {
                     margin: "4px 0 0",
                     fontSize: 10,
                     fontWeight: 600,
-                    color: "rgba(255,255,255,0.65)",
+                    letterSpacing: ".05em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.6)",
                   }}
                 >
                   {s.label}
@@ -1014,12 +1022,12 @@ export default function ParentPortal() {
             maxWidth: 640,
             margin: "0 auto",
             overflowX: "auto",
+            borderBottom: `1px solid ${T.border}`,
           }}
         >
           <div
             style={{
               display: "flex",
-              borderBottom: `1px solid ${T.border}`,
               minWidth: "max-content",
               width: "100%",
             }}
@@ -1041,8 +1049,9 @@ export default function ParentPortal() {
                   justifyContent: "center",
                   gap: 5,
                   padding: "13px 10px",
-                  fontSize: 12,
-                  fontWeight: 600,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: ".02em",
                   border: "none",
                   background: "none",
                   cursor: "pointer",
@@ -1060,6 +1069,7 @@ export default function ParentPortal() {
                   position: "relative",
                   top: 1,
                   whiteSpace: "nowrap",
+                  fontFamily: "'Sora',sans-serif",
                 }}
               >
                 {locked ? (
@@ -1093,7 +1103,7 @@ export default function ParentPortal() {
       <div
         style={{ maxWidth: 640, margin: "0 auto", padding: "16px 16px 60px" }}
       >
-        {/* ══ NOTICES (merged admin + teacher announcements) ════════════════ */}
+        {/* ══ NOTICES ══════════════════════════════════════════════════════ */}
         {activeTab === "notices" && (
           <div
             style={{
@@ -1145,6 +1155,7 @@ export default function ParentPortal() {
                             gap: 5,
                             fontSize: 10,
                             fontWeight: 700,
+                            letterSpacing: ".04em",
                             padding: "3px 10px",
                             borderRadius: 99,
                             background: isTeacher ? T.tealLight : tc.bg,
@@ -1195,10 +1206,12 @@ export default function ParentPortal() {
                       <p
                         style={{
                           margin: 0,
-                          fontSize: 15,
-                          fontWeight: 700,
-                          color: T.text,
-                          marginBottom: 6,
+                          fontFamily: "'Crimson Pro',serif",
+                          fontSize: 17,
+                          fontWeight: 600,
+                          color: T.ink,
+                          marginBottom: 5,
+                          lineHeight: 1.3,
                         }}
                       >
                         {n.title}
@@ -1221,7 +1234,9 @@ export default function ParentPortal() {
                         <p
                           style={{
                             margin: "6px 0 0",
-                            fontSize: 11,
+                            fontFamily: "'Crimson Pro',serif",
+                            fontStyle: "italic",
+                            fontSize: 13,
                             color: T.textFaint,
                           }}
                         >
@@ -1247,6 +1262,7 @@ export default function ParentPortal() {
                             display: "flex",
                             alignItems: "center",
                             gap: 4,
+                            fontFamily: "'Sora',sans-serif",
                           }}
                         >
                           {isExpanded ? "Show less" : "Read more"}
@@ -1287,14 +1303,16 @@ export default function ParentPortal() {
                     style={{
                       padding: "6px 16px",
                       borderRadius: 99,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      border: "none",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: ".04em",
+                      border: `1px solid ${gradeFilter === g ? "transparent" : T.border}`,
                       cursor: "pointer",
                       background: gradeFilter === g ? T.primary : T.surface,
                       color: gradeFilter === g ? "#fff" : T.textMid,
                       boxShadow: T.shadow,
                       transition: "all .15s",
+                      fontFamily: "'Sora',sans-serif",
                     }}
                   >
                     {g}
@@ -1355,6 +1373,7 @@ export default function ParentPortal() {
                               alignItems: "center",
                               justifyContent: "center",
                               flexShrink: 0,
+                              border: `1px solid ${T.border}`,
                             }}
                           >
                             <BookOpen
@@ -1369,9 +1388,10 @@ export default function ParentPortal() {
                             <p
                               style={{
                                 margin: 0,
-                                fontSize: 15,
-                                fontWeight: 700,
-                                color: T.text,
+                                fontFamily: "'Crimson Pro',serif",
+                                fontSize: 17,
+                                fontWeight: 600,
+                                color: T.ink,
                                 lineHeight: 1.3,
                               }}
                             >
@@ -1392,7 +1412,9 @@ export default function ParentPortal() {
                               <p
                                 style={{
                                   margin: "2px 0 0",
-                                  fontSize: 11,
+                                  fontFamily: "'Crimson Pro',serif",
+                                  fontStyle: "italic",
+                                  fontSize: 13,
                                   color: T.textFaint,
                                 }}
                               >
@@ -1404,6 +1426,7 @@ export default function ParentPortal() {
                             style={{
                               fontSize: 10,
                               fontWeight: 700,
+                              letterSpacing: ".04em",
                               padding: "4px 10px",
                               borderRadius: 99,
                               background: p.bg,
@@ -1423,7 +1446,7 @@ export default function ParentPortal() {
                               gap: 7,
                               padding: "8px 12px",
                               borderRadius: 10,
-                              background: isOverdue ? "#fff0f0" : T.bg,
+                              background: isOverdue ? "#fff0f0" : T.surfaceAlt,
                               border: `1px solid ${isOverdue ? "#fecaca" : T.border}`,
                             }}
                           >
@@ -1570,8 +1593,9 @@ export default function ParentPortal() {
                         <p
                           style={{
                             margin: 0,
-                            fontSize: 22,
-                            fontWeight: 800,
+                            fontFamily: "'Crimson Pro',serif",
+                            fontSize: 24,
+                            fontWeight: 600,
                             color: isClose ? T.red : T.primary,
                             lineHeight: 1,
                           }}
@@ -1583,8 +1607,8 @@ export default function ParentPortal() {
                             margin: "2px 0 0",
                             fontSize: 9,
                             fontWeight: 700,
-                            color: isClose ? "#fc8181" : "#52b98a",
                             letterSpacing: ".08em",
+                            color: isClose ? "#fc8181" : "#52b98a",
                           }}
                         >
                           {d
@@ -1596,9 +1620,10 @@ export default function ParentPortal() {
                         <p
                           style={{
                             margin: 0,
-                            fontSize: 15,
-                            fontWeight: 700,
-                            color: T.text,
+                            fontFamily: "'Crimson Pro',serif",
+                            fontSize: 17,
+                            fontWeight: 600,
+                            color: T.ink,
                           }}
                         >
                           {ev.title}
@@ -1632,6 +1657,7 @@ export default function ParentPortal() {
                         style={{
                           fontSize: 10,
                           fontWeight: 700,
+                          letterSpacing: ".03em",
                           padding: "5px 11px",
                           borderRadius: 99,
                           background:
@@ -1639,7 +1665,7 @@ export default function ParentPortal() {
                               ? T.red
                               : daysAway <= 3
                                 ? "#fff0f0"
-                                : T.bg,
+                                : T.surfaceAlt,
                           color:
                             daysAway === 0
                               ? "#fff"
@@ -1691,14 +1717,15 @@ export default function ParentPortal() {
                       style={{
                         padding: "6px 16px",
                         borderRadius: 99,
-                        fontSize: 12,
-                        fontWeight: 600,
-                        border: "none",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        border: `1px solid ${ttGrade === g ? "transparent" : T.border}`,
                         cursor: "pointer",
                         background: ttGrade === g ? T.primary : T.surface,
                         color: ttGrade === g ? "#fff" : T.textMid,
                         boxShadow: T.shadow,
                         transition: "all .15s",
+                        fontFamily: "'Sora',sans-serif",
                       }}
                     >
                       {g}
@@ -1726,9 +1753,9 @@ export default function ParentPortal() {
                           flexShrink: 0,
                           padding: "8px 14px",
                           borderRadius: 12,
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: 700,
-                          border: "none",
+                          border: `1px solid ${ttDay === day ? "transparent" : T.border}`,
                           cursor: "pointer",
                           background:
                             ttDay === day
@@ -1745,6 +1772,7 @@ export default function ParentPortal() {
                           boxShadow: T.shadow,
                           transition: "all .15s",
                           position: "relative",
+                          fontFamily: "'Sora',sans-serif",
                         }}
                       >
                         {day.slice(0, 3)}
@@ -1832,12 +1860,14 @@ export default function ParentPortal() {
                                 alignItems: "center",
                                 justifyContent: "center",
                                 flexShrink: 0,
+                                border: `1px solid ${T.border}`,
                               }}
                             >
                               <span
                                 style={{
-                                  fontSize: 13,
-                                  fontWeight: 800,
+                                  fontFamily: "'Crimson Pro',serif",
+                                  fontSize: 16,
+                                  fontWeight: 600,
                                   color: ac.color,
                                 }}
                               >
@@ -1848,9 +1878,10 @@ export default function ParentPortal() {
                               <p
                                 style={{
                                   margin: 0,
-                                  fontSize: 15,
-                                  fontWeight: 700,
-                                  color: T.text,
+                                  fontFamily: "'Crimson Pro',serif",
+                                  fontSize: 17,
+                                  fontWeight: 600,
+                                  color: T.ink,
                                 }}
                               >
                                 {subject || "—"}
@@ -1887,7 +1918,7 @@ export default function ParentPortal() {
                                   gap: 5,
                                   padding: "5px 10px",
                                   borderRadius: 99,
-                                  background: T.bg,
+                                  background: T.surfaceAlt,
                                   border: `1px solid ${T.border}`,
                                   flexShrink: 0,
                                 }}
@@ -1922,335 +1953,348 @@ export default function ParentPortal() {
         )}
 
         {/* ══ REPORTS ═══════════════════════════════════════════════════════ */}
-{activeTab === "reports" && verifiedStudent && (
-  <div style={{ animation: "fadeUp .25s ease" }}>
-    <SectionHeader
-      name={verifiedStudent.name}
-      grade={verifiedStudent.grade}
-    />
+        {activeTab === "reports" && verifiedStudent && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            <SectionHeader
+              name={verifiedStudent.name}
+              grade={verifiedStudent.grade}
+            />
 
-    {studentReports.length === 0 ? (
-      <EmptyState
-        icon={ClipboardList}
-        title="No reports yet"
-        message="No report cards have been saved for your child yet."
-        color={T.purpleLight}
-        iconColor={T.purple}
-      />
-    ) : (
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {studentReports.map((rep, i) => {
-          const isExpanded = expandedReport === rep.id;
-          const rd = rep.reportData || {};
+            {studentReports.length === 0 ? (
+              <EmptyState
+                icon={ClipboardList}
+                title="No reports yet"
+                message="No report cards have been saved for your child yet."
+                color={T.purpleLight}
+                iconColor={T.purple}
+              />
+            ) : (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 14 }}
+              >
+                {studentReports.map((rep, i) => {
+                  const isExpanded = expandedReport === rep.id;
+                  const rd = rep.reportData || {};
 
-          // Pull comments
-          const comments = [1, 2, 3, 4]
-            .map((n) => ({ term: n, text: rd[`comments${n}`] }))
-            .filter((c) => c.text?.trim());
+                  const comments = [1, 2, 3, 4]
+                    .map((n) => ({ term: n, text: rd[`comments${n}`] }))
+                    .filter((c) => c.text?.trim());
 
-          // Derive theme colour for accent bar
-          const themeAccents = {
-            classic: "#1d3557", modern: "#1e3a8a",
-            professional: "#111827", playful: "#7c3aed",
-            gradeR: "#7c3aed", grade0: "#db2777", grade1: "#b45309",
-            grade2: "#0369a1", grade3: "#15803d", grade4: "#6d28d9",
-            grade5: "#9a3412", grade6: "#0f4c75", grade7: "#111827",
-          };
-          const accentColor = themeAccents[rep.themeId] || T.primary;
+                  const themeAccents = {
+                    classic: "#1d3557",
+                    modern: "#1e3a8a",
+                    professional: "#111827",
+                    playful: "#7c3aed",
+                    gradeR: "#7c3aed",
+                    grade0: "#db2777",
+                    grade1: "#b45309",
+                    grade2: "#0369a1",
+                    grade3: "#15803d",
+                    grade4: "#6d28d9",
+                    grade5: "#9a3412",
+                    grade6: "#0f4c75",
+                    grade7: "#111827",
+                  };
+                  const accentColor = themeAccents[rep.themeId] || T.primary;
 
-          return (
-            <div
-              key={rep.id}
-              style={{
-                background: T.surface,
-                borderRadius: T.radius,
-                border: `1px solid ${T.border}`,
-                boxShadow: T.shadow,
-                overflow: "hidden",
-                animation: `fadeUp .3s ease ${i * 0.05}s both`,
-              }}
-            >
-              {/* Colour bar matching the report theme */}
-              <div style={{ height: 5, background: accentColor }} />
-
-              <div style={{ padding: "16px 16px 14px" }}>
-                {/* Header row */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 12,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 46,
-                      height: 46,
-                      borderRadius: 13,
-                      background: T.primaryLight,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <FileText
-                      style={{ width: 20, height: 20, color: accentColor }}
-                    />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p
+                  return (
+                    <div
+                      key={rep.id}
                       style={{
-                        margin: 0,
-                        fontSize: 15,
-                        fontWeight: 700,
-                        color: T.text,
+                        background: T.surface,
+                        borderRadius: T.radius,
+                        border: `1px solid ${T.border}`,
+                        boxShadow: T.shadow,
+                        overflow: "hidden",
+                        animation: `fadeUp .3s ease ${i * 0.05}s both`,
                       }}
                     >
-                      Progress Report
-                    </p>
-                    <p
-                      style={{
-                        margin: "3px 0 0",
-                        fontSize: 12,
-                        color: T.textSoft,
-                      }}
-                    >
-                      Grade {rd.grade || verifiedStudent.grade}
-                      {rd.schoolYear ? ` · ${rd.schoolYear}` : ""}
-                      {rd.classGrade ? ` · ${rd.classGrade}` : ""}
-                    </p>
-                    {rd.teacher && (
-                      <p
-                        style={{
-                          margin: "2px 0 0",
-                          fontSize: 11,
-                          color: T.textFaint,
-                        }}
-                      >
-                        Teacher: {rd.teacher}
-                      </p>
-                    )}
-                  </div>
-                  {/* Year badge */}
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      padding: "5px 12px",
-                      borderRadius: 99,
-                      background: T.primaryLight,
-                      color: accentColor,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {rd.schoolYear || "2026"}
-                  </span>
-                </div>
+                      <div style={{ height: 5, background: accentColor }} />
 
-                {/* Info pills */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 8,
-                    marginTop: 14,
-                  }}
-                >
-                  {[
-                    rd.reportDate && { label: "📅 " + rd.reportDate },
-                    rd.principal && { label: "🏫 " + rd.principal },
-                    rd.emisNo && { label: "ID: " + rd.emisNo },
-                  ]
-                    .filter(Boolean)
-                    .map(({ label }) => (
-                      <span
-                        key={label}
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 600,
-                          padding: "4px 11px",
-                          borderRadius: 99,
-                          background: T.bg,
-                          color: T.textMid,
-                          border: `1px solid ${T.border}`,
-                        }}
-                      >
-                        {label}
-                      </span>
-                    ))}
-                </div>
-
-                {/* Expand / collapse toggle */}
-                <button
-                  onClick={() =>
-                    setExpandedReport(isExpanded ? null : rep.id)
-                  }
-                  style={{
-                    marginTop: 12,
-                    width: "100%",
-                    padding: "9px",
-                    borderRadius: 10,
-                    background: T.bg,
-                    border: `1px solid ${T.border}`,
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: T.textMid,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 6,
-                  }}
-                >
-                  <ClipboardList style={{ width: 13, height: 13 }} />
-                  {isExpanded ? "Hide comments" : "View teacher comments"}
-                  <ChevronDown
-                    style={{
-                      width: 13,
-                      height: 13,
-                      transform: isExpanded ? "rotate(180deg)" : "none",
-                      transition: "transform .2s",
-                    }}
-                  />
-                </button>
-              </div>
-
-              {/* Expanded: teacher comments per term */}
-              {isExpanded && (
-                <div
-                  style={{
-                    borderTop: `1px solid ${T.border}`,
-                    padding: "14px 16px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 12,
-                  }}
-                >
-                  {/* Learner info summary */}
-                  <div
-                    style={{
-                      padding: "12px 14px",
-                      borderRadius: 12,
-                      background: T.bg,
-                      border: `1px solid ${T.border}`,
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "8px 16px",
-                    }}
-                  >
-                    {[
-                      ["Date of Birth", rd.dob],
-                      ["EMIS No.", rd.emisNo],
-                      ["Class", rd.classGrade],
-                      ["Principal", rd.principal],
-                      ["Report Date", rd.reportDate],
-                      ["School Year", rd.schoolYear],
-                    ]
-                      .filter(([, v]) => v)
-                      .map(([label, value]) => (
-                        <div key={label}>
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: 9,
-                              fontWeight: 700,
-                              color: T.textFaint,
-                              textTransform: "uppercase",
-                              letterSpacing: ".05em",
-                            }}
-                          >
-                            {label}
-                          </p>
-                          <p
-                            style={{
-                              margin: "1px 0 0",
-                              fontSize: 12,
-                              fontWeight: 600,
-                              color: T.text,
-                            }}
-                          >
-                            {value}
-                          </p>
-                        </div>
-                      ))}
-                  </div>
-
-                  {/* Term comments */}
-                  {comments.length > 0 ? (
-                    <>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: 12,
-                          fontWeight: 700,
-                          color: T.textMid,
-                          textTransform: "uppercase",
-                          letterSpacing: ".06em",
-                        }}
-                      >
-                        Teacher Comments
-                      </p>
-                      {comments.map(({ term, text }) => (
+                      <div style={{ padding: "16px 16px 14px" }}>
                         <div
-                          key={term}
                           style={{
-                            padding: "12px 14px",
-                            borderRadius: 12,
-                            background: T.primaryLight,
-                            border: `1px solid #c6e8d9`,
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 12,
                           }}
                         >
-                          <p
+                          <div
                             style={{
-                              margin: "0 0 6px",
+                              width: 46,
+                              height: 46,
+                              borderRadius: 13,
+                              background: T.primaryLight,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                              border: `1px solid ${T.border}`,
+                            }}
+                          >
+                            <FileText
+                              style={{
+                                width: 20,
+                                height: 20,
+                                color: accentColor,
+                              }}
+                            />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p
+                              style={{
+                                margin: 0,
+                                fontFamily: "'Crimson Pro',serif",
+                                fontSize: 18,
+                                fontWeight: 600,
+                                color: T.ink,
+                              }}
+                            >
+                              Progress Report
+                            </p>
+                            <p
+                              style={{
+                                margin: "3px 0 0",
+                                fontSize: 12,
+                                color: T.textSoft,
+                              }}
+                            >
+                              Grade {rd.grade || verifiedStudent.grade}
+                              {rd.schoolYear ? ` · ${rd.schoolYear}` : ""}
+                              {rd.classGrade ? ` · ${rd.classGrade}` : ""}
+                            </p>
+                            {rd.teacher && (
+                              <p
+                                style={{
+                                  margin: "2px 0 0",
+                                  fontFamily: "'Crimson Pro',serif",
+                                  fontStyle: "italic",
+                                  fontSize: 13,
+                                  color: T.textFaint,
+                                }}
+                              >
+                                {rd.teacher}
+                              </p>
+                            )}
+                          </div>
+                          <span
+                            style={{
                               fontSize: 11,
                               fontWeight: 700,
+                              padding: "5px 12px",
+                              borderRadius: 99,
+                              background: T.primaryLight,
                               color: accentColor,
-                              textTransform: "uppercase",
-                              letterSpacing: ".06em",
+                              flexShrink: 0,
                             }}
                           >
-                            Term {term}
-                          </p>
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: 13,
-                              color: T.textMid,
-                              lineHeight: 1.65,
-                            }}
-                          >
-                            {text}
-                          </p>
+                            {rd.schoolYear || "2026"}
+                          </span>
                         </div>
-                      ))}
-                    </>
-                  ) : (
-                    <div
-                      style={{
-                        padding: "16px",
-                        textAlign: "center",
-                        color: T.textFaint,
-                        fontSize: 13,
-                        border: `1.5px dashed ${T.border}`,
-                        borderRadius: 12,
-                      }}
-                    >
-                      No teacher comments recorded yet
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    )}
-  </div>
-)}
 
-        {/* ══ MARKS (from mark book) ════════════════════════════════════════ */}
+                        <div
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 8,
+                            marginTop: 14,
+                          }}
+                        >
+                          {[
+                            rd.reportDate && { label: "📅 " + rd.reportDate },
+                            rd.principal && { label: "🏫 " + rd.principal },
+                            rd.emisNo && { label: "ID: " + rd.emisNo },
+                          ]
+                            .filter(Boolean)
+                            .map(({ label }) => (
+                              <span
+                                key={label}
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: 600,
+                                  padding: "4px 11px",
+                                  borderRadius: 99,
+                                  background: T.surfaceAlt,
+                                  color: T.textMid,
+                                  border: `1px solid ${T.border}`,
+                                }}
+                              >
+                                {label}
+                              </span>
+                            ))}
+                        </div>
+
+                        <button
+                          onClick={() =>
+                            setExpandedReport(isExpanded ? null : rep.id)
+                          }
+                          style={{
+                            marginTop: 12,
+                            width: "100%",
+                            padding: "9px",
+                            borderRadius: 10,
+                            background: T.surfaceAlt,
+                            border: `1px solid ${T.border}`,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: T.textMid,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 6,
+                            fontFamily: "'Sora',sans-serif",
+                          }}
+                        >
+                          <ClipboardList style={{ width: 13, height: 13 }} />
+                          {isExpanded
+                            ? "Hide comments"
+                            : "View teacher comments"}
+                          <ChevronDown
+                            style={{
+                              width: 13,
+                              height: 13,
+                              transform: isExpanded ? "rotate(180deg)" : "none",
+                              transition: "transform .2s",
+                            }}
+                          />
+                        </button>
+                      </div>
+
+                      {isExpanded && (
+                        <div
+                          style={{
+                            borderTop: `1px solid ${T.border}`,
+                            padding: "14px 16px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 12,
+                            background: T.bg,
+                          }}
+                        >
+                          <div
+                            style={{
+                              padding: "12px 14px",
+                              borderRadius: 12,
+                              background: T.surface,
+                              border: `1px solid ${T.border}`,
+                              display: "grid",
+                              gridTemplateColumns: "1fr 1fr",
+                              gap: "8px 16px",
+                            }}
+                          >
+                            {[
+                              ["Date of Birth", rd.dob],
+                              ["EMIS No.", rd.emisNo],
+                              ["Class", rd.classGrade],
+                              ["Principal", rd.principal],
+                              ["Report Date", rd.reportDate],
+                              ["School Year", rd.schoolYear],
+                            ]
+                              .filter(([, v]) => v)
+                              .map(([label, value]) => (
+                                <div key={label}>
+                                  <p
+                                    style={{
+                                      margin: 0,
+                                      fontSize: 9,
+                                      fontWeight: 600,
+                                      color: T.textFaint,
+                                      textTransform: "uppercase",
+                                      letterSpacing: ".07em",
+                                    }}
+                                  >
+                                    {label}
+                                  </p>
+                                  <p
+                                    style={{
+                                      margin: "1px 0 0",
+                                      fontSize: 13,
+                                      fontWeight: 600,
+                                      color: T.text,
+                                    }}
+                                  >
+                                    {value}
+                                  </p>
+                                </div>
+                              ))}
+                          </div>
+
+                          {comments.length > 0 ? (
+                            <>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 10,
+                                  fontWeight: 600,
+                                  color: T.textSoft,
+                                  textTransform: "uppercase",
+                                  letterSpacing: ".08em",
+                                }}
+                              >
+                                Teacher Comments
+                              </p>
+                              {comments.map(({ term, text }) => (
+                                <div
+                                  key={term}
+                                  style={{
+                                    padding: "12px 14px",
+                                    borderRadius: 12,
+                                    background: T.primaryLight,
+                                    border: `1px solid #c6e8d9`,
+                                  }}
+                                >
+                                  <p
+                                    style={{
+                                      margin: "0 0 6px",
+                                      fontSize: 10,
+                                      fontWeight: 700,
+                                      color: accentColor,
+                                      textTransform: "uppercase",
+                                      letterSpacing: ".08em",
+                                    }}
+                                  >
+                                    Term {term}
+                                  </p>
+                                  <p
+                                    style={{
+                                      margin: 0,
+                                      fontFamily: "'Crimson Pro',serif",
+                                      fontSize: 15,
+                                      color: T.textMid,
+                                      lineHeight: 1.65,
+                                    }}
+                                  >
+                                    {text}
+                                  </p>
+                                </div>
+                              ))}
+                            </>
+                          ) : (
+                            <div
+                              style={{
+                                padding: "16px",
+                                textAlign: "center",
+                                color: T.textFaint,
+                                fontSize: 13,
+                                border: `1.5px dashed ${T.border}`,
+                                borderRadius: 12,
+                              }}
+                            >
+                              No teacher comments recorded yet
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══ MARKS ═════════════════════════════════════════════════════════ */}
         {activeTab === "marks" && verifiedStudent && (
           <div style={{ animation: "fadeUp .25s ease" }}>
             <SectionHeader
@@ -2269,7 +2313,6 @@ export default function ParentPortal() {
               <div
                 style={{ display: "flex", flexDirection: "column", gap: 12 }}
               >
-                {/* Subject summary cards */}
                 {(() => {
                   const subjectMap = {};
                   myMarkbook.forEach((entry) => {
@@ -2326,6 +2369,7 @@ export default function ParentPortal() {
                                 alignItems: "center",
                                 justifyContent: "center",
                                 flexShrink: 0,
+                                border: `1px solid ${T.border}`,
                               }}
                             >
                               <BookOpen
@@ -2336,9 +2380,10 @@ export default function ParentPortal() {
                               <p
                                 style={{
                                   margin: 0,
-                                  fontSize: 15,
-                                  fontWeight: 800,
-                                  color: T.text,
+                                  fontFamily: "'Crimson Pro',serif",
+                                  fontSize: 18,
+                                  fontWeight: 600,
+                                  color: T.ink,
                                 }}
                               >
                                 {subject}
@@ -2358,8 +2403,9 @@ export default function ParentPortal() {
                               <p
                                 style={{
                                   margin: 0,
-                                  fontSize: 20,
-                                  fontWeight: 800,
+                                  fontFamily: "'Crimson Pro',serif",
+                                  fontSize: 26,
+                                  fontWeight: 600,
                                   color: avgColor,
                                 }}
                               >
@@ -2371,6 +2417,7 @@ export default function ParentPortal() {
                                   fontSize: 10,
                                   fontWeight: 600,
                                   color: T.textFaint,
+                                  letterSpacing: ".04em",
                                 }}
                               >
                                 avg
@@ -2398,7 +2445,7 @@ export default function ParentPortal() {
                                       ri < results.length - 1
                                         ? `1px solid ${T.border}`
                                         : "none",
-                                    background: T.bg,
+                                    background: T.surfaceAlt,
                                   }}
                                 >
                                   <div style={{ flex: 1 }}>
@@ -2426,8 +2473,9 @@ export default function ParentPortal() {
                                     <p
                                       style={{
                                         margin: 0,
-                                        fontSize: 14,
-                                        fontWeight: 800,
+                                        fontFamily: "'Crimson Pro',serif",
+                                        fontSize: 16,
+                                        fontWeight: 600,
                                         color: col,
                                       }}
                                     >
@@ -2547,6 +2595,7 @@ export default function ParentPortal() {
                             alignItems: "center",
                             justifyContent: "center",
                             flexShrink: 0,
+                            border: `1px solid ${T.border}`,
                           }}
                         >
                           <Flag
@@ -2557,9 +2606,10 @@ export default function ParentPortal() {
                           <p
                             style={{
                               margin: 0,
-                              fontSize: 15,
-                              fontWeight: 700,
-                              color: T.text,
+                              fontFamily: "'Crimson Pro',serif",
+                              fontSize: 17,
+                              fontWeight: 600,
+                              color: T.ink,
                             }}
                           >
                             {evt.eventName}
@@ -2577,8 +2627,9 @@ export default function ParentPortal() {
                         </div>
                         <span
                           style={{
-                            fontSize: 11,
+                            fontSize: 10,
                             fontWeight: 700,
+                            letterSpacing: ".03em",
                             padding: "6px 12px",
                             borderRadius: 99,
                             background: statusCfg.bg,
@@ -2626,7 +2677,6 @@ export default function ParentPortal() {
               grade={verifiedStudent.grade}
             />
 
-            {/* Sensitive notice */}
             <div
               style={{
                 padding: "12px 14px",
@@ -2706,8 +2756,9 @@ export default function ParentPortal() {
                         >
                           <span
                             style={{
-                              fontSize: 11,
+                              fontSize: 10,
                               fontWeight: 700,
+                              letterSpacing: ".04em",
                               padding: "3px 10px",
                               borderRadius: 99,
                               background: sc.bg,
@@ -2761,10 +2812,10 @@ export default function ParentPortal() {
                               style={{
                                 margin: "0 0 3px",
                                 fontSize: 10,
-                                fontWeight: 700,
+                                fontWeight: 600,
                                 color: T.primary,
                                 textTransform: "uppercase",
-                                letterSpacing: ".05em",
+                                letterSpacing: ".07em",
                               }}
                             >
                               Action Taken
@@ -2772,7 +2823,7 @@ export default function ParentPortal() {
                             <p
                               style={{
                                 margin: 0,
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: T.textMid,
                               }}
                             >
@@ -2855,7 +2906,7 @@ export default function ParentPortal() {
               },
             }[status] || {
               label: "Unknown",
-              bg: T.bg,
+              bg: T.surfaceAlt,
               color: T.textSoft,
               bar: T.textFaint,
             };
@@ -2888,17 +2939,19 @@ export default function ParentPortal() {
                       <p
                         style={{
                           margin: 0,
-                          fontSize: 14,
-                          fontWeight: 700,
-                          color: T.text,
+                          fontFamily: "'Crimson Pro',serif",
+                          fontSize: 18,
+                          fontWeight: 600,
+                          color: T.ink,
                         }}
                       >
                         Fee Account
                       </p>
                       <span
                         style={{
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: 700,
+                          letterSpacing: ".04em",
                           padding: "5px 13px",
                           borderRadius: 99,
                           background: sc.bg,
@@ -2926,8 +2979,9 @@ export default function ParentPortal() {
                       </span>
                       <span
                         style={{
-                          fontSize: 11,
-                          fontWeight: 700,
+                          fontFamily: "'Crimson Pro',serif",
+                          fontSize: 15,
+                          fontWeight: 600,
                           color: sc.color,
                         }}
                       >
@@ -2938,7 +2992,7 @@ export default function ParentPortal() {
                       style={{
                         height: 12,
                         borderRadius: 99,
-                        background: T.bg,
+                        background: T.surfaceAlt,
                         overflow: "hidden",
                         border: `1px solid ${T.border}`,
                       }}
@@ -2995,8 +3049,9 @@ export default function ParentPortal() {
                         <p
                           style={{
                             margin: 0,
-                            fontSize: 15,
-                            fontWeight: 800,
+                            fontFamily: "'Crimson Pro',serif",
+                            fontSize: 18,
+                            fontWeight: 600,
                             color: item.color,
                             lineHeight: 1.2,
                           }}
@@ -3010,6 +3065,7 @@ export default function ParentPortal() {
                             fontWeight: 600,
                             color: T.textFaint,
                             lineHeight: 1.3,
+                            letterSpacing: ".04em",
                           }}
                         >
                           {item.label}
@@ -3118,8 +3174,9 @@ export default function ParentPortal() {
                       <p
                         style={{
                           margin: 0,
-                          fontSize: 18,
-                          fontWeight: 800,
+                          fontFamily: "'Crimson Pro',serif",
+                          fontSize: 22,
+                          fontWeight: 600,
                           color: s.color,
                         }}
                       >
@@ -3131,6 +3188,7 @@ export default function ParentPortal() {
                           fontSize: 10,
                           fontWeight: 600,
                           color: T.textFaint,
+                          letterSpacing: ".04em",
                         }}
                       >
                         {s.label}
@@ -3169,7 +3227,7 @@ export default function ParentPortal() {
                       },
                     }[rec.status] || {
                       label: rec.status,
-                      bg: T.bg,
+                      bg: T.surfaceAlt,
                       color: T.textSoft,
                       dot: T.textFaint,
                     };
@@ -3209,8 +3267,9 @@ export default function ParentPortal() {
                         </p>
                         <span
                           style={{
-                            fontSize: 11,
+                            fontSize: 10,
                             fontWeight: 700,
+                            letterSpacing: ".04em",
                             padding: "3px 10px",
                             borderRadius: 99,
                             background: cfg.bg,
@@ -3251,9 +3310,10 @@ export default function ParentPortal() {
         <p
           style={{
             margin: 0,
-            fontSize: 12,
-            color: T.textFaint,
-            fontWeight: 500,
+            fontFamily: "'Crimson Pro',serif",
+            fontSize: 15,
+            fontWeight: 600,
+            color: T.textSoft,
           }}
         >
           {schoolName} · Parent Portal
@@ -3262,8 +3322,9 @@ export default function ParentPortal() {
           style={{
             margin: "4px 0 0",
             fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: ".06em",
             color: T.textFaint,
-            opacity: 0.6,
           }}
         >
           Information is updated in real-time
@@ -3294,6 +3355,7 @@ function formatDate(dateStr) {
     month: "short",
   });
 }
+
 function SectionHeader({ name, grade }) {
   return (
     <div
@@ -3305,7 +3367,7 @@ function SectionHeader({ name, grade }) {
         padding: "10px 14px",
         background: "#fff",
         borderRadius: 12,
-        border: "1px solid #e8ecf0",
+        border: "1px solid #e8e4db",
       }}
     >
       <div
@@ -3317,21 +3379,29 @@ function SectionHeader({ name, grade }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          border: "1px solid #e8e4db",
         }}
       >
         <User style={{ width: 16, height: 16, color: "#1a6b4a" }} />
       </div>
       <div>
         <p
-          style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#1a202c" }}
+          style={{
+            margin: 0,
+            fontFamily: "'Crimson Pro',serif",
+            fontSize: 16,
+            fontWeight: 600,
+            color: "#1a1814",
+          }}
         >
           {name}
         </p>
-        <p style={{ margin: 0, fontSize: 11, color: "#718096" }}>{grade}</p>
+        <p style={{ margin: 0, fontSize: 11, color: "#9c9890" }}>{grade}</p>
       </div>
     </div>
   );
 }
+
 function EmptyState({ icon: Icon, title, message, color, iconColor }) {
   return (
     <div
@@ -3350,6 +3420,7 @@ function EmptyState({ icon: Icon, title, message, color, iconColor }) {
           height: 60,
           borderRadius: 18,
           background: color,
+          border: "1px solid #e8e4db",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -3358,14 +3429,22 @@ function EmptyState({ icon: Icon, title, message, color, iconColor }) {
       >
         <Icon style={{ width: 26, height: 26, color: iconColor }} />
       </div>
-      <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a202c" }}>
+      <p
+        style={{
+          margin: 0,
+          fontFamily: "'Crimson Pro',serif",
+          fontSize: 20,
+          fontWeight: 600,
+          color: "#1a1814",
+        }}
+      >
         {title}
       </p>
       <p
         style={{
           margin: 0,
           fontSize: 13,
-          color: "#718096",
+          color: "#9c9890",
           maxWidth: 240,
           lineHeight: 1.6,
         }}
@@ -3376,10 +3455,11 @@ function EmptyState({ icon: Icon, title, message, color, iconColor }) {
   );
 }
 
+// ── Style constants ────────────────────────────────────────────────────────────
 const fonts = `
-  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
   * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-  button { font-family:'Outfit',sans-serif; }
+  button { font-family:'Sora',sans-serif; }
 `;
 const keyframes = `
   @keyframes fadeUp {

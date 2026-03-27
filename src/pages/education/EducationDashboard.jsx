@@ -186,7 +186,7 @@ const MOCK_EVENTS = [
 ];
 
 const MOCK_TIMETABLE = {
-  "Pre-School A": {
+  "Grade R": {
     Monday: [
       "Circle Time",
       "Phonics",
@@ -323,7 +323,7 @@ const MOCK_TIMETABLE = {
 
 const TIME_SLOTS = ["08:00", "09:00", "10:00", "10:30", "11:30", "12:30"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-const CLASSES = ["Pre-School A", "Grade 1", "Grade 2", "Grade 3"];
+const CLASSES = ["Grade R", "Grade 1", "Grade 2", "Grade 3"];
 
 const MOCK_HOMEWORK = [
   {
@@ -365,7 +365,7 @@ const MOCK_HOMEWORK = [
   {
     id: 5,
     subject: "Art",
-    grade: "Pre-School A",
+    grade: "Grade R",
     title: "Bring a photo of your family",
     dueDate: "2026-03-09",
     assignedBy: "Ms. Mthembu",
@@ -448,8 +448,8 @@ const SUBJECT_ICONS = {
 
 const gradeColor = (grade) => {
   const map = {
-    "Pre-School A": "rose",
-    "Pre-School B": "pink",
+    "Grade R": "rose",
+    "Grade 0": "pink",
     "Grade 1": "violet",
     "Grade 2": "blue",
     "Grade 3": "emerald",
@@ -2338,8 +2338,8 @@ const AttendanceView = ({
 }) => {
   const classOptions = [
     "All Classes",
-    "Pre-School A",
-    "Pre-School B",
+    "Grade R",
+    "Grade 0",
     "Grade 1",
     "Grade 2",
     "Grade 3",
@@ -2884,8 +2884,8 @@ const HomeworkView = ({
                 }
               >
                 {[
-                  "Pre-School A",
-                  "Pre-School B",
+                  "Grade R",
+                  "Grade 0",
                   "Grade 1",
                   "Grade 2",
                   "Grade 3",

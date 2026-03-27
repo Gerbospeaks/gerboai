@@ -81,8 +81,8 @@ const C = {
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const TIME_SLOTS = ["08:00", "09:00", "10:00", "10:30", "11:30", "12:30"];
 const GRADES = [
-  "Pre-School A",
-  "Pre-School B",
+  "Grade R",
+  "Grade 0",
   "Grade 1",
   "Grade 2",
   "Grade 3",

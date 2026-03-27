@@ -6494,7 +6494,7 @@ export default function Reports() {
   };
 
   const currentSection = SECTIONS.find((s) => s.id === activeSection);
-
+const ALL_GRADES = ["R", "1", "2", "3", "4", "5", "6", "7"];
   return (
     <>
       <div
@@ -6669,22 +6669,11 @@ export default function Reports() {
                     }}
                   >
                     <option value="">Select grade…</option>
-                    {[
-                      ...new Set(
-                        students.map((s) => normaliseGrade(s.gradeLevel)),
-                      ),
-                    ]
-                      .filter(Boolean)
-                      .sort((a, b) => {
-                        if (a === "R") return -1;
-                        if (b === "R") return 1;
-                        return (parseInt(a) || 0) - (parseInt(b) || 0);
-                      })
-                      .map((g) => (
-                        <option key={g} value={g}>
-                          Grade {g}
-                        </option>
-                      ))}
+                    {ALL_GRADES.map((g) => (
+                      <option key={g} value={g}>
+                        Grade {g}
+                      </option>
+                    ))}
                   </select>
                 ) : (
                   <input

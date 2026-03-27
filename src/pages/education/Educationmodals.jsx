@@ -293,8 +293,8 @@ export function HomeworkModal({ open, onClose, onSave }) {
                 onChange={(e) => set("grade", e.target.value)}
               >
                 {[
-                  "Pre-School A",
-                  "Pre-School B",
+                  "Grade R",
+                  "Grade 0",
                   "Grade 1",
                   "Grade 2",
                   "Grade 3",
@@ -940,8 +940,8 @@ export function StaffModal({ open, onClose, onSave, initial }) {
                 <option value="">Select a class…</option>
                 <option value="Grade 1A">Grade 1A</option>
                 <option value="Grade 1B">Grade 1B</option>
-                <option value="Pre-school A">Pre-school A</option>
-                <option value="Pre-school B">Pre-school B</option>
+                <option value="Grade R">Grade R</option>
+                <option value="Grade 0">Grade 0</option>
                 <option value="Grade 3">Grade 3</option>
               </select>
             </div>
@@ -1156,8 +1156,8 @@ export function StudentModal({ open, onClose, onSave, initial }) {
                 onChange={(e) => set("grade", e.target.value)}
               >
                 {[
-                  "Pre-School A",
-                  "Pre-School B",
+                  "Grade R",
+                  "Grade 0",
                   "Grade 1",
                   "Grade 2",
                   "Grade 3",
@@ -1309,8 +1309,8 @@ export function TimetableModal({
   const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const TIME_SLOTS = ["08:00", "09:00", "10:00", "10:30", "11:30", "12:30"];
   const CLASSES = [
-    "Pre-School A",
-    "Pre-School B",
+    "Grade R",
+    "Grade 0",
     "Grade 1",
     "Grade 2",
     "Grade 3",

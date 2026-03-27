@@ -101,8 +101,8 @@ export const useFeesFirebase = (userId) => {
     // 2. Update student fees.paid + status
     const student = students.find((s) => s.id === studentId);
     if (student) {
-      const newPaid = (student.fees?.paid || 0) + Number(amount);
-      const total = student.fees?.total || 0;
+      const newPaid = Number(student.fees?.paid || 0) + Number(amount);
+      const total = Number(student.fees?.total || 0);
       const newStatus =
         newPaid >= total ? "paid" : newPaid > 0 ? "partial" : "unpaid";
 
