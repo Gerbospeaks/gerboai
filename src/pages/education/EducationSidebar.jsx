@@ -144,8 +144,8 @@ export default function EducationSidebar({
     },
     {
       icon: Award,
-      title: "Assessments",
-      action: () => goTo("assessments"),
+      title: "Assessment",
+      action: () => goTo("assessment"),
       color: "from-blue-600 to-blue-700",
     },
    
@@ -426,7 +426,7 @@ export default function EducationSidebar({
               <NavItem
                 icon={Award}
                 label="Assessments"
-                onClick={() => goTo("assessments")}
+                onClick={() => goTo("assessment")}
                 color="blue"
               />
               <NavItem

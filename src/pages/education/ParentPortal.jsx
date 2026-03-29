@@ -41,6 +41,7 @@ import {
   Package,
   Flag,
   Star,
+  PlayCircle,
 } from "lucide-react";
 
 // ── Design tokens — warm editorial palette from SchoolOverview ─────────────
@@ -58,7 +59,6 @@ const T = {
   purpleLight: "#faf5ff",
   teal: "#0f766e",
   tealLight: "#f0fdfa",
-  // ── Warm palette from SchoolOverview ──
   bg: "#f8f7f4",
   surface: "#ffffff",
   surfaceAlt: "#f1efe9",
@@ -79,6 +79,151 @@ const gradeBg = (g) =>
   ({ A: "#f0fdf4", B: "#eff6ff", C: "#fffbeb", D: "#faf5ff", E: T.redLight })[
     g
   ] || T.bg;
+
+// ── Tutorial data — replace videoUrl values with your real hosted URLs ──────
+const TUTORIAL_CATEGORIES = [
+  { id: "all", label: "All", emoji: "⭐" },
+  { id: "abc", label: "ABCs", emoji: "🔤" },
+  { id: "numbers", label: "Numbers", emoji: "🔢" },
+  { id: "shapes", label: "Shapes", emoji: "🔷" },
+  { id: "colors", label: "Colors", emoji: "🎨" },
+];
+
+const TUTORIALS = [
+  {
+    id: "t1",
+    cat: "abc",
+    title: "The Alphabet Song",
+    description:
+      "Sing along and learn all 26 letters with fun animations and bright characters.",
+    duration: "3:22",
+    thumbnailEmoji: "🔤",
+    thumbnailBg: "#e8f5ef",
+    thumbnailColor: T.primary,
+    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4", // ← replace with your real URL
+    badge: "ABCs",
+    badgeBg: T.primaryLight,
+    badgeColor: T.primary,
+  },
+  {
+    id: "t2",
+    cat: "abc",
+    title: "Letter A — Apple",
+    description:
+      "Meet the letter A! Learn how it looks, sounds, and words that start with it.",
+    duration: "2:45",
+    thumbnailEmoji: "🍎",
+    thumbnailBg: "#fef2f2",
+    thumbnailColor: T.red,
+    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    badge: "ABCs",
+    badgeBg: T.primaryLight,
+    badgeColor: T.primary,
+  },
+  {
+    id: "t3",
+    cat: "abc",
+    title: "Letter B — Balloon",
+    description:
+      "Bounce into the letter B with Bella the bear and her big blue balloons.",
+    duration: "2:51",
+    thumbnailEmoji: "🎈",
+    thumbnailBg: T.blueLight,
+    thumbnailColor: T.blue,
+    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    badge: "ABCs",
+    badgeBg: T.primaryLight,
+    badgeColor: T.primary,
+  },
+  {
+    id: "t4",
+    cat: "numbers",
+    title: "Counting 1 to 10",
+    description: "Count colorful fruits and animals from 1 all the way to 10!",
+    duration: "4:10",
+    thumbnailEmoji: "🔢",
+    thumbnailBg: T.purpleLight,
+    thumbnailColor: T.purple,
+    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    badge: "Numbers",
+    badgeBg: T.purpleLight,
+    badgeColor: T.purple,
+  },
+  {
+    id: "t5",
+    cat: "numbers",
+    title: "Adding With Fingers",
+    description:
+      "Use your fingers to add small numbers together — easy and fun!",
+    duration: "3:50",
+    thumbnailEmoji: "🖐",
+    thumbnailBg: T.accentLight,
+    thumbnailColor: "#b45309",
+    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    badge: "Numbers",
+    badgeBg: T.purpleLight,
+    badgeColor: T.purple,
+  },
+  {
+    id: "t6",
+    cat: "shapes",
+    title: "Circles Everywhere!",
+    description: "Spot circles in the real world — wheels, the sun, and more.",
+    duration: "2:30",
+    thumbnailEmoji: "⭕",
+    thumbnailBg: T.tealLight,
+    thumbnailColor: T.teal,
+    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    badge: "Shapes",
+    badgeBg: T.tealLight,
+    badgeColor: T.teal,
+  },
+  {
+    id: "t7",
+    cat: "shapes",
+    title: "Triangles & Squares",
+    description:
+      "Learn the difference between triangles and squares with fun shape puzzles.",
+    duration: "3:15",
+    thumbnailEmoji: "🔷",
+    thumbnailBg: T.blueLight,
+    thumbnailColor: T.blue,
+    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    badge: "Shapes",
+    badgeBg: T.tealLight,
+    badgeColor: T.teal,
+  },
+  {
+    id: "t8",
+    cat: "colors",
+    title: "Rainbow of Colors",
+    description:
+      "Discover red, orange, yellow, green, blue, and purple in this rainbow adventure!",
+    duration: "3:40",
+    thumbnailEmoji: "🌈",
+    thumbnailBg: "#faf5ff",
+    thumbnailColor: T.purple,
+    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    badge: "Colors",
+    badgeBg: "#faf5ff",
+    badgeColor: T.purple,
+  },
+  {
+    id: "t9",
+    cat: "colors",
+    title: "Mixing Colors",
+    description:
+      "See what happens when you mix red and blue, or yellow and blue. Magic!",
+    duration: "2:55",
+    thumbnailEmoji: "🎨",
+    thumbnailBg: T.accentLight,
+    thumbnailColor: "#b45309",
+    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    badge: "Colors",
+    badgeBg: "#faf5ff",
+    badgeColor: T.purple,
+  },
+];
 
 export default function ParentPortal() {
   const { portalSlug } = useParams();
@@ -113,6 +258,11 @@ export default function ParentPortal() {
   const [identityError, setIdentityError] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [verifiedStudent, setVerifiedStudent] = useState(null);
+
+  // ── Tutorial state ───────────────────────────────────────────────────────
+  const [tutorialCat, setTutorialCat] = useState("all");
+  const [tutorialSearch, setTutorialSearch] = useState("");
+  const [activeTutorial, setActiveTutorial] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -310,15 +460,12 @@ export default function ParentPortal() {
           verifiedStudent.name.trim().toLowerCase(),
       )
     : [];
-
   const myPermEvents = verifiedStudent
     ? permEvents.filter((e) => e.grade === verifiedStudent.grade)
     : [];
-
   const myMarkbook = verifiedStudent
     ? markbook.filter((m) => m.grade === verifiedStudent.grade)
     : [];
-
   const myIncidents = verifiedStudent
     ? incidents.filter(
         (i) =>
@@ -344,11 +491,7 @@ export default function ParentPortal() {
       _source: "teacher",
       type: a.type || "info",
     })),
-  ].sort((a, b) => {
-    const da = a.createdAt?.seconds || 0;
-    const db_ = b.createdAt?.seconds || 0;
-    return db_ - da;
-  });
+  ].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
   const noticeConfig = {
     important: {
@@ -392,9 +535,19 @@ export default function ParentPortal() {
       : homework.filter((h) => h.grade === gradeFilter);
   const schoolName =
     businessInfo?.name || businessInfo?.businessName || "School Portal";
-
   const noticeBadge =
     allNotices.filter((n) => !n.read).length || allNotices.length;
+
+  // ── Filtered tutorials ──────────────────────────────────────────────────
+  const filteredTutorials = TUTORIALS.filter((t) => {
+    const matchesCat = tutorialCat === "all" || t.cat === tutorialCat;
+    const q = tutorialSearch.toLowerCase();
+    const matchesSearch =
+      !q ||
+      t.title.toLowerCase().includes(q) ||
+      t.description.toLowerCase().includes(q);
+    return matchesCat && matchesSearch;
+  });
 
   const allTabs = [
     {
@@ -423,6 +576,13 @@ export default function ParentPortal() {
       label: "Timetable",
       icon: Clock,
       count: null,
+      locked: false,
+    },
+    {
+      id: "tutorials",
+      label: "Tutorials",
+      icon: PlayCircle,
+      count: TUTORIALS.length,
       locked: false,
     },
     {
@@ -590,6 +750,180 @@ export default function ParentPortal() {
       }}
     >
       <style>{fonts + keyframes}</style>
+
+      {/* ── TUTORIAL VIDEO MODAL ──────────────────────────────────────────── */}
+      {activeTutorial && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(26,24,20,0.75)",
+            zIndex: 200,
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+          }}
+          onClick={() => setActiveTutorial(null)}
+        >
+          <div
+            style={{
+              background: T.surface,
+              borderRadius: "22px 22px 0 0",
+              width: "100%",
+              maxWidth: 520,
+              overflow: "hidden",
+              animation: "slideUp .25s ease",
+              border: `1px solid ${T.border}`,
+              borderBottom: "none",
+              paddingBottom: "env(safe-area-inset-bottom,0px)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drag handle */}
+            <div
+              style={{
+                width: 40,
+                height: 4,
+                borderRadius: 99,
+                background: T.border,
+                margin: "14px auto 0",
+              }}
+            />
+
+            {/* Video area */}
+            {activeTutorial.videoUrl ? (
+              <video
+                src={activeTutorial.videoUrl}
+                controls
+                autoPlay
+                style={{
+                  width: "100%",
+                  aspectRatio: "16/9",
+                  background: "#000",
+                  display: "block",
+                  marginTop: 14,
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  aspectRatio: "16/9",
+                  background: activeTutorial.thumbnailBg,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                  marginTop: 14,
+                }}
+              >
+                <span style={{ fontSize: 52 }}>
+                  {activeTutorial.thumbnailEmoji}
+                </span>
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: T.textSoft,
+                    padding: "6px 14px",
+                    borderRadius: 99,
+                    background: T.surface,
+                    border: `1px solid ${T.border}`,
+                  }}
+                >
+                  Video coming soon
+                </span>
+              </div>
+            )}
+
+            {/* Info */}
+            <div style={{ padding: "16px 20px 20px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                  gap: 12,
+                }}
+              >
+                <div style={{ flex: 1 }}>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontFamily: "'Crimson Pro',serif",
+                      fontSize: 20,
+                      fontWeight: 600,
+                      color: T.ink,
+                      lineHeight: 1.25,
+                    }}
+                  >
+                    {activeTutorial.title}
+                  </p>
+                  <p
+                    style={{
+                      margin: "5px 0 0",
+                      fontSize: 13,
+                      color: T.textMid,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {activeTutorial.description}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveTutorial(null)}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    background: T.surfaceAlt,
+                    border: `1px solid ${T.border}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                  }}
+                >
+                  <X style={{ width: 15, height: 15, color: T.textMid }} />
+                </button>
+              </div>
+              <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    padding: "4px 12px",
+                    borderRadius: 99,
+                    background: activeTutorial.badgeBg,
+                    color: activeTutorial.badgeColor,
+                  }}
+                >
+                  {activeTutorial.badge}
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    padding: "4px 12px",
+                    borderRadius: 99,
+                    background: T.surfaceAlt,
+                    color: T.textSoft,
+                    border: `1px solid ${T.border}`,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                  }}
+                >
+                  <Clock style={{ width: 11, height: 11 }} />
+                  {activeTutorial.duration}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── IDENTITY MODAL ────────────────────────────────────────────────── */}
       {showIdentityModal && (
@@ -796,7 +1130,6 @@ export default function ParentPortal() {
         <div
           style={{ padding: "20px 20px 0", maxWidth: 640, margin: "0 auto" }}
         >
-          {/* Top row */}
           <div
             style={{
               display: "flex",
@@ -1026,11 +1359,7 @@ export default function ParentPortal() {
           }}
         >
           <div
-            style={{
-              display: "flex",
-              minWidth: "max-content",
-              width: "100%",
-            }}
+            style={{ display: "flex", minWidth: "max-content", width: "100%" }}
           >
             {allTabs.map(({ id, label, icon: Icon, count, locked }) => (
               <button
@@ -1163,7 +1492,7 @@ export default function ParentPortal() {
                           }}
                         >
                           <Icon style={{ width: 10, height: 10 }} />
-                          {isTeacher ? `Class Notice` : tc.label}
+                          {isTeacher ? "Class Notice" : tc.label}
                         </span>
                         {isTeacher && n.grade && (
                           <span
@@ -1952,6 +2281,250 @@ export default function ParentPortal() {
           </div>
         )}
 
+        {/* ══ TUTORIALS ═════════════════════════════════════════════════════ */}
+        {activeTab === "tutorials" && (
+          <div style={{ animation: "fadeUp .25s ease" }}>
+            {/* Search */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                background: T.surface,
+                border: `1px solid ${T.border}`,
+                borderRadius: 13,
+                padding: "0 14px",
+                marginBottom: 14,
+                boxShadow: T.shadow,
+              }}
+            >
+              <Search
+                style={{
+                  width: 15,
+                  height: 15,
+                  color: T.textFaint,
+                  flexShrink: 0,
+                }}
+              />
+              <input
+                value={tutorialSearch}
+                onChange={(e) => setTutorialSearch(e.target.value)}
+                placeholder="Search lessons…"
+                style={{
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  fontSize: 14,
+                  padding: "12px 0",
+                  background: "transparent",
+                  fontFamily: "'Sora',sans-serif",
+                  color: T.text,
+                }}
+              />
+              {tutorialSearch && (
+                <button
+                  onClick={() => setTutorialSearch("")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                    display: "flex",
+                  }}
+                >
+                  <X style={{ width: 14, height: 14, color: T.textFaint }} />
+                </button>
+              )}
+            </div>
+
+            {/* Category pills */}
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                overflowX: "auto",
+                paddingBottom: 4,
+                marginBottom: 16,
+              }}
+            >
+              {TUTORIAL_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setTutorialCat(cat.id)}
+                  style={{
+                    flexShrink: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                    padding: "7px 14px",
+                    borderRadius: 99,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    border: `1px solid ${tutorialCat === cat.id ? "transparent" : T.border}`,
+                    cursor: "pointer",
+                    background: tutorialCat === cat.id ? T.primary : T.surface,
+                    color: tutorialCat === cat.id ? "#fff" : T.textMid,
+                    boxShadow: T.shadow,
+                    transition: "all .15s",
+                    fontFamily: "'Sora',sans-serif",
+                  }}
+                >
+                  <span style={{ fontSize: 13 }}>{cat.emoji}</span>
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Grid */}
+            {filteredTutorials.length === 0 ? (
+              <EmptyState
+                icon={PlayCircle}
+                title="No lessons found"
+                message="Try a different category or search term."
+                color={T.primaryLight}
+                iconColor={T.primary}
+              />
+            ) : (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+                  gap: 12,
+                }}
+              >
+                {filteredTutorials.map((tut, i) => (
+                  <button
+                    key={tut.id}
+                    onClick={() => setActiveTutorial(tut)}
+                    style={{
+                      background: T.surface,
+                      borderRadius: T.radius,
+                      border: `1px solid ${T.border}`,
+                      boxShadow: T.shadow,
+                      overflow: "hidden",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      padding: 0,
+                      animation: `fadeUp .3s ease ${i * 0.04}s both`,
+                      transition: "transform .15s, box-shadow .15s",
+                      fontFamily: "'Sora',sans-serif",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow =
+                        "0 4px 20px rgba(0,0,0,0.10)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "none";
+                      e.currentTarget.style.boxShadow = T.shadow;
+                    }}
+                  >
+                    {/* Thumbnail */}
+                    <div
+                      style={{
+                        width: "100%",
+                        aspectRatio: "16/9",
+                        background: tut.thumbnailBg,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "relative",
+                      }}
+                    >
+                      <span style={{ fontSize: 34 }}>{tut.thumbnailEmoji}</span>
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: 8,
+                          right: 8,
+                          width: 30,
+                          height: 30,
+                          borderRadius: "50%",
+                          background: "rgba(255,255,255,0.92)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          boxShadow: "0 1px 6px rgba(0,0,0,0.15)",
+                        }}
+                      >
+                        <PlayCircle
+                          style={{ width: 16, height: 16, color: T.primary }}
+                        />
+                      </div>
+                    </div>
+                    {/* Body */}
+                    <div style={{ padding: "10px 12px 12px" }}>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontFamily: "'Crimson Pro',serif",
+                          fontSize: 15,
+                          fontWeight: 600,
+                          color: T.ink,
+                          lineHeight: 1.3,
+                          marginBottom: 6,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {tut.title}
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 6,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: "3px 9px",
+                            borderRadius: 99,
+                            background: tut.badgeBg,
+                            color: tut.badgeColor,
+                          }}
+                        >
+                          {tut.badge}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 600,
+                            color: T.textFaint,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 3,
+                          }}
+                        >
+                          <Clock style={{ width: 10, height: 10 }} />
+                          {tut.duration}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <p
+              style={{
+                fontSize: 11,
+                color: T.textFaint,
+                textAlign: "center",
+                marginTop: 20,
+                lineHeight: 1.6,
+              }}
+            >
+              {TUTORIALS.length} lessons · Updated by your school
+            </p>
+          </div>
+        )}
+
         {/* ══ REPORTS ═══════════════════════════════════════════════════════ */}
         {activeTab === "reports" && verifiedStudent && (
           <div style={{ animation: "fadeUp .25s ease" }}>
@@ -1959,7 +2532,6 @@ export default function ParentPortal() {
               name={verifiedStudent.name}
               grade={verifiedStudent.grade}
             />
-
             {studentReports.length === 0 ? (
               <EmptyState
                 icon={ClipboardList}
@@ -1975,11 +2547,9 @@ export default function ParentPortal() {
                 {studentReports.map((rep, i) => {
                   const isExpanded = expandedReport === rep.id;
                   const rd = rep.reportData || {};
-
                   const comments = [1, 2, 3, 4]
                     .map((n) => ({ term: n, text: rd[`comments${n}`] }))
                     .filter((c) => c.text?.trim());
-
                   const themeAccents = {
                     classic: "#1d3557",
                     modern: "#1e3a8a",
@@ -1996,7 +2566,6 @@ export default function ParentPortal() {
                     grade7: "#111827",
                   };
                   const accentColor = themeAccents[rep.themeId] || T.primary;
-
                   return (
                     <div
                       key={rep.id}
@@ -2010,7 +2579,6 @@ export default function ParentPortal() {
                       }}
                     >
                       <div style={{ height: 5, background: accentColor }} />
-
                       <div style={{ padding: "16px 16px 14px" }}>
                         <div
                           style={{
@@ -2091,7 +2659,6 @@ export default function ParentPortal() {
                             {rd.schoolYear || "2026"}
                           </span>
                         </div>
-
                         <div
                           style={{
                             display: "flex",
@@ -2123,7 +2690,6 @@ export default function ParentPortal() {
                               </span>
                             ))}
                         </div>
-
                         <button
                           onClick={() =>
                             setExpandedReport(isExpanded ? null : rep.id)
@@ -2160,7 +2726,6 @@ export default function ParentPortal() {
                           />
                         </button>
                       </div>
-
                       {isExpanded && (
                         <div
                           style={{
@@ -2219,7 +2784,6 @@ export default function ParentPortal() {
                                 </div>
                               ))}
                           </div>
-
                           {comments.length > 0 ? (
                             <>
                               <p
@@ -2241,7 +2805,7 @@ export default function ParentPortal() {
                                     padding: "12px 14px",
                                     borderRadius: 12,
                                     background: T.primaryLight,
-                                    border: `1px solid #c6e8d9`,
+                                    border: "1px solid #c6e8d9",
                                   }}
                                 >
                                   <p
@@ -2645,7 +3209,7 @@ export default function ParentPortal() {
                           style={{
                             padding: "10px 16px",
                             background: T.redLight,
-                            borderTop: `1px solid #fecaca`,
+                            borderTop: "1px solid #fecaca",
                           }}
                         >
                           <p
@@ -2676,7 +3240,6 @@ export default function ParentPortal() {
               name={verifiedStudent.name}
               grade={verifiedStudent.grade}
             />
-
             <div
               style={{
                 padding: "12px 14px",
@@ -2709,7 +3272,6 @@ export default function ParentPortal() {
                 teacher. Please contact the school if you have questions.
               </p>
             </div>
-
             {myIncidents.length === 0 ? (
               <EmptyState
                 icon={ShieldAlert}
@@ -2805,7 +3367,7 @@ export default function ParentPortal() {
                               padding: "8px 12px",
                               borderRadius: 9,
                               background: T.primaryLight,
-                              border: `1px solid #c6e8d9`,
+                              border: "1px solid #c6e8d9",
                             }}
                           >
                             <p
