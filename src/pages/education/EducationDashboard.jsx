@@ -166,7 +166,7 @@ const MOCK_STAFF = [
     phone: "082 111 2222",
     email: "sarah@school.com",
     status: "present",
-    classes: ["Grade 1A", "Grade 1B"],
+    classes: ["Grade 1", "Grade 2"],
   },
 ];
 
@@ -383,7 +383,7 @@ const MOCK_NOTICES = [
 
 const TIME_SLOTS = ["08:00", "09:00", "10:00", "10:30", "11:30", "12:30"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-const CLASSES = ["Grade R", "Grade 1", "Grade 2", "Grade 3"];
+const CLASSES = ["Grade R", "Grade 0", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7"];
 
 const SUBJECT_ICONS = {
   Maths: Calculator,
@@ -2867,7 +2867,7 @@ const HomeworkView = ({
                   setNewHomework((p) => ({ ...p, grade: e.target.value }))
                 }
               >
-                {["Grade R", "Grade 0", "Grade 1", "Grade 2", "Grade 3"].map(
+                {["Grade R", "Grade 0", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7"].map(
                   (g) => (
                     <option key={g}>{g}</option>
                   ),
@@ -3192,9 +3192,15 @@ const NoticesView = ({
                   {[
                     "All Parents",
                     "Pre-School Parents",
+                    "Grade R Parents",
+                    "Grade 0 Parents",
                     "Grade 1 Parents",
                     "Grade 2 Parents",
                     "Grade 3 Parents",
+                    "Grade 4 Parents",
+                    "Grade 5 Parents",
+                    "Grade 6 Parents",
+                    "Grade 7 Parents",
                     "Selected Parents",
                   ].map((r) => (
                     <option key={r}>{r}</option>
@@ -3287,10 +3293,22 @@ const NoticesView = ({
                     let targets = students.filter((s) => s.phone);
                     if (noticeForm.recipient === "Grade 1 Parents")
                       targets = targets.filter((s) => s.grade === "Grade 1");
+                     else if (noticeForm.recipient === "Grade R Parents")
+                      targets = targets.filter((s) => s.grade === "Grade R");
+                     else if (noticeForm.recipient === "Grade 0 Parents")
+                      targets = targets.filter((s) => s.grade === "Grade 0");
                     else if (noticeForm.recipient === "Grade 2 Parents")
                       targets = targets.filter((s) => s.grade === "Grade 2");
                     else if (noticeForm.recipient === "Grade 3 Parents")
                       targets = targets.filter((s) => s.grade === "Grade 3");
+                     else if (noticeForm.recipient === "Grade 4 Parents")
+                      targets = targets.filter((s) => s.grade === "Grade 4");
+                     else if (noticeForm.recipient === "Grade 5 Parents")
+                      targets = targets.filter((s) => s.grade === "Grade 5");
+                     else if (noticeForm.recipient === "Grade 6 Parents")
+                      targets = targets.filter((s) => s.grade === "Grade 6");
+                     else if (noticeForm.recipient === "Grade 7 Parents")
+                      targets = targets.filter((s) => s.grade === "Grade 7");
                     const msg = encodeURIComponent(
                       `📚 *${noticeForm.title}*\n\n${noticeForm.message}\n\n_Sent by ${businessInfo?.name || "the school"}_`,
                     );

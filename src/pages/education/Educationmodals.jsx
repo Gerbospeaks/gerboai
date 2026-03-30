@@ -292,15 +292,11 @@ export function HomeworkModal({ open, onClose, onSave }) {
                 value={form.grade}
                 onChange={(e) => set("grade", e.target.value)}
               >
-                {[
-                  "Grade R",
-                  "Grade 0",
-                  "Grade 1",
-                  "Grade 2",
-                  "Grade 3",
-                ].map((g) => (
-                  <option key={g}>{g}</option>
-                ))}
+                {["Grade R", "Grade 0", "Grade 1", "Grade 2", "Grade 3"].map(
+                  (g) => (
+                    <option key={g}>{g}</option>
+                  ),
+                )}
               </select>
             </div>
           </div>
@@ -491,6 +487,11 @@ export function AttendanceModal({
 
   if (!open) return null;
 
+  // ✅ FIX: Guard against undefined/malformed student entries
+  const safeStudents = (students || []).filter(
+    (s) => s && typeof s.name === "string",
+  );
+
   const handleSaveAll = async () => {
     setSaving(true);
     await onSaveAll(attendance);
@@ -561,8 +562,20 @@ export function AttendanceModal({
 
         {/* Student list */}
         <div className="p-6 space-y-2">
-          {students.map((s) => {
+          {safeStudents.length === 0 && (
+            <p className="text-sm text-slate-400 text-center py-6">
+              No students found for this class.
+            </p>
+          )}
+          {safeStudents.map((s) => {
             const current = attendance[s.id] || "present";
+            // ✅ FIX: Safe initials — name is guaranteed to be a string here
+            const initials = s.name
+              .split(" ")
+              .map((w) => w[0])
+              .join("")
+              .slice(0, 2);
+
             return (
               <div
                 key={s.id}
@@ -576,11 +589,7 @@ export function AttendanceModal({
                     color: `hsl(${s.id * 47},50%,35%)`,
                   }}
                 >
-                  {s.name
-                    .split(" ")
-                    .map((w) => w[0])
-                    .join("")
-                    .slice(0, 2)}
+                  {initials}
                 </div>
                 {/* Name */}
                 <div className="flex-1 min-w-0">
@@ -770,14 +779,6 @@ export function EventModal({ open, onClose, onSave }) {
   );
 }
 
-// StaffModal.jsx — updated to include PIN field
-// Drop-in replacement for your existing StaffModal in educationModals.jsx
-// PIN auto-fills from last 4 digits of phone number when phone is entered
-
-// StaffModal.jsx — updated to include PIN field
-// Drop-in replacement for your existing StaffModal in educationModals.jsx
-// PIN auto-fills from last 4 digits of phone number when phone is entered
-
 export function StaffModal({ open, onClose, onSave, initial }) {
   const EMPTY = {
     name: "",
@@ -797,10 +798,8 @@ export function StaffModal({ open, onClose, onSave, initial }) {
 
   if (!open) return null;
 
-  // Regular field setter
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
-  // Phone setter — always tracks last 4 digits of phone as PIN while auto-fill is active
   const setPhone = (v) => {
     const digits = v.replace(/\D/g, "");
     if (digits.length >= 4) {
@@ -851,7 +850,6 @@ export function StaffModal({ open, onClose, onSave, initial }) {
         />
 
         <div className={BODY}>
-          {/* Name + Role */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={LABEL}>Full Name *</label>
@@ -873,7 +871,6 @@ export function StaffModal({ open, onClose, onSave, initial }) {
             </div>
           </div>
 
-          {/* Subject + Status */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={LABEL}>Subject / Phase</label>
@@ -897,7 +894,6 @@ export function StaffModal({ open, onClose, onSave, initial }) {
             </div>
           </div>
 
-          {/* Phone + Email */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={LABEL}>Phone</label>
@@ -926,7 +922,6 @@ export function StaffModal({ open, onClose, onSave, initial }) {
             </div>
           </div>
 
-          {/* Classes */}
           <div>
             <label className={LABEL}>Classes</label>
             <div className="flex gap-2 mb-2">
@@ -938,10 +933,10 @@ export function StaffModal({ open, onClose, onSave, initial }) {
                 }}
               >
                 <option value="">Select a class…</option>
-                <option value="Grade 1A">Grade 1A</option>
-                <option value="Grade 1B">Grade 1B</option>
                 <option value="Grade R">Grade R</option>
                 <option value="Grade 0">Grade 0</option>
+                <option value="Grade 1">Grade 1</option>
+                <option value="Grade 2">Grade 2</option>
                 <option value="Grade 3">Grade 3</option>
               </select>
             </div>
@@ -963,7 +958,6 @@ export function StaffModal({ open, onClose, onSave, initial }) {
             </div>
           </div>
 
-          {/* ── Staff Portal PIN ───────────────────────────────────────────── */}
           <div>
             <div
               style={{
@@ -1008,11 +1002,10 @@ export function StaffModal({ open, onClose, onSave, initial }) {
                 value={form.pin}
                 onChange={(e) => {
                   set("pin", e.target.value.replace(/\D/g, ""));
-                  setPinAutoFilled(false); // manual edit disables auto-fill
+                  setPinAutoFilled(false);
                   setPinError("");
                 }}
               />
-              {/* Auto-filled badge */}
               {pinAutoFilled && form.pin && (
                 <span
                   style={{
@@ -1088,6 +1081,7 @@ export function StaffModal({ open, onClose, onSave, initial }) {
     </div>
   );
 }
+
 export function StudentModal({ open, onClose, onSave, initial }) {
   const EMPTY = {
     name: "",
@@ -1106,7 +1100,6 @@ export function StudentModal({ open, onClose, onSave, initial }) {
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
   const setFee = (k, v) => {
     const fees = { ...form.fees, [k]: v };
-    // auto-calculate status
     const paid = Number(k === "paid" ? v : fees.paid);
     const total = Number(k === "total" ? v : fees.total);
     fees.status = paid >= total ? "paid" : paid > 0 ? "partial" : "unpaid";
@@ -1133,7 +1126,6 @@ export function StudentModal({ open, onClose, onSave, initial }) {
           onClose={onClose}
         />
         <div className={BODY}>
-          {/* Student info */}
           <div className="text-xs font-700 text-slate-400 uppercase tracking-wider pb-1 border-b border-slate-100">
             Student Information
           </div>
@@ -1155,15 +1147,11 @@ export function StudentModal({ open, onClose, onSave, initial }) {
                 value={form.grade}
                 onChange={(e) => set("grade", e.target.value)}
               >
-                {[
-                  "Grade R",
-                  "Grade 0",
-                  "Grade 1",
-                  "Grade 2",
-                  "Grade 3",
-                ].map((g) => (
-                  <option key={g}>{g}</option>
-                ))}
+                {["Grade R", "Grade 0", "Grade 1", "Grade 2", "Grade 3"].map(
+                  (g) => (
+                    <option key={g}>{g}</option>
+                  ),
+                )}
               </select>
             </div>
             <div>
@@ -1180,7 +1168,6 @@ export function StudentModal({ open, onClose, onSave, initial }) {
             </div>
           </div>
 
-          {/* Parent info */}
           <div className="text-xs font-700 text-slate-400 uppercase tracking-wider pb-1 border-b border-slate-100 mt-2">
             Parent / Guardian
           </div>
@@ -1223,7 +1210,6 @@ export function StudentModal({ open, onClose, onSave, initial }) {
             </div>
           </div>
 
-          {/* Fees */}
           <div className="text-xs font-700 text-slate-400 uppercase tracking-wider pb-1 border-b border-slate-100 mt-2">
             Fee Information
           </div>
@@ -1251,7 +1237,6 @@ export function StudentModal({ open, onClose, onSave, initial }) {
             </div>
           </div>
 
-          {/* Fee status indicator */}
           <div
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-600 ${
               form.fees.status === "paid"
@@ -1308,18 +1293,11 @@ export function TimetableModal({
 }) {
   const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const TIME_SLOTS = ["08:00", "09:00", "10:00", "10:30", "11:30", "12:30"];
-  const CLASSES = [
-    "Grade R",
-    "Grade 0",
-    "Grade 1",
-    "Grade 2",
-    "Grade 3",
-  ];
+  const CLASSES = ["Grade R", "Grade 0", "Grade 1", "Grade 2", "Grade 3"];
 
   const [selectedClass, setSelectedClass] = useState(initialClass || "Grade 1");
   const [saving, setSaving] = useState(false);
 
-  // Build editable grid: { Monday: ["Maths","English",...], ... }
   const buildEmpty = () =>
     DAYS.reduce(
       (acc, d) => ({ ...acc, [d]: Array(TIME_SLOTS.length).fill("") }),
@@ -1333,7 +1311,6 @@ export function TimetableModal({
 
   if (!open) return null;
 
-  // When class changes, load existing or blank schedule
   const handleClassChange = (cls) => {
     setSelectedClass(cls);
     const existing = timetable?.[cls];
@@ -1370,7 +1347,6 @@ export function TimetableModal({
         />
 
         <div className="px-6 pt-4">
-          {/* Class selector */}
           <div className="flex flex-wrap gap-2 mb-5">
             {CLASSES.map((c) => (
               <button
@@ -1387,7 +1363,6 @@ export function TimetableModal({
             ))}
           </div>
 
-          {/* Grid */}
           <div className="overflow-x-auto">
             <table className="w-full" style={{ minWidth: 540 }}>
               <thead>

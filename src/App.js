@@ -64,10 +64,27 @@ const PUBLIC_ROUTES = new Set([
   "/privacy", "/terms", "/login", "/register", "/auth-action"
 ]);
 
+// ─── NEW: Redirect authenticated users away from login/register ───────────────
+// While auth is still loading we render nothing to avoid a flash of the login
+// page before the redirect fires.
+function PublicOnlyRoute({ children }) {
+  const { currentUser, loading } = useAuth();
+
+  if (loading) return null; // wait for Firebase / auth to resolve
+
+  if (currentUser) {
+    // Already logged in → send straight to their dashboard
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function PWAGate() {
   const { loading } = useAuth();
   const { pathname } = useLocation();
-
+  
   const isPublic = React.useMemo(() =>
     PUBLIC_ROUTES.has(pathname) ||
     pathname.startsWith("/parents/") ||
@@ -75,14 +92,13 @@ function PWAGate() {
     [pathname]
   );
 
-  // Never render anything until auth is fully resolved
-  // and never render on public routes
   if (loading || isPublic) return null;
 
   return <PWAInstallPrompt appReady={true} />;
 }
+
 function App() {
- useEffect(() => {
+  useEffect(() => {
     // Disable right-click
     const handleContextMenu = (e) => e.preventDefault();
 
@@ -105,7 +121,6 @@ function App() {
     document.addEventListener('contextmenu', handleContextMenu);
     document.addEventListener('keydown', handleKeyDown);
 
-    // Cleanup on unmount
     return () => {
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('keydown', handleKeyDown);
@@ -113,11 +128,10 @@ function App() {
   }, []);
   
   return (
-    
     <Router>
       <AuthProvider>
         <AdminProvider>
-         <PWAGate />
+          <PWAGate />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
@@ -127,9 +141,24 @@ function App() {
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/auth-action" element={<AuthAction />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            
+
+            {/* ─── Login & Register: skip if already authenticated ─── */}
+            <Route
+              path="/login"
+              element={
+                <PublicOnlyRoute>
+                  <Login />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicOnlyRoute>
+                  <Register />
+                </PublicOnlyRoute>
+              }
+            />
 
             {/* Admin Route */}
             <Route 
@@ -411,7 +440,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-             <Route 
+            <Route 
               path="/painting" 
               element={
                 <ProtectedRoute>
@@ -419,7 +448,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-             <Route 
+            <Route 
               path="/pest-control" 
               element={
                 <ProtectedRoute>
@@ -427,7 +456,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-             <Route 
+            <Route 
               path="/pool-services" 
               element={
                 <ProtectedRoute>
@@ -435,7 +464,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-             <Route 
+            <Route 
               path="/solar-installation" 
               element={
                 <ProtectedRoute>
@@ -443,7 +472,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-             <Route 
+            <Route 
               path="/towing" 
               element={
                 <ProtectedRoute>
@@ -451,7 +480,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-             <Route 
+            <Route 
               path="/welding" 
               element={
                 <ProtectedRoute>
@@ -459,7 +488,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-             <Route 
+            <Route 
               path="/carpentry" 
               element={
                 <ProtectedRoute>
@@ -467,7 +496,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-             <Route 
+            <Route 
               path="/window-repair" 
               element={
                 <ProtectedRoute>

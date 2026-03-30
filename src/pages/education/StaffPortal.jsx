@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { getAuth } from "firebase/auth";
 import {
   collection,
   getDocs,
@@ -77,7 +78,7 @@ const C = {
   shadow: "0 2px 10px rgba(0,0,0,0.06)",
   shadowMd: "0 4px 20px rgba(0,0,0,0.10)",
 };
-
+const WORKER_URL = "https://r2-upload-worker.v8-auto.workers.dev";
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const TIME_SLOTS = ["08:00", "09:00", "10:00", "10:30", "11:30", "12:30"];
 const GRADES = [
@@ -86,6 +87,10 @@ const GRADES = [
   "Grade 1",
   "Grade 2",
   "Grade 3",
+  "Grade 4",
+  "Grade 5",
+  "Grade 6",
+  "Grade 7",
 ];
 const PAD = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"];
 
@@ -125,7 +130,21 @@ const RESOURCE_CATEGORIES = [
   "Furniture",
   "Other",
 ];
-
+const uploadToCloudflare = async (file) => {
+  const auth = getAuth();
+  const idToken = await auth.currentUser.getIdToken();
+  const res = await fetch(`${WORKER_URL}/upload-pdf`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+      "Content-Type": file.type || "application/octet-stream",
+      "X-File-Name": file.name,
+    },
+    body: await file.arrayBuffer(),
+  });
+  if (!res.ok) throw new Error("Upload failed");
+  return res.json(); // returns { publicUrl, key }
+};
 export default function StaffPortal() {
   const { portalSlug } = useParams();
 
@@ -154,19 +173,20 @@ export default function StaffPortal() {
   const [attSaved, setAttSaved] = useState(false);
 
   // ── Homework ───────────────────────────────────────────────────────────────
-  const [hwForm, setHwForm] = useState({
-    subject: "",
-    grade: "",
-    title: "",
-    dueDate: "",
-    priority: "medium",
-    attachmentUrl: "",
-    attachmentName: "",
-  });
-  const [savingHw, setSavingHw] = useState(false);
-  const [hwSaved, setHwSaved] = useState(false);
-  const [hwError, setHwError] = useState("");
-
+const [hwForm, setHwForm] = useState({
+  subject: "",
+  grade: "",
+  title: "",
+  dueDate: "",
+  priority: "medium",
+  attachmentUrl: "",
+  attachmentName: "",
+});
+const [hwFile, setHwFile] = useState(null);         
+const hwFileRef = useRef(null);                      
+const [savingHw, setSavingHw] = useState(false);
+const [hwSaved, setHwSaved] = useState(false);
+const [hwError, setHwError] = useState("");
   // ── Timetable ──────────────────────────────────────────────────────────────
   const [ttClass, setTtClass] = useState("");
   const [ttSchedule, setTtSchedule] = useState({});
@@ -430,43 +450,56 @@ export default function StaffPortal() {
     }
   };
 
-  // ── Save homework ──────────────────────────────────────────────────────────
-  const saveHomework = async () => {
-    if (!hwForm.title || !hwForm.subject) {
-      setHwError("Subject and description are required.");
-      return;
+ // REPLACE WITH:
+const saveHomework = async () => {
+  if (!hwForm.title || !hwForm.subject) {
+    setHwError("Subject and description are required.");
+    return;
+  }
+  setSavingHw(true);
+  setHwError("");
+  try {
+    let attachmentUrl = hwForm.attachmentUrl || null;
+    let attachmentName = hwForm.attachmentName || null;
+
+    // ── If a file was selected, upload it first ──
+    if (hwFile) {
+      const result = await uploadToCloudflare(hwFile);
+      attachmentUrl = result.publicUrl;
+      attachmentName = hwFile.name;
     }
-    setSavingHw(true);
-    setHwError("");
-    try {
-      const payload = {
-        ...hwForm,
-        assignedBy: teacher.name,
-        createdAt: serverTimestamp(),
-      };
-      if (!payload.attachmentUrl) {
-        delete payload.attachmentUrl;
-        delete payload.attachmentName;
-      }
-      await addDoc(collection(db, "users", uid, "homework"), payload);
-      setHwForm({
-        subject: "",
-        grade: myClasses[0] || "",
-        title: "",
-        dueDate: "",
-        priority: "medium",
-        attachmentUrl: "",
-        attachmentName: "",
-      });
-      setHwSaved(true);
-      setTimeout(() => setHwSaved(false), 3000);
-    } catch (e) {
-      console.error(e);
-      setHwError("Failed to save. Please try again.");
-    } finally {
-      setSavingHw(false);
+
+    const payload = {
+      ...hwForm,
+      attachmentUrl,
+      attachmentName,
+      assignedBy: teacher.name,
+      createdAt: serverTimestamp(),
+    };
+    if (!payload.attachmentUrl) {
+      delete payload.attachmentUrl;
+      delete payload.attachmentName;
     }
-  };
+    await addDoc(collection(db, "users", uid, "homework"), payload);
+    setHwForm({
+      subject: "",
+      grade: myClasses[0] || "",
+      title: "",
+      dueDate: "",
+      priority: "medium",
+      attachmentUrl: "",
+      attachmentName: "",
+    });
+    setHwFile(null);                                 // ← clear file
+    setHwSaved(true);
+    setTimeout(() => setHwSaved(false), 3000);
+  } catch (e) {
+    console.error(e);
+    setHwError(e.message || "Failed to save. Please try again.");
+  } finally {
+    setSavingHw(false);
+  }
+};
 
   // ── Save timetable ─────────────────────────────────────────────────────────
   const saveTimetable = async () => {
@@ -1527,46 +1560,66 @@ export default function StaffPortal() {
                   </div>
                 </Field>
               </div>
-              <div style={{ marginTop: 14 }}>
-                <Field label="PDF / Document URL (optional)">
-                  <input
-                    style={{
-                      ...inputSt,
-                      width: "100%",
-                      boxSizing: "border-box",
-                    }}
-                    placeholder="https://drive.google.com/…"
-                    value={hwForm.attachmentUrl}
-                    onChange={(e) =>
-                      setHwForm((f) => ({
-                        ...f,
-                        attachmentUrl: e.target.value,
-                      }))
-                    }
-                  />
-                </Field>
-                {hwForm.attachmentUrl && (
-                  <div style={{ marginTop: 10 }}>
-                    <Field label="File Label (optional)">
-                      <input
-                        style={{
-                          ...inputSt,
-                          width: "100%",
-                          boxSizing: "border-box",
-                        }}
-                        placeholder='e.g. "Maths Worksheet – Chapter 4"'
-                        value={hwForm.attachmentName}
-                        onChange={(e) =>
-                          setHwForm((f) => ({
-                            ...f,
-                            attachmentName: e.target.value,
-                          }))
-                        }
-                      />
-                    </Field>
-                  </div>
-                )}
-              </div>
+              {/* REPLACE WITH: */}
+<div style={{ marginTop: 14 }}>
+  <Field label="Attach Document (optional)">
+    <input
+      ref={hwFileRef}
+      type="file"
+      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+      style={{ display: "none" }}
+      onChange={(e) => setHwFile(e.target.files?.[0] ?? null)}
+    />
+    <div
+      onClick={() => hwFileRef.current?.click()}
+      style={{
+        border: `2px dashed ${hwFile ? C.green : C.border}`,
+        borderRadius: 10,
+        padding: "14px 16px",
+        textAlign: "center",
+        cursor: "pointer",
+        background: hwFile ? C.greenLight : "#f8fafc",
+        transition: "all .15s",
+      }}
+    >
+      {hwFile ? (
+        <>
+          <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: C.green }}>
+            ✓ {hwFile.name}
+          </p>
+          <p style={{ margin: "3px 0 0", fontSize: 11, color: C.textSoft }}>
+            {(hwFile.size / 1024).toFixed(0)} KB — click to change
+          </p>
+        </>
+      ) : (
+        <>
+          <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: C.textMid }}>
+            Click to upload PDF / document
+          </p>
+          <p style={{ margin: "3px 0 0", fontSize: 11, color: C.textSoft }}>
+            PDF, JPG, PNG, DOC supported
+          </p>
+        </>
+      )}
+    </div>
+    {hwFile && (
+      <button
+        onClick={() => setHwFile(null)}
+        style={{
+          marginTop: 6,
+          fontSize: 11,
+          color: C.red,
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          fontFamily: "inherit",
+        }}
+      >
+        ✕ Remove file
+      </button>
+    )}
+  </Field>
+</div>
               {hwError && <ErrorNote>{hwError}</ErrorNote>}
               <SaveBtn
                 onClick={saveHomework}
