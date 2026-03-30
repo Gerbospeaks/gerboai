@@ -58,7 +58,8 @@ import SignatureStamp from './pages/mechanics/SignatureStamp';
 import TemplateSelector from './pages/accounting/TemplateSelector';
 import ParentPortal from './pages/education/ParentPortal';
 import StaffPortal from './pages/education/StaffPortal';
-
+import { getSubdomain } from './utils/getSubdomain';
+import { SUBDOMAIN_ROUTES } from './utils/subdomainMap';
 const PUBLIC_ROUTES = new Set([
   "/", "/about", "/contact", "/blogs",
   "/privacy", "/terms", "/login", "/register", "/auth-action"
@@ -95,6 +96,8 @@ function PWAGate() {
 }
 
 function App() {
+  const subdomain = getSubdomain();
+  const subdomainRoute = subdomain ? SUBDOMAIN_ROUTES[subdomain] : null;
   useEffect(() => {
     // Disable right-click
     const handleContextMenu = (e) => e.preventDefault();
@@ -130,6 +133,16 @@ function App() {
         <AdminProvider>
           <PWAGate />
           <Routes>
+            {subdomainRoute && (
+              <Route 
+                path="/" 
+                element={
+                  <ProtectedRoute>
+                    <Navigate to={subdomainRoute} replace />
+                  </ProtectedRoute>
+                } 
+              />
+            )}
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/about" element={<AboutPage />} />
