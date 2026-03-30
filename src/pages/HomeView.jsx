@@ -659,36 +659,7 @@ export default function Home({
                 <ArrowRight size={13} color={Z.textMuted} />
               </div>
               <div className="zh-panel-body">
-                <div className="zh-actions-list">
-                  {[
-                    ...actions,
-                    {
-                      label: "Go to Dashboard",
-                      icon: LayoutDashboard,
-                      onClick: goToDashboard,
-                    },
-                  ].map(({ label, icon: Icon, onClick }, i) => {
-                    const pal = actionPalette[i % actionPalette.length];
-                    return (
-                      <button
-                        key={label}
-                        className="zh-action-btn"
-                        onClick={onClick}
-                      >
-                        <div className="zh-action-btn-left">
-                          <div
-                            className="zh-action-icon"
-                            style={{ background: pal.iconBg }}
-                          >
-                            <Icon size={13} color={pal.iconColor} />
-                          </div>
-                          <span className="zh-action-label">{label}</span>
-                        </div>
-                        <ArrowRight size={13} className="zh-action-arrow" />
-                      </button>
-                    );
-                  })}
-                </div>
+                
               </div>
             </div>
           </div>
