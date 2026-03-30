@@ -569,27 +569,6 @@ export const ClassicTemplate = (props) => (
       </div>
     </div>
 
-    {props.showStamp && (
-      <div className="text-center mb-4">
-        <SignatureStamp
-          text={props.stampText}
-          color={props.stampColor}
-          showDate={props.showStampDate}
-          rotation={-5}
-          size="medium"
-        />
-        <div
-          className="border-t-2 border-gray-800 pt-2 mt-2"
-          style={{ minWidth: "200px" }}
-        >
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">
-            {props.businessInfo.businessName}
-          </p>
-        </div>
-      </div>
-    )}
-
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {props.documentType === "quote"
         ? "This quote is valid for 30 days from the date above."
@@ -743,21 +722,6 @@ export const ModernTemplate = (props) => (
       </div>
     </div>
 
-    <div className="mt-8 flex justify-between items-center">
-      <div className="text-sm text-gray-500">
-        <p className="font-semibold">Terms:</p>
-        <p>Payment due within 30 days</p>
-      </div>
-      {props.showStamp && (
-        <SignatureStamp
-          text={props.stampText}
-          color={props.stampColor}
-          showDate={props.showStampDate}
-          rotation={-5}
-          size="medium"
-        />
-      )}
-    </div>
     <div className="text-center text-xs text-gray-500 italic border-t pt-3 mt-4">
       {props.documentType === "quote"
         ? "This quote is valid for 30 days from the date above."
@@ -888,15 +852,7 @@ export const ElegantTemplate = (props) => (
           <p className="font-semibold">Terms:</p>
           <p>Payment due within 30 days</p>
         </div>
-        {props.showStamp && (
-          <SignatureStamp
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        )}
+       
       </div>
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
         {props.documentType === "quote"
@@ -1033,15 +989,7 @@ export const SpeedTemplate = (props) => (
         <p className="font-semibold">Terms:</p>
         <p>Payment due within 30 days</p>
       </div>
-      {props.showStamp && (
-        <SignatureStamp
-          text={props.stampText}
-          color={props.stampColor}
-          showDate={props.showStampDate}
-          rotation={-5}
-          size="medium"
-        />
-      )}
+     
     </div>
     <div className="text-center text-xs text-gray-500 italic border-t border-gray-800 pt-3">
       {props.documentType === "quote"
@@ -1220,15 +1168,7 @@ export const DiagnosticTemplate = (props) => (
         <p className="font-semibold">Terms:</p>
         <p>Payment due within 30 days</p>
       </div>
-      {props.showStamp && (
-        <SignatureStamp
-          text={props.stampText}
-          color={props.stampColor}
-          showDate={props.showStampDate}
-          rotation={-5}
-          size="medium"
-        />
-      )}
+     
     </div>
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {props.documentType === "quote"
