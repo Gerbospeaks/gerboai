@@ -482,6 +482,7 @@ const MechanicsDashboard = () => {
   const loadJobCard = (jobCard) => {
     setJobCardId(jobCard.id);
     setJobCardNumber(jobCard.jobCardNumber || "");
+    setDocumentType(jobCard.documentType || "invoice");
     setCustomerName(jobCard.customer?.name || "");
     setCustomerEmail(jobCard.customer?.email || "");
     setCustomerPhone(jobCard.customer?.phone || "");

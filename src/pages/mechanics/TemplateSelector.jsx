@@ -419,23 +419,7 @@ export const DefaultTemplate = ({
       </div>
     </div>
 
-    <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
-      <div>
-        <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
-        <div className="border-b border-black h-8" />
-      </div>
-      {showStamp && (
-        <div className="flex justify-end">
-          <SignatureStamp
-            text={stampText}
-            color={stampColor}
-            showDate={showStampDate}
-            rotation={-5}
-            size="small"
-          />
-        </div>
-      )}
-    </div>
+   
 
     <div className="text-center text-xs text-red-600 italic">
       {documentType === "quote"

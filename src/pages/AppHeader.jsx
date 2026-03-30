@@ -57,7 +57,6 @@ const css = `
 
   .zah * { font-family: 'Lato', sans-serif; box-sizing: border-box; }
 
-  /* ── Header bar ── */
   .zah-bar {
     position: sticky; top: 0; z-index: 40;
     background: transparent;
@@ -69,7 +68,6 @@ const css = `
     min-width: 0;
   }
 
-  /* ── Left cluster ── */
   .zah-left {
     display: flex; align-items: center; gap: 6px;
     flex-shrink: 0; min-width: 0;
@@ -87,7 +85,6 @@ const css = `
   }
   .zah-hamburger:hover { background: rgba(255,255,255,.1); color: #fff; }
 
-  /* Logo icon — hidden on mobile, visible on sm+ */
   .zah-logo-icon {
     width: 28px; height: 28px; border-radius: 50%;
     background: ${Z.red};
@@ -114,7 +111,6 @@ const css = `
     .zah-page-title { max-width: 200px; }
   }
 
-  /* Plan badge — hide below 520px */
   .zah-plan {
     display: none;
     align-items: center;
@@ -129,7 +125,6 @@ const css = `
   .zah-plan-enterprise { background: rgb(46, 2, 116); color: #c4b5fd; }
   .zah-plan-free       { background: rgb(97, 4, 4); color: rgba(255,255,255,.5); }
 
-  /* Doc number chip — desktop only */
   .zah-docnum {
     font-size: 10px; font-family: 'Courier New', monospace;
     color: rgba(255,255,255,.35);
@@ -141,10 +136,8 @@ const css = `
     .zah-docnum { display: inline; }
   }
 
-  /* ── Spacer ── */
   .zah-spacer { flex: 1; min-width: 0; }
 
-  /* ── Right cluster ── */
   .zah-right {
     display: flex; align-items: center; gap: 2px;
     flex-shrink: 0;
@@ -153,7 +146,6 @@ const css = `
     .zah-right { gap: 4px; }
   }
 
-  /* Icon button */
   .zah-icon-btn {
     width: 32px; height: 32px; border-radius: 4px;
     background: rgb(3, 44, 77); border: none; cursor: pointer;
@@ -164,7 +156,6 @@ const css = `
   }
   .zah-icon-btn:hover { background: rgb(255, 255, 255); color: #212a42; }
 
-  /* Search pill — hidden on mobile, visible on sm+ */
   .zah-search-pill {
     display: none;
     align-items: center; justify-content: center;
@@ -193,7 +184,6 @@ const css = `
     color: rgb(255, 255, 255);
   }
 
-  /* Create button — icon-only on mobile, with text on sm+ */
   .zah-create-btn {
     height: 30px;
     padding: 0 10px;
@@ -212,7 +202,6 @@ const css = `
     .zah-create-btn { padding: 0 12px; }
   }
 
-  /* Notification dot */
   .zah-notif-dot {
     position: absolute; top: 4px; right: 4px;
     width: 14px; height: 14px; border-radius: 50%;
@@ -221,7 +210,6 @@ const css = `
     display: flex; align-items: center; justify-content: center;
   }
 
-  /* Bell icon — hidden on mobile, visible on sm+ */
   .zah-bell-btn {
     display: none !important;
   }
@@ -229,19 +217,16 @@ const css = `
     .zah-bell-btn { display: flex !important; }
   }
 
-  /* Help button — hidden on mobile */
   .zah-help-btn { display: none !important; }
   @media (min-width: 640px) {
     .zah-help-btn { display: flex !important; }
   }
 
-  /* Vertical divider */
   .zah-v-divider {
     width: 1px; height: 20px; background: rgb(3, 44, 77);
     margin: 0 2px; flex-shrink: 0;
   }
 
-  /* Avatar button */
   .zah-avatar-btn {
     display: flex; align-items: center; gap: 5px;
     height: 32px; padding: 0 4px;
@@ -270,7 +255,6 @@ const css = `
   .zah-chevron  { color: rgba(255,255,255,.4); transition: transform .2s; flex-shrink: 0; }
   .zah-chevron.open { transform: rotate(180deg); }
 
-  /* ── Dropdowns ── */
   .zah-dropdown {
     position: fixed; z-index: 9999;
     background: ${Z.white};
@@ -306,7 +290,6 @@ const css = `
   }
   .zah-drop-divider { height: 1px; background: ${Z.border}; margin: 2px 0; }
 
-  /* User card inside menu */
   .zah-user-card {
     padding: 12px 14px; background: ${Z.navy};
     border-bottom: 1px solid rgba(255,255,255,.08);
@@ -327,11 +310,9 @@ const css = `
     background: ${Z.red}; color: #fff;
   }
 
-  /* Signout */
   .zah-drop-item.danger { color: ${Z.red}; }
   .zah-drop-item.danger:hover { background: ${Z.redLight}; }
 
-  /* Notifications */
   .zah-notif-item {
     display: flex; align-items: flex-start; gap: 10px;
     padding: 10px 14px; transition: background .12s; cursor: default;
@@ -371,12 +352,10 @@ const css = `
   }
   .zah-mark-all:hover { color: ${Z.red}; }
 
-  /* Empty notifs */
   .zah-notif-empty { padding: 24px 14px; text-align: center; }
   .zah-notif-empty-icon { width: 40px; height: 40px; background: ${Z.navy}; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; }
   .zah-notif-empty-text { font-size: 12px; color: ${Z.textMuted}; }
 
-  /* ── Search overlay ── */
   .zah-search-overlay {
     position: fixed; inset: 0; z-index: 9999;
     background: rgba(20,26,48,.5); backdrop-filter: blur(4px);
@@ -432,6 +411,21 @@ const css = `
     padding: 1px 5px; background: ${Z.white}; border: 1px solid ${Z.border};
     border-radius: 3px; font-family: monospace; font-size: 10px; color: ${Z.textMid};
   }
+
+  /* ── Action buttons row (scrollable on mobile) ── */
+  .zah-actions-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    background: rgb(3, 26, 54);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex-shrink: 0;
+  }
+  .zah-actions-bar::-webkit-scrollbar { display: none; }
 `;
 
 const DASHBOARD_CONFIG = {
@@ -722,6 +716,7 @@ const AppHeader = ({
   setSidebarOpen = () => {},
   onQuickCreate = () => {},
   actions = [],
+  mobileActions = [],
   showActions = true,
   onSettingsOpen,
   notifications = [],
@@ -737,6 +732,7 @@ const AppHeader = ({
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [localNotifs, setLocalNotifs] = useState(notifications);
+  const [isMobile, setIsMobile] = useState(false);
 
   const searchRef = useRef(null);
   const notifRef = useRef(null);
@@ -749,6 +745,13 @@ const AppHeader = ({
   const getDropStyle = useDropStyle();
   const getNotifDropStyle = useDropStyle(300);
   const getUserMenuDropStyle = useDropStyle(240);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   useEffect(() => {
     setLocalNotifs(notifications);
@@ -821,11 +824,15 @@ const AppHeader = ({
     onQuickCreate({ view: item.view, action: item.action, label: item.label });
   };
 
+  // Decide which action list to render
+  const visibleActions =
+    isMobile && mobileActions.length > 0 ? mobileActions : actions;
+
   return (
     <div className="zah">
       <style>{css}</style>
 
-      {/* ── Search overlay (only opened via ⌘K on desktop) ── */}
+      {/* ── Search overlay ── */}
       {showSearch && (
         <div
           className="zah-search-overlay"
@@ -893,7 +900,6 @@ const AppHeader = ({
             {sidebarOpen ? <X size={16} /> : <Menu size={16} />}
           </button>
 
-          {/* Logo icon hidden on mobile to avoid clutter next to hamburger */}
           <div className="zah-logo-icon">
             <LayoutDashboard size={14} color="#fff" />
           </div>
@@ -964,14 +970,40 @@ const AppHeader = ({
             )}
           </div>
 
-          {/* Page-level action buttons */}
+          {/* ── Page-level action buttons ── */}
           {showActions &&
-            actions.length > 0 &&
-            actions.map(
-              ({ label, icon: Icon, onClick, variant = "secondary" }, i) => (
+            visibleActions.length > 0 &&
+            visibleActions.map((action, i) => {
+              const {
+                label,
+                icon: Icon,
+                onClick,
+                variant = "secondary",
+                className,
+              } = action;
+
+              // If a className was passed (Tailwind), use it directly
+              if (className) {
+                return (
+                  <button
+                    key={i}
+                    onClick={onClick}
+                    title={label}
+                    aria-label={label}
+                    className={className}
+                  >
+                    {Icon && <Icon size={13} />}
+                    <span>{label}</span>
+                  </button>
+                );
+              }
+
+              // Fallback: render with inline styles (variant-based)
+              return (
                 <button
                   key={i}
                   onClick={onClick}
+                  title={label}
                   aria-label={label}
                   style={
                     variant === "primary"
@@ -989,6 +1021,8 @@ const AppHeader = ({
                           alignItems: "center",
                           gap: 5,
                           fontFamily: "'Lato',sans-serif",
+                          whiteSpace: "nowrap",
+                          flexShrink: 0,
                         }
                       : {
                           height: 30,
@@ -1004,17 +1038,16 @@ const AppHeader = ({
                           alignItems: "center",
                           gap: 5,
                           fontFamily: "'Lato',sans-serif",
+                          whiteSpace: "nowrap",
+                          flexShrink: 0,
                         }
                   }
                 >
                   {Icon && <Icon size={13} />}
-                  <span style={{ display: "none" }} id={`zah-action-${i}`}>
-                    {label}
-                  </span>
-                  <style>{`@media (min-width:640px){ #zah-action-${i} { display:inline; } }`}</style>
+                  <span>{label}</span>
                 </button>
-              ),
-            )}
+              );
+            })}
 
           {/* Help — desktop only */}
           <button
