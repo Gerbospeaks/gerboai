@@ -19,6 +19,7 @@ import DocumentsVault from "./DocumentsVault";
 import { MedicalAlert } from "./StudentMedicalSection";
 import Assessment from "./Assessment";
 import Curriculum from "./Curriculum";
+import LibraryView from "./LibraryView";
 import {
   BehaviourLogView,
   MarkBookView,
@@ -85,6 +86,7 @@ import {
   Send,
   Save,
   X,
+  Library,
   Edit,
   Sparkles,
   LogOut,
@@ -861,6 +863,7 @@ const EducationDashboard = () => {
     { id: "reports", label: "Report Cards", icon: ClipboardList },
     { id: "behaviour", label: "Behaviour Log", icon: ShieldAlert },
     { id: "markbook", label: "Mark Book", icon: BarChart2 },
+    { id: "library", label: "Library", icon: Library },
     { id: "slips", label: "Permission Slips", icon: ClipboardList },
     { id: "welfare", label: "Welfare Flags", icon: Heart },
     { id: "resources", label: "Resource Requests", icon: Package },
@@ -1171,7 +1174,7 @@ const EducationDashboard = () => {
           {activeView === "trends" && (
             <AttendanceTrends userId={user?.uid} students={students} />
           )}
-
+          {activeView === "library" && <LibraryView userId={user?.uid} />}
           {/* TEMPLATES */}
           {activeView === "templates" && (
             <div className="h-full overflow-y-auto p-6">

@@ -142,6 +142,12 @@ export default function EducationSidebar({
       action: () => goTo("curriculum"),
       color: "from-teal-600 to-teal-700",
     },
+     {
+      icon: BookOpen,
+      title: "Library",
+      action: () => goTo("library"),
+      color: "from-teal-600 to-teal-700",
+    },
     {
       icon: Award,
       title: "Assessment",
@@ -415,6 +421,12 @@ export default function EducationSidebar({
                 icon={Clock}
                 label="Timetable"
                 onClick={() => openModal(onOpenTimetableModal)}
+                color="teal"
+              />
+               <NavItem
+                icon={BookOpen}
+                label="Library"
+                onClick={() => goTo("library")}
                 color="teal"
               />
               <NavItem

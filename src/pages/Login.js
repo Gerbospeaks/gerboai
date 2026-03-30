@@ -55,7 +55,7 @@ export default function Login() {
     const result = await login(email, password);
     setIsSubmitting(false);
     if (result.success) {
-      navigate(result.isAdmin ? "/admin" : "/home");
+      navigate(result.isAdmin ? "/admin" : "/dashboard");
     } else {
       setError(result.message);
     }

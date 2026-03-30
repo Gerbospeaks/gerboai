@@ -64,22 +64,19 @@ const PUBLIC_ROUTES = new Set([
   "/privacy", "/terms", "/login", "/register", "/auth-action"
 ]);
 
-// ─── NEW: Redirect authenticated users away from login/register ───────────────
-// While auth is still loading we render nothing to avoid a flash of the login
-// page before the redirect fires.
 function PublicOnlyRoute({ children }) {
   const { currentUser, loading } = useAuth();
 
-  if (loading) return null; // wait for Firebase / auth to resolve
+  if (loading) return null; 
 
   if (currentUser) {
-    // Already logged in → send straight to their dashboard
+    
     return <Navigate to="/dashboard" replace />;
   }
 
   return children;
 }
-// ─────────────────────────────────────────────────────────────────────────────
+
 
 function PWAGate() {
   const { loading } = useAuth();
@@ -170,15 +167,7 @@ function App() {
               } 
             />
 
-            {/* Protected Home Page */}
-            <Route 
-              path="/home" 
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              } 
-            />
+          <Route path="/home" element={<Navigate to="/dashboard" replace />} />
 
             {/* Dashboard Router - redirects to user's assigned dashboard */}
             <Route 
