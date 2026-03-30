@@ -1,12 +1,45 @@
 import { getAuth, signOut } from "firebase/auth";
 import {
-  addDoc, collection, doc,
-  getDoc, getDocs, getFirestore, limit, orderBy, query, serverTimestamp, setDoc, updateDoc
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  limit,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 import {
-  ArrowRight, Building2, Car, CheckSquare, ChevronLeft,
-  ChevronRight, CreditCard, Download, Eye, FileText, MapPin, Package, Plus, Printer, Receipt, Save, Send, Sparkles, TrendingDown, TrendingUp, Truck, Users, Wallet, Wrench, X
+  ArrowRight,
+  Building2,
+  Car,
+  CheckSquare,
+  ChevronLeft,
+  ChevronRight,
+  CreditCard,
+  Download,
+  Eye,
+  FileText,
+  MapPin,
+  Package,
+  Plus,
+  Printer,
+  Receipt,
+  Save,
+  Send,
+  Sparkles,
+  TrendingDown,
+  TrendingUp,
+  Truck,
+  Users,
+  Wallet,
+  Wrench,
+  X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -16,16 +49,14 @@ import { useAuth } from "../../contexts/AuthContext";
 import { db } from "../../firebase";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import HomeView from "../HomeView";
-import AIInvoiceWindow from '../AIInvoiceWindow';
+import AIInvoiceWindow from "../AIInvoiceWindow";
 import AppHeader from "../AppHeader";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import FinancialOverview from "../FinancialOverview";
 import ReportsView from "./ReportsView";
-import {
-  POTemplateRenderer
-} from "../Purchaseordertemplates";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import HistoryView from "./HistoryView";
 import MechanicsSidebar from "./MechanicsSidebar";
 import NotesView from "./NotesView";
@@ -57,15 +88,15 @@ const functions = getFunctions();
 
 const MechanicsDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeView, setActiveView]   = useState("home");
+  const [activeView, setActiveView] = useState("home");
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const handleQuickCreate = ({ view, action }) => {
-  if (action === "newInvoice")  handleNewInvoice();
-  if (action === "newQuote")    handleNewQuote();
-  if (action === "newCustomer") handleAddNewCustomer();
-  if (view) setActiveView(view);
-};
+    if (action === "newInvoice") handleNewInvoice();
+    if (action === "newQuote") handleNewQuote();
+    if (action === "newCustomer") handleAddNewCustomer();
+    if (view) setActiveView(view);
+  };
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState("JobCard");
   const [showJobCard, setShowJobCard] = useState(false);
@@ -93,6 +124,7 @@ const MechanicsDashboard = () => {
     useState(null);
   const [useAI, setUseAI] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [vatRate, setVatRate] = useState(0);
   const [isTablet, setIsTablet] = useState(false);
   const [invoices, setInvoices] = useState([]);
   const [stats, setStats] = useState({
@@ -104,7 +136,7 @@ const MechanicsDashboard = () => {
     loading: true,
   });
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
-  const [aiDocType, setAiDocType] = useState('invoice');
+  const [aiDocType, setAiDocType] = useState("invoice");
   const [showAIWindow, setShowAIWindow] = useState(false);
   const [poNumber, setPoNumber] = useState("");
   const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
@@ -146,7 +178,7 @@ const MechanicsDashboard = () => {
     const unitPrice = Number(newPoItem.unitPrice) || 0;
     const qty = Number(newPoItem.qty);
     setPoItems((prev) => [
-      ...prev.filter((i) => i.description), 
+      ...prev.filter((i) => i.description),
       {
         description: newPoItem.description,
         qty,
@@ -684,7 +716,7 @@ const MechanicsDashboard = () => {
   });
 
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-  const vat = subtotal * 0.0;
+  const vat = subtotal * (vatRate / 100);
   const total = subtotal + vat;
 
   useEffect(() => {
@@ -720,6 +752,7 @@ const MechanicsDashboard = () => {
       mileage: vehicleMileage,
     },
     items,
+    vatRate,
     totals: { subtotal, vat, total, paid: 0, due: total },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -1332,19 +1365,19 @@ const MechanicsDashboard = () => {
         )}
       </div>
       {showAIWindow && (
-              <AIInvoiceWindow
-    user={user}
-    businessInfo={businessInfo}
-    documentType={documentType}
-    onExit={() => setShowAIWindow(false)}
-    onNavigateTo={(view) => {
-    setAiWindowOpen(false);
-    setActiveView(view); 
-  }}
-  industry="mechanics"
-    TemplateRenderer={TemplateRenderer}   
-  />
-            )}
+        <AIInvoiceWindow
+          user={user}
+          businessInfo={businessInfo}
+          documentType={documentType}
+          onExit={() => setShowAIWindow(false)}
+          onNavigateTo={(view) => {
+            setAiWindowOpen(false);
+            setActiveView(view);
+          }}
+          industry="mechanics"
+          TemplateRenderer={TemplateRenderer}
+        />
+      )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar */}
         <MechanicsSidebar
@@ -1388,11 +1421,11 @@ const MechanicsDashboard = () => {
             actions={headerActions}
             mobileActions={mobileDashboardActions}
             onSettingsOpen={() => setShowSettings(true)}
-            dashboardType="mechanics"        // adapts Quick Create menu + accent colour
+            dashboardType="mechanics" // adapts Quick Create menu + accent colour
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
             onQuickCreate={handleQuickCreate}
-            pageTitle="Job Cards"            // optional breadcrumb
+            pageTitle="Job Cards" // optional breadcrumb
             plan="pro"
             notifications={notifications}
           />
@@ -1579,19 +1612,19 @@ const MechanicsDashboard = () => {
 
           {/* ── Views ──────────────────────────────────────────────────────── */}
           {activeView === "home" && (
-                      <div className="flex-1 overflow-y-auto p-4">
-                        <HomeView
-                          user={user}
-                          onNavigate={(view, docType) => {
-                            if (docType) setDocumentType(docType);
-                            setActiveView(view);
-                          }}
-                          onGoToDashboard={() => setActiveView("quote")}
-                          onSidebarToggle={() => setSidebarOpen((p) => !p)}
-                          sidebarOpen={sidebarOpen}
-                        />
-                      </div>
-                    )}
+            <div className="flex-1 overflow-y-auto p-4">
+              <HomeView
+                user={user}
+                onNavigate={(view, docType) => {
+                  if (docType) setDocumentType(docType);
+                  setActiveView(view);
+                }}
+                onGoToDashboard={() => setActiveView("quote")}
+                onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                sidebarOpen={sidebarOpen}
+              />
+            </div>
+          )}
           {activeView === "financial-overview" && (
             <div className="flex-1 overflow-y-auto p-4">
               <FinancialOverview user={user} />
@@ -1622,11 +1655,11 @@ const MechanicsDashboard = () => {
               <Templates user={user} />
             </div>
           )}
-{activeView === "reports" && (
-  <div className="flex-1 overflow-y-auto p-4">
-    <ReportsView user={user} />
-  </div>
-)}
+          {activeView === "reports" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <ReportsView user={user} />
+            </div>
+          )}
           {/* ── Invoice / Job Card Builder — split layout ──────────────────── */}
           {(activeView === "invoice" || activeView === "purchase-orders") && (
             <div className="flex-1 overflow-hidden flex min-h-0">
@@ -1748,7 +1781,6 @@ const MechanicsDashboard = () => {
                   <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
                     {/* Input mode tabs */}
                     <div className="flex border-b border-[#e2e8f0] bg-[#f8fafc]">
-                      
                       <button
                         onClick={() => setShowAIWindow(true)}
                         className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto
@@ -1761,8 +1793,6 @@ const MechanicsDashboard = () => {
                         AI Mode
                       </button>
                     </div>
-
-                    
 
                     {inputMode === "manual" && (
                       <>
@@ -2790,21 +2820,42 @@ const MechanicsDashboard = () => {
                                         </table>
                                       </div>
                                       {/* Totals footer */}
+                                      {/* Totals footer */}
                                       <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
                                         <div className="flex flex-col items-end gap-1 text-sm">
-                                          <div className="flex justify-between w-44 text-[#64748b]">
+                                          <div className="flex justify-between w-52 text-[#64748b]">
                                             <span>Subtotal</span>
                                             <span className="font-medium text-[#374151]">
                                               R{subtotal.toFixed(2)}
                                             </span>
                                           </div>
-                                          <div className="flex justify-between w-44 text-[#64748b]">
-                                            <span>VAT (0%)</span>
+                                          <div className="flex items-center justify-between w-52 text-[#64748b]">
+                                            <label className="flex items-center gap-1.5">
+                                              <span>VAT</span>
+                                              <div className="flex items-center border border-[#d1d5db] rounded-md overflow-hidden bg-white">
+                                                <input
+                                                  type="number"
+                                                  min="0"
+                                                  max="100"
+                                                  step="0.5"
+                                                  value={vatRate}
+                                                  onChange={(e) =>
+                                                    setVatRate(
+                                                      Number(e.target.value),
+                                                    )
+                                                  }
+                                                  className="w-12 px-1.5 py-0.5 text-xs text-center text-[#1e293b] focus:outline-none focus:ring-1 focus:ring-[#2563eb]"
+                                                />
+                                                <span className="px-1.5 text-xs text-[#64748b] bg-[#f1f5f9] border-l border-[#d1d5db]">
+                                                  %
+                                                </span>
+                                              </div>
+                                            </label>
                                             <span className="font-medium text-[#374151]">
                                               R{vat.toFixed(2)}
                                             </span>
                                           </div>
-                                          <div className="flex justify-between w-44 pt-2 border-t border-[#e2e8f0] font-semibold text-[#1e293b]">
+                                          <div className="flex justify-between w-52 pt-2 border-t border-[#e2e8f0] font-semibold text-[#1e293b]">
                                             <span>Total</span>
                                             <span className="text-[#2563eb]">
                                               R{total.toFixed(2)}
