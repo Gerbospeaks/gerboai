@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "short_name": "Solidflo",
   "name": "SolidFlo Saas",
   "description": "Professional accounting, invoicing and payroll for your clients",
@@ -11,37 +12,53 @@
   "lang": "en-ZA",
   "categories": ["finance", "business", "productivity"],
   "prefer_related_applications": false,
- "icons": [
-  {
-    "src": "favicon.png",
-    "sizes": "64x64 32x32 24x24 16x16",
-    "type": "image/x-icon"
-  },
-  {
-    "src": "logo192.png",
-    "type": "image/png",
-    "sizes": "192x192",
-    "purpose": "any"
-  },
-  {
-    "src": "logo192.png",
-    "type": "image/png",
-    "sizes": "192x192",
-    "purpose": "maskable"
-  },
-  {
-    "src": "logo512.png",
-    "type": "image/png",
-    "sizes": "512x512",
-    "purpose": "any"
-  },
-  {
-    "src": "logo512.png",
-    "type": "image/png",
-    "sizes": "512x512",
-    "purpose": "maskable"
-  }
-],
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "SolidFlo Dashboard"
+    },
+    {
+      "src": "screenshot2.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "SolidFlo on mobile"
+    }
+  ],
   "shortcuts": [
     {
       "name": "New Invoice",

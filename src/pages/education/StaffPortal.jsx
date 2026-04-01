@@ -324,7 +324,30 @@ const [hwError, setHwError] = useState("");
     };
     load();
   }, [portalSlug]);
+  useEffect(() => {
+  if (!schoolName || schoolName === "School") return;
 
+  const manifestData = {
+    short_name: schoolName,
+    name: `${schoolName} | Solidflo`,
+    start_url: window.location.href,
+    scope: window.location.pathname,
+    display: "standalone",
+    orientation: "portrait-primary",
+    theme_color: "#0f1923",
+    background_color: "#f1f5f9",
+    icons: [
+      { src: "/logo192.png", type: "image/png", sizes: "192x192", purpose: "any maskable" },
+      { src: "/logo512.png", type: "image/png", sizes: "512x512", purpose: "any maskable" }
+    ]
+  };
+
+  const blob = new Blob([JSON.stringify(manifestData)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  document.getElementById("manifest-link").setAttribute("href", url);
+
+  return () => URL.revokeObjectURL(url);
+}, [schoolName]);
   // ── PIN ────────────────────────────────────────────────────────────────────
   const handlePadPress = (val) => {
     if (val === "⌫") {

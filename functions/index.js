@@ -1,7 +1,7 @@
+/* eslint-disable require-jsdoc */
 /* eslint-disable max-len */
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const nodemailer = require("nodemailer");
 const {GoogleGenerativeAI} = require("@google/generative-ai");
 
 // Initialize Firebase Admin
@@ -10,44 +10,309 @@ admin.initializeApp();
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(functions.config().google.gemini_key);
 
-// Configure email transporter for Zoho
-const transporter = nodemailer.createTransport({
-  host: "smtp.zoho.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: functions.config().zoho.email,
-    pass: functions.config().zoho.password,
-  },
+const {SendMailClient} = require("zeptomail");
+const zeptoClient = new SendMailClient({
+  url: "api.zeptomail.com/",
+  token: functions.config().zepto.token, 
 });
 
-// Gemini-based extraction function
-exports.extractInvoiceDataGemini = functions.https.onCall(async (data, context) => {
+const APP_NAME = "SolidFlo";
+const APP_EMAIL = functions.config().zoho.email;
+const APP_ADDRESS = "58 Minuet Crescent, Olivienhoutbosch, South Africa";
+
+// Maps industry + documentType → Firestore collection name
+const INDUSTRY_COLLECTIONS = {
+  "accounting": {invoice: "invoices", estimate: "estimates"},
+  "mechanics": {
+    invoice: "invoices",
+    estimate: "estimates",
+    jobcard: "jobcards",
+  },
+  "healthcare": {invoice: "invoices", estimate: "quotes"},
+  "electrical": {invoice: "invoices", estimate: "estimates"},
+  "plumbing": {invoice: "invoices", estimate: "estimates"},
+  "construction": {invoice: "invoices", estimate: "estimates"},
+  "cleaning": {invoice: "invoices", estimate: "quotes"},
+  "security": {invoice: "invoices", estimate: "estimates"},
+  "restaurant": {invoice: "invoices", estimate: "estimates"},
+  "legal": {invoice: "invoices", estimate: "quotes"},
+  "landscaping": {invoice: "invoices", estimate: "estimates"},
+  "logistics": {invoice: "invoices", estimate: "quotes"},
+  "photography": {invoice: "invoices", estimate: "quotes"},
+  "realestate": {invoice: "invoices", estimate: "quotes"},
+  "flooring": {invoice: "invoices", estimate: "estimates"},
+  "hvac": {invoice: "invoices", estimate: "estimates"},
+  "painting": {invoice: "invoices", estimate: "estimates"},
+  "retail": {invoice: "invoices", estimate: "quotes"},
+  "hotel": {invoice: "invoices", estimate: "quotes"},
+  "education": {invoice: "invoices", estimate: "quotes"},
+  "carpentry": {invoice: "invoices", estimate: "estimates"},
+  "solar": {invoice: "invoices", estimate: "estimates"},
+  "towing": {invoice: "invoices", estimate: "estimates"},
+  "welding": {invoice: "invoices", estimate: "estimates"},
+  "pest-control": {invoice: "invoices", estimate: "estimates"},
+  "pool-services": {invoice: "invoices", estimate: "estimates"},
+  "window-repair": {invoice: "invoices", estimate: "estimates"},
+  "general": {invoice: "invoices", estimate: "estimates"},
+};
+
+// Friendly document label per industry
+const DOC_LABELS = {
+  "mechanics": {
+    invoice: "Job Card / Invoice",
+    estimate: "Quote",
+    jobcard: "Job Card",
+  },
+  "healthcare": {invoice: "Tax Invoice", estimate: "Quote"},
+  "legal": {invoice: "Fee Note", estimate: "Proposal"},
+  "realestate": {invoice: "Invoice", estimate: "Proposal"},
+  "default": {invoice: "Invoice", estimate: "Estimate"},
+};
+
+function resolveCollection(industry, documentType, override) {
+  if (override) return override;
+  const map = INDUSTRY_COLLECTIONS[industry] || INDUSTRY_COLLECTIONS.general;
+  return map[documentType] || "invoices";
+}
+
+function resolveDocLabel(industry, documentType) {
+  const map = DOC_LABELS[industry] || DOC_LABELS.default;
+  return (
+    map[documentType] || (documentType === "estimate" ? "Estimate" : "Invoice")
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// NEW: Universal callable — used by ALL industry dashboards
+// ─────────────────────────────────────────────────────────────────
+exports.sendInvoiceEmail = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError(
         "unauthenticated",
-        "User must be authenticated to use AI extraction",
+        "Must be signed in",
     );
   }
 
-  const {input, businessInfo, documentType} = data;
+  const uid = context.auth.uid;
+  const {
+    invoiceId,
+    documentType = "invoice",
+    recipientEmail,
+    recipientName,
+    invoiceNumber,
+    total,
+    industry = "general",
+    collectionName,
+    pdfBase64,
+  } = data;
 
-  if (!input || !input.trim()) {
+  if (!recipientEmail || !invoiceNumber) {
     throw new functions.https.HttpsError(
         "invalid-argument",
-        "Input text is required",
+        "Missing required fields",
     );
   }
 
-  try {
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-      },
-    });
+  // Load this user's email config + business info from Firestore
+  const [configSnap, bizSnap] = await Promise.all([
+    admin.firestore().doc(`users/${uid}/settings/emailConfig`).get(),
+    admin.firestore().doc(`users/${uid}/settings/businessInfo`).get(),
+  ]);
 
-    const prompt = `Extract invoice data from this description and return ONLY valid JSON:
+  const emailConfig = configSnap.exists ? configSnap.data() : {};
+  const businessInfo = bizSnap.exists ? bizSnap.data() : {};
+
+  const fromName =
+    emailConfig.fromName || businessInfo.businessName || APP_NAME;
+  const replyTo = emailConfig.replyTo || businessInfo.email || APP_EMAIL;
+  const signature = emailConfig.signature || `Kind regards,\n${fromName}`;
+  const sendCopy = emailConfig.sendCopyToSelf ?? true;
+
+  // Banking details — from their businessInfo if set, else blank
+  const bankName = businessInfo.bankName || "";
+  const accountName = businessInfo.accountName || fromName;
+  const accountNo = businessInfo.accountNo || "";
+  const branchCode = businessInfo.branchCode || "";
+
+  const docLabel = resolveDocLabel(industry, documentType);
+  const subject = `${docLabel} ${invoiceNumber} from ${fromName}`;
+
+  const signatureHtml = signature
+      .split("\n")
+      .map((l) => `<span>${l}</span>`)
+      .join("<br/>");
+
+  const bankingSection = bankName
+    ? `
+    <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:20px;margin:20px 0;border-radius:4px;">
+      <h3 style="margin-top:0;color:#78350f;">Banking Details for Payment</h3>
+      <table style="width:100%;border-collapse:collapse;margin-top:12px;">
+        <tr>
+          <td style="padding:6px 0;color:#92400e;font-weight:600;width:140px;">Bank Name:</td>
+          <td style="padding:6px 0;color:#1f2937;">${bankName}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#92400e;font-weight:600;">Account Name:</td>
+          <td style="padding:6px 0;color:#1f2937;">${accountName}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#92400e;font-weight:600;">Account Number:</td>
+          <td style="padding:6px 0;color:#1f2937;">${accountNo}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#92400e;font-weight:600;">Branch Code:</td>
+          <td style="padding:6px 0;color:#1f2937;">${branchCode}</td>
+        </tr>
+      </table>
+      <p style="margin:15px 0 0;font-style:italic;color:#92400e;">
+        <strong>Reference:</strong> Please use <strong>${invoiceNumber}</strong> as your payment reference.
+      </p>
+    </div>
+  `
+    : "";
+
+  const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 700px; margin: 0 auto; background: #f3f4f6; }
+        .container { background: white; margin: 20px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { background: #1a2332; color: white; padding: 32px 28px; display: flex; justify-content: space-between; align-items: center; }
+        .content { padding: 28px; }
+        .detail-box { background: #f9fafb; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+        .detail-row:last-child { border-bottom: none; }
+        .footer { padding: 20px 28px; text-align: center; background: #f9fafb; color: #6b7280; font-size: 13px; border-top: 1px solid #e5e7eb; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <span style="font-size:20px;font-weight:700;">${fromName}</span>
+          <span style="font-size:12px;color:#94a3b8;">via ${APP_NAME}</span>
+        </div>
+        <div class="content">
+          <p>Dear <strong>${recipientName || "Client"}</strong>,</p>
+          <p>Please find your <strong>${docLabel}</strong> <strong>${invoiceNumber}</strong> ${pdfBase64 ? "attached." : "below."}</p>
+
+          <div class="detail-box">
+            <div class="detail-row">
+              <span style="color:#6b7280;font-weight:600;">Document</span>
+              <span style="font-weight:700;">${invoiceNumber}</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:#6b7280;font-weight:600;">Amount Due</span>
+              <span style="font-weight:700;color:#2563eb;font-size:18px;">R${Number(total || 0).toFixed(2)}</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:#6b7280;font-weight:600;">Payment Terms</span>
+              <span style="font-weight:700;">Net 30 Days</span>
+            </div>
+          </div>
+
+          ${bankingSection}
+
+          <p style="margin-top:24px;">Please reply to this email if you have any questions.</p>
+          <p style="line-height:1.8;">${signatureHtml}</p>
+        </div>
+        <div class="footer">
+          <p style="margin:4px 0;">Sent via ${APP_NAME} &bull; ${APP_ADDRESS}</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"${fromName}" <${APP_EMAIL}>`,
+    replyTo: replyTo,
+    to: recipientEmail,
+    subject,
+    html: emailHtml,
+    attachments: pdfBase64
+      ? [
+        {
+          filename: `${invoiceNumber}.pdf`,
+          content: pdfBase64,
+          encoding: "base64",
+        },
+      ]
+      : [],
+  };
+
+  await zeptoClient.sendMail({
+    from: {address: APP_EMAIL, name: fromName},
+    to: [{email_address: {address: recipientEmail, name: recipientName || ""}}],
+    reply_to: [{address: replyTo, name: fromName}],
+    subject: subject,
+    htmlbody: emailHtml,
+    attachments: pdfBase64 ? [{
+      name: `${invoiceNumber}.pdf`,
+      content: pdfBase64,
+      mime_type: "application/pdf",
+    }] : [],
+  });
+
+  // Optional self-copy to the accountant/user
+  if (sendCopy && replyTo && replyTo !== APP_EMAIL) {
+    await zeptoClient.sendMail({
+      from: {address: APP_EMAIL, name: fromName},
+      to: [{email_address: {address: replyTo, name: fromName}}],
+      reply_to: [{address: replyTo, name: fromName}],
+      subject: `[Copy] ${subject}`,
+      htmlbody: emailHtml,
+      attachments: pdfBase64 ? [{
+        name: `${invoiceNumber}.pdf`,
+        content: pdfBase64,
+        mime_type: "application/pdf",
+      }] : [],
+    });
+  }
+
+  // Mark document as sent in the correct Firestore collection
+  const col = resolveCollection(industry, documentType, collectionName);
+  try {
+    await admin.firestore().doc(`users/${uid}/${col}/${invoiceId}`).update({
+      status: "sent",
+      sentAt: admin.firestore.FieldValue.serverTimestamp(),
+      sentTo: recipientEmail,
+    });
+  } catch (e) {
+    // Don't fail the whole function if the status update fails
+    console.warn("Could not update document status:", e.message);
+  }
+
+  return {success: true};
+});
+// Gemini-based extraction function
+exports.extractInvoiceDataGemini = functions.https.onCall(
+    async (data, context) => {
+      if (!context.auth) {
+        throw new functions.https.HttpsError(
+            "unauthenticated",
+            "User must be authenticated to use AI extraction",
+        );
+      }
+
+      const {input, businessInfo, documentType} = data;
+
+      if (!input || !input.trim()) {
+        throw new functions.https.HttpsError(
+            "invalid-argument",
+            "Input text is required",
+        );
+      }
+
+      try {
+        const model = genAI.getGenerativeModel({
+          model: "gemini-1.5-flash",
+          generationConfig: {
+            responseMimeType: "application/json",
+          },
+        });
+
+        const prompt = `Extract invoice data from this description and return ONLY valid JSON:
 
 "${input}"
 
@@ -62,22 +327,23 @@ JSON structure:
   "items": [{"description": "", "type": "Labor or Parts", "rate": 0, "qty": 0, "amount": 0}]
 }`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const jsonData = JSON.parse(response.text());
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const jsonData = JSON.parse(response.text());
 
-    return jsonData;
-  } catch (error) {
-    console.error("Error in extractInvoiceDataGemini:", error);
-    throw new functions.https.HttpsError(
-        "internal",
-        error.message || "An error occurred during extraction",
-    );
-  }
-});
+        return jsonData;
+      } catch (error) {
+        console.error("Error in extractInvoiceDataGemini:", error);
+        throw new functions.https.HttpsError(
+            "internal",
+            error.message || "An error occurred during extraction",
+        );
+      }
+    },
+);
 
 // Send Invoice Email
-exports.sendInvoiceEmail = functions.firestore
+exports.sendInvoiceEmail_firestore = functions.firestore
     .document("users/{userId}/adminInvoices/{invoiceId}")
     .onUpdate(async (change, context) => {
       const newData = change.after.data();
@@ -100,7 +366,9 @@ exports.sendInvoiceEmail = functions.firestore
             day: "numeric",
           });
 
-          const itemsHtml = newData.items.map((item, index) => `
+          const itemsHtml = newData.items
+              .map(
+                  (item, index) => `
             <tr style="border-bottom: 1px solid #e5e7eb;">
               <td style="padding: 12px; text-align: center; color: #6b7280;">${index + 1}</td>
               <td style="padding: 12px;">
@@ -111,7 +379,9 @@ exports.sendInvoiceEmail = functions.firestore
               <td style="padding: 12px; text-align: right;">R${item.unitPrice.toFixed(2)}</td>
               <td style="padding: 12px; text-align: right;"><strong>R${item.amount.toFixed(2)}</strong></td>
             </tr>
-          `).join("");
+          `,
+              )
+              .join("");
 
           const emailHtml = `
             <!DOCTYPE html>
@@ -327,12 +597,16 @@ exports.sendInvoiceEmail = functions.firestore
                     </p>
                   </div>
 
-                  ${newData.notes ? `
+                  ${
+                    newData.notes
+                      ? `
                     <div style="background: #eff6ff; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0; border-radius: 4px;">
                       <strong style="color: #1e40af;">Additional Notes:</strong><br>
                       ${newData.notes}
                     </div>
-                  ` : ""}
+                  `
+                      : ""
+}
 
                   <p style="margin-top: 30px;">If you have any questions about this invoice, please don't hesitate to contact us.</p>
                   
@@ -396,7 +670,9 @@ exports.sendQuoteEmail = functions.firestore
             day: "numeric",
           });
 
-          const itemsHtml = newData.items.map((item, index) => `
+          const itemsHtml = newData.items
+              .map(
+                  (item, index) => `
             <tr style="border-bottom: 1px solid #e5e7eb;">
               <td style="padding: 12px; text-align: center; color: #6b7280;">${index + 1}</td>
               <td style="padding: 12px;">
@@ -407,7 +683,9 @@ exports.sendQuoteEmail = functions.firestore
               <td style="padding: 12px; text-align: right;">R${item.unitPrice.toFixed(2)}</td>
               <td style="padding: 12px; text-align: right;"><strong>R${item.amount.toFixed(2)}</strong></td>
             </tr>
-          `).join("");
+          `,
+              )
+              .join("");
 
           const emailHtml = `
             <!DOCTYPE html>
@@ -590,12 +868,16 @@ exports.sendQuoteEmail = functions.firestore
                     </p>
                   </div>
 
-                  ${newData.notes ? `
+                  ${
+                    newData.notes
+                      ? `
                     <div style="background: #eff6ff; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0; border-radius: 4px;">
                       <strong style="color: #1e40af;">Additional Notes:</strong><br>
                       ${newData.notes}
                     </div>
-                  ` : ""}
+                  `
+                      : ""
+}
 
                   <p style="margin-top: 30px;">If you would like to proceed with this quote or have any questions, please don't hesitate to contact us.</p>
                   

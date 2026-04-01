@@ -535,6 +535,30 @@ export default function ParentPortal() {
       : homework.filter((h) => h.grade === gradeFilter);
   const schoolName =
     businessInfo?.name || businessInfo?.businessName || "School Portal";
+    useEffect(() => {
+  if (!schoolName || schoolName === "School Portal") return;
+
+  const manifestData = {
+    short_name: schoolName,
+    name: `${schoolName} | Solidflo`,
+    start_url: window.location.href,
+    scope: window.location.pathname,
+    display: "standalone",
+    orientation: "portrait-primary",
+    theme_color: "#1a6b4a",
+    background_color: "#f8f7f4",
+    icons: [
+      { src: "/logo192.png", type: "image/png", sizes: "192x192", purpose: "any maskable" },
+      { src: "/logo512.png", type: "image/png", sizes: "512x512", purpose: "any maskable" }
+    ]
+  };
+
+  const blob = new Blob([JSON.stringify(manifestData)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  document.getElementById("manifest-link").setAttribute("href", url);
+
+  return () => URL.revokeObjectURL(url);
+}, [schoolName]);
   const noticeBadge =
     allNotices.filter((n) => !n.read).length || allNotices.length;
 

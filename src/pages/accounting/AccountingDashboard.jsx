@@ -583,13 +583,11 @@ const AccountingDashboard = () => {
   };
 
   const handleNewEstimate = () => {
-    setDocumentType("estimate");
-    handleNewInvoice();
-  };
-  const handleNewInvoiceDoc = () => {
-    setDocumentType("invoice");
-    handleNewInvoice();
-  };
+  handleNewInvoice("estimate");
+};
+const handleNewInvoiceDoc = () => {
+  handleNewInvoice("invoice");
+};
   const handleNewInvoice = (type = documentType) => {
     setDocumentType(type); // update state for UI
     setInvoiceId(null);
