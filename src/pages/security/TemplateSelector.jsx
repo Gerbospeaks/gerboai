@@ -1,131 +1,2215 @@
-import React, { useState, useEffect } from "react";
-import { FileText, Check } from "lucide-react";
-import SignatureStamp from "../SignatureStamp";
+import React, { useState } from "react";
 import {
-  getFirestore,
-  doc,
-  getDoc,
-  updateDoc,
-  serverTimestamp,
-} from "firebase/firestore";
+  Check,
+  Shield,
+  AlertTriangle,
+  Eye,
+  Clipboard,
+  Radio,
+} from "lucide-react";
 
-const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
-export const TemplateSelector = ({
-  user,
-  selectedTemplate,
-  onTemplateChange,
+// ─────────────────────────────────────────────────────────────────────────────
+// GOOGLE FONTS IMPORT
+// ─────────────────────────────────────────────────────────────────────────────
+const FontImport = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+  `}</style>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// businessInfo → companyInfo ADAPTER
+// Maps the BusinessSettingsModal / Firestore field names to the internal
+// companyInfo shape used by every template below.
+// ─────────────────────────────────────────────────────────────────────────────
+export const normaliseBusinessInfo = (businessInfo = {}) => ({
+  // identity
+  companyName: businessInfo.businessName || businessInfo.companyName || "",
+  tagline: businessInfo.tagline || "Vigilance · Protection · Response",
+  logoUrl: businessInfo.logoUrl || "",
+  // address
+  addressLine1: businessInfo.addressLine1 || "",
+  addressLine2: businessInfo.addressLine2 || "",
+  city: businessInfo.city || "",
+  postalCode: businessInfo.postalCode || "",
+  // contact
+  phone: businessInfo.primaryPhone || businessInfo.phone || "",
+  // banking
+  bankName: businessInfo.bankName || "First National Bank",
+  accountNumber: businessInfo.accountNumber || "",
+  branchCode: businessInfo.branchCode || "",
+  // security-specific (pass through if already present)
+  psiraNumber: businessInfo.psiraNumber || "",
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DESIGN TOKENS
+// ─────────────────────────────────────────────────────────────────────────────
+const C = {
+  bg0: "#f0f2f5",
+  bg1: "#ffffff",
+  bg2: "#f8f9fb",
+  bg3: "#f2f4f7",
+  bg4: "#e8ecf2",
+  border: "#d4dae4",
+  borderLight: "#e2e6ee",
+  textPrimary: "#1a2035",
+  textSecondary: "#4a5568",
+  textMuted: "#9aa5b4",
+  textLabel: "#6b7a92",
+  gold: "#b8922a",
+  goldDim: "#9a7a1e",
+  goldGlow: "#b8922a18",
+  silver: "#64748b",
+  blue: "#2c5fad",
+  blueDim: "#1e4a8a",
+  danger: "#b91c1c",
+  dangerBg: "#fef2f2",
+  warn: "#b45309",
+  warnBg: "#fffbeb",
+  ok: "#15803d",
+  okBg: "#f0fdf4",
+};
+
+const FONT = {
+  display: "'Playfair Display', Georgia, serif",
+  body: "'DM Sans', 'Segoe UI', Helvetica, sans-serif",
+  mono: "'DM Mono', 'Courier New', monospace",
+};
+
+const today = () => new Date().toLocaleDateString("en-ZA");
+
+// ── Section Bar ────────────────────────────────────────────────────────────
+const SectionBar = ({
+  children,
+  bg = C.bg4,
+  color = C.gold,
+  accent = C.gold,
+}) => (
+  <div
+    style={{
+      background: bg,
+      color,
+      padding: "7px 14px",
+      fontFamily: FONT.body,
+      fontWeight: 700,
+      fontSize: 10,
+      letterSpacing: 2,
+      textTransform: "uppercase",
+      borderLeft: `3px solid ${accent}`,
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+    }}
+  >
+    <span style={{ color: accent, fontSize: 8 }}>◆</span>
+    {children}
+  </div>
+);
+
+// ── Info Cell ──────────────────────────────────────────────────────────────
+const InfoCell = ({ title, rows, style = {} }) => (
+  <div
+    style={{ border: `1px solid ${C.border}`, overflow: "hidden", ...style }}
+  >
+    <SectionBar>{title}</SectionBar>
+    <div style={{ padding: "10px 14px", background: C.bg2 }}>
+      {rows.map(([label, val]) => (
+        <div
+          key={label}
+          style={{
+            fontSize: 11,
+            lineHeight: 2,
+            fontFamily: FONT.body,
+            color: C.textPrimary,
+            display: "flex",
+            gap: 6,
+          }}
+        >
+          <span
+            style={{
+              color: C.textLabel,
+              minWidth: 86,
+              flexShrink: 0,
+              fontWeight: 500,
+            }}
+          >
+            {label}
+          </span>
+          <span style={{ fontWeight: 400 }}>{val || "—"}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ── Table ──────────────────────────────────────────────────────────────────
+const SecTable = ({ headers, rows, accentCol = -1 }) => (
+  <table
+    style={{
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 11,
+      fontFamily: FONT.body,
+    }}
+  >
+    <thead>
+      <tr style={{ background: C.bg4 }}>
+        {headers.map((h, i) => (
+          <th
+            key={h}
+            style={{
+              padding: "9px 14px",
+              textAlign: i === 0 ? "left" : "center",
+              color: C.gold,
+              fontWeight: 700,
+              letterSpacing: 1.5,
+              fontSize: 9.5,
+              textTransform: "uppercase",
+              borderBottom: `1px solid ${C.gold}`,
+              borderRight: `1px solid ${C.border}`,
+            }}
+          >
+            {h}
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row, i) => (
+        <tr
+          key={i}
+          style={{
+            background: i % 2 === 0 ? C.bg2 : C.bg3,
+            borderBottom: `1px solid ${C.border}`,
+          }}
+        >
+          {row.map((cell, j) => (
+            <td
+              key={j}
+              style={{
+                padding: "8px 14px",
+                textAlign: j === 0 ? "left" : "center",
+                color: j === accentCol ? C.gold : C.textPrimary,
+                fontWeight: j === accentCol ? 600 : 400,
+                borderRight: `1px solid ${C.border}`,
+                fontSize: 11,
+              }}
+            >
+              {cell || "—"}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);
+
+// ── Banking Block ──────────────────────────────────────────────────────────
+const BankingBlock = ({ companyInfo }) => (
+  <div
+    style={{
+      background: C.bg3,
+      border: `1px solid ${C.border}`,
+      borderLeft: `3px solid ${C.gold}`,
+      padding: "12px 16px",
+      marginBottom: 14,
+    }}
+  >
+    <div
+      style={{
+        fontFamily: FONT.body,
+        fontWeight: 700,
+        fontSize: 9.5,
+        color: C.gold,
+        letterSpacing: 2,
+        marginBottom: 10,
+        textTransform: "uppercase",
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+      }}
+    >
+      <span style={{ fontSize: 7 }}>◆</span> Payment &amp; Banking Details
+    </div>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 6,
+        fontSize: 11,
+        fontFamily: FONT.body,
+        color: C.textPrimary,
+      }}
+    >
+      {[
+        ["Bank", companyInfo.bankName || "First National Bank"],
+        ["Account Holder", companyInfo.companyName || "—"],
+        ["Account Number", companyInfo.accountNumber || "—"],
+        ["Branch Code", companyInfo.branchCode || "—"],
+      ].map(([k, v]) => (
+        <div key={k} style={{ display: "flex", gap: 5 }}>
+          <span style={{ color: C.textLabel, fontWeight: 500 }}>{k}:</span>
+          <span>{v}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ── Signature Strip ────────────────────────────────────────────────────────
+const SigStrip = ({ labels = ["Officer", "Supervisor", "Client"] }) => (
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: `repeat(${labels.length}, 1fr)`,
+      gap: 16,
+      marginBottom: 16,
+    }}
+  >
+    {labels.map((label) => (
+      <div key={label}>
+        <div
+          style={{
+            fontFamily: FONT.body,
+            fontSize: 9.5,
+            color: C.textLabel,
+            letterSpacing: 1.5,
+            marginBottom: 5,
+            textTransform: "uppercase",
+            fontWeight: 600,
+          }}
+        >
+          {label}
+        </div>
+        <div
+          style={{ borderBottom: `1px solid ${C.borderLight}`, height: 32 }}
+        />
+        <div
+          style={{
+            fontFamily: FONT.body,
+            fontSize: 9,
+            color: C.textMuted,
+            marginTop: 4,
+          }}
+        >
+          Signature / Date / Stamp
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+// ── Footer ─────────────────────────────────────────────────────────────────
+const SecFooter = ({ text = "Restricted — Authorised Personnel Only" }) => (
+  <div
+    style={{
+      borderTop: `1px solid ${C.border}`,
+      paddingTop: 10,
+      marginTop: 6,
+      fontFamily: FONT.body,
+      fontSize: 9.5,
+      color: C.textMuted,
+      textAlign: "center",
+      letterSpacing: 1.5,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+    }}
+  >
+    <div style={{ flex: 1, height: 1, background: C.border }} />
+    <span style={{ color: C.textLabel, textTransform: "uppercase" }}>
+      ◆ {text} ◆
+    </span>
+    <div style={{ flex: 1, height: 1, background: C.border }} />
+  </div>
+);
+
+// ── Security Stamp ─────────────────────────────────────────────────────────
+const SecStamp = ({
+  text = "AUTHORISED",
+  color = C.gold,
+  showDate = true,
+  size = "medium",
 }) => {
-  const [purchasedTemplates, setPurchasedTemplates] = useState(["classic"]);
-  const [isOpen, setIsOpen] = useState(false);
-
-  const templateNames = {
-    default: "Default (Original)",
-    classic: "Classic Workshop",
-    modern: "Modern Minimalist",
-    elegant: "Elegant Business",
-    premium: "Premium Auto Service",
-    speed: "Speed Shop Pro",
-    diagnostic: "Diagnostic Specialist",
-  };
-
-  useEffect(() => {
-    loadPurchasedTemplates();
-  }, [user]);
-
-  const loadPurchasedTemplates = async () => {
-    if (!user?.uid) return;
-
-    try {
-      const db = getFirestore();
-      const docRef = doc(db, "users", user.uid, "settings", "templates");
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        setPurchasedTemplates([
-          "default",
-          ...(docSnap.data().purchased || ["classic"]),
-        ]);
-      } else {
-        setPurchasedTemplates(["default", "classic"]);
-      }
-    } catch (error) {
-      console.error("Error loading templates:", error);
-    }
-  };
-
-  const handleSelectTemplate = async (templateId) => {
-    if (!user?.uid) return;
-
-    try {
-      const db = getFirestore();
-      const docRef = doc(db, "users", user.uid, "settings", "templates");
-
-      await updateDoc(docRef, {
-        active: templateId,
-        updatedAt: serverTimestamp(),
-      });
-
-      onTemplateChange(templateId);
-      setIsOpen(false);
-    } catch (error) {
-      console.error("Error updating template:", error);
-    }
-  };
-
+  const s = size === "small" ? 88 : size === "large" ? 148 : 118;
   return (
-    <div className="relative">
+    <div
+      style={{
+        display: "inline-block",
+        transform: "rotate(-6deg)",
+        opacity: 0.78,
+      }}
+    >
+      <svg width={s} height={s} viewBox="0 0 118 118">
+        <rect
+          x="5"
+          y="5"
+          width="108"
+          height="108"
+          fill="none"
+          stroke={color}
+          strokeWidth="3"
+        />
+        <rect
+          x="10"
+          y="10"
+          width="98"
+          height="98"
+          fill="none"
+          stroke={color}
+          strokeWidth="0.8"
+          opacity="0.5"
+        />
+        <text
+          x="59"
+          y="46"
+          textAnchor="middle"
+          fill={color}
+          fontSize="8.5"
+          fontWeight="700"
+          fontFamily={FONT.body}
+          letterSpacing="3"
+        >
+          SECURITY
+        </text>
+        <text
+          x="59"
+          y="63"
+          textAnchor="middle"
+          fill={color}
+          fontSize="15"
+          fontWeight="900"
+          fontFamily={FONT.display}
+          letterSpacing="1"
+        >
+          {text}
+        </text>
+        {showDate && (
+          <text
+            x="59"
+            y="77"
+            textAnchor="middle"
+            fill={color}
+            fontSize="8"
+            fontFamily={FONT.mono}
+          >
+            {today()}
+          </text>
+        )}
+        <text
+          x="59"
+          y="92"
+          textAnchor="middle"
+          fill={color}
+          fontSize="7"
+          fontFamily={FONT.body}
+          letterSpacing="3"
+        >
+          CLASSIFIED
+        </text>
+      </svg>
+    </div>
+  );
+};
+
+// ── Page Wrapper ───────────────────────────────────────────────────────────
+const SecPage = ({ children, style = {} }) => (
+  <div
+    style={{
+      background: C.bg1,
+      padding: "14mm 18mm",
+      color: C.textPrimary,
+      position: "relative",
+      minHeight: "100%",
+      ...style,
+    }}
+  >
+    <FontImport />
+    <div style={{ background: "transparent", position: "relative" }}>
+      {children}
+    </div>
+  </div>
+);
+
+// ── Refined Header ─────────────────────────────────────────────────────────
+const SecHeader = ({
+  companyInfo,
+  reportNumber,
+  reportType,
+  metaRows = [],
+}) => (
+  <div
+    style={{
+      borderBottom: `1px solid ${C.border}`,
+      paddingBottom: 16,
+      marginBottom: 18,
+    }}
+  >
+    <div
+      style={{
+        height: 3,
+        background: `linear-gradient(90deg, ${C.gold}, ${C.goldDim}, transparent)`,
+        marginBottom: 16,
+      }}
+    />
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+      }}
+    >
+      {/* Left: Logo + Company */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+        <div style={{ width: 64, height: 64, flexShrink: 0 }}>
+          {companyInfo.logoUrl ? (
+            <img
+              src={companyInfo.logoUrl}
+              alt="Logo"
+              style={{ width: 64, height: 64, objectFit: "contain" }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                background: C.bg4,
+                border: `1px solid ${C.border}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Shield style={{ color: C.gold, width: 32, height: 32 }} />
+            </div>
+          )}
+        </div>
+        <div>
+          <div
+            style={{
+              fontFamily: FONT.display,
+              fontWeight: 700,
+              fontSize: 20,
+              color: C.textPrimary,
+              letterSpacing: 1,
+              lineHeight: 1.1,
+              marginBottom: 3,
+            }}
+          >
+            {companyInfo.companyName || "Sentinel Security Operations"}
+          </div>
+          <div
+            style={{
+              fontFamily: FONT.body,
+              fontSize: 9.5,
+              color: C.gold,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              fontWeight: 500,
+              marginBottom: 8,
+            }}
+          >
+            {companyInfo.tagline || "Vigilance · Protection · Response"}
+          </div>
+          <div
+            style={{
+              fontFamily: FONT.body,
+              fontSize: 10,
+              color: C.textLabel,
+              lineHeight: 1.8,
+            }}
+          >
+            <div>{companyInfo.addressLine1}</div>
+            <div>
+              {companyInfo.city} {companyInfo.postalCode}
+            </div>
+            <div>
+              Tel: {companyInfo.phone} &nbsp;|&nbsp; PSiRA:{" "}
+              {companyInfo.psiraNumber || "N/A"}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Right: Report type + meta box */}
+      <div style={{ textAlign: "right" }}>
+        <div
+          style={{
+            fontFamily: FONT.display,
+            fontWeight: 700,
+            fontSize: 22,
+            color: C.gold,
+            letterSpacing: 1,
+            textTransform: "uppercase",
+            lineHeight: 1.1,
+            marginBottom: 12,
+          }}
+        >
+          {reportType}
+        </div>
+        <div
+          style={{
+            background: C.bg3,
+            border: `1px solid ${C.border}`,
+            borderTop: `2px solid ${C.gold}`,
+            padding: "10px 16px",
+            fontSize: 10.5,
+            fontFamily: FONT.body,
+            minWidth: 200,
+          }}
+        >
+          {[
+            ["Report No.", reportNumber],
+            ["Date Issued", today()],
+            ...metaRows,
+          ].map(([k, v]) => (
+            <div
+              key={k}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 20,
+                marginBottom: 4,
+              }}
+            >
+              <span style={{ color: C.textLabel, fontWeight: 500 }}>{k}</span>
+              <span style={{ color: C.textPrimary, fontWeight: 600 }}>{v}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATE 1 — DEFAULT: INCIDENT REPORT
+// Accepts either `businessInfo` (from Firestore/BusinessSettingsModal)
+// or `companyInfo` (legacy). businessInfo takes priority.
+// ═══════════════════════════════════════════════════════════════════════════
+export const DefaultTemplate = ({
+  businessInfo,
+  companyInfo: _companyInfo = {},
+  reportNumber = "INC-2025-0001",
+  reportType = "Incident Report",
+  officerName,
+  officerBadge,
+  officerRank,
+  siteName,
+  siteAddress,
+  siteZone,
+  incidentDate,
+  incidentTime,
+  incidentCategory,
+  items = [],
+  summaryNotes,
+  threatLevel = "MEDIUM",
+  showStamp = false,
+  stampText = "CLEARED",
+  stampColor = C.gold,
+  showStampDate = true,
+}) => {
+  const companyInfo = businessInfo
+    ? normaliseBusinessInfo(businessInfo)
+    : _companyInfo;
+  const tlColors = {
+    LOW: C.ok,
+    MEDIUM: C.warn,
+    HIGH: C.danger,
+    CRITICAL: "#8b0000",
+  };
+  const tc = tlColors[threatLevel] || C.warn;
+  return (
+    <SecPage>
+      <SecHeader
+        companyInfo={companyInfo}
+        reportNumber={reportNumber}
+        reportType={reportType}
+        metaRows={[
+          ["Threat Level", threatLevel],
+          ["Category", incidentCategory || "—"],
+          ["Status", "Filed"],
+        ]}
+      />
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          background: tc + "22",
+          border: `1px solid ${tc}`,
+          color: tc,
+          fontFamily: FONT.body,
+          fontWeight: 700,
+          fontSize: 10.5,
+          letterSpacing: 2,
+          padding: "6px 16px",
+          marginBottom: 16,
+          textTransform: "uppercase",
+        }}
+      >
+        <AlertTriangle style={{ width: 13, height: 13 }} />
+        Threat Level: {threatLevel}
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          gap: 12,
+          marginBottom: 16,
+        }}
+      >
+        <InfoCell
+          title="Reporting Officer"
+          rows={[
+            ["Name", officerName],
+            ["Badge No.", officerBadge],
+            ["Rank", officerRank],
+          ]}
+        />
+        <InfoCell
+          title="Site Details"
+          rows={[
+            ["Site", siteName],
+            ["Address", siteAddress],
+            ["Zone", siteZone],
+          ]}
+        />
+        <InfoCell
+          title="Incident Details"
+          rows={[
+            ["Date", incidentDate || today()],
+            ["Time", incidentTime],
+            ["Category", incidentCategory],
+          ]}
+        />
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <SectionBar>Observations &amp; Findings</SectionBar>
+        <SecTable
+          headers={[
+            "Observation / Finding",
+            "Time",
+            "Zone / Location",
+            "Priority",
+          ]}
+          rows={items.map((i) => [
+            i.description || i.finding,
+            i.time || i.qty,
+            i.zone || i.rate,
+            i.priority || i.amount,
+          ])}
+          accentCol={3}
+        />
+      </div>
+      {summaryNotes && (
+        <div
+          style={{
+            background: C.dangerBg,
+            border: `1px solid ${C.danger}22`,
+            borderLeft: `3px solid ${C.danger}`,
+            padding: "12px 16px",
+            marginBottom: 16,
+            fontSize: 11,
+            fontFamily: FONT.body,
+            color: C.textPrimary,
+            lineHeight: 1.8,
+          }}
+        >
+          <div
+            style={{
+              color: C.danger,
+              fontWeight: 700,
+              marginBottom: 6,
+              letterSpacing: 1.5,
+              fontSize: 9.5,
+              textTransform: "uppercase",
+            }}
+          >
+            ◆ Incident Summary
+          </div>
+          {summaryNotes}
+        </div>
+      )}
+      <SigStrip labels={["Officer", "Supervisor", "Client"]} />
+      <BankingBlock companyInfo={companyInfo} />
+      {showStamp && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 12,
+          }}
+        >
+          <SecStamp
+            text={stampText}
+            color={stampColor}
+            showDate={showStampDate}
+          />
+        </div>
+      )}
+      <SecFooter text="Classified — Authorised Personnel Only — Do Not Distribute" />
+    </SecPage>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATE 2 — CLASSIC: GUARD PATROL REPORT
+// ═══════════════════════════════════════════════════════════════════════════
+export const ClassicTemplate = ({
+  businessInfo,
+  companyInfo: _companyInfo = {},
+  reportNumber = "PAT-2025-0001",
+  reportType = "Guard Patrol Report",
+  officerName,
+  officerBadge,
+  officerRank,
+  siteName,
+  siteAddress,
+  siteZone,
+  incidentDate,
+  incidentTime,
+  items = [],
+  showStamp = false,
+  stampText = "Patrol Complete",
+  stampColor = C.gold,
+  showStampDate = true,
+}) => {
+  const companyInfo = businessInfo
+    ? normaliseBusinessInfo(businessInfo)
+    : _companyInfo;
+  return (
+    <SecPage>
+      <div
+        style={{
+          height: 3,
+          background: `linear-gradient(90deg, transparent, ${C.gold}, transparent)`,
+          marginBottom: 16,
+        }}
+      />
+      <div
+        style={{
+          textAlign: "center",
+          borderBottom: `1px solid ${C.border}`,
+          paddingBottom: 18,
+          marginBottom: 18,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 14,
+            marginBottom: 12,
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              height: 1,
+              background: `linear-gradient(90deg, transparent, ${C.border})`,
+            }}
+          />
+          <div
+            style={{
+              width: 58,
+              height: 58,
+              border: `1px solid ${C.border}`,
+              background: C.bg4,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {companyInfo.logoUrl ? (
+              <img
+                src={companyInfo.logoUrl}
+                alt="Logo"
+                style={{ width: 50, height: 50, objectFit: "contain" }}
+              />
+            ) : (
+              <Radio style={{ color: C.gold, width: 26, height: 26 }} />
+            )}
+          </div>
+          <div
+            style={{
+              flex: 1,
+              height: 1,
+              background: `linear-gradient(90deg, ${C.border}, transparent)`,
+            }}
+          />
+        </div>
+        <div
+          style={{
+            fontFamily: FONT.display,
+            fontWeight: 700,
+            fontSize: 22,
+            color: C.textPrimary,
+            letterSpacing: 1,
+            marginBottom: 4,
+          }}
+        >
+          {companyInfo.companyName || "Sentinel Security Operations"}
+        </div>
+        <div
+          style={{
+            fontFamily: FONT.body,
+            fontSize: 9.5,
+            color: C.gold,
+            letterSpacing: 3,
+            textTransform: "uppercase",
+            fontWeight: 500,
+            marginBottom: 8,
+          }}
+        >
+          {companyInfo.tagline || "Vigilance · Protection · Response"}
+        </div>
+        <div
+          style={{ fontFamily: FONT.body, fontSize: 10, color: C.textLabel }}
+        >
+          {companyInfo.addressLine1} &nbsp;|&nbsp; Tel: {companyInfo.phone}{" "}
+          &nbsp;|&nbsp; PSiRA: {companyInfo.psiraNumber || "N/A"}
+        </div>
+        <div
+          style={{
+            marginTop: 14,
+            borderTop: `1px solid ${C.border}`,
+            paddingTop: 14,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: FONT.display,
+              fontWeight: 700,
+              fontSize: 20,
+              color: C.gold,
+              letterSpacing: 1,
+              marginBottom: 4,
+            }}
+          >
+            {reportType}
+          </div>
+          <div
+            style={{
+              fontFamily: FONT.body,
+              fontSize: 10.5,
+              color: C.textLabel,
+            }}
+          >
+            Ref: {reportNumber} &nbsp;|&nbsp; Date: {today()}
+          </div>
+        </div>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          gap: 12,
+          marginBottom: 16,
+        }}
+      >
+        <InfoCell
+          title="Patrol Officer"
+          rows={[
+            ["Name", officerName],
+            ["Badge No.", officerBadge],
+            ["Rank", officerRank],
+          ]}
+        />
+        <InfoCell
+          title="Patrol Site"
+          rows={[
+            ["Site", siteName],
+            ["Address", siteAddress],
+            ["Zone", siteZone],
+          ]}
+        />
+        <InfoCell
+          title="Patrol Period"
+          rows={[
+            ["Date", incidentDate || today()],
+            ["Start Time", incidentTime],
+            ["Shift", "Alpha"],
+          ]}
+        />
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <SectionBar>Checkpoint Log</SectionBar>
+        <SecTable
+          headers={["Checkpoint / Observation", "Time", "Zone", "Status"]}
+          rows={items.map((i) => [
+            i.description || i.checkpoint,
+            i.time || i.qty,
+            i.zone || i.rate,
+            i.status || i.amount || "Clear",
+          ])}
+          accentCol={3}
+        />
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: 16,
+        }}
+      >
+        <div
+          style={{
+            border: `1px solid ${C.border}`,
+            minWidth: 240,
+            overflow: "hidden",
+          }}
+        >
+          <SectionBar>Patrol Summary</SectionBar>
+          <div
+            style={{
+              background: C.bg2,
+              padding: 12,
+              fontSize: 11,
+              fontFamily: FONT.body,
+              color: C.textPrimary,
+            }}
+          >
+            {[
+              ["Checkpoints Logged", items.length],
+              [
+                "All Clear",
+                items.filter((i) => (i.status || "Clear") === "Clear").length,
+              ],
+              [
+                "Anomalies",
+                items.filter((i) => i.status && i.status !== "Clear").length,
+              ],
+            ].map(([label, val]) => (
+              <div
+                key={label}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 6,
+                }}
+              >
+                <span style={{ color: C.textLabel, fontWeight: 500 }}>
+                  {label}
+                </span>
+                <span style={{ fontWeight: 700, color: C.gold }}>{val}</span>
+              </div>
+            ))}
+            <div
+              style={{
+                background: C.bg4,
+                margin: "8px -12px -12px",
+                padding: "8px 12px",
+                display: "flex",
+                justifyContent: "space-between",
+                fontWeight: 700,
+                borderTop: `1px solid ${C.border}`,
+              }}
+            >
+              <span style={{ color: C.textLabel }}>Patrol Status</span>
+              <span style={{ color: C.gold }}>Complete</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <SigStrip labels={["Officer", "Supervisor", "Site Manager"]} />
+      <BankingBlock companyInfo={companyInfo} />
+      {showStamp && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 12,
+          }}
+        >
+          <SecStamp
+            text={stampText}
+            color={stampColor}
+            showDate={showStampDate}
+          />
+        </div>
+      )}
+      <SecFooter text="Guard Patrol Log — Confidential Operational Record" />
+    </SecPage>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATE 3 — MODERN: RISK ASSESSMENT
+// ═══════════════════════════════════════════════════════════════════════════
+export const ModernTemplate = ({
+  businessInfo,
+  companyInfo: _companyInfo = {},
+  reportNumber = "RSK-2025-0001",
+  reportType = "Risk Assessment",
+  officerName,
+  officerBadge,
+  officerRank,
+  siteName,
+  siteAddress,
+  siteZone,
+  incidentDate,
+  items = [],
+  threatLevel = "MEDIUM",
+  showStamp = false,
+  stampText = "ASSESSED",
+  stampColor = C.gold,
+  showStampDate = true,
+}) => {
+  const companyInfo = businessInfo
+    ? normaliseBusinessInfo(businessInfo)
+    : _companyInfo;
+  const sevColor = (sev) => {
+    const s = String(sev || "").toUpperCase();
+    if (s === "CRITICAL" || s === "HIGH") return C.danger;
+    if (s === "MEDIUM") return C.warn;
+    return C.ok;
+  };
+  return (
+    <SecPage>
+      <SecHeader
+        companyInfo={companyInfo}
+        reportNumber={reportNumber}
+        reportType={reportType}
+        metaRows={[
+          ["Threat Level", threatLevel],
+          ["Type", "Risk Assessment"],
+        ]}
+      />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 14,
+          marginBottom: 16,
+        }}
+      >
+        <div style={{ border: `1px solid ${C.border}`, overflow: "hidden" }}>
+          <SectionBar>Assessing Officer</SectionBar>
+          <div style={{ padding: "12px 14px", background: C.bg2 }}>
+            <div
+              style={{
+                fontFamily: FONT.display,
+                fontSize: 18,
+                fontWeight: 600,
+                color: C.textPrimary,
+                marginBottom: 4,
+              }}
+            >
+              {officerName || "—"}
+            </div>
+            <div
+              style={{
+                fontFamily: FONT.body,
+                fontSize: 10.5,
+                color: C.textLabel,
+              }}
+            >
+              {officerRank || "Officer"} &nbsp;|&nbsp; Badge:{" "}
+              {officerBadge || "—"}
+            </div>
+          </div>
+        </div>
+        <div style={{ border: `1px solid ${C.border}`, overflow: "hidden" }}>
+          <SectionBar>Assessment Site</SectionBar>
+          <div style={{ padding: "12px 14px", background: C.bg2 }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 4,
+                fontFamily: FONT.body,
+                fontSize: 11,
+                color: C.textPrimary,
+              }}
+            >
+              {[
+                ["Site", siteName],
+                ["Zone", siteZone],
+                ["Address", siteAddress],
+                ["Date", incidentDate || today()],
+              ].map(([k, v]) => (
+                <div key={k} style={{ display: "flex", gap: 5 }}>
+                  <span style={{ color: C.textLabel, fontWeight: 500 }}>
+                    {k}:
+                  </span>
+                  <span>{v || "—"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <SectionBar>Risk Register</SectionBar>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            fontSize: 11,
+            fontFamily: FONT.body,
+          }}
+        >
+          <thead>
+            <tr style={{ background: C.bg4 }}>
+              {[
+                "Risk / Finding",
+                "Severity",
+                "Likelihood",
+                "Location",
+                "Recommendation",
+              ].map((h, i) => (
+                <th
+                  key={h}
+                  style={{
+                    padding: "9px 14px",
+                    textAlign: i === 0 ? "left" : "center",
+                    color: C.gold,
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    fontSize: 9.5,
+                    textTransform: "uppercase",
+                    borderBottom: `1px solid ${C.gold}`,
+                    borderRight: `1px solid ${C.border}`,
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, i) => (
+              <tr
+                key={i}
+                style={{
+                  background: i % 2 === 0 ? C.bg2 : C.bg3,
+                  borderBottom: `1px solid ${C.border}`,
+                }}
+              >
+                <td style={{ padding: "8px 14px", color: C.textPrimary }}>
+                  {item.description || item.risk || "—"}
+                </td>
+                <td
+                  style={{
+                    textAlign: "center",
+                    padding: "8px 14px",
+                    color: sevColor(item.severity || item.qty),
+                    fontWeight: 700,
+                  }}
+                >
+                  {item.severity || item.qty || "—"}
+                </td>
+                <td
+                  style={{
+                    textAlign: "center",
+                    padding: "8px 14px",
+                    color: C.textSecondary,
+                  }}
+                >
+                  {item.likelihood || "Medium"}
+                </td>
+                <td
+                  style={{
+                    textAlign: "center",
+                    padding: "8px 14px",
+                    color: C.textSecondary,
+                  }}
+                >
+                  {item.location || item.rate || "—"}
+                </td>
+                <td
+                  style={{
+                    textAlign: "center",
+                    padding: "8px 14px",
+                    color: C.textPrimary,
+                  }}
+                >
+                  {item.recommendation || item.amount || "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: 16,
+        }}
+      >
+        <div
+          style={{
+            border: `1px solid ${C.border}`,
+            minWidth: 260,
+            overflow: "hidden",
+          }}
+        >
+          <SectionBar>Risk Summary</SectionBar>
+          <div
+            style={{
+              background: C.bg2,
+              padding: 12,
+              fontSize: 11,
+              fontFamily: FONT.body,
+            }}
+          >
+            {[
+              ["Total Risks Identified", items.length],
+              [
+                "High / Critical",
+                items.filter((i) =>
+                  ["HIGH", "CRITICAL"].includes(
+                    (i.severity || "").toUpperCase(),
+                  ),
+                ).length,
+              ],
+              [
+                "Medium",
+                items.filter(
+                  (i) => (i.severity || "").toUpperCase() === "MEDIUM",
+                ).length,
+              ],
+              [
+                "Low",
+                items.filter((i) =>
+                  ["LOW", ""].includes((i.severity || "").toUpperCase()),
+                ).length,
+              ],
+            ].map(([label, val]) => (
+              <div
+                key={label}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 6,
+                }}
+              >
+                <span style={{ color: C.textLabel, fontWeight: 500 }}>
+                  {label}
+                </span>
+                <span style={{ fontWeight: 700, color: C.gold }}>{val}</span>
+              </div>
+            ))}
+            <div
+              style={{
+                background: C.bg4,
+                margin: "8px -12px -12px",
+                padding: "8px 12px",
+                display: "flex",
+                justifyContent: "space-between",
+                fontWeight: 700,
+                borderTop: `1px solid ${C.border}`,
+              }}
+            >
+              <span style={{ color: C.textLabel }}>Overall Risk</span>
+              <span style={{ color: C.gold }}>{threatLevel}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <SigStrip labels={["Assessor", "Supervisor", "Client Representative"]} />
+      <BankingBlock companyInfo={companyInfo} />
+      {showStamp && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 12,
+          }}
+        >
+          <SecStamp
+            text={stampText}
+            color={stampColor}
+            showDate={showStampDate}
+          />
+        </div>
+      )}
+      <SecFooter text="Risk Assessment — Sensitive Operational Document" />
+    </SecPage>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATE 4 — ELEGANT: EXECUTIVE SECURITY BRIEF
+// ═══════════════════════════════════════════════════════════════════════════
+export const ElegantTemplate = ({
+  businessInfo,
+  companyInfo: _companyInfo = {},
+  reportNumber = "EXC-2025-0001",
+  reportType = "Executive Security Brief",
+  officerName,
+  officerBadge,
+  officerRank,
+  siteName,
+  siteAddress,
+  incidentDate,
+  items = [],
+  showStamp = false,
+  stampText = "APPROVED",
+  stampColor = C.gold,
+  showStampDate = true,
+}) => {
+  const companyInfo = businessInfo
+    ? normaliseBusinessInfo(businessInfo)
+    : _companyInfo;
+  return (
+    <SecPage>
+      <div style={{ border: `1px solid ${C.gold}`, padding: "18px 22px" }}>
+        <div style={{ border: `1px solid ${C.border}`, padding: "16px 20px" }}>
+          <div
+            style={{
+              textAlign: "center",
+              borderBottom: `1px solid ${C.border}`,
+              paddingBottom: 18,
+              marginBottom: 18,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: 12,
+              }}
+            >
+              <div
+                style={{
+                  width: 70,
+                  height: 70,
+                  border: `1px solid ${C.gold}`,
+                  background: C.bg4,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {companyInfo.logoUrl ? (
+                  <img
+                    src={companyInfo.logoUrl}
+                    alt="Logo"
+                    style={{ width: 62, height: 62, objectFit: "contain" }}
+                  />
+                ) : (
+                  <Shield style={{ color: C.gold, width: 34, height: 34 }} />
+                )}
+              </div>
+            </div>
+            <div
+              style={{
+                fontFamily: FONT.display,
+                fontWeight: 700,
+                fontSize: 22,
+                color: C.textPrimary,
+                letterSpacing: 1,
+                marginBottom: 4,
+              }}
+            >
+              {companyInfo.companyName || "Sentinel Security Operations"}
+            </div>
+            <div
+              style={{
+                fontFamily: FONT.body,
+                fontSize: 9.5,
+                color: C.gold,
+                letterSpacing: 3,
+                textTransform: "uppercase",
+                fontWeight: 500,
+                marginBottom: 6,
+              }}
+            >
+              {companyInfo.tagline || "Vigilance · Protection · Response"}
+            </div>
+            <div
+              style={{
+                fontFamily: FONT.body,
+                fontSize: 10,
+                color: C.textLabel,
+              }}
+            >
+              {companyInfo.addressLine1} &nbsp;|&nbsp; PSiRA:{" "}
+              {companyInfo.psiraNumber || "N/A"}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                margin: "14px 0 10px",
+              }}
+            >
+              <div
+                style={{
+                  flex: 1,
+                  height: 1,
+                  background: `linear-gradient(90deg, transparent, ${C.border})`,
+                }}
+              />
+              <span style={{ color: C.gold, fontSize: 14 }}>◆</span>
+              <div
+                style={{
+                  flex: 1,
+                  height: 1,
+                  background: `linear-gradient(90deg, ${C.border}, transparent)`,
+                }}
+              />
+            </div>
+            <div
+              style={{
+                fontFamily: FONT.display,
+                fontWeight: 700,
+                fontSize: 20,
+                color: C.gold,
+                letterSpacing: 1,
+                marginBottom: 4,
+              }}
+            >
+              {reportType}
+            </div>
+            <div
+              style={{
+                fontFamily: FONT.body,
+                fontSize: 10.5,
+                color: C.textLabel,
+              }}
+            >
+              Ref: {reportNumber} &nbsp;|&nbsp; Date: {today()}
+            </div>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 18,
+              marginBottom: 18,
+            }}
+          >
+            {[
+              {
+                title: "Prepared By",
+                rows: [
+                  ["Name", officerName],
+                  ["Rank", officerRank],
+                  ["Badge", officerBadge],
+                ],
+              },
+              {
+                title: "Site & Period",
+                rows: [
+                  ["Site", siteName],
+                  ["Address", siteAddress],
+                  ["Period", incidentDate || today()],
+                ],
+              },
+            ].map(({ title, rows }) => (
+              <div key={title}>
+                <div
+                  style={{
+                    fontFamily: FONT.body,
+                    fontWeight: 700,
+                    fontSize: 9.5,
+                    color: C.gold,
+                    letterSpacing: 2,
+                    textTransform: "uppercase",
+                    borderBottom: `1px solid ${C.border}`,
+                    paddingBottom: 5,
+                    marginBottom: 10,
+                  }}
+                >
+                  {title}
+                </div>
+                {rows.map(([k, v]) => (
+                  <div
+                    key={k}
+                    style={{
+                      fontFamily: FONT.body,
+                      fontSize: 11,
+                      lineHeight: 1.9,
+                      color: C.textPrimary,
+                      display: "flex",
+                      gap: 6,
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: C.textLabel,
+                        minWidth: 76,
+                        flexShrink: 0,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {k}:
+                    </span>
+                    <span>{v || "—"}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <SectionBar>Executive Findings</SectionBar>
+            <SecTable
+              headers={[
+                "Finding / Observation",
+                "Priority",
+                "Status",
+                "Action Required",
+              ]}
+              rows={items.map((i) => [
+                i.description || i.finding,
+                i.priority || i.qty,
+                i.status || i.rate,
+                i.action || i.amount,
+              ])}
+              accentCol={1}
+            />
+          </div>
+          <SigStrip labels={["Officer", "Director", "Client"]} />
+          <BankingBlock companyInfo={companyInfo} />
+          {showStamp && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginBottom: 12,
+              }}
+            >
+              <SecStamp
+                text={stampText}
+                color={stampColor}
+                showDate={showStampDate}
+              />
+            </div>
+          )}
+          <SecFooter text="Executive Brief — Eyes Only — Restricted Distribution" />
+        </div>
+      </div>
+    </SecPage>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATE 5 — SPEED: RAPID RESPONSE REPORT
+// ═══════════════════════════════════════════════════════════════════════════
+export const SpeedTemplate = ({
+  businessInfo,
+  companyInfo: _companyInfo = {},
+  reportNumber = "RRT-2025-0001",
+  reportType = "Rapid Response Report",
+  officerName,
+  officerBadge,
+  officerRank,
+  siteName,
+  siteAddress,
+  incidentDate,
+  incidentTime,
+  items = [],
+  threatLevel = "HIGH",
+  showStamp = false,
+  stampText = "RESPONDED",
+  stampColor = C.danger,
+  showStampDate = true,
+}) => {
+  const companyInfo = businessInfo
+    ? normaliseBusinessInfo(businessInfo)
+    : _companyInfo;
+  return (
+    <SecPage style={{ background: C.bg0 }}>
+      <div
+        style={{
+          background: C.danger,
+          color: "#fff",
+          fontFamily: FONT.body,
+          fontWeight: 700,
+          fontSize: 10.5,
+          letterSpacing: 3,
+          padding: "8px 16px",
+          marginBottom: 16,
+          textAlign: "center",
+          textTransform: "uppercase",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 10,
+        }}
+      >
+        <AlertTriangle style={{ width: 13, height: 13 }} />
+        Rapid Response — Active Incident Record
+        <AlertTriangle style={{ width: 13, height: 13 }} />
+      </div>
+      <div
+        style={{
+          borderBottom: `1px solid ${C.danger}44`,
+          paddingBottom: 16,
+          marginBottom: 18,
+        }}
+      >
+        <div
+          style={{
+            height: 2,
+            background: `linear-gradient(90deg, ${C.danger}, ${C.danger}44, transparent)`,
+            marginBottom: 14,
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                marginBottom: 8,
+              }}
+            >
+              <div
+                style={{
+                  width: 60,
+                  height: 60,
+                  border: `2px solid ${C.danger}66`,
+                  background: C.bg3,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {companyInfo.logoUrl ? (
+                  <img
+                    src={companyInfo.logoUrl}
+                    alt="Logo"
+                    style={{ width: 52, height: 52, objectFit: "contain" }}
+                  />
+                ) : (
+                  <AlertTriangle
+                    style={{ color: C.danger, width: 28, height: 28 }}
+                  />
+                )}
+              </div>
+              <div>
+                <div
+                  style={{
+                    fontFamily: FONT.display,
+                    fontWeight: 700,
+                    fontSize: 20,
+                    color: C.textPrimary,
+                    letterSpacing: 0.5,
+                    marginBottom: 3,
+                  }}
+                >
+                  {companyInfo.companyName || "Sentinel Security Operations"}
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT.body,
+                    fontSize: 9.5,
+                    color: C.danger,
+                    letterSpacing: 3,
+                    textTransform: "uppercase",
+                    fontWeight: 600,
+                  }}
+                >
+                  Rapid Response Unit
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                fontFamily: FONT.body,
+                fontSize: 10,
+                color: C.textLabel,
+              }}
+            >
+              {companyInfo.addressLine1} &nbsp;|&nbsp; {companyInfo.phone}{" "}
+              &nbsp;|&nbsp; PSiRA: {companyInfo.psiraNumber || "N/A"}
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div
+              style={{
+                fontFamily: FONT.display,
+                fontWeight: 700,
+                fontSize: 22,
+                color: C.danger,
+                marginBottom: 10,
+                letterSpacing: 0.5,
+              }}
+            >
+              {reportType}
+            </div>
+            <div
+              style={{
+                background: C.dangerBg,
+                border: `1px solid ${C.danger}44`,
+                borderTop: `2px solid ${C.danger}`,
+                padding: "10px 16px",
+                fontFamily: FONT.body,
+                minWidth: 200,
+              }}
+            >
+              <div
+                style={{ fontWeight: 700, fontSize: 13, color: C.textPrimary }}
+              >
+                # {reportNumber}
+              </div>
+              <div style={{ fontSize: 10.5, color: C.textLabel, marginTop: 4 }}>
+                {today()} · {incidentTime || "—"}
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: C.danger,
+                  marginTop: 5,
+                  letterSpacing: 2,
+                  textTransform: "uppercase",
+                }}
+              >
+                Threat: {threatLevel}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 14,
+          marginBottom: 16,
+        }}
+      >
+        <InfoCell
+          title="Responding Officer"
+          rows={[
+            ["Name", officerName],
+            ["Badge No.", officerBadge],
+            ["Rank", officerRank],
+          ]}
+        />
+        <InfoCell
+          title="Incident Site"
+          rows={[
+            ["Site", siteName],
+            ["Address", siteAddress],
+            ["Date", incidentDate || today()],
+          ]}
+        />
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <SectionBar bg={C.dangerBg} color={C.danger} accent={C.danger}>
+          Action / Event Log
+        </SectionBar>
+        <SecTable
+          headers={["Action / Event", "Time", "Zone", "Outcome"]}
+          rows={items.map((i) => [
+            i.description || i.action,
+            i.time || i.qty,
+            i.zone || i.rate,
+            i.outcome || i.amount,
+          ])}
+          accentCol={3}
+        />
+      </div>
+      <SigStrip labels={["Responding Officer", "Control Room", "Client"]} />
+      <BankingBlock companyInfo={companyInfo} />
+      {showStamp && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 12,
+          }}
+        >
+          <SecStamp
+            text={stampText}
+            color={stampColor}
+            showDate={showStampDate}
+          />
+        </div>
+      )}
+      <SecFooter text="Rapid Response Log — For Official Use Only" />
+    </SecPage>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATE 6 — DIAGNOSTIC: SITE INSPECTION REPORT
+// ═══════════════════════════════════════════════════════════════════════════
+export const DiagnosticTemplate = ({
+  businessInfo,
+  companyInfo: _companyInfo = {},
+  reportNumber = "INS-2025-0001",
+  reportType = "Site Inspection Report",
+  officerName,
+  officerBadge,
+  siteName,
+  siteAddress,
+  siteZone,
+  incidentDate,
+  items = [],
+  showStamp = false,
+  stampText = "INSPECTED",
+  stampColor = C.gold,
+  showStampDate = true,
+}) => {
+  const companyInfo = businessInfo
+    ? normaliseBusinessInfo(businessInfo)
+    : _companyInfo;
+  const passed = items.filter((i) => (i.result || "PASS") !== "FAIL").length;
+  const failed = items.length - passed;
+  const pct = items.length ? Math.round((passed / items.length) * 100) : 0;
+  const statusColor = pct >= 80 ? C.ok : pct >= 60 ? C.warn : C.danger;
+  const statusLabel =
+    pct >= 80 ? "Compliant" : pct >= 60 ? "Conditional" : "Non-Compliant";
+  return (
+    <SecPage>
+      <SecHeader
+        companyInfo={companyInfo}
+        reportNumber={reportNumber}
+        reportType={reportType}
+        metaRows={[
+          ["Type", "Site Inspection"],
+          ["Compliance", `${pct}%`],
+        ]}
+      />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 14,
+          marginBottom: 16,
+        }}
+      >
+        <InfoCell
+          title="Inspector Details"
+          rows={[
+            ["Inspector", officerName],
+            ["Badge No.", officerBadge],
+            ["Date", incidentDate || today()],
+          ]}
+        />
+        <InfoCell
+          title="Site Details"
+          rows={[
+            ["Site Name", siteName],
+            ["Address", siteAddress],
+            ["Zone", siteZone],
+          ]}
+        />
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <SectionBar>Inspection Checklist</SectionBar>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            fontSize: 11,
+            fontFamily: FONT.body,
+          }}
+        >
+          <thead>
+            <tr style={{ background: C.bg4 }}>
+              {[
+                "Inspection Item",
+                "Category",
+                "Result",
+                "Notes / Deficiency",
+              ].map((h, i) => (
+                <th
+                  key={h}
+                  style={{
+                    padding: "9px 14px",
+                    textAlign: i === 0 ? "left" : "center",
+                    color: C.gold,
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    fontSize: 9.5,
+                    textTransform: "uppercase",
+                    borderBottom: `1px solid ${C.gold}`,
+                    borderRight: `1px solid ${C.border}`,
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, i) => {
+              const result = item.result || "PASS";
+              const rc =
+                result === "FAIL"
+                  ? C.danger
+                  : result === "N/A"
+                    ? C.textMuted
+                    : C.ok;
+              return (
+                <tr
+                  key={i}
+                  style={{
+                    background: i % 2 === 0 ? C.bg2 : C.bg3,
+                    borderBottom: `1px solid ${C.border}`,
+                  }}
+                >
+                  <td style={{ padding: "8px 14px", color: C.textPrimary }}>
+                    {item.description || item.inspectionItem || "—"}
+                  </td>
+                  <td
+                    style={{
+                      textAlign: "center",
+                      padding: "8px 14px",
+                      color: C.textSecondary,
+                    }}
+                  >
+                    {item.category || item.qty || "General"}
+                  </td>
+                  <td
+                    style={{
+                      textAlign: "center",
+                      padding: "8px 14px",
+                      color: rc,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {result === "PASS"
+                      ? "✓ Pass"
+                      : result === "FAIL"
+                        ? "✗ Fail"
+                        : result}
+                  </td>
+                  <td
+                    style={{
+                      padding: "8px 14px",
+                      color: C.textMuted,
+                      fontSize: 10,
+                    }}
+                  >
+                    {item.notes || item.amount || "—"}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: 16,
+        }}
+      >
+        <div
+          style={{
+            border: `1px solid ${C.border}`,
+            minWidth: 280,
+            overflow: "hidden",
+          }}
+        >
+          <SectionBar>Compliance Summary</SectionBar>
+          <div
+            style={{
+              background: C.bg2,
+              padding: 12,
+              fontSize: 11,
+              fontFamily: FONT.body,
+            }}
+          >
+            {[
+              ["Items Inspected", items.length],
+              ["Passed", passed],
+              ["Failed", failed],
+              ["N/A", items.filter((i) => i.result === "N/A").length],
+            ].map(([label, val]) => (
+              <div
+                key={label}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 6,
+                }}
+              >
+                <span style={{ color: C.textLabel, fontWeight: 500 }}>
+                  {label}
+                </span>
+                <span style={{ fontWeight: 700, color: C.gold }}>{val}</span>
+              </div>
+            ))}
+            <div style={{ margin: "10px 0 6px" }}>
+              <div
+                style={{
+                  background: C.bg4,
+                  height: 8,
+                  borderRadius: 2,
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    background: statusColor,
+                    height: "100%",
+                    width: `${pct}%`,
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  textAlign: "right",
+                  fontSize: 9.5,
+                  color: C.textLabel,
+                  marginTop: 4,
+                }}
+              >
+                {pct}% Compliance
+              </div>
+            </div>
+            <div
+              style={{
+                background: statusColor + "22",
+                border: `1px solid ${statusColor}33`,
+                margin: "6px -12px -12px",
+                padding: "8px 12px",
+                display: "flex",
+                justifyContent: "space-between",
+                fontWeight: 700,
+              }}
+            >
+              <span style={{ color: C.textLabel }}>Overall Status</span>
+              <span style={{ color: statusColor }}>{statusLabel}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <SigStrip labels={["Inspector", "Supervisor", "Site Representative"]} />
+      <BankingBlock companyInfo={companyInfo} />
+      {showStamp && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 12,
+          }}
+        >
+          <SecStamp
+            text={stampText}
+            color={stampColor}
+            showDate={showStampDate}
+          />
+        </div>
+      )}
+      <SecFooter text="Site Inspection Record — Retain for Compliance & Audit Purposes" />
+    </SecPage>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATE SELECTOR
+// ═══════════════════════════════════════════════════════════════════════════
+export const TemplateSelector = ({ selectedTemplate, onTemplateChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const templateNames = {
+    default: "Incident Report",
+    classic: "Guard Patrol Report",
+    modern: "Risk Assessment",
+    elegant: "Executive Brief",
+    speed: "Rapid Response",
+    diagnostic: "Site Inspection",
+  };
+  return (
+    <div style={{ position: "relative" }}>
+      <FontImport />
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-800"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "9px 18px",
+          background: C.bg3,
+          border: `1px solid ${C.border}`,
+          color: C.textPrimary,
+          fontFamily: FONT.body,
+          fontSize: 12,
+          fontWeight: 500,
+          cursor: "pointer",
+          letterSpacing: 0.5,
+        }}
       >
-        <FileText className="w-4 h-4" />
-        <span className="hidden sm:inline">
-          {templateNames[selectedTemplate] || "Select Template"}
-        </span>
-        <span className="sm:hidden">Template</span>
-        <svg
-          className="w-4 h-4 ml-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+        <Shield style={{ width: 14, height: 14, color: C.gold }} />
+        {templateNames[selectedTemplate] || "Select Template"}
+        <span style={{ marginLeft: 4, color: C.textLabel }}>▾</span>
       </button>
-
       {isOpen && (
         <>
           <div
-            className="fixed inset-0 z-10"
+            style={{ position: "fixed", inset: 0, zIndex: 10 }}
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-80 overflow-auto">
-            <div className="p-2">
-              <div className="text-xs font-semibold text-gray-500 px-3 py-2">
-                Your Templates
-              </div>
-              {purchasedTemplates.map((templateId) => (
-                <button
-                  key={templateId}
-                  onClick={() => handleSelectTemplate(templateId)}
-                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-between ${
-                    selectedTemplate === templateId
-                      ? "bg-orange-50 text-orange-600"
-                      : "text-gray-700"
-                  }`}
-                >
-                  <span>{templateNames[templateId]}</span>
-                  {selectedTemplate === templateId && (
-                    <Check className="w-4 h-4" />
-                  )}
-                </button>
-              ))}
+          <div
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              marginTop: 4,
+              background: C.bg3,
+              border: `1px solid ${C.border}`,
+              borderTop: `2px solid ${C.gold}`,
+              zIndex: 20,
+              minWidth: 260,
+              boxShadow: "0 8px 32px #00000066",
+            }}
+          >
+            <div
+              style={{
+                padding: "8px 14px 4px",
+                fontFamily: FONT.body,
+                fontSize: 9.5,
+                color: C.textMuted,
+                letterSpacing: 2,
+                textTransform: "uppercase",
+                fontWeight: 600,
+              }}
+            >
+              ◆ Report Templates
             </div>
+            {Object.entries(templateNames).map(([id, name]) => (
+              <button
+                key={id}
+                onClick={() => {
+                  onTemplateChange(id);
+                  setIsOpen(false);
+                }}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "9px 14px",
+                  background: selectedTemplate === id ? C.bg4 : "transparent",
+                  color: selectedTemplate === id ? C.gold : C.textPrimary,
+                  fontFamily: FONT.body,
+                  fontSize: 12,
+                  fontWeight: selectedTemplate === id ? 600 : 400,
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  letterSpacing: 0.3,
+                  borderBottom: `1px solid ${C.border}`,
+                }}
+              >
+                <span>{name}</span>
+                {selectedTemplate === id && (
+                  <Check style={{ width: 13, height: 13 }} />
+                )}
+              </button>
+            ))}
           </div>
         </>
       )}
@@ -133,1090 +2217,48 @@ export const TemplateSelector = ({
   );
 };
 
-// Default Template (Your Original)
-export const DefaultTemplate = ({
-  businessInfo,
-  loading,
-  jobCardNumber,
-  customerName,
-  customerEmail,
-  customerPhone,
-  customerAddress,
-  vehicleReg,
-  vehicleMake,
-  vehicleModel,
-  vehicleYear,
-  vehicleVin,
-  vehicleMileage,
-  items,
-  subtotal,
-  vat,
-  total,
-  showStamp = false,
-  stampText = "APPROVED",
-  stampColor = "#d32f2f",
-  showStampDate = true,
-}) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-    {/* Header Section */}
-    <div className="border-b-2 border-black pb-4 mb-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            {loading ? (
-              <div className="w-16 h-16 bg-gray-200 animate-pulse rounded"></div>
-            ) : businessInfo.logoUrl ? (
-              <img
-                src={businessInfo.logoUrl}
-                alt="Business Logo"
-                className="w-16 h-16 object-contain"
-              />
-            ) : (
-              <div className="w-12 h-12 bg-white rounded flex items-center justify-center"></div>
-            )}
-            <div>
-              <div className="text-xl font-bold">
-                {businessInfo?.businessName?.split(" ")[0] || ""}{" "}
-                {businessInfo?.businessName?.split(" ")[1] || ""}
-              </div>
-              <div className="text-sm font-semibold">
-                {businessInfo?.businessName?.split(" ").slice(2).join(" ") ||
-                  ""}
-              </div>
-            </div>
-          </div>
-          <div className="text-xs leading-relaxed">
-            <div>{businessInfo.addressLine1}</div>
-            <div>{businessInfo.addressLine2}</div>
-            <div>
-              {businessInfo.city} {businessInfo.postalCode}
-            </div>
-            <div className="mt-1">
-              T: {businessInfo.primaryPhone}
-              {businessInfo.secondaryPhone &&
-                `, ${businessInfo.secondaryPhone}`}
-            </div>
-          </div>
-        </div>
-
-        <div className="text-right">
-          <div className="text-3xl font-bold mb-4">INVOICE</div>
-          <div className="text-xs space-y-1">
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
-              <span>{jobCardNumber}</span>
-            </div>
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">DATE</span>
-              <span>{new Date().toLocaleDateString("en-ZA")}</span>
-            </div>
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">MERCHANT CODE</span>
-              <span>V8PA-12345</span>
-            </div>
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">SERVICE TYPE</span>
-              <span>SERVICE</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {/* Three Column Section */}
-    <div className="grid grid-cols-3 gap-4 mb-4">
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          INVOICE TO
-        </div>
-        <div className="text-xs space-y-1">
-          <div>{customerName}</div>
-          <div>ABC Limited</div>
-          <div className="h-16 overflow-hidden text-xs leading-tight">
-            {customerAddress}
-          </div>
-          <div>{customerEmail}</div>
-          <div>{customerPhone}</div>
-        </div>
-      </div>
-
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          BILL TO
-        </div>
-        <div className="text-xs space-y-1">
-          <div>{customerName}</div>
-          <div>ABC Limited</div>
-          <div className="h-16 overflow-hidden text-xs leading-tight">
-            {customerAddress}
-          </div>
-          <div>{customerEmail}</div>
-          <div>{customerPhone}</div>
-        </div>
-      </div>
-
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          VEHICLE DETAILS
-        </div>
-        <div className="text-xs space-y-1">
-          <div className="flex justify-between">
-            <span className="font-semibold">Reg Number:</span>
-            <span>{vehicleReg}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Make:</span>
-            <span>{vehicleMake}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Model:</span>
-            <span>{vehicleModel}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Engine No:</span>
-            <span>{vehicleYear}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">VIN Number:</span>
-            <span className="text-[9px]">{vehicleVin}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Odometer:</span>
-            <span>{vehicleMileage} km</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Pre Auth:</span>
-            <span>AUTH123</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Auth Code:</span>
-            <span>456789</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {/* Items Table */}
-    <div className="mb-4">
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="bg-gray-800">
-            <th className="text-left px-2 py-1 font-bold">ITEM DESCRIPTION</th>
-            <th className="text-center px-2 py-1 font-bold">QUANTITY</th>
-            <th className="text-right px-2 py-1 font-bold">UNIT PRICE</th>
-            <th className="text-right px-2 py-1 font-bold">NET PRICE</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item, index) => (
-            <tr key={index} className="border-b">
-              <td className="px-2 py-2">{item.description}</td>
-              <td className="text-center px-2 py-2">{item.qty}</td>
-              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-2 py-2">
-                R {item.amount.toFixed(2)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-
-    {/* Totals */}
-    <div className="flex justify-end mb-6">
-      <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
-          <span>Subtotal:</span>
-          <span>R {subtotal.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-1">
-          <span>VAT:</span>
-          <span>R {vat.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-2 font-bold bg-gray-50 text-gray-800 px-2">
-          <span>TOTAL:</span>
-          <span>R {total.toFixed(2)}</span>
-        </div>
-      </div>
-    </div>
-
-    {/* Signatures */}
-    <div className="grid grid-cols-3 gap-4 mb-6 text-xs">
-      <div>
-        <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-      <div>
-        <div className="font-semibold mb-1">CLIENT SIGNATURE</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-      <div>
-        <div className="font-semibold mb-1">CONTACT NUMBER:</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-    </div>
-
-    {/* Banking Details */}
-    <div className="bg-red-50 border border-red-200 p-3 mb-4">
-      <div className="text-red-600 font-bold text-xs mb-2">BANKING DETAILS</div>
-      <div className="text-xs space-y-1">
-        <div>
-          <span className="font-semibold">Bank Name:</span> FNB
-        </div>
-        <div>
-          <span className="font-semibold">Account Holder:</span> V8 POWERED AUTO
-        </div>
-        <div>
-          <span className="font-semibold">Branch Name:</span> LIFESTYLE
-          CENTURION
-        </div>
-        <div>
-          <span className="font-semibold">Account Number:</span> 62146991441
-        </div>
-      </div>
-    </div>
-    {/* Signatures and Stamp */}
-    <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
-      <div>
-        <div className="font-semibold mb-1">WORKSHOP SIGNATURE</div>
-        <div className="border-b border-black h-8"></div>
-      </div>
-      {showStamp && (
-        <div className="flex justify-end">
-          <SignatureStamp
-            text={stampText}
-            color={stampColor}
-            showDate={showStampDate}
-            rotation={-5}
-            size="small"
-          />
-        </div>
-      )}
-    </div>
-
-    {/* Footer Note */}
-    <div className="text-center text-xs text-red-600 italic">
-      NB: All our parts and workmanship have 12 months or 15000KM Guarantee
-    </div>
-  </div>
-);
-
-// Classic Template
-export const ClassicTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-    <div className="border-b-2 border-black pb-4 mb-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            {props.businessInfo.logoUrl && (
-              <img
-                src={props.businessInfo.logoUrl}
-                alt="Logo"
-                className="w-16 h-16 object-contain"
-              />
-            )}
-            <div></div>
-          </div>
-          <div className="text-xs leading-relaxed">
-            <div>{props.businessInfo.addressLine1}</div>
-            <div>
-              {props.businessInfo.city}, {props.businessInfo.postalCode}
-            </div>
-            <div>T: {props.businessInfo.primaryPhone}</div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-3xl font-bold mb-4">INVOICE</div>
-          <div className="text-xs space-y-1">
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
-              <span>{props.jobCardNumber}</span>
-            </div>
-            <div className="flex justify-between gap-8">
-              <span className="font-semibold">DATE</span>
-              <span>{new Date().toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-3 gap-4 mb-4">
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          CUSTOMER
-        </div>
-        <div className="text-xs space-y-1">
-          <div>{props.customerName}</div>
-          <div>{props.customerAddress}</div>
-          <div>{props.customerEmail}</div>
-          <div>{props.customerPhone}</div>
-        </div>
-      </div>
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          VEHICLE
-        </div>
-        <div className="text-xs space-y-1">
-          <div>
-            {props.vehicleYear} {props.vehicleMake} {props.vehicleModel}
-          </div>
-          <div>Reg: {props.vehicleReg}</div>
-          <div>VIN: {props.vehicleVin}</div>
-          <div>Mileage: {props.vehicleMileage} km</div>
-        </div>
-      </div>
-      <div className="bg-gray-200 p-3">
-        <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          SERVICE INFO
-        </div>
-        <div className="text-xs space-y-1">
-          <div>Date: {new Date().toLocaleDateString()}</div>
-          <div>Status: In Progress</div>
-        </div>
-      </div>
-    </div>
-
-    <table className="w-full text-xs mb-4">
-      <thead>
-        <tr className="bg-gray-800">
-          <th className="text-left px-2 py-1 font-bold">Description</th>
-          <th className="text-center px-2 py-1 font-bold">Qty</th>
-          <th className="text-right px-2 py-1 font-bold">Unit Price</th>
-          <th className="text-right px-2 py-1 font-bold">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        {props.items.map((item, i) => (
-          <tr key={i} className="border-b">
-            <td className="px-2 py-2">{item.description}</td>
-            <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-
-    <div className="flex justify-end">
-      <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
-          <span>Subtotal:</span>
-          <span>R {props.subtotal.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-1">
-          <span>VAT (15%):</span>
-          <span>R {props.vat.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-2 font-bold bg-gray-50 text-gray-800 px-2">
-          <span>TOTAL:</span>
-          <span>R {props.total.toFixed(2)}</span>
-        </div>
-      </div>
-    </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">
-        PAYMENT INFORMATION
-      </div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div>
-          <span className="font-semibold">Bank Name:</span>{" "}
-          {props.businessInfo.bankName || "First National Bank"}
-        </div>
-        <div>
-          <span className="font-semibold">Account Holder:</span>{" "}
-          {props.businessInfo.businessName}
-        </div>
-        <div>
-          <span className="font-semibold">Account Number:</span>{" "}
-          {props.businessInfo.accountNumber || "62146991441"}
-        </div>
-        <div>
-          <span className="font-semibold">Branch Code:</span>{" "}
-          {props.businessInfo.branchCode || "250655"}
-        </div>
-      </div>
-    </div>
-    {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div
-          className="border-t-2 border-gray-800 pt-2"
-          style={{ minWidth: "200px" }}
-        >
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">
-            {props.businessInfo.businessName}
-          </p>
-        </div>
-      </div>
-    )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice
-      date.
-    </div>
-  </div>
-);
-
-// Modern Template
-export const ModernTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-    <div className="border-b-4 border-blue-500 pb-6 mb-6">
-      <div className="flex justify-between items-start">
-        <div>
-          {props.businessInfo.logoUrl && (
-            <img
-              src={props.businessInfo.logoUrl}
-              alt="Logo"
-              className="w-20 h-20 object-contain mb-3"
-            />
-          )}
-
-          <div className="text-sm text-gray-600 space-y-1">
-            <div>{props.businessInfo.addressLine1}</div>
-            <div>
-              {props.businessInfo.city}, {props.businessInfo.postalCode}
-            </div>
-            <div>{props.businessInfo.primaryPhone}</div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-5xl font-bold text-blue-500 mb-4">INVOICE</div>
-          <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-            <div className="text-sm">
-              <span className="font-semibold">Invoice #:</span>{" "}
-              {props.jobCardNumber}
-            </div>
-            <div className="text-sm">
-              <span className="font-semibold">Date:</span>{" "}
-              {new Date().toLocaleDateString()}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-2 gap-6 mb-6">
-      <div className="bg-gray-800 p-4 rounded-lg">
-        <div className="text-sm font-bold text-gray-500 mb-3">BILL TO</div>
-        <div className="space-y-1 text-sm">
-          <div className="font-semibold text-lg">{props.customerName}</div>
-          <div>{props.customerAddress}</div>
-          <div>{props.customerEmail}</div>
-          <div>{props.customerPhone}</div>
-        </div>
-      </div>
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <div className="text-sm font-bold text-blue-700 mb-3">
-          VEHICLE INFORMATION
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <span className="font-semibold">Make:</span> {props.vehicleMake}
-          </div>
-          <div>
-            <span className="font-semibold">Model:</span> {props.vehicleModel}
-          </div>
-          <div>
-            <span className="font-semibold">Year:</span> {props.vehicleYear}
-          </div>
-          <div>
-            <span className="font-semibold">Reg:</span> {props.vehicleReg}
-          </div>
-          <div className="col-span-2">
-            <span className="font-semibold">Mileage:</span>{" "}
-            {props.vehicleMileage} km
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <table className="w-full mb-6">
-      <thead>
-        <tr className="bg-blue-500 text-gray-800">
-          <th className="text-left px-4 py-3 rounded-l-lg">Description</th>
-          <th className="text-center px-4 py-3">Qty</th>
-          <th className="text-right px-4 py-3">Unit Price</th>
-          <th className="text-right px-4 py-3 rounded-r-lg">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        {props.items.map((item, i) => (
-          <tr key={i} className="border-b hover:bg-gray-800">
-            <td className="px-4 py-3">{item.description}</td>
-            <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-4 py-3 font-semibold">
-              R {item.amount.toFixed(2)}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-
-    <div className="flex justify-end">
-      <div className="w-80 space-y-2">
-        <div className="flex justify-between py-2 text-gray-600">
-          <span>Subtotal:</span>
-          <span>R {props.subtotal.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-2 text-gray-600">
-          <span>VAT (15%):</span>
-          <span>R {props.vat.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-3 text-xl font-bold bg-blue-500 text-gray-800 px-4 rounded-lg">
-          <span>TOTAL:</span>
-          <span>R {props.total.toFixed(2)}</span>
-        </div>
-      </div>
-    </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">
-        PAYMENT INFORMATION
-      </div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div>
-          <span className="font-semibold">Bank Name:</span>{" "}
-          {props.businessInfo.bankName || "First National Bank"}
-        </div>
-        <div>
-          <span className="font-semibold">Account Holder:</span>{" "}
-          {props.businessInfo.businessName}
-        </div>
-        <div>
-          <span className="font-semibold">Account Number:</span>{" "}
-          {props.businessInfo.accountNumber || "62146991441"}
-        </div>
-        <div>
-          <span className="font-semibold">Branch Code:</span>{" "}
-          {props.businessInfo.branchCode || "250655"}
-        </div>
-      </div>
-    </div>
-    {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div
-          className="border-t-2 border-gray-800 pt-2"
-          style={{ minWidth: "200px" }}
-        >
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">
-            {props.businessInfo.businessName}
-          </p>
-        </div>
-      </div>
-    )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice
-      date.
-    </div>
-  </div>
-);
-
-// Elegant/Premium Template
-export const ElegantTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-    <div className="border-4 border-purple-900 p-8">
-      <div className="text-center border-b-2 border-purple-900 pb-6 mb-6">
-        {props.businessInfo.logoUrl && (
-          <img
-            src={props.businessInfo.logoUrl}
-            alt="Logo"
-            className="w-24 h-24 object-contain mx-auto mb-4"
-          />
-        )}
-
-        <div className="text-sm text-gray-600">
-          {props.businessInfo.addressLine1} • {props.businessInfo.city}
-        </div>
-        <div className="text-2xl font-serif text-purple-700 mt-4">INVOICE</div>
-        <div className="text-sm text-gray-500 mt-1">#{props.jobCardNumber}</div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-6 mb-6">
-        <div>
-          <div className="font-serif font-bold text-purple-900 mb-2">
-            BILLED TO
-          </div>
-          <div className="text-sm space-y-1">
-            <div className="font-semibold">{props.customerName}</div>
-            <div>{props.customerAddress}</div>
-            <div>{props.customerEmail}</div>
-          </div>
-        </div>
-        <div>
-          <div className="font-serif font-bold text-purple-900 mb-2">
-            VEHICLE
-          </div>
-          <div className="text-sm space-y-1">
-            <div>
-              {props.vehicleYear} {props.vehicleMake} {props.vehicleModel}
-            </div>
-            <div>Registration: {props.vehicleReg}</div>
-            <div>Mileage: {props.vehicleMileage} km</div>
-          </div>
-        </div>
-      </div>
-
-      <table className="w-full mb-6">
-        <thead>
-          <tr className="border-b-2 border-purple-900">
-            <th className="text-left py-2 font-serif">Service</th>
-            <th className="text-center py-2 font-serif">Qty</th>
-            <th className="text-right py-2 font-serif">Price</th>
-            <th className="text-right py-2 font-serif">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {props.items.map((item, i) => (
-            <tr key={i} className="border-b border-gray-200">
-              <td className="py-3">{item.description}</td>
-              <td className="text-center py-3">{item.qty}</td>
-              <td className="text-right py-3">R {item.rate.toFixed(2)}</td>
-              <td className="text-right py-3">R {item.amount.toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="flex justify-end">
-        <div className="w-64">
-          <div className="flex justify-between py-2">
-            <span>Subtotal:</span>
-            <span>R {props.subtotal.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between py-2">
-            <span>VAT:</span>
-            <span>R {props.vat.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between py-3 font-bold text-lg bg-purple-900 text-gray-800 px-4">
-            <span>TOTAL:</span>
-            <span>R {props.total.toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
-      {/* Payment Information */}
-      <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-        <div className="text-blue-800 font-bold text-sm mb-2">
-          PAYMENT INFORMATION
-        </div>
-        <div className="text-xs space-y-1 text-gray-700">
-          <div>
-            <span className="font-semibold">Bank Name:</span>{" "}
-            {props.businessInfo.bankName || "First National Bank"}
-          </div>
-          <div>
-            <span className="font-semibold">Account Holder:</span>{" "}
-            {props.businessInfo.businessName}
-          </div>
-          <div>
-            <span className="font-semibold">Account Number:</span>{" "}
-            {props.businessInfo.accountNumber || "62146991441"}
-          </div>
-          <div>
-            <span className="font-semibold">Branch Code:</span>{" "}
-            {props.businessInfo.branchCode || "250655"}
-          </div>
-        </div>
-      </div>
-      {props.showStamp && (
-        <div className="text-center mb-4">
-          <div className="mb-4">
-            <SignatureStamp
-              text={props.stampText}
-              color={props.stampColor}
-              showDate={props.showStampDate}
-              rotation={-5}
-              size="medium"
-            />
-          </div>
-          <div
-            className="border-t-2 border-gray-800 pt-2"
-            style={{ minWidth: "200px" }}
-          >
-            <p className="text-sm font-semibold">Authorized Signature</p>
-            <p className="text-xs text-gray-600">
-              {props.businessInfo.businessName}
-            </p>
-          </div>
-        </div>
-      )}
-      {/* Footer Note */}
-      <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-        Thank you for your business. Payment is due within 30 days of invoice
-        date.
-      </div>
-    </div>
-  </div>
-);
-
-// Speed Shop Template
-export const SpeedTemplate = (props) => (
-  <div className="bg-black text-gray-800" style={{ padding: "15mm 20mm" }}>
-    <div className="border-b-4 border-red-600 pb-6 mb-6">
-      <div className="flex justify-between items-start">
-        <div>
-          {props.businessInfo.logoUrl && (
-            <img
-              src={props.businessInfo.logoUrl}
-              alt="Logo"
-              className="w-20 h-20 object-contain mb-3 brightness-0 invert"
-            />
-          )}
-          <div className="text-3xl font-black text-red-600 mb-2">
-            {props.businessInfo.businessName}
-          </div>
-          <div className="text-sm text-gray-400">
-            {props.businessInfo.addressLine1}
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-5xl font-black text-red-600 mb-4 italic">
-            INVOICE
-          </div>
-          <div className="bg-red-600 p-4 rounded space-y-1">
-            <div className="text-sm font-bold">#{props.jobCardNumber}</div>
-            <div className="text-sm">{new Date().toLocaleDateString()}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-2 gap-6 mb-6">
-      <div className="bg-gray-900 p-4 rounded">
-        <div className="text-sm font-bold text-red-600 mb-3">CLIENT</div>
-        <div className="text-sm space-y-1">
-          <div className="font-bold">{props.customerName}</div>
-          <div className="text-gray-400">{props.customerAddress}</div>
-        </div>
-      </div>
-      <div className="bg-gray-900 p-4 rounded">
-        <div className="text-sm font-bold text-red-600 mb-3">VEHICLE</div>
-        <div className="text-sm">
-          <div className="font-bold">
-            {props.vehicleYear} {props.vehicleMake} {props.vehicleModel}
-          </div>
-          <div className="text-gray-400">Reg: {props.vehicleReg}</div>
-        </div>
-      </div>
-    </div>
-
-    <table className="w-full mb-6">
-      <thead>
-        <tr className="bg-red-600">
-          <th className="text-left px-4 py-3 font-black">DESCRIPTION</th>
-          <th className="text-center px-4 py-3 font-black">QTY</th>
-          <th className="text-right px-4 py-3 font-black">PRICE</th>
-          <th className="text-right px-4 py-3 font-black">TOTAL</th>
-        </tr>
-      </thead>
-      <tbody>
-        {props.items.map((item, i) => (
-          <tr key={i} className="border-b border-gray-800">
-            <td className="px-4 py-3">{item.description}</td>
-            <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-            <td className="text-right px-4 py-3 font-bold">
-              R {item.amount.toFixed(2)}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-    <div className="flex justify-end">
-      <div className="w-80">
-        <div className="flex justify-between py-2 text-gray-400">
-          <span>Subtotal:</span>
-          <span>R {props.subtotal.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-2 text-gray-400">
-          <span>VAT:</span>
-          <span>R {props.vat.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-3 text-xl font-black bg-red-600 px-4 rounded">
-          <span>TOTAL:</span>
-          <span>R {props.total.toFixed(2)}</span>
-        </div>
-      </div>
-    </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">
-        PAYMENT INFORMATION
-      </div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div>
-          <span className="font-semibold">Bank Name:</span>{" "}
-          {props.businessInfo.bankName || "First National Bank"}
-        </div>
-        <div>
-          <span className="font-semibold">Account Holder:</span>{" "}
-          {props.businessInfo.businessName}
-        </div>
-        <div>
-          <span className="font-semibold">Account Number:</span>{" "}
-          {props.businessInfo.accountNumber || "62146991441"}
-        </div>
-        <div>
-          <span className="font-semibold">Branch Code:</span>{" "}
-          {props.businessInfo.branchCode || "250655"}
-        </div>
-      </div>
-    </div>
-    {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div
-          className="border-t-2 border-gray-800 pt-2"
-          style={{ minWidth: "200px" }}
-        >
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">
-            {props.businessInfo.businessName}
-          </p>
-        </div>
-      </div>
-    )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice
-      date.
-    </div>
-  </div>
-);
-// Diagnostic Template
-export const DiagnosticTemplate = (props) => (
-  <div className="bg-white" style={{ padding: "15mm 20mm" }}>
-    <div className="border-b-4 border-green-600 pb-6 mb-6">
-      <div className="flex justify-between items-start">
-        <div>
-          {props.businessInfo.logoUrl && (
-            <img
-              src={props.businessInfo.logoUrl}
-              alt="Logo"
-              className="w-20 h-20 object-contain mb-3"
-            />
-          )}
-
-          <div className="text-sm text-gray-600">
-            {props.businessInfo.addressLine1}
-          </div>
-          <div className="text-sm text-gray-600">{props.businessInfo.city}</div>
-        </div>
-        <div className="text-right">
-          <div className="text-4xl font-bold text-green-600 mb-4">
-            SERVICE INVOICE
-          </div>
-          <div className="bg-green-50 border-2 border-green-600 p-3 rounded">
-            <div className="text-sm">
-              <span className="font-bold">Invoice:</span> {props.jobCardNumber}
-            </div>
-            <div className="text-sm">
-              <span className="font-bold">Date:</span>{" "}
-              {new Date().toLocaleDateString()}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div className="grid grid-cols-2 gap-6 mb-6">
-      <div className="border-2 border-green-600 p-4 rounded">
-        <div className="text-sm font-bold text-green-600 mb-3">
-          CUSTOMER DETAILS
-        </div>
-        <div className="text-sm space-y-1">
-          <div>
-            <span className="font-semibold">Name:</span> {props.customerName}
-          </div>
-          <div>
-            <span className="font-semibold">Email:</span> {props.customerEmail}
-          </div>
-          <div>
-            <span className="font-semibold">Phone:</span> {props.customerPhone}
-          </div>
-        </div>
-      </div>
-      <div className="border-2 border-green-600 p-4 rounded">
-        <div className="text-sm font-bold text-green-600 mb-3">
-          VEHICLE DETAILS
-        </div>
-        <div className="text-sm space-y-1">
-          <div>
-            <span className="font-semibold">Vehicle:</span> {props.vehicleYear}{" "}
-            {props.vehicleMake} {props.vehicleModel}
-          </div>
-          <div>
-            <span className="font-semibold">Registration:</span>{" "}
-            {props.vehicleReg}
-          </div>
-          <div>
-            <span className="font-semibold">Odometer:</span>{" "}
-            {props.vehicleMileage} km
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div className="mb-6">
-      <div className="bg-green-600 text-gray-800 px-4 py-2 font-bold">
-        SERVICES PERFORMED
-      </div>
-      <table className="w-full">
-        <thead>
-          <tr className="bg-green-50 border-b-2 border-green-600">
-            <th className="text-left px-4 py-2 text-sm">Description</th>
-            <th className="text-center px-4 py-2 text-sm">Qty</th>
-            <th className="text-right px-4 py-2 text-sm">Unit Price</th>
-            <th className="text-right px-4 py-2 text-sm">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {props.items.map((item, i) => (
-            <tr key={i} className="border-b">
-              <td className="px-4 py-3">{item.description}</td>
-              <td className="text-center px-4 py-3">{item.qty}</td>
-              <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
-              <td className="text-right px-4 py-3 font-semibold">
-                R {item.amount.toFixed(2)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-
-    <div className="flex justify-end">
-      <div className="w-80 border-2 border-green-600 p-4 rounded">
-        <div className="flex justify-between py-2">
-          <span>Subtotal:</span>
-          <span>R {props.subtotal.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-2">
-          <span>VAT (15%):</span>
-          <span>R {props.vat.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-3 text-xl font-bold bg-green-600 text-gray-800 px-4 rounded">
-          <span>TOTAL DUE:</span>
-          <span>R {props.total.toFixed(2)}</span>
-        </div>
-      </div>
-    </div>
-    {/* Payment Information */}
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded">
-      <div className="text-blue-800 font-bold text-sm mb-2">
-        PAYMENT INFORMATION
-      </div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div>
-          <span className="font-semibold">Bank Name:</span>{" "}
-          {props.businessInfo.bankName || "First National Bank"}
-        </div>
-        <div>
-          <span className="font-semibold">Account Holder:</span>{" "}
-          {props.businessInfo.businessName}
-        </div>
-        <div>
-          <span className="font-semibold">Account Number:</span>{" "}
-          {props.businessInfo.accountNumber || "62146991441"}
-        </div>
-        <div>
-          <span className="font-semibold">Branch Code:</span>{" "}
-          {props.businessInfo.branchCode || "250655"}
-        </div>
-      </div>
-    </div>
-    {props.showStamp && (
-      <div className="text-center mb-4">
-        <div className="mb-4">
-          <SignatureStamp
-            text={props.stampText}
-            color={props.stampColor}
-            showDate={props.showStampDate}
-            rotation={-5}
-            size="medium"
-          />
-        </div>
-        <div
-          className="border-t-2 border-gray-800 pt-2"
-          style={{ minWidth: "200px" }}
-        >
-          <p className="text-sm font-semibold">Authorized Signature</p>
-          <p className="text-xs text-gray-600">
-            {props.businessInfo.businessName}
-          </p>
-        </div>
-      </div>
-    )}
-    {/* Footer Note */}
-    <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for your business. Payment is due within 30 days of invoice
-      date.
-    </div>
-  </div>
-);
-// Template Renderer
+// ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATE RENDERER
+// Accepts `businessInfo` (Firestore shape) OR legacy `companyInfo`.
+// ═══════════════════════════════════════════════════════════════════════════
 export const TemplateRenderer = ({
   templateId,
-  documentType = "invoice",
-  stampText = "APPROVED",
-  stampColor = "#d32f2f",
+  reportType,
+  businessInfo, // ← from BusinessSettingsModal / Firestore
+  companyInfo, // ← legacy fallback
+  stampText = "AUTHORISED",
+  stampColor = C.gold,
   showStampDate = true,
   showStamp = false,
   ...props
 }) => {
-  const templateProps = {
+  const tProps = {
     ...props,
-    documentType,
+    reportType,
     stampText,
     stampColor,
     showStampDate,
     showStamp,
+    businessInfo,
+    companyInfo,
   };
   switch (templateId) {
     case "default":
-      return <DefaultTemplate {...templateProps} />;
+      return <DefaultTemplate {...tProps} />;
     case "classic":
-      return <ClassicTemplate {...templateProps} />;
+      return <ClassicTemplate {...tProps} />;
     case "modern":
-      return <ModernTemplate {...templateProps} />;
+      return <ModernTemplate {...tProps} />;
     case "elegant":
     case "premium":
-      return <ElegantTemplate {...templateProps} />;
+      return <ElegantTemplate {...tProps} />;
     case "speed":
-      return <SpeedTemplate {...templateProps} />;
+      return <SpeedTemplate {...tProps} />;
     case "diagnostic":
-      return <DiagnosticTemplate {...templateProps} />;
+      return <DiagnosticTemplate {...tProps} />;
     default:
-      return <DefaultTemplate {...templateProps} />;
+      return <DefaultTemplate {...tProps} />;
   }
 };
+
 export default TemplateSelector;
