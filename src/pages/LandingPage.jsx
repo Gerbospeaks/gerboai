@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import VapiAssistant from "./VapiAssistant";
 import ChatAssistant from "../components/ChatAssistant";
+import IndustryPickerModal from "../components/IndustryPickerModal";
+import { useIndustryPicker } from "../hooks/useIndustryPicker";
 import TimelineNavigation from "./TimelineNavigation";
 import { Helmet } from "react-helmet";
 import {
@@ -109,21 +111,28 @@ const css = `
     --red-light:  #fdf2f0;
     --blue:       #1b6ec2;
     --green:      #1d8348;
-    --border:     #d9dde6;
-    --bg:         #f4f5f8;
-    --white:      #ffffff;
-    --text:       #1a2340;
-    --text-mid:   #4a5568;
-    --text-muted: #8a93a6;
+
+    /* ── Creamy palette ── */
+    --cream:      #fdf6ec;       /* main page background  */
+    --cream-mid:  #f7ede0;       /* slightly deeper cream */
+    --cream-dark: #f0e2cf;       /* section dividers / borders */
+    --card-bg:    #fffdf8;       /* card / white surfaces */
+
+    --border:     #e8ddd0;
+    --bg:         var(--cream);
+    --white:      var(--card-bg);
+    --text:       #2b1f14;
+    --text-mid:   #6b5744;
+    --text-muted: #a08878;
   }
 
   .lp * { box-sizing: border-box; }
-  .lp { font-family: 'Lato', sans-serif; color: var(--text); overflow-x: hidden; }
+  .lp { font-family: 'Lato', sans-serif; color: var(--text); overflow-x: hidden; background: var(--cream); }
   .lp h1, .lp h2, .lp h3 { font-family: 'DM Serif Display', serif; }
 
   /* ── Scroll bar ── */
   .lp ::-webkit-scrollbar { width: 6px; }
-  .lp ::-webkit-scrollbar-track { background: var(--navy); }
+  .lp ::-webkit-scrollbar-track { background: var(--cream-mid); }
   .lp ::-webkit-scrollbar-thumb { background: var(--red); border-radius: 6px; }
 
   /* ── Scroll progress bar ── */
@@ -212,7 +221,7 @@ const css = `
   .lp-drawer-ctas .lp-btn-primary { width: 100%; justify-content: center; height: 44px; font-size: 14px; }
 
   /* ════════════════════════════════════════════════
-     HERO
+     HERO  (keeps dark navy — contrast with cream below)
   ════════════════════════════════════════════════ */
   .lp-hero {
     background: var(--navy);
@@ -222,8 +231,6 @@ const css = `
     position: relative; overflow: hidden;
     text-align: center;
   }
-
-  /* Grid texture */
   .lp-hero::before {
     content: '';
     position: absolute; inset: 0;
@@ -233,7 +240,6 @@ const css = `
     background-size: 48px 48px;
     pointer-events: none;
   }
-  /* Red diagonal slash accent */
   .lp-hero::after {
     content: '';
     position: absolute;
@@ -305,7 +311,6 @@ const css = `
   .lp-hero-trust-item { display: flex; align-items: center; gap: 6px; }
   .lp-hero-trust-item svg { color: #4ade80; }
 
-  /* Hero screenshot */
   .lp-hero-screen {
     position: relative; max-width: 900px; width: 100%; margin: 20px auto 0;
     animation: lp-up .8s ease both .25s;
@@ -322,41 +327,40 @@ const css = `
     position: relative;
   }
   .lp-hero-screen-frame img { width: 100%; height: auto; display: block; }
-  /* ════════════════════════════════════════════════
-   INVOICE CALCULATION FLOATS (hero grid overlay)
-════════════════════════════════════════════════ */
-.lp-invoice-float {
-  position: absolute;
-  left: 32px; top: 22%;
-  background: rgba(14,22,45,.88);
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 8px;
-  padding: 18px 20px;
-  width: 308px;
-  z-index: 2;
-  text-align: left;
-  animation: lp-up .7s ease both .3s;
-}
-.lp-invoice-float2 {
-  position: absolute;
-  right: 32px; top: 26%;
-  background: rgba(14,22,45,.88);
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 8px;
-  padding: 16px 18px;
-  width: 220px;
-  z-index: 2;
-  text-align: left;
-  animation: lp-up .7s ease both .45s;
-}
-.lp-invoice-float-tag {
-  font-size: 9px; font-weight: 700; letter-spacing: .06em;
-  text-transform: uppercase; padding: 2px 8px;
-  border-radius: 10px;
-}
-@media (max-width: 1200px) {
-  .lp-invoice-float, .lp-invoice-float2 { display: none; }
-}
+
+  /* ── Invoice floats ── */
+  .lp-invoice-float {
+    position: absolute;
+    left: 32px; top: 22%;
+    background: rgba(14,22,45,.88);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px;
+    padding: 18px 20px;
+    width: 308px;
+    z-index: 2;
+    text-align: left;
+    animation: lp-up .7s ease both .3s;
+  }
+  .lp-invoice-float2 {
+    position: absolute;
+    right: 32px; top: 26%;
+    background: rgba(14,22,45,.88);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px;
+    padding: 16px 18px;
+    width: 220px;
+    z-index: 2;
+    text-align: left;
+    animation: lp-up .7s ease both .45s;
+  }
+  .lp-invoice-float-tag {
+    font-size: 9px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; padding: 2px 8px;
+    border-radius: 10px;
+  }
+  @media (max-width: 1200px) {
+    .lp-invoice-float, .lp-invoice-float2 { display: none; }
+  }
   .lp-slide-dots { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
   .lp-slide-dot {
     height: 4px; border-radius: 2px; cursor: pointer;
@@ -366,7 +370,6 @@ const css = `
   }
   .lp-slide-dot.active { width: 28px; background: var(--red); }
 
-  /* ── Diagonal section cut ── */
   .lp-cut {
     width: 100%; overflow: hidden; line-height: 0;
     background: var(--navy);
@@ -374,10 +377,10 @@ const css = `
   .lp-cut svg { display: block; }
 
   /* ════════════════════════════════════════════════
-     STATS STRIP
+     STATS STRIP  — creamy dark
   ════════════════════════════════════════════════ */
   .lp-stats {
-    background: #0f1627;
+    background: #2b1f14;         /* warm dark brown instead of #0f1627 */
     padding: 56px 24px;
     position: relative;
   }
@@ -388,7 +391,7 @@ const css = `
   .lp-stat {
     text-align: center;
     padding: 20px 24px;
-    border-right: 1px solid rgba(255,255,255,.07);
+    border-right: 1px solid rgba(253,246,236,.08);
     opacity: 0; transform: translateY(20px);
     transition: opacity .5s ease, transform .5s ease;
   }
@@ -400,14 +403,14 @@ const css = `
     display: flex; align-items: center; justify-content: center;
     margin: 0 auto 12px; color: var(--red);
   }
-  .lp-stat-value { font-size: 36px; font-weight: 900; color: #fff; line-height: 1; margin-bottom: 6px; font-family: 'DM Serif Display', serif; }
-  .lp-stat-label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.4); }
+  .lp-stat-value { font-size: 36px; font-weight: 900; color: var(--cream); line-height: 1; margin-bottom: 6px; font-family: 'DM Serif Display', serif; }
+  .lp-stat-label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(253,246,236,.4); }
 
   /* ════════════════════════════════════════════════
-     FEATURES
+     FEATURES  — creamy background
   ════════════════════════════════════════════════ */
   .lp-features {
-    background: var(--bg);
+    background: var(--cream);
     padding: 96px 24px;
   }
   .lp-section-head { text-align: center; margin-bottom: 56px; }
@@ -426,19 +429,18 @@ const css = `
   .lp-features-grid {
     max-width: 1100px; margin: 0 auto;
     display: grid; grid-template-columns: repeat(3,1fr); gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
+    background: var(--cream-dark);
+    border: 1px solid var(--cream-dark);
     border-radius: 6px; overflow: hidden;
   }
   .lp-feature-card {
-    background: #fff;
+    background: var(--card-bg);
     padding: 32px 28px;
-    transition: background .2s;
     opacity: 0; transform: translateY(16px);
     transition: opacity .45s ease, transform .45s ease, background .2s;
   }
   .lp-feature-card.visible { opacity: 1; transform: translateY(0); }
-  .lp-feature-card:hover { background: #fafbfc; }
+  .lp-feature-card:hover { background: var(--cream-mid); }
   .lp-feature-icon {
     width: 44px; height: 44px; border-radius: 4px;
     display: flex; align-items: center; justify-content: center;
@@ -456,7 +458,7 @@ const css = `
   .lp-feature-card:hover .lp-feature-bar { width: 100%; }
 
   /* ════════════════════════════════════════════════
-     GLOBE
+     GLOBE  — keeps navy
   ════════════════════════════════════════════════ */
   .lp-globe {
     background: var(--navy);
@@ -474,10 +476,10 @@ const css = `
   .lp-globe img { max-width: 760px; width: 100%; }
 
   /* ════════════════════════════════════════════════
-     PRICING
+     PRICING  — deeper cream
   ════════════════════════════════════════════════ */
   .lp-pricing {
-    background: var(--bg);
+    background: var(--cream-mid);
     padding: 96px 24px;
     position: relative; overflow: hidden;
   }
@@ -486,15 +488,15 @@ const css = `
     display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
   }
   .lp-plan {
-    background: #fff;
-    border: 1px solid var(--border);
+    background: var(--card-bg);
+    border: 1px solid var(--cream-dark);
     border-radius: 5px; padding: 36px 28px;
     position: relative;
     opacity: 0; transform: translateY(16px);
     transition: opacity .45s ease, transform .45s ease, box-shadow .2s;
   }
   .lp-plan.visible { opacity: 1; transform: translateY(0); }
-  .lp-plan:hover { box-shadow: 0 8px 32px rgba(26,35,64,.1); }
+  .lp-plan:hover { box-shadow: 0 8px 32px rgba(43,31,20,.1); }
   .lp-plan.popular {
     background: var(--navy);
     border-color: var(--navy);
@@ -520,7 +522,7 @@ const css = `
   .lp-plan.popular .lp-plan-period { color: rgba(255,255,255,.45); }
   .lp-plan-usd { font-size: 11px; color: var(--text-muted); margin-bottom: 20px; }
   .lp-plan.popular .lp-plan-usd { color: rgba(255,255,255,.3); }
-  .lp-plan-desc { font-size: 13px; color: var(--text-mid); margin-bottom: 24px; line-height: 1.5; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+  .lp-plan-desc { font-size: 13px; color: var(--text-mid); margin-bottom: 24px; line-height: 1.5; border-bottom: 1px solid var(--cream-dark); padding-bottom: 20px; }
   .lp-plan.popular .lp-plan-desc { color: rgba(255,255,255,.55); border-color: rgba(255,255,255,.1); }
   .lp-plan-features { list-style: none; padding: 0; margin: 0 0 28px; display: flex; flex-direction: column; gap: 10px; }
   .lp-plan-feature {
@@ -538,16 +540,16 @@ const css = `
   }
   .lp-plan-cta-default {
     background: transparent; color: var(--navy);
-    border: 1px solid var(--border);
+    border: 1px solid var(--cream-dark);
   }
-  .lp-plan-cta-default:hover { border-color: var(--navy); background: var(--bg); }
+  .lp-plan-cta-default:hover { border-color: var(--navy); background: var(--cream); }
   .lp-plan-cta-popular {
     background: var(--red); color: #fff;
   }
   .lp-plan-cta-popular:hover { background: var(--red-hover); transform: translateY(-1px); }
   .lp-price-skeleton {
     display: inline-block; width: 100px; height: 44px;
-    background: linear-gradient(90deg, var(--border) 25%, #eef0f5 50%, var(--border) 75%);
+    background: linear-gradient(90deg, var(--cream-dark) 25%, var(--cream-mid) 50%, var(--cream-dark) 75%);
     background-size: 200% 100%;
     animation: lp-shimmer 1.4s infinite;
     border-radius: 4px;
@@ -560,21 +562,21 @@ const css = `
   }
 
   /* ════════════════════════════════════════════════
-     TESTIMONIALS
+     TESTIMONIALS  — warm dark brown
   ════════════════════════════════════════════════ */
   .lp-testimonials {
-    background: #0f1627;
+    background: #2b1f14;
     padding: 96px 24px;
   }
-  .lp-testimonials h2 { color: #fff; text-align: center; font-size: clamp(2rem,4vw,3rem); margin-bottom: 10px; }
-  .lp-testimonials > .lp-section-head > p { color: rgba(255,255,255,.5); }
+  .lp-testimonials h2 { color: var(--cream); text-align: center; font-size: clamp(2rem,4vw,3rem); margin-bottom: 10px; }
+  .lp-testimonials > .lp-section-head > p { color: rgba(253,246,236,.5); }
   .lp-testimonials-grid {
     max-width: 1060px; margin: 0 auto;
     display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
   }
   .lp-testimonial {
-    background: rgba(255,255,255,.04);
-    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(253,246,236,.04);
+    border: 1px solid rgba(253,246,236,.08);
     border-left: 3px solid var(--red);
     border-radius: 4px; padding: 28px;
     opacity: 0; transform: translateY(16px);
@@ -582,25 +584,24 @@ const css = `
   }
   .lp-testimonial.visible { opacity: 1; transform: translateY(0); }
   .lp-testimonial-stars { display: flex; gap: 3px; margin-bottom: 16px; color: #fb923c; }
-  .lp-testimonial-text { font-size: 14px; color: rgba(255,255,255,.7); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+  .lp-testimonial-text { font-size: 14px; color: rgba(253,246,236,.7); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
   .lp-testimonial-author { display: flex; align-items: center; gap: 10px; }
-  .lp-testimonial-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(255,255,255,.1); }
-  .lp-testimonial-name { font-size: 13px; font-weight: 700; color: #fff; }
-  .lp-testimonial-role { font-size: 11px; color: rgba(255,255,255,.4); margin-top: 1px; }
+  .lp-testimonial-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(253,246,236,.1); }
+  .lp-testimonial-name { font-size: 13px; font-weight: 700; color: var(--cream); }
+  .lp-testimonial-role { font-size: 11px; color: rgba(253,246,236,.4); margin-top: 1px; }
 
   /* ════════════════════════════════════════════════
-     FAQ
+     FAQ  — lightest cream
   ════════════════════════════════════════════════ */
   .lp-faq {
-    background: var(--bg); padding: 96px 24px;
+    background: var(--cream); padding: 96px 24px;
   }
   .lp-faq-list {
     max-width: 760px; margin: 0 auto;
     display: flex; flex-direction: column; gap: 2px;
   }
   .lp-faq-item {
-    background: #fff; border: 1px solid var(--border); border-radius: 3px; padding: 20px 24px;
-    transition: border-color .15s;
+    background: var(--card-bg); border: 1px solid var(--cream-dark); border-radius: 3px; padding: 20px 24px;
     opacity: 0; transform: translateX(-12px);
     transition: opacity .4s ease, transform .4s ease, border-color .15s;
   }
@@ -656,7 +657,7 @@ const css = `
   .lp-cta-footnote { font-size: 12px; color: rgba(255,255,255,.6); letter-spacing: .03em; }
 
   /* ════════════════════════════════════════════════
-     FOOTER
+     FOOTER  — keeps navy
   ════════════════════════════════════════════════ */
   .lp-footer { background: var(--navy); padding: 72px 24px 32px; }
   .lp-footer-grid {
@@ -710,7 +711,7 @@ const css = `
     .lp-nav-links, .lp-nav-ctas { display: none; }
     .lp-hamburger { display: block; }
     .lp-stats-inner { grid-template-columns: repeat(2,1fr); }
-    .lp-stat { border-bottom: 1px solid rgba(255,255,255,.07); }
+    .lp-stat { border-bottom: 1px solid rgba(253,246,236,.07); }
     .lp-features-grid { grid-template-columns: 1fr 1fr; }
     .lp-pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
     .lp-testimonials-grid { grid-template-columns: 1fr; }
@@ -725,6 +726,7 @@ const css = `
 
 /* ─── Component ──────────────────────────────────────────────────────────── */
 const LandingPage = () => {
+  const { isOpen, open, close } = useIndustryPicker();
   const navigate = useNavigate();
   const {
     currencyCode,
@@ -857,10 +859,12 @@ const LandingPage = () => {
     window.addEventListener("scroll", h);
     return () => window.removeEventListener("scroll", h);
   }, []);
+
   useEffect(() => {
     const t = setInterval(() => setCardsSwapped((p) => !p), 3500);
     return () => clearInterval(t);
   }, []);
+
   /* ── Intersection observer ── */
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -1046,6 +1050,7 @@ const LandingPage = () => {
 
   return (
     <>
+      {isOpen && <IndustryPickerModal onClose={close} />}
       <Helmet>
         <title>SolidFlo — Invoicing Made Smarter</title>
       </Helmet>
@@ -1066,16 +1071,10 @@ const LandingPage = () => {
               <a href="#faq">FAQ</a>
             </div>
             <div className="lp-nav-ctas">
-              <button
-                className="lp-btn-ghost"
-                onClick={() => navigate("/login")}
-              >
+              <button className="lp-btn-ghost" onClick={open}>
                 Login
               </button>
-              <button
-                className="lp-btn-primary"
-                onClick={() => navigate("/register")}
-              >
+              <button className="lp-btn-primary" onClick={open}>
                 Start Free <ArrowRight size={13} />
               </button>
             </div>
@@ -1115,22 +1114,10 @@ const LandingPage = () => {
             ))}
           </div>
           <div className="lp-drawer-ctas">
-            <button
-              className="lp-btn-ghost"
-              onClick={() => {
-                setMobileOpen(false);
-                navigate("/login");
-              }}
-            >
+            <button className="lp-btn-ghost" onClick={open}>
               Login
             </button>
-            <button
-              className="lp-btn-primary"
-              onClick={() => {
-                setMobileOpen(false);
-                navigate("/register");
-              }}
-            >
+            <button className="lp-btn-primary" onClick={open}>
               Start Free
             </button>
           </div>
@@ -1138,7 +1125,6 @@ const LandingPage = () => {
 
         {/* ── Hero ── */}
         <section className="lp-hero">
-          
           <div className="lp-hero-badge">
             <Sparkles size={12} />
             Trusted by 10,000+ businesses worldwide
@@ -1149,10 +1135,7 @@ const LandingPage = () => {
           </h1>
           <p className="lp-hero-sub">{ROTATING[currentWord].sub}</p>
           <div className="lp-hero-ctas">
-            <button
-              className="lp-hero-primary"
-              onClick={() => navigate("/register")}
-            >
+            <button className="lp-hero-primary" onClick={open}>
               Start Free Trial <ArrowRight size={15} />
             </button>
             <button className="lp-hero-secondary" onClick={openCalendly}>
@@ -1250,36 +1233,34 @@ const LandingPage = () => {
 
         {/* ── Globe ── */}
         <section
-  className="lp-globe"
-  style={{
-    position: "relative",
-    overflow: "hidden",
-  }}
->
-  {/* Background image with radial fade */}
-  <div
-    style={{
-      position: "absolute",
-      inset: 0,
-      zIndex: 0,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
-    <img
-      src={globe}
-      alt="Global presence"
-      style={{
-        width: "70%",
-        height: "70%",
-        objectFit: "cover",
-        opacity: 0.18,
-        maskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%)",
-        WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%)",
-      }}
-    />
-  </div>
+          className="lp-globe"
+          style={{ position: "relative", overflow: "hidden" }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img
+              src={globe}
+              alt="Global presence"
+              style={{
+                width: "70%",
+                height: "70%",
+                objectFit: "cover",
+                opacity: 0.18,
+                maskImage:
+                  "radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%)",
+                WebkitMaskImage:
+                  "radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%)",
+              }}
+            />
+          </div>
           <div
             className="lp-section-eyebrow"
             style={{
@@ -1296,7 +1277,7 @@ const LandingPage = () => {
           <p>
             Join thousands of businesses across 50+ countries using SolidFlo.
           </p>
-          
+
           <div className="lp-invoice-float">
             <div
               style={{
@@ -1304,9 +1285,6 @@ const LandingPage = () => {
                 justifyContent: "space-between",
                 alignItems: "center",
                 marginBottom: 12,
-                left: cardsSwapped ? "auto" : "32px",
-                right: cardsSwapped ? "32px" : "auto",
-                transition: "left .6s ease, right .6s ease, transform .6s ease",
               }}
             >
               <span
@@ -1327,7 +1305,6 @@ const LandingPage = () => {
                 PAID
               </span>
             </div>
-
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
@@ -1403,7 +1380,6 @@ const LandingPage = () => {
                 ))}
               </tbody>
             </table>
-
             <div
               style={{
                 borderTop: "1px solid rgba(255,255,255,.12)",
@@ -1457,7 +1433,6 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* ── Floating monthly summary card ── */}
           <div className="lp-invoice-float2">
             <div
               style={{
@@ -1467,9 +1442,6 @@ const LandingPage = () => {
                 letterSpacing: ".07em",
                 textTransform: "uppercase",
                 marginBottom: 10,
-                right: cardsSwapped ? "auto" : "32px",
-                left: cardsSwapped ? "32px" : "auto",
-                transition: "left .6s ease, right .6s ease, transform .6s ease",
               }}
             >
               Monthly Summary
@@ -1621,7 +1593,7 @@ const LandingPage = () => {
               Testimonials
             </div>
             <h2>Loved by thousands of businesses</h2>
-            <p style={{ color: "rgba(255,255,255,.5)" }}>
+            <p style={{ color: "rgba(253,246,236,.5)" }}>
               See what our customers have to say about SolidFlo.
             </p>
           </div>
@@ -1727,7 +1699,6 @@ const LandingPage = () => {
                 ))}
               </div>
             </div>
-
             <div>
               <div className="lp-footer-col-title">Product</div>
               <ul className="lp-footer-links">
@@ -1744,7 +1715,6 @@ const LandingPage = () => {
                 ))}
               </ul>
             </div>
-
             <div>
               <div className="lp-footer-col-title">Company</div>
               <ul className="lp-footer-links">
@@ -1761,7 +1731,6 @@ const LandingPage = () => {
                 ))}
               </ul>
             </div>
-
             <div>
               <div className="lp-footer-col-title">Resources</div>
               <ul className="lp-footer-links">

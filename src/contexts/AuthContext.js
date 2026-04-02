@@ -17,7 +17,12 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext({
+  user: null,
+  loading: true,   
+  login: () => {},
+  logout: () => {},
+});
 
 export const useAuth = () => useContext(AuthContext);
 
