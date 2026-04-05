@@ -535,6 +535,36 @@ function DashboardRoutes() {
   );
 }
 
+const SUBDOMAIN_LANDING = {
+  education:         SolidEducare,
+  mechanics:         SolidMechanic,
+  accounting:        SolidAccountant,
+  cleaning:          SolidCleaner,
+  carpentry:         SolidCarpenter,
+  construction:      SolidConstructor,
+  electrical:        SolidElectrical,
+  flooring:          SolidFlooring,
+  health:            SolidHealth,
+  healthcare:        SolidHealth,
+  hotel:             SolidHotel,
+  hvac:              SolidHVAC,
+  landscaping:       SolidLandscaping,
+  legal:             SolidLegal,
+  logistics:         SolidLogistics,
+  painting:          SolidPainting,
+  "pest-control":    SolidPestControl,
+  photography:       SolidPhotography,
+  plumbing:          SolidPlumbing,
+  "pool-services":   SolidPoolService,
+  realestate:        SolidRealEstate,
+  restaurants:       SolidRestaurants,
+  retail:            SolidRetail,
+  security:          SolidSecurity,
+  "solar-installation": SolidSolar,
+  towing:            SolidTowing,
+  welding:           SolidWelder,
+  "window-repair":   SolidWindowRepair,
+};
 // ─── Main App ─────────────────────────────────────────────────────────────────
 function App() {
   useSecurityLock();
@@ -548,33 +578,14 @@ function App() {
           {IS_SUBDOMAIN ? (
             // ── SUBDOMAIN (e.g. mechanics.solidflo.co.za) ────────────────────
             <Routes>
-              <Route path="/" element={<SolidEducare />} />
-              <Route path="/" element={<SolidMechanic />} />
-              <Route path="/" element={<SolidAccountant />} />
-              <Route path="/" element={<SolidCleaner />} />
-              <Route path="/" element={<SolidCarpenter />} />
-              <Route path="/" element={<SolidConstructor />} />
-              <Route path="/" element={<SolidElectrical />} />
-              <Route path="/" element={<SolidFlooring />} />
-              <Route path="/" element={<SolidHealth />} />
-              <Route path="/" element={<SolidHotel />} />
-              <Route path="/" element={<SolidHVAC />} />
-              <Route path="/" element={<SolidLandscaping />} />
-              <Route path="/" element={<SolidLegal />} />
-              <Route path="/" element={<SolidLogistics />} />
-              <Route path="/" element={<SolidPainting />} />
-              <Route path="/" element={<SolidPestControl />} />
-              <Route path="/" element={<SolidPhotography />} />
-              <Route path="/" element={<SolidPlumbing />} />
-              <Route path="/" element={<SolidPoolService />} />
-              <Route path="/" element={<SolidRealEstate />} />
-              <Route path="/" element={<SolidRestaurants />} />
-              <Route path="/" element={<SolidRetail />} />
-              <Route path="/" element={<SolidSecurity />} />
-              <Route path="/" element={<SolidSolar />} />
-              <Route path="/" element={<SolidTowing />} />
-              <Route path="/" element={<SolidWelder />} />
-              <Route path="/" element={<SolidWindowRepair />} />
+              <Route
+      path="/"
+      element={(() => {
+        const subdomain = getSubdomainFromHost();
+        const LandingPage = SUBDOMAIN_LANDING[subdomain];
+        return LandingPage ? <LandingPage /> : <Navigate to="/" replace />;
+      })()}
+    />
               <Route
                 path="/login"
                 element={
