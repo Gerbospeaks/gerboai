@@ -356,7 +356,7 @@ function DashboardRoutes() {
         }
       />
       <Route
-        path="/education"
+        path="/educare"
         element={
           <ProtectedRoute>
             <EducationDashboard />

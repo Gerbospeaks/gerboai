@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-
-/* ─── Inline Google Fonts ──────────────────────────────────────────────── */
+import { useNavigate } from "react-router-dom";
+import logo from "../../assets/img/mechanics-logo.png";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
@@ -336,9 +336,9 @@ function Navbar({ onLogin, onRegister }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
             style={{
-              background: C.orange,
-              width: 34,
-              height: 34,
+              background: "transparent",
+              width: 160,
+             
               borderRadius: 8,
               display: "flex",
               alignItems: "center",
@@ -346,30 +346,9 @@ function Navbar({ onLogin, onRegister }) {
               fontSize: 17,
             }}
           >
-            <img src="logo" alt="" />
+            <img src={logo} alt="SolidFlo" />
           </div>
-          <div>
-            <span
-              style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 900,
-                fontSize: 20,
-                color: C.white,
-                letterSpacing: 0.5,
-              }}
-            >
-              SolidFlo
-            </span>
-            <span
-              style={{
-                color: "rgba(255,255,255,0.35)",
-                fontSize: 12,
-                marginLeft: 8,
-              }}
-            >
-              Motor
-            </span>
-          </div>
+         
         </div>
 
         {/* Desktop links */}
@@ -1956,8 +1935,10 @@ function Footer({ onLogin, onRegister }) {
 
 /* ─── App ───────────────────────────────────────────────────────────────── */
 export default function SubdomainLandingPage() {
-  const goLogin = () => console.log("navigate /login");
-  const goRegister = () => console.log("navigate /register");
+  const navigate = useNavigate();
+  
+  const goLogin = () => navigate("/login");
+  const goRegister = () => navigate("/register");
 
   return (
     <>

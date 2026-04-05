@@ -1230,9 +1230,9 @@ export const INDUSTRY_CONFIG = {
 
   // ─── EDUCATION ───────────────────────────────────────────────────────────────
   education: {
-    subdomain: "education",
+    subdomain: "educare",
     label: "Education",
-    headline: "Fee Invoicing Made Easy for Schools & Tutors",
+    headline: "School Management Made Easy for Schools & Tutors",
     subheadline:
       "Send term fees, tuition invoices and ad hoc charges professionally — and give parents a simple way to pay.",
     cta: "Start Free Today",
