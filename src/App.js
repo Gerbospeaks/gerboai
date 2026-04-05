@@ -565,6 +565,12 @@ const SUBDOMAIN_LANDING = {
   welding:           SolidWelder,
   "window-repair":   SolidWindowRepair,
 };
+function SubdomainRoot() {
+  const subdomain = getSubdomainFromHost();
+  const Landing = SUBDOMAIN_LANDING[subdomain];
+  return Landing ? <Landing /> : <LandingPage />;
+}
+
 // ─── Main App ─────────────────────────────────────────────────────────────────
 function App() {
   useSecurityLock();
@@ -578,14 +584,7 @@ function App() {
           {IS_SUBDOMAIN ? (
             // ── SUBDOMAIN (e.g. mechanics.solidflo.co.za) ────────────────────
             <Routes>
-              <Route
-      path="/"
-      element={(() => {
-        const subdomain = getSubdomainFromHost();
-        const LandingPage = SUBDOMAIN_LANDING[subdomain];
-        return LandingPage ? <LandingPage /> : <Navigate to="/" replace />;
-      })()}
-    />
+              <Route path="/" element={<SubdomainRoot />} />
               <Route
                 path="/login"
                 element={
