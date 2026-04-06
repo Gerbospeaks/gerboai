@@ -1,92 +1,273 @@
-
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
+import logo from "../../assets/img/landscaping-logo.png";
+// ─── Google Fonts ─────────────────────────────────────────────────────────────
+const fontStyle = `
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
+`;
 
-// ─── Smooth scroll helper ─────────────────────────────────────────────────────
-function scrollTo(id) {
+// ─── Design Tokens ────────────────────────────────────────────────────────────
+// Base palette — accent values are overridden per config
+const base = {
+  ink: "#111318",
+  ink2: "#1C2028",
+  surface: "#F6F2EE",
+  white: "#FFFFFF",
+  border: "#E4D8CC",
+  text: "#1E2027",
+  muted: "#8A7B6E",
+};
+
+// Derive runtime tokens from config.accent (hex)
+function tokens(accent) {
+  return {
+    ...base,
+    accent,
+    accentD: shadeHex(accent, -30),
+    accentL: hexAlpha(accent, 0.15),
+    accentBorder: hexAlpha(accent, 0.3),
+  };
+}
+
+// Tiny hex helpers — no deps
+function hexAlpha(hex, a) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function shadeHex(hex, pct) {
+  const clamp = (v) => Math.max(0, Math.min(255, v));
+  const r = clamp(parseInt(hex.slice(1, 3), 16) + pct);
+  const g = clamp(parseInt(hex.slice(3, 5), 16) + pct);
+  const b = clamp(parseInt(hex.slice(5, 7), 16) + pct);
+  return `#${[r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")}`;
+}
+
+// ─── Scroll helper ────────────────────────────────────────────────────────────
+const scrollTo = (id) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
+// ─── Noise Texture ────────────────────────────────────────────────────────────
+function NoiseTile({ opacity = 0.04 }) {
+  return (
+    <svg
+      style={{
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+        opacity,
+      }}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <filter id="noise">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.72"
+          numOctaves="4"
+          stitchTiles="stitch"
+        />
+        <feColorMatrix type="saturate" values="0" />
+      </filter>
+      <rect width="100%" height="100%" filter="url(#noise)" />
+    </svg>
+  );
 }
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
-function Navbar({ config, onLogin, onRegister }) {
+function Navbar({ config, C, onLogin, onRegister }) {
+  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", fn);
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  const links = ["features", "pricing", "testimonials", "faq"];
 
   return (
     <nav
-      style={{ background: config.color, borderBottom: `1px solid rgba(255,255,255,0.08)` }}
-      className="sticky top-0 z-50"
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        background: base.ink,
+        borderBottom: `1px solid ${hexAlpha(C.accent, 0.15)}`,
+        transition: "box-shadow .2s",
+        boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.4)" : "none",
+        fontFamily: "'Barlow', sans-serif",
+      }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: 60,
+        }}
+      >
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{config.icon}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          
           <div>
-            <span className="text-white font-bold text-sm">SolidFlo</span>
-            <span className="text-white/40 text-xs ml-1.5">{config.label}</span>
+           <img src={logo} width={160} alt="" />
           </div>
         </div>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-6">
-          {["features", "pricing", "testimonials", "faq"].map((s) => (
+        {/* Desktop links */}
+        <div
+          style={{
+            display: "flex",
+            gap: 28,
+            alignItems: "center",
+          }}
+        >
+          {links.map((s) => (
             <button
               key={s}
               onClick={() => scrollTo(s)}
-              className="text-white/60 hover:text-white text-sm capitalize transition-colors"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "rgba(246,238,228,0.45)",
+                fontSize: 14,
+                fontFamily: "'Barlow', sans-serif",
+                fontWeight: 500,
+                textTransform: "capitalize",
+                transition: "color .2s",
+              }}
+              onMouseEnter={(e) => (e.target.style.color = "#F6EEE4")}
+              onMouseLeave={(e) =>
+                (e.target.style.color = "rgba(246,238,228,0.45)")
+              }
             >
               {s}
             </button>
           ))}
         </div>
 
-        {/* CTA buttons */}
-        <div className="hidden md:flex items-center gap-2">
+        {/* CTA */}
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <button
             onClick={onLogin}
-            className="px-4 py-1.5 text-sm text-white/70 hover:text-white transition-colors"
+            style={{
+              background: "none",
+              border: `1px solid ${hexAlpha(C.accent, 0.3)}`,
+              borderRadius: 8,
+              padding: "7px 18px",
+              color: "rgba(246,238,228,0.7)",
+              fontSize: 13,
+              fontFamily: "'Barlow', sans-serif",
+              cursor: "pointer",
+              transition: "border-color .2s",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.borderColor = hexAlpha(C.accent, 0.6))
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.borderColor = hexAlpha(C.accent, 0.3))
+            }
           >
             Sign In
           </button>
           <button
             onClick={onRegister}
-            className="px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors"
-            style={{ background: config.accent, color: "#fff" }}
+            style={{
+              background: C.accent,
+              border: "none",
+              borderRadius: 8,
+              padding: "8px 20px",
+              color: base.white,
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: "'Barlow', sans-serif",
+              cursor: "pointer",
+              boxShadow: `0 4px 12px ${hexAlpha(C.accent, 0.4)}`,
+              transition: "opacity .2s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
           >
-            {config.cta}
+            {config.cta} →
           </button>
         </div>
-
-        {/* Mobile hamburger */}
-        <button onClick={() => setOpen(!open)} className="md:hidden p-2 text-white/60 hover:text-white">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            {open ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
-          </svg>
-        </button>
       </div>
 
       {/* Mobile menu */}
       {open && (
-        <div style={{ background: config.color }} className="md:hidden border-t border-white/10 px-4 pb-4 pt-2 space-y-2">
-          {["features", "pricing", "testimonials", "faq"].map((s) => (
+        <div
+          style={{
+            background: base.ink2,
+            borderTop: `1px solid ${hexAlpha(C.accent, 0.1)}`,
+            padding: "12px 24px 20px",
+          }}
+        >
+          {links.map((s) => (
             <button
               key={s}
-              onClick={() => { scrollTo(s); setOpen(false); }}
-              className="block w-full text-left text-white/60 hover:text-white py-1.5 text-sm capitalize"
+              onClick={() => {
+                scrollTo(s);
+                setOpen(false);
+              }}
+              style={{
+                display: "block",
+                width: "100%",
+                textAlign: "left",
+                background: "none",
+                border: "none",
+                color: "rgba(246,238,228,0.5)",
+                fontSize: 14,
+                fontFamily: "'Barlow', sans-serif",
+                padding: "10px 0",
+                cursor: "pointer",
+                textTransform: "capitalize",
+              }}
             >
               {s}
             </button>
           ))}
-          <div className="flex gap-2 pt-2">
-            <button onClick={onLogin} className="flex-1 py-2 text-sm text-white border border-white/20 rounded-lg hover:border-white/40 transition-colors">
+          <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+            <button
+              onClick={onLogin}
+              style={{
+                flex: 1,
+                padding: "10px",
+                borderRadius: 8,
+                border: `1px solid ${hexAlpha(C.accent, 0.3)}`,
+                background: "none",
+                color: "rgba(246,238,228,0.7)",
+                fontSize: 13,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
+            >
               Sign In
             </button>
             <button
               onClick={onRegister}
-              className="flex-1 py-2 text-sm font-semibold rounded-lg"
-              style={{ background: config.accent, color: "#fff" }}
+              style={{
+                flex: 1,
+                padding: "10px",
+                borderRadius: 8,
+                background: C.accent,
+                border: "none",
+                color: base.white,
+                fontSize: 13,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
             >
               Sign Up Free
             </button>
@@ -98,67 +279,187 @@ function Navbar({ config, onLogin, onRegister }) {
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
-function Hero({ config, onRegister }) {
+function Hero({ config, C, onRegister }) {
   return (
     <section
-      className="relative overflow-hidden py-20 sm:py-28"
-      style={{ background: config.color }}
+      style={{
+        background: base.ink,
+        padding: "80px 24px 96px",
+        position: "relative",
+        overflow: "hidden",
+        minHeight: "92vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        fontFamily: "'Barlow', sans-serif",
+      }}
     >
-      {/* Subtle grid pattern */}
+      <NoiseTile opacity={0.045} />
+
+      {/* Warm glow */}
       <div
-        className="absolute inset-0 opacity-5"
         style={{
-          backgroundImage: `linear-gradient(${config.accent}33 1px, transparent 1px), linear-gradient(90deg, ${config.accent}33 1px, transparent 1px)`,
-          backgroundSize: "40px 40px",
+          position: "absolute",
+          bottom: -80,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: 700,
+          height: 300,
+          borderRadius: "50%",
+          background: C.accent,
+          opacity: 0.09,
+          filter: "blur(80px)",
+          pointerEvents: "none",
         }}
       />
 
-      {/* Glow blob */}
+      {/* Grid lines */}
       <div
-        className="absolute -top-20 -right-20 w-96 h-96 rounded-full blur-3xl opacity-20"
-        style={{ background: config.accent }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: `linear-gradient(${hexAlpha(C.accent, 0.04)} 1px, transparent 1px), linear-gradient(90deg, ${hexAlpha(C.accent, 0.04)} 1px, transparent 1px)`,
+          backgroundSize: "60px 60px",
+          pointerEvents: "none",
+        }}
       />
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
-        {/* Industry badge */}
+      <div
+        style={{
+          maxWidth: 860,
+          margin: "0 auto",
+          position: "relative",
+          textAlign: "center",
+          width: "100%",
+        }}
+      >
+        {/* Badge */}
         <div
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-6"
-          style={{ background: `${config.accent}22`, color: config.accent, border: `1px solid ${config.accent}44` }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            background: hexAlpha(C.accent, 0.12),
+            border: `1px solid ${hexAlpha(C.accent, 0.3)}`,
+            borderRadius: 99,
+            padding: "5px 16px",
+            marginBottom: 24,
+          }}
         >
-          <span>{config.icon}</span>
-          <span>Built for {config.label} Businesses</span>
+          <span style={{ fontSize: 14 }}>{config.icon}</span>
+          <span
+            style={{
+              color: C.accent,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+            }}
+          >
+            Built for {config.label} Businesses
+          </span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight mb-5">
+        <h1
+          style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontWeight: 900,
+            fontSize: "clamp(42px, 6vw, 72px)",
+            lineHeight: 1.04,
+            color: "#F6EEE4",
+            margin: "0 0 22px",
+            letterSpacing: "-0.5px",
+          }}
+        >
           {config.headline}
         </h1>
-        <p className="text-base sm:text-xl text-white/60 leading-relaxed max-w-2xl mx-auto mb-10">
+
+        <p
+          style={{
+            color: "rgba(246,238,228,0.5)",
+            fontSize: 18,
+            lineHeight: 1.7,
+            margin: "0 auto 40px",
+            maxWidth: 560,
+          }}
+        >
           {config.subheadline}
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <div
+          style={{
+            display: "flex",
+            gap: 14,
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
           <button
             onClick={onRegister}
-            className="px-8 py-3.5 rounded-xl font-bold text-white text-base shadow-lg transition-transform hover:scale-105"
-            style={{ background: config.accent }}
+            style={{
+              background: C.accent,
+              border: "none",
+              borderRadius: 10,
+              padding: "15px 32px",
+              color: base.white,
+              fontSize: 15,
+              fontWeight: 700,
+              fontFamily: "'Barlow', sans-serif",
+              cursor: "pointer",
+              boxShadow: `0 8px 24px ${hexAlpha(C.accent, 0.4)}`,
+              transition: "transform .15s",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.transform = "scale(1.03)")
+            }
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
           >
             {config.cta}
           </button>
           <button
             onClick={() => scrollTo("features")}
-            className="px-8 py-3.5 rounded-xl font-semibold text-sm text-white/70 border border-white/20 hover:border-white/40 transition-colors"
+            style={{
+              background: hexAlpha(C.accent, 0.08),
+              border: `1px solid ${hexAlpha(C.accent, 0.3)}`,
+              borderRadius: 10,
+              padding: "15px 28px",
+              color: "rgba(246,238,228,0.7)",
+              fontSize: 15,
+              fontWeight: 600,
+              fontFamily: "'Barlow', sans-serif",
+              cursor: "pointer",
+            }}
           >
             See how it works →
           </button>
         </div>
 
-        {/* Trust badges */}
-        <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-white/30 text-xs">
-          {["No credit card required", "Free plan available", "Cancel anytime", "South African business"].map((t) => (
-            <span key={t} className="flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5" style={{ color: config.accent }} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
+        {/* Trust row */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 28,
+            marginTop: 36,
+            justifyContent: "center",
+          }}
+        >
+          {[
+            "No credit card required",
+            "Free plan available",
+            "Cancel anytime",
+            "South African business",
+          ].map((t) => (
+            <span
+              key={t}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                color: "rgba(246,238,228,0.28)",
+                fontSize: 12,
+              }}
+            >
+              <span style={{ color: C.accent, fontSize: 10 }}>✦</span>
               {t}
             </span>
           ))}
@@ -168,41 +469,152 @@ function Hero({ config, onRegister }) {
   );
 }
 
-// ─── Features ─────────────────────────────────────────────────────────────────
-function Features({ config }) {
+// ─── Layer Divider ────────────────────────────────────────────────────────────
+function LayDivider({ C }) {
   return (
-    <section id="features" className="py-16 sm:py-24 bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
+    <div
+      style={{
+        background: base.surface,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 16,
+        padding: "20px 24px",
+      }}
+    >
+      <div
+        style={{
+          height: 1,
+          flex: 1,
+          background: `linear-gradient(to right, transparent, ${hexAlpha(C.accent, 0.3)})`,
+        }}
+      />
+      <span style={{ color: C.accent, fontSize: 14 }}>✦</span>
+      <div
+        style={{
+          height: 1,
+          flex: 1,
+          background: `linear-gradient(to left, transparent, ${hexAlpha(C.accent, 0.3)})`,
+        }}
+      />
+    </div>
+  );
+}
+
+// ─── Features ─────────────────────────────────────────────────────────────────
+function Features({ config, C }) {
+  return (
+    <section
+      id="features"
+      style={{ background: base.surface, padding: "80px 24px" }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 52 }}>
           <p
-            className="text-xs font-bold uppercase tracking-widest mb-3"
-            style={{ color: config.accent }}
+            style={{
+              color: C.accent,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              fontFamily: "'Barlow', sans-serif",
+              marginBottom: 10,
+            }}
           >
             Features
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
+          <h2
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(28px,4vw,46px)",
+              color: base.ink,
+              margin: "0 0 12px",
+              letterSpacing: -0.5,
+            }}
+          >
             Everything your {config.label.toLowerCase()} business needs
           </h2>
-          <p className="text-gray-400 mt-3 max-w-xl mx-auto text-sm sm:text-base">
-            No unnecessary extras. Just the tools that matter for how you work.
+          <p
+            style={{
+              color: base.muted,
+              fontSize: 15,
+              maxWidth: 520,
+              margin: "0 auto",
+              fontFamily: "'Barlow', sans-serif",
+            }}
+          >
+            No bloat. No irrelevant features. Just what your business actually
+            uses every day.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {config.features.map((f) => (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+            gap: 18,
+          }}
+        >
+          {config.features.map((f, i) => (
             <div
-              key={f.title}
-              className="group p-6 rounded-2xl border border-gray-100 hover:border-transparent transition-all hover:shadow-lg"
-              style={{ "--hover-bg": config.lightBg }}
+              key={i}
+              style={{
+                background: base.white,
+                borderRadius: 14,
+                padding: "24px 22px",
+                border: `1px solid ${hexAlpha(C.accent, 0.15)}`,
+                transition: "box-shadow .2s, transform .2s, border-color .2s",
+                cursor: "default",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = `0 8px 32px ${hexAlpha(C.accent, 0.12)}`;
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.borderColor = hexAlpha(C.accent, 0.45);
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = hexAlpha(C.accent, 0.15);
+              }}
             >
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-4"
-                style={{ background: config.lightBg }}
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 10,
+                  background: C.accentL,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 22,
+                  marginBottom: 14,
+                }}
               >
                 {f.icon}
               </div>
-              <h3 className="font-bold text-gray-800 mb-1.5 text-sm">{f.title}</h3>
-              <p className="text-gray-400 text-xs leading-relaxed">{f.desc}</p>
+              <h3
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 800,
+                  fontSize: 18,
+                  color: base.ink,
+                  margin: "0 0 6px",
+                }}
+              >
+                {f.title}
+              </h3>
+              <p
+                style={{
+                  color: base.muted,
+                  fontSize: 13,
+                  lineHeight: 1.65,
+                  margin: 0,
+                  fontFamily: "'Barlow', sans-serif",
+                }}
+              >
+                {f.desc}
+              </p>
             </div>
           ))}
         </div>
@@ -212,81 +624,218 @@ function Features({ config }) {
 }
 
 // ─── Pricing ──────────────────────────────────────────────────────────────────
-function Pricing({ config, onRegister }) {
+function Pricing({ config, C, onRegister }) {
   return (
-    <section id="pricing" style={{ background: config.lightBg }} className="py-16 sm:py-24">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>
+    <section
+      id="pricing"
+      style={{ background: base.white, padding: "80px 24px" }}
+    >
+      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 52 }}>
+          <p
+            style={{
+              color: C.accent,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              fontFamily: "'Barlow', sans-serif",
+              marginBottom: 10,
+            }}
+          >
             Pricing
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">Simple, honest pricing</h2>
-          <p className="text-gray-500 mt-3 text-sm sm:text-base">
-            Start free. Upgrade when you're ready. No hidden fees.
+          <h2
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(28px,4vw,46px)",
+              color: base.ink,
+              margin: "0 0 12px",
+              letterSpacing: -0.5,
+            }}
+          >
+            Honest pricing. No surprises.
+          </h2>
+          <p
+            style={{
+              color: base.muted,
+              fontSize: 15,
+              fontFamily: "'Barlow', sans-serif",
+            }}
+          >
+            Start free. Upgrade when your business is ready to grow.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {config.pricing.map((plan) => (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))",
+            gap: 20,
+          }}
+        >
+          {config.pricing.map((plan, i) => (
             <div
-              key={plan.name}
-              className={`relative rounded-2xl p-6 flex flex-col ${
-                plan.highlight
-                  ? "shadow-xl text-white"
-                  : "bg-white border border-gray-200"
-              }`}
-              style={plan.highlight ? { background: config.color } : {}}
+              key={i}
+              style={{
+                borderRadius: 16,
+                padding: "32px 28px",
+                background: plan.highlight ? base.ink : base.surface,
+                border: plan.highlight
+                  ? `2px solid ${C.accent}`
+                  : `1px solid ${base.border}`,
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+                boxShadow: plan.highlight
+                  ? "0 20px 60px rgba(17,19,24,0.35)"
+                  : "none",
+              }}
             >
               {plan.highlight && (
                 <div
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold px-4 py-1 rounded-full text-white"
-                  style={{ background: config.accent }}
+                  style={{
+                    position: "absolute",
+                    top: -14,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: C.accent,
+                    color: base.white,
+                    fontSize: 11,
+                    fontWeight: 800,
+                    padding: "5px 16px",
+                    borderRadius: 99,
+                    fontFamily: "'Barlow', sans-serif",
+                    letterSpacing: "0.08em",
+                    boxShadow: `0 4px 12px ${hexAlpha(C.accent, 0.4)}`,
+                    whiteSpace: "nowrap",
+                  }}
                 >
-                  Most Popular
+                  MOST POPULAR
                 </div>
               )}
 
-              <div className="mb-4">
-                <p className={`font-bold text-sm mb-0.5 ${plan.highlight ? "text-white/70" : "text-gray-500"}`}>
+              <div style={{ marginBottom: 20 }}>
+                <p
+                  style={{
+                    color: plan.highlight ? "rgba(246,238,228,0.5)" : C.accent,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.12em",
+                    margin: "0 0 6px",
+                    fontFamily: "'Barlow', sans-serif",
+                  }}
+                >
                   {plan.name}
                 </p>
-                <div className="flex items-baseline gap-1">
-                  <span className={`text-3xl font-extrabold ${plan.highlight ? "text-white" : "text-gray-900"}`}>
+                <div
+                  style={{ display: "flex", alignItems: "baseline", gap: 4 }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 900,
+                      fontSize: 40,
+                      color: plan.highlight ? "#F6EEE4" : base.ink,
+                    }}
+                  >
                     {plan.price}
                   </span>
-                  <span className={`text-sm ${plan.highlight ? "text-white/50" : "text-gray-400"}`}>
+                  <span
+                    style={{
+                      color: plan.highlight
+                        ? "rgba(246,238,228,0.4)"
+                        : base.muted,
+                      fontSize: 14,
+                      fontFamily: "'Barlow', sans-serif",
+                    }}
+                  >
                     {plan.period}
                   </span>
                 </div>
-                <p className={`text-xs mt-1 ${plan.highlight ? "text-white/50" : "text-gray-400"}`}>
+                <p
+                  style={{
+                    color: plan.highlight
+                      ? "rgba(246,238,228,0.4)"
+                      : base.muted,
+                    fontSize: 12,
+                    margin: "4px 0 0",
+                    fontFamily: "'Barlow', sans-serif",
+                  }}
+                >
                   {plan.desc}
                 </p>
               </div>
 
-              <ul className="space-y-2.5 flex-1 mb-6">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-xs">
+              <ul
+                style={{
+                  listStyle: "none",
+                  padding: 0,
+                  margin: "0 0 28px",
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                {plan.features.map((f, j) => (
+                  <li
+                    key={j}
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      alignItems: "flex-start",
+                    }}
+                  >
                     <svg
-                      className="w-4 h-4 flex-shrink-0 mt-0.5"
-                      style={{ color: config.accent }}
-                      fill="currentColor"
+                      width="15"
+                      height="15"
                       viewBox="0 0 20 20"
+                      fill={C.accent}
+                      style={{ flexShrink: 0, marginTop: 2 }}
                     >
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
                     </svg>
-                    <span className={plan.highlight ? "text-white/80" : "text-gray-600"}>{f}</span>
+                    <span
+                      style={{
+                        color: plan.highlight
+                          ? "rgba(246,238,228,0.75)"
+                          : base.text,
+                        fontSize: 13,
+                        fontFamily: "'Barlow', sans-serif",
+                      }}
+                    >
+                      {f}
+                    </span>
                   </li>
                 ))}
               </ul>
 
               <button
                 onClick={onRegister}
-                className="w-full py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90"
-                style={
-                  plan.highlight
-                    ? { background: config.accent, color: "#fff" }
-                    : { background: config.lightBg, color: config.accentDark }
-                }
+                style={{
+                  background: plan.highlight ? C.accent : base.ink,
+                  border: "none",
+                  borderRadius: 10,
+                  padding: "12px",
+                  color: plan.highlight ? base.white : "#F6EEE4",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  fontFamily: "'Barlow', sans-serif",
+                  cursor: "pointer",
+                  boxShadow: plan.highlight
+                    ? `0 6px 20px ${hexAlpha(C.accent, 0.35)}`
+                    : "none",
+                  transition: "opacity .2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
               >
                 {plan.cta}
               </button>
@@ -299,43 +848,129 @@ function Pricing({ config, onRegister }) {
 }
 
 // ─── Testimonials ─────────────────────────────────────────────────────────────
-function Testimonials({ config }) {
+function Testimonials({ config, C }) {
   return (
-    <section id="testimonials" className="py-16 sm:py-24 bg-white">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>
+    <section
+      id="testimonials"
+      style={{ background: base.surface, padding: "80px 24px" }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 52 }}>
+          <p
+            style={{
+              color: C.accent,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              fontFamily: "'Barlow', sans-serif",
+              marginBottom: 10,
+            }}
+          >
             Testimonials
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
+          <h2
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(28px,4vw,46px)",
+              color: base.ink,
+              margin: 0,
+              letterSpacing: -0.5,
+            }}
+          >
             Trusted by {config.label.toLowerCase()} businesses across SA
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {config.testimonials.map((t) => (
-            <div key={t.name} className="p-6 rounded-2xl border border-gray-100 flex flex-col gap-4">
-              {/* Stars */}
-              <div className="flex gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-4 h-4" style={{ color: config.accent }} fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))",
+            gap: 20,
+          }}
+        >
+          {config.testimonials.map((t, i) => (
+            <div
+              key={i}
+              style={{
+                background: base.white,
+                borderRadius: 16,
+                padding: "28px 24px",
+                border: `1px solid ${hexAlpha(C.accent, 0.15)}`,
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
+              }}
+            >
+              <div style={{ display: "flex", gap: 2 }}>
+                {[...Array(5)].map((_, j) => (
+                  <span key={j} style={{ color: C.accent, fontSize: 16 }}>
+                    ★
+                  </span>
                 ))}
               </div>
-
-              <p className="text-gray-600 text-sm leading-relaxed flex-1">"{t.quote}"</p>
-
-              <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+              <p
+                style={{
+                  color: base.text,
+                  fontSize: 14,
+                  lineHeight: 1.75,
+                  fontFamily: "'Barlow', sans-serif",
+                  margin: 0,
+                  flex: 1,
+                }}
+              >
+                "{t.quote}"
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  paddingTop: 12,
+                  borderTop: `1px solid ${hexAlpha(C.accent, 0.12)}`,
+                }}
+              >
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                  style={{ background: config.accent }}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    background: C.accentD,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800,
+                    fontSize: 14,
+                    color: base.white,
+                    flexShrink: 0,
+                  }}
                 >
                   {t.avatar}
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-800">{t.name}</p>
-                  <p className="text-xs text-gray-400">{t.role}</p>
+                  <p
+                    style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 700,
+                      fontSize: 15,
+                      color: base.ink,
+                      margin: 0,
+                    }}
+                  >
+                    {t.name}
+                  </p>
+                  <p
+                    style={{
+                      fontFamily: "'Barlow', sans-serif",
+                      fontSize: 12,
+                      color: base.muted,
+                      margin: 0,
+                    }}
+                  >
+                    {t.role}
+                  </p>
                 </div>
               </div>
             </div>
@@ -346,45 +981,113 @@ function Testimonials({ config }) {
   );
 }
 
-// ─── FAQ ─────────────────────────────────────────────────────────────────────
-function FAQ({ config }) {
+// ─── FAQ ──────────────────────────────────────────────────────────────────────
+function FAQ({ config, C }) {
   const [open, setOpen] = useState(null);
 
   return (
-    <section id="faq" style={{ background: config.lightBg }} className="py-16 sm:py-24">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>
+    <section id="faq" style={{ background: base.white, padding: "80px 24px" }}>
+      <div style={{ maxWidth: 760, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <p
+            style={{
+              color: C.accent,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              fontFamily: "'Barlow', sans-serif",
+              marginBottom: 10,
+            }}
+          >
             FAQ
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">Common questions</h2>
+          <h2
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(28px,4vw,46px)",
+              color: base.ink,
+              margin: 0,
+              letterSpacing: -0.5,
+            }}
+          >
+            Common questions
+          </h2>
         </div>
 
-        <div className="space-y-3">
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {config.faqs.map((faq, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div
+              key={i}
+              style={{
+                background: open === i ? C.accentL : base.surface,
+                borderRadius: 12,
+                border: `1px solid ${open === i ? C.accent : base.border}`,
+                overflow: "hidden",
+                transition: "border-color .2s, background .2s",
+              }}
+            >
               <button
-                className="w-full flex items-center justify-between px-5 py-4 text-left"
                 onClick={() => setOpen(open === i ? null : i)}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "18px 22px",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  gap: 16,
+                }}
               >
-                <span className="text-sm font-semibold text-gray-800 pr-4">{faq.q}</span>
-                <svg
-                  className="w-4 h-4 flex-shrink-0 transition-transform"
+                <span
                   style={{
-                    color: config.accent,
-                    transform: open === i ? "rotate(180deg)" : "rotate(0deg)",
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 700,
+                    fontSize: 17,
+                    color: base.ink,
                   }}
-                  fill="none"
+                >
+                  {faq.q}
+                </span>
+                <svg
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
+                  fill="none"
+                  stroke={C.accent}
+                  strokeWidth="2.5"
+                  style={{
+                    flexShrink: 0,
+                    transform: open === i ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform .2s",
+                  }}
                 >
                   <path d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
               {open === i && (
-                <div className="px-5 pb-4 text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-3">
-                  {faq.a}
+                <div
+                  style={{
+                    padding: "0 22px 18px",
+                    borderTop: `1px solid ${hexAlpha(C.accent, 0.2)}`,
+                    paddingTop: 14,
+                  }}
+                >
+                  <p
+                    style={{
+                      color: base.muted,
+                      fontSize: 14,
+                      lineHeight: 1.7,
+                      margin: 0,
+                      fontFamily: "'Barlow', sans-serif",
+                    }}
+                  >
+                    {faq.a}
+                  </p>
                 </div>
               )}
             </div>
@@ -396,61 +1099,281 @@ function FAQ({ config }) {
 }
 
 // ─── CTA Banner ───────────────────────────────────────────────────────────────
-function CTABanner({ config, onRegister }) {
+function CTABanner({ config, C, onRegister }) {
   return (
-    <section className="py-16 sm:py-20" style={{ background: config.color }}>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <span className="text-4xl">{config.icon}</span>
-        <h2 className="text-2xl sm:text-4xl font-extrabold text-white mt-4 mb-4">
+    <section
+      style={{
+        background: base.ink,
+        padding: "80px 24px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <NoiseTile opacity={0.04} />
+      {/* Giant bg icon */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "18rem",
+          lineHeight: 1,
+          opacity: 0.04,
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+      >
+        {config.icon}
+      </div>
+
+      <div
+        style={{
+          maxWidth: 680,
+          margin: "0 auto",
+          textAlign: "center",
+          position: "relative",
+        }}
+      >
+        <p
+          style={{
+            color: C.accent,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            fontFamily: "'Barlow', sans-serif",
+            marginBottom: 16,
+          }}
+        >
+          Get started today
+        </p>
+        <h2
+          style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontWeight: 900,
+            fontSize: "clamp(28px,4vw,52px)",
+            color: "#F6EEE4",
+            margin: "0 0 16px",
+            letterSpacing: -0.5,
+          }}
+        >
           Ready to get paid faster?
         </h2>
-        <p className="text-white/50 mb-8 text-sm sm:text-base">
-          Join hundreds of {config.label.toLowerCase()} businesses already using SolidFlo.
-        </p>
-        <button
-          onClick={onRegister}
-          className="px-10 py-4 rounded-xl font-bold text-white text-base shadow-lg transition-transform hover:scale-105"
-          style={{ background: config.accent }}
+        <p
+          style={{
+            color: "rgba(246,238,228,0.4)",
+            fontSize: 16,
+            margin: "0 0 36px",
+            fontFamily: "'Barlow', sans-serif",
+          }}
         >
-          {config.cta}
-        </button>
+          Join hundreds of {config.label.toLowerCase()} businesses already using
+          SolidFlo to quote professionally and get paid on time.
+        </p>
+        <div
+          style={{
+            display: "flex",
+            gap: 14,
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <button
+            onClick={onRegister}
+            style={{
+              background: C.accent,
+              border: "none",
+              borderRadius: 12,
+              padding: "16px 36px",
+              color: base.white,
+              fontSize: 16,
+              fontWeight: 800,
+              fontFamily: "'Barlow Condensed', sans-serif",
+              cursor: "pointer",
+              letterSpacing: 0.5,
+              boxShadow: `0 8px 28px ${hexAlpha(C.accent, 0.45)}`,
+            }}
+          >
+            {config.cta.toUpperCase()}
+          </button>
+          <button
+            onClick={() => scrollTo("pricing")}
+            style={{
+              background: hexAlpha(C.accent, 0.1),
+              border: `1px solid ${hexAlpha(C.accent, 0.3)}`,
+              borderRadius: 12,
+              padding: "16px 28px",
+              color: "rgba(246,238,228,0.7)",
+              fontSize: 15,
+              fontWeight: 600,
+              fontFamily: "'Barlow', sans-serif",
+              cursor: "pointer",
+            }}
+          >
+            See all plans →
+          </button>
+        </div>
+        <p
+          style={{
+            color: "rgba(246,238,228,0.2)",
+            fontSize: 12,
+            marginTop: 20,
+            fontFamily: "'Barlow', sans-serif",
+          }}
+        >
+          No credit card required · Free plan available forever · Cancel anytime
+        </p>
       </div>
     </section>
   );
 }
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer({ config, onLogin, onRegister }) {
-  return (
-    <footer className="border-t border-gray-100 py-10 bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">{config.icon}</span>
-            <div>
-              <p className="font-bold text-gray-800 text-sm">SolidFlo {config.label}</p>
-              <p className="text-xs text-gray-400">Professional invoicing for SA businesses</p>
-            </div>
-          </div>
+function Footer({ config, C, onLogin, onRegister }) {
+  const cols = [
+    {
+      title: "Product",
+      links: ["Features", "Pricing", "Quote Builder", "Reports"],
+    },
+    {
+      title: "Resources",
+      links: ["Help Centre", "Video Guides", "Blog", "Community"],
+    },
+    {
+      title: "Company",
+      links: [
+        "About SolidFlo",
+        "Contact Us",
+        "Privacy Policy",
+        "Terms of Service",
+        "Made in SA 🇿🇦",
+      ],
+    },
+  ];
 
-          <div className="flex items-center gap-6 text-xs text-gray-400">
-            <button onClick={() => scrollTo("features")} className="hover:text-gray-600 transition-colors">Features</button>
-            <button onClick={() => scrollTo("pricing")} className="hover:text-gray-600 transition-colors">Pricing</button>
-            <button onClick={() => scrollTo("faq")} className="hover:text-gray-600 transition-colors">FAQ</button>
-            <button onClick={onLogin} className="hover:text-gray-600 transition-colors">Sign In</button>
+  return (
+    <footer
+      style={{
+        background: "#0A0C10",
+        borderTop: `1px solid ${hexAlpha(C.accent, 0.1)}`,
+        padding: "56px 24px 32px",
+        fontFamily: "'Barlow', sans-serif",
+      }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "2fr repeat(3, 1fr)",
+            gap: 40,
+            marginBottom: 48,
+          }}
+        >
+          {/* Brand */}
+          <div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                marginBottom: 16,
+              }}
+            >
+              <img src={logo} width={160} alt="" />
+            </div>
+            <p
+              style={{
+                color: "rgba(246,238,228,0.25)",
+                fontSize: 13,
+                lineHeight: 1.7,
+                marginBottom: 20,
+                maxWidth: 220,
+              }}
+            >
+              Professional invoicing software built for South African{" "}
+              {config.label.toLowerCase()} businesses.
+            </p>
             <button
               onClick={onRegister}
-              className="px-3 py-1.5 rounded-lg text-white text-xs font-semibold"
-              style={{ background: config.accent }}
+              style={{
+                background: C.accent,
+                border: "none",
+                borderRadius: 8,
+                padding: "10px 20px",
+                color: base.white,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
             >
-              Sign Up
+              Get started free
             </button>
           </div>
+
+          {cols.map((col, i) => (
+            <div key={i}>
+              <p
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 800,
+                  fontSize: 14,
+                  color: "rgba(246,238,228,0.4)",
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                  margin: "0 0 16px",
+                }}
+              >
+                {col.title}
+              </p>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 10 }}
+              >
+                {col.links.map((l) => (
+                  <a
+                    key={l}
+                    href="#"
+                    style={{
+                      color: "rgba(246,238,228,0.3)",
+                      fontSize: 13,
+                      textDecoration: "none",
+                      transition: "color .15s",
+                    }}
+                    onMouseEnter={(e) => (e.target.style.color = "#F6EEE4")}
+                    onMouseLeave={(e) =>
+                      (e.target.style.color = "rgba(246,238,228,0.3)")
+                    }
+                  >
+                    {l}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-300">
-          <p>© {new Date().getFullYear()} SolidFlo. All rights reserved.</p>
-          <p>Made in South Africa 🇿🇦</p>
+        <div
+          style={{
+            borderTop: `1px solid ${hexAlpha(C.accent, 0.08)}`,
+            paddingTop: 24,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
+          <p
+            style={{ color: "rgba(246,238,228,0.2)", fontSize: 12, margin: 0 }}
+          >
+            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+          </p>
+          <p
+            style={{ color: "rgba(246,238,228,0.2)", fontSize: 12, margin: 0 }}
+          >
+            Made with craft in South Africa 🇿🇦
+          </p>
         </div>
       </div>
     </footer>
@@ -463,19 +1386,36 @@ export default function SubdomainLandingPage() {
   const { subdomain } = useSubdomain();
   const config = getIndustryConfig(subdomain);
 
+  // Build runtime color tokens from the config's accent colour
+  const C = tokens(config.accent);
+
   const goLogin = () => navigate("/login");
   const goRegister = () => navigate("/register");
 
   return (
-    <div className="min-h-screen font-sans">
-      <Navbar config={config} onLogin={goLogin} onRegister={goRegister} />
-      <Hero config={config} onRegister={goRegister} />
-      <Features config={config} />
-      <Pricing config={config} onRegister={goRegister} />
-      <Testimonials config={config} />
-      <FAQ config={config} />
-      <CTABanner config={config} onRegister={goRegister} />
-      <Footer config={config} onLogin={goLogin} onRegister={goRegister} />
-    </div>
+    <>
+      <style>{fontStyle}</style>
+      <div style={{ minHeight: "100vh", fontFamily: "'Barlow', sans-serif" }}>
+        <Navbar
+          config={config}
+          C={C}
+          onLogin={goLogin}
+          onRegister={goRegister}
+        />
+        <Hero config={config} C={C} onRegister={goRegister} />
+        <LayDivider C={C} />
+        <Features config={config} C={C} />
+        <Pricing config={config} C={C} onRegister={goRegister} />
+        <Testimonials config={config} C={C} />
+        <FAQ config={config} C={C} />
+        <CTABanner config={config} C={C} onRegister={goRegister} />
+        <Footer
+          config={config}
+          C={C}
+          onLogin={goLogin}
+          onRegister={goRegister}
+        />
+      </div>
+    </>
   );
 }
