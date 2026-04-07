@@ -1071,8 +1071,8 @@ const LandingPage = () => {
               <a href="#faq">FAQ</a>
             </div>
             <div className="lp-nav-ctas">
-              <button className="lp-btn-ghost" onClick={() => open("login")}>
-  Login
+              <button className="lp-btn-ghost" onClick={() => open("register")}>
+  Register
 </button>
 
               <button className="lp-btn-primary" onClick={() => open("register")}>
