@@ -6,17 +6,7 @@ import logo from "../assets/img/solidflo.png";
 import slide1 from "../assets/img/slide1.avif";
 import slide2 from "../assets/img/slide2.avif";
 import slide3 from "../assets/img/slide3.jpg";
-import {
-  Eye,
-  EyeOff,
-  ArrowRight,
-  ChevronLeft,
-  Check,
-  Search,
-  Zap,
-  Shield,
-  Users,
-} from "lucide-react";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
 
 /* ─── Slide data ─────────────────────────────────────────────────────────── */
 const slides = [
@@ -36,131 +26,6 @@ const slides = [
     description: "Work together with your team in real-time",
   },
 ];
-
-/* ─── Pricing plans ──────────────────────────────────────────────────────── */
-const PLANS = [
-  {
-    id: "starter",
-    name: "Starter",
-    price: 0,
-    period: "forever free",
-    icon: <Shield className="w-4 h-4" />,
-    color: "#6b7280",
-    features: [
-      "Up to 5 clients",
-      "Unlimited invoices",
-      "AI assistant (basic)",
-      "Email support",
-      "Mobile app access",
-    ],
-    cta: "Start Free",
-    popular: false,
-  },
-  {
-    id: "professional",
-    name: "Professional",
-    price: 6,
-    period: "per month",
-    icon: <Zap className="w-4 h-4" />,
-    color: "#1655e0",
-    features: [
-      "Unlimited clients",
-      "AI assistant (full)",
-      "Recurring billing",
-      "Custom branding",
-      "Priority support",
-      "Analytics & reports",
-      "API access",
-    ],
-    cta: "Start Free Trial",
-    popular: true,
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: 25,
-    period: "per month",
-    icon: <Users className="w-4 h-4" />,
-    color: "#0f766e",
-    features: [
-      "Everything in Pro",
-      "Multi-user access",
-      "White-label option",
-      "Dedicated manager",
-      "Custom integrations",
-      "SLA guarantee",
-      "Custom training",
-    ],
-    cta: "Contact Sales",
-    popular: false,
-  },
-];
-
-/* ─── Step dot ───────────────────────────────────────────────────────────── */
-function StepDot({ step, current, label }) {
-  const done = current > step;
-  const active = current === step;
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
-        ${
-          done
-            ? "bg-[#1655e0] text-white"
-            : active
-              ? "bg-[#1655e0] text-white ring-4 ring-[#1655e0]/20"
-              : "bg-[#f1f3f9] text-[#a0aec0]"
-        }`}
-      >
-        {done ? <Check className="w-4 h-4" /> : step}
-      </div>
-      <span
-        className={`text-[10px] font-medium whitespace-nowrap
-        ${active ? "text-[#1655e0]" : "text-[#a0aec0]"}`}
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function StepLine({ active }) {
-  return (
-    <div
-      className="flex-1 h-[2px] mt-[-12px] rounded-full transition-all duration-500"
-      style={{ background: active ? "#1655e0" : "#e8eaf0" }}
-    />
-  );
-}
-
-/* ─── Industry card ──────────────────────────────────────────────────────── */
-function IndustryCard({ dashboard, selected, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`relative group flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 text-left w-full
-        ${
-          selected
-            ? "border-[#1655e0] bg-[#f0f4ff] shadow-md"
-            : "border-[#e8eaf0] bg-white hover:border-[#b8c5f0] hover:bg-[#f8f9ff] hover:shadow-sm"
-        }`}
-    >
-      {selected && (
-        <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[#1655e0] rounded-full flex items-center justify-center">
-          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-        </span>
-      )}
-      <span className="text-2xl leading-none">{dashboard.icon}</span>
-      <span
-        className={`text-[11px] font-semibold leading-tight text-center transition-colors
-        ${selected ? "text-[#1655e0]" : "text-[#374151] group-hover:text-[#1655e0]"}`}
-      >
-        {dashboard.name}
-      </span>
-    </button>
-  );
-}
 
 /* ─── Form helpers ───────────────────────────────────────────────────────── */
 function Field({ label, children }) {
@@ -203,87 +68,30 @@ function Input({
   );
 }
 
-/* ─── Plan card ──────────────────────────────────────────────────────────── */
-function PlanCard({ plan, selected, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`relative w-full text-left rounded-2xl border-2 p-5 transition-all duration-200
-        ${
-          selected
-            ? "border-[#1655e0] bg-[#f0f4ff] shadow-md"
-            : "border-[#e8eaf0] bg-white hover:border-[#b8c5f0] hover:shadow-sm"
-        }`}
-    >
-      {plan.popular && (
-        <span
-          className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1
-          bg-[#1655e0] text-white text-[10px] font-bold rounded-full whitespace-nowrap tracking-wide"
-        >
-          MOST POPULAR
-        </span>
-      )}
-      {selected && (
-        <span className="absolute top-3 right-3 w-5 h-5 bg-[#1655e0] rounded-full flex items-center justify-center">
-          <Check className="w-3 h-3 text-white" strokeWidth={3} />
-        </span>
-      )}
-      <div className="flex items-center gap-2 mb-3">
-        <span
-          className="p-1.5 rounded-lg"
-          style={{ background: `${plan.color}18`, color: plan.color }}
-        >
-          {plan.icon}
-        </span>
-        <span className="text-[14px] font-bold text-[#111827]">
-          {plan.name}
-        </span>
-      </div>
-      <div className="flex items-baseline gap-1 mb-1">
-        <span className="text-[26px] font-extrabold text-[#111827]">
-          {plan.price === 0 ? "Free" : `$${plan.price}`}
-        </span>
-        {plan.price > 0 && (
-          <span className="text-[12px] text-[#9ca3af]">/ {plan.period}</span>
-        )}
-      </div>
-      {plan.price === 0 && (
-        <p className="text-[11px] text-[#9ca3af] mb-1">{plan.period}</p>
-      )}
-      <div className="border-t border-[#f0f0f0] my-3" />
-      <ul className="space-y-1.5">
-        {plan.features.map((f, i) => (
-          <li key={i} className="flex items-start gap-2">
-            <Check
-              className="w-3.5 h-3.5 mt-0.5 flex-shrink-0"
-              style={{ color: selected ? "#1655e0" : "#22c55e" }}
-              strokeWidth={2.5}
-            />
-            <span className="text-[12px] text-[#6b7280]">{f}</span>
-          </li>
-        ))}
-      </ul>
-    </button>
-  );
-}
-
 /* ─── Main component ─────────────────────────────────────────────────────── */
 export default function Register() {
-  const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [selectedDashboard, setSelectedDashboard] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState("professional");
-  const [industrySearch, setIndustrySearch] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // ── Read the industry the user picked on the landing page ──────────────────
+  const [dashboardId, setDashboardId] = useState("");
+
+  useEffect(() => {
+    const pending = localStorage.getItem("pendingDashboardId");
+    if (pending) {
+      setDashboardId(pending);
+    }
+  }, []);
+
+  const industryInfo = dashboards.find((d) => d.id === dashboardId);
 
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -297,67 +105,37 @@ export default function Register() {
     return () => clearInterval(t);
   }, []);
 
-  const filteredDashboards = dashboards.filter(
-    (d) =>
-      d.name.toLowerCase().includes(industrySearch.toLowerCase()) ||
-      d.description.toLowerCase().includes(industrySearch.toLowerCase()),
-  );
-  const selectedInfo = dashboards.find((d) => d.id === selectedDashboard);
-
   /* ── Validation ── */
-  const validateStep1 = () => {
+  const validate = () => {
     if (!name.trim()) return "Please enter your full name";
     if (!email.trim()) return "Please enter your email address";
     if (password.length < 6) return "Password must be at least 6 characters";
     if (password !== confirmPassword) return "Passwords do not match";
+    // Guard: industry must have been picked on the landing page
+    if (!dashboardId)
+      return "No industry selected. Please go back and choose your industry.";
     return null;
   };
 
-  /* ── Navigation ── */
-  const goNext = () => {
-    if (step === 1) {
-      const err = validateStep1();
-      if (err) {
-        setError(err);
-        return;
-      }
-    }
-    if (step === 2 && !selectedDashboard) {
-      setError("Please select your industry to continue");
-      return;
-    }
-    setError("");
-    setStep((s) => s + 1);
-  };
-
-  const goBack = () => {
-    setError("");
-    setStep((s) => s - 1);
-  };
-
-  /* ── Submit on step 3 ── */
+  /* ── Submit ── */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (step < 3) {
-      goNext();
-      return;
-    }
-    if (!selectedPlan) {
-      setError("Please choose a plan to continue");
+    const err = validate();
+    if (err) {
+      setError(err);
       return;
     }
 
     setError("");
     setIsSubmitting(true);
     try {
-      // selectedDashboard is passed as the industry/route key.
-      // selectedPlan is passed in the extra metadata object.
-      // Your AuthContext register() should save both fields to Firestore:
-      //   { dashboard: selectedDashboard, plan: selectedPlan, ... }
-      const result = await register(name, email, password, selectedDashboard, {
-        plan: selectedPlan,
-      });
+      // Pass dashboardId (from landing page) into register() so it's
+      // saved to Firestore under users/{uid}.dashboardId
+      const result = await register(name, email, password, dashboardId);
+
       if (result.success) {
+        // Clean up localStorage now that registration succeeded
+        localStorage.removeItem("pendingDashboardId");
         setSuccess(result.message);
         setTimeout(() => navigate("/login"), 5000);
       } else {
@@ -369,29 +147,6 @@ export default function Register() {
       setIsSubmitting(false);
     }
   };
-
-  const STEP_LABELS = ["Account", "Industry", "Subscribe"];
-
-  const headings = [
-    {
-      title: "Create your account",
-      sub: "Get started — it's free. No credit card required.",
-    },
-    {
-      title: "Choose your industry",
-      sub: "We'll tailor your dashboard to match your business type.",
-    },
-    {
-      title: "Pick your plan",
-      sub: "Start free and upgrade anytime. No contracts, cancel whenever.",
-    },
-  ];
-
-  const panelHint = [
-    "Create a secure account in under 60 seconds.",
-    `${dashboards.length}+ industry templates — your dashboard is ready the moment you sign up.`,
-    "Start free, scale when you're ready. No card needed for the Starter plan.",
-  ];
 
   return (
     <div
@@ -408,25 +163,49 @@ export default function Register() {
             <img src={logo} alt="SolidFlo" className="h-9 object-contain" />
           </div>
 
-          {/* 3-step indicator */}
-          <div className="flex items-center gap-0 mb-8">
-            {STEP_LABELS.map((label, i) => (
-              <React.Fragment key={label}>
-                <StepDot step={i + 1} current={step} label={label} />
-                {i < STEP_LABELS.length - 1 && (
-                  <StepLine active={step > i + 1} />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-
           {/* Heading */}
           <h1 className="text-[26px] font-bold text-[#111827] mb-1">
-            {headings[step - 1].title}
+            Create your account
           </h1>
-          <p className="text-[14px] text-[#6b7280] mb-7">
-            {headings[step - 1].sub}
+          <p className="text-[14px] text-[#6b7280] mb-5">
+            Get started — it's free. No credit card required.
           </p>
+
+          {/* ── Industry badge (read-only confirmation) ── */}
+          {industryInfo ? (
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-[#f0f4ff] border border-[#c7d5f8] rounded-xl mb-6">
+              <span className="text-xl">{industryInfo.icon}</span>
+              <div>
+                <p className="text-[12px] text-[#6b7280]">Selected industry</p>
+                <p className="text-[13px] font-bold text-[#1655e0]">
+                  {industryInfo.name}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="ml-auto text-[11px] text-[#1655e0] font-semibold hover:underline"
+              >
+                Change
+              </button>
+            </div>
+          ) : (
+            // No industry found — nudge user back
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl mb-6">
+              <span>⚠️</span>
+              <p className="text-[12px] text-amber-700 flex-1">
+                No industry selected.{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="font-semibold underline"
+                >
+                  Go back
+                </button>{" "}
+                to choose one.
+              </p>
+            </div>
+          )}
 
           {/* Alerts */}
           {error && (
@@ -441,242 +220,114 @@ export default function Register() {
           )}
 
           <form onSubmit={handleSubmit} className="flex flex-col flex-1">
-            {/* ── STEP 1: Account ── */}
-            {step === 1 && (
-              <div className="space-y-4 flex-1">
-                <Field label="Full Name">
-                  <Input
-                    placeholder="John Smith"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    disabled={isSubmitting}
-                  />
-                </Field>
+            <div className="space-y-4 flex-1">
+              <Field label="Full Name">
+                <Input
+                  placeholder="John Smith"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </Field>
 
-                <Field label="Email Address">
-                  <Input
-                    type="email"
-                    placeholder="john@company.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isSubmitting}
-                  />
-                </Field>
+              <Field label="Email Address">
+                <Input
+                  type="email"
+                  placeholder="john@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </Field>
 
-                <Field label="Password">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Min. 6 characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isSubmitting}
-                    rightElement={
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword((p) => !p)}
-                        className="text-[#9ca3af] hover:text-[#374151] transition-colors"
-                      >
-                        {showPassword ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </button>
-                    }
-                  />
-                  {password && (
-                    <div className="flex gap-1 mt-2">
-                      {[...Array(4)].map((_, i) => {
-                        const strength = Math.min(
-                          Math.floor(password.length / 3),
-                          4,
-                        );
-                        const colors = [
-                          "bg-red-400",
-                          "bg-orange-400",
-                          "bg-yellow-400",
-                          "bg-emerald-400",
-                        ];
-                        return (
-                          <div
-                            key={i}
-                            className={`h-1 flex-1 rounded-full transition-all duration-300
-                              ${i < strength ? colors[strength - 1] : "bg-[#e8eaf0]"}`}
-                          />
-                        );
-                      })}
-                    </div>
-                  )}
-                </Field>
-
-                <Field label="Confirm Password">
-                  <Input
-                    type={showConfirm ? "text" : "password"}
-                    placeholder="Re-enter your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={isSubmitting}
-                    rightElement={
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirm((p) => !p)}
-                        className="text-[#9ca3af] hover:text-[#374151] transition-colors"
-                      >
-                        {showConfirm ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </button>
-                    }
-                  />
-                </Field>
-
-                <button
-                  type="button"
-                  onClick={goNext}
-                  className="w-full mt-2 bg-[#1655e0] hover:bg-[#1245c0] text-white font-semibold py-3 rounded-xl
-                    transition-all duration-200 flex items-center justify-center gap-2 text-sm shadow-md shadow-[#1655e0]/20"
-                >
-                  Continue <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-
-            {/* ── STEP 2: Industry ── */}
-            {step === 2 && (
-              <div className="flex flex-col flex-1 min-h-0">
-                <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af]" />
-                  <input
-                    type="text"
-                    placeholder="Search industry..."
-                    value={industrySearch}
-                    onChange={(e) => setIndustrySearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-white border border-[#d1d5db] rounded-lg text-sm
-                      focus:outline-none focus:ring-2 focus:ring-[#1655e0]/30 focus:border-[#1655e0]
-                      placeholder:text-[#c0c4ce] transition-all"
-                  />
-                </div>
-
-                {selectedInfo && (
-                  <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-[#f0f4ff] border border-[#c7d5f8] rounded-lg">
-                    <span className="text-base">{selectedInfo.icon}</span>
-                    <span className="text-[13px] font-semibold text-[#1655e0]">
-                      {selectedInfo.name}
-                    </span>
-                    <span className="text-[11px] text-[#6b7280] ml-1">
-                      — {selectedInfo.description}
-                    </span>
-                  </div>
-                )}
-
-                <div
-                  className="overflow-y-auto flex-1 pr-1 pb-1"
-                  style={{ maxHeight: "320px" }}
-                >
-                  {filteredDashboards.length === 0 ? (
-                    <div className="text-center py-8 text-[#9ca3af] text-sm">
-                      No industries found for "{industrySearch}"
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-4 gap-2">
-                      {filteredDashboards.map((d) => (
-                        <IndustryCard
-                          key={d.id}
-                          dashboard={d}
-                          selected={selectedDashboard === d.id}
-                          onClick={() => setSelectedDashboard(d.id)}
+              <Field label="Password">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Min. 6 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting}
+                  rightElement={
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((p) => !p)}
+                      className="text-[#9ca3af] hover:text-[#374151] transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  }
+                />
+                {password && (
+                  <div className="flex gap-1 mt-2">
+                    {[...Array(4)].map((_, i) => {
+                      const strength = Math.min(
+                        Math.floor(password.length / 3),
+                        4,
+                      );
+                      const colors = [
+                        "bg-red-400",
+                        "bg-orange-400",
+                        "bg-yellow-400",
+                        "bg-emerald-400",
+                      ];
+                      return (
+                        <div
+                          key={i}
+                          className={`h-1 flex-1 rounded-full transition-all duration-300
+                            ${i < strength ? colors[strength - 1] : "bg-[#e8eaf0]"}`}
                         />
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-3 mt-4 pt-3 border-t border-[#e8eaf0]">
-                  <button
-                    type="button"
-                    onClick={goBack}
-                    className="flex items-center gap-1.5 px-4 py-3 border border-[#d1d5db] text-[#374151]
-                      rounded-xl text-sm font-semibold hover:bg-[#f9fafb] transition-all"
-                  >
-                    <ChevronLeft className="w-4 h-4" /> Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={goNext}
-                    disabled={!selectedDashboard}
-                    className="flex-1 bg-[#1655e0] hover:bg-[#1245c0] text-white font-semibold py-3 rounded-xl
-                      transition-all duration-200 flex items-center justify-center gap-2 text-sm
-                      shadow-md shadow-[#1655e0]/20 disabled:bg-[#a0aec0] disabled:cursor-not-allowed disabled:shadow-none"
-                  >
-                    {selectedDashboard ? "Continue" : "Select an Industry"}
-                    {selectedDashboard && <ArrowRight className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* ── STEP 3: Subscription plan ── */}
-            {step === 3 && (
-              <div className="flex flex-col flex-1">
-                <div className="grid grid-cols-1 gap-4 mb-5">
-                  {PLANS.map((plan) => (
-                    <PlanCard
-                      key={plan.id}
-                      plan={plan}
-                      selected={selectedPlan === plan.id}
-                      onClick={() => setSelectedPlan(plan.id)}
-                    />
-                  ))}
-                </div>
-
-                {selectedPlan && (
-                  <div className="flex items-center gap-2 px-4 py-2.5 bg-[#f0f4ff] border border-[#c7d5f8] rounded-xl mb-4">
-                    <Check
-                      className="w-4 h-4 text-[#1655e0]"
-                      strokeWidth={2.5}
-                    />
-                    <span className="text-[13px] text-[#374151]">
-                      Selected:{" "}
-                      <span className="font-bold text-[#1655e0]">
-                        {PLANS.find((p) => p.id === selectedPlan)?.name}
-                      </span>{" "}
-                      — upgrade or downgrade anytime.
-                    </span>
+                      );
+                    })}
                   </div>
                 )}
+              </Field>
 
-                <div className="flex gap-3 pt-3 border-t border-[#e8eaf0]">
-                  <button
-                    type="button"
-                    onClick={goBack}
-                    className="flex items-center gap-1.5 px-4 py-3 border border-[#d1d5db] text-[#374151]
-                      rounded-xl text-sm font-semibold hover:bg-[#f9fafb] transition-all"
-                  >
-                    <ChevronLeft className="w-4 h-4" /> Back
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || !selectedPlan}
-                    className="flex-1 bg-[#1655e0] hover:bg-[#1245c0] text-white font-semibold py-3 rounded-xl
-                      transition-all duration-200 flex items-center justify-center gap-2 text-sm
-                      shadow-md shadow-[#1655e0]/20 disabled:bg-[#a0aec0] disabled:cursor-not-allowed disabled:shadow-none"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Creating account...
-                      </>
-                    ) : (
-                      <>
-                        Create Account <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
+              <Field label="Confirm Password">
+                <Input
+                  type={showConfirm ? "text" : "password"}
+                  placeholder="Re-enter your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isSubmitting}
+                  rightElement={
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm((p) => !p)}
+                      className="text-[#9ca3af] hover:text-[#374151] transition-colors"
+                    >
+                      {showConfirm ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  }
+                />
+              </Field>
+
+              <button
+                type="submit"
+                disabled={isSubmitting || !dashboardId}
+                className="w-full mt-2 bg-[#1655e0] hover:bg-[#1245c0] text-white font-semibold py-3 rounded-xl
+                  transition-all duration-200 flex items-center justify-center gap-2 text-sm
+                  shadow-md shadow-[#1655e0]/20 disabled:bg-[#a0aec0] disabled:cursor-not-allowed disabled:shadow-none"
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  <>
+                    Create Account <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
           </form>
 
           {/* Footer */}
@@ -802,11 +453,25 @@ export default function Register() {
             ))}
           </div>
 
-          {/* Step-aware hint */}
+          {/* Industry confirmation on right panel */}
           <div className="mt-4 bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-4 backdrop-blur-sm">
-            <p className="text-[12px] text-white/50 text-center leading-relaxed">
-              {panelHint[step - 1]}
-            </p>
+            {industryInfo ? (
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{industryInfo.icon}</span>
+                <div>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest font-semibold">
+                    Your dashboard
+                  </p>
+                  <p className="text-[13px] text-white font-bold">
+                    {industryInfo.name}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-[12px] text-white/50 text-center leading-relaxed">
+                Create a secure account in under 60 seconds.
+              </p>
+            )}
           </div>
         </div>
       </div>

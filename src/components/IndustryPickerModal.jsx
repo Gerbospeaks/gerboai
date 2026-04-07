@@ -2,9 +2,10 @@
 // Shown when the user clicks "Get Started" on the main landing page.
 // Lets them pick an industry → redirects to that industry's subdomain landing page.
 // No login or register happens here — that all lives on the subdomain.
-
-import { useState, useMemo } from "react";
-import { X, Search, ArrowRight } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { dashboards } from "../config/dashboardConfig";
+import { X, Search, ArrowRight, Check } from "lucide-react";
 
 // ─── All industries ────────────────────────────────────────────────────────────
 // subdomain: the actual subdomain used in the URL (e.g. "mechanics.solidflo.co.za")
@@ -219,105 +220,235 @@ function getSubdomainUrl(subdomain) {
   return `${protocol}//${subdomain}.${BASE_DOMAIN}`;
 }
 
-// ─── Modal component ───────────────────────────────────────────────────────────
 export default function IndustryPickerModal({ onClose }) {
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState(null);
-
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    if (!q) return INDUSTRIES;
-    return INDUSTRIES.filter(
-      (i) =>
-        i.label.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q),
-    );
-  }, [search]);
-
-  function handleGo() {
+  const navigate = useNavigate();
+  const [selected, setSelected] = useState("");
+  const [query, setQuery] = useState("");
+ 
+  const filtered = dashboards.filter(
+    (d) =>
+      d.name.toLowerCase().includes(query.toLowerCase()) ||
+      d.description?.toLowerCase().includes(query.toLowerCase()),
+  );
+ 
+  const selectedInfo = dashboards.find((d) => d.id === selected);
+ 
+  const handleContinue = () => {
     if (!selected) return;
-    const industry = INDUSTRIES.find((i) => i.id === selected);
-    if (!industry) return;
-    window.location.href = getSubdomainUrl(industry.subdomain);
-  }
-
-  const selectedIndustry = INDUSTRIES.find((i) => i.id === selected);
-
+    // ── Persist industry so Register.js can read it after navigation ──
+    localStorage.setItem("pendingDashboardId", selected);
+    onClose();
+    navigate("/register");
+  };
+ 
   return (
-    // Faux overlay — uses in-flow div so iframe height is not collapsed
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.55)" }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="bg-white w-full max-w-2xl rounded-2xl border border-gray-200 shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.55)",
+          zIndex: 900,
+          backdropFilter: "blur(4px)",
+        }}
+      />
+ 
+      {/* Modal */}
+      <div
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%,-50%)",
+          zIndex: 910,
+          background: "#fff",
+          borderRadius: 16,
+          padding: "32px 28px 28px",
+          width: "min(92vw, 680px)",
+          maxHeight: "85vh",
+          display: "flex",
+          flexDirection: "column",
+          boxShadow: "0 24px 60px rgba(0,0,0,0.22)",
+          fontFamily: "'DM Sans', sans-serif",
+        }}
+      >
         {/* Header */}
-        <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-gray-100 flex-shrink-0">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
           <div>
-            <h2 className="text-lg font-bold text-gray-900 mb-1">
+            <h2
+              style={{
+                fontSize: 22,
+                fontWeight: 700,
+                color: "#111827",
+                margin: 0,
+                marginBottom: 6,
+              }}
+            >
               Choose your industry
             </h2>
-            <p className="text-sm text-gray-400">
-              Select your industry and we'll take you to your dedicated SolidFlo
-              experience.
+            <p style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>
+              We'll tailor your dashboard to match your business type.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0 ml-4"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#9ca3af",
+              padding: 4,
+              marginLeft: 12,
+              flexShrink: 0,
+            }}
           >
-            <X className="w-4 h-4" />
+            <X size={20} />
           </button>
         </div>
-
+ 
         {/* Search */}
-        <div className="px-6 py-3 border-b border-gray-100 flex-shrink-0">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search industries..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              autoFocus
-              className="w-full pl-9 pr-4 h-9 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-            />
-          </div>
+        <div style={{ position: "relative", marginBottom: 16 }}>
+          <Search
+            size={15}
+            style={{
+              position: "absolute",
+              left: 12,
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "#9ca3af",
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Search industry..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "10px 14px 10px 36px",
+              border: "1px solid #d1d5db",
+              borderRadius: 8,
+              fontSize: 13,
+              outline: "none",
+              boxSizing: "border-box",
+              color: "#111827",
+            }}
+          />
         </div>
-
-        {/* Industry grid */}
-        <div className="flex-1 overflow-y-auto p-4">
+ 
+        {/* Selection banner */}
+        {selectedInfo && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 12px",
+              background: "#f0f4ff",
+              border: "1px solid #c7d5f8",
+              borderRadius: 8,
+              marginBottom: 14,
+              fontSize: 13,
+            }}
+          >
+            <span style={{ fontSize: 18 }}>{selectedInfo.icon}</span>
+            <span style={{ fontWeight: 700, color: "#1655e0" }}>
+              {selectedInfo.name}
+            </span>
+            {selectedInfo.description && (
+              <span style={{ color: "#6b7280", marginLeft: 2 }}>
+                — {selectedInfo.description}
+              </span>
+            )}
+          </div>
+        )}
+ 
+        {/* Grid */}
+        <div
+          style={{
+            overflowY: "auto",
+            flex: 1,
+            paddingRight: 4,
+            marginBottom: 20,
+          }}
+        >
           {filtered.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 text-sm">
-              No industries match "{search}"
-            </div>
+            <p
+              style={{
+                textAlign: "center",
+                color: "#9ca3af",
+                fontSize: 13,
+                padding: "32px 0",
+              }}
+            >
+              No industries found for "{query}"
+            </p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-              {filtered.map((industry) => {
-                const isSelected = selected === industry.id;
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
+                gap: 10,
+              }}
+            >
+              {filtered.map((d) => {
+                const isSelected = selected === d.id;
                 return (
                   <button
-                    key={industry.id}
-                    onClick={() => setSelected(industry.id)}
-                    className={`text-left p-3 rounded-xl border transition-all flex flex-col gap-1.5 ${
-                      isSelected
-                        ? "border-blue-400 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                    }`}
+                    key={d.id}
+                    onClick={() => setSelected(d.id)}
+                    style={{
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "12px 8px",
+                      border: `2px solid ${isSelected ? "#1655e0" : "#e8eaf0"}`,
+                      borderRadius: 12,
+                      background: isSelected ? "#f0f4ff" : "#fff",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
                   >
-                    <span className="text-xl leading-none">
-                      {industry.icon}
-                    </span>
+                    {isSelected && (
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: 6,
+                          right: 6,
+                          width: 16,
+                          height: 16,
+                          background: "#1655e0",
+                          borderRadius: "50%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Check size={10} color="#fff" strokeWidth={3} />
+                      </span>
+                    )}
+                    <span style={{ fontSize: 24, lineHeight: 1 }}>{d.icon}</span>
                     <span
-                      className={`text-xs font-semibold leading-tight ${isSelected ? "text-blue-800" : "text-gray-800"}`}
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        textAlign: "center",
+                        color: isSelected ? "#1655e0" : "#374151",
+                        lineHeight: 1.3,
+                      }}
                     >
-                      {industry.label}
-                    </span>
-                    <span
-                      className={`text-[11px] leading-tight ${isSelected ? "text-blue-600" : "text-gray-400"}`}
-                    >
-                      {industry.desc}
+                      {d.name}
                     </span>
                   </button>
                 );
@@ -325,24 +456,56 @@ export default function IndustryPickerModal({ onClose }) {
             </div>
           )}
         </div>
-
+ 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50 flex-shrink-0">
-          <p className="text-xs text-gray-400">
-            {selectedIndustry
-              ? `Going to ${selectedIndustry.subdomain}.${BASE_DOMAIN}`
-              : "Select an industry to continue"}
-          </p>
+        <div style={{ display: "flex", gap: 10 }}>
           <button
-            onClick={handleGo}
-            disabled={!selected}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold text-white bg-gray-900 hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            onClick={onClose}
+            style={{
+              padding: "12px 20px",
+              border: "1px solid #d1d5db",
+              borderRadius: 10,
+              background: "none",
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "#374151",
+              fontFamily: "'DM Sans', sans-serif",
+            }}
           >
-            Get started
-            <ArrowRight className="w-4 h-4" />
+            Cancel
+          </button>
+          <button
+            onClick={handleContinue}
+            disabled={!selected}
+            style={{
+              flex: 1,
+              padding: "12px 20px",
+              background: selected ? "#1655e0" : "#a0aec0",
+              color: "#fff",
+              border: "none",
+              borderRadius: 10,
+              cursor: selected ? "pointer" : "not-allowed",
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: "'DM Sans', sans-serif",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              transition: "background 0.15s",
+            }}
+          >
+            {selected ? (
+              <>
+                Continue as {selectedInfo?.name} <ArrowRight size={14} />
+              </>
+            ) : (
+              "Select an Industry"
+            )}
           </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }

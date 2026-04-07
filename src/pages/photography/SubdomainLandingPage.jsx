@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/img/photography-logo.png"; 
+import logo from "../../assets/img/photography-logo.png";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
@@ -327,6 +327,7 @@ function MockInvoice() {
 
 /* ─── Navbar ────────────────────────────────────────────────────────────── */
 function Navbar({ onLogin, onRegister }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -357,14 +358,20 @@ function Navbar({ onLogin, onRegister }) {
           height: 60,
         }}
       >
+        {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          
-          <div>
-            <img src={logo} width={160} alt="" />
-          </div>
+          <img src={logo} width={160} alt="" />
         </div>
 
-        <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+        {/* Desktop nav links */}
+        <div
+          style={{
+            display: "flex",
+            gap: 28,
+            alignItems: "center",
+          }}
+          className="desktop-links" // hide via media query at ≤768px
+        >
           {["features", "pricing", "testimonials", "faq"].map((s) => (
             <button
               key={s}
@@ -390,7 +397,11 @@ function Navbar({ onLogin, onRegister }) {
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        {/* Desktop CTAs */}
+        <div
+          style={{ display: "flex", gap: 10, alignItems: "center" }}
+          className="desktop-ctas" // hide via media query at ≤768px
+        >
           <button
             onClick={onLogin}
             style={{
@@ -424,7 +435,125 @@ function Navbar({ onLogin, onRegister }) {
             Start Free →
           </button>
         </div>
+
+        {/* Hamburger — mobile only */}
+        <button
+          onClick={() => setMenuOpen((o) => !o)}
+          className="hamburger" // show only at ≤768px via media query
+          style={{
+            display: "none", // overridden by the media query below
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            flexDirection: "column",
+            gap: 5,
+            padding: 8,
+          }}
+          aria-label="Toggle menu"
+        >
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              style={{
+                display: "block",
+                width: 22,
+                height: 2,
+                background: "rgba(245,240,232,0.7)",
+                borderRadius: 2,
+                transition: "all .25s",
+                transform:
+                  menuOpen && i === 0
+                    ? "translateY(7px) rotate(45deg)"
+                    : menuOpen && i === 1
+                      ? "scaleX(0)"
+                      : menuOpen && i === 2
+                        ? "translateY(-7px) rotate(-45deg)"
+                        : "none",
+              }}
+            />
+          ))}
+        </button>
       </div>
+
+      {/* Mobile dropdown */}
+      {menuOpen && (
+        <div
+          style={{
+            borderTop: `1px solid rgba(200,151,58,0.12)`,
+            padding: "12px 24px 16px",
+            background: C.ink,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              marginBottom: 14,
+            }}
+          >
+            {["features", "pricing", "testimonials", "faq"].map((s) => (
+              <button
+                key={s}
+                onClick={() => {
+                  scrollTo(s);
+                  setMenuOpen(false);
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  borderBottom: "1px solid rgba(200,151,58,0.08)",
+                  cursor: "pointer",
+                  color: "rgba(245,240,232,0.55)",
+                  fontSize: 15,
+                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 500,
+                  textTransform: "capitalize",
+                  textAlign: "left",
+                  padding: "10px 4px",
+                }}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button
+              onClick={onLogin}
+              style={{
+                flex: 1,
+                background: "none",
+                border: `1px solid rgba(200,151,58,0.35)`,
+                borderRadius: 8,
+                padding: "9px",
+                color: "rgba(245,240,232,0.7)",
+                fontSize: 13,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={onRegister}
+              style={{
+                flex: 1,
+                background: C.gold,
+                border: "none",
+                borderRadius: 8,
+                padding: "9px",
+                color: C.white,
+                fontSize: 14,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
+            >
+              Start Free →
+            </button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
@@ -874,7 +1003,7 @@ function HowItWorks() {
                 0{i + 1}
               </div>
               <img src={logo} width={80} alt="" />
-             
+
               <p
                 style={{
                   color: i === 1 ? "rgba(245,240,232,0.55)" : C.muted,
@@ -1876,9 +2005,8 @@ function Footer({ onLogin, onRegister }) {
                 marginBottom: 16,
               }}
             >
-             
               <div>
-               <img src={logo} width={160} alt="" />
+                <img src={logo} width={160} alt="" />
               </div>
             </div>
             <p
@@ -1993,7 +2121,9 @@ function Footer({ onLogin, onRegister }) {
 
 /* ─── App ───────────────────────────────────────────────────────────────── */
 export default function PhotographyLandingPage() {
+  
   const navigate = useNavigate();
+
   const goLogin = () => navigate("/login");
   const goRegister = () => navigate("/register");
 
