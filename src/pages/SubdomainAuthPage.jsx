@@ -489,9 +489,20 @@ function RegisterView() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const pending = localStorage.getItem("pendingDashboardId");
-    if (pending) setDashboardId(pending);
-  }, []);
+  // 1. Try URL param first (production: came from main domain redirect)
+  const params = new URLSearchParams(window.location.search);
+  const fromUrl = params.get("industry");
+
+  // 2. Fall back to localStorage (dev mode or same-origin flow)
+  const fromStorage = localStorage.getItem("pendingDashboardId");
+
+  const resolved = fromUrl || fromStorage;
+  if (resolved) {
+    setDashboardId(resolved);
+    // Persist it locally so page refreshes don't lose it
+    localStorage.setItem("pendingDashboardId", resolved);
+  }
+}, []);
 
   useEffect(() => {
     const t = setInterval(() => setCurrentSlide((p) => (p + 1) % 3), 4000);

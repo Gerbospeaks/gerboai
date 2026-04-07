@@ -234,28 +234,29 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
   const selectedInfo = dashboards.find((d) => d.id === selected);
 
   const handleContinue = () => {
-    if (!selected) return;
-    const industry = dashboards.find((d) => d.id === selected);
-    if (!industry) return;
+  if (!selected) return;
+  const industry = dashboards.find((d) => d.id === selected);
+  if (!industry) return;
 
-    const isDev =
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1";
+  onClose();
 
-    if (intent === "register") {
-      localStorage.setItem("pendingDashboardId", selected);
-    }
+  const isDev =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
 
-    onClose();
-
-    if (isDev) {
-      window.location.href = `http://localhost:${window.location.port}?industry=${industry.id}&mode=${intent}`;
+  if (isDev) {
+    // Dev: stay on localhost, pass industry + mode as query params
+    window.location.href = `http://localhost:${window.location.port}?industry=${industry.id}&mode=${intent}`;
+  } else {
+    const protocol = window.location.protocol;
+    if (intent === "login") {
+      window.location.href = `${protocol}//${industry.id}.solidflo.co.za/login`;
     } else {
-      const protocol = window.location.protocol;
-      const path = intent === "login" ? "/login" : "/";
-      window.location.href = `${protocol}//${industry.id}.solidflo.co.za${path}`;
+      // Pass dashboardId in the URL — localStorage doesn't work cross-origin
+      window.location.href = `${protocol}//${industry.id}.solidflo.co.za/register?industry=${industry.id}`;
     }
-  };
+  }
+};
   return (
     <>
       {/* Backdrop */}
