@@ -1050,7 +1050,7 @@ const LandingPage = () => {
 
   return (
     <>
-      {isOpen && <IndustryPickerModal onClose={close} />}
+      {isOpen && <IndustryPickerModal onClose={close} intent={intent} />}
       <Helmet>
         <title>SolidFlo — Invoicing Made Smarter</title>
       </Helmet>
@@ -1071,10 +1071,11 @@ const LandingPage = () => {
               <a href="#faq">FAQ</a>
             </div>
             <div className="lp-nav-ctas">
-              <button className="lp-btn-ghost" onClick={open}>
-                Login
-              </button>
-              <button className="lp-btn-primary" onClick={open}>
+              <button className="lp-btn-ghost" onClick={() => open("login")}>
+  Login
+</button>
+
+              <button className="lp-btn-primary" onClick={() => open("register")}>
                 Start Free <ArrowRight size={13} />
               </button>
             </div>
@@ -1114,10 +1115,11 @@ const LandingPage = () => {
             ))}
           </div>
           <div className="lp-drawer-ctas">
-            <button className="lp-btn-ghost" onClick={open}>
-              Login
-            </button>
-            <button className="lp-btn-primary" onClick={open}>
+            <button className="lp-btn-ghost" onClick={() => open("login")}>
+  Login
+</button>
+
+            <button className="lp-btn-primary" onClick={() => open("register")}>
               Start Free
             </button>
           </div>

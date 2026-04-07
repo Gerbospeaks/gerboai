@@ -220,27 +220,42 @@ function getSubdomainUrl(subdomain) {
   return `${protocol}//${subdomain}.${BASE_DOMAIN}`;
 }
 
-export default function IndustryPickerModal({ onClose }) {
+export default function IndustryPickerModal({ onClose, intent = "register" }) {
   const navigate = useNavigate();
   const [selected, setSelected] = useState("");
   const [query, setQuery] = useState("");
- 
+
   const filtered = dashboards.filter(
     (d) =>
       d.name.toLowerCase().includes(query.toLowerCase()) ||
       d.description?.toLowerCase().includes(query.toLowerCase()),
   );
- 
+
   const selectedInfo = dashboards.find((d) => d.id === selected);
- 
+
   const handleContinue = () => {
     if (!selected) return;
-    // ── Persist industry so Register.js can read it after navigation ──
-    localStorage.setItem("pendingDashboardId", selected);
+    const industry = dashboards.find((d) => d.id === selected);
+    if (!industry) return;
+
+    const isDev =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+
+    if (intent === "register") {
+      localStorage.setItem("pendingDashboardId", selected);
+    }
+
     onClose();
-    navigate("/register");
+
+    if (isDev) {
+      window.location.href = `http://localhost:${window.location.port}?industry=${industry.id}&mode=${intent}`;
+    } else {
+      const protocol = window.location.protocol;
+      const path = intent === "login" ? "/login" : "/";
+      window.location.href = `${protocol}//${industry.id}.solidflo.co.za${path}`;
+    }
   };
- 
   return (
     <>
       {/* Backdrop */}
@@ -254,7 +269,7 @@ export default function IndustryPickerModal({ onClose }) {
           backdropFilter: "blur(4px)",
         }}
       />
- 
+
       {/* Modal */}
       <div
         style={{
@@ -314,7 +329,7 @@ export default function IndustryPickerModal({ onClose }) {
             <X size={20} />
           </button>
         </div>
- 
+
         {/* Search */}
         <div style={{ position: "relative", marginBottom: 16 }}>
           <Search
@@ -344,7 +359,7 @@ export default function IndustryPickerModal({ onClose }) {
             }}
           />
         </div>
- 
+
         {/* Selection banner */}
         {selectedInfo && (
           <div
@@ -371,7 +386,7 @@ export default function IndustryPickerModal({ onClose }) {
             )}
           </div>
         )}
- 
+
         {/* Grid */}
         <div
           style={{
@@ -438,7 +453,9 @@ export default function IndustryPickerModal({ onClose }) {
                         <Check size={10} color="#fff" strokeWidth={3} />
                       </span>
                     )}
-                    <span style={{ fontSize: 24, lineHeight: 1 }}>{d.icon}</span>
+                    <span style={{ fontSize: 24, lineHeight: 1 }}>
+                      {d.icon}
+                    </span>
                     <span
                       style={{
                         fontSize: 11,
@@ -456,7 +473,7 @@ export default function IndustryPickerModal({ onClose }) {
             </div>
           )}
         </div>
- 
+
         {/* Footer */}
         <div style={{ display: "flex", gap: 10 }}>
           <button
