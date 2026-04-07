@@ -473,93 +473,61 @@ const panelHint = [
 ];
 
 function RegisterView() {
-  const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [selectedDashboard, setSelectedDashboard] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState("professional");
-  const [industrySearch, setIndustrySearch] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { subdomain } = useSubdomain();
+  const [dashboardId, setDashboardId] = useState("");
+
   const auth = getAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const pending = localStorage.getItem("pendingDashboardId");
+    if (pending) setDashboardId(pending);
+  }, []);
 
   useEffect(() => {
     const t = setInterval(() => setCurrentSlide((p) => (p + 1) % 3), 4000);
     return () => clearInterval(t);
   }, []);
 
-  const filteredDashboards = (dashboards || []).filter(
-    (d) =>
-      d.name.toLowerCase().includes(industrySearch.toLowerCase()) ||
-      d.description.toLowerCase().includes(industrySearch.toLowerCase()),
-  );
-  const selectedInfo = (dashboards || []).find(
-    (d) => d.id === selectedDashboard,
-  );
+  const industryInfo = (dashboards || []).find((d) => d.id === dashboardId);
 
-  const validateStep1 = () => {
+  const validate = () => {
     if (!name.trim()) return "Please enter your full name";
     if (!email.trim()) return "Please enter your email address";
     if (password.length < 6) return "Password must be at least 6 characters";
     if (password !== confirmPassword) return "Passwords do not match";
+    if (!dashboardId)
+      return "No industry selected. Please go back and choose your industry.";
     return null;
-  };
-
-  const goNext = () => {
-    if (step === 1) {
-      const err = validateStep1();
-      if (err) {
-        setError(err);
-        return;
-      }
-    }
-    if (step === 2 && !selectedDashboard) {
-      setError("Please select your industry to continue");
-      return;
-    }
-    setError("");
-    setStep((s) => s + 1);
-  };
-
-  const goBack = () => {
-    setError("");
-    setStep((s) => s - 1);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (step < 3) {
-      goNext();
-      return;
-    }
-    if (!selectedPlan) {
-      setError("Please choose a plan to continue");
-      return;
-    }
+    const err = validate();
+    if (err) { setError(err); return; }
+
     setError("");
     setIsSubmitting(true);
     try {
-      const { user } = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email,
         displayName: name,
-        dashboardId: selectedDashboard || subdomain || "general",
-        plan: selectedPlan,
+        dashboardId: dashboardId || "general",
+        plan: "starter",
         createdAt: serverTimestamp(),
       });
+      localStorage.removeItem("pendingDashboardId");
       setSuccess("Account created! Redirecting to login...");
       setTimeout(() => navigate("/login"), 3000);
     } catch (err) {
@@ -568,21 +536,6 @@ function RegisterView() {
       setIsSubmitting(false);
     }
   };
-
-  const headings = [
-    {
-      title: "Create your account",
-      sub: "Get started — it's free. No credit card required.",
-    },
-    {
-      title: "Choose your industry",
-      sub: "We'll tailor your dashboard to match your business type.",
-    },
-    {
-      title: "Pick your plan",
-      sub: "Start free and upgrade anytime. No contracts, cancel whenever.",
-    },
-  ];
 
   return (
     <div
@@ -595,24 +548,47 @@ function RegisterView() {
             <img src={logo} alt="SolidFlo" className="h-9 object-contain" />
           </div>
 
-          {/* Step indicator */}
-          <div className="flex items-center gap-0 mb-8">
-            {STEP_LABELS.map((label, i) => (
-              <React.Fragment key={label}>
-                <StepDot step={i + 1} current={step} label={label} />
-                {i < STEP_LABELS.length - 1 && (
-                  <StepLine active={step > i + 1} />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-
           <h1 className="text-[26px] font-bold text-[#111827] mb-1">
-            {headings[step - 1].title}
+            Create your account
           </h1>
-          <p className="text-[14px] text-[#6b7280] mb-7">
-            {headings[step - 1].sub}
+          <p className="text-[14px] text-[#6b7280] mb-5">
+            Get started — it's free. No credit card required.
           </p>
+
+          {/* Industry badge */}
+          {industryInfo ? (
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-[#f0f4ff] border border-[#c7d5f8] rounded-xl mb-6">
+              <span className="text-xl">{industryInfo.icon}</span>
+              <div>
+                <p className="text-[12px] text-[#6b7280]">Selected industry</p>
+                <p className="text-[13px] font-bold text-[#1655e0]">
+                  {industryInfo.name}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="ml-auto text-[11px] text-[#1655e0] font-semibold hover:underline"
+              >
+                Change
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl mb-6">
+              <span>⚠️</span>
+              <p className="text-[12px] text-amber-700 flex-1">
+                No industry selected.{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="font-semibold underline"
+                >
+                  Go back
+                </button>{" "}
+                to choose one.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-5 text-sm">
@@ -626,269 +602,119 @@ function RegisterView() {
           )}
 
           <form onSubmit={handleSubmit} className="flex flex-col flex-1">
-            {/* STEP 1 */}
-            {step === 1 && (
-              <div className="space-y-4 flex-1">
-                <Field label="Full Name">
+            <div className="space-y-4 flex-1">
+              <Field label="Full Name">
+                <input
+                  type="text"
+                  placeholder="John Smith"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={isSubmitting}
+                  className={inputCls}
+                />
+              </Field>
+
+              <Field label="Email Address">
+                <input
+                  type="email"
+                  placeholder="john@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting}
+                  className={inputCls}
+                />
+              </Field>
+
+              <Field label="Password">
+                <div className="relative">
                   <input
-                    type="text"
-                    required
-                    placeholder="John Smith"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Min. 6 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     disabled={isSubmitting}
-                    className={inputCls}
+                    className={`${inputCls} pr-11`}
                   />
-                </Field>
-                <Field label="Email Address">
-                  <input
-                    type="email"
-                    required
-                    placeholder="john@company.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isSubmitting}
-                    className={inputCls}
-                  />
-                </Field>
-
-                <Field label="Password">
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      required
-                      placeholder="Min. 6 characters"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={isSubmitting}
-                      className={`${inputCls} pr-11`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((p) => !p)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-[#374151] transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                  {password && (
-                    <div className="flex gap-1 mt-2">
-                      {[...Array(4)].map((_, i) => {
-                        const strength = Math.min(
-                          Math.floor(password.length / 3),
-                          4,
-                        );
-                        const colors = [
-                          "bg-red-400",
-                          "bg-orange-400",
-                          "bg-yellow-400",
-                          "bg-emerald-400",
-                        ];
-                        return (
-                          <div
-                            key={i}
-                            className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < strength ? colors[strength - 1] : "bg-[#e8eaf0]"}`}
-                          />
-                        );
-                      })}
-                    </div>
-                  )}
-                </Field>
-
-                <Field label="Confirm Password">
-                  <div className="relative">
-                    <input
-                      type={showConfirm ? "text" : "password"}
-                      required
-                      placeholder="Re-enter your password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      disabled={isSubmitting}
-                      className={`${inputCls} pr-11`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirm((p) => !p)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-[#374151] transition-colors"
-                    >
-                      {showConfirm ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                </Field>
-
-                <button
-                  type="button"
-                  onClick={goNext}
-                  className="w-full mt-2 bg-[#1655e0] hover:bg-[#1245c0] text-white font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm shadow-md shadow-[#1655e0]/20"
-                >
-                  Continue <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-
-            {/* STEP 2 */}
-            {step === 2 && (
-              <div className="flex flex-col flex-1 min-h-0">
-                <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af]" />
-                  <input
-                    type="text"
-                    placeholder="Search industry..."
-                    value={industrySearch}
-                    onChange={(e) => setIndustrySearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-white border border-[#d1d5db] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1655e0]/30 focus:border-[#1655e0] placeholder:text-[#c0c4ce] transition-all"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-[#374151] transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
-
-                {selectedInfo && (
-                  <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-[#f0f4ff] border border-[#c7d5f8] rounded-lg">
-                    <span className="text-base">{selectedInfo.icon}</span>
-                    <span className="text-[13px] font-semibold text-[#1655e0]">
-                      {selectedInfo.name}
-                    </span>
-                    <span className="text-[11px] text-[#6b7280] ml-1">
-                      — {selectedInfo.description}
-                    </span>
-                  </div>
-                )}
-
-                <div
-                  className="overflow-y-auto flex-1 pr-1 pb-1"
-                  style={{ maxHeight: "320px" }}
-                >
-                  {filteredDashboards.length === 0 ? (
-                    <div className="text-center py-8 text-[#9ca3af] text-sm">
-                      No industries found for "{industrySearch}"
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-4 gap-2">
-                      {filteredDashboards.map((d) => (
-                        <IndustryCard
-                          key={d.id}
-                          dashboard={d}
-                          selected={selectedDashboard === d.id}
-                          onClick={() => setSelectedDashboard(d.id)}
+                {password && (
+                  <div className="flex gap-1 mt-2">
+                    {[...Array(4)].map((_, i) => {
+                      const strength = Math.min(Math.floor(password.length / 3), 4);
+                      const colors = ["bg-red-400", "bg-orange-400", "bg-yellow-400", "bg-emerald-400"];
+                      return (
+                        <div
+                          key={i}
+                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < strength ? colors[strength - 1] : "bg-[#e8eaf0]"}`}
                         />
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-3 mt-4 pt-3 border-t border-[#e8eaf0]">
-                  <button
-                    type="button"
-                    onClick={goBack}
-                    className="flex items-center gap-1.5 px-4 py-3 border border-[#d1d5db] text-[#374151] rounded-xl text-sm font-semibold hover:bg-[#f9fafb] transition-all"
-                  >
-                    <ChevronLeft className="w-4 h-4" /> Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={goNext}
-                    disabled={!selectedDashboard}
-                    className="flex-1 bg-[#1655e0] hover:bg-[#1245c0] text-white font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm shadow-md shadow-[#1655e0]/20 disabled:bg-[#a0aec0] disabled:cursor-not-allowed disabled:shadow-none"
-                  >
-                    {selectedDashboard ? "Continue" : "Select an Industry"}
-                    {selectedDashboard && <ArrowRight className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3 */}
-            {step === 3 && (
-              <div className="flex flex-col flex-1">
-                <div className="grid grid-cols-1 gap-4 mb-5">
-                  {PLANS.map((plan) => (
-                    <PlanCard
-                      key={plan.id}
-                      plan={plan}
-                      selected={selectedPlan === plan.id}
-                      onClick={() => setSelectedPlan(plan.id)}
-                    />
-                  ))}
-                </div>
-
-                {selectedPlan && (
-                  <div className="flex items-center gap-2 px-4 py-2.5 bg-[#f0f4ff] border border-[#c7d5f8] rounded-xl mb-4">
-                    <Check
-                      className="w-4 h-4 text-[#1655e0]"
-                      strokeWidth={2.5}
-                    />
-                    <span className="text-[13px] text-[#374151]">
-                      Selected:{" "}
-                      <span className="font-bold text-[#1655e0]">
-                        {PLANS.find((p) => p.id === selectedPlan)?.name}
-                      </span>{" "}
-                      — upgrade or downgrade anytime.
-                    </span>
+                      );
+                    })}
                   </div>
                 )}
+              </Field>
 
-                <div className="flex gap-3 pt-3 border-t border-[#e8eaf0]">
+              <Field label="Confirm Password">
+                <div className="relative">
+                  <input
+                    type={showConfirm ? "text" : "password"}
+                    placeholder="Re-enter your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    disabled={isSubmitting}
+                    className={`${inputCls} pr-11`}
+                  />
                   <button
                     type="button"
-                    onClick={goBack}
-                    className="flex items-center gap-1.5 px-4 py-3 border border-[#d1d5db] text-[#374151] rounded-xl text-sm font-semibold hover:bg-[#f9fafb] transition-all"
+                    onClick={() => setShowConfirm((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-[#374151] transition-colors"
                   >
-                    <ChevronLeft className="w-4 h-4" /> Back
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || !selectedPlan}
-                    className="flex-1 bg-[#1655e0] hover:bg-[#1245c0] text-white font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm shadow-md shadow-[#1655e0]/20 disabled:bg-[#a0aec0] disabled:cursor-not-allowed disabled:shadow-none"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{" "}
-                        Creating account...
-                      </>
-                    ) : (
-                      <>
-                        Create Account <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
+                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-              </div>
-            )}
+              </Field>
+
+              <button
+                type="submit"
+                disabled={isSubmitting || !dashboardId}
+                className="w-full mt-2 bg-[#1655e0] hover:bg-[#1245c0] text-white font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm shadow-md shadow-[#1655e0]/20 disabled:bg-[#a0aec0] disabled:cursor-not-allowed disabled:shadow-none"
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  <>
+                    Create Account <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
           </form>
 
           <div className="mt-6 pt-5 border-t border-[#e8eaf0]">
             <p className="text-[12px] text-[#9ca3af] text-center mb-3">
               By creating an account, you agree to our{" "}
-              <Link to="/terms" className="text-[#1655e0] hover:underline">
-                Terms
-              </Link>{" "}
+              <Link to="/terms" className="text-[#1655e0] hover:underline">Terms</Link>{" "}
               and{" "}
-              <Link to="/privacy" className="text-[#1655e0] hover:underline">
-                Privacy Policy
-              </Link>
+              <Link to="/privacy" className="text-[#1655e0] hover:underline">Privacy Policy</Link>
             </p>
             <p className="text-[13px] text-[#6b7280] text-center">
               Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-[#1655e0] font-semibold hover:underline"
-              >
+              <Link to="/login" className="text-[#1655e0] font-semibold hover:underline">
                 Sign in
               </Link>
             </p>
           </div>
         </div>
       </div>
-      <AuthRightPanel
-        currentSlide={currentSlide}
-        setCurrentSlide={setCurrentSlide}
-      />
+      <AuthRightPanel currentSlide={currentSlide} setCurrentSlide={setCurrentSlide} />
     </div>
   );
 }
