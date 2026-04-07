@@ -726,7 +726,7 @@ const css = `
 
 /* ─── Component ──────────────────────────────────────────────────────────── */
 const LandingPage = () => {
-  const { isOpen, open, close } = useIndustryPicker();
+  const { isOpen, intent, open, close } = useIndustryPicker();
   const navigate = useNavigate();
   const {
     currencyCode,
