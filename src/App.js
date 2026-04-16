@@ -536,7 +536,7 @@ function DashboardRoutes() {
 }
 
 const SUBDOMAIN_LANDING = {
-  education:         SolidEducare,
+  educare:         SolidEducare,
   mechanics:         SolidMechanic,
   accounting:        SolidAccountant,
   cleaning:          SolidCleaner,

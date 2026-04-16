@@ -151,7 +151,7 @@ export const INDUSTRIES = [
     label: "Education",
     icon: "🎓",
     desc: "School fee & parent billing",
-    subdomain: "education",
+    subdomain: "educare",
   },
   {
     id: "carpentry",
