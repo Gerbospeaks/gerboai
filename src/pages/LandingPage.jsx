@@ -103,27 +103,26 @@ const css = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Lato:wght@300;400;600;700;900&display=swap');
 
   :root {
-    --navy:       #1a2340;
-    --navy-mid:   #2d3a55;
-    --navy-light: #3d4f70;
-    --red:        #e8442a;
-    --red-hover:  #c73b24;
-    --red-light:  #fdf2f0;
+    --navy:       #1a1a2e;
+    --navy-mid:   #2d2d4e;
+    --navy-light: #3d3d6b;
+    --red:        #c8442a;
+    --red-hover:  #a83520;
+    --red-light:  #fdf0ed;
     --blue:       #1b6ec2;
     --green:      #1d8348;
 
-    /* ── Creamy palette ── */
-    --cream:      #fdf6ec;       /* main page background  */
-    --cream-mid:  #f7ede0;       /* slightly deeper cream */
-    --cream-dark: #f0e2cf;       /* section dividers / borders */
-    --card-bg:    #fffdf8;       /* card / white surfaces */
+    --cream:      #fefcf8;
+    --cream-mid:  #f9f5ee;
+    --cream-dark: #f0e8d8;
+    --card-bg:    #ffffff;
 
     --border:     #e8ddd0;
     --bg:         var(--cream);
     --white:      var(--card-bg);
-    --text:       #2b1f14;
-    --text-mid:   #6b5744;
-    --text-muted: #a08878;
+    --text:       #1a1208;
+    --text-mid:   #5a4a35;
+    --text-muted: #8a7a68;
   }
 
   .lp * { box-sizing: border-box; }
@@ -153,9 +152,9 @@ const css = `
     transition: background .25s, box-shadow .25s;
   }
   .lp-nav.scrolled {
-    background: rgba(26,35,64,.96);
+    background: rgba(254,252,248,.97);
     backdrop-filter: blur(12px);
-    box-shadow: 0 2px 20px rgba(0,0,0,.25);
+    box-shadow: 0 2px 20px rgba(26,18,8,.08);
   }
   .lp-nav-inner {
     max-width: 1200px; width: 100%; margin: 0 auto;
@@ -164,20 +163,20 @@ const css = `
   .lp-nav-links { display: flex; align-items: center; gap: 32px; }
   .lp-nav-links a {
     font-size: 13px; font-weight: 700; letter-spacing: .04em;
-    text-transform: uppercase; color: rgba(255,255,255,.7);
+    text-transform: uppercase; color: var(--text-mid);
     text-decoration: none; transition: color .15s;
   }
-  .lp-nav-links a:hover { color: #fff; }
+  .lp-nav-links a:hover { color: var(--navy); }
   .lp-nav-ctas { display: flex; align-items: center; gap: 10px; }
   .lp-btn-ghost {
     height: 36px; padding: 0 18px;
-    background: transparent; border: 1px solid rgba(255,255,255,.3);
-    color: rgba(255,255,255,.8); border-radius: 3px;
+    background: transparent; border: 1px solid var(--cream-dark);
+    color: var(--text-mid); border-radius: 3px;
     font-size: 13px; font-weight: 700; cursor: pointer;
     font-family: 'Lato', sans-serif; letter-spacing: .03em;
     transition: border-color .15s, color .15s, background .15s;
   }
-  .lp-btn-ghost:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,.08); }
+  .lp-btn-ghost:hover { border-color: var(--navy); color: var(--navy); background: var(--cream-mid); }
   .lp-btn-primary {
     height: 36px; padding: 0 20px;
     background: var(--red); color: #fff;
@@ -224,7 +223,7 @@ const css = `
      HERO  (keeps dark navy — contrast with cream below)
   ════════════════════════════════════════════════ */
   .lp-hero {
-    background: var(--navy);
+    background: var(--cream);
     min-height: 100vh;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 380px 24px 80px;
@@ -234,40 +233,42 @@ const css = `
   .lp-hero::before {
     content: '';
     position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-    background-size: 48px 48px;
+    background:
+      radial-gradient(ellipse 70% 60% at 15% 40%, rgba(200,68,42,.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 70% at 85% 20%, rgba(27,110,194,.06) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 50% at 50% 90%, rgba(200,68,42,.04) 0%, transparent 60%);
     pointer-events: none;
   }
   .lp-hero::after {
     content: '';
     position: absolute;
-    width: 600px; height: 600px;
-    background: radial-gradient(ellipse, rgba(232,68,42,.18) 0%, transparent 70%);
-    top: -100px; right: -100px;
+    width: 800px; height: 800px;
+    background:
+      radial-gradient(ellipse at 40% 40%, rgba(200,68,42,.09) 0%, transparent 55%),
+      radial-gradient(ellipse at 70% 60%, rgba(27,110,194,.07) 0%, transparent 55%);
+    top: -200px; right: -200px;
     pointer-events: none;
   }
   .lp-hero-badge {
     display: inline-flex; align-items: center; gap: 7px;
     padding: 6px 14px;
-    background: rgba(232,68,42,.15);
-    border: 1px solid rgba(232,68,42,.3);
+    background: rgba(200,68,42,.08);
+    border: 1px solid rgba(200,68,42,.2);
     border-radius: 20px;
     font-size: 12px; font-weight: 700; letter-spacing: .05em;
-    text-transform: uppercase; color: #ff9a85;
+    text-transform: uppercase; color: var(--red);
     margin-bottom: 28px;
     animation: lp-up .6s ease both;
   }
   .lp-hero h1 {
     font-size: clamp(3rem, 7vw, 5.5rem);
-    line-height: 1.05; color: #fff;
+    line-height: 1.05; color: var(--navy);
     margin-bottom: 24px;
     animation: lp-up .65s ease both .05s;
   }
   .lp-hero h1 em { font-style: italic; color: var(--red); }
   .lp-hero-sub {
-    font-size: clamp(1rem, 2vw, 1.25rem); color: rgba(255,255,255,.6);
+    font-size: clamp(1rem, 2vw, 1.25rem); color: var(--text-mid);
     max-width: 620px; margin: 0 auto 40px; line-height: 1.7;
     animation: lp-up .65s ease both .1s;
   }
@@ -294,17 +295,17 @@ const css = `
   .lp-hero-secondary {
     height: 52px; padding: 0 28px;
     background: transparent;
-    border: 1px solid rgba(255,255,255,.25); border-radius: 4px;
+    border: 1.5px solid var(--cream-dark); border-radius: 4px;
     font-family: 'Lato', sans-serif;
     font-size: 14px; font-weight: 700; letter-spacing: .04em;
-    display: flex; align-items: center; gap: 8px; cursor: pointer; color: rgba(255,255,255,.8);
+    display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--navy);
     transition: border-color .15s, color .15s, background .15s;
     text-transform: uppercase;
   }
-  .lp-hero-secondary:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,.06); }
+  .lp-hero-secondary:hover { border-color: var(--navy); color: var(--navy); background: var(--cream-mid); }
   .lp-hero-trust {
     display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap;
-    font-size: 12px; color: rgba(255,255,255,.45); font-weight: 600; letter-spacing: .03em;
+    font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: .03em;
     animation: lp-up .65s ease both .2s;
     margin-bottom: 32px;
   }
@@ -380,7 +381,7 @@ const css = `
      STATS STRIP  — creamy dark
   ════════════════════════════════════════════════ */
   .lp-stats {
-    background: #2b1f14;         /* warm dark brown instead of #0f1627 */
+    background: linear-gradient(135deg, #1a1208 0%, #2a1e0f 50%, #1a1a2e 100%);
     padding: 56px 24px;
     position: relative;
   }
@@ -403,7 +404,7 @@ const css = `
     display: flex; align-items: center; justify-content: center;
     margin: 0 auto 12px; color: var(--red);
   }
-  .lp-stat-value { font-size: 36px; font-weight: 900; color: var(--cream); line-height: 1; margin-bottom: 6px; font-family: 'DM Serif Display', serif; }
+  .lp-stat-value { font-size: 36px; font-weight: 900; color: #fefcf8; line-height: 1; margin-bottom: 6px; font-family: 'DM Serif Display', serif; }
   .lp-stat-label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(253,246,236,.4); }
 
   /* ════════════════════════════════════════════════
@@ -421,8 +422,9 @@ const css = `
     padding: 4px 12px; background: var(--red-light);
     border: 1px solid rgba(232,68,42,.2); border-radius: 2px;
   }
-  .lp-section-head h2 {
+.lp-section-head h2 {
     font-size: clamp(2rem, 4vw, 3rem); color: var(--navy); line-height: 1.1; margin-bottom: 16px;
+    letter-spacing: -.02em;
   }
   .lp-section-head p { font-size: 16px; color: var(--text-mid); max-width: 560px; margin: 0 auto; line-height: 1.7; }
 
@@ -565,11 +567,20 @@ const css = `
      TESTIMONIALS  — warm dark brown
   ════════════════════════════════════════════════ */
   .lp-testimonials {
-    background: #2b1f14;
+    background: linear-gradient(155deg, #1a1208 0%, #2a1e0f 45%, #1a1a2e 100%);
     padding: 96px 24px;
+    position: relative; overflow: hidden;
   }
-  .lp-testimonials h2 { color: var(--cream); text-align: center; font-size: clamp(2rem,4vw,3rem); margin-bottom: 10px; }
-  .lp-testimonials > .lp-section-head > p { color: rgba(253,246,236,.5); }
+  .lp-testimonials::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 55% 50% at 5% 30%, rgba(200,68,42,.09) 0%, transparent 55%),
+      radial-gradient(ellipse 45% 55% at 95% 70%, rgba(27,110,194,.07) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .lp-testimonials h2 { color: #fefcf8; text-align: center; font-size: clamp(2rem,4vw,3rem); margin-bottom: 10px; }
+  .lp-testimonials > .lp-section-head > p { color: rgba(254,252,248,.5); }
   .lp-testimonials-grid {
     max-width: 1060px; margin: 0 auto;
     display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
@@ -626,10 +637,10 @@ const css = `
   .lp-cta::before {
     content: '';
     position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
-    background-size: 48px 48px;
+    background:
+      radial-gradient(ellipse 70% 80% at 10% 50%, rgba(255,255,255,.1) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 60% at 90% 20%, rgba(255,255,255,.08) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 40% at 50% 100%, rgba(0,0,0,.12) 0%, transparent 50%);
     pointer-events: none;
   }
   .lp-cta h2 { color: #fff; font-size: clamp(2rem,4vw,3.2rem); margin-bottom: 16px; }
@@ -744,9 +755,9 @@ const LandingPage = () => {
   const [cardsSwapped, setCardsSwapped] = useState(false);
   const words = ["Smarter", "Faster", "Simpler", "Powerful", "Professional"];
   const slides = [
-    { id: 1, src: require("../assets/images/product1.png"), alt: "Dashboard" },
-    { id: 2, src: require("../assets/images/product2.png"), alt: "Invoices" },
-    { id: 3, src: require("../assets/images/product3.png"), alt: "Payments" },
+    { id: 1, src: require("../assets/images/healthcare.png"), alt: "Dashboard" },
+    { id: 2, src: require("../assets/images/construction.png"), alt: "Invoices" },
+    { id: 3, src: require("../assets/images/electrical.png"), alt: "Payments" },
   ];
   const ROTATING = [
     {
@@ -1179,6 +1190,22 @@ const LandingPage = () => {
               />
             ))}
           </div>
+           {/* Floating orbs */}
+  <div style={{
+    position:'absolute', width:500, height:500, borderRadius:'50%',
+    background:'radial-gradient(circle, rgba(232,68,42,.18) 0%, transparent 70%)',
+    top:'-10%', left:'-5%', filter:'blur(60px)', pointerEvents:'none', zIndex:0
+  }}/>
+  <div style={{
+    position:'absolute', width:400, height:400, borderRadius:'50%',
+    background:'radial-gradient(circle, rgba(27,110,194,.15) 0%, transparent 70%)',
+    top:'30%', right:'-8%', filter:'blur(80px)', pointerEvents:'none', zIndex:0
+  }}/>
+  <div style={{
+    position:'absolute', width:300, height:300, borderRadius:'50%',
+    background:'radial-gradient(circle, rgba(232,68,42,.1) 0%, transparent 70%)',
+    bottom:'10%', left:'30%', filter:'blur(60px)', pointerEvents:'none', zIndex:0
+  }}/>
         </section>
 
         {/* ── Stats ── */}
