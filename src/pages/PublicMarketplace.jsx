@@ -1649,19 +1649,9 @@ export default function PublicMarketplace() {
         <div className="mp-nav-inner">
           <div className="mp-nav-logo">
             <div className="mp-nav-logo-icon">
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#fff"
-                strokeWidth="2.5"
-              >
-                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21h6" />
-              </svg>
+              <img src={logo} alt="SolidFlo" style={{ height: 44 }} />
             </div>
-            <span className="mp-nav-logo-text">SolidFlo</span>
-            <span className="mp-nav-logo-sub">Marketplace</span>
+
           </div>
           <div className="mp-nav-ctas">
             <button className="mp-btn-ghost" onClick={() => openModal("login")}>
