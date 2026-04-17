@@ -68,22 +68,9 @@ const css = `
     display: flex; align-items: center; justify-content: space-between;
   }
   .mp-nav-logo {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center;
   }
-  .mp-nav-logo-icon {
-    width: 34px; height: 34px; border-radius: 6px;
-    background: var(--red);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .mp-nav-logo-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 17px; font-weight: 700; color: #fff;
-  }
-  .mp-nav-logo-sub {
-    font-size: 10px; font-weight: 700; letter-spacing: .08em;
-    text-transform: uppercase; color: rgba(255,255,255,.35);
-    margin-left: 2px;
-  }
+ 
   .mp-nav-ctas { display: flex; align-items: center; gap: 10px; }
   .mp-btn-ghost {
     height: 36px; padding: 0 18px;
@@ -1648,9 +1635,9 @@ export default function PublicMarketplace() {
       <nav className={`mp-nav${scrolled ? " scrolled" : ""}`}>
         <div className="mp-nav-inner">
           <div className="mp-nav-logo">
-            <div className="mp-nav-logo-icon">
+           
               <img src={logo} alt="SolidFlo" style={{ height: 44 }} />
-            </div>
+            
 
           </div>
           <div className="mp-nav-ctas">
