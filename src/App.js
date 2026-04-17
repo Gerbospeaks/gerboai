@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -26,7 +25,7 @@ import DashboardRouter from "./components/DashboardRouter";
 import FinancialOverview from "./pages/FinancialOverview";
 import AdminDashboard from "./pages/AdminDashboard";
 import TemplateSelector from "./pages/accounting/TemplateSelector";
-import PublicMarketplace from './pages/PublicMarketplace';
+import SolidMarket from "./pages/PublicMarketplace";
 import SolidEducare from "./pages/education/SubdomainLandingPage";
 import SolidMechanic from "./pages/mechanics/SubdomainLandingPage";
 import SolidAccountant from "./pages/accounting/SubdomainLandingPage";
@@ -85,8 +84,6 @@ import WindowrepairDashboard from "./pages/window-repair/WindowrepairDashboard";
 import HVACDashboard from "./pages/hvac/HVACDashboard";
 import CarpentryDashboard from "./pages/carpentry/CarpentryDashboard";
 import AccountingDashboard from "./pages/accounting/AccountingDashboard";
-
-// ── Sub-pages ─────────────────────────────────────────────────────────────────
 import Vehicles from "./pages/mechanics/Vehicles";
 import Templates from "./pages/mechanics/Templates";
 import PartsInventory from "./pages/mechanics/PartsInventory";
@@ -255,7 +252,7 @@ function DashboardRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="/market" element={<PublicMarketplace />} />
+
       <Route
         path="/templates"
         element={
@@ -537,35 +534,35 @@ function DashboardRoutes() {
 }
 
 const SUBDOMAIN_LANDING = {
-  education:         SolidEducare,
-  mechanics:         SolidMechanic,
-  accounting:        SolidAccountant,
-  cleaning:          SolidCleaner,
-  carpentry:         SolidCarpenter,
-  construction:      SolidConstructor,
-  electrical:        SolidElectrical,
-  flooring:          SolidFlooring,
-  market:         PublicMarketplace,
-  health:            SolidHealth,
-  healthcare:        SolidHealth,
-  hotel:             SolidHotel,
-  hvac:              SolidHVAC,
-  landscaping:       SolidLandscaping,
-  legal:             SolidLegal,
-  logistics:         SolidLogistics,
-  painting:          SolidPainting,
-  "pest-control":    SolidPestControl,
-  photography:       SolidPhotography,
-  plumbing:          SolidPlumbing,
-  "pool-services":   SolidPoolService,
-  realestate:        SolidRealEstate,
-  restaurants:       SolidRestaurants,
-  retail:            SolidRetail,
-  security:          SolidSecurity,
+  education: SolidEducare,
+  mechanics: SolidMechanic,
+  accounting: SolidAccountant,
+  cleaning: SolidCleaner,
+  carpentry: SolidCarpenter,
+  construction: SolidConstructor,
+  electrical: SolidElectrical,
+  flooring: SolidFlooring,
+  market: SolidMarket,
+  health: SolidHealth,
+  healthcare: SolidHealth,
+  hotel: SolidHotel,
+  hvac: SolidHVAC,
+  landscaping: SolidLandscaping,
+  legal: SolidLegal,
+  logistics: SolidLogistics,
+  painting: SolidPainting,
+  "pest-control": SolidPestControl,
+  photography: SolidPhotography,
+  plumbing: SolidPlumbing,
+  "pool-services": SolidPoolService,
+  realestate: SolidRealEstate,
+  restaurants: SolidRestaurants,
+  retail: SolidRetail,
+  security: SolidSecurity,
   "solar-installation": SolidSolar,
-  towing:            SolidTowing,
-  welding:           SolidWelder,
-  "window-repair":   SolidWindowRepair,
+  towing: SolidTowing,
+  welding: SolidWelder,
+  "window-repair": SolidWindowRepair,
 };
 function SubdomainRoot() {
   const subdomain = getSubdomainFromHost();
@@ -603,6 +600,7 @@ function App() {
                   </PublicOnlyRoute>
                 }
               />
+              <Route path="/market" element={<SolidMarket />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/auth-action" element={<AuthAction />} />
