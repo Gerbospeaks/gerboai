@@ -2018,7 +2018,7 @@ export default function PublicMarketplace() {
      
 
      {/* Dark wrapper so the whole below-filter area is navy */}
-<div style={{ background: "var(--navy)" }}>
+<div style={{ background: "#fffff" }}>
   <div className="mp-layout">
 
     {/* ── Sidebar ── */}
