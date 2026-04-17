@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import heroBg from "../assets/videos/world.mp4";
-
+import logo from "../assets/img/solidflo.png";
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const SOLIDFLO_URL = "https://solidflo.co.za";
@@ -125,10 +125,7 @@ const css = `
   }
   .mp-hero-overlay {
     position: absolute; inset: 0; z-index: 1; pointer-events: none;
-    background:
-      radial-gradient(ellipse 70% 60% at 15% 50%, rgba(99,102,241,.18) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 70% at 85% 20%, rgba(14,165,233,.12) 0%, transparent 55%),
-      linear-gradient(to bottom, rgba(15,23,42,.6) 0%, rgba(15,23,42,.4) 50%, rgba(15,23,42,.8) 100%);
+    background: transparent;
   }
   .mp-hero-inner {
     max-width: 1200px; width: 100%; margin: 0 auto;
@@ -1405,19 +1402,8 @@ function RegisterModal({ mode, providerName, onClose }) {
         </button>
 
         <div className="mp-modal-logo">
-          <div className="mp-modal-logo-icon">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.5"
-            >
-              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21h6" />
-            </svg>
-          </div>
-          <span className="mp-modal-logo-text">SolidFlo</span>
+          
+           <img src={logo} alt="SolidFlo" style={{ height: 44 }} />
         </div>
 
         <h2>
