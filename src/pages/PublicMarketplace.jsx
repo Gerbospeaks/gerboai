@@ -112,7 +112,7 @@ const css = `
   }
   .mp-hero-overlay {
     position: absolute; inset: 0; z-index: 1; pointer-events: none;
-    background: #1dfdfd;
+    background: #29231fa1;
   }
   .mp-hero-inner {
     max-width: 1200px; width: 100%; margin: 0 auto;
