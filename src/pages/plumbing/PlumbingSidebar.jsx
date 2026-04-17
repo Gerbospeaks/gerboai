@@ -16,6 +16,7 @@ import {
   CreditCard,
   FileBarChart,
   LogOut,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -36,6 +37,7 @@ export default function PlumbingSidebar({
   setShowJobCardsList,
   setShowCustomersListModal,
   handleLogout,
+   newRequestCount,
 }) {
   const [isWorkOrdersOpen, setIsWorkOrdersOpen] = useState(false);
   const [isCustomersOpen, setIsCustomersOpen] = useState(false);

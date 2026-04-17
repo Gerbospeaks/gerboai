@@ -5,6 +5,8 @@ import { getAuth, signOut } from "firebase/auth";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import AIInvoiceWindow from '../AIInvoiceWindow';

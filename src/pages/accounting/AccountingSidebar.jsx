@@ -17,6 +17,7 @@ import {
   ClipboardList,
   Landmark,
   Menu,
+  Store,
   X,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
@@ -41,6 +42,7 @@ export default function AccountingSidebar({
   handleAddNewCustomer,
   handleNewInvoiceDoc,
   handleNewEstimate,
+  newRequestCount,
 }) {
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
@@ -93,12 +95,20 @@ export default function AccountingSidebar({
 
       {/* Scrollable nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-        <NavItem
+         <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
+        <NavItem
+  icon={Store}
+  label="Find a Service"
+  onClick={() => goTo("marketplace")}
+  active={activeView === "marketplace"}
+  badge={newRequestCount > 0 ? newRequestCount : null}
+/>
+        
         <NavItem
           icon={Settings}
           label="Settings"
@@ -116,7 +126,7 @@ export default function AccountingSidebar({
           onClick={() => goTo("financial-overview")}
           active={activeView === "financial-overview"}
         />
-
+         
         {/* Invoicing */}
         <Accordion
           icon={Receipt}
@@ -365,6 +375,11 @@ export default function AccountingSidebar({
                   action: () => setShowSettings(true),
                 },
                 {
+  icon: Store,
+  title: "Find a Service",
+  action: () => goTo("marketplace"),
+},
+                {
                   icon: TrendingUp,
                   title: "Financial Overview",
                   action: () => goTo("financial-overview"),
@@ -442,7 +457,7 @@ function SectionLabel({ children }) {
   );
 }
 
-function NavItem({ icon: Icon, label, onClick, active = false }) {
+function NavItem({ icon: Icon, label, onClick, active = false, badge = null }) {
   return (
     <div
       onClick={onClick}
@@ -453,7 +468,12 @@ function NavItem({ icon: Icon, label, onClick, active = false }) {
       }`}
     >
       <Icon className="w-4 h-4 flex-shrink-0" />
-      <span className="truncate">{label}</span>
+      <span className="truncate flex-1">{label}</span>
+      {badge != null && (
+        <span className="bg-[#059669] text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
+          {badge}
+        </span>
+      )}
     </div>
   );
 }

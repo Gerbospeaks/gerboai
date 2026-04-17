@@ -6,7 +6,7 @@ import slide1 from "../assets/img/slide1.avif";
 import slide2 from "../assets/img/slide2.avif";
 import slide3 from "../assets/img/slide3.jpg";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
-
+import "tailwindcss";
 const slides = [
   {
     image: slide1,

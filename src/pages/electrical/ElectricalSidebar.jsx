@@ -14,6 +14,7 @@ import {
   Zap,
   Menu,
   X,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -29,6 +30,7 @@ export default function ElectricalSidebar({
   handleNewQuote,
   businessInfo,
   savedQuotes,
+   newRequestCount,
   savedCustomers, // ← receives `customers` from dashboard (the populated array)
   handleLogout,
   // ── previously missing props ──────────────────────────────────────
@@ -84,12 +86,19 @@ export default function ElectricalSidebar({
 
       {/* Nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-        <NavItem
+         <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
+        <NavItem
+  icon={Store}
+  label="Find a Service"
+  onClick={() => goTo("marketplace")}
+  active={activeView === "marketplace"}
+  badge={newRequestCount > 0 ? newRequestCount : null}
+/>
         <NavItem
           icon={Settings}
           label="Settings"

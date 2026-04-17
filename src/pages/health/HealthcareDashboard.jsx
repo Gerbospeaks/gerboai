@@ -7,6 +7,8 @@ import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import MedicalAIExtractor from "./MedicalAIExtractor";
@@ -788,7 +790,17 @@ const HealthcareDashboard = () => {
               <Prescriptions user={user} />
             </div>
           )}
+{activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={facilityInfo} />
+  </div>
+)}
 
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={facilityInfo} />
+  </div>
+)}
           {/* ── Invoice view — split layout ────────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

@@ -26,6 +26,8 @@ import { Printer, Download, Sparkles } from "lucide-react";
 import { db } from "../../firebase";
 import GuestModal from "./GuestModal";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import HotelAIExtractor from "./HotelAIExtractor";
@@ -621,7 +623,17 @@ const HotelDashboard = () => {
               </div>
             </div>
           )}
+{activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={propertyInfo} />
+  </div>
+)}
 
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={propertyInfo} />
+  </div>
+)}
           {/* ── Invoice split layout ──────────────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

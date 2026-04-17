@@ -4,6 +4,8 @@ import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
 import { serverTimestamp } from "firebase/firestore";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import HomeView from "../HomeView";
@@ -975,6 +977,7 @@ const LandscapingDashboard = () => {
           setShowJobCardsList={setShowJobCardsList}
           setShowCustomersListModal={setShowCustomersListModal}
           handleAddNewCustomer={handleAddNewCustomer}
+          newRequestCount={0}
         />
 
         {/* ── Main content ───────────────────────────────────────────── */}
@@ -1256,7 +1259,17 @@ const LandscapingDashboard = () => {
               </div>
             </div>
           )}
+{activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+  </div>
+)}
 
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={businessInfo} />
+  </div>
+)}
           {/* ── Work order builder — split layout ──────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

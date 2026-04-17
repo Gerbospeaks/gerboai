@@ -11,6 +11,7 @@ import {
   Calendar,
   BarChart3,
   Grid3x3,
+  Store,
   LogOut,
 } from "lucide-react";
 
@@ -33,6 +34,7 @@ export default function WindowRepairSidebar({
   setShowCustomersListModal,
   documentType,
   handleLogout,
+   newRequestCount,
 }) {
   const [isQuotesInvoicesOpen, setIsQuotesInvoicesOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);

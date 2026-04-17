@@ -7,6 +7,8 @@ import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import AIInvoiceWindow from "../AIInvoiceWindow";
@@ -3606,6 +3608,7 @@ const LegalDashboard = () => {
           setShowCustomersListModal={setShowCustomersListModal}
           documentType={documentType}
           handleLogout={handleLogout}
+          newRequestCount={0}
         />
 
         <div
@@ -3965,7 +3968,17 @@ const LegalDashboard = () => {
               </div>
             </div>
           )}
+{activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+  </div>
+)}
 
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={businessInfo} />
+  </div>
+)}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
               <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">

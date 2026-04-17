@@ -21,6 +21,7 @@ import {
   ClipboardList,
   CreditCard,
   AlertCircle,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -40,6 +41,7 @@ export default function HealthSidebar({
   setShowInvoicesList,
   setShowPatientsListModal,
   handleLogout,
+   newRequestCount,
   // NEW optional props — pass from parent or leave undefined to hide sections
   notifications = [], // array of { id, message, type: "info"|"warning"|"alert", time }
   doctorInfo = null, // { name, specialty, practiceNumber, status: "available"|"busy"|"away" }
@@ -232,12 +234,19 @@ export default function HealthSidebar({
 
       {/* ── Scrollable nav ──────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-        <NavItem
+         <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
+        <NavItem
+  icon={Store}
+  label="Find a Service"
+  onClick={() => goTo("marketplace")}
+  active={activeView === "marketplace"}
+  badge={newRequestCount > 0 ? newRequestCount : null}
+/>
         <NavItem
           icon={Settings}
           label="Settings"

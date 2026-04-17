@@ -10,6 +10,8 @@ import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import CarpentrySidebar from "./CarpentrySidebar";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
@@ -746,6 +748,7 @@ const CarpentryDashboard = () => {
           setShowCustomersListModal={setShowCustomersListModal}
           handleAddNewCustomer={handleAddNewCustomer}
           documentType={documentType}
+          newRequestCount={0}
         />
 
         {/* Main content */}
@@ -980,6 +983,17 @@ const CarpentryDashboard = () => {
               <ProjectsView user={user} defaultTab={activeView} />
             </div>
           )}
+          {activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+  </div>
+)}
+
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={businessInfo} />
+  </div>
+)}
           {/* ── Quote/Invoice builder — split layout ───────────────────────── */}
           {activeView === "quote" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

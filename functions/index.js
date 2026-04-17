@@ -6,7 +6,7 @@ const admin = require("firebase-admin");
 const {GoogleGenerativeAI} = require("@google/generative-ai");
 const {SendMailClient} = require("zeptomail");
 
-// ─── Params (replaces functions.config()) ─────────────────────────────────────
+// ─── Params ───────────────────────────────────────────────────────────────────
 const geminiKey = defineSecret("GOOGLE_GEMINI_KEY");
 const zeptoToken = defineSecret("ZEPTO_TOKEN");
 const zeptoFromEmail = defineString("ZEPTO_FROM_EMAIL");
@@ -22,7 +22,11 @@ const APP_PHONE = "+27 68 488 7039";
 
 const INDUSTRY_COLLECTIONS = {
   "accounting": {invoice: "invoices", estimate: "estimates"},
-  "mechanics": {invoice: "invoices", estimate: "estimates", jobcard: "jobcards"},
+  "mechanics": {
+    invoice: "invoices",
+    estimate: "estimates",
+    jobcard: "jobcards",
+  },
   "healthcare": {invoice: "invoices", estimate: "quotes"},
   "electrical": {invoice: "invoices", estimate: "estimates"},
   "plumbing": {invoice: "invoices", estimate: "estimates"},
@@ -52,11 +56,15 @@ const INDUSTRY_COLLECTIONS = {
 };
 
 const DOC_LABELS = {
-  "mechanics": {invoice: "Job Card / Invoice", estimate: "Quote", jobcard: "Job Card"},
-  "healthcare": {invoice: "Tax Invoice", estimate: "Quote"},
-  "legal": {invoice: "Fee Note", estimate: "Proposal"},
-  "realestate": {invoice: "Invoice", estimate: "Proposal"},
-  "default": {invoice: "Invoice", estimate: "Estimate"},
+  mechanics: {
+    invoice: "Job Card / Invoice",
+    estimate: "Quote",
+    jobcard: "Job Card",
+  },
+  healthcare: {invoice: "Tax Invoice", estimate: "Quote"},
+  legal: {invoice: "Fee Note", estimate: "Proposal"},
+  realestate: {invoice: "Invoice", estimate: "Proposal"},
+  default: {invoice: "Invoice", estimate: "Estimate"},
 };
 
 function resolveCollection(industry, documentType, override) {
@@ -67,11 +75,16 @@ function resolveCollection(industry, documentType, override) {
 
 function resolveDocLabel(industry, documentType) {
   const map = DOC_LABELS[industry] || DOC_LABELS["default"];
-  return map[documentType] || (documentType === "estimate" ? "Estimate" : "Invoice");
+  return (
+    map[documentType] || (documentType === "estimate" ? "Estimate" : "Invoice")
+  );
 }
 
-
-async function sendViaZepto({fromName, toEmail, toName, replyTo, subject, htmlBody, attachments = []}, appEmail, zeptoClientInstance) {
+async function sendViaZepto(
+    {fromName, toEmail, toName, replyTo, subject, htmlBody, attachments = []},
+    appEmail,
+    zeptoClientInstance,
+) {
   return zeptoClientInstance.sendMail({
     from: {address: appEmail, name: fromName},
     to: [{email_address: {address: toEmail, name: toName || ""}}],
@@ -98,7 +111,8 @@ function buildInvoiceEmailHtml({
   appAddress,
   appName,
 }) {
-  const bankingSection = bankName ? `
+  const bankingSection = bankName ?
+    `
     <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:20px;margin:20px 0;border-radius:4px;">
       <h3 style="margin-top:0;color:#78350f;">Banking Details for Payment</h3>
       <table style="width:100%;border-collapse:collapse;margin-top:12px;">
@@ -122,7 +136,8 @@ function buildInvoiceEmailHtml({
       <p style="margin:15px 0 0;font-style:italic;color:#92400e;">
         <strong>Reference:</strong> Please use <strong>${invoiceNumber}</strong> as your payment reference.
       </p>
-    </div>` : "";
+    </div>` :
+    "";
 
   return `<!DOCTYPE html>
 <html>
@@ -174,7 +189,18 @@ function buildInvoiceEmailHtml({
 </html>`;
 }
 
-function buildAdminEmailHtml({title, subtitle, detailsHtml, itemsHtml, totalsHtml, extraHtml, notes, appName, appAddress, appPhone}) {
+function buildAdminEmailHtml({
+  title,
+  subtitle,
+  detailsHtml,
+  itemsHtml,
+  totalsHtml,
+  extraHtml,
+  notes,
+  appName,
+  appAddress,
+  appPhone,
+}) {
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -221,10 +247,14 @@ function buildAdminEmailHtml({title, subtitle, detailsHtml, itemsHtml, totalsHtm
       </table>
       <div class="section-box">${totalsHtml}</div>
       ${extraHtml || ""}
-      ${notes ? `
+      ${
+        notes ?
+          `
         <div style="background:#eff6ff;border-left:4px solid #2563eb;padding:15px;margin:20px 0;border-radius:4px;">
           <strong style="color:#1e40af;">Additional Notes:</strong><br>${notes}
-        </div>` : ""}
+        </div>` :
+          ""
+}
       <p style="margin-top:30px;">If you have any questions, please don't hesitate to contact us.</p>
       <p>Best regards,<br>
         <strong>${appName} Team</strong><br>
@@ -247,13 +277,19 @@ exports.extractInvoiceDataGemini = functions
     .runWith({secrets: [geminiKey]})
     .https.onCall(async (data, context) => {
       if (!context.auth) {
-        throw new functions.https.HttpsError("unauthenticated", "User must be authenticated to use AI extraction");
+        throw new functions.https.HttpsError(
+            "unauthenticated",
+            "User must be authenticated to use AI extraction",
+        );
       }
 
       const {input, businessInfo, documentType} = data;
 
       if (!input || !input.trim()) {
-        throw new functions.https.HttpsError("invalid-argument", "Input text is required");
+        throw new functions.https.HttpsError(
+            "invalid-argument",
+            "Input text is required",
+        );
       }
 
       try {
@@ -283,7 +319,10 @@ JSON structure:
         return JSON.parse(response.text());
       } catch (error) {
         console.error("Error in extractInvoiceDataGemini:", error);
-        throw new functions.https.HttpsError("internal", error.message || "An error occurred during extraction");
+        throw new functions.https.HttpsError(
+            "internal",
+            error.message || "An error occurred during extraction",
+        );
       }
     });
 
@@ -293,7 +332,10 @@ exports.sendInvoiceEmail = functions
     .runWith({secrets: [zeptoToken]})
     .https.onCall(async (data, context) => {
       if (!context.auth) {
-        throw new functions.https.HttpsError("unauthenticated", "Must be signed in");
+        throw new functions.https.HttpsError(
+            "unauthenticated",
+            "Must be signed in",
+        );
       }
 
       const appEmail = zeptoFromEmail.value();
@@ -316,7 +358,10 @@ exports.sendInvoiceEmail = functions
       } = data;
 
       if (!recipientEmail || !invoiceNumber) {
-        throw new functions.https.HttpsError("invalid-argument", "Missing required fields: recipientEmail and invoiceNumber");
+        throw new functions.https.HttpsError(
+            "invalid-argument",
+            "Missing required fields: recipientEmail and invoiceNumber",
+        );
       }
 
       const [configSnap, bizSnap] = await Promise.all([
@@ -327,12 +372,16 @@ exports.sendInvoiceEmail = functions
       const emailConfig = configSnap.exists ? configSnap.data() : {};
       const businessInfo = bizSnap.exists ? bizSnap.data() : {};
 
-      const fromName = emailConfig.fromName || businessInfo.businessName || APP_NAME;
+      const fromName =
+      emailConfig.fromName || businessInfo.businessName || APP_NAME;
       const replyTo = emailConfig.replyTo || businessInfo.email || appEmail;
       const signature = emailConfig.signature || `Kind regards,\n${fromName}`;
       const sendCopy = emailConfig.sendCopyToSelf ?? true;
 
-      const signatureHtml = signature.split("\n").map((l) => `<span>${l}</span>`).join("<br/>");
+      const signatureHtml = signature
+          .split("\n")
+          .map((l) => `<span>${l}</span>`)
+          .join("<br/>");
 
       const docLabel = resolveDocLabel(industry, documentType);
       const subject = `${docLabel} ${invoiceNumber} from ${fromName}`;
@@ -354,24 +403,44 @@ exports.sendInvoiceEmail = functions
         appName: APP_NAME,
       });
 
-      const attachments = pdfBase64 ? [{
-        name: `${invoiceNumber}.pdf`,
-        content: pdfBase64,
-        mime_type: "application/pdf",
-      }] : [];
+      const attachments = pdfBase64 ?
+      [
+        {
+          name: `${invoiceNumber}.pdf`,
+          content: pdfBase64,
+          mime_type: "application/pdf",
+        },
+      ] :
+      [];
 
-      await sendViaZepto({fromName, toEmail: recipientEmail, toName: recipientName, replyTo, subject, htmlBody, attachments}, appEmail, zeptoClient);
+      await sendViaZepto(
+          {
+            fromName,
+            toEmail: recipientEmail,
+            toName: recipientName,
+            replyTo,
+            subject,
+            htmlBody,
+            attachments,
+          },
+          appEmail,
+          zeptoClient,
+      );
 
       if (sendCopy && replyTo && replyTo !== appEmail) {
-        await sendViaZepto({
-          fromName,
-          toEmail: replyTo,
-          toName: fromName,
-          replyTo,
-          subject: `[Copy] ${subject}`,
-          htmlBody,
-          attachments,
-        }, appEmail, zeptoClient);
+        await sendViaZepto(
+            {
+              fromName,
+              toEmail: replyTo,
+              toName: fromName,
+              replyTo,
+              subject: `[Copy] ${subject}`,
+              htmlBody,
+              attachments,
+            },
+            appEmail,
+            zeptoClient,
+        );
       }
 
       const col = resolveCollection(industry, documentType, collectionName);
@@ -392,13 +461,14 @@ exports.sendInvoiceEmail = functions
 
 exports.sendInvoiceEmail_firestore = functions
     .runWith({secrets: [zeptoToken]})
-    .firestore
-    .document("users/{userId}/adminInvoices/{invoiceId}")
+    .firestore.document("users/{userId}/adminInvoices/{invoiceId}")
     .onUpdate(async (change, context) => {
       const newData = change.after.data();
       const previousData = change.before.data();
 
-      if (newData.status !== "sent" || previousData.status === "sent") return null;
+      if (newData.status !== "sent" || previousData.status === "sent") {
+        return null;
+      }
 
       const appEmail = zeptoFromEmail.value();
       const zeptoClient = new SendMailClient({
@@ -407,14 +477,33 @@ exports.sendInvoiceEmail_firestore = functions
       });
 
       try {
-        const {invoiceNumber, clientEmail, clientName, total, subtotal, tax, notes, items} = newData;
+        const {
+          invoiceNumber,
+          clientEmail,
+          clientName,
+          total,
+          subtotal,
+          tax,
+          notes,
+          items,
+        } = newData;
         const dueDate = newData.dueDate.toDate();
         const issueDate = newData.issueDate.toDate();
 
-        const dueDateFormatted = dueDate.toLocaleDateString("en-ZA", {year: "numeric", month: "long", day: "numeric"});
-        const issueDateFormatted = issueDate.toLocaleDateString("en-ZA", {year: "numeric", month: "long", day: "numeric"});
+        const dueDateFormatted = dueDate.toLocaleDateString("en-ZA", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        const issueDateFormatted = issueDate.toLocaleDateString("en-ZA", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
 
-        const itemsHtml = items.map((item, i) => `
+        const itemsHtml = items
+            .map(
+                (item, i) => `
           <tr style="border-bottom:1px solid #e5e7eb;">
             <td style="padding:12px;text-align:center;color:#6b7280;">${i + 1}</td>
             <td style="padding:12px;">
@@ -424,7 +513,9 @@ exports.sendInvoiceEmail_firestore = functions
             <td style="padding:12px;text-align:center;">${item.quantity}</td>
             <td style="padding:12px;text-align:right;">R${Number(item.unitPrice).toFixed(2)}</td>
             <td style="padding:12px;text-align:right;"><strong>R${Number(item.amount).toFixed(2)}</strong></td>
-          </tr>`).join("");
+          </tr>`,
+            )
+            .join("");
 
         const detailsHtml = `
           <p>Dear <strong>${clientName}</strong>,</p>
@@ -468,17 +559,23 @@ exports.sendInvoiceEmail_firestore = functions
           appPhone: APP_PHONE,
         });
 
-        await sendViaZepto({
-          fromName: APP_NAME,
-          toEmail: clientEmail,
-          toName: clientName,
-          replyTo: appEmail,
-          subject: `Invoice ${invoiceNumber} from ${APP_NAME} - Payment Due ${dueDateFormatted}`,
-          htmlBody,
-        }, appEmail, zeptoClient);
+        await sendViaZepto(
+            {
+              fromName: APP_NAME,
+              toEmail: clientEmail,
+              toName: clientName,
+              replyTo: appEmail,
+              subject: `Invoice ${invoiceNumber} from ${APP_NAME} - Payment Due ${dueDateFormatted}`,
+              htmlBody,
+            },
+            appEmail,
+            zeptoClient,
+        );
 
         console.log("Admin invoice email sent to:", clientEmail);
-        await change.after.ref.update({emailSentAt: admin.firestore.FieldValue.serverTimestamp()});
+        await change.after.ref.update({
+          emailSentAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
       } catch (error) {
         console.error("Error sending admin invoice email:", error);
       }
@@ -490,13 +587,14 @@ exports.sendInvoiceEmail_firestore = functions
 
 exports.sendQuoteEmail = functions
     .runWith({secrets: [zeptoToken]})
-    .firestore
-    .document("users/{userId}/adminQuotes/{quoteId}")
+    .firestore.document("users/{userId}/adminQuotes/{quoteId}")
     .onUpdate(async (change, context) => {
       const newData = change.after.data();
       const previousData = change.before.data();
 
-      if (newData.status !== "sent" || previousData.status === "sent") return null;
+      if (newData.status !== "sent" || previousData.status === "sent") {
+        return null;
+      }
 
       const appEmail = zeptoFromEmail.value();
       const zeptoClient = new SendMailClient({
@@ -505,14 +603,33 @@ exports.sendQuoteEmail = functions
       });
 
       try {
-        const {quoteNumber, clientEmail, clientName, total, subtotal, tax, notes, items} = newData;
+        const {
+          quoteNumber,
+          clientEmail,
+          clientName,
+          total,
+          subtotal,
+          tax,
+          notes,
+          items,
+        } = newData;
         const validUntil = newData.validUntil.toDate();
         const issueDate = newData.issueDate.toDate();
 
-        const validUntilFormatted = validUntil.toLocaleDateString("en-ZA", {year: "numeric", month: "long", day: "numeric"});
-        const issueDateFormatted = issueDate.toLocaleDateString("en-ZA", {year: "numeric", month: "long", day: "numeric"});
+        const validUntilFormatted = validUntil.toLocaleDateString("en-ZA", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        const issueDateFormatted = issueDate.toLocaleDateString("en-ZA", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
 
-        const itemsHtml = items.map((item, i) => `
+        const itemsHtml = items
+            .map(
+                (item, i) => `
           <tr style="border-bottom:1px solid #e5e7eb;">
             <td style="padding:12px;text-align:center;color:#6b7280;">${i + 1}</td>
             <td style="padding:12px;">
@@ -522,7 +639,9 @@ exports.sendQuoteEmail = functions
             <td style="padding:12px;text-align:center;">${item.quantity}</td>
             <td style="padding:12px;text-align:right;">R${Number(item.unitPrice).toFixed(2)}</td>
             <td style="padding:12px;text-align:right;"><strong>R${Number(item.amount).toFixed(2)}</strong></td>
-          </tr>`).join("");
+          </tr>`,
+            )
+            .join("");
 
         const detailsHtml = `
           <p>Dear <strong>${clientName}</strong>,</p>
@@ -561,20 +680,60 @@ exports.sendQuoteEmail = functions
           appPhone: APP_PHONE,
         });
 
-        await sendViaZepto({
-          fromName: APP_NAME,
-          toEmail: clientEmail,
-          toName: clientName,
-          replyTo: appEmail,
-          subject: `Quote ${quoteNumber} from ${APP_NAME} - Valid Until ${validUntilFormatted}`,
-          htmlBody,
-        }, appEmail, zeptoClient);
+        await sendViaZepto(
+            {
+              fromName: APP_NAME,
+              toEmail: clientEmail,
+              toName: clientName,
+              replyTo: appEmail,
+              subject: `Quote ${quoteNumber} from ${APP_NAME} - Valid Until ${validUntilFormatted}`,
+              htmlBody,
+            },
+            appEmail,
+            zeptoClient,
+        );
 
         console.log("Quote email sent to:", clientEmail);
-        await change.after.ref.update({emailSentAt: admin.firestore.FieldValue.serverTimestamp()});
+        await change.after.ref.update({
+          emailSentAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
       } catch (error) {
         console.error("Error sending quote email:", error);
       }
 
       return null;
+    });
+
+// ─── 5. FIRESTORE TRIGGER — incoming service request notification ──────────────
+
+exports.onNewIncomingRequest = functions.firestore
+    .document("users/{providerId}/incomingRequests/{requestId}")
+    .onCreate(async (snap, context) => {
+      const data = snap.data();
+      const {providerId} = context.params;
+
+      // Get provider FCM token
+      const providerDoc = await admin
+          .firestore()
+          .doc(`serviceProviders/${providerId}`)
+          .get();
+      const fcmToken = providerDoc.data()?.fcmToken;
+
+      if (fcmToken) {
+        await admin.messaging().send({
+          token: fcmToken,
+          notification: {
+            title: "New booking request 📥",
+            body: `${data.requesterName} needs your ${data.requesterIndustry} service.`,
+          },
+          data: {
+            type: "incoming_request",
+            requestId: data.requestId,
+          },
+        });
+      }
+
+    // Optional: send email via ZeptoMail
+    // const zeptoClient = new SendMailClient({ url: "api.zeptomail.com/", token: zeptoToken.value() });
+    // await sendViaZepto({ fromName: APP_NAME, toEmail: providerEmail, ... }, zeptoFromEmail.value(), zeptoClient);
     });

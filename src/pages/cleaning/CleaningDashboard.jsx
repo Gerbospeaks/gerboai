@@ -10,6 +10,8 @@ import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import CleaningSidebar from "./CleaningSidebar";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
@@ -779,6 +781,7 @@ const CleaningDashboard = () => {
           handleAddNewCustomer={handleAddNewCustomer}
           // FIX: pass documentType so sidebar label shows correct type
           documentType={documentType}
+          newRequestCount={0}
         />
 
         {/* ── Main content ──────────────────────────────────────────────── */}
@@ -1136,6 +1139,17 @@ const CleaningDashboard = () => {
               <FleetView user={user} />
             </div>
           )}
+          {activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+  </div>
+)}
+
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={businessInfo} />
+  </div>
+)}
           {/* ── Quote/Invoice view — split layout ─────────────────────── */}
           {activeView === "quote" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import AIInvoiceWindow from '../AIInvoiceWindow';

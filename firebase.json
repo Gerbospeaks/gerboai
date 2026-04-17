@@ -15,7 +15,6 @@
       "source": "functions"
     },
     {
-      "source": "solid5",
       "codebase": "solid5",
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
@@ -24,7 +23,8 @@
         "firebase-debug.log",
         "firebase-debug.*.log",
         "*.local"
-      ]
+      ],
+      "source": "solid5"
     }
   ]
 }

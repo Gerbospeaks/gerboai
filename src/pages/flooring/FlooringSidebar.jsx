@@ -16,6 +16,7 @@ import {
   Truck,
   Menu,
   X,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -38,6 +39,7 @@ export default function FlooringSidebar({
   setShowCustomersListModal,
   handleAddNewCustomer,
   documentType,
+   newRequestCount,
   // NOTE: showQuotesList + isQuotesInvoicesOpen2/setIsQuotesInvoicesOpen2
   // removed — accordion state is managed internally here like all other sidebars
 }) {
@@ -89,12 +91,19 @@ export default function FlooringSidebar({
 
       {/* Nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-        <NavItem
+         <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
+        <NavItem
+  icon={Store}
+  label="Find a Service"
+  onClick={() => goTo("marketplace")}
+  active={activeView === "marketplace"}
+  badge={newRequestCount > 0 ? newRequestCount : null}
+/>
         <NavItem
           icon={Settings}
           label="Settings"

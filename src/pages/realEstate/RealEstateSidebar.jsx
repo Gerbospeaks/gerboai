@@ -15,6 +15,7 @@ import {
   CreditCard,
   FileBarChart,
   LogOut,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -35,6 +36,7 @@ export default function RealEstateSidebar({
   setShowInvoicesList,
   setShowCustomersListModal,
   handleLogout,
+   newRequestCount,
 }) {
   const [isInvoicesOpen, setIsInvoicesOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);

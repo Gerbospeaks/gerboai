@@ -18,6 +18,7 @@ import {
   FileBarChart,
   BarChart3,
   LogOut,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -35,6 +36,7 @@ export default function SecuritySidebar({
   showIncidentsList,
   setShowIncidentsList,
   handleLogout,
+   newRequestCount,
 }) {
   const [isIncidentsOpen, setIsIncidentsOpen] = useState(false);
   const [isSchedulesOpen, setIsSchedulesOpen] = useState(false);

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { updatePortalSlug } from '../contexts/AuthContext';
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { getAuth } from "firebase/auth";
 import { uploadLogoToR2 } from "../utils/uploadLogoToR2";
@@ -198,7 +198,25 @@ function GatewayRow({ gateway, saved, onSave }) {
     </div>
   );
 }
-
+async function createProviderProfile(user, businessInfo) {
+  await setDoc(doc(db, "serviceProviders", user.uid), {
+    uid:          user.uid,
+    businessName: businessInfo.businessName,
+    industry:     businessInfo.industry,
+    location:     businessInfo.location || "",
+    rate:         businessInfo.rate || "Quote on request",
+    rating:       0,
+    reviewCount:  0,
+    responseTime: "TBD",
+    available:    true,
+    featured:     false,
+    initials:     businessInfo.businessName.slice(0, 2).toUpperCase(),
+    about:        "",
+    badges:       [],
+    createdAt:    serverTimestamp(),
+    updatedAt:    serverTimestamp(),
+  }, { merge: true });
+}
 // ─── Main modal ────────────────────────────────────────────────────────────────
 const BusinessSettingsModal = ({ onClose }) => {
   const { user, refreshUser, authUser } = useAuth();
@@ -296,7 +314,13 @@ const BusinessSettingsModal = ({ onClose }) => {
     try {
       const db = getFirestore();
       const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-      await setDoc(docRef, { ...businessInfo, stampSettings });
+      await createProviderProfile(user, {
+  ...businessInfo,
+  location: [businessInfo.addressLine1, businessInfo.addressLine2, businessInfo.city]
+    .filter(Boolean)
+    .join(", "),
+});
+       await createProviderProfile(user, businessInfo);
       if (user?.dashboardId === "education" && businessInfo?.businessName) {
         await updatePortalSlug(user.uid, businessInfo.businessName);
       }

@@ -27,6 +27,8 @@ import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import SignatureStamp from "../SignatureStamp";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import PlumbingMultiStepForm from "./PlumbingMultiStepForm";
@@ -1235,6 +1237,17 @@ const PlumbingDashboard = () => {
                           />
                         </div>
                       )}
+                      {activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+  </div>
+)}
+
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={businessInfo} />
+  </div>
+)}
 
             {/* ── Invoice / Work Order Builder ─────────────────────────── */}
             {activeView === "invoice" && (

@@ -11,6 +11,8 @@ import Vehicles from "./Vehicles";
 import PartsInventory from "./PartsInventory";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useNavigate, useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
@@ -1311,6 +1313,7 @@ const TowingDashboard = () => {
           setShowCustomersListModal={setShowCustomersListModal}
           documentType={documentType}
           handleLogout={handleLogout}
+          newRequestCount={0}
         />
         {/* ── Main content ─────────────────────────────────────────────────── */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
@@ -1642,7 +1645,17 @@ const TowingDashboard = () => {
               <Templates user={user} />
             </div>
           )}
+           {activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+  </div>
+)}
 
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={businessInfo} />
+  </div>
+)}
           {/* ── Invoice / Service Call Builder ────────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

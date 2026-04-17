@@ -18,6 +18,7 @@ import {
   Package,
   ClipboardList,
   Ruler,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -41,6 +42,7 @@ export default function PaintingSidebar({
   handleAddNewCustomer,
   documentType,
   isQuotesInvoicesOpen2,
+   newRequestCount,
   setIsQuotesInvoicesOpen2,
 }) {
   const [isClientsOpen, setIsClientsOpen] = useState(false);

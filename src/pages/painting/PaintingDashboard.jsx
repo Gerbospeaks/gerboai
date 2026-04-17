@@ -9,6 +9,8 @@ import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import ScheduleView from "./ScheduleView";
@@ -1505,6 +1507,17 @@ const PaintingDashboard = () => {
           {activeView === "schedule" && (
   <div className="flex-1 overflow-y-auto p-4">
     <ScheduleView user={user} />
+  </div>
+)}
+{activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+  </div>
+)}
+
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={businessInfo} />
   </div>
 )}
 {activeView === "reports" && (

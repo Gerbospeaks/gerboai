@@ -23,6 +23,7 @@ import {
   BookMarked,
   Shield,
   Plus,
+  Store,
 } from "lucide-react";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -60,6 +61,7 @@ export default function EducationSidebar({
   onOpenEventModal,
   onOpenStaffModal,
   onOpenTimetableModal,
+   newRequestCount,
 }) {
   const [isReportCardsOpen, setIsReportCardsOpen] = useState(false);
   const [isStudentsOpen, setIsStudentsOpen] = useState(false);

@@ -11,6 +11,7 @@ import {
   Calendar,
   BarChart3,
   LogOut,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -33,6 +34,7 @@ export default function SolarSidebar({
   setShowCustomersListModal,
   documentType,
   handleLogout,
+   newRequestCount,
 }) {
   const [isQuotesOpen, setIsQuotesOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);

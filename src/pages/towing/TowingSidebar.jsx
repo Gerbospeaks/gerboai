@@ -11,6 +11,7 @@ import {
   ClipboardList,
   Car,
   LogOut,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -33,6 +34,7 @@ export default function TowingSidebar({
   setShowCustomersListModal,
   documentType,
   handleLogout,
+   newRequestCount,
 }) {
   const [isJobCardsOpen, setIsJobCardsOpen] = useState(false);
   const [isCustomersOpen, setIsCustomersOpen] = useState(false);

@@ -8,6 +8,8 @@ import { getAuth, signOut } from "firebase/auth";
 import logo from "../../assets/img/solidflo-logo.png";
 import FinancialOverview from "../FinancialOverview";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import HvacAIExtractor from "./HvacAIExtractor";
@@ -1630,6 +1632,17 @@ const HvacDashboard = () => {
               <MaintenanceSchedule user={user} />
             </div>
           )}
+          {activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+  </div>
+)}
+
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={businessInfo} />
+  </div>
+)}
           {/* ── Invoice builder — split layout ─────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

@@ -7,6 +7,8 @@ import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import SecurityIncidentMultiStepForm from "./SecurityIncidentMultiStepForm";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
@@ -1439,7 +1441,17 @@ const SecurityDashboard = () => {
               />
             </div>
           )}
+          {activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+  </div>
+)}
 
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={businessInfo} />
+  </div>
+)}
           {/* Incident report builder */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">

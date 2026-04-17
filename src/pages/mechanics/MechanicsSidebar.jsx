@@ -18,6 +18,7 @@ import {
   StickyNote, 
   BarChart2,
   X,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -40,6 +41,7 @@ export default function MechanicsSidebar({
   setShowCustomersListModal,
   documentType,
   handleLogout,
+   newRequestCount,
 }) {
   const [isJobCardsOpen, setIsJobCardsOpen] = useState(false);
   const [isCustomersOpen, setIsCustomersOpen] = useState(false);
@@ -90,12 +92,19 @@ export default function MechanicsSidebar({
 
       {/* Scrollable nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-        <NavItem
+         <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
+        <NavItem
+  icon={Store}
+  label="Find a Service"
+  onClick={() => goTo("marketplace")}
+  active={activeView === "marketplace"}
+  badge={newRequestCount > 0 ? newRequestCount : null}
+/>
         <NavItem
           icon={Settings}
           label="Settings"
@@ -386,7 +395,7 @@ function SectionLabel({ children }) {
   );
 }
 
-function NavItem({ icon: Icon, label, onClick, active = false }) {
+function NavItem({ icon: Icon, label, onClick, active = false, badge = null }) {
   return (
     <div
       onClick={onClick}
@@ -397,7 +406,12 @@ function NavItem({ icon: Icon, label, onClick, active = false }) {
       }`}
     >
       <Icon className="w-4 h-4 flex-shrink-0" />
-      <span className="truncate">{label}</span>
+      <span className="truncate flex-1">{label}</span>
+      {badge != null && (
+        <span className="bg-[#059669] text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
+          {badge}
+        </span>
+      )}
     </div>
   );
 }

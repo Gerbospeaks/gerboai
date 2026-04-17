@@ -22,6 +22,7 @@ import {
   Warehouse,
   Menu,
   X,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -43,6 +44,7 @@ export default function LogisticsSidebar({
   setShowCustomersListModal,
   handleAddNewCustomer,
   setShowInTransitModal,
+   newRequestCount,
 }) {
   const [isWaybillsOpen, setIsWaybillsOpen] = useState(false);
   const [isCustomersOpen, setIsCustomersOpen] = useState(false);
@@ -96,12 +98,19 @@ export default function LogisticsSidebar({
 
       {/* Scrollable nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-        <NavItem
+         <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
+        <NavItem
+  icon={Store}
+  label="Find a Service"
+  onClick={() => goTo("marketplace")}
+  active={activeView === "marketplace"}
+  badge={newRequestCount > 0 ? newRequestCount : null}
+/>
         <NavItem
           icon={Settings}
           label="Settings"

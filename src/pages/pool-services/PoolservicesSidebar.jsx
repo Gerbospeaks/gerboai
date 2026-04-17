@@ -17,6 +17,7 @@ import {
   Package,
   ClipboardList,
   Wrench,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -41,6 +42,7 @@ export default function PoolServiceSidebar({
   documentType,
   isQuotesInvoicesOpen2,
   setIsQuotesInvoicesOpen2,
+   newRequestCount,
 }) {
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);

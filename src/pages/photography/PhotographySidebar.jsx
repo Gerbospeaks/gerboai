@@ -20,6 +20,7 @@ import {
   Film,
   Star,
   FolderOpen,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -40,6 +41,7 @@ export default function PhotographySidebar({
   setShowInvoicesList,
   setShowCustomersListModal,
   handleAddNewCustomer,
+   newRequestCount,
 }) {
   const [isInvoicesOpen, setIsInvoicesOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);

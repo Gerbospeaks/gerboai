@@ -62,6 +62,8 @@ import MechanicsSidebar from "./MechanicsSidebar";
 import NotesView from "./NotesView";
 import PartsInventory from "./PartsInventory";
 import Templates from "./Templates";
+import ServiceMarketplaceView from "../ServiceMarketplaceView";
+import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import Vehicles from "./Vehicles";
@@ -1414,6 +1416,7 @@ const MechanicsDashboard = () => {
           handleLogout={handleLogout}
           isMobile={isMobile}
           logo={logo}
+          newRequestCount={0}
         />
 
         {/* Main content */}
@@ -1656,6 +1659,17 @@ const MechanicsDashboard = () => {
               <Templates user={user} />
             </div>
           )}
+          {activeView === "marketplace" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+  </div>
+)}
+
+{activeView === "incoming-requests" && (
+  <div className="flex-1 overflow-y-auto p-6">
+    <ServiceRequestsView user={user} businessInfo={businessInfo} />
+  </div>
+)}
           {activeView === "reports" && (
             <div className="flex-1 overflow-y-auto p-4">
               <ReportsView user={user} />
