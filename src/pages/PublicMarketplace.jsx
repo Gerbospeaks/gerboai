@@ -192,6 +192,85 @@ const css = `
     display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
     animation: mp-up .7s ease both .25s;
   }
+    .mp-hero-slider {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04);
+  padding: 6px;
+  animation: mp-up .7s ease both .25s;
+  /* clip the overflow so cards vanish at edges */
+  mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+  height: 420px;
+}
+.mp-hero-slider-track {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: mp-slide-up 18s linear infinite;
+}
+.mp-hero-slider-track:hover { animation-play-state: paused; }
+
+@keyframes mp-slide-up {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+.mp-hero-mini-card {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  transition: background .2s, border-color .2s;
+  cursor: default;
+}
+.mp-hero-mini-card:hover {
+  background: rgba(255,255,255,.12);
+  border-color: rgba(99,102,241,.4);
+}
+.mp-hero-mini-avatar {
+  width: 40px; height: 40px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  flex-shrink: 0;
+}
+.mp-hero-mini-info { flex: 1; min-width: 0; }
+.mp-hero-mini-name {
+  font-size: 13px; font-weight: 700; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.mp-hero-mini-meta {
+  font-size: 11px; color: rgba(255,255,255,.45);
+}
+.mp-hero-mini-right {
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 4px; flex-shrink: 0;
+}
+.mp-hero-mini-rate {
+  font-size: 12px; font-weight: 700; color: #fff;
+}
+.mp-hero-mini-avail {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; color: #4ade80;
+}
+.mp-hero-mini-avail-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #4ade80; box-shadow: 0 0 6px #4ade80;
+}
+.mp-hero-mini-unavail {
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,.3);
+}
+.mp-hero-mini-star {
+  font-size: 10px; color: #f59e0b;
+}
   .mp-hero-stat {
     background: rgba(255,255,255,.06);
     border-radius: 8px; padding: 24px 20px;
@@ -1480,6 +1559,9 @@ function Hero({ availCount, totalCount, onPostJob, onBrowse }) {
     return () => clearInterval(t);
   }, []);
 
+  // Duplicate the providers list so the loop is seamless
+  const sliderItems = [...PROVIDERS, ...PROVIDERS];
+
   return (
     <section className="mp-hero">
       <video
@@ -1542,20 +1624,40 @@ function Hero({ availCount, totalCount, onPostJob, onBrowse }) {
           </div>
         </div>
 
-        {/* Right — stats panel */}
-        <div className="mp-hero-stats">
-          {[
-            { icon: "🔧", val: totalCount, lbl: "Listed Providers" },
-            { icon: "✅", val: availCount, lbl: "Available Today" },
-            { icon: "⭐", val: "4.7", lbl: "Avg. Rating" },
-            { icon: "🏭", val: INDUSTRIES.length - 1, lbl: "Industries" },
-          ].map((s, i) => (
-            <div key={i} className="mp-hero-stat">
-              <div className="mp-hero-stat-icon">{s.icon}</div>
-              <div className="mp-hero-stat-val">{s.val}</div>
-              <div className="mp-hero-stat-lbl">{s.lbl}</div>
-            </div>
-          ))}
+        {/* Right — sliding provider cards */}
+        <div className="mp-hero-slider">
+          <div className="mp-hero-slider-track">
+            {sliderItems.map((p, i) => (
+              <div key={`${p.id}-${i}`} className="mp-hero-mini-card">
+                <div
+                  className="mp-hero-mini-avatar"
+                  style={{ background: p.bg, color: p.tc }}
+                >
+                  {p.initials}
+                </div>
+                <div className="mp-hero-mini-info">
+                  <div className="mp-hero-mini-name">{p.name}</div>
+                  <div className="mp-hero-mini-meta">
+                    {getIndustryLabel(p.industry)} · {p.loc}
+                  </div>
+                </div>
+                <div className="mp-hero-mini-right">
+                  <span className="mp-hero-mini-rate">{p.rate}</span>
+                  <span className="mp-hero-mini-star">
+                    ★ {p.rating}
+                  </span>
+                  {p.avail ? (
+                    <span className="mp-hero-mini-avail">
+                      <span className="mp-hero-mini-avail-dot" />
+                      Available
+                    </span>
+                  ) : (
+                    <span className="mp-hero-mini-unavail">Unavailable</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
