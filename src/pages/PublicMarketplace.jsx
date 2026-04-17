@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import heroBg from "../assets/videos/world.mp4";
+import heroBg from "../assets/videos/market.mp4";
 import logo from "../assets/img/solidflo.png";
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -108,7 +108,7 @@ const css = `
     width: 100%; height: 100%;
     object-fit: cover; object-position: center;
     z-index: 0; pointer-events: none;
-    opacity: 0.18;
+    opacity: 1;
   }
   .mp-hero-overlay {
     position: absolute; inset: 0; z-index: 1; pointer-events: none;
