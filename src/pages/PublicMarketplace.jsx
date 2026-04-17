@@ -325,32 +325,58 @@ const css = `
 
   /* avail banner */
   .mp-avail-banner {
-    background: var(--navy);
-    border-radius: 8px; padding: 20px 28px;
-    margin-bottom: 36px;
-    display: flex; align-items: center; gap: 16px;
-    border: 1px solid rgba(255,255,255,.06);
-  }
-  .mp-avail-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: #4ade80; flex-shrink: 0;
-    box-shadow: 0 0 10px #4ade80;
-  }
-  .mp-avail-text {
-    font-size: 14px; color: rgba(255,255,255,.7); font-weight: 600;
-  }
-  .mp-avail-count {
-    margin-left: auto; text-align: right;
-  }
-  .mp-avail-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 32px; font-weight: 700; color: #fff; line-height: 1;
-  }
-  .mp-avail-sub {
-    font-size: 10px; color: rgba(255,255,255,.3);
-    letter-spacing: .07em; text-transform: uppercase;
-  }
-
+  background: linear-gradient(135deg, rgba(99,102,241,.1) 0%, rgba(14,165,233,.06) 100%);
+  border: 1px solid rgba(99,102,241,.2);
+  border-radius: 14px; padding: 28px 36px;
+  margin-bottom: 48px;
+  display: flex; align-items: center; gap: 24px;
+  position: relative; overflow: hidden;
+}
+  .mp-avail-banner::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,.55), rgba(14,165,233,.35), transparent);
+}
+.mp-avail-banner::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 50% 120% at 90% 50%, rgba(14,165,233,.07) 0%, transparent 70%);
+}
+.mp-avail-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #4ade80; flex-shrink: 0;
+  box-shadow: 0 0 0 4px rgba(74,222,128,.15), 0 0 16px #4ade80;
+  animation: mp-live-pulse 2.2s ease-in-out infinite;
+}
+ .mp-avail-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #4ade80; flex-shrink: 0;
+  box-shadow: 0 0 0 4px rgba(74,222,128,.15), 0 0 16px #4ade80;
+  animation: mp-live-pulse 2.2s ease-in-out infinite;
+}
+ @keyframes mp-live-pulse {
+  0%,100% { box-shadow: 0 0 0 4px rgba(74,222,128,.15), 0 0 14px #4ade80; }
+  50%      { box-shadow: 0 0 0 9px rgba(74,222,128,.06), 0 0 22px #4ade80; }
+}
+.mp-avail-text {
+  font-size: 14px; color: rgba(255,255,255,.6);
+  font-weight: 600; line-height: 1.5; flex: 1;
+}
+.mp-avail-text strong { color: rgba(255,255,255,.9); font-weight: 700; }
+.mp-avail-count { margin-left: auto; display: flex; align-items: center; gap: 0; }
+.mp-avail-stat {
+  text-align: center; padding: 0 28px;
+  border-left: 1px solid rgba(255,255,255,.08);
+}
+.mp-avail-stat:first-child { border-left: none; }
+.mp-avail-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px; font-weight: 700; color: #fff; line-height: 1; display: block;
+}
+.mp-avail-sub {
+  font-size: 10px; color: rgba(255,255,255,.3);
+  letter-spacing: .08em; text-transform: uppercase; margin-top: 3px; display: block;
+}
   /* section title */
   .mp-section-eyebrow {
     display: inline-block; font-size: 10px; font-weight: 700;
@@ -360,114 +386,126 @@ const css = `
     border: 1px solid rgba(99,102,241,.2); border-radius: 2px;
   }
   .mp-section-title {
-    display: flex; align-items: center; gap: 12px;
-    margin: 36px 0 20px;
-  }
-  .mp-section-title-text {
-    font-size: 10px; font-weight: 700; letter-spacing: .09em;
-    text-transform: uppercase; color: var(--text-muted);
-    white-space: nowrap;
-  }
-  .mp-section-title-line {
-    flex: 1; height: 1px; background: var(--cream-dark);
-  }
-
+  display: flex; align-items: center; gap: 18px;
+  margin: 48px 0 28px;
+}
+.mp-section-title-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 600; color: #fff;
+  white-space: nowrap; letter-spacing: -.015em;
+}
+.mp-section-title-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(99,102,241,.35) 0%, transparent 100%);
+}
+.mp-section-title-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: rgba(99,102,241,.8);
+  background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.2);
+  padding: 4px 12px; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+}
   /* ════════════════════════════════════
      PROVIDER CARDS — big grid
   ════════════════════════════════════ */
   .mp-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px; margin-bottom: 8px;
-  }
-  .mp-card {
-    background: var(--card-bg);
-    border: 1px solid var(--cream-dark);
-    border-radius: 8px;
-    padding: 28px;
-    cursor: pointer;
-    display: flex; flex-direction: column; gap: 16px;
-    transition: box-shadow .2s, transform .2s, border-color .2s;
-    opacity: 0; transform: translateY(16px);
-    animation: mp-up .45s ease forwards;
-  }
-  .mp-card:hover {
-    box-shadow: 0 12px 40px rgba(15,23,42,.12);
-    transform: translateY(-3px);
-    border-color: rgba(99,102,241,.3);
-  }
-  .mp-card.featured {
-    border-color: var(--red);
-    border-width: 1.5px;
-  }
-  /* top row */
-  .mp-card-top { display: flex; align-items: flex-start; gap: 14px; }
-  .mp-card-avatar {
-    width: 52px; height: 52px; border-radius: 8px;
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 700;
-  }
-  .mp-card-info { flex: 1; min-width: 0; }
-  .mp-card-name {
-    font-size: 15px; font-weight: 700; color: var(--text);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    margin-bottom: 4px;
-  }
-  .mp-card-meta { font-size: 12px; color: var(--text-muted); }
-  .mp-card-right {
-    flex-shrink: 0; display: flex; flex-direction: column;
-    align-items: flex-end; gap: 5px;
-  }
-  .mp-card-featured-badge {
-    font-size: 10px; font-weight: 700;
-    background: var(--red-light); color: var(--red);
-    padding: 3px 10px; border-radius: 20px;
-  }
-  .mp-card-rate {
-    font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap;
-  }
-  /* badges */
-  .mp-card-badges { display: flex; gap: 6px; flex-wrap: wrap; }
-  .mp-badge {
-    font-size: 10px; font-weight: 700;
-    padding: 3px 10px; border-radius: 20px;
-  }
-  .mp-badge-green  { background: #ecfdf5; color: #059669; }
-  .mp-badge-blue   { background: #eff6ff; color: #1d4ed8; }
-  .mp-badge-amber  { background: #fffbeb; color: #b45309; }
-  .mp-badge-purple { background: #f5f3ff; color: #6d28d9; }
-  /* stats row */
-  .mp-card-stats {
-    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-  }
-  .mp-card-stat { font-size: 12px; color: var(--text-muted); }
-  .mp-card-unavail { font-size: 11px; color: #ef4444; font-weight: 700; }
-  /* expanded about */
-  .mp-card-about {
-    font-size: 13px; color: var(--text-mid); line-height: 1.65;
-    padding-top: 16px; border-top: 1px solid var(--cream-dark);
-  }
-  .mp-card-about-link {
-    margin-top: 10px; font-size: 12px; color: var(--red); font-weight: 700;
-  }
-  /* CTA button */
-  .mp-card-btn {
-    width: 100%; padding: 12px 0;
-    border-radius: 4px; border: none;
-    font-family: 'Lato', sans-serif; font-size: 13px;
-    font-weight: 700; letter-spacing: .04em;
-    cursor: pointer; transition: all .15s;
-    text-transform: uppercase;
-  }
-  .mp-card-btn-avail {
-    background: var(--navy); color: #fff;
-  }
-  .mp-card-btn-avail:hover { background: #0f172aee; transform: translateY(-1px); }
-  .mp-card-btn-unavail {
-    background: var(--cream-mid); color: var(--text-muted);
-    cursor: not-allowed;
-  }
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px; margin-bottom: 8px;
+}
+.mp-card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px; padding: 26px;
+  cursor: pointer;
+  display: flex; flex-direction: column; gap: 16px;
+  transition: box-shadow .22s, transform .22s, border-color .22s, background .22s;
+  opacity: 0; transform: translateY(16px);
+  animation: mp-up .45s ease forwards;
+  position: relative; overflow: hidden;
+}
+.mp-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent);
+}
+.mp-card:hover {
+  box-shadow: 0 20px 52px rgba(0,0,0,.45), 0 0 0 1px rgba(99,102,241,.35);
+  transform: translateY(-4px);
+  background: rgba(255,255,255,.07);
+  border-color: rgba(99,102,241,.3);
+}
+.mp-card.featured {
+  border-color: rgba(99,102,241,.3);
+  background: rgba(99,102,241,.06);
+}
+.mp-card.featured::before {
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,.45), rgba(14,165,233,.25), transparent);
+}
+.mp-card-top { display: flex; align-items: flex-start; gap: 14px; }
+.mp-card-avatar {
+  width: 48px; height: 48px; border-radius: 10px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  box-shadow: 0 2px 12px rgba(0,0,0,.25);
+}
+.mp-card-info { flex: 1; min-width: 0; }
+.mp-card-name {
+  font-size: 15px; font-weight: 700; color: #fff;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  margin-bottom: 4px;
+}
+.mp-card-meta { font-size: 12px; color: rgba(255,255,255,.38); }
+.mp-card-right {
+  flex-shrink: 0; display: flex; flex-direction: column;
+  align-items: flex-end; gap: 6px;
+}
+.mp-card-featured-badge {
+  font-size: 10px; font-weight: 700;
+  background: rgba(99,102,241,.18); color: #a5b4fc;
+  padding: 3px 10px; border-radius: 20px;
+  border: 1px solid rgba(99,102,241,.3);
+}
+.mp-card-rate { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; }
+.mp-card-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.mp-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px; border: 1px solid transparent;
+}
+.mp-badge-green  { background: rgba(16,185,129,.14);  color: #34d399; border-color: rgba(16,185,129,.25); }
+.mp-badge-blue   { background: rgba(14,165,233,.14);  color: #38bdf8; border-color: rgba(14,165,233,.25); }
+.mp-badge-amber  { background: rgba(245,158,11,.14);  color: #fbbf24; border-color: rgba(245,158,11,.22); }
+.mp-badge-purple { background: rgba(139,92,246,.14);  color: #c4b5fd; border-color: rgba(139,92,246,.25); }
+.mp-card-stats { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.mp-card-stat { font-size: 12px; color: rgba(255,255,255,.38); }
+.mp-card-unavail { font-size: 11px; color: #f87171; font-weight: 700; }
+.mp-card-about {
+  font-size: 13px; color: rgba(255,255,255,.5); line-height: 1.7;
+  padding-top: 16px; border-top: 1px solid rgba(255,255,255,.07);
+}
+.mp-card-about-link { margin-top: 10px; font-size: 12px; color: #818cf8; font-weight: 700; }
+.mp-card-btn {
+  width: 100%; padding: 13px 0;
+  border-radius: 6px;
+  font-family: 'Lato', sans-serif; font-size: 12px;
+  font-weight: 700; letter-spacing: .05em;
+  cursor: pointer; transition: all .18s;
+  text-transform: uppercase;
+}
+.mp-card-btn-avail {
+  background: rgba(99,102,241,.18); color: #a5b4fc;
+  border: 1px solid rgba(99,102,241,.3);
+}
+.mp-card-btn-avail:hover {
+  background: var(--red); color: #fff;
+  border-color: var(--red);
+  box-shadow: 0 6px 20px rgba(99,102,241,.35);
+  transform: translateY(-1px);
+}
+.mp-card-btn-unavail {
+  background: rgba(255,255,255,.03); color: rgba(255,255,255,.2);
+  border: 1px solid rgba(255,255,255,.07); cursor: not-allowed;
+}
 
   /* ════════════════════════════════════
      STATS STRIP (below hero)
@@ -506,54 +544,72 @@ const css = `
      BOTTOM CTA SECTION
   ════════════════════════════════════ */
   .mp-cta {
-    background: var(--navy); border-radius: 8px;
-    padding: 56px 40px; margin-top: 56px;
-    text-align: center; position: relative; overflow: hidden;
-  }
-  .mp-cta::before {
-    content: '';
-    position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(ellipse 70% 80% at 20% 50%, rgba(99,102,241,.18) 0%, transparent 55%);
-  }
-  .mp-cta-inner { position: relative; z-index: 1; }
-  .mp-cta-tag {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 5px 14px; border-radius: 20px; margin-bottom: 20px;
-    background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.3);
-    font-size: 10px; font-weight: 700; letter-spacing: .07em;
-    text-transform: uppercase; color: #a5b4fc;
-  }
-  .mp-cta h2 {
-    font-size: clamp(1.8rem, 3vw, 2.8rem); color: #fff; margin-bottom: 14px;
-  }
-  .mp-cta p {
-    font-size: 16px; color: rgba(255,255,255,.55);
-    max-width: 520px; margin: 0 auto 36px; line-height: 1.7;
-  }
-  .mp-cta-btns { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
-  .mp-cta-primary {
-    height: 52px; padding: 0 32px;
-    background: var(--red); color: #fff; border: none; border-radius: 4px;
-    font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
-    letter-spacing: .04em; text-transform: uppercase;
-    display: flex; align-items: center; gap: 8px; cursor: pointer;
-    transition: all .15s;
-  }
-  .mp-cta-primary:hover {
-    background: var(--red-hover); transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(99,102,241,.4);
-  }
-  .mp-cta-secondary {
-    height: 52px; padding: 0 28px;
-    background: rgba(255,255,255,.08);
-    color: rgba(255,255,255,.8);
-    border: 1px solid rgba(255,255,255,.2); border-radius: 4px;
-    font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
-    letter-spacing: .04em; text-transform: uppercase; cursor: pointer;
-    transition: all .15s;
-  }
-  .mp-cta-secondary:hover { background: rgba(255,255,255,.15); color: #fff; }
-  .mp-cta-note { font-size: 12px; color: rgba(255,255,255,.3); margin-top: 18px; letter-spacing: .03em; }
+  border: 1px solid rgba(99,102,241,.2);
+  border-radius: 16px; padding: 80px 48px; margin-top: 72px;
+  text-align: center; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, rgba(15,23,42,1) 0%, rgba(26,16,64,.9) 50%, rgba(15,32,64,.95) 100%);
+}
+.mp-cta::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 65% 80% at 15% 50%, rgba(99,102,241,.22) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 65% at 85% 25%, rgba(14,165,233,.14) 0%, transparent 55%);
+}
+.mp-cta::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(99,102,241,.7) 40%, rgba(14,165,233,.5) 60%, transparent 100%);
+}
+.mp-cta-inner { position: relative; z-index: 1; }
+.mp-cta-tag {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 16px; border-radius: 20px; margin-bottom: 24px;
+  background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.3);
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: #a5b4fc;
+}
+.mp-cta h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem); color: #fff; margin-bottom: 16px; line-height: 1.1;
+}
+.mp-cta h2 em { font-style: italic; color: #818cf8; }
+.mp-cta p {
+  font-size: 16px; color: rgba(255,255,255,.5);
+  max-width: 500px; margin: 0 auto 44px; line-height: 1.75;
+}
+.mp-cta-btns { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.mp-cta-primary {
+  height: 54px; padding: 0 36px;
+  background: var(--red); color: #fff; border: none; border-radius: 6px;
+  font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  transition: all .18s;
+}
+.mp-cta-primary:hover {
+  background: var(--red-hover); transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(99,102,241,.45);
+}
+.mp-cta-secondary {
+  height: 54px; padding: 0 32px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.75);
+  border: 1px solid rgba(255,255,255,.15); border-radius: 6px;
+  font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase; cursor: pointer;
+  transition: all .18s;
+}
+.mp-cta-secondary:hover { background: rgba(255,255,255,.12); color: #fff; }
+.mp-cta-perks {
+  display: flex; align-items: center; justify-content: center; gap: 28px;
+  margin-top: 28px; flex-wrap: wrap;
+}
+.mp-cta-perk {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; color: rgba(255,255,255,.3);
+  font-weight: 600; letter-spacing: .03em;
+}
+.mp-cta-perk-check { color: #4ade80; font-size: 13px; }
 
   /* ════════════════════════════════════
      MODAL
@@ -613,29 +669,65 @@ const css = `
   /* ════════════════════════════════════
      FOOTER
   ════════════════════════════════════ */
-  .mp-footer {
-    background: var(--navy);
-    padding: 32px 40px;
-    text-align: center;
-    border-top: 1px solid rgba(255,255,255,.06);
-  }
-  .mp-footer p { font-size: 13px; color: rgba(255,255,255,.3); letter-spacing: .03em; }
-  .mp-footer a { color: rgba(255,255,255,.55); font-weight: 700; text-decoration: none; }
-  .mp-footer a:hover { color: #fff; }
+ .mp-footer {
+  background: var(--navy);
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.mp-footer-upper {
+  max-width: 1200px; margin: 0 auto;
+  padding: 48px 40px 36px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 40px; flex-wrap: wrap;
+}
+.mp-footer-brand { display: flex; flex-direction: column; gap: 10px; max-width: 280px; }
+.mp-footer-tagline {
+  font-size: 13px; color: rgba(255,255,255,.3); line-height: 1.65;
+}
+.mp-footer-links-group {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.mp-footer-links-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: rgba(255,255,255,.25); margin-bottom: 4px;
+}
+.mp-footer-link {
+  font-size: 13px; color: rgba(255,255,255,.4);
+  text-decoration: none; transition: color .15s; cursor: pointer;
+}
+.mp-footer-link:hover { color: rgba(255,255,255,.85); }
+.mp-footer-lower {
+  border-top: 1px solid rgba(255,255,255,.05);
+  padding: 20px 40px;
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.mp-footer-copy { font-size: 12px; color: rgba(255,255,255,.2); letter-spacing: .02em; }
+.mp-footer-legal { display: flex; gap: 20px; }
+.mp-footer-legal a {
+  font-size: 12px; color: rgba(255,255,255,.2);
+  text-decoration: none; transition: color .15s;
+}
+.mp-footer-legal a:hover { color: rgba(255,255,255,.55); }
 
   /* ════════════════════════════════════
      EMPTY STATE
   ════════════════════════════════════ */
-  .mp-empty {
-    text-align: center; padding: 72px 24px;
-  }
-  .mp-empty-icon {
-    width: 64px; height: 64px; margin: 0 auto 16px;
-    background: var(--cream-mid); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-size: 28px;
-  }
-  .mp-empty-title { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
-  .mp-empty-sub { font-size: 13px; color: var(--text-muted); }
+ .mp-empty {
+  text-align: center; padding: 80px 24px;
+}
+.mp-empty-icon {
+  width: 72px; height: 72px; margin: 0 auto 20px;
+  background: rgba(99,102,241,.1);
+  border: 1px solid rgba(99,102,241,.2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 30px;
+}
+.mp-empty-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 10px;
+}
+.mp-empty-sub { font-size: 14px; color: rgba(255,255,255,.35); line-height: 1.6; }
 
   /* ════════════════════════════════════
      ANIMATIONS
@@ -663,6 +755,14 @@ const css = `
     .mp-filter-bar { padding: 0 20px; }
     .mp-cta { padding: 40px 24px; }
   }
+    @media (max-width: 640px) {
+  .mp-avail-banner { flex-direction: column; align-items: flex-start; gap: 16px; padding: 24px 20px; }
+  .mp-avail-count { width: 100%; }
+  .mp-avail-stat { padding: 0 20px 0 0; border-left: none; border-right: 1px solid rgba(255,255,255,.08); }
+  .mp-footer-upper { flex-direction: column; gap: 32px; padding: 40px 20px 28px; }
+  .mp-footer-lower { padding: 16px 20px; }
+  .mp-cta { padding: 48px 24px; }
+}
 `;
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -1352,11 +1452,14 @@ function Badge({ label, type }) {
   );
 }
 
-function SectionTitle({ children }) {
+function SectionTitle({ children, count }) {
   return (
     <div className="mp-section-title">
       <span className="mp-section-title-text">{children}</span>
       <div className="mp-section-title-line" />
+      {count != null && (
+        <span className="mp-section-title-badge">{count} listed</span>
+      )}
     </div>
   );
 }
@@ -1819,127 +1922,172 @@ export default function PublicMarketplace() {
         ))}
       </div>
 
-      {/* Content */}
-      <div className="mp-content">
-        {/* Availability banner */}
-        <div className="mp-avail-banner">
-          <div className="mp-avail-dot" />
-          <span className="mp-avail-text">
-            Service providers available on the platform today
+     {/* Dark wrapper so the whole below-filter area is navy */}
+<div style={{ background: "var(--navy)", minHeight: "100vh" }}>
+  <div className="mp-content">
+
+    {/* Availability banner */}
+    <div className="mp-avail-banner">
+      <div className="mp-avail-dot" />
+      <span className="mp-avail-text">
+        <strong>Live marketplace</strong> — verified service providers
+        ready to quote across Gauteng right now.
+      </span>
+      <div className="mp-avail-count">
+        <div className="mp-avail-stat">
+          <span className="mp-avail-num">
+            {filtered.filter((p) => p.avail).length}
           </span>
-          <div className="mp-avail-count">
-            <div className="mp-avail-num">
-              {filtered.filter((p) => p.avail).length}
-            </div>
-            <div className="mp-avail-sub">Available now</div>
-          </div>
+          <span className="mp-avail-sub">Available now</span>
         </div>
-
-        {/* Featured */}
-        {featured.length > 0 && (
-          <>
-            <SectionTitle>Recommended for you</SectionTitle>
-            <div className="mp-grid">
-              {featured.map((p, i) => (
-                <ProviderCard
-                  key={p.id}
-                  provider={p}
-                  expanded={!!expandedCards[p.id]}
-                  onToggle={toggleCard}
-                  onBook={handleBook}
-                  delay={i * 60}
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Standard */}
-        {standard.length > 0 && (
-          <>
-            {featured.length > 0 && <SectionTitle>More providers</SectionTitle>}
-            <div className="mp-grid">
-              {standard.map((p, i) => (
-                <ProviderCard
-                  key={p.id}
-                  provider={p}
-                  expanded={!!expandedCards[p.id]}
-                  onToggle={toggleCard}
-                  onBook={handleBook}
-                  delay={i * 40}
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Empty */}
-        {filtered.length === 0 && (
-          <div className="mp-empty">
-            <div className="mp-empty-icon">
-              {INDUSTRIES.find((i) => i.id === activeFilter)?.emoji || "🔍"}
-            </div>
-            <div className="mp-empty-title">
-              No providers listed in this category yet
-            </div>
-            <div className="mp-empty-sub">
-              Be the first to list your business — register on SolidFlo.
-            </div>
-          </div>
-        )}
-
-        {/* CTA */}
-        <div className="mp-cta">
-          <div className="mp-cta-inner">
-            <div className="mp-cta-tag">For Businesses</div>
-            <h2>Need a specific service?</h2>
-            <p>
-              Register on SolidFlo to post a job request and receive quotes
-              directly from verified providers in your area.
-            </p>
-            <div className="mp-cta-btns">
-              <button
-                className="mp-cta-primary"
-                onClick={() => openModal("register")}
-              >
-                Post a Job Request
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path d="M7 17L17 7M7 7h10v10" />
-                </svg>
-              </button>
-              <button
-                className="mp-cta-secondary"
-                onClick={() => navigateTo("/")}
-              >
-                Learn More about SolidFlo
-              </button>
-            </div>
-            <p className="mp-cta-note">
-              ✓ Free to register &nbsp;·&nbsp; ✓ No credit card required
-              &nbsp;·&nbsp; ✓ Starter plan forever free
-            </p>
-          </div>
+        <div className="mp-avail-stat">
+          <span className="mp-avail-num">{filtered.length}</span>
+          <span className="mp-avail-sub">Total listed</span>
         </div>
       </div>
+    </div>
 
-      {/* Footer */}
-      <footer className="mp-footer">
+    {/* Featured */}
+    {featured.length > 0 && (
+      <>
+        <SectionTitle count={featured.length}>Recommended for you</SectionTitle>
+        <div className="mp-grid">
+          {featured.map((p, i) => (
+            <ProviderCard
+              key={p.id}
+              provider={p}
+              expanded={!!expandedCards[p.id]}
+              onToggle={toggleCard}
+              onBook={handleBook}
+              delay={i * 60}
+            />
+          ))}
+        </div>
+      </>
+    )}
+
+    {/* Standard */}
+    {standard.length > 0 && (
+      <>
+        {featured.length > 0 && (
+          <SectionTitle count={standard.length}>More providers</SectionTitle>
+        )}
+        <div className="mp-grid">
+          {standard.map((p, i) => (
+            <ProviderCard
+              key={p.id}
+              provider={p}
+              expanded={!!expandedCards[p.id]}
+              onToggle={toggleCard}
+              onBook={handleBook}
+              delay={i * 40}
+            />
+          ))}
+        </div>
+      </>
+    )}
+
+    {/* Empty */}
+    {filtered.length === 0 && (
+      <div className="mp-empty">
+        <div className="mp-empty-icon">
+          {INDUSTRIES.find((i) => i.id === activeFilter)?.emoji || "🔍"}
+        </div>
+        <div className="mp-empty-title">
+          No providers listed in this category yet
+        </div>
+        <div className="mp-empty-sub">
+          Be the first to list your business — register on SolidFlo today.
+        </div>
+      </div>
+    )}
+
+    {/* CTA */}
+    <div className="mp-cta">
+      <div className="mp-cta-inner">
+        <div className="mp-cta-tag">For Businesses</div>
+        <h2>
+          Need a specific <em>service?</em>
+        </h2>
         <p>
-          © {new Date().getFullYear()} SolidFlo &nbsp;·&nbsp;
-          <a href={SOLIDFLO_URL} target="_blank" rel="noopener noreferrer">
-            solidflo.co.za
-          </a>
-          &nbsp;·&nbsp; Marketplace for verified service providers in Gauteng
+          Post a job request and receive quotes directly from verified
+          providers in your area — free to start, no credit card needed.
         </p>
-      </footer>
+        <div className="mp-cta-btns">
+          <button
+            className="mp-cta-primary"
+            onClick={() => openModal("register")}
+          >
+            Post a Job Request
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M7 17L17 7M7 7h10v10" />
+            </svg>
+          </button>
+          <button
+            className="mp-cta-secondary"
+            onClick={() => navigateTo("/")}
+          >
+            Learn More
+          </button>
+        </div>
+        <div className="mp-cta-perks">
+          {["Free to register", "No credit card required", "Starter plan forever free"].map((t) => (
+            <span key={t} className="mp-cta-perk">
+              <span className="mp-cta-perk-check">✓</span> {t}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
 
+  </div>
+</div>
+
+{/* Footer */}
+<footer className="mp-footer">
+  <div className="mp-footer-upper">
+    <div className="mp-footer-brand">
+      <img src={logo} alt="SolidFlo" style={{ height: 40 }} />
+      <p className="mp-footer-tagline">
+        The marketplace for verified trade and professional service
+        providers across Gauteng.
+      </p>
+    </div>
+    <div className="mp-footer-links-group">
+      <div className="mp-footer-links-label">Platform</div>
+      <span className="mp-footer-link" onClick={() => navigateTo("/register")}>Register Free</span>
+      <span className="mp-footer-link" onClick={() => navigateTo("/login")}>Sign In</span>
+      <span className="mp-footer-link" onClick={() => openModal("register")}>Post a Job</span>
+    </div>
+    <div className="mp-footer-links-group">
+      <div className="mp-footer-links-label">Industries</div>
+      {INDUSTRIES.slice(1, 6).map((ind) => (
+        <span
+          key={ind.id}
+          className="mp-footer-link"
+          onClick={() => {
+            document.getElementById("mp-filter")?.scrollIntoView({ behavior: "smooth" });
+          }}
+        >
+          {ind.emoji} {ind.label}
+        </span>
+      ))}
+    </div>
+    <div className="mp-footer-links-group">
+      <div className="mp-footer-links-label">Company</div>
+      <a className="mp-footer-link" href={SOLIDFLO_URL} target="_blank" rel="noopener noreferrer">solidflo.co.za</a>
+    </div>
+  </div>
+  <div className="mp-footer-lower">
+    <span className="mp-footer-copy">
+      © {new Date().getFullYear()} SolidFlo · Marketplace for verified service providers in Gauteng
+    </span>
+    <div className="mp-footer-legal">
+      <a href={`${SOLIDFLO_URL}/privacy`} target="_blank" rel="noopener noreferrer">Privacy</a>
+      <a href={`${SOLIDFLO_URL}/terms`} target="_blank" rel="noopener noreferrer">Terms</a>
+    </div>
+  </div>
+</footer>
       {/* Modal */}
       {modal && (
         <RegisterModal
