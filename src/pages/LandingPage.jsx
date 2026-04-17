@@ -6,6 +6,7 @@ import IndustryPickerModal from "../components/IndustryPickerModal";
 import { useIndustryPicker } from "../hooks/useIndustryPicker";
 import TimelineNavigation from "./TimelineNavigation";
 import { Helmet } from "react-helmet";
+import heroBg from "../assets/videos/world.mp4";
 import {
   Zap,
   Shield,
@@ -49,7 +50,7 @@ const fetchExchangeRate = async (targetCurrency) => {
   if (targetCurrency === "USD") return 1;
   try {
     const res = await fetch(
-      `https://api.frankfurter.app/latest?from=USD&to=${targetCurrency}`,
+      `https://open.er-api.com/v6/latest/USD`
     );
     if (!res.ok) throw new Error();
     const data = await res.json();
@@ -100,34 +101,34 @@ const useCurrency = () => {
 
 /* ─── Styles ─────────────────────────────────────────────────────────────── */
 const css = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Lato:wght@300;400;600;700;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;600;700;900&display=swap');
 
   :root {
-    --navy:       #1a1a2e;
-    --navy-mid:   #2d2d4e;
-    --navy-light: #3d3d6b;
-    --red:        #c8442a;
-    --red-hover:  #a83520;
-    --red-light:  #fdf0ed;
-    --blue:       #1b6ec2;
-    --green:      #1d8348;
+  --navy:       #0f172a;
+  --navy-mid:   #1e293b;
+  --navy-light: #334155;
+  --red:        #6366f1;
+  --red-hover:  #4f46e5;
+  --red-light:  #eef2ff;
+  --blue:       #0ea5e9;
+  --green:      #10b981;
 
-    --cream:      #fefcf8;
-    --cream-mid:  #f9f5ee;
-    --cream-dark: #f0e8d8;
-    --card-bg:    #ffffff;
+  --cream:      #f8fafc;
+  --cream-mid:  #f1f5f9;
+  --cream-dark: #e2e8f0;
+  --card-bg:    #ffffff;
 
-    --border:     #e8ddd0;
-    --bg:         var(--cream);
-    --white:      var(--card-bg);
-    --text:       #1a1208;
-    --text-mid:   #5a4a35;
-    --text-muted: #8a7a68;
-  }
+  --border:     #e2e8f0;
+  --bg:         var(--cream);
+  --white:      var(--card-bg);
+  --text:       #0f172a;
+  --text-mid:   #475569;
+  --text-muted: #94a3b8;
+}
 
   .lp * { box-sizing: border-box; }
   .lp { font-family: 'Lato', sans-serif; color: var(--text); overflow-x: hidden; background: var(--cream); }
-  .lp h1, .lp h2, .lp h3 { font-family: 'DM Serif Display', serif; }
+  .lp h1, .lp h2, .lp h3 { font-family: 'Playfair Display', serif; }
 
   /* ── Scroll bar ── */
   .lp ::-webkit-scrollbar { width: 6px; }
@@ -137,7 +138,7 @@ const css = `
   /* ── Scroll progress bar ── */
   .lp-progress {
     position: fixed; top: 0; left: 0; height: 3px; z-index: 200;
-    background: linear-gradient(90deg, var(--red), #ff7a57);
+   background: linear-gradient(90deg, var(--red), #818cf8);
     transition: width .1s linear;
   }
 
@@ -145,7 +146,7 @@ const css = `
      NAV
   ════════════════════════════════════════════════ */
   .lp-nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    position: fixed; top: 40px; left: 0; right: 0; z-index: 100;
     height: 64px;
     display: flex; align-items: center;
     padding: 0 40px;
@@ -188,9 +189,15 @@ const css = `
   }
   .lp-btn-primary:hover { background: var(--red-hover); transform: translateY(-1px); }
   .lp-hamburger {
-    display: none; background: none; border: none; cursor: pointer; color: #fff; padding: 4px;
+    display: none; background: none; border: none; cursor: pointer; color: var(--navy); padding: 4px;
   }
+  .lp-nav:not(.scrolled) .lp-hamburger {
+  color: var(--navy);
+}
 
+.lp-nav.scrolled .lp-hamburger {
+  color: var(--navy);
+}
   /* ── Mobile nav drawer ── */
   .lp-drawer-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 150;
@@ -223,20 +230,69 @@ const css = `
      HERO  (keeps dark navy — contrast with cream below)
   ════════════════════════════════════════════════ */
   .lp-hero {
-    background: var(--cream);
-    min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 380px 24px 80px;
-    position: relative; overflow: hidden;
-    text-align: center;
-  }
+   background: #ffffff;
+  transition: background 0.4s ease;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 100px 40px 80px;
+  position: relative;
+  overflow: hidden;
+}
+  .lp-hero-inner {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 60px;
+}
+
+.lp-hero-left {
+  text-align: left;
+  padding-top: 100px;
+}
+.lp-hero.scrolled {
+  background: #5ed34e;
+}
+.lp-hero-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+    .lp-hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.lp-hero-video-overlay {
+  position: absolute;
+  padding-top: 40px;
+  inset: 0;
+  
+  z-index: 1;
+  pointer-events: none;
+}
+  .lp-hero > *:not(.lp-hero-video):not(.lp-hero-video-overlay) {
+  position: relative;
+  z-index: 2;
+}
   .lp-hero::before {
     content: '';
     position: absolute; inset: 0;
     background:
-      radial-gradient(ellipse 70% 60% at 15% 40%, rgba(200,68,42,.07) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 60% at 15% 40%, rgba(99,102,241,.07) 0%, transparent 60%),
       radial-gradient(ellipse 60% 70% at 85% 20%, rgba(27,110,194,.06) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 50% at 50% 90%, rgba(200,68,42,.04) 0%, transparent 60%);
+      radial-gradient(ellipse 50% 50% at 50% 90%, rgba(99,102,241,.04) 0%, transparent 60%);
     pointer-events: none;
   }
   .lp-hero::after {
@@ -244,37 +300,42 @@ const css = `
     position: absolute;
     width: 800px; height: 800px;
     background:
-      radial-gradient(ellipse at 40% 40%, rgba(200,68,42,.09) 0%, transparent 55%),
+      radial-gradient(ellipse at 40% 40%, rgba(99,102,241,.09) 0%, transparent 55%),
       radial-gradient(ellipse at 70% 60%, rgba(27,110,194,.07) 0%, transparent 55%);
     top: -200px; right: -200px;
     pointer-events: none;
   }
   .lp-hero-badge {
     display: inline-flex; align-items: center; gap: 7px;
-    padding: 6px 14px;
-    background: rgba(200,68,42,.08);
-    border: 1px solid rgba(200,68,42,.2);
-    border-radius: 20px;
-    font-size: 12px; font-weight: 700; letter-spacing: .05em;
-    text-transform: uppercase; color: var(--red);
-    margin-bottom: 28px;
-    animation: lp-up .6s ease both;
+  padding: 6px 14px;
+  background: rgba(99,102,241,.08);
+  border: 1px solid rgba(99,102,241,.2);
+  border-radius: 20px;
+  font-size: 12px; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--red);
+  margin-bottom: 28px;
   }
   .lp-hero h1 {
-    font-size: clamp(3rem, 7vw, 5.5rem);
-    line-height: 1.05; color: var(--navy);
-    margin-bottom: 24px;
+   font-size: clamp(2.8rem, 5vw, 4.5rem);
+  line-height: 1.08;
+  color: var(--navy);
+  margin-bottom: 24px;
+  text-align: left;
     animation: lp-up .65s ease both .05s;
   }
   .lp-hero h1 em { font-style: italic; color: var(--red); }
   .lp-hero-sub {
     font-size: clamp(1rem, 2vw, 1.25rem); color: var(--text-mid);
-    max-width: 620px; margin: 0 auto 40px; line-height: 1.7;
+    max-width: 520px; margin: 0 0 40px; line-height: 1.7; text-align: left;
     animation: lp-up .65s ease both .1s;
   }
   .lp-hero-ctas {
-    display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
-    margin-bottom: 40px;
+    display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-bottom: 40px;
     animation: lp-up .65s ease both .15s;
   }
   .lp-hero-primary {
@@ -304,30 +365,85 @@ const css = `
   }
   .lp-hero-secondary:hover { border-color: var(--navy); color: var(--navy); background: var(--cream-mid); }
   .lp-hero-trust {
-    display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap;
-    font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: .03em;
+   display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: .03em;
+  justify-content: flex-start;
     animation: lp-up .65s ease both .2s;
-    margin-bottom: 32px;
+    
   }
   .lp-hero-trust-item { display: flex; align-items: center; gap: 6px; }
   .lp-hero-trust-item svg { color: #4ade80; }
 
   .lp-hero-screen {
-    position: relative; max-width: 900px; width: 100%; margin: 20px auto 0;
-    animation: lp-up .8s ease both .25s;
+    width: 100%;
+  position: relative;
+  animation: lp-float 6s ease-in-out infinite;
   }
+    .lp-hero-orb {
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%,
+    #818cf8 0%,
+    #6366f1 30%,
+    #4338ca 60%,
+    #1e1b4b 100%
+  );
+  position: relative;
+  animation: lp-float 6s ease-in-out infinite;
+  box-shadow:
+    0 0 80px rgba(99,102,241,.35),
+    0 0 160px rgba(99,102,241,.15);
+}
+
+.lp-hero-orb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%,
+    rgba(255,255,255,.25) 0%,
+    transparent 55%
+  );
+}
+
+/* Remove old floating invoices on small screens */
+@media (max-width: 900px) {
+  .lp-hero-inner {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .lp-hero h1,
+  .lp-hero-sub { text-align: center; }
+  .lp-hero-ctas,
+  .lp-hero-trust { justify-content: center; }
+  .lp-hero-right { display: none; }
+  .lp-hero { padding: 120px 24px 60px; }
+}
   .lp-hero-screen-glow {
     position: absolute; inset: -40px;
     background: radial-gradient(ellipse at 50% 60%, rgba(232,68,42,.2), transparent 70%);
     pointer-events: none;
   }
   .lp-hero-screen-frame {
-    border-radius: 8px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,.1);
-    box-shadow: 0 40px 80px rgba(0,0,0,.5);
-    position: relative;
+    border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--cream-dark);
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, .12),
+    0 4px 16px rgba(15, 23, 42, .06);
+  background: var(--cream-mid);
   }
-  .lp-hero-screen-frame img { width: 100%; height: auto; display: block; }
+  .lp-hero-screen-frame img { width: 100%;
+  height: auto;
+  display: block;
+  transition: opacity .4s ease; }
 
   /* ── Invoice floats ── */
   .lp-invoice-float {
@@ -362,15 +478,28 @@ const css = `
   @media (max-width: 1200px) {
     .lp-invoice-float, .lp-invoice-float2 { display: none; }
   }
-  .lp-slide-dots { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
+  .lp-slide-dots { display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px; }
   .lp-slide-dot {
-    height: 4px; border-radius: 2px; cursor: pointer;
-    transition: width .3s, background .3s;
-    background: rgba(255,255,255,.2);
-    width: 8px; border: none;
+    height: 4px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: width .3s, background .3s;
+  background: var(--cream-dark);
+  width: 8px;
+  border: none;
   }
   .lp-slide-dot.active { width: 28px; background: var(--red); }
+@keyframes lp-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
+.lp-hero-screen-frame img {
+  animation: lp-fade .4s ease both;
+}
   .lp-cut {
     width: 100%; overflow: hidden; line-height: 0;
     background: var(--navy);
@@ -381,7 +510,7 @@ const css = `
      STATS STRIP  — creamy dark
   ════════════════════════════════════════════════ */
   .lp-stats {
-    background: linear-gradient(135deg, #1a1208 0%, #2a1e0f 50%, #1a1a2e 100%);
+   background: #0f172a;
     padding: 56px 24px;
     position: relative;
   }
@@ -404,7 +533,7 @@ const css = `
     display: flex; align-items: center; justify-content: center;
     margin: 0 auto 12px; color: var(--red);
   }
-  .lp-stat-value { font-size: 36px; font-weight: 900; color: #fefcf8; line-height: 1; margin-bottom: 6px; font-family: 'DM Serif Display', serif; }
+  .lp-stat-value { font-size: 36px; font-weight: 900; color: #fefcf8; line-height: 1; margin-bottom: 6px; font-family: 'Playfair Display', serif; }
   .lp-stat-label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(253,246,236,.4); }
 
   /* ════════════════════════════════════════════════
@@ -463,18 +592,18 @@ const css = `
      GLOBE  — keeps navy
   ════════════════════════════════════════════════ */
   .lp-globe {
-    background: var(--navy);
+    background: transparent;
     padding: 96px 24px; text-align: center;
     position: relative; overflow: hidden;
   }
   .lp-globe::before {
     content: '';
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse at 50% 100%, rgba(232,68,42,.12), transparent 60%);
+    background: transparent;
     pointer-events: none;
   }
-  .lp-globe h2 { color: #fff; font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 12px; }
-  .lp-globe p  { color: rgba(255,255,255,.55); font-size: 16px; max-width: 480px; margin: 0 auto 48px; line-height: 1.65; }
+  .lp-globe h2 { color: #000000; font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 12px; }
+  .lp-globe p  { color: rgba(0,0,0,.55); font-size: 16px; max-width: 480px; margin: 0 auto 48px; line-height: 1.65; }
   .lp-globe img { max-width: 760px; width: 100%; }
 
   /* ════════════════════════════════════════════════
@@ -516,7 +645,7 @@ const css = `
   }
   .lp-plan.popular .lp-plan-name { color: rgba(255,255,255,.5); }
   .lp-plan-price {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Playfair Display', serif;
     font-size: 42px; color: var(--navy); line-height: 1; margin-bottom: 4px;
   }
   .lp-plan.popular .lp-plan-price { color: #fff; }
@@ -567,7 +696,7 @@ const css = `
      TESTIMONIALS  — warm dark brown
   ════════════════════════════════════════════════ */
   .lp-testimonials {
-    background: linear-gradient(155deg, #1a1208 0%, #2a1e0f 45%, #1a1a2e 100%);
+    background: transparent;
     padding: 96px 24px;
     position: relative; overflow: hidden;
   }
@@ -575,18 +704,18 @@ const css = `
     content: '';
     position: absolute; inset: 0;
     background:
-      radial-gradient(ellipse 55% 50% at 5% 30%, rgba(200,68,42,.09) 0%, transparent 55%),
+      radial-gradient(ellipse 55% 50% at 5% 30%, rgba(99,102,241,.09) 0%, transparent 55%),
       radial-gradient(ellipse 45% 55% at 95% 70%, rgba(27,110,194,.07) 0%, transparent 55%);
     pointer-events: none;
   }
-  .lp-testimonials h2 { color: #fefcf8; text-align: center; font-size: clamp(2rem,4vw,3rem); margin-bottom: 10px; }
-  .lp-testimonials > .lp-section-head > p { color: rgba(254,252,248,.5); }
+  .lp-testimonials h2 { color: #0a0a0a; text-align: center; font-size: clamp(2rem,4vw,3rem); margin-bottom: 10px; }
+  .lp-testimonials > .lp-section-head > p { color: rgba(22, 22, 22, 0.5); }
   .lp-testimonials-grid {
     max-width: 1060px; margin: 0 auto;
     display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
   }
   .lp-testimonial {
-    background: rgba(253,246,236,.04);
+    background: rgba(253,246,236);
     border: 1px solid rgba(253,246,236,.08);
     border-left: 3px solid var(--red);
     border-radius: 4px; padding: 28px;
@@ -595,11 +724,11 @@ const css = `
   }
   .lp-testimonial.visible { opacity: 1; transform: translateY(0); }
   .lp-testimonial-stars { display: flex; gap: 3px; margin-bottom: 16px; color: #fb923c; }
-  .lp-testimonial-text { font-size: 14px; color: rgba(253,246,236,.7); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+  .lp-testimonial-text { font-size: 14px; color: #000000; line-height: 1.7; margin-bottom: 20px; font-style: italic; }
   .lp-testimonial-author { display: flex; align-items: center; gap: 10px; }
   .lp-testimonial-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(253,246,236,.1); }
-  .lp-testimonial-name { font-size: 13px; font-weight: 700; color: var(--cream); }
-  .lp-testimonial-role { font-size: 11px; color: rgba(253,246,236,.4); margin-top: 1px; }
+  .lp-testimonial-name { font-size: 13px; font-weight: 700; color: #5f2c02; }
+  .lp-testimonial-role { font-size: 11px; color: rgb(151, 94, 13); margin-top: 1px; }
 
   /* ════════════════════════════════════════════════
      FAQ  — lightest cream
@@ -629,7 +758,7 @@ const css = `
      CTA BANNER
   ════════════════════════════════════════════════ */
   .lp-cta {
-    background: var(--red);
+    background: transparent;
     padding: 96px 24px;
     text-align: center;
     position: relative; overflow: hidden;
@@ -638,17 +767,17 @@ const css = `
     content: '';
     position: absolute; inset: 0;
     background:
-      radial-gradient(ellipse 70% 80% at 10% 50%, rgba(255,255,255,.1) 0%, transparent 50%),
-      radial-gradient(ellipse 50% 60% at 90% 20%, rgba(255,255,255,.08) 0%, transparent 50%),
-      radial-gradient(ellipse 40% 40% at 50% 100%, rgba(0,0,0,.12) 0%, transparent 50%);
+    radial-gradient(ellipse 70% 80% at 10% 50%, rgba(255,255,255,.08) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 60% at 90% 20%, rgba(255,255,255,.06) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 40% at 50% 100%, rgba(0,0,0,.1) 0%, transparent 50%);
     pointer-events: none;
   }
-  .lp-cta h2 { color: #fff; font-size: clamp(2rem,4vw,3.2rem); margin-bottom: 16px; }
-  .lp-cta p  { color: rgba(255,255,255,.8); font-size: 16px; max-width: 540px; margin: 0 auto 40px; line-height: 1.65; }
+  .lp-cta h2 { color: #01034e; font-size: clamp(2rem,4vw,3.2rem); margin-bottom: 16px; }
+  .lp-cta p  { color: rgba(2, 46, 129, 0.8); font-size: 16px; max-width: 540px; margin: 0 auto 40px; line-height: 1.65; }
   .lp-cta-btns { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
   .lp-cta-primary {
     height: 52px; padding: 0 32px;
-    background: #fff; color: var(--red);
+    background: #1f9df1; color: white;
     border: none; border-radius: 4px; cursor: pointer;
     font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
     letter-spacing: .04em; text-transform: uppercase;
@@ -658,8 +787,8 @@ const css = `
   .lp-cta-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
   .lp-cta-secondary {
     height: 52px; padding: 0 28px;
-    background: transparent; color: rgba(255,255,255,.9);
-    border: 1px solid rgba(255,255,255,.4); border-radius: 4px; cursor: pointer;
+    background: transparent; color: #1f9df1;
+    border: 1px solid #1f9df1; border-radius: 4px; cursor: pointer;
     font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
     letter-spacing: .04em; text-transform: uppercase;
     transition: border-color .15s, background .15s;
@@ -670,7 +799,7 @@ const css = `
   /* ════════════════════════════════════════════════
      FOOTER  — keeps navy
   ════════════════════════════════════════════════ */
-  .lp-footer { background: var(--navy); padding: 72px 24px 32px; }
+  .lp-footer { background: #0f172a; padding: 72px 24px 32px; }
   .lp-footer-grid {
     max-width: 1100px; margin: 0 auto;
     display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
@@ -685,7 +814,7 @@ const css = `
     display: flex; align-items: center; justify-content: center;
     transition: background .15s, border-color .15s; cursor: pointer;
   }
-  .lp-footer-social:hover { background: var(--red); border-color: var(--red); }
+  .lp-footer-social:hover { background: #6366f1; border-color: #6366f1; }
   .lp-footer-social img { width: 16px; height: 16px; filter: brightness(0) invert(1); }
   .lp-footer-col-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--red); margin-bottom: 16px; }
   .lp-footer-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
@@ -824,7 +953,7 @@ const LandingPage = () => {
         widget.setAttribute("mode", "chat");
         widget.setAttribute("theme", "dark");
         widget.setAttribute("base-bg-color", "#000000");
-        widget.setAttribute("accent-color", "#e8442a");
+        widget.setAttribute("accent-color", "#2a83e8");
         widget.setAttribute("position", "bottom-right");
         widget.setAttribute("title", "TALK WITH AARON");
         widget.setAttribute(
@@ -890,6 +1019,17 @@ const LandingPage = () => {
     return () => obs.disconnect();
   }, []);
 
+
+useEffect(() => {
+  const hero = document.querySelector('.lp-hero');
+
+  const handleScroll = () => {
+    hero.classList.toggle('scrolled', window.scrollY > 50);
+  };
+
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
   const openCalendly = () => {
     if (window.Calendly)
       window.Calendly.initPopupWidget({
@@ -946,7 +1086,7 @@ const LandingPage = () => {
   const stats = [
     { value: "10K+", label: "Active Users", icon: <Users size={18} /> },
     {
-      value: "$5k+",
+      value: "$500k+",
       label: "Processed Monthly",
       icon: <TrendingUp size={18} />,
     },
@@ -996,7 +1136,7 @@ const LandingPage = () => {
     },
     {
       name: "Professional",
-      usdPrice: 6,
+      usdPrice: 7,
       period: "per month",
       desc: "Ideal for growing businesses",
       popular: true,
@@ -1014,7 +1154,7 @@ const LandingPage = () => {
     },
     {
       name: "Enterprise",
-      usdPrice: 25,
+      usdPrice: 13.50,
       period: "per month",
       desc: "For large teams and businesses",
       popular: false,
@@ -1137,76 +1277,71 @@ const LandingPage = () => {
         </div>
 
         {/* ── Hero ── */}
-        <section className="lp-hero">
-          <div className="lp-hero-badge">
-            <Sparkles size={12} />
-            Trusted by 10,000+ businesses worldwide
-          </div>
-          <h1>
-            Business Management Made{" "}
-            <em key={currentWord}>{ROTATING[currentWord].word}</em>
-          </h1>
-          <p className="lp-hero-sub">{ROTATING[currentWord].sub}</p>
-          <div className="lp-hero-ctas">
-            <button className="lp-hero-primary" onClick={open}>
-              Start Free Trial <ArrowRight size={15} />
-            </button>
-            <button className="lp-hero-secondary" onClick={openCalendly}>
-              <Play size={14} /> Book a Demo
-            </button>
-          </div>
-          <div className="lp-hero-trust">
-            {[
-              "No credit card required",
-              "30-day free trial",
-              "Cancel anytime",
-            ].map((t) => (
-              <div key={t} className="lp-hero-trust-item">
-                <CheckCircle size={13} /> {t}
-              </div>
-            ))}
-          </div>
+       <section className="lp-hero">
+  {/* Video background if you added it */}
+  <video autoPlay muted loop playsInline className="lp-hero-video" src={heroBg} />
+  <div className="lp-hero-video-overlay" />
 
-          <div style={{ marginBottom: 24 }}>
-            <TimelineNavigation variant="inline" />
-          </div>
+  <div className="lp-hero-inner">
+    {/* LEFT — text */}
+    <div className="lp-hero-left">
+      <div className="lp-hero-badge">
+        <Sparkles size={12} />
+        Trusted by 10,000+ businesses worldwide
+      </div>
 
-          {/* Screenshot carousel */}
-          <div className="lp-hero-screen lp-float">
-            <div className="lp-hero-screen-glow" />
-            <div className="lp-hero-screen-frame">
-              <img
-                src={slides[currentSlide].src}
-                alt={slides[currentSlide].alt}
-              />
-            </div>
+      <h1>
+        Business Management<br />
+        Made <em key={currentWord}>{ROTATING[currentWord].word}</em>
+      </h1>
+
+      <p className="lp-hero-sub">{ROTATING[currentWord].sub}</p>
+
+      <div className="lp-hero-ctas">
+        <button className="lp-hero-primary" onClick={open}>
+          Start Free Trial <ArrowRight size={15} />
+        </button>
+        <button className="lp-hero-secondary" onClick={openCalendly}>
+          <Play size={14} /> Book a Demo
+        </button>
+      </div>
+
+      <div className="lp-hero-trust">
+        {["No credit card required", "30-day free trial", "Cancel anytime"].map((t) => (
+          <div key={t} className="lp-hero-trust-item">
+            <CheckCircle size={13} /> {t}
           </div>
-          <div className="lp-slide-dots">
-            {slides.map((_, i) => (
-              <button
-                key={i}
-                className={`lp-slide-dot${i === currentSlide ? " active" : ""}`}
-                onClick={() => setCurrentSlide(i)}
-              />
-            ))}
-          </div>
-           {/* Floating orbs */}
-  <div style={{
-    position:'absolute', width:500, height:500, borderRadius:'50%',
-    background:'radial-gradient(circle, rgba(232,68,42,.18) 0%, transparent 70%)',
-    top:'-10%', left:'-5%', filter:'blur(60px)', pointerEvents:'none', zIndex:0
-  }}/>
-  <div style={{
-    position:'absolute', width:400, height:400, borderRadius:'50%',
-    background:'radial-gradient(circle, rgba(27,110,194,.15) 0%, transparent 70%)',
-    top:'30%', right:'-8%', filter:'blur(80px)', pointerEvents:'none', zIndex:0
-  }}/>
-  <div style={{
-    position:'absolute', width:300, height:300, borderRadius:'50%',
-    background:'radial-gradient(circle, rgba(232,68,42,.1) 0%, transparent 70%)',
-    bottom:'10%', left:'30%', filter:'blur(60px)', pointerEvents:'none', zIndex:0
-  }}/>
-        </section>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 32 }}>
+        <TimelineNavigation variant="inline" />
+      </div>
+    </div>
+
+    {/* RIGHT — orb visual */}
+   <div className="lp-hero-right">
+  <div className="lp-hero-screen">
+    <div className="lp-hero-screen-frame">
+      <img
+        key={currentSlide}
+        src={slides[currentSlide].src}
+        alt={slides[currentSlide].alt}
+      />
+    </div>
+    <div className="lp-slide-dots">
+      {slides.map((_, i) => (
+        <button
+          key={i}
+          className={`lp-slide-dot${i === currentSlide ? " active" : ""}`}
+          onClick={() => setCurrentSlide(i)}
+        />
+      ))}
+    </div>
+  </div>
+</div>
+  </div>
+</section>
 
         {/* ── Stats ── */}
         <section className="lp-stats">
@@ -1529,7 +1664,7 @@ const LandingPage = () => {
                   fontSize: 16,
                   fontWeight: 900,
                   color: "#fff",
-                  fontFamily: "'DM Serif Display', serif",
+                  fontFamily: "'Playfair Display', serif",
                 }}
               >
                 $8,450.00
