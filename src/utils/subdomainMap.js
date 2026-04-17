@@ -18,7 +18,7 @@ export const SUBDOMAIN_ROUTES = {
   accounting:          '/accounting',
   photography:         '/photography',
   welding:             '/welding',
-  educare:           '/education',
+  education:           '/education',
   hotel:               '/hotel',
   painting:            '/painting',
   flooring:            '/flooring',

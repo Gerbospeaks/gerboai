@@ -1063,7 +1063,7 @@ function Pricing({ onRegister }) {
     },
     {
       name: "Professional",
-      price: "R499",
+      price: "R199",
       period: "/month",
       desc: "The sweet spot for growing practices",
       highlight: true,
@@ -1072,7 +1072,6 @@ function Pricing({ onRegister }) {
         "Up to 50 clients",
         "Automated payment reminders",
         "Cash flow dashboard",
-        "Xero & Sage sync",
         "VAT reports",
         "Priority support",
       ],
@@ -1080,7 +1079,7 @@ function Pricing({ onRegister }) {
     },
     {
       name: "Firm",
-      price: "R1 299",
+      price: "R399",
       period: "/month",
       desc: "Multi-partner firms & large teams",
       features: [
@@ -1939,7 +1938,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 · VAT Reg: 4760283891
+            Proudly South African 🇿🇦 · 
           </p>
         </div>
       </div>

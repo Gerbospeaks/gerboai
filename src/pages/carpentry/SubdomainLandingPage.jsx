@@ -1121,7 +1121,7 @@ function Pricing({ onRegister }) {
     },
     {
       name: "Craftsman",
-      price: "R299",
+      price: "R99",
       period: "/month",
       desc: "For established carpentry businesses",
       highlight: true,
@@ -1138,7 +1138,7 @@ function Pricing({ onRegister }) {
     },
     {
       name: "Workshop",
-      price: "R599",
+      price: "R199",
       period: "/month",
       desc: "For joinery shops with multiple staff",
       features: [

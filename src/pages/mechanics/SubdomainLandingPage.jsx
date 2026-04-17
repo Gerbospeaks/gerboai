@@ -1044,7 +1044,7 @@ function Pricing({ onRegister }) {
     },
     {
       name: "Workshop",
-      price: "R349",
+      price: "R149",
       period: "/month",
       desc: "The sweet spot for growing workshops",
       highlight: true,
@@ -1061,7 +1061,7 @@ function Pricing({ onRegister }) {
     },
     {
       name: "Fleet",
-      price: "R799",
+      price: "R399",
       period: "/month",
       desc: "Multi-bay workshops & dealer service centres",
       features: [
@@ -1925,7 +1925,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 · VAT Reg: 4760283891
+            Proudly South African 🇿🇦 · 
           </p>
         </div>
       </div>

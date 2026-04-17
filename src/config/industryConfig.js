@@ -1230,7 +1230,7 @@ export const INDUSTRY_CONFIG = {
 
   // ─── EDUCATION ───────────────────────────────────────────────────────────────
   education: {
-    subdomain: "educare",
+    subdomain: "education",
     label: "Education",
     headline: "School Management Made Easy for Schools & Tutors",
     subheadline:

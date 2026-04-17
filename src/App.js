@@ -356,7 +356,7 @@ function DashboardRoutes() {
         }
       />
       <Route
-        path="/educare"
+        path="/education"
         element={
           <ProtectedRoute>
             <EducationDashboard />
@@ -536,7 +536,7 @@ function DashboardRoutes() {
 }
 
 const SUBDOMAIN_LANDING = {
-  educare:         SolidEducare,
+  education:         SolidEducare,
   mechanics:         SolidMechanic,
   accounting:        SolidAccountant,
   cleaning:          SolidCleaner,
