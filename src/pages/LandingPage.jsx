@@ -1096,23 +1096,23 @@ useEffect(() => {
 
   const testimonials = [
     {
-      name: "Thomas Dube",
-      role: "CEO, Afromind Capital",
+      name: "Pritchard Ray",
+      role: "CEO, Videolid ",
       image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Thomas",
       rating: 5,
       text: "SolidFlo has completely transformed how we handle invoicing. We've cut our billing time by 70% and get paid 2× faster. The automation features are incredible!",
     },
     {
-      name: "Gracious Ncube",
-      role: "Founder, Anantara Skincare",
+      name: "Gregquinn Lee",
+      role: "Founder, Reelancestry Streaming",
       image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Gracious",
       rating: 5,
       text: "The automated recurring billing feature has been a game-changer for our subscription business. Our cash flow has never been better.",
     },
     {
-      name: "Gabriel Moyo",
-      role: "Owner, Gerbospeaks AI",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Gabriel",
+      name: "Donald Potts",
+      role: "Owner, Gerbo AI Call Answering AI",
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Donald",
       rating: 5,
       text: "Best invoicing software we've used. Simple, powerful, and the support team is incredibly responsive.",
     },
