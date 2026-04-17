@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
-import { db } from "../firebase";
-import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from "firebase/firestore";
-// ─── Industry config — all 27 from App.js ────────────────────────────────────
+import { useState, useCallback } from "react";
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+
 const INDUSTRIES = [
-  { id: "all", label: "All industries", emoji: "🌐" },
+  { id: "all", label: "All Industries", emoji: "🌐" },
   { id: "mechanics", label: "Mechanical", emoji: "🔧" },
   { id: "electrical", label: "Electrical", emoji: "⚡" },
   { id: "carpentry", label: "Carpentry", emoji: "🪚" },
@@ -33,9 +33,7 @@ const INDUSTRIES = [
   { id: "window-repair", label: "Window Repair", emoji: "🪟" },
 ];
 
-// ─── Sample provider data covering all 27 industries ─────────────────────────
 const PROVIDERS = [
-  // Mechanics
   {
     id: "p1",
     industry: "mechanics",
@@ -48,8 +46,8 @@ const PROVIDERS = [
     available: true,
     featured: true,
     initials: "JM",
-    color: "#fef3c7",
-    textColor: "#92400e",
+    color: "#fef9c3",
+    textColor: "#854d0e",
     badges: [
       { label: "Available today", type: "green" },
       { label: "Fleet servicing", type: "blue" },
@@ -68,6 +66,7 @@ const PROVIDERS = [
     reviews: 22,
     response: "~45 min",
     available: false,
+    featured: false,
     initials: "AP",
     color: "#fee2e2",
     textColor: "#991b1b",
@@ -77,7 +76,6 @@ const PROVIDERS = [
     ],
     about: "Full mechanical overhaul specialists with 15 years experience.",
   },
-  // Electrical
   {
     id: "p3",
     industry: "electrical",
@@ -110,6 +108,7 @@ const PROVIDERS = [
     reviews: 17,
     response: "~1 hr",
     available: true,
+    featured: false,
     initials: "VM",
     color: "#ede9fe",
     textColor: "#5b21b6",
@@ -119,7 +118,6 @@ const PROVIDERS = [
     ],
     about: "Fast fault diagnosis and after-hours emergency call-outs.",
   },
-  // Carpentry
   {
     id: "p5",
     industry: "carpentry",
@@ -130,6 +128,7 @@ const PROVIDERS = [
     reviews: 29,
     response: "~1 hr",
     available: true,
+    featured: false,
     initials: "TW",
     color: "#dcfce7",
     textColor: "#166534",
@@ -140,7 +139,6 @@ const PROVIDERS = [
     ],
     about: "Bespoke timber solutions for homes and commercial spaces.",
   },
-  // Plumbing
   {
     id: "p6",
     industry: "plumbing",
@@ -162,7 +160,6 @@ const PROVIDERS = [
     ],
     about: "24/7 emergency plumbing and complete bathroom renovations.",
   },
-  // Logistics
   {
     id: "p7",
     industry: "logistics",
@@ -173,6 +170,7 @@ const PROVIDERS = [
     reviews: 67,
     response: "~15 min",
     available: true,
+    featured: false,
     initials: "SC",
     color: "#fdf4ff",
     textColor: "#7e22ce",
@@ -193,6 +191,7 @@ const PROVIDERS = [
     reviews: 33,
     response: "~30 min",
     available: false,
+    featured: false,
     initials: "SM",
     color: "#fff7ed",
     textColor: "#c2410c",
@@ -202,7 +201,6 @@ const PROVIDERS = [
     ],
     about: "Heavy freight and office/warehouse relocation specialists.",
   },
-  // Construction
   {
     id: "p9",
     industry: "construction",
@@ -225,7 +223,6 @@ const PROVIDERS = [
     about:
       "Fully CIDB-accredited contractor for residential and commercial builds.",
   },
-  // Accounting
   {
     id: "p10",
     industry: "accounting",
@@ -248,7 +245,6 @@ const PROVIDERS = [
     about:
       "Registered accountants handling SME bookkeeping, VAT and tax submissions.",
   },
-  // Cleaning
   {
     id: "p11",
     industry: "cleaning",
@@ -259,6 +255,7 @@ const PROVIDERS = [
     reviews: 55,
     response: "~20 min",
     available: true,
+    featured: false,
     initials: "SP",
     color: "#ecfdf5",
     textColor: "#065f46",
@@ -269,7 +266,6 @@ const PROVIDERS = [
     ],
     about: "Industrial and domestic deep-cleaning with eco-friendly products.",
   },
-  // Education
   {
     id: "p12",
     industry: "education",
@@ -280,6 +276,7 @@ const PROVIDERS = [
     reviews: 41,
     response: "~45 min",
     available: true,
+    featured: false,
     initials: "BM",
     color: "#fdf4ff",
     textColor: "#7e22ce",
@@ -289,7 +286,6 @@ const PROVIDERS = [
     ],
     about: "Grade 8-12 tutoring specialists with 95% matric pass rate.",
   },
-  // Health
   {
     id: "p13",
     industry: "health",
@@ -312,7 +308,6 @@ const PROVIDERS = [
     about:
       "Occupational health services including medicals, IOD and wellness screenings.",
   },
-  // Hotel / Hospitality
   {
     id: "p14",
     industry: "hotel",
@@ -323,6 +318,7 @@ const PROVIDERS = [
     reviews: 19,
     response: "~2 hrs",
     available: true,
+    featured: false,
     initials: "ES",
     color: "#fffbeb",
     textColor: "#78350f",
@@ -334,7 +330,6 @@ const PROVIDERS = [
     about:
       "Full event and conference management with catering and AV solutions.",
   },
-  // HVAC
   {
     id: "p15",
     industry: "hvac",
@@ -357,7 +352,6 @@ const PROVIDERS = [
     about:
       "Commercial and industrial HVAC installation, servicing and emergency repairs.",
   },
-  // Landscaping
   {
     id: "p16",
     industry: "landscaping",
@@ -368,6 +362,7 @@ const PROVIDERS = [
     reviews: 48,
     response: "~1 hr",
     available: false,
+    featured: false,
     initials: "GS",
     color: "#f0fdf4",
     textColor: "#14532d",
@@ -379,7 +374,6 @@ const PROVIDERS = [
     about:
       "Landscape architects and maintenance crews for residential and commercial.",
   },
-  // Legal
   {
     id: "p17",
     industry: "legal",
@@ -390,6 +384,7 @@ const PROVIDERS = [
     reviews: 15,
     response: "~4 hrs",
     available: true,
+    featured: false,
     initials: "MA",
     color: "#f8fafc",
     textColor: "#334155",
@@ -401,7 +396,6 @@ const PROVIDERS = [
     about:
       "Boutique commercial law firm specialising in SME contracts and labour.",
   },
-  // Painting
   {
     id: "p18",
     industry: "painting",
@@ -412,6 +406,7 @@ const PROVIDERS = [
     reviews: 62,
     response: "~45 min",
     available: true,
+    featured: false,
     initials: "PP",
     color: "#fff1f2",
     textColor: "#9f1239",
@@ -423,7 +418,6 @@ const PROVIDERS = [
     about:
       "Professional painters with 10+ years experience across residential and commercial.",
   },
-  // Pest Control
   {
     id: "p19",
     industry: "pest-control",
@@ -434,6 +428,7 @@ const PROVIDERS = [
     reviews: 37,
     response: "~30 min",
     available: true,
+    featured: false,
     initials: "BB",
     color: "#fff7ed",
     textColor: "#9a3412",
@@ -445,7 +440,6 @@ const PROVIDERS = [
     about:
       "Registered pest control operators for residential and commercial premises.",
   },
-  // Photography
   {
     id: "p20",
     industry: "photography",
@@ -456,6 +450,7 @@ const PROVIDERS = [
     reviews: 43,
     response: "~2 hrs",
     available: false,
+    featured: false,
     initials: "LL",
     color: "#1e1b4b",
     textColor: "#c7d2fe",
@@ -467,7 +462,6 @@ const PROVIDERS = [
     about:
       "Award-winning commercial and event photographers with drone capability.",
   },
-  // Pool Services
   {
     id: "p21",
     industry: "pool-services",
@@ -478,6 +472,7 @@ const PROVIDERS = [
     reviews: 29,
     response: "~1 hr",
     available: true,
+    featured: false,
     initials: "AC",
     color: "#ecfeff",
     textColor: "#0e7490",
@@ -488,7 +483,6 @@ const PROVIDERS = [
     ],
     about: "Full pool maintenance, chemical balancing and pump/filter repairs.",
   },
-  // Real Estate
   {
     id: "p22",
     industry: "realestate",
@@ -499,6 +493,7 @@ const PROVIDERS = [
     reviews: 31,
     response: "~2 hrs",
     available: true,
+    featured: false,
     initials: "PR",
     color: "#f8fafc",
     textColor: "#0f172a",
@@ -509,7 +504,6 @@ const PROVIDERS = [
     ],
     about: "Specialist commercial and industrial property agents in Gauteng.",
   },
-  // Restaurants
   {
     id: "p23",
     industry: "restaurants",
@@ -520,6 +514,7 @@ const PROVIDERS = [
     reviews: 56,
     response: "~1 hr",
     available: true,
+    featured: false,
     initials: "CT",
     color: "#fdf4ff",
     textColor: "#6b21a8",
@@ -531,7 +526,6 @@ const PROVIDERS = [
     about:
       "Professional catering for corporate functions, launches and team events.",
   },
-  // Retail
   {
     id: "p24",
     industry: "retail",
@@ -542,6 +536,7 @@ const PROVIDERS = [
     reviews: 14,
     response: "~3 hrs",
     available: true,
+    featured: false,
     initials: "SS",
     color: "#fef9c3",
     textColor: "#713f12",
@@ -553,7 +548,6 @@ const PROVIDERS = [
     about:
       "End-to-end retail merchandising, store layouts and POS installations.",
   },
-  // Security
   {
     id: "p25",
     industry: "security",
@@ -576,7 +570,6 @@ const PROVIDERS = [
     about:
       "PSiRA-registered security company providing armed, guarding and CCTV services.",
   },
-  // Solar
   {
     id: "p26",
     industry: "solar-installation",
@@ -587,7 +580,8 @@ const PROVIDERS = [
     reviews: 22,
     response: "~1 hr",
     available: true,
-    initials: "SP",
+    featured: false,
+    initials: "SP2",
     color: "#fef9c3",
     textColor: "#713f12",
     badges: [
@@ -598,7 +592,6 @@ const PROVIDERS = [
     about:
       "NRS097 compliant solar installers for commercial and residential rooftops.",
   },
-  // Towing
   {
     id: "p27",
     industry: "towing",
@@ -609,6 +602,7 @@ const PROVIDERS = [
     reviews: 71,
     response: "~10 min",
     available: true,
+    featured: false,
     initials: "FT",
     color: "#fee2e2",
     textColor: "#991b1b",
@@ -620,7 +614,6 @@ const PROVIDERS = [
     about:
       "24-hour roadside assistance and accident recovery across Gauteng highways.",
   },
-  // Welding
   {
     id: "p28",
     industry: "welding",
@@ -631,6 +624,7 @@ const PROVIDERS = [
     reviews: 18,
     response: "~1 hr",
     available: false,
+    featured: false,
     initials: "IF",
     color: "#1c1917",
     textColor: "#d6d3d1",
@@ -642,7 +636,6 @@ const PROVIDERS = [
     about:
       "Certified welders for structural, fabrication and pipe welding projects.",
   },
-  // Flooring
   {
     id: "p29",
     industry: "flooring",
@@ -653,6 +646,7 @@ const PROVIDERS = [
     reviews: 36,
     response: "~1 hr",
     available: true,
+    featured: false,
     initials: "FM",
     color: "#fdf4ff",
     textColor: "#581c87",
@@ -664,7 +658,6 @@ const PROVIDERS = [
     about:
       "Commercial and residential flooring specialists across all materials.",
   },
-  // Window Repair
   {
     id: "p30",
     industry: "window-repair",
@@ -675,6 +668,7 @@ const PROVIDERS = [
     reviews: 24,
     response: "~30 min",
     available: true,
+    featured: false,
     initials: "CV",
     color: "#ecfeff",
     textColor: "#164e63",
@@ -688,44 +682,143 @@ const PROVIDERS = [
   },
 ];
 
-// ─── Badge color map ──────────────────────────────────────────────────────────
-const BADGE_STYLES = {
-  green: { background: "#dcfce7", color: "#166534" },
-  blue: { background: "#dbeafe", color: "#1e40af" },
-  amber: { background: "#fef3c7", color: "#92400e" },
-  purple: { background: "#ede9fe", color: "#5b21b6" },
+const INITIAL_INCOMING = [
+  {
+    id: "r1",
+    from: "SparkleClean Pro",
+    fromIndustry: "cleaning",
+    service: "Fleet vehicle servicing — 4 vans due for 10 000 km service",
+    address: "14 Industrial Road, Boksburg",
+    date: "2025-08-18",
+    time: "08:00",
+    urgency: "Standard (2-3 days)",
+    attachedDoc: "New purchase order",
+    receivedAt: "2 hours ago",
+    status: "new",
+  },
+  {
+    id: "r2",
+    from: "BuildRight Construction",
+    fromIndustry: "construction",
+    service: "Electrical COC required for new commercial premises, 3-phase DB",
+    address: "Plot 22, Pretoria North Industrial",
+    date: "2025-08-19",
+    time: "07:30",
+    urgency: "Urgent (today/tomorrow)",
+    attachedDoc: "Current quote",
+    receivedAt: "Yesterday",
+    status: "quoted",
+    quoteAmount: "R3 200",
+  },
+  {
+    id: "r3",
+    from: "ClearBooks Accounting",
+    fromIndustry: "accounting",
+    service: "Monthly bookkeeping catchup — 6 months behind, Xero setup needed",
+    address: "Online / remote",
+    date: "2025-08-20",
+    time: "10:00",
+    urgency: "Flexible (within a week)",
+    attachedDoc: "None",
+    receivedAt: "3 days ago",
+    status: "accepted",
+  },
+];
+
+const INITIAL_MY_REQS = [
+  {
+    id: 1,
+    name: "Jake's Motor Workshop",
+    industry: "mechanics",
+    date: "2 days ago",
+    status: "confirmed",
+  },
+  {
+    id: 2,
+    name: "PowerEdge Electrical",
+    industry: "electrical",
+    date: "5 days ago",
+    status: "progress",
+  },
+  {
+    id: 3,
+    name: "SA Courier Express",
+    industry: "logistics",
+    date: "today",
+    status: "pending",
+  },
+];
+
+const STATUS_PILL = {
+  confirmed: { bg: "#eafaf1", color: "#1d8348", label: "Confirmed" },
+  progress: { bg: "#e8f0fb", color: "#1b6ec2", label: "In progress" },
+  pending: { bg: "#fffbeb", color: "#b45309", label: "Awaiting quote" },
 };
-function useProviders(industry) {
-  const [providers, setProviders] = useState([]);
-  const [loading, setLoading]     = useState(true);
 
-  useEffect(() => {
-    async function fetch() {
-      setLoading(true);
-      const ref = collection(db, "serviceProviders");
-      const q = industry === "all"
-        ? query(ref)
-        : query(ref, where("industry", "==", industry));
-      const snap = await getDocs(q);
-      setProviders(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    }
-    fetch();
-  }, [industry]);
+const INC_STATUS = {
+  new: { label: "New request", bg: "#f3f0ff", color: "#6d28d9" },
+  quoted: { label: "Quote sent", bg: "#fffbeb", color: "#b45309" },
+  accepted: { label: "Accepted", bg: "#eafaf1", color: "#1d8348" },
+  declined: { label: "Declined", bg: "#fdf2f0", color: "#e8442a" },
+};
 
-  return { providers, loading };
+const URGENCY_STYLES = {
+  "Urgent (today/tomorrow)": { bg: "#fdf2f0", color: "#e8442a" },
+  "Standard (2-3 days)": { bg: "#e8f0fb", color: "#1b6ec2" },
+  "Flexible (within a week)": { bg: "#eafaf1", color: "#1d8348" },
+};
+
+const BADGE_COLORS = {
+  green: { bg: "#eafaf1", color: "#1d8348" },
+  blue: { bg: "#e8f0fb", color: "#1b6ec2" },
+  amber: { bg: "#fffbeb", color: "#b45309" },
+  purple: { bg: "#f3f0ff", color: "#6d28d9" },
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function getLabel(id) {
+  return (INDUSTRIES.find((i) => i.id === id) || { label: id }).label;
 }
-// ─── Reusable badge ───────────────────────────────────────────────────────────
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function Toast({ message }) {
+  return message ? (
+    <div
+      style={{
+        position: "fixed",
+        bottom: 24,
+        left: "50%",
+        transform: "translateX(-50%)",
+        background: "#1d8348",
+        color: "#fff",
+        fontSize: 13,
+        fontWeight: 700,
+        padding: "10px 20px",
+        borderRadius: 4,
+        zIndex: 9999,
+        whiteSpace: "nowrap",
+        boxShadow: "0 4px 16px rgba(20,26,48,.2)",
+        pointerEvents: "none",
+      }}
+    >
+      {message}
+    </div>
+  ) : null;
+}
+
 function Badge({ label, type }) {
-  const s = BADGE_STYLES[type] || BADGE_STYLES.blue;
+  const c = BADGE_COLORS[type] || BADGE_COLORS.blue;
   return (
     <span
       style={{
-        fontSize: 11,
-        fontWeight: 500,
-        padding: "3px 8px",
+        fontSize: 10,
+        fontWeight: 700,
+        padding: "2px 7px",
         borderRadius: 20,
-        ...s,
+        background: c.bg,
+        color: c.color,
       }}
     >
       {label}
@@ -733,810 +826,571 @@ function Badge({ label, type }) {
   );
 }
 
-// ─── Provider card ────────────────────────────────────────────────────────────
-function ProviderCard({ provider, onBook }) {
-  const [expanded, setExpanded] = useState(false);
-
+function ProviderCard({ provider, expanded, onToggle, onBook }) {
+  const p = provider;
   return (
     <div
-      onClick={() => setExpanded((e) => !e)}
+      onClick={() => onToggle(p.id)}
       style={{
-        background: "var(--color-background-primary)",
-        border: provider.featured
-          ? "1.5px solid #0891b2"
-          : "0.5px solid var(--color-border-tertiary)",
-        borderRadius: "var(--border-radius-lg)",
-        padding: 14,
-        display: "flex",
-        gap: 12,
+        background: "#fff",
+        border: p.featured ? "1.5px solid #1b6ec2" : "1px solid #d9dde6",
+        borderRadius: 4,
+        padding: "14px 16px",
         cursor: "pointer",
-        transition: "border-color .15s, box-shadow .15s",
-        marginBottom: 10,
+        boxShadow: "none",
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        transition: "box-shadow .15s",
       }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,.06)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = "none";
-      }}
+      onMouseEnter={(e) =>
+        (e.currentTarget.style.boxShadow = "0 2px 12px rgba(20,26,48,.08)")
+      }
+      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
     >
-      {/* Avatar */}
-      <div
-        style={{
-          width: 44,
-          height: 44,
-          borderRadius: "var(--border-radius-md)",
-          background: provider.color,
-          color: provider.textColor,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 14,
-          fontWeight: 600,
-          flexShrink: 0,
-        }}
-      >
-        {provider.initials}
-      </div>
-
-      {/* Body */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {/* Top row */}
+      {/* Top row */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+        <div
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 4,
+            flexShrink: 0,
+            background: p.color,
+            color: p.textColor,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 13,
+            fontWeight: 700,
+          }}
+        >
+          {p.initials}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#1a2340",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {p.name}
+          </div>
+          <div style={{ fontSize: 11, color: "#8a93a6", marginTop: 2 }}>
+            {getLabel(p.industry)} · {p.location}
+          </div>
+        </div>
         <div
           style={{
             display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            gap: 8,
-            marginBottom: 4,
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: 4,
+            flexShrink: 0,
           }}
         >
-          <div>
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 500,
-                color: "var(--color-text-primary)",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {provider.name}
-            </div>
-            <div style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>
-              {INDUSTRIES.find((i) => i.id === provider.industry)?.label} ·{" "}
-              {provider.location}
-            </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-end",
-              gap: 4,
-            }}
-          >
-            {provider.featured && (
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 500,
-                  background: "#ecfeff",
-                  color: "#0e7490",
-                  padding: "2px 8px",
-                  borderRadius: 20,
-                  border: "0.5px solid #a5f3fc",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Top rated
-              </span>
-            )}
+          {p.featured && (
             <span
               style={{
-                fontSize: 13,
-                fontWeight: 500,
-                color: "#0891b2",
-                whiteSpace: "nowrap",
+                fontSize: 10,
+                fontWeight: 700,
+                background: "#e8f0fb",
+                color: "#1b6ec2",
+                padding: "2px 7px",
+                borderRadius: 20,
               }}
             >
-              {provider.rate}
-            </span>
-          </div>
-        </div>
-
-        {/* Badges */}
-        <div
-          style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}
-        >
-          {provider.badges.map((b, i) => (
-            <Badge key={i} {...b} />
-          ))}
-        </div>
-
-        {/* Meta */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span
-            style={{
-              fontSize: 12,
-              color: "var(--color-text-secondary)",
-              display: "flex",
-              alignItems: "center",
-              gap: 3,
-            }}
-          >
-            <span style={{ color: "#f59e0b" }}>★</span>
-            {provider.rating} ({provider.reviews} reviews)
-          </span>
-          <span
-            style={{
-              fontSize: 12,
-              color: "var(--color-text-secondary)",
-              display: "flex",
-              alignItems: "center",
-              gap: 3,
-            }}
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-            Responds in {provider.response}
-          </span>
-          {!provider.available && (
-            <span style={{ fontSize: 11, color: "#dc2626", fontWeight: 500 }}>
-              Unavailable
+              Top Rated
             </span>
           )}
-        </div>
-
-        {/* Expanded about */}
-        {expanded && (
-          <div
+          <span
             style={{
-              marginTop: 8,
-              fontSize: 12,
-              color: "var(--color-text-secondary)",
-              lineHeight: 1.5,
-              paddingTop: 8,
-              borderTop: "0.5px solid var(--color-border-tertiary)",
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#1a2340",
+              whiteSpace: "nowrap",
             }}
           >
-            {provider.about}
-          </div>
-        )}
+            {p.rate}
+          </span>
+        </div>
+      </div>
 
-        {/* Book button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onBook(provider);
-          }}
+      {/* Badges */}
+      <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+        {p.badges.map((b, i) => (
+          <Badge key={i} label={b.label} type={b.type} />
+        ))}
+      </div>
+
+      {/* Meta */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          flexWrap: "wrap",
+        }}
+      >
+        <span
           style={{
-            marginTop: 10,
-            width: "100%",
-            fontSize: 12,
-            fontWeight: 500,
-            padding: "7px 14px",
-            borderRadius: "var(--border-radius-md)",
-            background: provider.available ? "#0891b2" : "#94a3b8",
-            color: "#fff",
-            border: "none",
-            cursor: provider.available ? "pointer" : "not-allowed",
-            transition: "background .15s",
-          }}
-          onMouseEnter={(e) => {
-            if (provider.available)
-              e.currentTarget.style.background = "#0e7490";
-          }}
-          onMouseLeave={(e) => {
-            if (provider.available)
-              e.currentTarget.style.background = "#0891b2";
+            fontSize: 11,
+            color: "#8a93a6",
+            display: "flex",
+            alignItems: "center",
+            gap: 3,
           }}
         >
-          {provider.available ? "Book now" : "Currently unavailable"}
-        </button>
+          <span style={{ color: "#f59e0b" }}>★</span>
+          {p.rating} ({p.reviews})
+        </span>
+        <span style={{ fontSize: 11, color: "#8a93a6" }}>⏱ {p.response}</span>
+        {!p.available && (
+          <span style={{ fontSize: 10, color: "#e8442a", fontWeight: 700 }}>
+            Unavailable
+          </span>
+        )}
       </div>
+
+      {/* Expanded about */}
+      {expanded && (
+        <div
+          style={{
+            fontSize: 11,
+            color: "#8a93a6",
+            lineHeight: 1.5,
+            paddingTop: 8,
+            borderTop: "1px solid #d9dde6",
+          }}
+        >
+          {p.about}
+        </div>
+      )}
+
+      {/* Book button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onBook(p.id);
+        }}
+        style={{
+          width: "100%",
+          fontSize: 12,
+          fontWeight: 700,
+          padding: 8,
+          borderRadius: 4,
+          border: "none",
+          cursor: p.available ? "pointer" : "not-allowed",
+          fontFamily: "Lato, sans-serif",
+          background: p.available ? "#1a2340" : "#eef0f5",
+          color: p.available ? "#fff" : "#8a93a6",
+          marginTop: 2,
+        }}
+      >
+        {p.available ? "Book Now" : "Currently Unavailable"}
+      </button>
     </div>
   );
 }
 
-// ─── Booking panel ────────────────────────────────────────────────────────────
 function BookingPanel({ provider, onClose, onSubmit }) {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("09:00");
   const [address, setAddress] = useState("");
   const [desc, setDesc] = useState("");
   const [urgency, setUrgency] = useState("Standard (2-3 days)");
-  const [attachDoc, setAttachDoc] = useState("None");
-  const [error, setError] = useState("");
-  const panelRef = useRef(null);
-
-  useEffect(() => {
-    panelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }, []);
+  const [doc, setDoc] = useState("None");
+  const [err, setErr] = useState("");
 
   const handleSubmit = () => {
     if (!date || !desc.trim()) {
-      setError("Please fill in the date and describe what you need.");
+      setErr("Please fill in the date and describe what you need.");
       return;
     }
-   async function submitBookingToFirestore({ provider, user, businessInfo, formData }) {
-  const requestId = doc(collection(db, "_ids")).id; // generate a clean ID
-
-  const base = {
-    requestId,
-    date:        formData.date,
-    time:        formData.time,
-    address:     formData.address,
-    description: formData.desc,
-    urgency:     formData.urgency,
-    attachedDoc: formData.attachDoc,
-    createdAt:   serverTimestamp(),
-    updatedAt:   serverTimestamp(),
-  };
-
-  // Requester copy
-  await setDoc(
-    doc(db, "users", user.uid, "serviceRequests", requestId),
-    {
-      ...base,
-      providerId:       provider.id,
-      providerName:     provider.name,
-      providerIndustry: provider.industry,
-      status:           "pending",
-      quoteAmount:      null,
-      quoteNotes:       null,
-    }
-  );
-
-  // Provider mirror copy
-  await setDoc(
-    doc(db, "users", provider.id, "incomingRequests", requestId),
-    {
-      ...base,
-      requesterId:        user.uid,
-      requesterName:      businessInfo?.businessName || user.displayName || "Unknown",
-      requesterIndustry:  businessInfo?.industry || "unknown",
-      status:             "new",
-      quoteAmount:        null,
-      quoteNotes:         null,
-    }
-  );
-
-  return requestId;
-}
+    onSubmit(provider);
   };
 
   const inputStyle = {
     fontSize: 13,
-    padding: "7px 10px",
-    borderRadius: "var(--border-radius-md)",
-    border: "0.5px solid var(--color-border-secondary)",
-    background: "var(--color-background-secondary)",
-    color: "var(--color-text-primary)",
+    padding: "8px 10px",
+    borderRadius: 4,
+    border: "1px solid #d9dde6",
+    background: "#fff",
+    color: "#1a2340",
     width: "100%",
     outline: "none",
+    fontFamily: "Lato, sans-serif",
+    boxSizing: "border-box",
+  };
+  const labelStyle = {
+    fontSize: 11,
+    fontWeight: 700,
+    color: "#4a5568",
+    textTransform: "uppercase",
+    letterSpacing: ".05em",
+    display: "block",
+    marginBottom: 4,
   };
 
   return (
     <div
-      ref={panelRef}
       style={{
-        background: "var(--color-background-primary)",
-        border: "0.5px solid var(--color-border-tertiary)",
-        borderRadius: "var(--border-radius-lg)",
-        padding: 16,
+        background: "#fff",
+        border: "1px solid #d9dde6",
+        borderRadius: 4,
+        overflow: "hidden",
+        marginBottom: 12,
       }}
     >
-      {/* Title */}
       <div
         style={{
-          fontSize: 13,
-          fontWeight: 500,
-          color: "var(--color-text-primary)",
-          marginBottom: 12,
+          background: "#f0f2f6",
+          borderBottom: "1px solid #d9dde6",
+          padding: "10px 16px",
           display: "flex",
           alignItems: "center",
-          gap: 8,
+          justifyContent: "space-between",
         }}
       >
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            color: "#1a2340",
+            textTransform: "uppercase",
+            letterSpacing: ".05em",
+          }}
+        >
+          Book — {provider.name}
+        </span>
+        <span style={{ fontSize: 11, color: "#8a93a6" }}>{provider.rate}</span>
+      </div>
+      <div style={{ padding: 16 }}>
         <div
           style={{
-            width: 20,
-            height: 20,
-            borderRadius: 6,
-            background: "#ecfeff",
+            background: "#1a2340",
+            borderRadius: 4,
+            padding: "10px 14px",
             display: "flex",
+            justifyContent: "space-between",
             alignItems: "center",
-            justifyContent: "center",
+            marginBottom: 10,
           }}
         >
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#0891b2"
-            strokeWidth="2.5"
-          >
-            <rect x="3" y="4" width="18" height="18" rx="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,.6)" }}>
+            {getLabel(provider.industry)} · {provider.location}
+          </span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
+            {provider.rate}
+          </span>
         </div>
-        Book — {provider.name}
-      </div>
 
-      {/* Summary strip */}
-      <div
-        style={{
-          background: "var(--color-background-secondary)",
-          borderRadius: "var(--border-radius-md)",
-          padding: "10px 12px",
-          marginBottom: 12,
-          display: "flex",
-          justifyContent: "space-between",
-          fontSize: 13,
-        }}
-      >
-        <span style={{ color: "var(--color-text-secondary)" }}>
-          {INDUSTRIES.find((i) => i.id === provider.industry)?.label} ·{" "}
-          {provider.location}
-        </span>
-        <span style={{ color: "var(--color-text-primary)", fontWeight: 500 }}>
-          {provider.rate}
-        </span>
-      </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 10,
+            marginBottom: 10,
+          }}
+        >
+          <div>
+            <label style={labelStyle}>Service date</label>
+            <input
+              type="date"
+              style={inputStyle}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Preferred time</label>
+            <input
+              type="time"
+              style={inputStyle}
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+            />
+          </div>
+        </div>
 
-      {/* Date / Time */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 10,
-          marginBottom: 10,
-        }}
-      >
-        <div>
-          <label
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              color: "var(--color-text-secondary)",
-              textTransform: "uppercase",
-              letterSpacing: ".05em",
-              display: "block",
-              marginBottom: 4,
-            }}
-          >
-            Service date
-          </label>
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle}>Service address</label>
           <input
-            type="date"
+            type="text"
             style={inputStyle}
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Your property or site address"
           />
         </div>
-        <div>
-          <label
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              color: "var(--color-text-secondary)",
-              textTransform: "uppercase",
-              letterSpacing: ".05em",
-              display: "block",
-              marginBottom: 4,
-            }}
-          >
-            Preferred time
-          </label>
-          <input
-            type="time"
-            style={inputStyle}
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
+
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle}>Describe what you need</label>
+          <textarea
+            style={{ ...inputStyle, resize: "vertical", minHeight: 64 }}
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            placeholder={provider.about}
           />
         </div>
-      </div>
 
-      {/* Address */}
-      <div style={{ marginBottom: 10 }}>
-        <label
+        <div
           style={{
-            fontSize: 11,
-            fontWeight: 500,
-            color: "var(--color-text-secondary)",
-            textTransform: "uppercase",
-            letterSpacing: ".05em",
-            display: "block",
-            marginBottom: 4,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 10,
+            marginBottom: 10,
           }}
         >
-          Service address
-        </label>
-        <input
-          type="text"
-          placeholder="Your property or site address"
-          style={inputStyle}
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
-      </div>
+          <div>
+            <label style={labelStyle}>Urgency</label>
+            <select
+              style={inputStyle}
+              value={urgency}
+              onChange={(e) => setUrgency(e.target.value)}
+            >
+              <option>Standard (2-3 days)</option>
+              <option>Urgent (today/tomorrow)</option>
+              <option>Flexible (within a week)</option>
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Attach to document</label>
+            <select
+              style={inputStyle}
+              value={doc}
+              onChange={(e) => setDoc(e.target.value)}
+            >
+              <option>None</option>
+              <option>Current quote</option>
+              <option>Current invoice</option>
+              <option>New purchase order</option>
+            </select>
+          </div>
+        </div>
 
-      {/* Description */}
-      <div style={{ marginBottom: 10 }}>
-        <label
-          style={{
-            fontSize: 11,
-            fontWeight: 500,
-            color: "var(--color-text-secondary)",
-            textTransform: "uppercase",
-            letterSpacing: ".05em",
-            display: "block",
-            marginBottom: 4,
-          }}
-        >
-          Describe what you need
-        </label>
-        <textarea
-          placeholder={`E.g. ${provider.about}`}
-          value={desc}
-          onChange={(e) => setDesc(e.target.value)}
-          style={{ ...inputStyle, resize: "vertical", minHeight: 64 }}
-        />
-      </div>
+        {err && (
+          <div style={{ fontSize: 12, color: "#e8442a", marginBottom: 8 }}>
+            {err}
+          </div>
+        )}
 
-      {/* Urgency / Attach */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 10,
-          marginBottom: 12,
-        }}
-      >
-        <div>
-          <label
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={onClose}
             style={{
-              fontSize: 11,
-              fontWeight: 500,
-              color: "var(--color-text-secondary)",
-              textTransform: "uppercase",
-              letterSpacing: ".05em",
-              display: "block",
-              marginBottom: 4,
+              fontSize: 13,
+              fontWeight: 700,
+              padding: "9px 16px",
+              borderRadius: 4,
+              background: "#f0f2f6",
+              color: "#4a5568",
+              border: "1px solid #d9dde6",
+              cursor: "pointer",
+              fontFamily: "Lato, sans-serif",
             }}
           >
-            Urgency
-          </label>
-          <select
-            style={inputStyle}
-            value={urgency}
-            onChange={(e) => setUrgency(e.target.value)}
-          >
-            <option>Standard (2-3 days)</option>
-            <option>Urgent (today/tomorrow)</option>
-            <option>Flexible (within a week)</option>
-          </select>
-        </div>
-        <div>
-          <label
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
             style={{
-              fontSize: 11,
-              fontWeight: 500,
-              color: "var(--color-text-secondary)",
-              textTransform: "uppercase",
-              letterSpacing: ".05em",
-              display: "block",
-              marginBottom: 4,
+              flex: 1,
+              fontSize: 13,
+              fontWeight: 700,
+              padding: 9,
+              borderRadius: 4,
+              background: "#1d8348",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "Lato, sans-serif",
             }}
           >
-            Attach to document
-          </label>
-          <select
-            style={inputStyle}
-            value={attachDoc}
-            onChange={(e) => setAttachDoc(e.target.value)}
-          >
-            <option>None</option>
-            <option>Current quote</option>
-            <option>Current invoice</option>
-            <option>New purchase order</option>
-          </select>
+            Send Booking Request
+          </button>
         </div>
-      </div>
-
-      {/* Error */}
-      {error && (
-        <div style={{ fontSize: 12, color: "#dc2626", marginBottom: 8 }}>
-          {error}
-        </div>
-      )}
-
-      {/* Actions */}
-      <div style={{ display: "flex", gap: 8 }}>
-        <button
-          onClick={onClose}
-          style={{
-            fontSize: 13,
-            fontWeight: 500,
-            padding: "9px 16px",
-            borderRadius: "var(--border-radius-md)",
-            background: "var(--color-background-secondary)",
-            color: "var(--color-text-secondary)",
-            border: "0.5px solid var(--color-border-secondary)",
-            cursor: "pointer",
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSubmit}
-          style={{
-            flex: 1,
-            fontSize: 13,
-            fontWeight: 500,
-            padding: 9,
-            borderRadius: "var(--border-radius-md)",
-            background: "#059669",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer",
-            transition: "background .15s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "#047857";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "#059669";
-          }}
-        >
-          Send booking request
-        </button>
       </div>
     </div>
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
-export default function ServiceMarketplaceView({ user, businessInfo, onBack }) {
+function MarketView({ onShowIncoming }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [bookingProvider, setBookingProvider] = useState(null);
-  const [requests, setRequests] = useState([
-    {
-      id: 1,
-      name: "Jake's Motor Workshop",
-      industry: "mechanics",
-      date: "2 days ago",
-      status: "confirmed",
-    },
-    {
-      id: 2,
-      name: "PowerEdge Electrical",
-      industry: "electrical",
-      date: "5 days ago",
-      status: "progress",
-    },
-    {
-      id: 3,
-      name: "SA Courier Express",
-      industry: "logistics",
-      date: "today",
-      status: "pending",
-    },
-  ]);
-  const [toast, setToast] = useState(null);
+  const [expandedCards, setExpandedCards] = useState({});
+  const [myReqs, setMyReqs] = useState(INITIAL_MY_REQS);
+  const [toast, setToast] = useState("");
 
-  const filteredProviders =
+  const showToast = useCallback((msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 3500);
+  }, []);
+
+  const filtered =
     activeCategory === "all"
       ? PROVIDERS
       : PROVIDERS.filter((p) => p.industry === activeCategory);
+  const featured = filtered.filter((p) => p.featured);
+  const standard = filtered.filter((p) => !p.featured);
+  const availCount = PROVIDERS.filter((p) => p.available).length;
 
-  const featuredProviders = filteredProviders.filter((p) => p.featured);
-  const standardProviders = filteredProviders.filter((p) => !p.featured);
-  const availableToday = PROVIDERS.filter((p) => p.available).length;
+  const toggleCard = (id) =>
+    setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  const handleBook = (provider) => {
-    setBookingProvider(provider);
+  const handleBook = (id) => {
+    const p = PROVIDERS.find((x) => x.id === id);
+    if (!p?.available) return;
+    setBookingProvider(p);
   };
 
-  const handleSubmitBooking = ({
-    provider,
-    date,
-    desc,
-    urgency,
-    attachDoc,
-  }) => {
-    const newReq = {
-      id: Date.now(),
-      name: provider.name,
-      industry: provider.industry,
-      date: "Just now",
-      status: "pending",
-    };
-    setRequests((r) => [...r, newReq]);
+  const handleSubmitBooking = (p) => {
+    setMyReqs((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        name: p.name,
+        industry: p.industry,
+        date: "Just now",
+        status: "pending",
+      },
+    ]);
     setBookingProvider(null);
-    setToast(
-      `Booking request sent to ${provider.name}. They'll respond with a quote shortly.`,
+    showToast(
+      `Booking request sent to ${p.name}. They'll respond with a quote shortly.`,
     );
-    setTimeout(() => setToast(null), 4000);
   };
 
-  const STATUS_PILL = {
-    confirmed: { background: "#dcfce7", color: "#166534", label: "Confirmed" },
-    progress: { background: "#dbeafe", color: "#1e40af", label: "In progress" },
-    pending: {
-      background: "#fef3c7",
-      color: "#92400e",
-      label: "Awaiting quote",
-    },
-  };
+  const chipStyle = (active) => ({
+    fontSize: 12,
+    fontWeight: 600,
+    padding: "4px 12px",
+    borderRadius: 3,
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+    border: active ? "1px solid #e8442a" : "1px solid transparent",
+    color: active ? "#fff" : "rgba(255,255,255,.6)",
+    background: active ? "#e8442a" : "transparent",
+    fontFamily: "Lato, sans-serif",
+    height: 28,
+    display: "flex",
+    alignItems: "center",
+    transition: "all .15s",
+  });
 
   return (
     <div
       style={{
-        background: "var(--color-background-tertiary)",
-        borderRadius: "var(--border-radius-lg)",
-        overflow: "hidden",
-        border: "0.5px solid var(--color-border-tertiary)",
-        position: "relative",
+        background: "#f4f5f8",
+        minHeight: "100vh",
+        fontFamily: "Lato, sans-serif",
       }}
     >
-      {/* Toast */}
-      {toast && (
-        <div
-          style={{
-            position: "absolute",
-            top: 16,
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "#059669",
-            color: "#fff",
-            fontSize: 13,
-            fontWeight: 500,
-            padding: "10px 18px",
-            borderRadius: 999,
-            zIndex: 100,
-            whiteSpace: "nowrap",
-            boxShadow: "0 4px 16px rgba(0,0,0,.15)",
-            pointerEvents: "none",
-          }}
-        >
-          {toast}
-        </div>
-      )}
-
-      {/* Top bar */}
+      {/* Topbar */}
       <div
         style={{
-          background: "var(--color-background-primary)",
-          borderBottom: "0.5px solid var(--color-border-tertiary)",
-          padding: "12px 16px",
+          background: "#1a2340",
+          height: 52,
+          padding: "0 24px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 12,
+          borderBottom: "1px solid rgba(255,255,255,.08)",
+          position: "sticky",
+          top: 0,
+          zIndex: 20,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {onBack && (
-            <button
-              onClick={onBack}
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: "var(--border-radius-md)",
-                border: "0.5px solid var(--color-border-secondary)",
-                background: "var(--color-background-secondary)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                flexShrink: 0,
-              }}
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: "50%",
+              background: "#e8442a",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="2"
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--color-text-secondary)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-          )}
-          <div>
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 500,
-                color: "var(--color-text-primary)",
-              }}
-            >
-              Find a service provider
-            </div>
-            <div
-              style={{
-                fontSize: 12,
-                color: "var(--color-text-secondary)",
-                marginTop: 1,
-              }}
-            >
-              Book from {INDUSTRIES.length - 1} industries on your platform
-            </div>
+              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21h6" />
+            </svg>
           </div>
+          <span
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: "#fff",
+              letterSpacing: ".01em",
+            }}
+          >
+            Service Marketplace
+          </span>
+          <span
+            style={{
+              fontSize: 11,
+              color: "rgba(255,255,255,.45)",
+              marginLeft: 6,
+            }}
+          >
+            Marketplace › Browse
+          </span>
         </div>
         <button
+          onClick={onShowIncoming}
           style={{
-            fontSize: 12,
-            fontWeight: 500,
-            padding: "6px 14px",
-            borderRadius: "var(--border-radius-md)",
-            background: "#7c3aed",
+            background: "#e8442a",
             color: "#fff",
             border: "none",
             cursor: "pointer",
+            fontSize: 12,
+            fontWeight: 700,
+            padding: "0 16px",
+            height: 32,
+            borderRadius: 4,
+            fontFamily: "Lato, sans-serif",
+            whiteSpace: "nowrap",
           }}
         >
-          Post a request ↗
+          Post a Request ↗
         </button>
       </div>
 
-      {/* Filter chips */}
+      {/* Filter bar */}
       <div
         style={{
-          background: "var(--color-background-primary)",
-          borderBottom: "0.5px solid var(--color-border-tertiary)",
-          padding: "10px 16px",
+          background: "#2d3a55",
+          borderBottom: "1px solid rgba(255,255,255,.08)",
+          padding: "0 24px",
           display: "flex",
-          gap: 8,
+          gap: 4,
           overflowX: "auto",
-          flexWrap: "nowrap",
+          alignItems: "center",
+          height: 40,
+          scrollbarWidth: "none",
         }}
       >
         {INDUSTRIES.map((ind) => (
           <button
             key={ind.id}
+            style={chipStyle(activeCategory === ind.id)}
             onClick={() => {
               setActiveCategory(ind.id);
               setBookingProvider(null);
-            }}
-            style={{
-              fontSize: 12,
-              fontWeight: 500,
-              padding: "5px 12px",
-              borderRadius: 20,
-              whiteSpace: "nowrap",
-              cursor: "pointer",
-              transition: "all .15s",
-              border: "0.5px solid",
-              background:
-                activeCategory === ind.id
-                  ? "#0891b2"
-                  : "var(--color-background-secondary)",
-              color:
-                activeCategory === ind.id
-                  ? "#fff"
-                  : "var(--color-text-secondary)",
-              borderColor:
-                activeCategory === ind.id
-                  ? "#0891b2"
-                  : "var(--color-border-secondary)",
+              setExpandedCards({});
             }}
           >
             {ind.emoji} {ind.label}
@@ -1547,24 +1401,23 @@ export default function ServiceMarketplaceView({ user, businessInfo, onBack }) {
       {/* Content */}
       <div
         style={{
-          padding: 16,
+          padding: "20px 24px",
           display: "flex",
           flexDirection: "column",
-          gap: 12,
+          gap: 0,
         }}
       >
-        {/* Availability bar */}
+        {/* Available banner */}
         <div
           style={{
-            background: "#f0fdf4",
-            border: "0.5px solid #bbf7d0",
-            borderRadius: "var(--border-radius-md)",
-            padding: "10px 14px",
+            background: "#1a2340",
+            borderRadius: 5,
+            padding: "14px 20px",
+            marginBottom: 16,
             display: "flex",
             alignItems: "center",
-            gap: 10,
-            fontSize: 13,
-            color: "#166534",
+            gap: 12,
+            flexWrap: "wrap",
           }}
         >
           <div
@@ -1572,106 +1425,118 @@ export default function ServiceMarketplaceView({ user, businessInfo, onBack }) {
               width: 8,
               height: 8,
               borderRadius: "50%",
-              background: "#22c55e",
+              background: "#4ade80",
               flexShrink: 0,
             }}
           />
-          <span>
-            {availableToday} providers across the platform are available today
-          </span>
-        </div>
-
-        {/* Featured section */}
-        {featuredProviders.length > 0 && (
-          <div>
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 500,
-                color: "var(--color-text-tertiary)",
-                textTransform: "uppercase",
-                letterSpacing: ".06em",
-                marginBottom: 8,
-              }}
-            >
-              Recommended for you
-            </div>
-            {featuredProviders.map((p) => (
-              <ProviderCard key={p.id} provider={p} onBook={handleBook} />
-            ))}
-          </div>
-        )}
-
-        {/* Divider */}
-        {featuredProviders.length > 0 && standardProviders.length > 0 && (
-          <div
+          <span
             style={{
-              height: "0.5px",
-              background: "var(--color-border-tertiary)",
-            }}
-          />
-        )}
-
-        {/* Standard section */}
-        {standardProviders.length > 0 && (
-          <div>
-            {featuredProviders.length > 0 && (
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 500,
-                  color: "var(--color-text-tertiary)",
-                  textTransform: "uppercase",
-                  letterSpacing: ".06em",
-                  marginBottom: 8,
-                }}
-              >
-                More providers
-              </div>
-            )}
-            {standardProviders.map((p) => (
-              <ProviderCard key={p.id} provider={p} onBook={handleBook} />
-            ))}
-          </div>
-        )}
-
-        {/* Empty state */}
-        {filteredProviders.length === 0 && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "32px 16px",
-              background: "var(--color-background-primary)",
-              borderRadius: "var(--border-radius-lg)",
-              border: "0.5px solid var(--color-border-tertiary)",
+              fontSize: 13,
+              color: "rgba(255,255,255,.85)",
+              fontWeight: 600,
             }}
           >
-            <div style={{ fontSize: 28, marginBottom: 8 }}>
+            Providers available on the platform today
+          </span>
+          <div style={{ marginLeft: "auto", textAlign: "right" }}>
+            <div style={{ fontSize: 28, fontWeight: 700, color: "#fff" }}>
+              {availCount}
+            </div>
+            <div
+              style={{
+                fontSize: 10,
+                color: "rgba(255,255,255,.45)",
+                textTransform: "uppercase",
+                letterSpacing: ".05em",
+              }}
+            >
+              Available now
+            </div>
+          </div>
+        </div>
+
+        {/* Featured */}
+        {featured.length > 0 && (
+          <>
+            <SectionTitle>Recommended for you</SectionTitle>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3,1fr)",
+                gap: 12,
+                marginBottom: 4,
+              }}
+            >
+              {featured.map((p) => (
+                <ProviderCard
+                  key={p.id}
+                  provider={p}
+                  expanded={!!expandedCards[p.id]}
+                  onToggle={toggleCard}
+                  onBook={handleBook}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Standard */}
+        {standard.length > 0 && (
+          <>
+            {featured.length > 0 && <SectionTitle>More providers</SectionTitle>}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3,1fr)",
+                gap: 12,
+                marginBottom: 4,
+              }}
+            >
+              {standard.map((p) => (
+                <ProviderCard
+                  key={p.id}
+                  provider={p}
+                  expanded={!!expandedCards[p.id]}
+                  onToggle={toggleCard}
+                  onBook={handleBook}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {filtered.length === 0 && (
+          <div style={{ textAlign: "center", padding: "32px 16px" }}>
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                margin: "0 auto 10px",
+                background: "#eef0f5",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 22,
+              }}
+            >
               {INDUSTRIES.find((i) => i.id === activeCategory)?.emoji || "🔍"}
             </div>
             <div
               style={{
-                fontSize: 14,
-                fontWeight: 500,
-                color: "var(--color-text-primary)",
+                fontSize: 13,
+                fontWeight: 700,
+                color: "#4a5568",
                 marginBottom: 4,
               }}
             >
               No providers listed yet
             </div>
-            <div style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>
+            <div style={{ fontSize: 12, color: "#8a93a6" }}>
               Be the first to list your business in this category.
             </div>
           </div>
         )}
-
-        {/* Divider */}
-        <div
-          style={{
-            height: "0.5px",
-            background: "var(--color-border-tertiary)",
-          }}
-        />
 
         {/* Booking panel */}
         {bookingProvider && (
@@ -1683,92 +1548,880 @@ export default function ServiceMarketplaceView({ user, businessInfo, onBack }) {
         )}
 
         {/* My requests */}
+        <SectionTitle>My Service Requests</SectionTitle>
         <div
           style={{
-            background: "var(--color-background-primary)",
-            border: "0.5px solid var(--color-border-tertiary)",
-            borderRadius: "var(--border-radius-lg)",
+            background: "#fff",
+            border: "1px solid #d9dde6",
+            borderRadius: 4,
             overflow: "hidden",
+            marginBottom: 12,
           }}
         >
           <div
             style={{
-              padding: "12px 14px",
-              borderBottom: "0.5px solid var(--color-border-tertiary)",
-              fontSize: 13,
-              fontWeight: 500,
-              color: "var(--color-text-primary)",
+              background: "#f0f2f6",
+              borderBottom: "1px solid #d9dde6",
+              padding: "10px 16px",
               display: "flex",
-              justifyContent: "space-between",
               alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            <span>My service requests</span>
             <span
               style={{
-                fontSize: 11,
-                color: "var(--color-text-tertiary)",
-                fontWeight: 400,
+                fontSize: 12,
+                fontWeight: 700,
+                color: "#1a2340",
+                textTransform: "uppercase",
+                letterSpacing: ".05em",
               }}
             >
-              {requests.length} total
+              Recent Requests
+            </span>
+            <span style={{ fontSize: 11, color: "#8a93a6" }}>
+              {myReqs.length} total
             </span>
           </div>
-          {requests.map((req, i) => {
-            const pill = STATUS_PILL[req.status];
+          <div style={{ padding: 16 }}>
+            {myReqs.map((req, i) => {
+              const pill = STATUS_PILL[req.status];
+              return (
+                <div
+                  key={req.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "10px 0",
+                    borderBottom:
+                      i < myReqs.length - 1 ? "1px solid #d9dde6" : "none",
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: "#1a2340",
+                      }}
+                    >
+                      {req.name}
+                    </div>
+                    <div
+                      style={{ fontSize: 11, color: "#8a93a6", marginTop: 2 }}
+                    >
+                      {getLabel(req.industry)} · Requested {req.date}
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      padding: "3px 10px",
+                      borderRadius: 20,
+                      background: pill.bg,
+                      color: pill.color,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {pill.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <Toast message={toast} />
+    </div>
+  );
+}
+
+function SectionTitle({ children }) {
+  return (
+    <div
+      style={{
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: ".07em",
+        textTransform: "uppercase",
+        color: "#8a93a6",
+        margin: "20px 0 10px",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+      }}
+    >
+      {children}
+      <div style={{ flex: 1, height: 1, background: "#d9dde6" }} />
+    </div>
+  );
+}
+
+function QuoteModal({ target, onClose, onSend }) {
+  const [amount, setAmount] = useState(target?.quoteAmount || "");
+  const [notes, setNotes] = useState("");
+
+  if (!target) return null;
+
+  const inputStyle = {
+    fontSize: 13,
+    padding: "8px 10px",
+    borderRadius: 4,
+    border: "1px solid #d9dde6",
+    background: "#fff",
+    color: "#1a2340",
+    width: "100%",
+    outline: "none",
+    fontFamily: "Lato, sans-serif",
+    boxSizing: "border-box",
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(20,26,48,.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: 16,
+      }}
+    >
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: 4,
+          padding: 20,
+          width: "100%",
+          maxWidth: 420,
+          border: "1px solid #d9dde6",
+          boxShadow: "0 8px 32px rgba(20,26,48,.18)",
+        }}
+      >
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 700,
+            color: "#1a2340",
+            marginBottom: 4,
+          }}
+        >
+          Send a Quote
+        </div>
+        <div style={{ fontSize: 12, color: "#8a93a6", marginBottom: 16 }}>
+          To: {target.from} · {target.service.slice(0, 60)}…
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: "#4a5568",
+              textTransform: "uppercase",
+              letterSpacing: ".05em",
+              display: "block",
+              marginBottom: 4,
+            }}
+          >
+            Quote amount (R)
+          </label>
+          <input
+            style={inputStyle}
+            type="text"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="e.g. R1 800 or R450/hr × 3hrs"
+          />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: "#4a5568",
+              textTransform: "uppercase",
+              letterSpacing: ".05em",
+              display: "block",
+              marginBottom: 4,
+            }}
+          >
+            Notes to client (optional)
+          </label>
+          <textarea
+            style={{ ...inputStyle, resize: "vertical", minHeight: 64 }}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Inclusions, exclusions, lead times…"
+          />
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={onClose}
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              padding: "9px 16px",
+              borderRadius: 4,
+              background: "#f0f2f6",
+              color: "#4a5568",
+              border: "1px solid #d9dde6",
+              cursor: "pointer",
+              fontFamily: "Lato, sans-serif",
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => amount.trim() && onSend(amount)}
+            style={{
+              flex: 1,
+              fontSize: 13,
+              fontWeight: 700,
+              padding: 9,
+              borderRadius: 4,
+              background: "#1b6ec2",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "Lato, sans-serif",
+            }}
+          >
+            Send Quote
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IncomingView({ onBack }) {
+  const [incReqs, setIncReqs] = useState(INITIAL_INCOMING);
+  const [incFilter, setIncFilter] = useState("all");
+  const [expandedInc, setExpandedInc] = useState({});
+  const [quoteTarget, setQuoteTarget] = useState(null);
+  const [toast, setToast] = useState("");
+
+  const showToast = useCallback((msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 3500);
+  }, []);
+
+  const newCount = incReqs.filter((r) => r.status === "new").length;
+  const shown =
+    incFilter === "all"
+      ? incReqs
+      : incReqs.filter((r) => r.status === incFilter);
+
+  const toggleInc = (id) =>
+    setExpandedInc((prev) => ({ ...prev, [id]: !prev[id] }));
+  const acceptReq = (id) => {
+    const r = incReqs.find((x) => x.id === id);
+    setIncReqs((prev) =>
+      prev.map((x) => (x.id === id ? { ...x, status: "accepted" } : x)),
+    );
+    setExpandedInc((prev) => ({ ...prev, [id]: true }));
+    showToast(`Job from ${r.from} accepted.`);
+  };
+  const declineReq = (id) => {
+    const r = incReqs.find((x) => x.id === id);
+    setIncReqs((prev) =>
+      prev.map((x) => (x.id === id ? { ...x, status: "declined" } : x)),
+    );
+    setExpandedInc((prev) => ({ ...prev, [id]: true }));
+    showToast(`Request from ${r.from} declined.`);
+  };
+  const sendQuote = (id, amount) => {
+    const r = incReqs.find((x) => x.id === id);
+    setIncReqs((prev) =>
+      prev.map((x) =>
+        x.id === id ? { ...x, status: "quoted", quoteAmount: amount } : x,
+      ),
+    );
+    setExpandedInc((prev) => ({ ...prev, [id]: true }));
+    showToast(`Quote of ${amount} sent to ${r.from}.`);
+    setQuoteTarget(null);
+  };
+
+  const tabFilters = [
+    { id: "all", label: "All" },
+    { id: "new", label: "New" },
+    { id: "quoted", label: "Quoted" },
+    { id: "accepted", label: "Accepted" },
+    { id: "declined", label: "Declined" },
+  ];
+
+  return (
+    <div
+      style={{
+        background: "#f4f5f8",
+        minHeight: "100vh",
+        fontFamily: "Lato, sans-serif",
+      }}
+    >
+      {/* Topbar */}
+      <div
+        style={{
+          background: "#1a2340",
+          height: 52,
+          padding: "0 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          borderBottom: "1px solid rgba(255,255,255,.08)",
+          position: "sticky",
+          top: 0,
+          zIndex: 20,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button
+            onClick={onBack}
+            style={{
+              background: "rgba(255,255,255,.1)",
+              border: "1px solid rgba(255,255,255,.2)",
+              color: "#fff",
+              cursor: "pointer",
+              width: 30,
+              height: 30,
+              borderRadius: 4,
+              fontSize: 16,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            ←
+          </button>
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: "50%",
+              background: "#e8442a",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginLeft: 4,
+            }}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="2"
+            >
+              <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+              <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+            </svg>
+          </div>
+          <span
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: "#fff",
+              letterSpacing: ".01em",
+            }}
+          >
+            Incoming Requests
+          </span>
+          <span
+            style={{
+              fontSize: 11,
+              color: "rgba(255,255,255,.45)",
+              marginLeft: 6,
+            }}
+          >
+            Marketplace › Requests
+          </span>
+        </div>
+        {newCount > 0 && (
+          <span
+            style={{
+              background: "#6d28d9",
+              color: "#fff",
+              fontSize: 11,
+              fontWeight: 700,
+              padding: "4px 10px",
+              borderRadius: 20,
+            }}
+          >
+            {newCount} new
+          </span>
+        )}
+      </div>
+
+      {/* Tab bar */}
+      <div
+        style={{
+          background: "#f0f2f6",
+          borderBottom: "1px solid #d9dde6",
+          padding: "8px 16px",
+          display: "flex",
+          gap: 4,
+          flexWrap: "wrap",
+        }}
+      >
+        {tabFilters.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => setIncFilter(f.id)}
+            style={{
+              fontSize: 12,
+              fontWeight: 700,
+              padding: "4px 12px",
+              borderRadius: 3,
+              background: incFilter === f.id ? "#e8442a" : "transparent",
+              color: incFilter === f.id ? "#fff" : "#8a93a6",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "Lato, sans-serif",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            {f.label}
+            {f.id === "new" && newCount > 0 && (
+              <span
+                style={{
+                  background: "#6d28d9",
+                  color: "#fff",
+                  fontSize: 10,
+                  padding: "1px 5px",
+                  borderRadius: 999,
+                }}
+              >
+                {newCount}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ padding: "20px 24px" }}>
+        {shown.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "32px 16px" }}>
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                margin: "0 auto 10px",
+                background: "#eef0f5",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 22,
+              }}
+            >
+              📭
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "#4a5568",
+                marginBottom: 4,
+              }}
+            >
+              No {incFilter !== "all" ? incFilter : ""} requests
+            </div>
+            <div style={{ fontSize: 12, color: "#8a93a6" }}>
+              When another business books your service, requests will appear
+              here.
+            </div>
+          </div>
+        ) : (
+          shown.map((req) => {
+            const st = INC_STATUS[req.status];
+            const urg = URGENCY_STYLES[req.urgency] || {
+              bg: "#e8f0fb",
+              color: "#1b6ec2",
+            };
+            const exp = expandedInc[req.id];
             return (
               <div
                 key={req.id}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "10px 14px",
-                  borderBottom:
-                    i < requests.length - 1
-                      ? "0.5px solid var(--color-border-tertiary)"
-                      : "none",
-                  fontSize: 13,
+                  background: "#fff",
+                  border:
+                    req.status === "new"
+                      ? "1.5px solid #6d28d9"
+                      : "1px solid #d9dde6",
+                  borderRadius: 4,
+                  marginBottom: 10,
+                  overflow: "hidden",
                 }}
               >
+                {/* Header */}
                 <div
-                  style={{ display: "flex", flexDirection: "column", gap: 2 }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 500,
-                      color: "var(--color-text-primary)",
-                    }}
-                  >
-                    {req.name}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: "var(--color-text-tertiary)",
-                    }}
-                  >
-                    {INDUSTRIES.find((i) => i.id === req.industry)?.label} ·
-                    Requested {req.date}
-                  </span>
-                </div>
-                <span
+                  onClick={() => toggleInc(req.id)}
                   style={{
-                    fontSize: 11,
-                    fontWeight: 500,
-                    padding: "3px 10px",
-                    borderRadius: 20,
-                    background: pill.background,
-                    color: pill.color,
+                    padding: "12px 14px",
+                    cursor: "pointer",
+                    display: "flex",
+                    gap: 12,
+                    alignItems: "flex-start",
                   }}
                 >
-                  {pill.label}
-                </span>
+                  <div
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: 4,
+                      background: "#f3f0ff",
+                      color: "#6d28d9",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 16,
+                      flexShrink: 0,
+                    }}
+                  >
+                    📥
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        gap: 8,
+                      }}
+                    >
+                      <div>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 700,
+                            color: "#1a2340",
+                          }}
+                        >
+                          {req.from}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 11,
+                            color: "#8a93a6",
+                            marginTop: 2,
+                          }}
+                        >
+                          {getLabel(req.fromIndustry)} · Received{" "}
+                          {req.receivedAt}
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          padding: "3px 10px",
+                          borderRadius: 20,
+                          background: st.bg,
+                          color: st.color,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {st.label}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "#4a5568",
+                        marginTop: 6,
+                        ...(exp
+                          ? {}
+                          : {
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }),
+                      }}
+                    >
+                      {req.service}
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 6,
+                        flexWrap: "wrap",
+                        marginTop: 6,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          padding: "2px 7px",
+                          borderRadius: 20,
+                          background: urg.bg,
+                          color: urg.color,
+                        }}
+                      >
+                        {req.urgency}
+                      </span>
+                      {req.attachedDoc !== "None" && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: "2px 7px",
+                            borderRadius: 20,
+                            background: "#e8f0fb",
+                            color: "#1b6ec2",
+                          }}
+                        >
+                          📎 {req.attachedDoc}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Expanded */}
+                {exp && (
+                  <div
+                    style={{
+                      padding: "0 14px 14px",
+                      borderTop: "1px solid #d9dde6",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 10,
+                        margin: "12px 0",
+                      }}
+                    >
+                      <div>
+                        <div
+                          style={{
+                            fontSize: 11,
+                            color: "#8a93a6",
+                            textTransform: "uppercase",
+                            letterSpacing: ".05em",
+                            marginBottom: 3,
+                            fontWeight: 700,
+                          }}
+                        >
+                          Date requested
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            color: "#1a2340",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {req.date} at {req.time}
+                        </div>
+                      </div>
+                      <div>
+                        <div
+                          style={{
+                            fontSize: 11,
+                            color: "#8a93a6",
+                            textTransform: "uppercase",
+                            letterSpacing: ".05em",
+                            marginBottom: 3,
+                            fontWeight: 700,
+                          }}
+                        >
+                          Address
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            color: "#1a2340",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {req.address}
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "#4a5568",
+                        lineHeight: 1.6,
+                        marginBottom: 12,
+                        background: "#f0f2f6",
+                        padding: "10px 12px",
+                        borderRadius: 4,
+                      }}
+                    >
+                      {req.service}
+                    </div>
+                    {req.quoteAmount && (
+                      <div
+                        style={{
+                          marginBottom: 12,
+                          fontSize: 13,
+                          color: "#1b6ec2",
+                          fontWeight: 700,
+                        }}
+                      >
+                        Your quote: {req.quoteAmount}
+                      </div>
+                    )}
+
+                    {(req.status === "new" || req.status === "quoted") && (
+                      <div
+                        style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
+                      >
+                        <button
+                          onClick={() => setQuoteTarget(req)}
+                          style={{
+                            flex: 1,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            padding: "8px 14px",
+                            borderRadius: 4,
+                            border: "none",
+                            cursor: "pointer",
+                            background: "#1b6ec2",
+                            color: "#fff",
+                            fontFamily: "Lato, sans-serif",
+                          }}
+                        >
+                          {req.status === "new"
+                            ? "Send a Quote"
+                            : "Update Quote"}
+                        </button>
+                        <button
+                          onClick={() => acceptReq(req.id)}
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 700,
+                            padding: "8px 14px",
+                            borderRadius: 4,
+                            border: "none",
+                            cursor: "pointer",
+                            background: "#1d8348",
+                            color: "#fff",
+                            fontFamily: "Lato, sans-serif",
+                          }}
+                        >
+                          Accept Job
+                        </button>
+                        <button
+                          onClick={() => declineReq(req.id)}
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 700,
+                            padding: "8px 14px",
+                            borderRadius: 4,
+                            border: "1px solid #d9dde6",
+                            cursor: "pointer",
+                            background: "#f0f2f6",
+                            color: "#4a5568",
+                            fontFamily: "Lato, sans-serif",
+                          }}
+                        >
+                          Decline
+                        </button>
+                      </div>
+                    )}
+                    {req.status === "accepted" && (
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "#1d8348",
+                          background: "#eafaf1",
+                          padding: "8px 12px",
+                          borderRadius: 4,
+                          fontWeight: 600,
+                        }}
+                      >
+                        ✓ Job accepted — added to your jobs queue.
+                      </div>
+                    )}
+                    {req.status === "declined" && (
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "#e8442a",
+                          background: "#fdf2f0",
+                          padding: "8px 12px",
+                          borderRadius: 4,
+                          fontWeight: 600,
+                        }}
+                      >
+                        ✗ Request declined.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
-          })}
-        </div>
+          })
+        )}
       </div>
+
+      {/* Summary footer */}
+      <div
+        style={{
+          padding: "10px 16px",
+          borderTop: "1px solid #d9dde6",
+          display: "flex",
+          gap: 16,
+          flexWrap: "wrap",
+          fontSize: 12,
+          color: "#8a93a6",
+        }}
+      >
+        {["new", "quoted", "accepted", "declined"].map((k) => {
+          const count = incReqs.filter((r) => r.status === k).length;
+          const s = INC_STATUS[k];
+          return count > 0 ? (
+            <span key={k}>
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: s.color,
+                  display: "inline-block",
+                  marginRight: 4,
+                }}
+              />
+              {count} {s.label.toLowerCase()}
+            </span>
+          ) : null;
+        })}
+      </div>
+
+      {quoteTarget && (
+        <QuoteModal
+          target={quoteTarget}
+          onClose={() => setQuoteTarget(null)}
+          onSend={(amount) => sendQuote(quoteTarget.id, amount)}
+        />
+      )}
+
+      <Toast message={toast} />
     </div>
+  );
+}
+
+// ── Root ──────────────────────────────────────────────────────────────────────
+
+export default function ServiceMarketplace() {
+  const [view, setView] = useState("market");
+
+  return view === "market" ? (
+    <MarketView onShowIncoming={() => setView("incoming")} />
+  ) : (
+    <IncomingView onBack={() => setView("market")} />
   );
 }
