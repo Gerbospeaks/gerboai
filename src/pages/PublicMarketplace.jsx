@@ -1,55 +1,606 @@
-/**
- * PublicMarketplace.jsx
- * ─────────────────────────────────────────────────────────────────────────────
- * SolidFlo Public-Facing Service Marketplace
- *
- * USAGE
- * ─────
- * 1. Drop this file into your src/pages/ (or src/components/) folder.
- * 2. Add the route in your router (e.g. React Router v6):
- *
- *      import PublicMarketplace from './pages/PublicMarketplace';
- *      <Route path="/marketplace" element={<PublicMarketplace />} />
- *
- * 3. Make sure Google Fonts are loaded. Add to your index.html <head>:
- *
- *      <link
- *        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;400;700;900&display=swap"
- *        rel="stylesheet"
- *      />
- *
- * 4. No extra npm packages required — pure React + inline styles.
- *
- * CUSTOMISATION
- * ─────────────
- * · PROVIDERS array  — add / remove / edit provider objects
- * · INDUSTRIES array — add new filter categories
- * · SOLIDFLO_URL     — change the base URL if your domain changes
- * · Colors           — edit the CSS_VARS object at the top
- * ─────────────────────────────────────────────────────────────────────────────
- */
-
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import heroBg from "../assets/videos/world.mp4";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const SOLIDFLO_URL = "https://solidflo.co.za";
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
+// ── CSS (mirrors LandingPage token system exactly) ────────────────────────────
 
-const T = {
-  navy: "#1a2340",
-  navyMid: "#2d3a55",
-  red: "#e8442a",
-  redHover: "#c73520",
-  cream: "#f4f5f8",
-  white: "#ffffff",
-  border: "#d9dde6",
-  text: "#1a2340",
-  muted: "#8a93a6",
-  green: "#1d8348",
-  blue: "#1b6ec2",
-};
+const css = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Lato:wght@300;400;600;700;900&display=swap');
+
+  :root {
+    --navy:       #0f172a;
+    --navy-mid:   #1e293b;
+    --navy-light: #334155;
+    --red:        #6366f1;
+    --red-hover:  #4f46e5;
+    --red-light:  #eef2ff;
+    --blue:       #0ea5e9;
+    --green:      #10b981;
+    --cream:      #f8fafc;
+    --cream-mid:  #f1f5f9;
+    --cream-dark: #e2e8f0;
+    --card-bg:    #ffffff;
+    --border:     #e2e8f0;
+    --bg:         var(--cream);
+    --white:      var(--card-bg);
+    --text:       #0f172a;
+    --text-mid:   #475569;
+    --text-muted: #94a3b8;
+  }
+
+  .mp * { box-sizing: border-box; }
+  .mp {
+    font-family: 'Lato', sans-serif;
+    color: var(--text);
+    overflow-x: hidden;
+    background: var(--cream);
+  }
+  .mp h1, .mp h2, .mp h3 { font-family: 'Playfair Display', serif; }
+
+  /* ── Scroll progress ── */
+  .mp-progress {
+    position: fixed; top: 0; left: 0; height: 3px; z-index: 200;
+    background: linear-gradient(90deg, var(--red), #818cf8);
+    transition: width .1s linear;
+    pointer-events: none;
+  }
+
+  /* ════════════════════════════════════
+     NAV
+  ════════════════════════════════════ */
+  .mp-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 64px;
+    display: flex; align-items: center;
+    padding: 0 40px;
+    transition: background .25s, box-shadow .25s;
+  }
+  .mp-nav.scrolled {
+    background: rgba(15,23,42,.97);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 2px 20px rgba(0,0,0,.25);
+  }
+  .mp-nav-inner {
+    max-width: 1200px; width: 100%; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .mp-nav-logo {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .mp-nav-logo-icon {
+    width: 34px; height: 34px; border-radius: 6px;
+    background: var(--red);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mp-nav-logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px; font-weight: 700; color: #fff;
+  }
+  .mp-nav-logo-sub {
+    font-size: 10px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: rgba(255,255,255,.35);
+    margin-left: 2px;
+  }
+  .mp-nav-ctas { display: flex; align-items: center; gap: 10px; }
+  .mp-btn-ghost {
+    height: 36px; padding: 0 18px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    color: rgba(255,255,255,.8); border-radius: 3px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: 'Lato', sans-serif; letter-spacing: .04em;
+    transition: all .15s;
+  }
+  .mp-btn-ghost:hover { background: rgba(255,255,255,.16); color: #fff; }
+  .mp-btn-primary {
+    height: 36px; padding: 0 20px;
+    background: var(--red); color: #fff;
+    border: none; border-radius: 3px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: 'Lato', sans-serif; letter-spacing: .04em;
+    display: flex; align-items: center; gap: 6px;
+    transition: background .15s, transform .15s;
+  }
+  .mp-btn-primary:hover { background: var(--red-hover); transform: translateY(-1px); }
+
+  /* ════════════════════════════════════
+     HERO
+  ════════════════════════════════════ */
+  .mp-hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 120px 40px 100px;
+    position: relative; overflow: hidden;
+    background: var(--navy);
+  }
+  .mp-hero-video {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+    z-index: 0; pointer-events: none;
+    opacity: 0.18;
+  }
+  .mp-hero-overlay {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 60% at 15% 50%, rgba(99,102,241,.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 70% at 85% 20%, rgba(14,165,233,.12) 0%, transparent 55%),
+      linear-gradient(to bottom, rgba(15,23,42,.6) 0%, rgba(15,23,42,.4) 50%, rgba(15,23,42,.8) 100%);
+  }
+  .mp-hero-inner {
+    max-width: 1200px; width: 100%; margin: 0 auto;
+    position: relative; z-index: 2;
+    display: grid; grid-template-columns: 1.1fr 1fr;
+    align-items: center; gap: 72px;
+  }
+  .mp-hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px;
+    background: rgba(99,102,241,.12);
+    border: 1px solid rgba(99,102,241,.3);
+    border-radius: 20px;
+    font-size: 11px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: #a5b4fc;
+    margin-bottom: 28px;
+  }
+  .mp-hero-badge-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 8px #4ade80;
+  }
+  .mp-hero h1 {
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    line-height: 1.06; color: #fff; margin-bottom: 22px;
+    animation: mp-up .65s ease both .05s;
+  }
+  .mp-hero h1 em { font-style: italic; color: var(--red); }
+  .mp-hero-sub {
+    font-size: 17px; color: rgba(255,255,255,.6);
+    line-height: 1.7; max-width: 500px; margin-bottom: 40px;
+    animation: mp-up .65s ease both .1s;
+  }
+  .mp-hero-ctas {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 40px;
+    animation: mp-up .65s ease both .15s;
+  }
+  .mp-hero-primary {
+    height: 54px; padding: 0 32px;
+    background: var(--red); color: #fff;
+    border: none; border-radius: 4px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; transition: all .15s;
+  }
+  .mp-hero-primary:hover {
+    background: var(--red-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(99,102,241,.45);
+  }
+  .mp-hero-secondary {
+    height: 54px; padding: 0 28px;
+    background: rgba(255,255,255,.08);
+    border: 1.5px solid rgba(255,255,255,.2);
+    color: rgba(255,255,255,.85); border-radius: 4px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase; cursor: pointer; transition: all .15s;
+  }
+  .mp-hero-secondary:hover { background: rgba(255,255,255,.15); color: #fff; }
+  .mp-hero-trust {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    font-size: 12px; color: rgba(255,255,255,.45);
+    font-weight: 600; letter-spacing: .03em;
+    animation: mp-up .65s ease both .2s;
+  }
+  .mp-hero-trust-item { display: flex; align-items: center; gap: 6px; }
+  .mp-hero-trust-check { color: #4ade80; }
+
+  /* hero stats panel */
+  .mp-hero-stats {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 12px; padding: 6px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    animation: mp-up .7s ease both .25s;
+  }
+  .mp-hero-stat {
+    background: rgba(255,255,255,.06);
+    border-radius: 8px; padding: 24px 20px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .mp-hero-stat-icon { font-size: 24px; }
+  .mp-hero-stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px; font-weight: 700; color: #fff; line-height: 1;
+  }
+  .mp-hero-stat-lbl {
+    font-size: 10px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; color: rgba(255,255,255,.35);
+  }
+
+  /* ════════════════════════════════════
+     FILTER BAR
+  ════════════════════════════════════ */
+  .mp-filter-bar {
+    background: var(--navy-mid);
+    padding: 0 40px; height: 48px;
+    display: flex; align-items: center; gap: 4px;
+    overflow-x: auto; scrollbar-width: none;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    position: sticky; top: 64px; z-index: 90;
+  }
+  .mp-filter-bar::-webkit-scrollbar { display: none; }
+  .mp-filter-btn {
+    height: 30px; padding: 0 14px;
+    border-radius: 3px; font-size: 12px; font-weight: 700;
+    white-space: nowrap; cursor: pointer;
+    border: 1px solid transparent;
+    font-family: 'Lato', sans-serif; flex-shrink: 0;
+    transition: all .15s;
+  }
+  .mp-filter-btn.active {
+    background: var(--red); color: #fff; border-color: var(--red);
+  }
+  .mp-filter-btn:not(.active) {
+    background: transparent; color: rgba(255,255,255,.5);
+  }
+  .mp-filter-btn:not(.active):hover {
+    color: rgba(255,255,255,.9); background: rgba(255,255,255,.08);
+  }
+
+  /* ════════════════════════════════════
+     CONTENT AREA
+  ════════════════════════════════════ */
+  .mp-content {
+    max-width: 1200px; margin: 0 auto; padding: 40px 40px 80px;
+  }
+
+  /* avail banner */
+  .mp-avail-banner {
+    background: var(--navy);
+    border-radius: 8px; padding: 20px 28px;
+    margin-bottom: 36px;
+    display: flex; align-items: center; gap: 16px;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .mp-avail-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #4ade80; flex-shrink: 0;
+    box-shadow: 0 0 10px #4ade80;
+  }
+  .mp-avail-text {
+    font-size: 14px; color: rgba(255,255,255,.7); font-weight: 600;
+  }
+  .mp-avail-count {
+    margin-left: auto; text-align: right;
+  }
+  .mp-avail-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px; font-weight: 700; color: #fff; line-height: 1;
+  }
+  .mp-avail-sub {
+    font-size: 10px; color: rgba(255,255,255,.3);
+    letter-spacing: .07em; text-transform: uppercase;
+  }
+
+  /* section title */
+  .mp-section-eyebrow {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--red); margin-bottom: 10px;
+    padding: 4px 12px; background: var(--red-light);
+    border: 1px solid rgba(99,102,241,.2); border-radius: 2px;
+  }
+  .mp-section-title {
+    display: flex; align-items: center; gap: 12px;
+    margin: 36px 0 20px;
+  }
+  .mp-section-title-text {
+    font-size: 10px; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .mp-section-title-line {
+    flex: 1; height: 1px; background: var(--cream-dark);
+  }
+
+  /* ════════════════════════════════════
+     PROVIDER CARDS — big grid
+  ════════════════════════════════════ */
+  .mp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px; margin-bottom: 8px;
+  }
+  .mp-card {
+    background: var(--card-bg);
+    border: 1px solid var(--cream-dark);
+    border-radius: 8px;
+    padding: 28px;
+    cursor: pointer;
+    display: flex; flex-direction: column; gap: 16px;
+    transition: box-shadow .2s, transform .2s, border-color .2s;
+    opacity: 0; transform: translateY(16px);
+    animation: mp-up .45s ease forwards;
+  }
+  .mp-card:hover {
+    box-shadow: 0 12px 40px rgba(15,23,42,.12);
+    transform: translateY(-3px);
+    border-color: rgba(99,102,241,.3);
+  }
+  .mp-card.featured {
+    border-color: var(--red);
+    border-width: 1.5px;
+  }
+  /* top row */
+  .mp-card-top { display: flex; align-items: flex-start; gap: 14px; }
+  .mp-card-avatar {
+    width: 52px; height: 52px; border-radius: 8px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+  }
+  .mp-card-info { flex: 1; min-width: 0; }
+  .mp-card-name {
+    font-size: 15px; font-weight: 700; color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    margin-bottom: 4px;
+  }
+  .mp-card-meta { font-size: 12px; color: var(--text-muted); }
+  .mp-card-right {
+    flex-shrink: 0; display: flex; flex-direction: column;
+    align-items: flex-end; gap: 5px;
+  }
+  .mp-card-featured-badge {
+    font-size: 10px; font-weight: 700;
+    background: var(--red-light); color: var(--red);
+    padding: 3px 10px; border-radius: 20px;
+  }
+  .mp-card-rate {
+    font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap;
+  }
+  /* badges */
+  .mp-card-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .mp-badge {
+    font-size: 10px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px;
+  }
+  .mp-badge-green  { background: #ecfdf5; color: #059669; }
+  .mp-badge-blue   { background: #eff6ff; color: #1d4ed8; }
+  .mp-badge-amber  { background: #fffbeb; color: #b45309; }
+  .mp-badge-purple { background: #f5f3ff; color: #6d28d9; }
+  /* stats row */
+  .mp-card-stats {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .mp-card-stat { font-size: 12px; color: var(--text-muted); }
+  .mp-card-unavail { font-size: 11px; color: #ef4444; font-weight: 700; }
+  /* expanded about */
+  .mp-card-about {
+    font-size: 13px; color: var(--text-mid); line-height: 1.65;
+    padding-top: 16px; border-top: 1px solid var(--cream-dark);
+  }
+  .mp-card-about-link {
+    margin-top: 10px; font-size: 12px; color: var(--red); font-weight: 700;
+  }
+  /* CTA button */
+  .mp-card-btn {
+    width: 100%; padding: 12px 0;
+    border-radius: 4px; border: none;
+    font-family: 'Lato', sans-serif; font-size: 13px;
+    font-weight: 700; letter-spacing: .04em;
+    cursor: pointer; transition: all .15s;
+    text-transform: uppercase;
+  }
+  .mp-card-btn-avail {
+    background: var(--navy); color: #fff;
+  }
+  .mp-card-btn-avail:hover { background: #0f172aee; transform: translateY(-1px); }
+  .mp-card-btn-unavail {
+    background: var(--cream-mid); color: var(--text-muted);
+    cursor: not-allowed;
+  }
+
+  /* ════════════════════════════════════
+     STATS STRIP (below hero)
+  ════════════════════════════════════ */
+  .mp-stats {
+    background: var(--navy); padding: 56px 24px;
+  }
+  .mp-stats-inner {
+    max-width: 1000px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 0;
+  }
+  .mp-stat-cell {
+    text-align: center; padding: 20px 24px;
+    border-right: 1px solid rgba(255,255,255,.07);
+    opacity: 0; transform: translateY(20px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .mp-stat-cell.visible { opacity: 1; transform: translateY(0); }
+  .mp-stat-cell:last-child { border-right: none; }
+  .mp-stat-cell-icon {
+    width: 40px; height: 40px; border-radius: 4px;
+    background: rgba(99,102,241,.12);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px; color: var(--red); font-size: 18px;
+  }
+  .mp-stat-cell-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 6px;
+  }
+  .mp-stat-cell-lbl {
+    font-size: 11px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; color: rgba(255,255,255,.35);
+  }
+
+  /* ════════════════════════════════════
+     BOTTOM CTA SECTION
+  ════════════════════════════════════ */
+  .mp-cta {
+    background: var(--navy); border-radius: 8px;
+    padding: 56px 40px; margin-top: 56px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .mp-cta::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 70% 80% at 20% 50%, rgba(99,102,241,.18) 0%, transparent 55%);
+  }
+  .mp-cta-inner { position: relative; z-index: 1; }
+  .mp-cta-tag {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 14px; border-radius: 20px; margin-bottom: 20px;
+    background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.3);
+    font-size: 10px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; color: #a5b4fc;
+  }
+  .mp-cta h2 {
+    font-size: clamp(1.8rem, 3vw, 2.8rem); color: #fff; margin-bottom: 14px;
+  }
+  .mp-cta p {
+    font-size: 16px; color: rgba(255,255,255,.55);
+    max-width: 520px; margin: 0 auto 36px; line-height: 1.7;
+  }
+  .mp-cta-btns { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .mp-cta-primary {
+    height: 52px; padding: 0 32px;
+    background: var(--red); color: #fff; border: none; border-radius: 4px;
+    font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    transition: all .15s;
+  }
+  .mp-cta-primary:hover {
+    background: var(--red-hover); transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(99,102,241,.4);
+  }
+  .mp-cta-secondary {
+    height: 52px; padding: 0 28px;
+    background: rgba(255,255,255,.08);
+    color: rgba(255,255,255,.8);
+    border: 1px solid rgba(255,255,255,.2); border-radius: 4px;
+    font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase; cursor: pointer;
+    transition: all .15s;
+  }
+  .mp-cta-secondary:hover { background: rgba(255,255,255,.15); color: #fff; }
+  .mp-cta-note { font-size: 12px; color: rgba(255,255,255,.3); margin-top: 18px; letter-spacing: .03em; }
+
+  /* ════════════════════════════════════
+     MODAL
+  ════════════════════════════════════ */
+  .mp-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,23,42,.75);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+    backdrop-filter: blur(6px);
+  }
+  .mp-modal {
+    background: var(--card-bg);
+    border-radius: 10px; padding: 36px;
+    width: 100%; max-width: 460px;
+    border: 1px solid var(--cream-dark);
+    box-shadow: 0 24px 60px rgba(15,23,42,.3);
+    position: relative;
+    animation: mp-up .3s ease;
+  }
+  .mp-modal-close {
+    position: absolute; top: 16px; right: 16px;
+    background: none; border: none; font-size: 20px;
+    color: var(--text-muted); cursor: pointer; line-height: 1;
+  }
+  .mp-modal-logo { display: flex; align-items: center; gap: 9px; margin-bottom: 22px; }
+  .mp-modal-logo-icon {
+    width: 30px; height: 30px; border-radius: 6px;
+    background: var(--red);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mp-modal-logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px; font-weight: 700; color: var(--navy);
+  }
+  .mp-modal h2 {
+    font-size: 24px; color: var(--navy); margin-bottom: 10px;
+  }
+  .mp-modal-sub { font-size: 14px; color: var(--text-muted); line-height: 1.65; margin-bottom: 24px; }
+  .mp-modal-features { margin-bottom: 26px; display: flex; flex-direction: column; gap: 12px; }
+  .mp-modal-feature { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text); }
+  .mp-modal-feature-check { color: var(--green); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .mp-modal-cta {
+    width: 100%; height: 48px;
+    background: var(--red); color: #fff;
+    border: none; border-radius: 4px;
+    font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all .15s;
+  }
+  .mp-modal-cta:hover { background: var(--red-hover); transform: translateY(-1px); }
+  .mp-modal-switch { text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-muted); }
+  .mp-modal-switch-link { color: var(--blue); font-weight: 700; cursor: pointer; }
+  .mp-modal-footnote { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 10px; }
+
+  /* ════════════════════════════════════
+     FOOTER
+  ════════════════════════════════════ */
+  .mp-footer {
+    background: var(--navy);
+    padding: 32px 40px;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+  .mp-footer p { font-size: 13px; color: rgba(255,255,255,.3); letter-spacing: .03em; }
+  .mp-footer a { color: rgba(255,255,255,.55); font-weight: 700; text-decoration: none; }
+  .mp-footer a:hover { color: #fff; }
+
+  /* ════════════════════════════════════
+     EMPTY STATE
+  ════════════════════════════════════ */
+  .mp-empty {
+    text-align: center; padding: 72px 24px;
+  }
+  .mp-empty-icon {
+    width: 64px; height: 64px; margin: 0 auto 16px;
+    background: var(--cream-mid); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+  }
+  .mp-empty-title { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .mp-empty-sub { font-size: 13px; color: var(--text-muted); }
+
+  /* ════════════════════════════════════
+     ANIMATIONS
+  ════════════════════════════════════ */
+  @keyframes mp-up {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes mp-float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-12px) } }
+
+  /* ════════════════════════════════════
+     RESPONSIVE
+  ════════════════════════════════════ */
+  @media (max-width: 1024px) {
+    .mp-grid { grid-template-columns: repeat(2, 1fr); }
+    .mp-hero-inner { grid-template-columns: 1fr; }
+    .mp-hero-stats { display: none; }
+    .mp-stats-inner { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .mp-grid { grid-template-columns: 1fr; }
+    .mp-nav { padding: 0 20px; }
+    .mp-hero { padding: 100px 24px 80px; }
+    .mp-content { padding: 28px 20px 60px; }
+    .mp-filter-bar { padding: 0 20px; }
+    .mp-cta { padding: 40px 24px; }
+  }
+`;
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -713,13 +1264,6 @@ const PROVIDERS = [
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const BADGE_STYLES = {
-  green: { background: "#eafaf1", color: "#1d8348" },
-  blue: { background: "#e8f0fb", color: "#1b6ec2" },
-  amber: { background: "#fffbeb", color: "#b45309" },
-  purple: { background: "#f3f0ff", color: "#6d28d9" },
-};
-
 function getIndustryLabel(id) {
   return (INDUSTRIES.find((i) => i.id === id) || { label: id }).label;
 }
@@ -728,43 +1272,18 @@ function navigateTo(path) {
   window.open(`${SOLIDFLO_URL}${path}`, "_blank", "noopener,noreferrer");
 }
 
-// ── Reusable style objects ────────────────────────────────────────────────────
-
-const s = {
-  // layout
-  flex: (gap = 0, align = "center", wrap = false) => ({
-    display: "flex",
-    alignItems: align,
-    gap,
-    ...(wrap ? { flexWrap: "wrap" } : {}),
-  }),
-  grid: (cols, gap) => ({
-    display: "grid",
-    gridTemplateColumns: cols,
-    gap,
-  }),
-  // text
-  label: {
-    fontSize: 11,
-    fontWeight: 700,
-    letterSpacing: ".06em",
-    textTransform: "uppercase",
-  },
+const BADGE_CLASS = {
+  green: "mp-badge-green",
+  blue: "mp-badge-blue",
+  amber: "mp-badge-amber",
+  purple: "mp-badge-purple",
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function Badge({ label, type }) {
   return (
-    <span
-      style={{
-        fontSize: 10,
-        fontWeight: 700,
-        padding: "2px 8px",
-        borderRadius: 20,
-        ...BADGE_STYLES[type],
-      }}
-    >
+    <span className={`mp-badge ${BADGE_CLASS[type] || "mp-badge-blue"}`}>
       {label}
     </span>
   );
@@ -772,198 +1291,77 @@ function Badge({ label, type }) {
 
 function SectionTitle({ children }) {
   return (
-    <div
-      style={{
-        ...s.label,
-        color: T.muted,
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        margin: "28px 0 12px",
-      }}
-    >
-      {children}
-      <div style={{ flex: 1, height: 1, background: T.border }} />
+    <div className="mp-section-title">
+      <span className="mp-section-title-text">{children}</span>
+      <div className="mp-section-title-line" />
     </div>
   );
 }
 
 // ── Provider Card ─────────────────────────────────────────────────────────────
 
-function ProviderCard({ provider: p, expanded, onToggle, onBook }) {
-  const [hovered, setHovered] = useState(false);
-
+function ProviderCard({ provider: p, expanded, onToggle, onBook, delay }) {
   return (
     <div
+      className={`mp-card${p.featured ? " featured" : ""}`}
+      style={{ animationDelay: `${delay}ms` }}
       onClick={() => onToggle(p.id)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: T.white,
-        border: p.featured ? `1.5px solid ${T.blue}` : `1px solid ${T.border}`,
-        borderRadius: 5,
-        padding: "16px",
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-        boxShadow: hovered ? "0 4px 20px rgba(26,35,64,.1)" : "none",
-        transform: hovered ? "translateY(-1px)" : "none",
-        transition: "box-shadow .15s, transform .15s",
-      }}
     >
-      {/* Top row */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+      {/* Top */}
+      <div className="mp-card-top">
         <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 5,
-            flexShrink: 0,
-            background: p.bg,
-            color: p.tc,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 13,
-            fontWeight: 700,
-          }}
+          className="mp-card-avatar"
+          style={{ background: p.bg, color: p.tc }}
         >
           {p.initials}
         </div>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: T.text,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {p.name}
-          </div>
-          <div style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>
+        <div className="mp-card-info">
+          <div className="mp-card-name">{p.name}</div>
+          <div className="mp-card-meta">
             {getIndustryLabel(p.industry)} · {p.loc}
           </div>
         </div>
-
-        <div
-          style={{
-            flexShrink: 0,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            gap: 4,
-          }}
-        >
+        <div className="mp-card-right">
           {p.featured && (
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                background: "#e8f0fb",
-                color: T.blue,
-                padding: "2px 8px",
-                borderRadius: 20,
-              }}
-            >
-              Top Rated
-            </span>
+            <span className="mp-card-featured-badge">Top Rated</span>
           )}
-          <span
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: T.text,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {p.rate}
-          </span>
+          <span className="mp-card-rate">{p.rate}</span>
         </div>
       </div>
 
       {/* Badges */}
-      <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+      <div className="mp-card-badges">
         {p.badges.map((b, i) => (
           <Badge key={i} label={b.l} type={b.t} />
         ))}
       </div>
 
       {/* Stats */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          flexWrap: "wrap",
-        }}
-      >
-        <span style={{ fontSize: 11, color: T.muted }}>
-          <span style={{ color: "#f59e0b" }}>★</span> {p.rating} ({p.reviews})
+      <div className="mp-card-stats">
+        <span className="mp-card-stat">
+          <span style={{ color: "#f59e0b" }}>★</span> {p.rating} ({p.reviews}{" "}
+          reviews)
         </span>
-        <span style={{ fontSize: 11, color: T.muted }}>⏱ {p.response}</span>
-        {!p.avail && (
-          <span style={{ fontSize: 10, color: T.red, fontWeight: 700 }}>
-            Unavailable
-          </span>
-        )}
+        <span className="mp-card-stat">⏱ {p.response}</span>
+        {!p.avail && <span className="mp-card-unavail">Unavailable</span>}
       </div>
 
-      {/* Expanded about */}
+      {/* Expanded */}
       {expanded && (
-        <div
-          style={{
-            fontSize: 12,
-            color: T.muted,
-            lineHeight: 1.6,
-            paddingTop: 8,
-            borderTop: `1px solid ${T.border}`,
-          }}
-        >
+        <div className="mp-card-about">
           {p.about}
-          <div
-            style={{
-              marginTop: 8,
-              fontSize: 11,
-              color: T.blue,
-              fontWeight: 700,
-            }}
-          >
+          <div className="mp-card-about-link">
             Register on SolidFlo to book this provider →
           </div>
         </div>
       )}
 
-      {/* Book button */}
+      {/* CTA */}
       <button
+        className={`mp-card-btn ${p.avail ? "mp-card-btn-avail" : "mp-card-btn-unavail"}`}
         onClick={(e) => {
           e.stopPropagation();
           if (p.avail) onBook(p);
-        }}
-        style={{
-          width: "100%",
-          padding: "9px 0",
-          borderRadius: 4,
-          border: "none",
-          fontFamily: "'Lato', sans-serif",
-          fontSize: 12,
-          fontWeight: 700,
-          letterSpacing: ".03em",
-          cursor: p.avail ? "pointer" : "not-allowed",
-          background: p.avail ? T.navy : "#eef0f5",
-          color: p.avail ? "#fff" : T.muted,
-          marginTop: 2,
-          transition: "background .15s",
-        }}
-        onMouseEnter={(e) => {
-          if (p.avail) e.currentTarget.style.background = "#0e1428";
-        }}
-        onMouseLeave={(e) => {
-          if (p.avail) e.currentTarget.style.background = T.navy;
         }}
       >
         {p.avail ? "Book Now — Get a Quote" : "Currently Unavailable"}
@@ -972,18 +1370,17 @@ function ProviderCard({ provider: p, expanded, onToggle, onBook }) {
   );
 }
 
-// ── Registration Modal ────────────────────────────────────────────────────────
+// ── Modal ─────────────────────────────────────────────────────────────────────
 
 function RegisterModal({ mode, providerName, onClose }) {
   const isLogin = mode === "login";
 
-  // Close on Escape key
   useEffect(() => {
-    const handle = (e) => {
+    const h = (e) => {
       if (e.key === "Escape") onClose();
     };
-    window.addEventListener("keydown", handle);
-    return () => window.removeEventListener("keydown", handle);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [onClose]);
 
   const features = isLogin
@@ -1001,70 +1398,14 @@ function RegisterModal({ mode, providerName, onClose }) {
       ];
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(20,26,48,.65)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        padding: 20,
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: T.white,
-          borderRadius: 6,
-          padding: 32,
-          width: "100%",
-          maxWidth: 440,
-          border: `1px solid ${T.border}`,
-          boxShadow: "0 16px 48px rgba(20,26,48,.25)",
-          position: "relative",
-        }}
-      >
-        {/* Close */}
-        <button
-          onClick={onClose}
-          style={{
-            position: "absolute",
-            top: 16,
-            right: 16,
-            background: "none",
-            border: "none",
-            fontSize: 18,
-            color: T.muted,
-            cursor: "pointer",
-            lineHeight: 1,
-          }}
-        >
+    <div className="mp-modal-overlay" onClick={onClose}>
+      <div className="mp-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="mp-modal-close" onClick={onClose}>
           ✕
         </button>
 
-        {/* Logo */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginBottom: 20,
-          }}
-        >
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 5,
-              background: T.red,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+        <div className="mp-modal-logo">
+          <div className="mp-modal-logo-icon">
             <svg
               width="14"
               height="14"
@@ -1076,41 +1417,17 @@ function RegisterModal({ mode, providerName, onClose }) {
               <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21h6" />
             </svg>
           </div>
-          <span
-            style={{
-              fontSize: 16,
-              fontWeight: 900,
-              color: T.navy,
-              fontFamily: "'Playfair Display', serif",
-            }}
-          >
-            SolidFlo
-          </span>
+          <span className="mp-modal-logo-text">SolidFlo</span>
         </div>
 
-        {/* Heading */}
-        <h2
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: 22,
-            color: T.navy,
-            marginBottom: 8,
-          }}
-        >
+        <h2>
           {isLogin
             ? "Sign In to SolidFlo"
             : providerName
               ? `Book ${providerName}`
               : "Create Your Free Account"}
         </h2>
-        <p
-          style={{
-            fontSize: 13,
-            color: T.muted,
-            lineHeight: 1.65,
-            marginBottom: 22,
-          }}
-        >
+        <p className="mp-modal-sub">
           {isLogin
             ? "Access your account to manage bookings, quotes and service requests."
             : providerName
@@ -1118,65 +1435,17 @@ function RegisterModal({ mode, providerName, onClose }) {
               : "Join SolidFlo to post job requests, receive quotes from multiple providers, and manage your entire business in one place."}
         </p>
 
-        {/* Features */}
-        <div style={{ marginBottom: 22 }}>
+        <div className="mp-modal-features">
           {features.map((f, i) => (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 8,
-                fontSize: 13,
-                color: T.text,
-                marginBottom: 10,
-              }}
-            >
-              <span
-                style={{
-                  color: T.green,
-                  fontSize: 14,
-                  flexShrink: 0,
-                  marginTop: 1,
-                }}
-              >
-                ✓
-              </span>
-              {f}
+            <div key={i} className="mp-modal-feature">
+              <span className="mp-modal-feature-check">✓</span> {f}
             </div>
           ))}
         </div>
 
-        {/* CTA */}
         <button
+          className="mp-modal-cta"
           onClick={() => navigateTo(isLogin ? "/login" : "/register")}
-          style={{
-            width: "100%",
-            height: 46,
-            background: T.red,
-            color: "#fff",
-            border: "none",
-            borderRadius: 4,
-            fontFamily: "'Lato', sans-serif",
-            fontSize: 14,
-            fontWeight: 700,
-            letterSpacing: ".04em",
-            textTransform: "uppercase",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            transition: "all .15s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = T.redHover;
-            e.currentTarget.style.transform = "translateY(-1px)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = T.red;
-            e.currentTarget.style.transform = "none";
-          }}
         >
           {isLogin ? "Sign In at solidflo.co.za" : "Get Started Free"}
           <svg
@@ -1191,21 +1460,13 @@ function RegisterModal({ mode, providerName, onClose }) {
           </svg>
         </button>
 
-        {/* Switch mode */}
-        <p
-          style={{
-            textAlign: "center",
-            marginTop: 14,
-            fontSize: 12,
-            color: T.muted,
-          }}
-        >
+        <p className="mp-modal-switch">
           {isLogin ? (
             <>
               Don't have an account?{" "}
               <span
+                className="mp-modal-switch-link"
                 onClick={() => navigateTo("/register")}
-                style={{ color: T.blue, fontWeight: 700, cursor: "pointer" }}
               >
                 Register free
               </span>
@@ -1214,8 +1475,8 @@ function RegisterModal({ mode, providerName, onClose }) {
             <>
               Already have an account?{" "}
               <span
+                className="mp-modal-switch-link"
                 onClick={() => navigateTo("/login")}
-                style={{ color: T.blue, fontWeight: 700, cursor: "pointer" }}
               >
                 Sign in
               </span>
@@ -1223,15 +1484,7 @@ function RegisterModal({ mode, providerName, onClose }) {
           )}
         </p>
         {!isLogin && (
-          <p
-            style={{
-              fontSize: 11,
-              color: T.muted,
-              textAlign: "center",
-              marginTop: 8,
-              letterSpacing: ".02em",
-            }}
-          >
+          <p className="mp-modal-footnote">
             ✓ No credit card required &nbsp;·&nbsp; ✓ Free to start
           </p>
         )}
@@ -1240,9 +1493,9 @@ function RegisterModal({ mode, providerName, onClose }) {
   );
 }
 
-// ── Hero Section ──────────────────────────────────────────────────────────────
+// ── Hero ──────────────────────────────────────────────────────────────────────
 
-function Hero({ availCount, totalCount, onPostJob }) {
+function Hero({ availCount, totalCount, onPostJob, onBrowse }) {
   const [currentWord, setCurrentWord] = useState(0);
   const WORDS = ["Fast", "Simple", "Trusted", "Smart"];
 
@@ -1255,258 +1508,84 @@ function Hero({ availCount, totalCount, onPostJob }) {
   }, []);
 
   return (
-    <div
-      style={{
-        background: T.navy,
-        padding: "64px 32px 72px",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Background glow */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background:
-            "radial-gradient(ellipse 60% 80% at 5% 50%, rgba(232,68,42,.12) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 95% 20%, rgba(27,110,194,.1) 0%, transparent 55%)",
-        }}
+    <section className="mp-hero">
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="mp-hero-video"
+        src={heroBg}
       />
+      <div className="mp-hero-overlay" />
 
-      <div
-        style={{
-          maxWidth: 1100,
-          margin: "0 auto",
-          position: "relative",
-          zIndex: 2,
-          display: "grid",
-          gridTemplateColumns: "1.1fr 1fr",
-          alignItems: "center",
-          gap: 64,
-        }}
-      >
+      <div className="mp-hero-inner">
         {/* Left */}
         <div>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 7,
-              padding: "5px 13px",
-              borderRadius: 20,
-              marginBottom: 22,
-              background: "rgba(232,68,42,.15)",
-              border: "1px solid rgba(232,68,42,.3)",
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: ".06em",
-              textTransform: "uppercase",
-              color: "#ff9a85",
-            }}
-          >
-            <span
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: "#4ade80",
-                display: "inline-block",
-              }}
-            />
+          <div className="mp-hero-badge">
+            <span className="mp-hero-badge-dot" />
             {availCount} providers available now
           </div>
 
-          <h1
-            style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: "clamp(2.4rem, 4vw, 3.6rem)",
-              lineHeight: 1.08,
-              color: "#fff",
-              marginBottom: 20,
-            }}
-          >
+          <h1>
             Find Trusted Providers{" "}
-            <em
-              style={{
-                fontStyle: "italic",
-                color: T.red,
-                display: "inline-block",
-                minWidth: 120,
-              }}
-            >
-              {WORDS[currentWord]}
-            </em>
+            <em key={currentWord}>{WORDS[currentWord]}</em>
           </h1>
 
-          <p
-            style={{
-              fontSize: 16,
-              color: "rgba(255,255,255,.6)",
-              lineHeight: 1.7,
-              marginBottom: 32,
-              maxWidth: 480,
-            }}
-          >
+          <p className="mp-hero-sub">
             Browse, compare and book verified trade and professional service
             providers across Gauteng. No registration needed to browse.
           </p>
 
-          <div
-            style={{
-              display: "flex",
-              gap: 12,
-              flexWrap: "wrap",
-              marginBottom: 32,
-            }}
-          >
-            <button
-              onClick={() =>
-                document
-                  .getElementById("sf-filter-bar")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-              style={{
-                height: 50,
-                padding: "0 28px",
-                background: T.red,
-                color: "#fff",
-                border: "none",
-                borderRadius: 4,
-                fontFamily: "'Lato', sans-serif",
-                fontSize: 14,
-                fontWeight: 700,
-                letterSpacing: ".04em",
-                textTransform: "uppercase",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                cursor: "pointer",
-                transition: "all .15s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = T.redHover;
-                e.currentTarget.style.transform = "translateY(-2px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = T.red;
-                e.currentTarget.style.transform = "none";
-              }}
-            >
+          <div className="mp-hero-ctas">
+            <button className="mp-hero-primary" onClick={onBrowse}>
               Browse Providers
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
             </button>
-            <button
-              onClick={onPostJob}
-              style={{
-                height: 50,
-                padding: "0 24px",
-                background: "rgba(255,255,255,.08)",
-                color: "rgba(255,255,255,.85)",
-                border: "1px solid rgba(255,255,255,.2)",
-                borderRadius: 4,
-                fontFamily: "'Lato', sans-serif",
-                fontSize: 14,
-                fontWeight: 700,
-                letterSpacing: ".04em",
-                textTransform: "uppercase",
-                cursor: "pointer",
-                transition: "all .15s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,.15)";
-                e.currentTarget.style.color = "#fff";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,.08)";
-                e.currentTarget.style.color = "rgba(255,255,255,.85)";
-              }}
-            >
+            <button className="mp-hero-secondary" onClick={onPostJob}>
               Post a Job ↗
             </button>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: 20,
-              flexWrap: "wrap",
-              fontSize: 12,
-              color: "rgba(255,255,255,.45)",
-              fontWeight: 600,
-            }}
-          >
+          <div className="mp-hero-trust">
             {[
               "No sign-up to browse",
               "Verified professionals",
               "Gauteng-based",
             ].map((t) => (
-              <span
-                key={t}
-                style={{ display: "flex", alignItems: "center", gap: 5 }}
-              >
-                <span style={{ color: "#4ade80" }}>✓</span> {t}
-              </span>
+              <div key={t} className="mp-hero-trust-item">
+                <span className="mp-hero-trust-check">✓</span> {t}
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Right — stats panel (hidden on mobile via CSS class approach, inline responsive) */}
-        <div
-          style={{
-            background: "rgba(255,255,255,.05)",
-            border: "1px solid rgba(255,255,255,.1)",
-            borderRadius: 8,
-            padding: 4,
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 4,
-          }}
-        >
+        {/* Right — stats panel */}
+        <div className="mp-hero-stats">
           {[
             { icon: "🔧", val: totalCount, lbl: "Listed Providers" },
             { icon: "✅", val: availCount, lbl: "Available Today" },
             { icon: "⭐", val: "4.7", lbl: "Avg. Rating" },
             { icon: "🏭", val: INDUSTRIES.length - 1, lbl: "Industries" },
-          ].map((stat, i) => (
-            <div
-              key={i}
-              style={{
-                background: "rgba(255,255,255,.06)",
-                borderRadius: 6,
-                padding: 20,
-                display: "flex",
-                flexDirection: "column",
-                gap: 4,
-              }}
-            >
-              <div style={{ fontSize: 22 }}>{stat.icon}</div>
-              <div
-                style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: 32,
-                  fontWeight: 700,
-                  color: "#fff",
-                  lineHeight: 1,
-                }}
-              >
-                {stat.val}
-              </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "rgba(255,255,255,.4)",
-                  fontWeight: 700,
-                  letterSpacing: ".05em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {stat.lbl}
-              </div>
+          ].map((s, i) => (
+            <div key={i} className="mp-hero-stat">
+              <div className="mp-hero-stat-icon">{s.icon}</div>
+              <div className="mp-hero-stat-val">{s.val}</div>
+              <div className="mp-hero-stat-lbl">{s.lbl}</div>
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -1515,7 +1594,10 @@ function Hero({ availCount, totalCount, onPostJob }) {
 export default function PublicMarketplace() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [expandedCards, setExpandedCards] = useState({});
-  const [modal, setModal] = useState(null); // { mode: 'register'|'login', providerName?: string }
+  const [modal, setModal] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [scrollPct, setScrollPct] = useState(0);
+  const [visible, setVisible] = useState({});
 
   const filtered =
     activeFilter === "all"
@@ -1525,484 +1607,235 @@ export default function PublicMarketplace() {
   const standard = filtered.filter((p) => !p.featured);
   const availCount = PROVIDERS.filter((p) => p.avail).length;
 
-  const openModal = useCallback((mode, providerName) => {
-    setModal({ mode, providerName });
+  // Scroll progress + nav scroll state
+  useEffect(() => {
+    const h = () => {
+      const sy = window.scrollY;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setScrolled(sy > 60);
+      setScrollPct(Math.min(sy / max, 1) * 100);
+    };
+    window.addEventListener("scroll", h);
+    return () => window.removeEventListener("scroll", h);
   }, []);
 
+  // Intersection observer for stats strip
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (e.isIntersecting)
+            setVisible((p) => ({ ...p, [e.target.id]: true }));
+        }),
+      { threshold: 0.12 },
+    );
+    document.querySelectorAll("[data-anim]").forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+
+  const openModal = useCallback(
+    (mode, providerName) => setModal({ mode, providerName }),
+    [],
+  );
   const closeModal = useCallback(() => setModal(null), []);
-
-  const toggleCard = useCallback((id) => {
-    setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
-  }, []);
-
+  const toggleCard = useCallback(
+    (id) => setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] })),
+    [],
+  );
   const handleBook = useCallback(
-    (provider) => {
-      openModal("register", provider.name);
-    },
+    (provider) => openModal("register", provider.name),
     [openModal],
   );
-
   const handleFilterChange = (id) => {
     setActiveFilter(id);
     setExpandedCards({});
   };
 
-  // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div
-      style={{
-        fontFamily: "'Lato', sans-serif",
-        background: T.cream,
-        color: T.text,
-        minHeight: "100vh",
-      }}
-    >
-      {/* ── Topbar ── */}
-      <div
-        style={{
-          background: T.navy,
-          height: 56,
-          padding: "0 32px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-          borderBottom: "1px solid rgba(255,255,255,.08)",
-        }}
-      >
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 6,
-              background: T.red,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.5"
-            >
-              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21h6" />
-            </svg>
+    <div className="mp">
+      <style>{css}</style>
+
+      {/* Scroll progress */}
+      <div className="mp-progress" style={{ width: `${scrollPct}%` }} />
+
+      {/* Nav */}
+      <nav className={`mp-nav${scrolled ? " scrolled" : ""}`}>
+        <div className="mp-nav-inner">
+          <div className="mp-nav-logo">
+            <div className="mp-nav-logo-icon">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#fff"
+                strokeWidth="2.5"
+              >
+                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21h6" />
+              </svg>
+            </div>
+            <span className="mp-nav-logo-text">SolidFlo</span>
+            <span className="mp-nav-logo-sub">Marketplace</span>
           </div>
-          <span
-            style={{
-              fontSize: 16,
-              fontWeight: 900,
-              color: "#fff",
-              fontFamily: "'Playfair Display', serif",
-            }}
-          >
-            SolidFlo
-          </span>
-          <span
-            style={{
-              fontSize: 11,
-              color: "rgba(255,255,255,.35)",
-              fontWeight: 700,
-              letterSpacing: ".06em",
-              textTransform: "uppercase",
-              marginLeft: 2,
-            }}
-          >
-            Marketplace
-          </span>
-        </div>
-
-        {/* Nav actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button
-            onClick={() => openModal("login")}
-            style={{
-              height: 34,
-              padding: "0 16px",
-              background: "rgba(255,255,255,.08)",
-              border: "1px solid rgba(255,255,255,.15)",
-              color: "rgba(255,255,255,.8)",
-              borderRadius: 3,
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: "pointer",
-              fontFamily: "'Lato', sans-serif",
-              letterSpacing: ".04em",
-              transition: "all .15s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,.15)";
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,.08)";
-              e.currentTarget.style.color = "rgba(255,255,255,.8)";
-            }}
-          >
-            Sign In
-          </button>
-          <button
-            onClick={() => openModal("register")}
-            style={{
-              height: 34,
-              padding: "0 18px",
-              background: T.red,
-              color: "#fff",
-              border: "none",
-              borderRadius: 3,
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: "pointer",
-              fontFamily: "'Lato', sans-serif",
-              letterSpacing: ".04em",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              transition: "all .15s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = T.redHover;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = T.red;
-            }}
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
+          <div className="mp-nav-ctas">
+            <button className="mp-btn-ghost" onClick={() => openModal("login")}>
+              Sign In
+            </button>
+            <button
+              className="mp-btn-primary"
+              onClick={() => openModal("register")}
             >
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            Post a Request
-          </button>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Post a Request
+            </button>
+          </div>
         </div>
-      </div>
+      </nav>
 
-      {/* ── Hero ── */}
+      {/* Hero */}
       <Hero
         availCount={availCount}
         totalCount={PROVIDERS.length}
         onPostJob={() => openModal("register")}
+        onBrowse={() =>
+          document
+            .getElementById("mp-filter")
+            ?.scrollIntoView({ behavior: "smooth" })
+        }
       />
 
-      {/* ── Filter bar ── */}
-      <div
-        id="sf-filter-bar"
-        style={{
-          background: T.navyMid,
-          padding: "0 32px",
-          height: 42,
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
-          overflowX: "auto",
-          scrollbarWidth: "none",
-          borderBottom: "1px solid rgba(255,255,255,.07)",
-          position: "sticky",
-          top: 56,
-          zIndex: 90,
-        }}
-      >
-        {INDUSTRIES.map((ind) => {
-          const active = activeFilter === ind.id;
-          return (
-            <button
-              key={ind.id}
-              onClick={() => handleFilterChange(ind.id)}
-              style={{
-                height: 28,
-                padding: "0 13px",
-                borderRadius: 3,
-                fontSize: 12,
-                fontWeight: 700,
-                whiteSpace: "nowrap",
-                cursor: "pointer",
-                border: "1px solid transparent",
-                fontFamily: "'Lato', sans-serif",
-                flexShrink: 0,
-                background: active ? T.red : "transparent",
-                color: active ? "#fff" : "rgba(255,255,255,.55)",
-                borderColor: active ? T.red : "transparent",
-                transition: "all .15s",
-              }}
-              onMouseEnter={(e) => {
-                if (!active) {
-                  e.currentTarget.style.color = "rgba(255,255,255,.85)";
-                  e.currentTarget.style.background = "rgba(255,255,255,.08)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!active) {
-                  e.currentTarget.style.color = "rgba(255,255,255,.55)";
-                  e.currentTarget.style.background = "transparent";
-                }
-              }}
+      {/* Stats strip */}
+      <section className="mp-stats">
+        <div className="mp-stats-inner">
+          {[
+            {
+              icon: "👥",
+              val: `${PROVIDERS.length}+`,
+              lbl: "Listed Providers",
+            },
+            { icon: "✅", val: `${availCount}`, lbl: "Available Today" },
+            { icon: "⭐", val: "4.7", lbl: "Average Rating" },
+            { icon: "🏭", val: `${INDUSTRIES.length - 1}`, lbl: "Industries" },
+          ].map((s, i) => (
+            <div
+              key={i}
+              id={`mpstat-${i}`}
+              data-anim
+              className={`mp-stat-cell${visible[`mpstat-${i}`] ? " visible" : ""}`}
+              style={{ transitionDelay: `${i * 80}ms` }}
             >
-              {ind.emoji} {ind.label}
-            </button>
-          );
-        })}
+              <div className="mp-stat-cell-icon">{s.icon}</div>
+              <div className="mp-stat-cell-val">{s.val}</div>
+              <div className="mp-stat-cell-lbl">{s.lbl}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Filter bar */}
+      <div id="mp-filter" className="mp-filter-bar">
+        {INDUSTRIES.map((ind) => (
+          <button
+            key={ind.id}
+            className={`mp-filter-btn${activeFilter === ind.id ? " active" : ""}`}
+            onClick={() => handleFilterChange(ind.id)}
+          >
+            {ind.emoji} {ind.label}
+          </button>
+        ))}
       </div>
 
-      {/* ── Content ── */}
-      <div
-        style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 32px 60px" }}
-      >
-        {/* Available banner */}
-        <div
-          style={{
-            background: T.navy,
-            borderRadius: 5,
-            padding: "14px 20px",
-            marginBottom: 24,
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-          }}
-        >
-          <div
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: "#4ade80",
-              flexShrink: 0,
-            }}
-          />
-          <span
-            style={{
-              fontSize: 13,
-              color: "rgba(255,255,255,.75)",
-              fontWeight: 600,
-            }}
-          >
+      {/* Content */}
+      <div className="mp-content">
+        {/* Availability banner */}
+        <div className="mp-avail-banner">
+          <div className="mp-avail-dot" />
+          <span className="mp-avail-text">
             Service providers available on the platform today
           </span>
-          <div style={{ marginLeft: "auto", textAlign: "right" }}>
-            <div
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: 28,
-                fontWeight: 700,
-                color: "#fff",
-                lineHeight: 1,
-              }}
-            >
+          <div className="mp-avail-count">
+            <div className="mp-avail-num">
               {filtered.filter((p) => p.avail).length}
             </div>
-            <div
-              style={{
-                fontSize: 10,
-                color: "rgba(255,255,255,.35)",
-                letterSpacing: ".06em",
-                textTransform: "uppercase",
-              }}
-            >
-              Available now
-            </div>
+            <div className="mp-avail-sub">Available now</div>
           </div>
         </div>
 
-        {/* Featured providers */}
+        {/* Featured */}
         {featured.length > 0 && (
           <>
             <SectionTitle>Recommended for you</SectionTitle>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 14,
-                marginBottom: 6,
-              }}
-            >
-              {featured.map((p) => (
+            <div className="mp-grid">
+              {featured.map((p, i) => (
                 <ProviderCard
                   key={p.id}
                   provider={p}
                   expanded={!!expandedCards[p.id]}
                   onToggle={toggleCard}
                   onBook={handleBook}
+                  delay={i * 60}
                 />
               ))}
             </div>
           </>
         )}
 
-        {/* Standard providers */}
+        {/* Standard */}
         {standard.length > 0 && (
           <>
             {featured.length > 0 && <SectionTitle>More providers</SectionTitle>}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 14,
-                marginBottom: 6,
-              }}
-            >
-              {standard.map((p) => (
+            <div className="mp-grid">
+              {standard.map((p, i) => (
                 <ProviderCard
                   key={p.id}
                   provider={p}
                   expanded={!!expandedCards[p.id]}
                   onToggle={toggleCard}
                   onBook={handleBook}
+                  delay={i * 40}
                 />
               ))}
             </div>
           </>
         )}
 
-        {/* Empty state */}
+        {/* Empty */}
         {filtered.length === 0 && (
-          <div style={{ textAlign: "center", padding: "48px 16px" }}>
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                margin: "0 auto 12px",
-                background: "#eef0f5",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 24,
-              }}
-            >
+          <div className="mp-empty">
+            <div className="mp-empty-icon">
               {INDUSTRIES.find((i) => i.id === activeFilter)?.emoji || "🔍"}
             </div>
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 700,
-                color: "#4a5568",
-                marginBottom: 6,
-              }}
-            >
+            <div className="mp-empty-title">
               No providers listed in this category yet
             </div>
-            <div style={{ fontSize: 13, color: T.muted }}>
+            <div className="mp-empty-sub">
               Be the first to list your business — register on SolidFlo.
             </div>
           </div>
         )}
 
-        {/* Post a job CTA */}
-        <div
-          style={{
-            background: T.navy,
-            borderRadius: 6,
-            padding: "40px 32px",
-            marginTop: 40,
-            textAlign: "center",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              pointerEvents: "none",
-              background:
-                "radial-gradient(ellipse 70% 80% at 20% 50%, rgba(232,68,42,.15) 0%, transparent 55%)",
-            }}
-          />
-          <div style={{ position: "relative", zIndex: 1 }}>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 7,
-                padding: "5px 13px",
-                borderRadius: 20,
-                marginBottom: 18,
-                background: "rgba(232,68,42,.15)",
-                border: "1px solid rgba(232,68,42,.3)",
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: ".06em",
-                textTransform: "uppercase",
-                color: "#ff9a85",
-              }}
-            >
-              For Businesses
-            </div>
-            <h2
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: "clamp(1.6rem, 3vw, 2.4rem)",
-                color: "#fff",
-                marginBottom: 12,
-              }}
-            >
-              Need a specific service?
-            </h2>
-            <p
-              style={{
-                fontSize: 15,
-                color: "rgba(255,255,255,.55)",
-                marginBottom: 28,
-                lineHeight: 1.65,
-                maxWidth: 520,
-                margin: "0 auto 28px",
-              }}
-            >
+        {/* CTA */}
+        <div className="mp-cta">
+          <div className="mp-cta-inner">
+            <div className="mp-cta-tag">For Businesses</div>
+            <h2>Need a specific service?</h2>
+            <p>
               Register on SolidFlo to post a job request and receive quotes
               directly from verified providers in your area.
             </p>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 12,
-                flexWrap: "wrap",
-              }}
-            >
+            <div className="mp-cta-btns">
               <button
+                className="mp-cta-primary"
                 onClick={() => openModal("register")}
-                style={{
-                  height: 50,
-                  padding: "0 28px",
-                  background: T.red,
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 4,
-                  fontFamily: "'Lato', sans-serif",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  letterSpacing: ".04em",
-                  textTransform: "uppercase",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  cursor: "pointer",
-                  transition: "all .15s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = T.redHover;
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 8px 24px rgba(232,68,42,.4)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = T.red;
-                  e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
               >
                 Post a Job Request
                 <svg
@@ -2017,42 +1850,13 @@ export default function PublicMarketplace() {
                 </svg>
               </button>
               <button
+                className="mp-cta-secondary"
                 onClick={() => navigateTo("/")}
-                style={{
-                  height: 50,
-                  padding: "0 24px",
-                  background: "rgba(255,255,255,.08)",
-                  color: "rgba(255,255,255,.8)",
-                  border: "1px solid rgba(255,255,255,.2)",
-                  borderRadius: 4,
-                  fontFamily: "'Lato', sans-serif",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  letterSpacing: ".04em",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                  transition: "all .15s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,.15)";
-                  e.currentTarget.style.color = "#fff";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,.08)";
-                  e.currentTarget.style.color = "rgba(255,255,255,.8)";
-                }}
               >
                 Learn More about SolidFlo
               </button>
             </div>
-            <p
-              style={{
-                fontSize: 12,
-                color: "rgba(255,255,255,.3)",
-                marginTop: 16,
-                letterSpacing: ".03em",
-              }}
-            >
+            <p className="mp-cta-note">
               ✓ Free to register &nbsp;·&nbsp; ✓ No credit card required
               &nbsp;·&nbsp; ✓ Starter plan forever free
             </p>
@@ -2060,40 +1864,18 @@ export default function PublicMarketplace() {
         </div>
       </div>
 
-      {/* ── Footer ── */}
-      <div
-        style={{
-          background: T.navy,
-          padding: "28px 32px",
-          textAlign: "center",
-          borderTop: "1px solid rgba(255,255,255,.06)",
-        }}
-      >
-        <p
-          style={{
-            fontSize: 12,
-            color: "rgba(255,255,255,.3)",
-            letterSpacing: ".03em",
-          }}
-        >
+      {/* Footer */}
+      <footer className="mp-footer">
+        <p>
           © {new Date().getFullYear()} SolidFlo &nbsp;·&nbsp;
-          <a
-            href={SOLIDFLO_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              color: "rgba(255,255,255,.55)",
-              fontWeight: 700,
-              textDecoration: "none",
-            }}
-          >
+          <a href={SOLIDFLO_URL} target="_blank" rel="noopener noreferrer">
             solidflo.co.za
           </a>
           &nbsp;·&nbsp; Marketplace for verified service providers in Gauteng
         </p>
-      </div>
+      </footer>
 
-      {/* ── Modal ── */}
+      {/* Modal */}
       {modal && (
         <RegisterModal
           mode={modal.mode}
