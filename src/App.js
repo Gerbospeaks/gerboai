@@ -26,7 +26,7 @@ import DashboardRouter from "./components/DashboardRouter";
 import FinancialOverview from "./pages/FinancialOverview";
 import AdminDashboard from "./pages/AdminDashboard";
 import TemplateSelector from "./pages/accounting/TemplateSelector";
-
+import PublicMarketplace from './pages/PublicMarketplace';
 import SolidEducare from "./pages/education/SubdomainLandingPage";
 import SolidMechanic from "./pages/mechanics/SubdomainLandingPage";
 import SolidAccountant from "./pages/accounting/SubdomainLandingPage";
@@ -255,6 +255,7 @@ function DashboardRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route path="/market" element={<PublicMarketplace />} />
       <Route
         path="/templates"
         element={
@@ -544,6 +545,7 @@ const SUBDOMAIN_LANDING = {
   construction:      SolidConstructor,
   electrical:        SolidElectrical,
   flooring:          SolidFlooring,
+  market:         PublicMarketplace,
   health:            SolidHealth,
   healthcare:        SolidHealth,
   hotel:             SolidHotel,
