@@ -289,40 +289,144 @@ const css = `
   /* ════════════════════════════════════
      FILTER BAR
   ════════════════════════════════════ */
-  .mp-filter-bar {
-    background: var(--navy-mid);
-    padding: 0 40px; height: 48px;
-    display: flex; align-items: center; gap: 4px;
-    overflow-x: auto; scrollbar-width: none;
-    border-bottom: 1px solid rgba(255,255,255,.07);
-    position: sticky; top: 64px; z-index: 90;
-  }
-  .mp-filter-bar::-webkit-scrollbar { display: none; }
-  .mp-filter-btn {
-    height: 30px; padding: 0 14px;
-    border-radius: 3px; font-size: 12px; font-weight: 700;
-    white-space: nowrap; cursor: pointer;
-    border: 1px solid transparent;
-    font-family: 'Lato', sans-serif; flex-shrink: 0;
-    transition: all .15s;
-  }
-  .mp-filter-btn.active {
-    background: var(--red); color: #fff; border-color: var(--red);
-  }
-  .mp-filter-btn:not(.active) {
-    background: transparent; color: rgba(255,255,255,.5);
-  }
-  .mp-filter-btn:not(.active):hover {
-    color: rgba(255,255,255,.9); background: rgba(255,255,255,.08);
-  }
 
   /* ════════════════════════════════════
      CONTENT AREA
   ════════════════════════════════════ */
-  .mp-content {
-    max-width: 1200px; margin: 0 auto; padding: 40px 40px 80px;
-  }
 
+/* ════════════════════════════════════
+   SIDEBAR LAYOUT
+════════════════════════════════════ */
+.mp-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 40px 80px;
+  gap: 32px;
+}
+
+/* ── Sidebar ── */
+.mp-sidebar {
+  position: sticky;
+  top: 80px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.mp-sidebar::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,.45), transparent);
+}
+.mp-sidebar-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.mp-sidebar-title {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: rgba(255,255,255,.3);
+}
+.mp-sidebar-search {
+  margin-top: 12px;
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+.mp-sidebar-search-icon { color: rgba(255,255,255,.25); font-size: 13px; flex-shrink: 0; }
+.mp-sidebar-search-input {
+  background: none; border: none; outline: none;
+  font-family: 'Lato', sans-serif;
+  font-size: 12px; color: rgba(255,255,255,.7);
+  width: 100%;
+}
+.mp-sidebar-search-input::placeholder { color: rgba(255,255,255,.25); }
+
+.mp-sidebar-list {
+  padding: 8px 0;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.08) transparent;
+}
+.mp-sidebar-list::-webkit-scrollbar { width: 4px; }
+.mp-sidebar-list::-webkit-scrollbar-track { background: transparent; }
+.mp-sidebar-list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.1); border-radius: 2px;
+}
+
+.mp-sidebar-item {
+  display: flex; align-items: center;
+  padding: 9px 20px; gap: 10px;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+  border-left: 2px solid transparent;
+  position: relative;
+}
+.mp-sidebar-item:hover { background: rgba(255,255,255,.05); }
+.mp-sidebar-item.active {
+  background: rgba(99,102,241,.12);
+  border-left-color: var(--red);
+}
+.mp-sidebar-item-emoji { font-size: 14px; line-height: 1; flex-shrink: 0; }
+.mp-sidebar-item-label {
+  font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,.45);
+  flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: color .14s;
+}
+.mp-sidebar-item:hover .mp-sidebar-item-label { color: rgba(255,255,255,.8); }
+.mp-sidebar-item.active .mp-sidebar-item-label { color: #a5b4fc; font-weight: 700; }
+.mp-sidebar-item-count {
+  font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.05);
+  border-radius: 10px;
+  padding: 2px 7px;
+  flex-shrink: 0;
+  transition: background .14s, color .14s;
+}
+.mp-sidebar-item.active .mp-sidebar-item-count {
+  background: rgba(99,102,241,.2);
+  color: #818cf8;
+}
+.mp-sidebar-divider {
+  height: 1px; background: rgba(255,255,255,.05);
+  margin: 6px 0;
+}
+
+/* ── Main content (right of sidebar) ── */
+.mp-main { min-width: 0; }
+
+/* ════════════════════════════════════
+   RESPONSIVE — sidebar collapses
+════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .mp-layout {
+    grid-template-columns: 200px 1fr;
+    padding: 28px 24px 60px;
+    gap: 24px;
+  }
+}
+@media (max-width: 768px) {
+  .mp-layout {
+    grid-template-columns: 1fr;
+    padding: 24px 20px 60px;
+  }
+  .mp-sidebar {
+    position: static;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .mp-sidebar-list {
+    max-height: 260px;
+    grid-column: span 2;
+  }
+}
   /* avail banner */
   .mp-avail-banner {
   background: linear-gradient(135deg, rgba(99,102,241,.1) 0%, rgba(14,165,233,.06) 100%);
@@ -751,8 +855,6 @@ const css = `
     .mp-grid { grid-template-columns: 1fr; }
     .mp-nav { padding: 0 20px; }
     .mp-hero { padding: 100px 24px 80px; }
-    .mp-content { padding: 28px 20px 60px; }
-    .mp-filter-bar { padding: 0 20px; }
     .mp-cta { padding: 40px 24px; }
   }
     @media (max-width: 640px) {
@@ -1767,13 +1869,17 @@ function Hero({ availCount, totalCount, onPostJob, onBrowse }) {
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+function industryProviderCount(industryId) {
+  if (industryId === "all") return PROVIDERS.length;
+  return PROVIDERS.filter((p) => p.industry === industryId).length;
+}
 
 export default function PublicMarketplace() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [expandedCards, setExpandedCards] = useState({});
   const [modal, setModal] = useState(null);
   const [scrolled, setScrolled] = useState(false);
+  const [sidebarSearch, setSidebarSearch] = useState("");
   const [scrollPct, setScrollPct] = useState(0);
   const [visible, setVisible] = useState({});
 
@@ -1909,138 +2015,160 @@ export default function PublicMarketplace() {
         </div>
       </section>
 
-      {/* Filter bar */}
-      <div id="mp-filter" className="mp-filter-bar">
-        {INDUSTRIES.map((ind) => (
-          <button
-            key={ind.id}
-            className={`mp-filter-btn${activeFilter === ind.id ? " active" : ""}`}
-            onClick={() => handleFilterChange(ind.id)}
-          >
-            {ind.emoji} {ind.label}
-          </button>
-        ))}
-      </div>
+     
 
      {/* Dark wrapper so the whole below-filter area is navy */}
-<div style={{ background: "var(--navy)", minHeight: "100vh" }}>
-  <div className="mp-content">
+<div style={{ background: "var(--navy)" }}>
+  <div className="mp-layout">
 
-    {/* Availability banner */}
-    <div className="mp-avail-banner">
-      <div className="mp-avail-dot" />
-      <span className="mp-avail-text">
-        <strong>Live marketplace</strong> — verified service providers
-        ready to quote across Gauteng right now.
-      </span>
-      <div className="mp-avail-count">
-        <div className="mp-avail-stat">
-          <span className="mp-avail-num">
-            {filtered.filter((p) => p.avail).length}
-          </span>
-          <span className="mp-avail-sub">Available now</span>
-        </div>
-        <div className="mp-avail-stat">
-          <span className="mp-avail-num">{filtered.length}</span>
-          <span className="mp-avail-sub">Total listed</span>
+    {/* ── Sidebar ── */}
+    <aside className="mp-sidebar">
+      <div className="mp-sidebar-header">
+        <div className="mp-sidebar-title">Industries</div>
+        <div className="mp-sidebar-search">
+          <span className="mp-sidebar-search-icon">⌕</span>
+          <input
+            className="mp-sidebar-search-input"
+            placeholder="Filter…"
+            value={sidebarSearch}
+            onChange={(e) => setSidebarSearch(e.target.value)}
+          />
         </div>
       </div>
-    </div>
 
-    {/* Featured */}
-    {featured.length > 0 && (
-      <>
-        <SectionTitle count={featured.length}>Recommended for you</SectionTitle>
-        <div className="mp-grid">
-          {featured.map((p, i) => (
-            <ProviderCard
-              key={p.id}
-              provider={p}
-              expanded={!!expandedCards[p.id]}
-              onToggle={toggleCard}
-              onBook={handleBook}
-              delay={i * 60}
-            />
-          ))}
-        </div>
-      </>
-    )}
-
-    {/* Standard */}
-    {standard.length > 0 && (
-      <>
-        {featured.length > 0 && (
-          <SectionTitle count={standard.length}>More providers</SectionTitle>
-        )}
-        <div className="mp-grid">
-          {standard.map((p, i) => (
-            <ProviderCard
-              key={p.id}
-              provider={p}
-              expanded={!!expandedCards[p.id]}
-              onToggle={toggleCard}
-              onBook={handleBook}
-              delay={i * 40}
-            />
-          ))}
-        </div>
-      </>
-    )}
-
-    {/* Empty */}
-    {filtered.length === 0 && (
-      <div className="mp-empty">
-        <div className="mp-empty-icon">
-          {INDUSTRIES.find((i) => i.id === activeFilter)?.emoji || "🔍"}
-        </div>
-        <div className="mp-empty-title">
-          No providers listed in this category yet
-        </div>
-        <div className="mp-empty-sub">
-          Be the first to list your business — register on SolidFlo today.
-        </div>
+      <div className="mp-sidebar-list">
+        {INDUSTRIES.filter((ind) =>
+          ind.label.toLowerCase().includes(sidebarSearch.toLowerCase())
+        ).map((ind, i) => (
+          <div key={ind.id}>
+            {ind.id === "all" && <div className="mp-sidebar-divider" />}
+            <div
+              className={`mp-sidebar-item${activeFilter === ind.id ? " active" : ""}`}
+              onClick={() => handleFilterChange(ind.id)}
+            >
+              <span className="mp-sidebar-item-emoji">{ind.emoji}</span>
+              <span className="mp-sidebar-item-label">{ind.label}</span>
+              <span className="mp-sidebar-item-count">
+                {industryProviderCount(ind.id)}
+              </span>
+            </div>
+            {ind.id === "all" && <div className="mp-sidebar-divider" />}
+          </div>
+        ))}
       </div>
-    )}
+    </aside>
 
-    {/* CTA */}
-    <div className="mp-cta">
-      <div className="mp-cta-inner">
-        <div className="mp-cta-tag">For Businesses</div>
-        <h2>
-          Need a specific <em>service?</em>
-        </h2>
-        <p>
-          Post a job request and receive quotes directly from verified
-          providers in your area — free to start, no credit card needed.
-        </p>
-        <div className="mp-cta-btns">
-          <button
-            className="mp-cta-primary"
-            onClick={() => openModal("register")}
-          >
-            Post a Job Request
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M7 17L17 7M7 7h10v10" />
-            </svg>
-          </button>
-          <button
-            className="mp-cta-secondary"
-            onClick={() => navigateTo("/")}
-          >
-            Learn More
-          </button>
-        </div>
-        <div className="mp-cta-perks">
-          {["Free to register", "No credit card required", "Starter plan forever free"].map((t) => (
-            <span key={t} className="mp-cta-perk">
-              <span className="mp-cta-perk-check">✓</span> {t}
+    {/* ── Main content ── */}
+    <div className="mp-main">
+
+      {/* Availability banner */}
+      <div className="mp-avail-banner">
+        <div className="mp-avail-dot" />
+        <span className="mp-avail-text">
+          <strong>Live marketplace</strong> — verified service providers
+          ready to quote across Gauteng right now.
+        </span>
+        <div className="mp-avail-count">
+          <div className="mp-avail-stat">
+            <span className="mp-avail-num">
+              {filtered.filter((p) => p.avail).length}
             </span>
-          ))}
+            <span className="mp-avail-sub">Available now</span>
+          </div>
+          <div className="mp-avail-stat">
+            <span className="mp-avail-num">{filtered.length}</span>
+            <span className="mp-avail-sub">Total listed</span>
+          </div>
         </div>
       </div>
-    </div>
 
-  </div>
+      {/* Featured */}
+      {featured.length > 0 && (
+        <>
+          <SectionTitle count={featured.length}>Recommended for you</SectionTitle>
+          <div className="mp-grid">
+            {featured.map((p, i) => (
+              <ProviderCard
+                key={p.id}
+                provider={p}
+                expanded={!!expandedCards[p.id]}
+                onToggle={toggleCard}
+                onBook={handleBook}
+                delay={i * 60}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Standard */}
+      {standard.length > 0 && (
+        <>
+          {featured.length > 0 && (
+            <SectionTitle count={standard.length}>More providers</SectionTitle>
+          )}
+          <div className="mp-grid">
+            {standard.map((p, i) => (
+              <ProviderCard
+                key={p.id}
+                provider={p}
+                expanded={!!expandedCards[p.id]}
+                onToggle={toggleCard}
+                onBook={handleBook}
+                delay={i * 40}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Empty */}
+      {filtered.length === 0 && (
+        <div className="mp-empty">
+          <div className="mp-empty-icon">
+            {INDUSTRIES.find((i) => i.id === activeFilter)?.emoji || "🔍"}
+          </div>
+          <div className="mp-empty-title">
+            No providers listed in this category yet
+          </div>
+          <div className="mp-empty-sub">
+            Be the first to list your business — register on SolidFlo today.
+          </div>
+        </div>
+      )}
+
+      {/* CTA */}
+      <div className="mp-cta">
+        <div className="mp-cta-inner">
+          <div className="mp-cta-tag">For Businesses</div>
+          <h2>Need a specific <em>service?</em></h2>
+          <p>
+            Post a job request and receive quotes directly from verified
+            providers in your area — free to start, no credit card needed.
+          </p>
+          <div className="mp-cta-btns">
+            <button className="mp-cta-primary" onClick={() => openModal("register")}>
+              Post a Job Request
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M7 17L17 7M7 7h10v10" />
+              </svg>
+            </button>
+            <button className="mp-cta-secondary" onClick={() => navigateTo("/")}>
+              Learn More
+            </button>
+          </div>
+          <div className="mp-cta-perks">
+            {["Free to register", "No credit card required", "Starter plan forever free"].map((t) => (
+              <span key={t} className="mp-cta-perk">
+                <span className="mp-cta-perk-check">✓</span> {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+    </div>{/* end .mp-main */}
+  </div>{/* end .mp-layout */}
 </div>
 
 {/* Footer */}
