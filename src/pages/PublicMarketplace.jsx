@@ -363,7 +363,7 @@ const css = `
 
 .mp-sidebar-list {
   padding: 6px 0;
-  max-height: calc(100vh - 220px);
+  max-height: 100vh ;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #e2e8f0 transparent;
