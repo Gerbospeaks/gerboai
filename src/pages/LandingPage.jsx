@@ -217,8 +217,8 @@ const css = `
   border-radius: 14px;
   padding: 28px 24px;
   cursor: pointer;
-  opacity: 0; transform: translateY(16px);
-  transition: opacity .4s ease, transform .4s ease, box-shadow .2s, border-color .2s;
+  opacity: 1;
+  transition: box-shadow .2s, border-color .2s, transform .2s;
   position: relative; overflow: hidden;
 }
 .lp-services-card::before {
@@ -228,7 +228,6 @@ const css = `
   opacity: 0; transition: opacity .2s;
 }
 .lp-services-card:hover::before { opacity: 1; }
-.lp-services-card.visible { opacity: 1; transform: translateY(0); }
 .lp-services-card:hover {
   box-shadow: 0 10px 32px rgba(99,102,241,.1);
   transform: translateY(-4px);
