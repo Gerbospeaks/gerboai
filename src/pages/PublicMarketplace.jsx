@@ -309,11 +309,11 @@ const css = `
 ════════════════════════════════════ */
 .mp-layout {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 400px 1fr;
   align-items: start;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 40px 80px;
+  padding: 20px 20px 20px;
   gap: 28px;
 }
 
