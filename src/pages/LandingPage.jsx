@@ -194,118 +194,121 @@ const css = `
   .lp-nav:not(.scrolled) .lp-hamburger {
   color: var(--navy);
 }
-Here's the code to drop into your LandingPage.jsx:
-1. Add to your css string:
-css/* ════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    SERVICES / MARKETPLACE SECTION
 ════════════════════════════════════════════════ */
 .lp-services {
-  background: var(--cream);
+  background: var(--cream-mid);
   padding: 96px 24px;
 }
 .lp-services-inner {
   max-width: 1060px;
   margin: 0 auto;
 }
-.lp-services-two-col {
+.lp-services-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 48px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
 }
-.lp-service-card {
+.lp-services-card {
   background: var(--card-bg);
   border: 1px solid var(--cream-dark);
   border-radius: 14px;
-  padding: 36px 32px;
+  padding: 28px 24px;
+  cursor: pointer;
   opacity: 0; transform: translateY(16px);
-  transition: opacity .45s ease, transform .45s ease;
+  transition: opacity .4s ease, transform .4s ease, box-shadow .2s, border-color .2s;
+  position: relative; overflow: hidden;
 }
-.lp-service-card.visible { opacity: 1; transform: translateY(0); }
-.lp-service-card.primary {
-  border: 2px solid rgba(99,102,241,.35);
-  background: linear-gradient(160deg, #fafbff 0%, var(--card-bg) 100%);
+.lp-services-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--red), #818cf8);
+  opacity: 0; transition: opacity .2s;
 }
-.lp-service-card-icon {
-  width: 48px; height: 48px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 20px; font-size: 22px;
+.lp-services-card:hover::before { opacity: 1; }
+.lp-services-card.visible { opacity: 1; transform: translateY(0); }
+.lp-services-card:hover {
+  box-shadow: 0 10px 32px rgba(99,102,241,.1);
+  transform: translateY(-4px);
+  border-color: rgba(99,102,241,.25);
 }
-.lp-service-card h3 {
+.lp-services-card-emoji {
+  font-size: 32px; margin-bottom: 14px; display: block;
+}
+.lp-services-card-title {
   font-family: 'Playfair Display', serif;
-  font-size: 22px; color: var(--navy); margin-bottom: 8px;
+  font-size: 17px; font-weight: 600;
+  color: var(--navy); margin-bottom: 6px;
 }
-.lp-service-card-desc {
-  font-size: 14px; color: var(--text-mid);
-  line-height: 1.65; margin-bottom: 24px;
+.lp-services-card-desc {
+  font-size: 12px; color: var(--text-muted);
+  line-height: 1.6; margin-bottom: 16px;
 }
-.lp-service-steps {
-  list-style: none; padding: 0; margin: 0 0 28px;
-  display: flex; flex-direction: column; gap: 10px;
-}
-.lp-service-step {
-  display: flex; align-items: flex-start; gap: 10px;
-  font-size: 13px; color: var(--text-mid); line-height: 1.4;
-}
-.lp-service-step-num {
-  width: 22px; height: 22px; border-radius: 50%;
+.lp-services-card-count {
+  display: inline-flex; align-items: center; gap: 5px;
   font-size: 11px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; margin-top: 1px;
+  color: var(--red);
+  background: var(--red-light);
+  border: 1px solid rgba(99,102,241,.18);
+  padding: 3px 10px; border-radius: 20px;
 }
-.lp-service-card-btn {
+.lp-services-card-count-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 5px #4ade80;
+}
+.lp-services-cta-row {
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  background: var(--navy);
+  border-radius: 14px; padding: 32px 36px;
+}
+.lp-services-cta-left h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; color: #fff; margin-bottom: 6px;
+}
+.lp-services-cta-left p {
+  font-size: 13px; color: rgba(255,255,255,.5);
+  line-height: 1.6; max-width: 420px;
+}
+.lp-services-cta-btns {
+  display: flex; gap: 10px; flex-wrap: wrap; flex-shrink: 0;
+}
+.lp-services-btn-primary {
   height: 44px; padding: 0 24px;
-  border-radius: 6px; cursor: pointer;
+  background: var(--red); color: #fff;
+  border: none; border-radius: 6px;
   font-family: 'Lato', sans-serif;
   font-size: 13px; font-weight: 700; letter-spacing: .04em;
   text-transform: uppercase;
   display: inline-flex; align-items: center; gap: 8px;
-  border: none; transition: all .18s;
+  cursor: pointer; transition: all .18s;
 }
-.lp-service-card-btn.filled {
-  background: var(--red); color: #fff;
-}
-.lp-service-card-btn.filled:hover {
+.lp-services-btn-primary:hover {
   background: var(--red-hover); transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(99,102,241,.3);
+  box-shadow: 0 6px 20px rgba(99,102,241,.4);
 }
-.lp-service-card-btn.outlined {
-  background: transparent; color: var(--green);
-  border: 1.5px solid var(--green);
+.lp-services-btn-ghost {
+  height: 44px; padding: 0 20px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.75); border-radius: 6px;
+  font-family: 'Lato', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; cursor: pointer; transition: all .18s;
 }
-.lp-service-card-btn.outlined:hover {
-  background: rgba(16,185,129,.06);
+.lp-services-btn-ghost:hover {
+  background: rgba(255,255,255,.13); color: #fff;
 }
-.lp-services-industries-label {
-  font-size: 11px; font-weight: 700; letter-spacing: .08em;
-  text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;
-}
-.lp-services-pills {
-  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
-}
-.lp-services-pill {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--cream-mid); border: 1px solid var(--cream-dark);
-  border-radius: 20px; padding: 6px 14px;
-  font-size: 12px; font-weight: 600; color: var(--text-mid);
-  cursor: pointer; transition: border-color .15s, color .15s, background .15s;
-}
-.lp-services-pill:hover {
-  border-color: rgba(99,102,241,.4);
-  color: var(--red);
-  background: var(--red-light);
-}
-.lp-services-pill-emoji { font-size: 14px; }
-.lp-services-more {
-  font-size: 13px; color: var(--red); font-weight: 700;
-  cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-  transition: gap .2s;
-}
-.lp-services-more:hover { gap: 10px; }
 
-@media (max-width: 768px) {
-  .lp-services-two-col { grid-template-columns: 1fr; }
-  .lp-service-card { padding: 28px 24px; }
+@media (max-width: 1024px) {
+  .lp-services-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .lp-services-grid { grid-template-columns: 1fr; }
+  .lp-services-cta-row { padding: 28px 24px; flex-direction: column; }
 }
 .lp-nav.scrolled .lp-hamburger {
   color: var(--navy);
@@ -1506,129 +1509,105 @@ useEffect(() => {
             ))}
           </div>
         </section>
-        {/* ── Services / Marketplace ── */}
+          {/* ── Services / Marketplace ── */}
 <section className="lp-services">
   <div className="lp-services-inner">
 
     <div className="lp-section-head">
       <div className="lp-section-eyebrow">Marketplace</div>
-      <h2>Find help. Get hired.</h2>
-      <p>Whether you need a skilled provider or want to grow your business,
-         SolidFlo connects you with the right people.</p>
+      <h2>Verified providers, every industry</h2>
+      <p>
+        Browse and book trusted service providers across Gauteng —
+        or list your own business and start getting clients today.
+      </p>
     </div>
 
-    <div className="lp-services-two-col">
-
-      {/* Need a service */}
-      <div
-        id="svc-need"
-        data-anim
-        className={`lp-service-card primary${visible["svc-need"] ? " visible" : ""}`}
-      >
-        <div className="lp-service-card-icon"
-          style={{ background: "var(--red-light)" }}>
-          🔍
-        </div>
-        <h3>I need a service</h3>
-        <p className="lp-service-card-desc">
-          Post a job and receive quotes from verified, rated providers in your area —
-          no registration needed to browse.
-        </p>
-        <ul className="lp-service-steps">
-          {[
-            "Describe your job or project",
-            "Receive quotes from nearby providers",
-            "Choose, book and pay — all in one place",
-          ].map((s, i) => (
-            <li key={i} className="lp-service-step">
-              <span className="lp-service-step-num"
-                style={{ background: "var(--red-light)", color: "var(--red)" }}>
-                {i + 1}
-              </span>
-              {s}
-            </li>
-          ))}
-        </ul>
-        <button
-          className="lp-service-card-btn filled"
-          onClick={() => window.open("https://market.solidflo.co.za", "_blank", "noopener,noreferrer")}
-        >
-          Post a job request <ArrowRight size={14} />
-        </button>
-      </div>
-
-      {/* Offer a service */}
-      <div
-        id="svc-offer"
-        data-anim
-        className={`lp-service-card${visible["svc-offer"] ? " visible" : ""}`}
-        style={{ transitionDelay: "80ms" }}
-      >
-        <div className="lp-service-card-icon"
-          style={{ background: "#d1fae5" }}>
-          🏢
-        </div>
-        <h3>I offer a service</h3>
-        <p className="lp-service-card-desc">
-          List your business on the marketplace and get discovered by clients
-          actively looking for your skills — then quote and invoice from the same platform.
-        </p>
-        <ul className="lp-service-steps">
-          {[
-            "Create your provider profile",
-            "Get discovered by clients near you",
-            "Quote, invoice and get paid",
-          ].map((s, i) => (
-            <li key={i} className="lp-service-step">
-              <span className="lp-service-step-num"
-                style={{ background: "#d1fae5", color: "var(--green)" }}>
-                {i + 1}
-              </span>
-              {s}
-            </li>
-          ))}
-        </ul>
-        <button
-          className="lp-service-card-btn outlined"
-          onClick={() => open("register")}
-        >
-          List my business <ArrowRight size={14} />
-        </button>
-      </div>
-    </div>
-
-    {/* Popular industry teasers */}
-    <div className="lp-services-industries-label">Popular industries</div>
-    <div className="lp-services-pills">
+    <div className="lp-services-grid">
       {[
-        { emoji: "🔧", label: "Mechanical" },
-        { emoji: "⚡", label: "Electrical" },
-        { emoji: "🚿", label: "Plumbing" },
-        { emoji: "🏗️", label: "Construction" },
-        { emoji: "❄️", label: "HVAC" },
-        { emoji: "🔒", label: "Security" },
-      ].map((ind) => (
-        <span
-          key={ind.label}
-          className="lp-services-pill"
+        {
+          emoji: "🔧",
+          title: "Mechanical",
+          desc: "Fleet servicing, diagnostics, engine rebuilds and roadworthy inspections.",
+          count: 2,
+        },
+        {
+          emoji: "⚡",
+          title: "Electrical",
+          desc: "COC-certified electricians for residential, commercial and solar wiring.",
+          count: 2,
+        },
+        {
+          emoji: "🚿",
+          title: "Plumbing",
+          desc: "24/7 emergency callouts, leak detection and full bathroom renovations.",
+          count: 1,
+        },
+        {
+          emoji: "🏗️",
+          title: "Construction",
+          desc: "CIDB-accredited contractors for new builds, renovations and extensions.",
+          count: 1,
+        },
+        {
+          emoji: "❄️",
+          title: "HVAC",
+          desc: "Commercial and industrial HVAC installation, servicing and repairs.",
+          count: 1,
+        },
+        {
+          emoji: "🔒",
+          title: "Security",
+          desc: "PSiRA-registered armed response, site guarding and CCTV solutions.",
+          count: 1,
+        },
+      ].map((ind, i) => (
+        <div
+          key={ind.title}
+          id={`svc-${i}`}
+          data-anim
+          className={`lp-services-card${visible[`svc-${i}`] ? " visible" : ""}`}
+          style={{ transitionDelay: `${i * 60}ms` }}
           onClick={() =>
             window.open("https://market.solidflo.co.za", "_blank", "noopener,noreferrer")
           }
         >
-          <span className="lp-services-pill-emoji">{ind.emoji}</span>
-          {ind.label}
-        </span>
+          <span className="lp-services-card-emoji">{ind.emoji}</span>
+          <div className="lp-services-card-title">{ind.title}</div>
+          <div className="lp-services-card-desc">{ind.desc}</div>
+          <span className="lp-services-card-count">
+            <span className="lp-services-card-count-dot" />
+            {ind.count} provider{ind.count !== 1 ? "s" : ""} listed
+          </span>
+        </div>
       ))}
     </div>
 
-    <span
-      className="lp-services-more"
-      onClick={() =>
-        window.open("https://market.solidflo.co.za", "_blank", "noopener,noreferrer")
-      }
-    >
-      + 20 more industries on the marketplace →
-    </span>
+    {/* CTA bar */}
+    <div className="lp-services-cta-row">
+      <div className="lp-services-cta-left">
+        <h3>26 industries. One marketplace.</h3>
+        <p>
+          Need a provider? Post a job and get quotes. Have a skill?
+          List your business free and start winning clients.
+        </p>
+      </div>
+      <div className="lp-services-cta-btns">
+        <button
+          className="lp-services-btn-primary"
+          onClick={() =>
+            window.open("https://market.solidflo.co.za", "_blank", "noopener,noreferrer")
+          }
+        >
+          Browse Marketplace <ArrowRight size={14} />
+        </button>
+        <button
+          className="lp-services-btn-ghost"
+          onClick={() => open("register")}
+        >
+          List My Business
+        </button>
+      </div>
+    </div>
 
   </div>
 </section>
