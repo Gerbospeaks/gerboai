@@ -53,7 +53,6 @@ import SolidSecurity from "./pages/security/SubdomainLandingPage";
 import SolidSolar from "./pages/solar-installation/SubdomainLandingPage";
 import SolidTowing from "./pages/towing/SubdomainLandingPage";
 import SolidWindowRepair from "./pages/window-repair/SubdomainLandingPage";
-
 import SubdomainAuthPage from "./pages/SubdomainAuthPage";
 
 // ── Industry dashboards ───────────────────────────────────────────────────────
@@ -96,7 +95,7 @@ import NotesView from "./pages/cleaning/NotesView";
 import ParentPortal from "./pages/education/ParentPortal";
 import StaffPortal from "./pages/education/StaffPortal";
 
-// ─── Detect subdomain once — does not change during a session ────────────────
+// ─── Detect subdomain once at module load — safe, doesn't change mid-session ──
 const IS_SUBDOMAIN = !!getSubdomainFromHost();
 
 const PUBLIC_ROUTES = new Set([
@@ -111,8 +110,42 @@ const PUBLIC_ROUTES = new Set([
   "/auth-action",
 ]);
 
+// ─── Map dashboardId → the route path DashboardRouter should navigate to ─────
+// This must match the paths defined in DashboardRoutes below
+export const DASHBOARD_ID_TO_PATH = {
+  mechanics: "/mechanics",
+  healthcare: "/healthcare",
+  health: "/healthcare",
+  security: "/security",
+  electrical: "/electrical",
+  restaurant: "/restaurant",
+  restaurants: "/restaurant",
+  construction: "/construction",
+  cleaning: "/cleaning",
+  education: "/education",
+  hotel: "/hotel",
+  legal: "/legal",
+  plumbing: "/plumbing",
+  retail: "/retail",
+  landscaping: "/landscaping",
+  logistics: "/logistics",
+  photography: "/photography",
+  realestate: "/realestate",
+  flooring: "/flooring",
+  hvac: "/hvac",
+  accounting: "/accounting",
+  painting: "/painting",
+  "pest-control": "/pest-control",
+  "pool-services": "/pool-services",
+  "solar-installation": "/solar-installation",
+  towing: "/towing",
+  welding: "/welding",
+  carpentry: "/carpentry",
+  "window-repair": "/window-repair",
+};
+
 // ─── Full-page spinner shown while Firebase resolves auth state ───────────────
-function AppLoader() {
+export function AppLoader() {
   return (
     <div
       style={{
@@ -121,16 +154,15 @@ function AppLoader() {
         alignItems: "center",
         height: "100vh",
         width: "100vw",
-        background: "#fff", // match your app background colour
+        background: "#f8f9fc",
       }}
     >
-      {/* Replace with your own logo / spinner component if you have one */}
       <div
         style={{
           width: 40,
           height: 40,
           border: "4px solid #e5e7eb",
-          borderTop: "4px solid #4f46e5",
+          borderTop: "4px solid #1655e0",
           borderRadius: "50%",
           animation: "spin 0.75s linear infinite",
         }}
@@ -140,24 +172,21 @@ function AppLoader() {
   );
 }
 
-// ─── Redirect logged-in users away from auth pages ───────────────────────────
+// ─── Redirect logged-in, verified users away from auth pages ─────────────────
 function PublicOnlyRoute({ children }) {
   const { user, loading } = useAuth();
-
-  // Show a full-page loader instead of null to prevent the flash
   if (loading) return <AppLoader />;
-  if (user) return <Navigate to="/dashboard" replace />;
+  // Only redirect if email is verified — unverified users stay on login
+  if (user && user.emailVerified) return <Navigate to="/dashboard" replace />;
   return children;
 }
 
-// ─── PWA prompt gate ─────────────────────────────────────────────────────────
+// ─── PWA prompt — only shown on protected (non-public) routes ────────────────
 function PWAGate() {
-  // Safely read context — may be the default value before provider fully mounts
-  const auth = useAuth();
+  const { loading } = useAuth();
   const { pathname } = useLocation();
 
-  // Guard: if context isn't ready yet or auth is still loading, render nothing
-  if (!auth || auth.loading) return null;
+  if (loading) return null;
 
   const isPublic =
     PUBLIC_ROUTES.has(pathname) ||
@@ -189,10 +218,15 @@ function useSecurityLock() {
   }, []);
 }
 
-// ─── All protected dashboard routes (shared by main domain + subdomains) ─────
+// ─── All protected dashboard routes ──────────────────────────────────────────
 function DashboardRoutes() {
   return (
     <Routes>
+      {/* 
+        /dashboard is the entry point after login.
+        DashboardRouter reads userDashboard from AuthContext
+        and navigates to the correct industry path below.
+      */}
       <Route
         path="/dashboard"
         element={
@@ -202,6 +236,7 @@ function DashboardRoutes() {
         }
       />
       <Route path="/home" element={<Navigate to="/dashboard" replace />} />
+
       <Route
         path="/financial-overview"
         element={
@@ -219,7 +254,7 @@ function DashboardRoutes() {
         }
       />
 
-      {/* Mechanics */}
+      {/* ── Mechanics ── */}
       <Route
         path="/mechanics"
         element={
@@ -252,7 +287,6 @@ function DashboardRoutes() {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/templates"
         element={
@@ -270,7 +304,7 @@ function DashboardRoutes() {
         }
       />
 
-      {/* Healthcare */}
+      {/* ── Healthcare ── */}
       <Route
         path="/healthcare"
         element={
@@ -304,7 +338,7 @@ function DashboardRoutes() {
         }
       />
 
-      {/* All other industries */}
+      {/* ── All other industries ── */}
       <Route
         path="/security"
         element={
@@ -514,11 +548,11 @@ function DashboardRoutes() {
         }
       />
 
-      {/* Education portals */}
+      {/* ── Education portals (intentionally unprotected — public links for parents/staff) ── */}
       <Route path="/parents/:portalSlug" element={<ParentPortal />} />
       <Route path="/staff/:portalSlug" element={<StaffPortal />} />
 
-      {/* Admin */}
+      {/* ── Admin ── */}
       <Route
         path="/admin"
         element={
@@ -533,6 +567,7 @@ function DashboardRoutes() {
   );
 }
 
+// ─── Subdomain landing page map ───────────────────────────────────────────────
 const SUBDOMAIN_LANDING = {
   education: SolidEducare,
   mechanics: SolidMechanic,
@@ -564,6 +599,7 @@ const SUBDOMAIN_LANDING = {
   welding: SolidWelder,
   "window-repair": SolidWindowRepair,
 };
+
 function SubdomainRoot() {
   const subdomain = getSubdomainFromHost();
   const Landing = SUBDOMAIN_LANDING[subdomain];
@@ -578,12 +614,17 @@ function App() {
     <Router>
       <AuthProvider>
         <AdminProvider>
-          <PWAGate />
-
           {IS_SUBDOMAIN ? (
-            // ── SUBDOMAIN (e.g. mechanics.solidflo.co.za) ────────────────────
+            // ── SUBDOMAIN (e.g. mechanics.solidflo.co.za) ──────────────────
             <Routes>
               <Route path="/" element={<SubdomainRoot />} />
+
+              {/* 
+                Login: SubdomainAuthPage reads pathname to show LoginView.
+                After successful Firebase sign-in it navigates to /dashboard.
+                DashboardRouter then reads userDashboard from AuthContext
+                and redirects to the correct industry dashboard path.
+              */}
               <Route
                 path="/login"
                 element={
@@ -600,14 +641,25 @@ function App() {
                   </PublicOnlyRoute>
                 }
               />
+
               <Route path="/market" element={<SolidMarket />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/auth-action" element={<AuthAction />} />
-              <Route path="/*" element={<DashboardRoutes />} />
+
+              {/* PWAGate lives inside Router so useLocation works */}
+              <Route
+                path="/*"
+                element={
+                  <>
+                    <PWAGate />
+                    <DashboardRoutes />
+                  </>
+                }
+              />
             </Routes>
           ) : (
-            // ── MAIN DOMAIN (solidflo.co.za) ──────────────────────────────────
+            // ── MAIN DOMAIN (solidflo.co.za) ──────────────────────────────
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/about" element={<AboutPage />} />
@@ -617,12 +669,19 @@ function App() {
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/auth-action" element={<AuthAction />} />
 
-              {/* Block direct access to auth on main domain */}
+              {/* Auth is subdomain-only — block direct access on main domain */}
               <Route path="/login" element={<Navigate to="/" replace />} />
               <Route path="/register" element={<Navigate to="/" replace />} />
 
-              {/* Protected dashboard routes */}
-              <Route path="/*" element={<DashboardRoutes />} />
+              <Route
+                path="/*"
+                element={
+                  <>
+                    <PWAGate />
+                    <DashboardRoutes />
+                  </>
+                }
+              />
             </Routes>
           )}
         </AdminProvider>
