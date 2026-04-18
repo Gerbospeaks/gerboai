@@ -2591,7 +2591,7 @@ useEffect(() => {
     const h = () => {
       const sy = window.scrollY;
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      setScrolled(sy > 60);
+      setScrolled(sy > 600);
       setScrollPct(Math.min(sy / max, 1) * 100);
     };
     window.addEventListener("scroll", h);
@@ -2726,17 +2726,6 @@ useEffect(() => {
       </div>
     )}
   </div>
-
-  {/* Dot indicators */}
-  <div className="mp-sidebar-ad-dots">
-    {ADS.map((_, i) => (
-      <button
-        key={i}
-        className={`mp-sidebar-ad-dot${i === currentAd ? " active" : ""}`}
-        onClick={() => setCurrentAd(i)}
-      />
-    ))}
-  </div>
 </div>
             <div className="mp-sidebar-header">
               <div className="mp-sidebar-title">Industries</div>
@@ -2771,8 +2760,47 @@ useEffect(() => {
                 </div>
               ))}
             </div>
+            {/* ── Bottom Sidebar Ad ── */}
+            <div style={{ padding: "12px 12px 16px" }}>
+              <div
+                key={`bottom-${currentAd}`}
+                className="mp-sidebar-ad mp-sidebar-ad-slot"
+                onClick={() =>
+                  window.open(ADS[currentAd].url, "_blank", "noopener,noreferrer")
+                }
+              >
+                <span className="mp-sidebar-ad-tag">Sponsored</span>
+                {ADS[currentAd].type === "image" ? (
+                  <>
+                    <img
+                      src={ADS[currentAd].src}
+                      alt={ADS[currentAd].alt}
+                      className="mp-sidebar-ad-image"
+                    />
+                    <div className="mp-sidebar-ad-caption">
+                      <strong>{ADS[currentAd].headline}</strong>
+                      <span>{ADS[currentAd].sub}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div
+                    className="mp-sidebar-ad-branded"
+                    style={{ background: ADS[currentAd].bg }}
+                  >
+                    <div className="mp-sidebar-ad-branded-headline">
+                      {ADS[currentAd].headline}
+                    </div>
+                    <div className="mp-sidebar-ad-branded-sub">
+                      {ADS[currentAd].sub}
+                    </div>
+                    <button className="mp-sidebar-ad-branded-btn">
+                      {ADS[currentAd].cta}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </aside>
-
           {/* ── Main content ── */}
           <div className="mp-main">
             {/* Availability banner */}
@@ -2817,28 +2845,86 @@ useEffect(() => {
               </>
             )}
 
-            {/* Standard */}
             {standard.length > 0 && (
-              <>
-                {featured.length > 0 && (
-                  <SectionTitle count={standard.length}>
-                    More providers
-                  </SectionTitle>
-                )}
-                <div className="mp-grid">
-                  {standard.map((p, i) => (
-                    <ProviderCard
-                      key={p.id}
-                      provider={p}
-                      expanded={!!expandedCards[p.id]}
-                      onToggle={toggleCard}
-                      onBook={handleBook}
-                      delay={i * 40}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+  <>
+    {featured.length > 0 && (
+      <SectionTitle count={standard.length}>
+        More providers
+      </SectionTitle>
+    )}
+
+    {/* ── Inline Ad Banner ── */}
+    <div
+      key={`inline-${currentAd}`}
+      className="mp-sidebar-ad mp-sidebar-ad-slot"
+      style={{ margin: "0 0 20px", borderRadius: 12, cursor: "pointer" }}
+      onClick={() =>
+        window.open(ADS[currentAd].url, "_blank", "noopener,noreferrer")
+      }
+    >
+      <span className="mp-sidebar-ad-tag">Sponsored</span>
+      {ADS[currentAd].type === "image" ? (
+        <div style={{ display: "flex", alignItems: "center", background: "#fff" }}>
+          <img
+            src={ADS[currentAd].src}
+            alt={ADS[currentAd].alt}
+            style={{
+              width: 120,
+              height: 90,
+              objectFit: "cover",
+              borderRadius: "12px 0 0 12px",
+              flexShrink: 0,
+            }}
+          />
+          <div style={{ padding: "12px 16px" }}>
+            <strong style={{ fontSize: 13, color: "#0f172a", display: "block", marginBottom: 4 }}>
+              {ADS[currentAd].headline}
+            </strong>
+            <span style={{ fontSize: 12, color: "#94a3b8" }}>
+              {ADS[currentAd].sub}
+            </span>
+            <div style={{
+              marginTop: 8,
+              fontSize: 11,
+              fontWeight: 700,
+              color: "#6366f1",
+              textTransform: "uppercase",
+              letterSpacing: ".04em",
+            }}>
+              Learn more →
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div
+          className="mp-sidebar-ad-branded"
+          style={{ background: ADS[currentAd].bg }}
+        >
+          <div className="mp-sidebar-ad-branded-headline">
+            {ADS[currentAd].headline}
+          </div>
+          <div className="mp-sidebar-ad-branded-sub">{ADS[currentAd].sub}</div>
+          <button className="mp-sidebar-ad-branded-btn">
+            {ADS[currentAd].cta}
+          </button>
+        </div>
+      )}
+    </div>
+
+    <div className="mp-grid">
+      {standard.map((p, i) => (
+        <ProviderCard
+          key={p.id}
+          provider={p}
+          expanded={!!expandedCards[p.id]}
+          onToggle={toggleCard}
+          onBook={handleBook}
+          delay={i * 40}
+        />
+      ))}
+    </div>
+  </>
+)}
 
             {/* Empty */}
             {filtered.length === 0 && (
