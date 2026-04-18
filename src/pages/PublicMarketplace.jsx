@@ -721,8 +721,8 @@ const css = `
 }
 .mp-card {
   background: #fff;
-  border: 1.5px solid #e8edf3;
-  border-radius: 18px;
+  border: 0.7px solid #e8edf3;
+  border-radius: 0px;
   padding: 0;
   cursor: pointer;
   display: flex; flex-direction: column;
@@ -739,7 +739,7 @@ const css = `
   border-color: #d0d8e4;
 }
 .mp-card.featured {
-  border-color: rgba(99,102,241,.4);
+  border-color: rgba(236, 236, 236, 0.4);
   border-width: 1.5px;
   box-shadow: 0 2px 18px rgba(99,102,241,.09);
 }
@@ -2538,34 +2538,6 @@ export default function PublicMarketplace() {
         }
       />
 
-      {/* Stats strip */}
-      <section className="mp-stats">
-        <div className="mp-stats-inner">
-          {[
-            {
-              icon: "👥",
-              val: `${PROVIDERS.length}+`,
-              lbl: "Listed Providers",
-            },
-            { icon: "✅", val: `${availCount}`, lbl: "Available Today" },
-            { icon: "⭐", val: "4.7", lbl: "Average Rating" },
-            { icon: "🏭", val: `${INDUSTRIES.length - 1}`, lbl: "Industries" },
-          ].map((s, i) => (
-            <div
-              key={i}
-              id={`mpstat-${i}`}
-              data-anim
-              className={`mp-stat-cell${visible[`mpstat-${i}`] ? " visible" : ""}`}
-              style={{ transitionDelay: `${i * 80}ms` }}
-            >
-              <div className="mp-stat-cell-icon">{s.icon}</div>
-              <div className="mp-stat-cell-val">{s.val}</div>
-              <div className="mp-stat-cell-lbl">{s.lbl}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Dark wrapper so the whole below-filter area is navy */}
       <div style={{ background: "#f8fafc" }}>
         <div className="mp-layout">
@@ -2689,7 +2661,39 @@ export default function PublicMarketplace() {
               </div>
             )}
 
-            {/* CTA */}
+           
+          </div>
+          {/* end .mp-main */}
+        </div>
+        {/* end .mp-layout */}
+      </div>
+
+      {/* ── Mobile Filter FAB ── */}
+      <button className="mp-filter-fab" onClick={() => setDrawerOpen(true)}>
+        <span className="mp-filter-fab-dot" />
+        {activeIndustry?.emoji} {activeIndustry?.label || "All Industries"}
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {/* ── Mobile Sidebar Drawer ── */}
+      <SidebarDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        activeFilter={activeFilter}
+        onFilterChange={handleFilterChange}
+        sidebarSearch={sidebarSearch}
+        setSidebarSearch={setSidebarSearch}
+      />
+        {/* CTA */}
             <div className="mp-cta">
               <div className="mp-cta-inner">
                 <div className="mp-cta-tag">For Businesses</div>
@@ -2736,39 +2740,7 @@ export default function PublicMarketplace() {
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-          {/* end .mp-main */}
-        </div>
-        {/* end .mp-layout */}
-      </div>
-
-      {/* ── Mobile Filter FAB ── */}
-      <button className="mp-filter-fab" onClick={() => setDrawerOpen(true)}>
-        <span className="mp-filter-fab-dot" />
-        {activeIndustry?.emoji} {activeIndustry?.label || "All Industries"}
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
-      </button>
-
-      {/* ── Mobile Sidebar Drawer ── */}
-      <SidebarDrawer
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        activeFilter={activeFilter}
-        onFilterChange={handleFilterChange}
-        sidebarSearch={sidebarSearch}
-        setSidebarSearch={setSidebarSearch}
-      />
-
+            </div> 
       {/* Footer */}
       <footer className="mp-footer">
         <div className="mp-footer-upper">
