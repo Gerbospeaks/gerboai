@@ -311,7 +311,7 @@ const css = `
   display: grid;
   grid-template-columns: 400px 1fr;
   align-items: start;
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 20px 20px 20px;
   gap: 28px;
