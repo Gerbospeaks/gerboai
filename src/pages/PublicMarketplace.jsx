@@ -1,8 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import heroBg from "../assets/videos/market.mp4";
 import logo from "../assets/img/solidflo.png";
+import BookingPanel from "../components/BookingPanel";
 // ── Config ────────────────────────────────────────────────────────────────────
-
+import { useProviders }        from "../hooks/useProviders";
+import { sendBookingRequest }  from "../hooks/useBookingRequests";
+import { useAuth }             from "../contexts/AuthContext"; 
 const SOLIDFLO_URL = "https://solidflo.co.za";
 
 // ── CSS (mirrors LandingPage token system exactly) ────────────────────────────
@@ -2402,13 +2405,7 @@ function RegisterModal({ mode, providerName, onClose }) {
           </div>
 
           <div className="mp-modal-illustration">
-            <div className="mp-modal-illus-circle mp-modal-illus-circle-a">
-              <div className="mp-modal-illus-rays" />
-              🏗️
-            </div>
-            <div className="mp-modal-illus-circle mp-modal-illus-circle-b">
-              🤝
-            </div>
+            
           </div>
         </div>
 
@@ -2718,14 +2715,18 @@ export default function PublicMarketplace() {
   const [scrollPct, setScrollPct] = useState(0);
   const [visible, setVisible] = useState({});
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const filtered =
-    activeFilter === "all"
-      ? PROVIDERS
-      : PROVIDERS.filter((p) => p.industry === activeFilter);
-  const featured = filtered.filter((p) => p.featured);
-  const standard = filtered.filter((p) => !p.featured);
-  const availCount = PROVIDERS.filter((p) => p.avail).length;
+const [bookingProvider, setBookingProvider] = useState(null);
+const [toast, setToast] = useState("");
+const showToast = useCallback((msg) => {
+  setToast(msg);
+  setTimeout(() => setToast(""), 3500);
+}, []);
+ const { user }                        = useAuth();
+const { providers, loading, error }   = useProviders(activeFilter);
+ 
+const featured   = providers.filter((p) => p.featured);
+const standard   = providers.filter((p) => !p.featured);
+const availCount = providers.filter((p) => p.avail).length;
 
   // Active industry label for FAB
   const activeIndustry = INDUSTRIES.find((i) => i.id === activeFilter);
@@ -2803,9 +2804,30 @@ useEffect(() => {
     [],
   );
   const handleBook = useCallback(
-    (provider) => openModal("register", provider.name),
-    [openModal],
-  );
+  (provider) => {
+    if (!user) {
+      // Not logged in → show your existing register modal
+      openModal("register", provider.name);
+      return;
+    }
+    // Logged in → open booking panel directly
+    setBookingProvider(provider);
+  },
+  [user, openModal],
+);
+const handleSubmitBooking = useCallback(
+  async (provider, formData) => {
+    try {
+      await sendBookingRequest(formData, provider, user);
+      setBookingProvider(null);
+      showToast(`Booking sent to ${provider.name}! They'll respond with a quote.`);
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to send booking. Please try again.");
+    }
+  },
+  [user],
+);
   const handleFilterChange = (id) => {
     setActiveFilter(id);
     setExpandedCards({});
@@ -2915,12 +2937,12 @@ useEffect(() => {
               <div className="mp-avail-count">
                 <div className="mp-avail-stat">
                   <span className="mp-avail-num">
-                    {filtered.filter((p) => p.avail).length}
+                    {availCount}
                   </span>
                   <span className="mp-avail-sub">Available now</span>
                 </div>
                 <div className="mp-avail-stat">
-                  <span className="mp-avail-num">{filtered.length}</span>
+                  <span className="mp-avail-num">{providers.length}</span>
                   <span className="mp-avail-sub">Total listed</span>
                 </div>
               </div>
@@ -3026,10 +3048,18 @@ useEffect(() => {
       ))}
     </div>
   </>
+)} 
+{bookingProvider && (
+  <div style={{ marginTop: 12 }}>
+    <BookingPanel
+      provider={bookingProvider}
+      onClose={() => setBookingProvider(null)}
+      onSubmit={handleSubmitBooking}
+    />
+  </div>
 )}
-
             {/* Empty */}
-            {filtered.length === 0 && (
+            {providers.length === 0 && !loading && (
               <div className="mp-empty">
                 <div className="mp-empty-icon">
                   {INDUSTRIES.find((i) => i.id === activeFilter)?.emoji || "🔍"}
@@ -3208,6 +3238,17 @@ useEffect(() => {
           providerName={modal.providerName}
           onClose={closeModal}
         />
+      )}
+       {/* Toast */}
+      {toast && (
+        <div style={{
+          position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
+          background: "#0f172a", color: "#fff", fontSize: 13, fontWeight: 700,
+          padding: "11px 22px", borderRadius: 8, zIndex: 9999,
+          boxShadow: "0 8px 28px rgba(15,23,42,.3)", pointerEvents: "none",
+        }}>
+          {toast}
+        </div>
       )}
     </div>
   );

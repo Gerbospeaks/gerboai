@@ -129,9 +129,14 @@ export default function Register() {
     setError("");
     setIsSubmitting(true);
     try {
-      // Pass dashboardId (from landing page) into register() so it's
-      // saved to Firestore under users/{uid}.dashboardId
-      const result = await register(name, email, password, dashboardId);
+      const result = await register(name, email, password, dashboardId, {
+  companyName:              name,          // use business name if you collect it
+  industry:                 dashboardId,   // maps to INDUSTRIES id list
+  location:                 "",            // they can fill in from settings later
+  rate:                     "",
+  about:                    "",
+  createMarketplaceListing: true,          // ← creates the public card
+});
 
       if (result.success) {
         // Clean up localStorage now that registration succeeded

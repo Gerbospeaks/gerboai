@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { createProviderListing } from "../hooks/useProviderListing";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -247,8 +248,20 @@ export const AuthProvider = ({ children }) => {
       await batch.commit();
       console.log("Batch committed successfully");
 
-      console.log("9. Signing out...");
-      await signOut(auth);
+      console.log("9. Creating marketplace listing...");
+if (companyInfo?.createMarketplaceListing) {
+  await createProviderListing(user.uid, {
+    companyName: companyInfo.companyName || name,
+    industry:    companyInfo.industry    || dashboardId,
+    location:    companyInfo.location    || "",
+    rate:        companyInfo.rate        || "Get a quote",
+    about:       companyInfo.about       || "",
+    phone:       companyInfo.phone       || "",
+  });
+}
+ 
+console.log("10. Signing out...");
+await signOut(auth);
       console.log("Signed out successfully");
 
       return {

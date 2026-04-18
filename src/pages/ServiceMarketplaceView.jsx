@@ -1,5 +1,15 @@
 import { useState, useCallback } from "react";
-
+import BookingPanel from "../components/BookingPanel";
+import {
+  sendBookingRequest,
+  sendQuote,
+  acceptRequest,
+  declineRequest,
+  useMyRequests,
+  useIncomingRequests,
+} from "../hooks/useBookingRequests";
+import { useMyProviderListing } from "../hooks/useProviders";
+import { useAuth }              from "../contexts/AuthContext";
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const T = {
   navy: "#0f172a",
@@ -788,9 +798,10 @@ const INITIAL_MY_REQS = [
 ];
 
 const STATUS_PILL = {
-  confirmed: { bg: T.greenLt, color: T.green, label: "Confirmed" },
-  progress: { bg: T.blueLt, color: T.blue, label: "In progress" },
-  pending: { bg: T.amberLt, color: T.amber, label: "Awaiting quote" },
+  new:      { bg: T.purpleLt, color: T.purple, label: "Awaiting quote" },
+  quoted:   { bg: T.amberLt,  color: T.amber,  label: "Quote received" },
+  accepted: { bg: T.greenLt,  color: T.green,  label: "Confirmed" },
+  declined: { bg: T.redLt,    color: T.red,     label: "Declined" },
 };
 
 const INC_STATUS = {
@@ -1464,216 +1475,6 @@ function ProviderCard({ provider: p, expanded, onToggle, onBook }) {
   );
 }
 
-// ── Booking panel ─────────────────────────────────────────────────────────────
-
-function BookingPanel({ provider, onClose, onSubmit }) {
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("09:00");
-  const [address, setAddress] = useState("");
-  const [desc, setDesc] = useState("");
-  const [urgency, setUrgency] = useState("Standard (2-3 days)");
-  const [doc, setDoc] = useState("None");
-  const [err, setErr] = useState("");
-
-  const inp = {
-    fontSize: 13,
-    padding: "9px 12px",
-    borderRadius: 8,
-    border: `1px solid ${T.border}`,
-    background: "#fff",
-    color: T.textPri,
-    width: "100%",
-    outline: "none",
-    fontFamily: "'Lato', sans-serif",
-    boxSizing: "border-box",
-  };
-  const lbl = {
-    fontSize: 11,
-    fontWeight: 700,
-    color: T.textMid,
-    textTransform: "uppercase",
-    letterSpacing: ".05em",
-    display: "block",
-    marginBottom: 5,
-  };
-
-  return (
-    <div
-      style={{
-        background: "#fff",
-        border: `1px solid ${T.border}`,
-        borderRadius: 14,
-        overflow: "hidden",
-        marginBottom: 20,
-        boxShadow: "0 4px 24px rgba(15,23,42,.08)",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          background: T.navy,
-          padding: "14px 22px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
-            Book — {provider.name}
-          </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: "rgba(255,255,255,.45)",
-              marginTop: 2,
-            }}
-          >
-            {getLabel(provider.industry)} · {provider.location}
-          </div>
-        </div>
-        <span
-          style={{
-            fontSize: 14,
-            fontWeight: 700,
-            color: "rgba(255,255,255,.8)",
-          }}
-        >
-          {provider.rate}
-        </span>
-      </div>
-
-      <div style={{ padding: 24 }}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 14,
-            marginBottom: 14,
-          }}
-        >
-          <div>
-            <label style={lbl}>Service date</label>
-            <input
-              type="date"
-              style={inp}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={lbl}>Preferred time</label>
-            <input
-              type="time"
-              style={inp}
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-            />
-          </div>
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          <label style={lbl}>Service address</label>
-          <input
-            type="text"
-            style={inp}
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Your property or site address"
-          />
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          <label style={lbl}>Describe what you need</label>
-          <textarea
-            style={{ ...inp, resize: "vertical", minHeight: 72 }}
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
-            placeholder={provider.about}
-          />
-        </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 14,
-            marginBottom: 14,
-          }}
-        >
-          <div>
-            <label style={lbl}>Urgency</label>
-            <select
-              style={inp}
-              value={urgency}
-              onChange={(e) => setUrgency(e.target.value)}
-            >
-              <option>Standard (2-3 days)</option>
-              <option>Urgent (today/tomorrow)</option>
-              <option>Flexible (within a week)</option>
-            </select>
-          </div>
-          <div>
-            <label style={lbl}>Attach to document</label>
-            <select
-              style={inp}
-              value={doc}
-              onChange={(e) => setDoc(e.target.value)}
-            >
-              <option>None</option>
-              <option>Current quote</option>
-              <option>Current invoice</option>
-              <option>New purchase order</option>
-            </select>
-          </div>
-        </div>
-        {err && (
-          <div style={{ fontSize: 12, color: T.red, marginBottom: 10 }}>
-            {err}
-          </div>
-        )}
-        <div style={{ display: "flex", gap: 10 }}>
-          <button
-            onClick={onClose}
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              padding: "10px 18px",
-              borderRadius: 8,
-              background: "#f8fafc",
-              color: T.textMid,
-              border: `1px solid ${T.border}`,
-              cursor: "pointer",
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              if (!date || !desc.trim()) {
-                setErr("Please fill in the date and describe what you need.");
-                return;
-              }
-              onSubmit(provider);
-            }}
-            style={{
-              flex: 1,
-              fontSize: 13,
-              fontWeight: 700,
-              padding: 10,
-              borderRadius: 8,
-              background: T.green,
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              letterSpacing: ".03em",
-            }}
-          >
-            Send Booking Request
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── My requests panel ─────────────────────────────────────────────────────────
 
 function MyRequests({ reqs }) {
@@ -1728,14 +1529,12 @@ function MyRequests({ reqs }) {
               }}
             >
               <div>
-                <div
-                  style={{ fontSize: 13, fontWeight: 600, color: T.textPri }}
-                >
-                  {req.name}
-                </div>
-                <div style={{ fontSize: 11, color: T.textMuted, marginTop: 2 }}>
-                  {getLabel(req.industry)} · Requested {req.date}
-                </div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: T.textPri }}>
+  {req.providerName}   {/* was req.name */}
+</div>
+<div style={{ fontSize: 11, color: T.textMuted, marginTop: 2 }}>
+  {getLabel(req.providerIndustry)} · Requested {req.receivedAt}  
+</div>
               </div>
               <span
                 style={{
@@ -1862,7 +1661,7 @@ function QuoteModal({ target, onClose, onSend }) {
             Cancel
           </button>
           <button
-            onClick={() => amount.trim() && onSend(amount)}
+            onClick={() => amount.trim() && onSend(amount, notes)}
             style={{
               flex: 1,
               fontSize: 13,
@@ -1889,7 +1688,8 @@ function MarketView({ onShowIncoming }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [bookingProvider, setBookingProvider] = useState(null);
   const [expandedCards, setExpandedCards] = useState({});
-  const [myReqs, setMyReqs] = useState(INITIAL_MY_REQS);
+  const { user }        = useAuth();
+  const { requests: myReqs = [], loading: reqsLoading } = useMyRequests(user?.uid);
   const [toast, setToast] = useState("");
 
   const showToast = useCallback((msg) => {
@@ -1911,22 +1711,20 @@ function MarketView({ onShowIncoming }) {
     const p = PROVIDERS.find((x) => x.id === id);
     if (p?.available) setBookingProvider(p);
   };
-  const handleSubmitBooking = (p) => {
-    setMyReqs((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        name: p.name,
-        industry: p.industry,
-        date: "Just now",
-        status: "pending",
-      },
-    ]);
-    setBookingProvider(null);
-    showToast(
-      `Booking request sent to ${p.name}. They'll respond with a quote shortly.`,
-    );
-  };
+const handleSubmitBooking = useCallback(
+  async (provider, formData) => {
+    try {
+      await sendBookingRequest(formData, provider, user);
+      setBookingProvider(null);
+      showToast(`Booking sent to ${provider.name}!`);
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to send booking. Please try again.");
+    }
+  },
+  [user],
+);
+ 
   const handleFilterChange = (id) => {
     setActiveCategory(id);
     setBookingProvider(null);
@@ -2140,7 +1938,9 @@ function MarketView({ onShowIncoming }) {
 // ── IncomingView ──────────────────────────────────────────────────────────────
 
 function IncomingView({ onBack }) {
-  const [incReqs, setIncReqs] = useState(INITIAL_INCOMING);
+  const { user }    = useAuth();
+const { listing } = useMyProviderListing(user?.uid);  // get their provider doc id
+const { requests: incReqs = [], loading: incLoading } = useIncomingRequests(listing?.id);
   const [incFilter, setIncFilter] = useState("all");
   const [expandedInc, setExpandedInc] = useState({});
   const [quoteTarget, setQuoteTarget] = useState(null);
@@ -2158,30 +1958,9 @@ function IncomingView({ onBack }) {
 
   const toggleInc = (id) =>
     setExpandedInc((prev) => ({ ...prev, [id]: !prev[id] }));
-  const acceptReq = (id) => {
-    const r = incReqs.find((x) => x.id === id);
-    setIncReqs((prev) =>
-      prev.map((x) => (x.id === id ? { ...x, status: "accepted" } : x)),
-    );
-    showToast(`Job from ${r.from} accepted.`);
-  };
-  const declineReq = (id) => {
-    const r = incReqs.find((x) => x.id === id);
-    setIncReqs((prev) =>
-      prev.map((x) => (x.id === id ? { ...x, status: "declined" } : x)),
-    );
-    showToast(`Request from ${r.from} declined.`);
-  };
-  const sendQuote = (id, amount) => {
-    const r = incReqs.find((x) => x.id === id);
-    setIncReqs((prev) =>
-      prev.map((x) =>
-        x.id === id ? { ...x, status: "quoted", quoteAmount: amount } : x,
-      ),
-    );
-    showToast(`Quote of ${amount} sent to ${r.from}.`);
-    setQuoteTarget(null);
-  };
+ const handleSendQuote  = async (id, amount, notes) => { await sendQuote(id, amount, notes);   setQuoteTarget(null); };
+const handleAccept     = async (id) => { await acceptRequest(id);  };
+const handleDecline    = async (id) => { await declineRequest(id); };
 
   const tabs = [
     { id: "all", label: "All" },
@@ -2454,7 +2233,7 @@ function IncomingView({ onBack }) {
                             color: T.textPri,
                           }}
                         >
-                          {req.from}
+                          {req.clientName}
                         </div>
                         <div
                           style={{
@@ -2463,8 +2242,7 @@ function IncomingView({ onBack }) {
                             marginTop: 2,
                           }}
                         >
-                          {getLabel(req.fromIndustry)} · Received{" "}
-                          {req.receivedAt}
+                        Received {req.receivedAt}
                         </div>
                       </div>
                       <span
@@ -2648,7 +2426,7 @@ function IncomingView({ onBack }) {
                             : "Update Quote"}
                         </button>
                         <button
-                          onClick={() => acceptReq(req.id)}
+                          onClick={() => acceptRequest(req.id)}
                           style={{
                             fontSize: 12,
                             fontWeight: 700,
@@ -2663,7 +2441,7 @@ function IncomingView({ onBack }) {
                           Accept Job
                         </button>
                         <button
-                          onClick={() => declineReq(req.id)}
+                          onClick={() => declineRequest(req.id)}
                           style={{
                             fontSize: 12,
                             fontWeight: 700,
@@ -2719,7 +2497,7 @@ function IncomingView({ onBack }) {
         <QuoteModal
           target={quoteTarget}
           onClose={() => setQuoteTarget(null)}
-          onSend={(amount) => sendQuote(quoteTarget.id, amount)}
+          onSend={(amount, notes) => handleSendQuote(quoteTarget.id, amount, notes)}
         />
       )}
       <Toast message={toast} />
