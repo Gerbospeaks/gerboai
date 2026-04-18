@@ -717,55 +717,107 @@ const css = `
  .mp-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px; margin-bottom: 8px;
+  gap: 20px; margin-bottom: 8px;
 }
 .mp-card {
   background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px; padding: 24px;
+  border: 1.5px solid #e8edf3;
+  border-radius: 18px;
+  padding: 0;
   cursor: pointer;
-  display: flex; flex-direction: column; gap: 15px;
-  transition: box-shadow .2s, transform .2s, border-color .2s;
+  display: flex; flex-direction: column;
+  transition: box-shadow .22s, transform .22s, border-color .22s;
   opacity: 0; transform: translateY(14px);
   animation: mp-up .4s ease forwards;
   position: relative;
+  overflow: hidden;
 }
 .mp-card::before { display: none; }
 .mp-card:hover {
-  box-shadow: 0 10px 36px rgba(15,23,42,.1);
-  transform: translateY(-3px);
-  border-color: rgba(99,102,241,.3);
+  box-shadow: 0 12px 40px rgba(15,23,42,.11);
+  transform: translateY(-4px);
+  border-color: #d0d8e4;
 }
 .mp-card.featured {
-  border-color: rgba(99,102,241,.35);
+  border-color: rgba(99,102,241,.4);
   border-width: 1.5px;
-  box-shadow: 0 2px 16px rgba(99,102,241,.08);
+  box-shadow: 0 2px 18px rgba(99,102,241,.09);
 }
-.mp-card-top { display: flex; align-items: flex-start; gap: 12px; }
-.mp-card-avatar {
-  width: 46px; height: 46px; border-radius: 10px;
-  flex-shrink: 0;
+
+/* ── Image banner at top of card ── */
+.mp-card-banner {
+  width: 100%;
+  height: 180px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+  flex-shrink: 0;
 }
-.mp-card-info { flex: 1; min-width: 0; }
-.mp-card-name {
-  font-size: 14px; font-weight: 700; color: #0f172a;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  margin-bottom: 3px;
+.mp-card-banner-initials {
+  font-size: 48px; font-weight: 900;
+  letter-spacing: -.03em;
+  opacity: .18;
+  position: absolute;
+  user-select: none;
+  font-family: 'Playfair Display', serif;
 }
-.mp-card-meta { font-size: 12px; color: #94a3b8; }
-.mp-card-right {
-  flex-shrink: 0; display: flex; flex-direction: column;
-  align-items: flex-end; gap: 5px;
+.mp-card-banner-icon {
+  font-size: 52px;
+  position: relative; z-index: 1;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,.15));
 }
 .mp-card-featured-badge {
+  position: absolute; top: 12px; right: 12px; z-index: 2;
   font-size: 10px; font-weight: 700;
-  background: var(--red-light); color: var(--red);
-  padding: 3px 10px; border-radius: 20px;
-  border: 1px solid rgba(99,102,241,.2);
+  background: rgba(255,255,255,.92);
+  color: var(--red);
+  padding: 4px 12px; border-radius: 20px;
+  border: 1px solid rgba(99,102,241,.25);
+  backdrop-filter: blur(6px);
 }
-.mp-card-rate { font-size: 14px; font-weight: 700; color: #0f172a; white-space: nowrap; }
+.mp-card-avail-pip {
+  position: absolute; top: 12px; left: 12px; z-index: 2;
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,.92);
+  border-radius: 20px; padding: 4px 10px;
+  font-size: 10px; font-weight: 700; color: #16a34a;
+  backdrop-filter: blur(6px);
+}
+.mp-card-avail-pip-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade80;
+}
+
+/* ── Card body ── */
+.mp-card-body {
+  padding: 18px 20px 20px;
+  display: flex; flex-direction: column; gap: 10px;
+  flex: 1;
+}
+
+/* Name row: bold name + rate badge */
+.mp-card-title-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+}
+.mp-card-name {
+  font-size: 16px; font-weight: 800; color: #0f172a;
+  line-height: 1.25; letter-spacing: -.02em;
+  font-family: 'Playfair Display', serif;
+}
+.mp-card-rate {
+  font-size: 11px; font-weight: 700;
+  color: var(--red);
+  background: var(--red-light);
+  border: 1px solid rgba(99,102,241,.18);
+  padding: 3px 10px; border-radius: 20px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.mp-card-meta { font-size: 12px; color: #94a3b8; margin-top: -4px; }
+.mp-card-about {
+  font-size: 13px; color: #64748b; line-height: 1.6;
+}
 .mp-card-badges { display: flex; gap: 5px; flex-wrap: wrap; }
 .mp-badge {
   font-size: 10px; font-weight: 700;
@@ -778,31 +830,42 @@ const css = `
 .mp-card-stats { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .mp-card-stat { font-size: 12px; color: #94a3b8; }
 .mp-card-unavail { font-size: 11px; color: #ef4444; font-weight: 700; }
-.mp-card-about {
-  font-size: 13px; color: #475569; line-height: 1.65;
-  padding-top: 14px; border-top: 1px solid #f1f5f9;
+
+/* ── "Shop Now" style link button ── */
+.mp-card-footer {
+  padding: 0 20px 18px;
+  display: flex; align-items: center; justify-content: flex-end;
+  border-top: 1px solid #f1f5f9;
+  margin-top: auto;
+  padding-top: 14px;
 }
-.mp-card-about-link { margin-top: 8px; font-size: 12px; color: var(--red); font-weight: 700; }
 .mp-card-btn {
-  width: 100%; padding: 12px 0;
-  border-radius: 6px;
-  font-family: 'Lato', sans-serif; font-size: 12px;
-  font-weight: 700; letter-spacing: .05em;
-  cursor: pointer; transition: all .18s;
-  text-transform: uppercase;
+  background: none; border: none; padding: 0;
+  font-family: 'Lato', sans-serif; font-size: 13px;
+  font-weight: 800; letter-spacing: .01em;
+  cursor: pointer; transition: gap .18s, color .18s;
+  display: flex; align-items: center; gap: 6px;
+  text-transform: none;
 }
 .mp-card-btn-avail {
-  background: #0f172a; color: #fff;
-  border: 1px solid #0f172a;
+  color: var(--red);
 }
 .mp-card-btn-avail:hover {
-  background: var(--red); border-color: var(--red);
-  box-shadow: 0 4px 14px rgba(99,102,241,.3);
-  transform: translateY(-1px);
+  color: var(--red-hover);
+  gap: 10px;
+}
+.mp-card-btn-avail .mp-card-btn-arrow {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  transition: transform .18s;
+}
+.mp-card-btn-avail:hover .mp-card-btn-arrow {
+  transform: translateX(3px);
 }
 .mp-card-btn-unavail {
-  background: #f8fafc; color: #cbd5e1;
-  border: 1px solid #e2e8f0; cursor: not-allowed;
+  color: #cbd5e1;
+  cursor: not-allowed;
+  font-size: 12px; font-weight: 600;
 }
   /* ════════════════════════════════════
      STATS STRIP (below hero)
@@ -1872,74 +1935,126 @@ function SectionTitle({ children, count }) {
   );
 }
 
+// ── Industry → emoji map for banner icon ─────────────────────────────────────
+const INDUSTRY_ICON = {
+  mechanics: "🔧",
+  electrical: "⚡",
+  carpentry: "🪚",
+  plumbing: "🚿",
+  logistics: "🚛",
+  construction: "🏗️",
+  accounting: "📊",
+  cleaning: "🧹",
+  education: "🎓",
+  health: "🏥",
+  hotel: "🏨",
+  hvac: "❄️",
+  landscaping: "🌿",
+  legal: "⚖️",
+  painting: "🎨",
+  "pest-control": "🐛",
+  photography: "📷",
+  pool: "🏊",
+  realestate: "🏠",
+  restaurants: "🍽️",
+  retail: "🛍️",
+  security: "🔒",
+  solar: "☀️",
+  towing: "🚗",
+  welding: "🔥",
+  flooring: "🪵",
+  windows: "🪟",
+};
+
 // ── Provider Card ─────────────────────────────────────────────────────────────
 
 function ProviderCard({ provider: p, expanded, onToggle, onBook, delay }) {
+  const icon = INDUSTRY_ICON[p.industry] || "🏢";
   return (
     <div
       className={`mp-card${p.featured ? " featured" : ""}`}
       style={{ animationDelay: `${delay}ms` }}
       onClick={() => onToggle(p.id)}
     >
-      {/* Top */}
-      <div className="mp-card-top">
-        <div
-          className="mp-card-avatar"
-          style={{ background: p.bg, color: p.tc }}
-        >
-          {p.initials}
-        </div>
-        <div className="mp-card-info">
-          <div className="mp-card-name">{p.name}</div>
-          <div className="mp-card-meta">
-            {getIndustryLabel(p.industry)} · {p.loc}
-          </div>
-        </div>
-        <div className="mp-card-right">
-          {p.featured && (
-            <span className="mp-card-featured-badge">Top Rated</span>
-          )}
-          <span className="mp-card-rate">{p.rate}</span>
-        </div>
-      </div>
-
-      {/* Badges */}
-      <div className="mp-card-badges">
-        {p.badges.map((b, i) => (
-          <Badge key={i} label={b.l} type={b.t} />
-        ))}
-      </div>
-
-      {/* Stats */}
-      <div className="mp-card-stats">
-        <span className="mp-card-stat">
-          <span style={{ color: "#f59e0b" }}>★</span> {p.rating} ({p.reviews}{" "}
-          reviews)
-        </span>
-        <span className="mp-card-stat">⏱ {p.response}</span>
-        {!p.avail && <span className="mp-card-unavail">Unavailable</span>}
-      </div>
-
-      {/* Expanded */}
-      {expanded && (
-        <div className="mp-card-about">
-          {p.about}
-          <div className="mp-card-about-link">
-            Register on SolidFlo to book this provider →
-          </div>
-        </div>
-      )}
-
-      {/* CTA */}
-      <button
-        className={`mp-card-btn ${p.avail ? "mp-card-btn-avail" : "mp-card-btn-unavail"}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (p.avail) onBook(p);
+      {/* ── Image-style banner ── */}
+      <div
+        className="mp-card-banner"
+        style={{
+          background: `linear-gradient(135deg, ${p.bg} 0%, ${p.bg}cc 100%)`,
         }}
       >
-        {p.avail ? "Book Now — Get a Quote" : "Currently Unavailable"}
-      </button>
+        <span className="mp-card-banner-initials" style={{ color: p.tc }}>
+          {p.initials}
+        </span>
+        <span className="mp-card-banner-icon">{icon}</span>
+
+        {/* Available pill — top left */}
+        {p.avail && (
+          <span className="mp-card-avail-pip">
+            <span className="mp-card-avail-pip-dot" />
+            Available
+          </span>
+        )}
+
+        {/* Top Rated badge — top right */}
+        {p.featured && (
+          <span className="mp-card-featured-badge">⭐ Top Rated</span>
+        )}
+      </div>
+
+      {/* ── Card body ── */}
+      <div className="mp-card-body">
+        {/* Name + rate */}
+        <div className="mp-card-title-row">
+          <div className="mp-card-name">{p.name}</div>
+          <span className="mp-card-rate">{p.rate}</span>
+        </div>
+
+        {/* Location + industry */}
+        <div className="mp-card-meta">
+          {getIndustryLabel(p.industry)} · {p.loc}
+        </div>
+
+        {/* About (always visible now) */}
+        <div className="mp-card-about">{p.about}</div>
+
+        {/* Badges */}
+        <div className="mp-card-badges">
+          {p.badges.map((b, i) => (
+            <Badge key={i} label={b.l} type={b.t} />
+          ))}
+        </div>
+
+        {/* Stats */}
+        <div className="mp-card-stats">
+          <span className="mp-card-stat">
+            <span style={{ color: "#f59e0b" }}>★</span> {p.rating} ({p.reviews}{" "}
+            reviews)
+          </span>
+          <span className="mp-card-stat">⏱ {p.response}</span>
+          {!p.avail && <span className="mp-card-unavail">Unavailable</span>}
+        </div>
+      </div>
+
+      {/* ── Shop-Now style footer link ── */}
+      <div className="mp-card-footer">
+        <button
+          className={`mp-card-btn ${p.avail ? "mp-card-btn-avail" : "mp-card-btn-unavail"}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (p.avail) onBook(p);
+          }}
+        >
+          {p.avail ? (
+            <>
+              Book Now — Get a Quote
+              <span className="mp-card-btn-arrow">→</span>
+            </>
+          ) : (
+            "Currently Unavailable"
+          )}
+        </button>
+      </div>
     </div>
   );
 }
