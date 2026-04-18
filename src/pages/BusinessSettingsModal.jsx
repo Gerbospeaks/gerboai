@@ -1,8 +1,7 @@
 // components/BusinessSettingsModal.jsx
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { updatePortalSlug } from '../contexts/AuthContext';
-import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { updatePortalSlug } from "../contexts/AuthContext";
 import { db } from "../firebase";
 import { getAuth } from "firebase/auth";
 import { uploadLogoToR2 } from "../utils/uploadLogoToR2";
@@ -35,8 +34,17 @@ const GATEWAYS = [
     badgeColor: "bg-green-100 text-green-700",
     fields: [
       { key: "merchant_id", label: "Merchant ID", placeholder: "10000100" },
-      { key: "merchant_key", label: "Merchant Key", placeholder: "q1cd2rdny4a53" },
-      { key: "passphrase", label: "Passphrase", placeholder: "Your passphrase", type: "password" },
+      {
+        key: "merchant_key",
+        label: "Merchant Key",
+        placeholder: "q1cd2rdny4a53",
+      },
+      {
+        key: "passphrase",
+        label: "Passphrase",
+        placeholder: "Your passphrase",
+        type: "password",
+      },
     ],
     hint: "Find these under Integration > Merchant Details in your PayFast dashboard.",
     docsUrl: "https://developers.payfast.co.za/docs",
@@ -49,7 +57,12 @@ const GATEWAYS = [
     abbr: "YC",
     badgeColor: "bg-green-100 text-green-700",
     fields: [
-      { key: "secret_key", label: "Secret Key", placeholder: "sk_live_...", type: "password" },
+      {
+        key: "secret_key",
+        label: "Secret Key",
+        placeholder: "sk_live_...",
+        type: "password",
+      },
       { key: "public_key", label: "Public Key", placeholder: "pk_live_..." },
     ],
     hint: "Find your keys under Developers > API Keys in the Yoco business portal.",
@@ -63,9 +76,23 @@ const GATEWAYS = [
     abbr: "ST",
     badgeColor: "bg-blue-100 text-blue-700",
     fields: [
-      { key: "secret_key", label: "Secret Key", placeholder: "sk_live_...", type: "password" },
-      { key: "publishable_key", label: "Publishable Key", placeholder: "pk_live_..." },
-      { key: "webhook_secret", label: "Webhook Secret (optional)", placeholder: "whsec_...", type: "password" },
+      {
+        key: "secret_key",
+        label: "Secret Key",
+        placeholder: "sk_live_...",
+        type: "password",
+      },
+      {
+        key: "publishable_key",
+        label: "Publishable Key",
+        placeholder: "pk_live_...",
+      },
+      {
+        key: "webhook_secret",
+        label: "Webhook Secret (optional)",
+        placeholder: "whsec_...",
+        type: "password",
+      },
     ],
     hint: "Get your keys at dashboard.stripe.com > Developers > API keys.",
     docsUrl: "https://stripe.com/docs/keys",
@@ -79,7 +106,12 @@ const GATEWAYS = [
     badgeColor: "bg-blue-100 text-blue-700",
     fields: [
       { key: "client_id", label: "Client ID", placeholder: "AaBbCc..." },
-      { key: "client_secret", label: "Client Secret", placeholder: "EeFfGg...", type: "password" },
+      {
+        key: "client_secret",
+        label: "Client Secret",
+        placeholder: "EeFfGg...",
+        type: "password",
+      },
     ],
     hint: "Create credentials at developer.paypal.com > Apps & Credentials.",
     docsUrl: "https://developer.paypal.com/api/rest/",
@@ -92,7 +124,9 @@ function GatewayRow({ gateway, saved, onSave }) {
   const [enabled, setEnabled] = useState(saved?.enabled ?? false);
   const [fields, setFields] = useState(() => {
     const init = {};
-    gateway.fields.forEach((f) => { init[f.key] = saved?.[f.key] ?? ""; });
+    gateway.fields.forEach((f) => {
+      init[f.key] = saved?.[f.key] ?? "";
+    });
     return init;
   });
   const [saving, setSaving] = useState(false);
@@ -114,7 +148,9 @@ function GatewayRow({ gateway, saved, onSave }) {
   }
 
   return (
-    <div className={`border rounded-lg overflow-hidden transition-all ${enabled ? "border-blue-400" : "border-gray-200"}`}>
+    <div
+      className={`border rounded-lg overflow-hidden transition-all ${enabled ? "border-blue-400" : "border-gray-200"}`}
+    >
       {/* Header */}
       <div
         className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors"
@@ -127,8 +163,12 @@ function GatewayRow({ gateway, saved, onSave }) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-semibold text-gray-800">{gateway.label}</span>
-            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${gateway.badgeColor}`}>
+            <span className="text-xs font-semibold text-gray-800">
+              {gateway.label}
+            </span>
+            <span
+              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${gateway.badgeColor}`}
+            >
               {gateway.region}
             </span>
           </div>
@@ -144,10 +184,19 @@ function GatewayRow({ gateway, saved, onSave }) {
           >
             <span
               className="absolute top-0.5 rounded-full bg-white transition-all"
-              style={{ width: 14, height: 14, left: enabled ? 16 : 2, transition: "left 0.2s" }}
+              style={{
+                width: 14,
+                height: 14,
+                left: enabled ? 16 : 2,
+                transition: "left 0.2s",
+              }}
             />
           </button>
-          {open ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+          {open ? (
+            <ChevronUp className="w-3.5 h-3.5 text-gray-400" />
+          ) : (
+            <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+          )}
         </div>
       </div>
 
@@ -160,12 +209,16 @@ function GatewayRow({ gateway, saved, onSave }) {
                 key={f.key}
                 className={`flex flex-col gap-1 ${gateway.fields.length === 3 && i === 0 ? "col-span-2" : ""}`}
               >
-                <label className="text-[11px] font-semibold text-gray-600">{f.label}</label>
+                <label className="text-[11px] font-semibold text-gray-600">
+                  {f.label}
+                </label>
                 <input
                   type={f.type || "text"}
                   placeholder={f.placeholder}
                   value={fields[f.key]}
-                  onChange={(e) => setFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                  onChange={(e) =>
+                    setFields((prev) => ({ ...prev, [f.key]: e.target.value }))
+                  }
                   className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-shadow"
                 />
               </div>
@@ -174,7 +227,12 @@ function GatewayRow({ gateway, saved, onSave }) {
 
           <p className="text-[11px] text-gray-400 mt-2">
             {gateway.hint}{" "}
-            <a href={gateway.docsUrl} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">
+            <a
+              href={gateway.docsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 hover:underline"
+            >
               View docs →
             </a>
           </p>
@@ -199,23 +257,27 @@ function GatewayRow({ gateway, saved, onSave }) {
   );
 }
 async function createProviderProfile(user, businessInfo) {
-  await setDoc(doc(db, "serviceProviders", user.uid), {
-    uid:          user.uid,
-    businessName: businessInfo.businessName,
-    industry:     businessInfo.industry,
-    location:     businessInfo.location || "",
-    rate:         businessInfo.rate || "Quote on request",
-    rating:       0,
-    reviewCount:  0,
-    responseTime: "TBD",
-    available:    true,
-    featured:     false,
-    initials:     businessInfo.businessName.slice(0, 2).toUpperCase(),
-    about:        "",
-    badges:       [],
-    createdAt:    serverTimestamp(),
-    updatedAt:    serverTimestamp(),
-  }, { merge: true });
+  await setDoc(
+    doc(db, "serviceProviders", user.uid),
+    {
+      uid: user.uid,
+      businessName: businessInfo.businessName,
+      industry: businessInfo.industry,
+      location: businessInfo.location || "",
+      rate: businessInfo.rate || "Quote on request",
+      rating: 0,
+      reviewCount: 0,
+      responseTime: "TBD",
+      available: true,
+      featured: false,
+      initials: businessInfo.businessName.slice(0, 2).toUpperCase(),
+      about: "",
+      badges: [],
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
 }
 // ─── Main modal ────────────────────────────────────────────────────────────────
 const BusinessSettingsModal = ({ onClose }) => {
@@ -254,24 +316,25 @@ const BusinessSettingsModal = ({ onClose }) => {
     }
   }, [user]);
 
-  const loadBusinessInfo = async () => {
-    try {
-      const db = getFirestore();
-      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setBusinessInfo(data);
-        if (data.stampSettings) setStampSettings(data.stampSettings);
-      }
-    } catch (error) {
-      console.error("Error loading business info:", error);
+const loadBusinessInfo = async () => {
+  try {
+    const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      setBusinessInfo(prev => ({ ...prev, ...data }));
+      if (data.stampSettings) setStampSettings(data.stampSettings);
     }
-  };
+  } catch (error) {
+    console.error("Error loading business info:", error);
+  }
+};
 
   const loadGatewayData = async () => {
     try {
-      const snap = await getDoc(doc(db, "users", user.uid, "settings", "paymentGateways"));
+      const snap = await getDoc(
+        doc(db, "users", user.uid, "settings", "paymentGateways"),
+      );
       if (snap.exists()) setGatewayData(snap.data());
     } catch (error) {
       console.error("Error loading gateway data:", error);
@@ -285,14 +348,15 @@ const BusinessSettingsModal = ({ onClose }) => {
     await setDoc(
       doc(db, "users", user.uid, "settings", "paymentGateways"),
       updated,
-      { merge: true }
+      { merge: true },
     );
   };
 
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || !user?.uid) return;
-    if (!file.type.startsWith("image/")) return alert("Please upload an image file.");
+    if (!file.type.startsWith("image/"))
+      return alert("Please upload an image file.");
     if (file.size > 5 * 1024 * 1024) return alert("Image must be under 5MB.");
     try {
       setUploading(true);
@@ -312,22 +376,42 @@ const BusinessSettingsModal = ({ onClose }) => {
   const handleSaveBusinessInfo = async () => {
     if (!user?.uid) return;
     try {
-      const db = getFirestore();
       const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
+
+      // Save business info + stamp settings together
+      await setDoc(
+        docRef,
+        {
+          ...businessInfo,
+          stampSettings,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true },
+      );
+
+      // Create/update marketplace provider profile once, with full location
       await createProviderProfile(user, {
-  ...businessInfo,
-  location: [businessInfo.addressLine1, businessInfo.addressLine2, businessInfo.city]
-    .filter(Boolean)
-    .join(", "),
-});
-       await createProviderProfile(user, businessInfo);
+        ...businessInfo,
+        industry: user.dashboardId,
+        location: [
+          businessInfo.addressLine1,
+          businessInfo.addressLine2,
+          businessInfo.city,
+        ]
+          .filter(Boolean)
+          .join(", "),
+      });
+
+      // Education-only: update portal slug if business name changed
       if (user?.dashboardId === "education" && businessInfo?.businessName) {
         await updatePortalSlug(user.uid, businessInfo.businessName);
       }
+
       await refreshUser();
       onClose();
     } catch (error) {
       console.error("Error saving business info:", error);
+      alert("Failed to save: " + error.message);
     }
   };
 
@@ -347,7 +431,9 @@ const BusinessSettingsModal = ({ onClose }) => {
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <Settings className="w-4 h-4 text-white" />
             </div>
-            <h2 className="text-base font-bold text-gray-800">Business Settings</h2>
+            <h2 className="text-base font-bold text-gray-800">
+              Business Settings
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -365,7 +451,9 @@ const BusinessSettingsModal = ({ onClose }) => {
             <div className="border-b border-gray-200">
               <div className="px-4 sm:px-5 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
                 <Image className="w-3 h-3 text-gray-400" />
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Business Logo</span>
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Business Logo
+                </span>
               </div>
               <div className="px-4 sm:px-5 py-4 flex items-center gap-4">
                 {businessInfo.logoUrl ? (
@@ -380,15 +468,27 @@ const BusinessSettingsModal = ({ onClose }) => {
                   </div>
                 )}
                 <div>
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-upload" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                    id="logo-upload"
+                  />
                   <label
                     htmlFor="logo-upload"
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors"
                   >
                     <Upload className="w-3 h-3" />
-                    {uploading ? "Uploading..." : businessInfo.logoUrl ? "Change Logo" : "Upload Logo"}
+                    {uploading
+                      ? "Uploading..."
+                      : businessInfo.logoUrl
+                        ? "Change Logo"
+                        : "Upload Logo"}
                   </label>
-                  <p className="text-xs text-gray-400 mt-1.5">Square image, PNG or JPG, max 5 MB</p>
+                  <p className="text-xs text-gray-400 mt-1.5">
+                    Square image, PNG or JPG, max 5 MB
+                  </p>
                 </div>
               </div>
             </div>
@@ -397,15 +497,24 @@ const BusinessSettingsModal = ({ onClose }) => {
             <div className="border-b border-gray-200">
               <div className="px-4 sm:px-5 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
                 <Building2 className="w-3 h-3 text-gray-400" />
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Business Information</span>
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Business Information
+                </span>
               </div>
               <div className="px-4 sm:px-5 py-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-700">Business Name</label>
+                  <label className="text-xs font-semibold text-gray-700">
+                    Business Name
+                  </label>
                   <input
                     type="text"
                     value={businessInfo.businessName}
-                    onChange={(e) => setBusinessInfo({ ...businessInfo, businessName: e.target.value })}
+                    onChange={(e) =>
+                      setBusinessInfo({
+                        ...businessInfo,
+                        businessName: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                     placeholder="e.g. Solidflo Invoicing SaaS"
                   />
@@ -417,45 +526,72 @@ const BusinessSettingsModal = ({ onClose }) => {
             <div className="border-b border-gray-200">
               <div className="px-4 sm:px-5 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
                 <MapPin className="w-3 h-3 text-gray-400" />
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Address</span>
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Address
+                </span>
               </div>
               <div className="px-4 sm:px-5 py-4 grid grid-cols-2 gap-3">
                 <div className="col-span-2 flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-700">Address Line 1</label>
+                  <label className="text-xs font-semibold text-gray-700">
+                    Address Line 1
+                  </label>
                   <input
                     type="text"
                     value={businessInfo.addressLine1}
-                    onChange={(e) => setBusinessInfo({ ...businessInfo, addressLine1: e.target.value })}
+                    onChange={(e) =>
+                      setBusinessInfo({
+                        ...businessInfo,
+                        addressLine1: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                     placeholder="9-10 CNR Third & Arkwright Ave"
                   />
                 </div>
                 <div className="col-span-2 flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-700">Address Line 2</label>
+                  <label className="text-xs font-semibold text-gray-700">
+                    Address Line 2
+                  </label>
                   <input
                     type="text"
                     value={businessInfo.addressLine2}
-                    onChange={(e) => setBusinessInfo({ ...businessInfo, addressLine2: e.target.value })}
+                    onChange={(e) =>
+                      setBusinessInfo({
+                        ...businessInfo,
+                        addressLine2: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                     placeholder="Wynberg"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-700">City</label>
+                  <label className="text-xs font-semibold text-gray-700">
+                    City
+                  </label>
                   <input
                     type="text"
                     value={businessInfo.city}
-                    onChange={(e) => setBusinessInfo({ ...businessInfo, city: e.target.value })}
+                    onChange={(e) =>
+                      setBusinessInfo({ ...businessInfo, city: e.target.value })
+                    }
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                     placeholder="Sandton"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-700">Postal Code</label>
+                  <label className="text-xs font-semibold text-gray-700">
+                    Postal Code
+                  </label>
                   <input
                     type="text"
                     value={businessInfo.postalCode}
-                    onChange={(e) => setBusinessInfo({ ...businessInfo, postalCode: e.target.value })}
+                    onChange={(e) =>
+                      setBusinessInfo({
+                        ...businessInfo,
+                        postalCode: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                     placeholder="2090"
                   />
@@ -467,7 +603,9 @@ const BusinessSettingsModal = ({ onClose }) => {
             <div className="border-b border-gray-200 lg:border-b-0">
               <div className="px-4 sm:px-5 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
                 <Phone className="w-3 h-3 text-gray-400" />
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</span>
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Contact
+                </span>
               </div>
               <div className="px-4 sm:px-5 py-4 grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
@@ -477,18 +615,30 @@ const BusinessSettingsModal = ({ onClose }) => {
                   <input
                     type="tel"
                     value={businessInfo.primaryPhone}
-                    onChange={(e) => setBusinessInfo({ ...businessInfo, primaryPhone: e.target.value })}
+                    onChange={(e) =>
+                      setBusinessInfo({
+                        ...businessInfo,
+                        primaryPhone: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                     placeholder="082 514 4509"
                     required
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-700">Secondary Phone</label>
+                  <label className="text-xs font-semibold text-gray-700">
+                    Secondary Phone
+                  </label>
                   <input
                     type="tel"
                     value={businessInfo.secondaryPhone}
-                    onChange={(e) => setBusinessInfo({ ...businessInfo, secondaryPhone: e.target.value })}
+                    onChange={(e) =>
+                      setBusinessInfo({
+                        ...businessInfo,
+                        secondaryPhone: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                     placeholder="084 583 9929"
                   />
@@ -503,21 +653,46 @@ const BusinessSettingsModal = ({ onClose }) => {
             <div className="border-b border-gray-200">
               <div className="px-4 sm:px-5 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
                 <CreditCard className="w-3 h-3 text-gray-400" />
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Bank Details</span>
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Bank Details
+                </span>
               </div>
               <div className="px-4 sm:px-5 py-4 grid grid-cols-2 gap-3">
                 {[
-                  { label: "Bank Name", key: "bankName", placeholder: "e.g. FNB" },
-                  { label: "Account Holder", key: "accountHolder", placeholder: "e.g. Acme Pty Ltd" },
-                  { label: "Account Number", key: "accountNumber", placeholder: "e.g. 62123456789" },
-                  { label: "Branch Code", key: "branchCode", placeholder: "e.g. 250655" },
+                  {
+                    label: "Bank Name",
+                    key: "bankName",
+                    placeholder: "e.g. FNB",
+                  },
+                  {
+                    label: "Account Holder",
+                    key: "accountHolder",
+                    placeholder: "e.g. Acme Pty Ltd",
+                  },
+                  {
+                    label: "Account Number",
+                    key: "accountNumber",
+                    placeholder: "e.g. 62123456789",
+                  },
+                  {
+                    label: "Branch Code",
+                    key: "branchCode",
+                    placeholder: "e.g. 250655",
+                  },
                 ].map(({ label, key, placeholder }) => (
                   <div key={key} className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-gray-700">{label}</label>
+                    <label className="text-xs font-semibold text-gray-700">
+                      {label}
+                    </label>
                     <input
                       type="text"
                       value={businessInfo[key] || ""}
-                      onChange={(e) => setBusinessInfo({ ...businessInfo, [key]: e.target.value })}
+                      onChange={(e) =>
+                        setBusinessInfo({
+                          ...businessInfo,
+                          [key]: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                       placeholder={placeholder}
                     />
@@ -530,30 +705,47 @@ const BusinessSettingsModal = ({ onClose }) => {
             <div className="border-b border-gray-200">
               <div className="px-4 sm:px-5 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
                 <Zap className="w-3 h-3 text-gray-400" />
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Payment Gateways</span>
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Payment Gateways
+                </span>
               </div>
               <div className="px-4 sm:px-5 py-4 space-y-3">
                 {/* Promo hint */}
                 <div className="flex items-start gap-2.5 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <span className="text-sm flex-shrink-0">💳</span>
                   <p className="text-xs text-blue-700 leading-relaxed">
-                    Enable a gateway and your clients will see a <strong>Pay Now</strong> button on every invoice you send.
+                    Enable a gateway and your clients will see a{" "}
+                    <strong>Pay Now</strong> button on every invoice you send.
                   </p>
                 </div>
 
                 {/* SA */}
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">South Africa</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  South Africa
+                </p>
                 <div className="space-y-2">
                   {saGateways.map((gw) => (
-                    <GatewayRow key={gw.id} gateway={gw} saved={gatewayData[gw.id]} onSave={handleGatewaySave} />
+                    <GatewayRow
+                      key={gw.id}
+                      gateway={gw}
+                      saved={gatewayData[gw.id]}
+                      onSave={handleGatewaySave}
+                    />
                   ))}
                 </div>
 
                 {/* International */}
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pt-1">International</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pt-1">
+                  International
+                </p>
                 <div className="space-y-2">
                   {intlGateways.map((gw) => (
-                    <GatewayRow key={gw.id} gateway={gw} saved={gatewayData[gw.id]} onSave={handleGatewaySave} />
+                    <GatewayRow
+                      key={gw.id}
+                      gateway={gw}
+                      saved={gatewayData[gw.id]}
+                      onSave={handleGatewaySave}
+                    />
                   ))}
                 </div>
               </div>
@@ -563,14 +755,21 @@ const BusinessSettingsModal = ({ onClose }) => {
             <div className="border-b border-gray-200">
               <div className="px-4 sm:px-5 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
                 <CheckSquare className="w-3 h-3 text-gray-400" />
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Invoice Stamp</span>
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Invoice Stamp
+                </span>
               </div>
               <div className="px-4 sm:px-5 py-4 space-y-3">
                 <label className="flex items-center gap-2.5 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={stampSettings.enabled}
-                    onChange={(e) => setStampSettings({ ...stampSettings, enabled: e.target.checked })}
+                    onChange={(e) =>
+                      setStampSettings({
+                        ...stampSettings,
+                        enabled: e.target.checked,
+                      })
+                    }
                     className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <span className="text-xs font-semibold text-gray-700">
@@ -580,11 +779,18 @@ const BusinessSettingsModal = ({ onClose }) => {
                 {stampSettings.enabled && (
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-gray-700">Stamp Text</label>
+                      <label className="text-xs font-semibold text-gray-700">
+                        Stamp Text
+                      </label>
                       <input
                         type="text"
                         value={stampSettings.text}
-                        onChange={(e) => setStampSettings({ ...stampSettings, text: e.target.value.toUpperCase() })}
+                        onChange={(e) =>
+                          setStampSettings({
+                            ...stampSettings,
+                            text: e.target.value.toUpperCase(),
+                          })
+                        }
                         className="w-full px-3 py-2 text-sm font-bold uppercase border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                         placeholder="APPROVED"
                         maxLength={15}
@@ -592,10 +798,17 @@ const BusinessSettingsModal = ({ onClose }) => {
                       <p className="text-xs text-gray-400">Max 15 characters</p>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-gray-700">Stamp Color</label>
+                      <label className="text-xs font-semibold text-gray-700">
+                        Stamp Color
+                      </label>
                       <select
                         value={stampSettings.color}
-                        onChange={(e) => setStampSettings({ ...stampSettings, color: e.target.value })}
+                        onChange={(e) =>
+                          setStampSettings({
+                            ...stampSettings,
+                            color: e.target.value,
+                          })
+                        }
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow cursor-pointer"
                       >
                         <option value="#d32f2f">🔴 Red — Traditional</option>
@@ -611,14 +824,23 @@ const BusinessSettingsModal = ({ onClose }) => {
                         <input
                           type="checkbox"
                           checked={stampSettings.showDate}
-                          onChange={(e) => setStampSettings({ ...stampSettings, showDate: e.target.checked })}
+                          onChange={(e) =>
+                            setStampSettings({
+                              ...stampSettings,
+                              showDate: e.target.checked,
+                            })
+                          }
                           className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                         />
-                        <span className="text-xs font-semibold text-gray-700">Include date on stamp</span>
+                        <span className="text-xs font-semibold text-gray-700">
+                          Include date on stamp
+                        </span>
                       </label>
                     </div>
                     <div className="col-span-2 p-4 bg-gray-50 border border-dashed border-gray-300 rounded-lg flex flex-col items-center gap-2">
-                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Preview</p>
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Preview
+                      </p>
                       <SignatureStamp
                         text={stampSettings.text}
                         color={stampSettings.color}
@@ -636,22 +858,35 @@ const BusinessSettingsModal = ({ onClose }) => {
             <div>
               <div className="px-4 sm:px-5 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
                 <Send className="w-3 h-3 text-gray-400" />
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email Configuration</span>
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Email Configuration
+                </span>
               </div>
               <div className="px-4 sm:px-5 py-4 space-y-3">
                 <div className="flex items-start gap-2.5 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <span className="text-sm flex-shrink-0">✉️</span>
                   <div>
-                    <p className="text-xs font-semibold text-blue-800">{user?.email || authUser?.email}</p>
-                    <p className="text-xs text-blue-500 mt-0.5">Quotes and invoices will be sent from this address.</p>
+                    <p className="text-xs font-semibold text-blue-800">
+                      {user?.email || authUser?.email}
+                    </p>
+                    <p className="text-xs text-blue-500 mt-0.5">
+                      Quotes and invoices will be sent from this address.
+                    </p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-gray-700">Email Provider</label>
+                    <label className="text-xs font-semibold text-gray-700">
+                      Email Provider
+                    </label>
                     <select
                       value={businessInfo.emailProvider || "gmail"}
-                      onChange={(e) => setBusinessInfo({ ...businessInfo, emailProvider: e.target.value })}
+                      onChange={(e) =>
+                        setBusinessInfo({
+                          ...businessInfo,
+                          emailProvider: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow cursor-pointer"
                     >
                       <option value="gmail">Gmail</option>
@@ -667,21 +902,34 @@ const BusinessSettingsModal = ({ onClose }) => {
                     <input
                       type="password"
                       value={businessInfo.emailPassword || ""}
-                      onChange={(e) => setBusinessInfo({ ...businessInfo, emailPassword: e.target.value })}
+                      onChange={(e) =>
+                        setBusinessInfo({
+                          ...businessInfo,
+                          emailPassword: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                       placeholder="••••••••••••••••"
                     />
                   </div>
                 </div>
-                {(businessInfo.emailProvider === "gmail" || !businessInfo.emailProvider) && (
+                {(businessInfo.emailProvider === "gmail" ||
+                  !businessInfo.emailProvider) && (
                   <details className="border border-orange-200 bg-orange-50 rounded-lg overflow-hidden">
                     <summary className="px-4 py-2.5 text-xs font-semibold text-orange-800 cursor-pointer select-none">
                       📖 How to get a Gmail App Password
                     </summary>
                     <ol className="px-5 pb-3 pt-1 text-xs text-orange-800 space-y-1 list-decimal">
-                      <li>Go to <strong>myaccount.google.com → Security</strong></li>
-                      <li>Enable <strong>2-Step Verification</strong></li>
-                      <li>Search for <strong>"App passwords"</strong> and create one</li>
+                      <li>
+                        Go to <strong>myaccount.google.com → Security</strong>
+                      </li>
+                      <li>
+                        Enable <strong>2-Step Verification</strong>
+                      </li>
+                      <li>
+                        Search for <strong>"App passwords"</strong> and create
+                        one
+                      </li>
                       <li>Copy the 16-character code and paste it above</li>
                     </ol>
                     <a
@@ -700,8 +948,15 @@ const BusinessSettingsModal = ({ onClose }) => {
                       📖 How to get an Outlook App Password
                     </summary>
                     <ol className="px-5 pb-3 pt-1 text-xs text-blue-800 space-y-1 list-decimal">
-                      <li>Go to <strong>account.microsoft.com/security</strong></li>
-                      <li>Click <strong>Advanced security options → App passwords</strong></li>
+                      <li>
+                        Go to <strong>account.microsoft.com/security</strong>
+                      </li>
+                      <li>
+                        Click{" "}
+                        <strong>
+                          Advanced security options → App passwords
+                        </strong>
+                      </li>
                       <li>Create a new app password and paste it above</li>
                     </ol>
                     <a
@@ -720,7 +975,9 @@ const BusinessSettingsModal = ({ onClose }) => {
                   className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  {businessInfo.emailPassword ? "Send Test Email" : "Enter App Password First"}
+                  {businessInfo.emailPassword
+                    ? "Send Test Email"
+                    : "Enter App Password First"}
                 </button>
               </div>
             </div>
