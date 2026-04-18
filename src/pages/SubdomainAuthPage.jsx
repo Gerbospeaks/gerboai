@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import React from "react";
+import { useAuth } from "../contexts/AuthContext";
 import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebase";
+
 import { useSubdomain } from "../hooks/useSubdomain";
 import {
   Eye,
@@ -228,7 +225,7 @@ function LoginView() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const auth = getAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -237,22 +234,28 @@ function LoginView() {
   }, []);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    if (!email || !password) {
-      setError("Please fill in all fields");
-      return;
+  e.preventDefault();
+  setError("");
+  if (!email || !password) {
+    setError("Please fill in all fields");
+    return;
+  }
+  setIsSubmitting(true);
+  try {
+    const result = await login(email, password);
+
+    if (result.success) {
+      // AuthContext login() already verified email check + signed out if unverified
+      navigate("/dashboard"); // DashboardRouter handles the industry redirect
+    } else {
+      setError(result.message);
     }
-    setIsSubmitting(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
-    } catch (err) {
-      setError(friendlyError(err.code));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  } catch (err) {
+    setError("Something went wrong. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div
@@ -484,8 +487,7 @@ function RegisterView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [dashboardId, setDashboardId] = useState("");
-
-  const auth = getAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -522,31 +524,30 @@ function RegisterView() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const err = validate();
-    if (err) { setError(err); return; }
+  e.preventDefault();
+  const err = validate();
+  if (err) { setError(err); return; }
 
-    setError("");
-    setIsSubmitting(true);
-    try {
-      const { user } = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        email,
-        displayName: name,
-        dashboardId: dashboardId || "general",
-        plan: "starter",
-        createdAt: serverTimestamp(),
-      });
+  setError("");
+  setIsSubmitting(true);
+  try {
+    const result = await register(name, email, password, dashboardId, {
+      companyName: name,
+      industry: dashboardId,
+    });
+
+    if (result.success) {
       localStorage.removeItem("pendingDashboardId");
-      setSuccess("Account created! Redirecting to login...");
-      setTimeout(() => navigate("/login"), 3000);
-    } catch (err) {
-      setError(friendlyError(err.code));
-    } finally {
-      setIsSubmitting(false);
+      setSuccess(result.message); // AuthContext already returns the right message
+    } else {
+      setError(result.message);
     }
-  };
+  } catch (err) {
+    setError("Something went wrong. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div
