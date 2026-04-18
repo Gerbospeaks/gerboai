@@ -2570,12 +2570,13 @@ const ADS = [
     "src": "/ads/gerbo-ad.png"
   },
   {
-    type: "branded",                 // no image — uses styled card
-    headline: "Manage invoices & quotes in one place",
-    sub: "Join 10,000+ businesses already using SolidFlo.",
-    cta: "Try Free →",
-    url: "https://solidflo.co.za",
-    bg: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
+    "type": "image",
+    "name": "Video and Image Editing",
+    "headline": "Video Trimming",
+    "sub": "remove unwanted Video sections",
+    "url": "https://videolid.com",
+    "status": "active",
+    "src": "/ads/videolid-ad.png"
   },
 ];
 
