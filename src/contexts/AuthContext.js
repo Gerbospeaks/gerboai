@@ -34,8 +34,6 @@ export const generateSlug = (text) =>
     .replace(/[^a-z0-9\s-]/g, "") // remove special chars
     .replace(/\s+/g, "-"); // spaces → dashes
 
-// ─── Helper: save/update the portal slug whenever school name changes ─────────
-// Call this from your BusinessSettingsModal / SettingsModal when saving school name
 export const updatePortalSlug = async (uid, businessName) => {
   if (!uid || !businessName) return null;
 
