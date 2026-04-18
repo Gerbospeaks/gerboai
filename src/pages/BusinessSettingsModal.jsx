@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { updatePortalSlug } from "../contexts/AuthContext";
 import { db } from "../firebase";
+import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { uploadLogoToR2 } from "../utils/uploadLogoToR2";
 import {
