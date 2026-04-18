@@ -1,5 +1,44 @@
 import { useState, useCallback } from "react";
 
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const T = {
+  navy: "#0f172a",
+  navyMid: "#1e293b",
+  navyLight: "#334155",
+  indigo: "#6366f1",
+  indigoHov: "#4f46e5",
+  indigoLt: "#eef2ff",
+  pageBg: "#f8fafc",
+  cardBg: "#ffffff",
+  border: "#e2e8f0",
+  borderMid: "#cbd5e1",
+  textPri: "#0f172a",
+  textMid: "#475569",
+  textMuted: "#94a3b8",
+  green: "#16a34a",
+  greenLt: "#f0fdf4",
+  greenBd: "#bbf7d0",
+  red: "#dc2626",
+  redLt: "#fef2f2",
+  amber: "#d97706",
+  amberLt: "#fffbeb",
+  amberBd: "#fde68a",
+  blue: "#2563eb",
+  blueLt: "#eff6ff",
+  blueBd: "#bfdbfe",
+  purple: "#7c3aed",
+  purpleLt: "#f5f3ff",
+  purpleBd: "#ddd6fe",
+};
+
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Lato:wght@300;400;600;700;900&display=swap');
+* { box-sizing: border-box; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+input, select, textarea, button { font-family: 'Lato', sans-serif; }
+`;
+
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 const INDUSTRIES = [
@@ -289,7 +328,7 @@ const PROVIDERS = [
   {
     id: "p13",
     industry: "health",
-    name: "PrimeCare Occupational Health",
+    name: "PrimeCare Occupational",
     location: "Rosebank, JHB",
     rate: "R800/hr",
     rating: 4.9,
@@ -415,8 +454,7 @@ const PROVIDERS = [
       { label: "Interior & exterior", type: "blue" },
       { label: "Waterproofing", type: "amber" },
     ],
-    about:
-      "Professional painters with 10+ years experience across residential and commercial.",
+    about: "Professional painters with 10+ years experience.",
   },
   {
     id: "p19",
@@ -750,29 +788,29 @@ const INITIAL_MY_REQS = [
 ];
 
 const STATUS_PILL = {
-  confirmed: { bg: "#eafaf1", color: "#1d8348", label: "Confirmed" },
-  progress: { bg: "#e8f0fb", color: "#1b6ec2", label: "In progress" },
-  pending: { bg: "#fffbeb", color: "#b45309", label: "Awaiting quote" },
+  confirmed: { bg: T.greenLt, color: T.green, label: "Confirmed" },
+  progress: { bg: T.blueLt, color: T.blue, label: "In progress" },
+  pending: { bg: T.amberLt, color: T.amber, label: "Awaiting quote" },
 };
 
 const INC_STATUS = {
-  new: { label: "New request", bg: "#f3f0ff", color: "#6d28d9" },
-  quoted: { label: "Quote sent", bg: "#fffbeb", color: "#b45309" },
-  accepted: { label: "Accepted", bg: "#eafaf1", color: "#1d8348" },
-  declined: { label: "Declined", bg: "#fdf2f0", color: "#e8442a" },
+  new: { label: "New request", bg: T.purpleLt, color: T.purple },
+  quoted: { label: "Quote sent", bg: T.amberLt, color: T.amber },
+  accepted: { label: "Accepted", bg: T.greenLt, color: T.green },
+  declined: { label: "Declined", bg: T.redLt, color: T.red },
 };
 
 const URGENCY_STYLES = {
-  "Urgent (today/tomorrow)": { bg: "#fdf2f0", color: "#e8442a" },
-  "Standard (2-3 days)": { bg: "#e8f0fb", color: "#1b6ec2" },
-  "Flexible (within a week)": { bg: "#eafaf1", color: "#1d8348" },
+  "Urgent (today/tomorrow)": { bg: T.redLt, color: T.red },
+  "Standard (2-3 days)": { bg: T.blueLt, color: T.blue },
+  "Flexible (within a week)": { bg: T.greenLt, color: T.green },
 };
 
 const BADGE_COLORS = {
-  green: { bg: "#eafaf1", color: "#1d8348" },
-  blue: { bg: "#e8f0fb", color: "#1b6ec2" },
-  amber: { bg: "#fffbeb", color: "#b45309" },
-  purple: { bg: "#f3f0ff", color: "#6d28d9" },
+  green: { bg: T.greenLt, color: T.green, border: T.greenBd },
+  blue: { bg: T.blueLt, color: T.blue, border: T.blueBd },
+  amber: { bg: T.amberLt, color: T.amber, border: T.amberBd },
+  purple: { bg: T.purpleLt, color: T.purple, border: T.purpleBd },
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -781,7 +819,12 @@ function getLabel(id) {
   return (INDUSTRIES.find((i) => i.id === id) || { label: id }).label;
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+function industryCount(id) {
+  if (id === "all") return PROVIDERS.length;
+  return PROVIDERS.filter((p) => p.industry === id).length;
+}
+
+// ── Shared primitives ─────────────────────────────────────────────────────────
 
 function Toast({ message }) {
   return message ? (
@@ -791,15 +834,16 @@ function Toast({ message }) {
         bottom: 24,
         left: "50%",
         transform: "translateX(-50%)",
-        background: "#1d8348",
+        background: T.navy,
         color: "#fff",
         fontSize: 13,
         fontWeight: 700,
-        padding: "10px 20px",
-        borderRadius: 4,
+        padding: "11px 22px",
+        borderRadius: 8,
         zIndex: 9999,
         whiteSpace: "nowrap",
-        boxShadow: "0 4px 16px rgba(20,26,48,.2)",
+        boxShadow: "0 8px 28px rgba(15,23,42,.3)",
+        border: "1px solid rgba(255,255,255,.08)",
         pointerEvents: "none",
       }}
     >
@@ -815,10 +859,11 @@ function Badge({ label, type }) {
       style={{
         fontSize: 10,
         fontWeight: 700,
-        padding: "2px 7px",
+        padding: "3px 9px",
         borderRadius: 20,
         background: c.bg,
         color: c.color,
+        border: `1px solid ${c.border}`,
       }}
     >
       {label}
@@ -826,42 +871,460 @@ function Badge({ label, type }) {
   );
 }
 
-function ProviderCard({ provider, expanded, onToggle, onBook }) {
-  const p = provider;
+function SectionTitle({ children, count }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 16,
+        margin: "36px 0 20px",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 20,
+          fontWeight: 600,
+          color: T.textPri,
+          whiteSpace: "nowrap",
+          letterSpacing: "-.015em",
+        }}
+      >
+        {children}
+      </span>
+      <div
+        style={{
+          flex: 1,
+          height: 1,
+          background: `linear-gradient(90deg, ${T.border} 0%, transparent 100%)`,
+        }}
+      />
+      {count != null && (
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: ".07em",
+            textTransform: "uppercase",
+            color: T.indigo,
+            background: T.indigoLt,
+            border: `1px solid rgba(99,102,241,.2)`,
+            padding: "4px 12px",
+            borderRadius: 20,
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+          }}
+        >
+          {count} listed
+        </span>
+      )}
+    </div>
+  );
+}
+
+// ── Topbar ────────────────────────────────────────────────────────────────────
+
+function Topbar({ title, subtitle, icon, right, onBack }) {
+  return (
+    <div
+      style={{
+        background: T.navy,
+        height: 60,
+        padding: "0 32px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        borderBottom: "1px solid rgba(255,255,255,.07)",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        boxShadow: "0 2px 20px rgba(0,0,0,.25)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {onBack && (
+          <button
+            onClick={onBack}
+            style={{
+              background: "rgba(255,255,255,.08)",
+              border: "1px solid rgba(255,255,255,.15)",
+              color: "#fff",
+              cursor: "pointer",
+              width: 32,
+              height: 32,
+              borderRadius: 6,
+              fontSize: 16,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "background .15s",
+            }}
+          >
+            ←
+          </button>
+        )}
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            background: T.indigo,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          {icon}
+        </div>
+        <div>
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: "#fff",
+              letterSpacing: ".01em",
+            }}
+          >
+            {title}
+          </div>
+          {subtitle && (
+            <div
+              style={{
+                fontSize: 11,
+                color: "rgba(255,255,255,.35)",
+                marginTop: 1,
+              }}
+            >
+              {subtitle}
+            </div>
+          )}
+        </div>
+      </div>
+      {right}
+    </div>
+  );
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+
+function Sidebar({ active, onSelect }) {
+  const [search, setSearch] = useState("");
+  const filtered = INDUSTRIES.filter((i) =>
+    i.label.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  return (
+    <aside
+      style={{
+        position: "sticky",
+        top: 60,
+        background: "#fff",
+        border: `1px solid ${T.border}`,
+        borderRadius: 14,
+        overflow: "hidden",
+        boxShadow: "0 1px 8px rgba(15,23,42,.06)",
+      }}
+    >
+      {/* Top gradient stripe */}
+      <div
+        style={{
+          height: 3,
+          background: "linear-gradient(90deg, #6366f1, #818cf8, #0ea5e9)",
+        }}
+      />
+
+      {/* Header */}
+      <div
+        style={{
+          padding: "16px 16px 12px",
+          borderBottom: `1px solid ${T.border}`,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: ".1em",
+            textTransform: "uppercase",
+            color: T.textMuted,
+            marginBottom: 12,
+          }}
+        >
+          Industries
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: "#f8fafc",
+            border: `1px solid ${T.border}`,
+            borderRadius: 8,
+            padding: "8px 12px",
+          }}
+        >
+          <span style={{ color: T.textMuted, fontSize: 14 }}>⌕</span>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filter…"
+            style={{
+              background: "none",
+              border: "none",
+              outline: "none",
+              fontSize: 12,
+              color: T.textPri,
+              width: "100%",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* List */}
+      <div
+        style={{
+          padding: "6px 0",
+          maxHeight: "calc(100vh - 200px)",
+          overflowY: "auto",
+        }}
+      >
+        {filtered.map((ind, i) => {
+          const isActive = active === ind.id;
+          return (
+            <div key={ind.id}>
+              {ind.id === "all" && (
+                <div
+                  style={{ height: 1, background: T.border, margin: "4px 0" }}
+                />
+              )}
+              <div
+                onClick={() => onSelect(ind.id)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "8px 16px",
+                  gap: 10,
+                  cursor: "pointer",
+                  transition: "background .13s",
+                  borderLeft: `2px solid ${isActive ? T.indigo : "transparent"}`,
+                  background: isActive ? T.indigoLt : "transparent",
+                }}
+                onMouseEnter={(e) =>
+                  !isActive && (e.currentTarget.style.background = "#f8fafc")
+                }
+                onMouseLeave={(e) =>
+                  !isActive &&
+                  (e.currentTarget.style.background = "transparent")
+                }
+              >
+                <span style={{ fontSize: 14, lineHeight: 1, flexShrink: 0 }}>
+                  {ind.emoji}
+                </span>
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: isActive ? 700 : 600,
+                    flex: 1,
+                    color: isActive ? T.indigo : T.textMid,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {ind.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    padding: "2px 7px",
+                    borderRadius: 10,
+                    background: isActive ? "rgba(99,102,241,.12)" : "#f1f5f9",
+                    color: isActive ? T.indigo : T.textMuted,
+                    flexShrink: 0,
+                  }}
+                >
+                  {industryCount(ind.id)}
+                </span>
+              </div>
+              {ind.id === "all" && (
+                <div
+                  style={{ height: 1, background: T.border, margin: "4px 0" }}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </aside>
+  );
+}
+
+// ── Availability banner ───────────────────────────────────────────────────────
+
+function AvailBanner({ availNow, total }) {
+  return (
+    <div
+      style={{
+        background: "#fff",
+        border: `1px solid ${T.border}`,
+        borderRadius: 14,
+        padding: "22px 28px",
+        marginBottom: 32,
+        display: "flex",
+        alignItems: "center",
+        gap: 20,
+        position: "relative",
+        overflow: "hidden",
+        boxShadow: "0 1px 8px rgba(15,23,42,.06)",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 3,
+          background: "linear-gradient(90deg, #6366f1, #818cf8, #0ea5e9)",
+        }}
+      />
+      <div
+        style={{
+          width: 11,
+          height: 11,
+          borderRadius: "50%",
+          background: "#22c55e",
+          flexShrink: 0,
+          boxShadow: "0 0 0 4px rgba(34,197,94,.15)",
+        }}
+      />
+      <span
+        style={{
+          fontSize: 14,
+          color: T.textMid,
+          fontWeight: 600,
+          flex: 1,
+          lineHeight: 1.5,
+        }}
+      >
+        <strong style={{ color: T.textPri }}>Live marketplace</strong> —
+        verified service providers ready to quote across Gauteng.
+      </span>
+      <div style={{ display: "flex" }}>
+        <div style={{ textAlign: "center", padding: "0 24px" }}>
+          <span
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: 36,
+              fontWeight: 700,
+              color: T.textPri,
+              lineHeight: 1,
+              display: "block",
+            }}
+          >
+            {availNow}
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              color: T.textMuted,
+              letterSpacing: ".07em",
+              textTransform: "uppercase",
+              marginTop: 3,
+              display: "block",
+            }}
+          >
+            Available now
+          </span>
+        </div>
+        <div
+          style={{
+            textAlign: "center",
+            padding: "0 24px",
+            borderLeft: `1px solid ${T.border}`,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: 36,
+              fontWeight: 700,
+              color: T.textPri,
+              lineHeight: 1,
+              display: "block",
+            }}
+          >
+            {total}
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              color: T.textMuted,
+              letterSpacing: ".07em",
+              textTransform: "uppercase",
+              marginTop: 3,
+              display: "block",
+            }}
+          >
+            Total listed
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Provider card ─────────────────────────────────────────────────────────────
+
+function ProviderCard({ provider: p, expanded, onToggle, onBook }) {
   return (
     <div
       onClick={() => onToggle(p.id)}
       style={{
         background: "#fff",
-        border: p.featured ? "1.5px solid #1b6ec2" : "1px solid #d9dde6",
-        borderRadius: 4,
-        padding: "14px 16px",
+        borderRadius: 12,
+        padding: "22px",
+        border: p.featured
+          ? `1.5px solid rgba(99,102,241,.4)`
+          : `1px solid ${T.border}`,
         cursor: "pointer",
-        boxShadow: "none",
         display: "flex",
         flexDirection: "column",
-        gap: 10,
-        transition: "box-shadow .15s",
+        gap: 14,
+        transition: "box-shadow .2s, transform .2s, border-color .2s",
+        position: "relative",
+        overflow: "hidden",
+        boxShadow: p.featured ? "0 2px 16px rgba(99,102,241,.08)" : "none",
       }}
-      onMouseEnter={(e) =>
-        (e.currentTarget.style.boxShadow = "0 2px 12px rgba(20,26,48,.08)")
-      }
-      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = "0 10px 36px rgba(15,23,42,.1)";
+        e.currentTarget.style.transform = "translateY(-3px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = p.featured
+          ? "0 2px 16px rgba(99,102,241,.08)"
+          : "none";
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
     >
       {/* Top row */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
         <div
           style={{
-            width: 38,
-            height: 38,
-            borderRadius: 4,
+            width: 46,
+            height: 46,
+            borderRadius: 10,
             flexShrink: 0,
             background: p.color,
             color: p.textColor,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: 700,
           }}
         >
@@ -870,17 +1333,18 @@ function ProviderCard({ provider, expanded, onToggle, onBook }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: 700,
-              color: "#1a2340",
+              color: T.textPri,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
+              marginBottom: 3,
             }}
           >
             {p.name}
           </div>
-          <div style={{ fontSize: 11, color: "#8a93a6", marginTop: 2 }}>
+          <div style={{ fontSize: 12, color: T.textMuted }}>
             {getLabel(p.industry)} · {p.location}
           </div>
         </div>
@@ -889,7 +1353,7 @@ function ProviderCard({ provider, expanded, onToggle, onBook }) {
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-end",
-            gap: 4,
+            gap: 5,
             flexShrink: 0,
           }}
         >
@@ -898,10 +1362,11 @@ function ProviderCard({ provider, expanded, onToggle, onBook }) {
               style={{
                 fontSize: 10,
                 fontWeight: 700,
-                background: "#e8f0fb",
-                color: "#1b6ec2",
-                padding: "2px 7px",
+                background: T.indigoLt,
+                color: T.indigo,
+                padding: "3px 10px",
                 borderRadius: 20,
+                border: "1px solid rgba(99,102,241,.2)",
               }}
             >
               Top Rated
@@ -909,9 +1374,9 @@ function ProviderCard({ provider, expanded, onToggle, onBook }) {
           )}
           <span
             style={{
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: 700,
-              color: "#1a2340",
+              color: T.textPri,
               whiteSpace: "nowrap",
             }}
           >
@@ -932,70 +1397,74 @@ function ProviderCard({ provider, expanded, onToggle, onBook }) {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 10,
+          gap: 12,
           flexWrap: "wrap",
         }}
       >
-        <span
-          style={{
-            fontSize: 11,
-            color: "#8a93a6",
-            display: "flex",
-            alignItems: "center",
-            gap: 3,
-          }}
-        >
-          <span style={{ color: "#f59e0b" }}>★</span>
-          {p.rating} ({p.reviews})
+        <span style={{ fontSize: 12, color: T.textMuted }}>
+          <span style={{ color: "#f59e0b" }}>★</span> {p.rating} ({p.reviews})
         </span>
-        <span style={{ fontSize: 11, color: "#8a93a6" }}>⏱ {p.response}</span>
+        <span style={{ fontSize: 12, color: T.textMuted }}>⏱ {p.response}</span>
         {!p.available && (
-          <span style={{ fontSize: 10, color: "#e8442a", fontWeight: 700 }}>
+          <span style={{ fontSize: 11, color: T.red, fontWeight: 700 }}>
             Unavailable
           </span>
         )}
       </div>
 
-      {/* Expanded about */}
+      {/* Expanded */}
       {expanded && (
         <div
           style={{
-            fontSize: 11,
-            color: "#8a93a6",
-            lineHeight: 1.5,
-            paddingTop: 8,
-            borderTop: "1px solid #d9dde6",
+            fontSize: 13,
+            color: T.textMid,
+            lineHeight: 1.65,
+            paddingTop: 14,
+            borderTop: `1px solid ${T.border}`,
           }}
         >
           {p.about}
         </div>
       )}
 
-      {/* Book button */}
+      {/* CTA */}
       <button
         onClick={(e) => {
           e.stopPropagation();
-          onBook(p.id);
+          p.available && onBook(p.id);
         }}
         style={{
           width: "100%",
+          padding: "12px 0",
+          borderRadius: 6,
           fontSize: 12,
           fontWeight: 700,
-          padding: 8,
-          borderRadius: 4,
-          border: "none",
+          letterSpacing: ".05em",
+          textTransform: "uppercase",
           cursor: p.available ? "pointer" : "not-allowed",
-          fontFamily: "Lato, sans-serif",
-          background: p.available ? "#1a2340" : "#eef0f5",
-          color: p.available ? "#fff" : "#8a93a6",
-          marginTop: 2,
+          background: p.available ? T.navy : "#f8fafc",
+          color: p.available ? "#fff" : T.textMuted,
+          border: p.available ? `1px solid ${T.navy}` : `1px solid ${T.border}`,
+          transition: "all .18s",
         }}
+        onMouseEnter={(e) =>
+          p.available &&
+          ((e.currentTarget.style.background = T.indigo),
+          (e.currentTarget.style.borderColor = T.indigo))
+        }
+        onMouseLeave={(e) =>
+          p.available &&
+          ((e.currentTarget.style.background = T.navy),
+          (e.currentTarget.style.borderColor = T.navy))
+        }
       >
-        {p.available ? "Book Now" : "Currently Unavailable"}
+        {p.available ? "Book Now — Get a Quote" : "Currently Unavailable"}
       </button>
     </div>
   );
 }
+
+// ── Booking panel ─────────────────────────────────────────────────────────────
 
 function BookingPanel({ provider, onClose, onSubmit }) {
   const [date, setDate] = useState("");
@@ -1006,150 +1475,133 @@ function BookingPanel({ provider, onClose, onSubmit }) {
   const [doc, setDoc] = useState("None");
   const [err, setErr] = useState("");
 
-  const handleSubmit = () => {
-    if (!date || !desc.trim()) {
-      setErr("Please fill in the date and describe what you need.");
-      return;
-    }
-    onSubmit(provider);
-  };
-
-  const inputStyle = {
+  const inp = {
     fontSize: 13,
-    padding: "8px 10px",
-    borderRadius: 4,
-    border: "1px solid #d9dde6",
+    padding: "9px 12px",
+    borderRadius: 8,
+    border: `1px solid ${T.border}`,
     background: "#fff",
-    color: "#1a2340",
+    color: T.textPri,
     width: "100%",
     outline: "none",
-    fontFamily: "Lato, sans-serif",
+    fontFamily: "'Lato', sans-serif",
     boxSizing: "border-box",
   };
-  const labelStyle = {
+  const lbl = {
     fontSize: 11,
     fontWeight: 700,
-    color: "#4a5568",
+    color: T.textMid,
     textTransform: "uppercase",
     letterSpacing: ".05em",
     display: "block",
-    marginBottom: 4,
+    marginBottom: 5,
   };
 
   return (
     <div
       style={{
         background: "#fff",
-        border: "1px solid #d9dde6",
-        borderRadius: 4,
+        border: `1px solid ${T.border}`,
+        borderRadius: 14,
         overflow: "hidden",
-        marginBottom: 12,
+        marginBottom: 20,
+        boxShadow: "0 4px 24px rgba(15,23,42,.08)",
       }}
     >
+      {/* Header */}
       <div
         style={{
-          background: "#f0f2f6",
-          borderBottom: "1px solid #d9dde6",
-          padding: "10px 16px",
+          background: T.navy,
+          padding: "14px 22px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
         }}
       >
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
+            Book — {provider.name}
+          </div>
+          <div
+            style={{
+              fontSize: 11,
+              color: "rgba(255,255,255,.45)",
+              marginTop: 2,
+            }}
+          >
+            {getLabel(provider.industry)} · {provider.location}
+          </div>
+        </div>
         <span
           style={{
-            fontSize: 12,
+            fontSize: 14,
             fontWeight: 700,
-            color: "#1a2340",
-            textTransform: "uppercase",
-            letterSpacing: ".05em",
+            color: "rgba(255,255,255,.8)",
           }}
         >
-          Book — {provider.name}
+          {provider.rate}
         </span>
-        <span style={{ fontSize: 11, color: "#8a93a6" }}>{provider.rate}</span>
       </div>
-      <div style={{ padding: 16 }}>
-        <div
-          style={{
-            background: "#1a2340",
-            borderRadius: 4,
-            padding: "10px 14px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 10,
-          }}
-        >
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,.6)" }}>
-            {getLabel(provider.industry)} · {provider.location}
-          </span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
-            {provider.rate}
-          </span>
-        </div>
 
+      <div style={{ padding: 24 }}>
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
-            gap: 10,
-            marginBottom: 10,
+            gap: 14,
+            marginBottom: 14,
           }}
         >
           <div>
-            <label style={labelStyle}>Service date</label>
+            <label style={lbl}>Service date</label>
             <input
               type="date"
-              style={inputStyle}
+              style={inp}
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
           </div>
           <div>
-            <label style={labelStyle}>Preferred time</label>
+            <label style={lbl}>Preferred time</label>
             <input
               type="time"
-              style={inputStyle}
+              style={inp}
               value={time}
               onChange={(e) => setTime(e.target.value)}
             />
           </div>
         </div>
-
-        <div style={{ marginBottom: 10 }}>
-          <label style={labelStyle}>Service address</label>
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Service address</label>
           <input
             type="text"
-            style={inputStyle}
+            style={inp}
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Your property or site address"
           />
         </div>
-
-        <div style={{ marginBottom: 10 }}>
-          <label style={labelStyle}>Describe what you need</label>
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Describe what you need</label>
           <textarea
-            style={{ ...inputStyle, resize: "vertical", minHeight: 64 }}
+            style={{ ...inp, resize: "vertical", minHeight: 72 }}
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
             placeholder={provider.about}
           />
         </div>
-
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
-            gap: 10,
-            marginBottom: 10,
+            gap: 14,
+            marginBottom: 14,
           }}
         >
           <div>
-            <label style={labelStyle}>Urgency</label>
+            <label style={lbl}>Urgency</label>
             <select
-              style={inputStyle}
+              style={inp}
               value={urgency}
               onChange={(e) => setUrgency(e.target.value)}
             >
@@ -1159,9 +1611,9 @@ function BookingPanel({ provider, onClose, onSubmit }) {
             </select>
           </div>
           <div>
-            <label style={labelStyle}>Attach to document</label>
+            <label style={lbl}>Attach to document</label>
             <select
-              style={inputStyle}
+              style={inp}
               value={doc}
               onChange={(e) => setDoc(e.target.value)}
             >
@@ -1172,43 +1624,46 @@ function BookingPanel({ provider, onClose, onSubmit }) {
             </select>
           </div>
         </div>
-
         {err && (
-          <div style={{ fontSize: 12, color: "#e8442a", marginBottom: 8 }}>
+          <div style={{ fontSize: 12, color: T.red, marginBottom: 10 }}>
             {err}
           </div>
         )}
-
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 10 }}>
           <button
             onClick={onClose}
             style={{
               fontSize: 13,
               fontWeight: 700,
-              padding: "9px 16px",
-              borderRadius: 4,
-              background: "#f0f2f6",
-              color: "#4a5568",
-              border: "1px solid #d9dde6",
+              padding: "10px 18px",
+              borderRadius: 8,
+              background: "#f8fafc",
+              color: T.textMid,
+              border: `1px solid ${T.border}`,
               cursor: "pointer",
-              fontFamily: "Lato, sans-serif",
             }}
           >
             Cancel
           </button>
           <button
-            onClick={handleSubmit}
+            onClick={() => {
+              if (!date || !desc.trim()) {
+                setErr("Please fill in the date and describe what you need.");
+                return;
+              }
+              onSubmit(provider);
+            }}
             style={{
               flex: 1,
               fontSize: 13,
               fontWeight: 700,
-              padding: 9,
-              borderRadius: 4,
-              background: "#1d8348",
+              padding: 10,
+              borderRadius: 8,
+              background: T.green,
               color: "#fff",
               border: "none",
               cursor: "pointer",
-              fontFamily: "Lato, sans-serif",
+              letterSpacing: ".03em",
             }}
           >
             Send Booking Request
@@ -1218,6 +1673,217 @@ function BookingPanel({ provider, onClose, onSubmit }) {
     </div>
   );
 }
+
+// ── My requests panel ─────────────────────────────────────────────────────────
+
+function MyRequests({ reqs }) {
+  return (
+    <div
+      style={{
+        background: "#fff",
+        border: `1px solid ${T.border}`,
+        borderRadius: 14,
+        overflow: "hidden",
+        boxShadow: "0 1px 8px rgba(15,23,42,.06)",
+      }}
+    >
+      <div
+        style={{
+          padding: "14px 22px",
+          borderBottom: `1px solid ${T.border}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontSize: 13, fontWeight: 700, color: T.textPri }}>
+          My Service Requests
+        </span>
+        <span
+          style={{
+            fontSize: 11,
+            color: T.textMuted,
+            background: "#f1f5f9",
+            padding: "3px 10px",
+            borderRadius: 20,
+            fontWeight: 600,
+          }}
+        >
+          {reqs.length} total
+        </span>
+      </div>
+      <div style={{ padding: "8px 0" }}>
+        {reqs.map((req, i) => {
+          const pill = STATUS_PILL[req.status];
+          return (
+            <div
+              key={req.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "12px 22px",
+                borderBottom:
+                  i < reqs.length - 1 ? `1px solid #f1f5f9` : "none",
+              }}
+            >
+              <div>
+                <div
+                  style={{ fontSize: 13, fontWeight: 600, color: T.textPri }}
+                >
+                  {req.name}
+                </div>
+                <div style={{ fontSize: 11, color: T.textMuted, marginTop: 2 }}>
+                  {getLabel(req.industry)} · Requested {req.date}
+                </div>
+              </div>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  padding: "4px 12px",
+                  borderRadius: 20,
+                  background: pill.bg,
+                  color: pill.color,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {pill.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Quote modal ───────────────────────────────────────────────────────────────
+
+function QuoteModal({ target, onClose, onSend }) {
+  const [amount, setAmount] = useState(target?.quoteAmount || "");
+  const [notes, setNotes] = useState("");
+  if (!target) return null;
+
+  const inp = {
+    fontSize: 13,
+    padding: "9px 12px",
+    borderRadius: 8,
+    border: `1px solid ${T.border}`,
+    background: "#fff",
+    color: T.textPri,
+    width: "100%",
+    outline: "none",
+    fontFamily: "'Lato', sans-serif",
+    boxSizing: "border-box",
+  };
+  const lbl = {
+    fontSize: 11,
+    fontWeight: 700,
+    color: T.textMid,
+    textTransform: "uppercase",
+    letterSpacing: ".05em",
+    display: "block",
+    marginBottom: 5,
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(15,23,42,.55)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: 20,
+        backdropFilter: "blur(6px)",
+      }}
+    >
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: 14,
+          padding: 28,
+          width: "100%",
+          maxWidth: 440,
+          border: `1px solid ${T.border}`,
+          boxShadow: "0 24px 60px rgba(15,23,42,.25)",
+        }}
+      >
+        <div
+          style={{
+            fontSize: 18,
+            fontFamily: "'Playfair Display', serif",
+            fontWeight: 600,
+            color: T.textPri,
+            marginBottom: 6,
+          }}
+        >
+          Send a Quote
+        </div>
+        <div style={{ fontSize: 13, color: T.textMuted, marginBottom: 20 }}>
+          To: {target.from} · {target.service.slice(0, 60)}…
+        </div>
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Quote amount (R)</label>
+          <input
+            style={inp}
+            type="text"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="e.g. R1 800 or R450/hr × 3hrs"
+          />
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          <label style={lbl}>Notes to client (optional)</label>
+          <textarea
+            style={{ ...inp, resize: "vertical", minHeight: 72 }}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Inclusions, exclusions, lead times…"
+          />
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button
+            onClick={onClose}
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              padding: "10px 18px",
+              borderRadius: 8,
+              background: "#f8fafc",
+              color: T.textMid,
+              border: `1px solid ${T.border}`,
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => amount.trim() && onSend(amount)}
+            style={{
+              flex: 1,
+              fontSize: 13,
+              fontWeight: 700,
+              padding: 10,
+              borderRadius: 8,
+              background: T.blue,
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            Send Quote
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── MarketView ────────────────────────────────────────────────────────────────
 
 function MarketView({ onShowIncoming }) {
   const [activeCategory, setActiveCategory] = useState("all");
@@ -1241,13 +1907,10 @@ function MarketView({ onShowIncoming }) {
 
   const toggleCard = (id) =>
     setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
-
   const handleBook = (id) => {
     const p = PROVIDERS.find((x) => x.id === id);
-    if (!p?.available) return;
-    setBookingProvider(p);
+    if (p?.available) setBookingProvider(p);
   };
-
   const handleSubmitBooking = (p) => {
     setMyReqs((prev) => [
       ...prev,
@@ -1264,372 +1927,207 @@ function MarketView({ onShowIncoming }) {
       `Booking request sent to ${p.name}. They'll respond with a quote shortly.`,
     );
   };
-
-  const chipStyle = (active) => ({
-    fontSize: 12,
-    fontWeight: 600,
-    padding: "4px 12px",
-    borderRadius: 3,
-    whiteSpace: "nowrap",
-    cursor: "pointer",
-    border: active ? "1px solid #e8442a" : "1px solid transparent",
-    color: active ? "#fff" : "rgba(255,255,255,.6)",
-    background: active ? "#e8442a" : "transparent",
-    fontFamily: "Lato, sans-serif",
-    height: 28,
-    display: "flex",
-    alignItems: "center",
-    transition: "all .15s",
-  });
+  const handleFilterChange = (id) => {
+    setActiveCategory(id);
+    setBookingProvider(null);
+    setExpandedCards({});
+  };
 
   return (
     <div
       style={{
-        background: "#f4f5f8",
+        background: T.pageBg,
         minHeight: "100vh",
-        fontFamily: "Lato, sans-serif",
+        fontFamily: "'Lato', sans-serif",
       }}
     >
-      {/* Topbar */}
-      <div
-        style={{
-          background: "#1a2340",
-          height: 52,
-          padding: "0 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          borderBottom: "1px solid rgba(255,255,255,.08)",
-          position: "sticky",
-          top: 0,
-          zIndex: 20,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: "50%",
-              background: "#e8442a",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+      <style>{FONTS}</style>
+
+      <Topbar
+        title="Service Marketplace"
+        subtitle="Marketplace › Browse"
+        icon={
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="2"
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2"
-            >
-              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21h6" />
-            </svg>
-          </div>
-          <span
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              color: "#fff",
-              letterSpacing: ".01em",
-            }}
-          >
-            Service Marketplace
-          </span>
-          <span
-            style={{
-              fontSize: 11,
-              color: "rgba(255,255,255,.45)",
-              marginLeft: 6,
-            }}
-          >
-            Marketplace › Browse
-          </span>
-        </div>
-        <button
-          onClick={onShowIncoming}
-          style={{
-            background: "#e8442a",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 12,
-            fontWeight: 700,
-            padding: "0 16px",
-            height: 32,
-            borderRadius: 4,
-            fontFamily: "Lato, sans-serif",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Post a Request ↗
-        </button>
-      </div>
-
-      {/* Filter bar */}
-      <div
-        style={{
-          background: "#2d3a55",
-          borderBottom: "1px solid rgba(255,255,255,.08)",
-          padding: "0 24px",
-          display: "flex",
-          gap: 4,
-          overflowX: "auto",
-          alignItems: "center",
-          height: 40,
-          scrollbarWidth: "none",
-        }}
-      >
-        {INDUSTRIES.map((ind) => (
-          <button
-            key={ind.id}
-            style={chipStyle(activeCategory === ind.id)}
-            onClick={() => {
-              setActiveCategory(ind.id);
-              setBookingProvider(null);
-              setExpandedCards({});
-            }}
-          >
-            {ind.emoji} {ind.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      <div
-        style={{
-          padding: "20px 24px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 0,
-        }}
-      >
-        {/* Available banner */}
-        <div
-          style={{
-            background: "#1a2340",
-            borderRadius: 5,
-            padding: "14px 20px",
-            marginBottom: 16,
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            flexWrap: "wrap",
-          }}
-        >
-          <div
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: "#4ade80",
-              flexShrink: 0,
-            }}
-          />
-          <span
-            style={{
-              fontSize: 13,
-              color: "rgba(255,255,255,.85)",
-              fontWeight: 600,
-            }}
-          >
-            Providers available on the platform today
-          </span>
-          <div style={{ marginLeft: "auto", textAlign: "right" }}>
-            <div style={{ fontSize: 28, fontWeight: 700, color: "#fff" }}>
-              {availCount}
-            </div>
-            <div
+            <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21h6" />
+          </svg>
+        }
+        right={
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button
+              onClick={onShowIncoming}
               style={{
-                fontSize: 10,
-                color: "rgba(255,255,255,.45)",
-                textTransform: "uppercase",
-                letterSpacing: ".05em",
-              }}
-            >
-              Available now
-            </div>
-          </div>
-        </div>
-
-        {/* Featured */}
-        {featured.length > 0 && (
-          <>
-            <SectionTitle>Recommended for you</SectionTitle>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3,1fr)",
-                gap: 12,
-                marginBottom: 4,
-              }}
-            >
-              {featured.map((p) => (
-                <ProviderCard
-                  key={p.id}
-                  provider={p}
-                  expanded={!!expandedCards[p.id]}
-                  onToggle={toggleCard}
-                  onBook={handleBook}
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Standard */}
-        {standard.length > 0 && (
-          <>
-            {featured.length > 0 && <SectionTitle>More providers</SectionTitle>}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3,1fr)",
-                gap: 12,
-                marginBottom: 4,
-              }}
-            >
-              {standard.map((p) => (
-                <ProviderCard
-                  key={p.id}
-                  provider={p}
-                  expanded={!!expandedCards[p.id]}
-                  onToggle={toggleCard}
-                  onBook={handleBook}
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        {filtered.length === 0 && (
-          <div style={{ textAlign: "center", padding: "32px 16px" }}>
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                margin: "0 auto 10px",
-                background: "#eef0f5",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 22,
-              }}
-            >
-              {INDUSTRIES.find((i) => i.id === activeCategory)?.emoji || "🔍"}
-            </div>
-            <div
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                color: "#4a5568",
-                marginBottom: 4,
-              }}
-            >
-              No providers listed yet
-            </div>
-            <div style={{ fontSize: 12, color: "#8a93a6" }}>
-              Be the first to list your business in this category.
-            </div>
-          </div>
-        )}
-
-        {/* Booking panel */}
-        {bookingProvider && (
-          <BookingPanel
-            provider={bookingProvider}
-            onClose={() => setBookingProvider(null)}
-            onSubmit={handleSubmitBooking}
-          />
-        )}
-
-        {/* My requests */}
-        <SectionTitle>My Service Requests</SectionTitle>
-        <div
-          style={{
-            background: "#fff",
-            border: "1px solid #d9dde6",
-            borderRadius: 4,
-            overflow: "hidden",
-            marginBottom: 12,
-          }}
-        >
-          <div
-            style={{
-              background: "#f0f2f6",
-              borderBottom: "1px solid #d9dde6",
-              padding: "10px 16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <span
-              style={{
+                height: 36,
+                padding: "0 18px",
+                background: "rgba(255,255,255,.08)",
+                border: "1px solid rgba(255,255,255,.15)",
+                color: "rgba(255,255,255,.8)",
+                borderRadius: 6,
                 fontSize: 12,
                 fontWeight: 700,
-                color: "#1a2340",
-                textTransform: "uppercase",
-                letterSpacing: ".05em",
+                cursor: "pointer",
+                letterSpacing: ".04em",
               }}
             >
-              Recent Requests
-            </span>
-            <span style={{ fontSize: 11, color: "#8a93a6" }}>
-              {myReqs.length} total
-            </span>
+              Incoming Requests
+            </button>
+            <button
+              onClick={onShowIncoming}
+              style={{
+                height: 36,
+                padding: "0 20px",
+                background: T.indigo,
+                color: "#fff",
+                border: "none",
+                borderRadius: 6,
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                letterSpacing: ".04em",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span>+</span> Post a Request
+            </button>
           </div>
-          <div style={{ padding: 16 }}>
-            {myReqs.map((req, i) => {
-              const pill = STATUS_PILL[req.status];
-              return (
-                <div
-                  key={req.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "10px 0",
-                    borderBottom:
-                      i < myReqs.length - 1 ? "1px solid #d9dde6" : "none",
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: "#1a2340",
-                      }}
-                    >
-                      {req.name}
-                    </div>
-                    <div
-                      style={{ fontSize: 11, color: "#8a93a6", marginTop: 2 }}
-                    >
-                      {getLabel(req.industry)} · Requested {req.date}
-                    </div>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      padding: "3px 10px",
-                      borderRadius: 20,
-                      background: pill.bg,
-                      color: pill.color,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {pill.label}
-                  </span>
-                </div>
-              );
-            })}
+        }
+      />
+
+      {/* Layout */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "240px 1fr",
+          alignItems: "start",
+          padding: "28px 32px 80px",
+          gap: 24,
+          maxWidth: 1440,
+          margin: "0 auto",
+        }}
+      >
+        <Sidebar active={activeCategory} onSelect={handleFilterChange} />
+
+        {/* Main */}
+        <div style={{ minWidth: 0 }}>
+          <AvailBanner
+            availNow={filtered.filter((p) => p.available).length}
+            total={filtered.length}
+          />
+
+          {/* Featured */}
+          {featured.length > 0 && (
+            <>
+              <SectionTitle count={featured.length}>
+                Recommended for you
+              </SectionTitle>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3,1fr)",
+                  gap: 18,
+                  marginBottom: 8,
+                }}
+              >
+                {featured.map((p) => (
+                  <ProviderCard
+                    key={p.id}
+                    provider={p}
+                    expanded={!!expandedCards[p.id]}
+                    onToggle={toggleCard}
+                    onBook={handleBook}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Standard */}
+          {standard.length > 0 && (
+            <>
+              {featured.length > 0 && (
+                <SectionTitle count={standard.length}>
+                  More providers
+                </SectionTitle>
+              )}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3,1fr)",
+                  gap: 18,
+                  marginBottom: 8,
+                }}
+              >
+                {standard.map((p) => (
+                  <ProviderCard
+                    key={p.id}
+                    provider={p}
+                    expanded={!!expandedCards[p.id]}
+                    onToggle={toggleCard}
+                    onBook={handleBook}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Empty */}
+          {filtered.length === 0 && (
+            <div style={{ textAlign: "center", padding: "80px 24px" }}>
+              <div
+                style={{
+                  width: 72,
+                  height: 72,
+                  margin: "0 auto 20px",
+                  background: "#f8fafc",
+                  border: `1px solid ${T.border}`,
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 28,
+                }}
+              >
+                {INDUSTRIES.find((i) => i.id === activeCategory)?.emoji || "🔍"}
+              </div>
+              <div
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: 20,
+                  fontWeight: 600,
+                  color: T.textPri,
+                  marginBottom: 8,
+                }}
+              >
+                No providers listed in this category yet
+              </div>
+              <div style={{ fontSize: 14, color: T.textMuted }}>
+                Be the first to list your business in this category.
+              </div>
+            </div>
+          )}
+
+          {/* Booking panel */}
+          {bookingProvider && (
+            <div style={{ marginTop: 12 }}>
+              <BookingPanel
+                provider={bookingProvider}
+                onClose={() => setBookingProvider(null)}
+                onSubmit={handleSubmitBooking}
+              />
+            </div>
+          )}
+
+          {/* My requests */}
+          <div style={{ marginTop: 36 }}>
+            <MyRequests reqs={myReqs} />
           </div>
         </div>
       </div>
@@ -1639,165 +2137,7 @@ function MarketView({ onShowIncoming }) {
   );
 }
 
-function SectionTitle({ children }) {
-  return (
-    <div
-      style={{
-        fontSize: 11,
-        fontWeight: 700,
-        letterSpacing: ".07em",
-        textTransform: "uppercase",
-        color: "#8a93a6",
-        margin: "20px 0 10px",
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-      }}
-    >
-      {children}
-      <div style={{ flex: 1, height: 1, background: "#d9dde6" }} />
-    </div>
-  );
-}
-
-function QuoteModal({ target, onClose, onSend }) {
-  const [amount, setAmount] = useState(target?.quoteAmount || "");
-  const [notes, setNotes] = useState("");
-
-  if (!target) return null;
-
-  const inputStyle = {
-    fontSize: 13,
-    padding: "8px 10px",
-    borderRadius: 4,
-    border: "1px solid #d9dde6",
-    background: "#fff",
-    color: "#1a2340",
-    width: "100%",
-    outline: "none",
-    fontFamily: "Lato, sans-serif",
-    boxSizing: "border-box",
-  };
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(20,26,48,.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        padding: 16,
-      }}
-    >
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: 4,
-          padding: 20,
-          width: "100%",
-          maxWidth: 420,
-          border: "1px solid #d9dde6",
-          boxShadow: "0 8px 32px rgba(20,26,48,.18)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 700,
-            color: "#1a2340",
-            marginBottom: 4,
-          }}
-        >
-          Send a Quote
-        </div>
-        <div style={{ fontSize: 12, color: "#8a93a6", marginBottom: 16 }}>
-          To: {target.from} · {target.service.slice(0, 60)}…
-        </div>
-        <div style={{ marginBottom: 12 }}>
-          <label
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: "#4a5568",
-              textTransform: "uppercase",
-              letterSpacing: ".05em",
-              display: "block",
-              marginBottom: 4,
-            }}
-          >
-            Quote amount (R)
-          </label>
-          <input
-            style={inputStyle}
-            type="text"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="e.g. R1 800 or R450/hr × 3hrs"
-          />
-        </div>
-        <div style={{ marginBottom: 12 }}>
-          <label
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: "#4a5568",
-              textTransform: "uppercase",
-              letterSpacing: ".05em",
-              display: "block",
-              marginBottom: 4,
-            }}
-          >
-            Notes to client (optional)
-          </label>
-          <textarea
-            style={{ ...inputStyle, resize: "vertical", minHeight: 64 }}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Inclusions, exclusions, lead times…"
-          />
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button
-            onClick={onClose}
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              padding: "9px 16px",
-              borderRadius: 4,
-              background: "#f0f2f6",
-              color: "#4a5568",
-              border: "1px solid #d9dde6",
-              cursor: "pointer",
-              fontFamily: "Lato, sans-serif",
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => amount.trim() && onSend(amount)}
-            style={{
-              flex: 1,
-              fontSize: 13,
-              fontWeight: 700,
-              padding: 9,
-              borderRadius: 4,
-              background: "#1b6ec2",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "Lato, sans-serif",
-            }}
-          >
-            Send Quote
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// ── IncomingView ──────────────────────────────────────────────────────────────
 
 function IncomingView({ onBack }) {
   const [incReqs, setIncReqs] = useState(INITIAL_INCOMING);
@@ -1810,7 +2150,6 @@ function IncomingView({ onBack }) {
     setToast(msg);
     setTimeout(() => setToast(""), 3500);
   }, []);
-
   const newCount = incReqs.filter((r) => r.status === "new").length;
   const shown =
     incFilter === "all"
@@ -1824,7 +2163,6 @@ function IncomingView({ onBack }) {
     setIncReqs((prev) =>
       prev.map((x) => (x.id === id ? { ...x, status: "accepted" } : x)),
     );
-    setExpandedInc((prev) => ({ ...prev, [id]: true }));
     showToast(`Job from ${r.from} accepted.`);
   };
   const declineReq = (id) => {
@@ -1832,7 +2170,6 @@ function IncomingView({ onBack }) {
     setIncReqs((prev) =>
       prev.map((x) => (x.id === id ? { ...x, status: "declined" } : x)),
     );
-    setExpandedInc((prev) => ({ ...prev, [id]: true }));
     showToast(`Request from ${r.from} declined.`);
   };
   const sendQuote = (id, amount) => {
@@ -1842,12 +2179,11 @@ function IncomingView({ onBack }) {
         x.id === id ? { ...x, status: "quoted", quoteAmount: amount } : x,
       ),
     );
-    setExpandedInc((prev) => ({ ...prev, [id]: true }));
     showToast(`Quote of ${amount} sent to ${r.from}.`);
     setQuoteTarget(null);
   };
 
-  const tabFilters = [
+  const tabs = [
     { id: "all", label: "All" },
     { id: "new", label: "New" },
     { id: "quoted", label: "Quoted" },
@@ -1858,183 +2194,192 @@ function IncomingView({ onBack }) {
   return (
     <div
       style={{
-        background: "#f4f5f8",
+        background: T.pageBg,
         minHeight: "100vh",
-        fontFamily: "Lato, sans-serif",
+        fontFamily: "'Lato', sans-serif",
       }}
     >
-      {/* Topbar */}
-      <div
-        style={{
-          background: "#1a2340",
-          height: 52,
-          padding: "0 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          borderBottom: "1px solid rgba(255,255,255,.08)",
-          position: "sticky",
-          top: 0,
-          zIndex: 20,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button
-            onClick={onBack}
-            style={{
-              background: "rgba(255,255,255,.1)",
-              border: "1px solid rgba(255,255,255,.2)",
-              color: "#fff",
-              cursor: "pointer",
-              width: 30,
-              height: 30,
-              borderRadius: 4,
-              fontSize: 16,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+      <style>{FONTS}</style>
+
+      <Topbar
+        title="Incoming Requests"
+        subtitle="Marketplace › Requests"
+        onBack={onBack}
+        icon={
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="2"
           >
-            ←
-          </button>
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: "50%",
-              background: "#e8442a",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginLeft: 4,
-            }}
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2"
+            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+          </svg>
+        }
+        right={
+          newCount > 0 && (
+            <span
+              style={{
+                background: T.purple,
+                color: "#fff",
+                fontSize: 11,
+                fontWeight: 700,
+                padding: "5px 12px",
+                borderRadius: 20,
+              }}
             >
-              <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
-              <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-            </svg>
-          </div>
-          <span
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              color: "#fff",
-              letterSpacing: ".01em",
-            }}
-          >
-            Incoming Requests
-          </span>
-          <span
-            style={{
-              fontSize: 11,
-              color: "rgba(255,255,255,.45)",
-              marginLeft: 6,
-            }}
-          >
-            Marketplace › Requests
-          </span>
-        </div>
-        {newCount > 0 && (
-          <span
-            style={{
-              background: "#6d28d9",
-              color: "#fff",
-              fontSize: 11,
-              fontWeight: 700,
-              padding: "4px 10px",
-              borderRadius: 20,
-            }}
-          >
-            {newCount} new
-          </span>
-        )}
-      </div>
+              {newCount} new
+            </span>
+          )
+        }
+      />
 
       {/* Tab bar */}
       <div
         style={{
-          background: "#f0f2f6",
-          borderBottom: "1px solid #d9dde6",
-          padding: "8px 16px",
+          background: "#fff",
+          borderBottom: `1px solid ${T.border}`,
+          padding: "0 32px",
           display: "flex",
           gap: 4,
-          flexWrap: "wrap",
+          alignItems: "center",
+          height: 48,
         }}
       >
-        {tabFilters.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => setIncFilter(f.id)}
-            style={{
-              fontSize: 12,
-              fontWeight: 700,
-              padding: "4px 12px",
-              borderRadius: 3,
-              background: incFilter === f.id ? "#e8442a" : "transparent",
-              color: incFilter === f.id ? "#fff" : "#8a93a6",
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "Lato, sans-serif",
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-            }}
-          >
-            {f.label}
-            {f.id === "new" && newCount > 0 && (
-              <span
-                style={{
-                  background: "#6d28d9",
-                  color: "#fff",
-                  fontSize: 10,
-                  padding: "1px 5px",
-                  borderRadius: 999,
-                }}
-              >
-                {newCount}
-              </span>
-            )}
-          </button>
-        ))}
+        {tabs.map((f) => {
+          const active = incFilter === f.id;
+          return (
+            <button
+              key={f.id}
+              onClick={() => setIncFilter(f.id)}
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                padding: "6px 14px",
+                borderRadius: 6,
+                background: active ? T.indigoLt : "transparent",
+                color: active ? T.indigo : T.textMuted,
+                border: active
+                  ? `1px solid rgba(99,102,241,.2)`
+                  : "1px solid transparent",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                transition: "all .13s",
+              }}
+            >
+              {f.label}
+              {f.id === "new" && newCount > 0 && (
+                <span
+                  style={{
+                    background: T.purple,
+                    color: "#fff",
+                    fontSize: 10,
+                    padding: "1px 6px",
+                    borderRadius: 999,
+                  }}
+                >
+                  {newCount}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      <div style={{ padding: "20px 24px" }}>
+      <div
+        style={{ maxWidth: 900, margin: "0 auto", padding: "28px 32px 80px" }}
+      >
+        {/* Stats row */}
+        <div style={{ display: "flex", gap: 12, marginBottom: 28 }}>
+          {["new", "quoted", "accepted", "declined"].map((k) => {
+            const count = incReqs.filter((r) => r.status === k).length;
+            const s = INC_STATUS[k];
+            return (
+              <div
+                key={k}
+                style={{
+                  flex: 1,
+                  background: "#fff",
+                  border: `1px solid ${T.border}`,
+                  borderRadius: 12,
+                  padding: "16px 20px",
+                  boxShadow: "0 1px 4px rgba(15,23,42,.04)",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: 28,
+                    fontWeight: 700,
+                    color: T.textPri,
+                    lineHeight: 1,
+                  }}
+                >
+                  {count}
+                </div>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: ".07em",
+                    color: s.color,
+                    marginTop: 4,
+                    background: s.bg,
+                    display: "inline-block",
+                    padding: "2px 8px",
+                    borderRadius: 20,
+                  }}
+                >
+                  {s.label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         {shown.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "32px 16px" }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "80px 24px",
+              background: "#fff",
+              borderRadius: 14,
+              border: `1px solid ${T.border}`,
+            }}
+          >
             <div
               style={{
-                width: 48,
-                height: 48,
-                margin: "0 auto 10px",
-                background: "#eef0f5",
+                width: 64,
+                height: 64,
+                margin: "0 auto 16px",
+                background: T.pageBg,
+                border: `1px solid ${T.border}`,
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 22,
+                fontSize: 26,
               }}
             >
               📭
             </div>
             <div
               style={{
-                fontSize: 13,
-                fontWeight: 700,
-                color: "#4a5568",
-                marginBottom: 4,
+                fontFamily: "'Playfair Display', serif",
+                fontSize: 18,
+                fontWeight: 600,
+                color: T.textPri,
+                marginBottom: 6,
               }}
             >
               No {incFilter !== "all" ? incFilter : ""} requests
             </div>
-            <div style={{ fontSize: 12, color: "#8a93a6" }}>
+            <div style={{ fontSize: 13, color: T.textMuted }}>
               When another business books your service, requests will appear
               here.
             </div>
@@ -2043,8 +2388,8 @@ function IncomingView({ onBack }) {
           shown.map((req) => {
             const st = INC_STATUS[req.status];
             const urg = URGENCY_STYLES[req.urgency] || {
-              bg: "#e8f0fb",
-              color: "#1b6ec2",
+              bg: T.blueLt,
+              color: T.blue,
             };
             const exp = expandedInc[req.id];
             return (
@@ -2054,36 +2399,40 @@ function IncomingView({ onBack }) {
                   background: "#fff",
                   border:
                     req.status === "new"
-                      ? "1.5px solid #6d28d9"
-                      : "1px solid #d9dde6",
-                  borderRadius: 4,
-                  marginBottom: 10,
+                      ? `1.5px solid ${T.purple}`
+                      : `1px solid ${T.border}`,
+                  borderRadius: 14,
+                  marginBottom: 12,
                   overflow: "hidden",
+                  boxShadow:
+                    req.status === "new"
+                      ? `0 0 0 4px ${T.purpleLt}`
+                      : "0 1px 4px rgba(15,23,42,.04)",
                 }}
               >
-                {/* Header */}
+                {/* Card header */}
                 <div
                   onClick={() => toggleInc(req.id)}
                   style={{
-                    padding: "12px 14px",
+                    padding: "16px 20px",
                     cursor: "pointer",
                     display: "flex",
-                    gap: 12,
+                    gap: 14,
                     alignItems: "flex-start",
                   }}
                 >
                   <div
                     style={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: 4,
-                      background: "#f3f0ff",
-                      color: "#6d28d9",
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      flexShrink: 0,
+                      background: T.purpleLt,
+                      color: T.purple,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: 16,
-                      flexShrink: 0,
+                      fontSize: 18,
                     }}
                   >
                     📥
@@ -2100,9 +2449,9 @@ function IncomingView({ onBack }) {
                       <div>
                         <div
                           style={{
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: 700,
-                            color: "#1a2340",
+                            color: T.textPri,
                           }}
                         >
                           {req.from}
@@ -2110,7 +2459,7 @@ function IncomingView({ onBack }) {
                         <div
                           style={{
                             fontSize: 11,
-                            color: "#8a93a6",
+                            color: T.textMuted,
                             marginTop: 2,
                           }}
                         >
@@ -2122,7 +2471,7 @@ function IncomingView({ onBack }) {
                         style={{
                           fontSize: 11,
                           fontWeight: 700,
-                          padding: "3px 10px",
+                          padding: "4px 12px",
                           borderRadius: 20,
                           background: st.bg,
                           color: st.color,
@@ -2134,9 +2483,9 @@ function IncomingView({ onBack }) {
                     </div>
                     <div
                       style={{
-                        fontSize: 12,
-                        color: "#4a5568",
-                        marginTop: 6,
+                        fontSize: 13,
+                        color: T.textMid,
+                        marginTop: 8,
                         ...(exp
                           ? {}
                           : {
@@ -2153,14 +2502,14 @@ function IncomingView({ onBack }) {
                         display: "flex",
                         gap: 6,
                         flexWrap: "wrap",
-                        marginTop: 6,
+                        marginTop: 8,
                       }}
                     >
                       <span
                         style={{
                           fontSize: 10,
                           fontWeight: 700,
-                          padding: "2px 7px",
+                          padding: "3px 10px",
                           borderRadius: 20,
                           background: urg.bg,
                           color: urg.color,
@@ -2173,10 +2522,10 @@ function IncomingView({ onBack }) {
                           style={{
                             fontSize: 10,
                             fontWeight: 700,
-                            padding: "2px 7px",
+                            padding: "3px 10px",
                             borderRadius: 20,
-                            background: "#e8f0fb",
-                            color: "#1b6ec2",
+                            background: T.blueLt,
+                            color: T.blue,
                           }}
                         >
                           📎 {req.attachedDoc}
@@ -2186,30 +2535,30 @@ function IncomingView({ onBack }) {
                   </div>
                 </div>
 
-                {/* Expanded */}
+                {/* Expanded body */}
                 {exp && (
                   <div
                     style={{
-                      padding: "0 14px 14px",
-                      borderTop: "1px solid #d9dde6",
+                      padding: "0 20px 20px",
+                      borderTop: `1px solid ${T.border}`,
                     }}
                   >
                     <div
                       style={{
                         display: "grid",
                         gridTemplateColumns: "1fr 1fr",
-                        gap: 10,
-                        margin: "12px 0",
+                        gap: 16,
+                        margin: "16px 0",
                       }}
                     >
                       <div>
                         <div
                           style={{
-                            fontSize: 11,
-                            color: "#8a93a6",
+                            fontSize: 10,
+                            color: T.textMuted,
                             textTransform: "uppercase",
-                            letterSpacing: ".05em",
-                            marginBottom: 3,
+                            letterSpacing: ".06em",
+                            marginBottom: 4,
                             fontWeight: 700,
                           }}
                         >
@@ -2218,7 +2567,7 @@ function IncomingView({ onBack }) {
                         <div
                           style={{
                             fontSize: 13,
-                            color: "#1a2340",
+                            color: T.textPri,
                             fontWeight: 600,
                           }}
                         >
@@ -2228,11 +2577,11 @@ function IncomingView({ onBack }) {
                       <div>
                         <div
                           style={{
-                            fontSize: 11,
-                            color: "#8a93a6",
+                            fontSize: 10,
+                            color: T.textMuted,
                             textTransform: "uppercase",
-                            letterSpacing: ".05em",
-                            marginBottom: 3,
+                            letterSpacing: ".06em",
+                            marginBottom: 4,
                             fontWeight: 700,
                           }}
                         >
@@ -2241,7 +2590,7 @@ function IncomingView({ onBack }) {
                         <div
                           style={{
                             fontSize: 13,
-                            color: "#1a2340",
+                            color: T.textPri,
                             fontWeight: 600,
                           }}
                         >
@@ -2251,13 +2600,14 @@ function IncomingView({ onBack }) {
                     </div>
                     <div
                       style={{
-                        fontSize: 12,
-                        color: "#4a5568",
-                        lineHeight: 1.6,
-                        marginBottom: 12,
-                        background: "#f0f2f6",
-                        padding: "10px 12px",
-                        borderRadius: 4,
+                        fontSize: 13,
+                        color: T.textMid,
+                        lineHeight: 1.65,
+                        marginBottom: 16,
+                        background: "#f8fafc",
+                        padding: "12px 16px",
+                        borderRadius: 8,
+                        border: `1px solid ${T.border}`,
                       }}
                     >
                       {req.service}
@@ -2265,9 +2615,9 @@ function IncomingView({ onBack }) {
                     {req.quoteAmount && (
                       <div
                         style={{
-                          marginBottom: 12,
+                          marginBottom: 14,
                           fontSize: 13,
-                          color: "#1b6ec2",
+                          color: T.blue,
                           fontWeight: 700,
                         }}
                       >
@@ -2277,7 +2627,7 @@ function IncomingView({ onBack }) {
 
                     {(req.status === "new" || req.status === "quoted") && (
                       <div
-                        style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
+                        style={{ display: "flex", gap: 10, flexWrap: "wrap" }}
                       >
                         <button
                           onClick={() => setQuoteTarget(req)}
@@ -2285,13 +2635,12 @@ function IncomingView({ onBack }) {
                             flex: 1,
                             fontSize: 12,
                             fontWeight: 700,
-                            padding: "8px 14px",
-                            borderRadius: 4,
+                            padding: "10px 16px",
+                            borderRadius: 8,
                             border: "none",
                             cursor: "pointer",
-                            background: "#1b6ec2",
+                            background: T.blue,
                             color: "#fff",
-                            fontFamily: "Lato, sans-serif",
                           }}
                         >
                           {req.status === "new"
@@ -2303,13 +2652,12 @@ function IncomingView({ onBack }) {
                           style={{
                             fontSize: 12,
                             fontWeight: 700,
-                            padding: "8px 14px",
-                            borderRadius: 4,
+                            padding: "10px 16px",
+                            borderRadius: 8,
                             border: "none",
                             cursor: "pointer",
-                            background: "#1d8348",
+                            background: T.green,
                             color: "#fff",
-                            fontFamily: "Lato, sans-serif",
                           }}
                         >
                           Accept Job
@@ -2319,13 +2667,12 @@ function IncomingView({ onBack }) {
                           style={{
                             fontSize: 12,
                             fontWeight: 700,
-                            padding: "8px 14px",
-                            borderRadius: 4,
-                            border: "1px solid #d9dde6",
+                            padding: "10px 16px",
+                            borderRadius: 8,
+                            border: `1px solid ${T.border}`,
                             cursor: "pointer",
-                            background: "#f0f2f6",
-                            color: "#4a5568",
-                            fontFamily: "Lato, sans-serif",
+                            background: "#f8fafc",
+                            color: T.textMid,
                           }}
                         >
                           Decline
@@ -2336,10 +2683,10 @@ function IncomingView({ onBack }) {
                       <div
                         style={{
                           fontSize: 12,
-                          color: "#1d8348",
-                          background: "#eafaf1",
-                          padding: "8px 12px",
-                          borderRadius: 4,
+                          color: T.green,
+                          background: T.greenLt,
+                          padding: "10px 14px",
+                          borderRadius: 8,
                           fontWeight: 600,
                         }}
                       >
@@ -2350,10 +2697,10 @@ function IncomingView({ onBack }) {
                       <div
                         style={{
                           fontSize: 12,
-                          color: "#e8442a",
-                          background: "#fdf2f0",
-                          padding: "8px 12px",
-                          borderRadius: 4,
+                          color: T.red,
+                          background: T.redLt,
+                          padding: "10px 14px",
+                          borderRadius: 8,
                           fontWeight: 600,
                         }}
                       >
@@ -2368,39 +2715,6 @@ function IncomingView({ onBack }) {
         )}
       </div>
 
-      {/* Summary footer */}
-      <div
-        style={{
-          padding: "10px 16px",
-          borderTop: "1px solid #d9dde6",
-          display: "flex",
-          gap: 16,
-          flexWrap: "wrap",
-          fontSize: 12,
-          color: "#8a93a6",
-        }}
-      >
-        {["new", "quoted", "accepted", "declined"].map((k) => {
-          const count = incReqs.filter((r) => r.status === k).length;
-          const s = INC_STATUS[k];
-          return count > 0 ? (
-            <span key={k}>
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: s.color,
-                  display: "inline-block",
-                  marginRight: 4,
-                }}
-              />
-              {count} {s.label.toLowerCase()}
-            </span>
-          ) : null;
-        })}
-      </div>
-
       {quoteTarget && (
         <QuoteModal
           target={quoteTarget}
@@ -2408,7 +2722,6 @@ function IncomingView({ onBack }) {
           onSend={(amount) => sendQuote(quoteTarget.id, amount)}
         />
       )}
-
       <Toast message={toast} />
     </div>
   );
@@ -2418,7 +2731,6 @@ function IncomingView({ onBack }) {
 
 export default function ServiceMarketplace() {
   const [view, setView] = useState("market");
-
   return view === "market" ? (
     <MarketView onShowIncoming={() => setView("incoming")} />
   ) : (

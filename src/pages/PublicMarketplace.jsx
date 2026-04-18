@@ -1858,7 +1858,7 @@ function RegisterModal({ mode, providerName, onClose }) {
 
           <button
             className="mp-modal-cta"
-            onClick={() => navigateTo(isLogin ? "/login" : "/register")}
+            onClick={() => navigateTo(isLogin ? "https://solidflo.co.za/login" : "https://solidflo.co.za")}
           >
             {isLogin ? "Sign In at solidflo.co.za" : "Get Started Free"}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -1870,7 +1870,7 @@ function RegisterModal({ mode, providerName, onClose }) {
             {isLogin ? (
               <>
                 Don't have an account?{" "}
-                <span className="mp-modal-switch-link" onClick={() => navigateTo("/register")}>
+                <span className="mp-modal-switch-link" onClick={() => navigateTo("https://solidflo.co.za")}>
                   Register free
                 </span>
               </>
@@ -2328,7 +2328,7 @@ export default function PublicMarketplace() {
     </div>
     <div className="mp-footer-links-group">
       <div className="mp-footer-links-label">Platform</div>
-      <span className="mp-footer-link" onClick={() => navigateTo("/register")}>Register Free</span>
+      <span className="mp-footer-link" onClick={() => navigateTo("https://solidflo.co.za")}>Register Free</span>
       <span className="mp-footer-link" onClick={() => navigateTo("/login")}>Sign In</span>
       <span className="mp-footer-link" onClick={() => openModal("register")}>Post a Job</span>
     </div>
