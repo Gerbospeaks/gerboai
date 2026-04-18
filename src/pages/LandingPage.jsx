@@ -194,7 +194,119 @@ const css = `
   .lp-nav:not(.scrolled) .lp-hamburger {
   color: var(--navy);
 }
+Here's the code to drop into your LandingPage.jsx:
+1. Add to your css string:
+css/* ════════════════════════════════════════════════
+   SERVICES / MARKETPLACE SECTION
+════════════════════════════════════════════════ */
+.lp-services {
+  background: var(--cream);
+  padding: 96px 24px;
+}
+.lp-services-inner {
+  max-width: 1060px;
+  margin: 0 auto;
+}
+.lp-services-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 48px;
+}
+.lp-service-card {
+  background: var(--card-bg);
+  border: 1px solid var(--cream-dark);
+  border-radius: 14px;
+  padding: 36px 32px;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .45s ease, transform .45s ease;
+}
+.lp-service-card.visible { opacity: 1; transform: translateY(0); }
+.lp-service-card.primary {
+  border: 2px solid rgba(99,102,241,.35);
+  background: linear-gradient(160deg, #fafbff 0%, var(--card-bg) 100%);
+}
+.lp-service-card-icon {
+  width: 48px; height: 48px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px; font-size: 22px;
+}
+.lp-service-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; color: var(--navy); margin-bottom: 8px;
+}
+.lp-service-card-desc {
+  font-size: 14px; color: var(--text-mid);
+  line-height: 1.65; margin-bottom: 24px;
+}
+.lp-service-steps {
+  list-style: none; padding: 0; margin: 0 0 28px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.lp-service-step {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--text-mid); line-height: 1.4;
+}
+.lp-service-step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.lp-service-card-btn {
+  height: 44px; padding: 0 24px;
+  border-radius: 6px; cursor: pointer;
+  font-family: 'Lato', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 8px;
+  border: none; transition: all .18s;
+}
+.lp-service-card-btn.filled {
+  background: var(--red); color: #fff;
+}
+.lp-service-card-btn.filled:hover {
+  background: var(--red-hover); transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(99,102,241,.3);
+}
+.lp-service-card-btn.outlined {
+  background: transparent; color: var(--green);
+  border: 1.5px solid var(--green);
+}
+.lp-service-card-btn.outlined:hover {
+  background: rgba(16,185,129,.06);
+}
+.lp-services-industries-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;
+}
+.lp-services-pills {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
+}
+.lp-services-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--cream-mid); border: 1px solid var(--cream-dark);
+  border-radius: 20px; padding: 6px 14px;
+  font-size: 12px; font-weight: 600; color: var(--text-mid);
+  cursor: pointer; transition: border-color .15s, color .15s, background .15s;
+}
+.lp-services-pill:hover {
+  border-color: rgba(99,102,241,.4);
+  color: var(--red);
+  background: var(--red-light);
+}
+.lp-services-pill-emoji { font-size: 14px; }
+.lp-services-more {
+  font-size: 13px; color: var(--red); font-weight: 700;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  transition: gap .2s;
+}
+.lp-services-more:hover { gap: 10px; }
 
+@media (max-width: 768px) {
+  .lp-services-two-col { grid-template-columns: 1fr; }
+  .lp-service-card { padding: 28px 24px; }
+}
 .lp-nav.scrolled .lp-hamburger {
   color: var(--navy);
 }
@@ -1394,7 +1506,132 @@ useEffect(() => {
             ))}
           </div>
         </section>
+        {/* ── Services / Marketplace ── */}
+<section className="lp-services">
+  <div className="lp-services-inner">
 
+    <div className="lp-section-head">
+      <div className="lp-section-eyebrow">Marketplace</div>
+      <h2>Find help. Get hired.</h2>
+      <p>Whether you need a skilled provider or want to grow your business,
+         SolidFlo connects you with the right people.</p>
+    </div>
+
+    <div className="lp-services-two-col">
+
+      {/* Need a service */}
+      <div
+        id="svc-need"
+        data-anim
+        className={`lp-service-card primary${visible["svc-need"] ? " visible" : ""}`}
+      >
+        <div className="lp-service-card-icon"
+          style={{ background: "var(--red-light)" }}>
+          🔍
+        </div>
+        <h3>I need a service</h3>
+        <p className="lp-service-card-desc">
+          Post a job and receive quotes from verified, rated providers in your area —
+          no registration needed to browse.
+        </p>
+        <ul className="lp-service-steps">
+          {[
+            "Describe your job or project",
+            "Receive quotes from nearby providers",
+            "Choose, book and pay — all in one place",
+          ].map((s, i) => (
+            <li key={i} className="lp-service-step">
+              <span className="lp-service-step-num"
+                style={{ background: "var(--red-light)", color: "var(--red)" }}>
+                {i + 1}
+              </span>
+              {s}
+            </li>
+          ))}
+        </ul>
+        <button
+          className="lp-service-card-btn filled"
+          onClick={() => window.open("https://market.solidflo.co.za", "_blank", "noopener,noreferrer")}
+        >
+          Post a job request <ArrowRight size={14} />
+        </button>
+      </div>
+
+      {/* Offer a service */}
+      <div
+        id="svc-offer"
+        data-anim
+        className={`lp-service-card${visible["svc-offer"] ? " visible" : ""}`}
+        style={{ transitionDelay: "80ms" }}
+      >
+        <div className="lp-service-card-icon"
+          style={{ background: "#d1fae5" }}>
+          🏢
+        </div>
+        <h3>I offer a service</h3>
+        <p className="lp-service-card-desc">
+          List your business on the marketplace and get discovered by clients
+          actively looking for your skills — then quote and invoice from the same platform.
+        </p>
+        <ul className="lp-service-steps">
+          {[
+            "Create your provider profile",
+            "Get discovered by clients near you",
+            "Quote, invoice and get paid",
+          ].map((s, i) => (
+            <li key={i} className="lp-service-step">
+              <span className="lp-service-step-num"
+                style={{ background: "#d1fae5", color: "var(--green)" }}>
+                {i + 1}
+              </span>
+              {s}
+            </li>
+          ))}
+        </ul>
+        <button
+          className="lp-service-card-btn outlined"
+          onClick={() => open("register")}
+        >
+          List my business <ArrowRight size={14} />
+        </button>
+      </div>
+    </div>
+
+    {/* Popular industry teasers */}
+    <div className="lp-services-industries-label">Popular industries</div>
+    <div className="lp-services-pills">
+      {[
+        { emoji: "🔧", label: "Mechanical" },
+        { emoji: "⚡", label: "Electrical" },
+        { emoji: "🚿", label: "Plumbing" },
+        { emoji: "🏗️", label: "Construction" },
+        { emoji: "❄️", label: "HVAC" },
+        { emoji: "🔒", label: "Security" },
+      ].map((ind) => (
+        <span
+          key={ind.label}
+          className="lp-services-pill"
+          onClick={() =>
+            window.open("https://market.solidflo.co.za", "_blank", "noopener,noreferrer")
+          }
+        >
+          <span className="lp-services-pill-emoji">{ind.emoji}</span>
+          {ind.label}
+        </span>
+      ))}
+    </div>
+
+    <span
+      className="lp-services-more"
+      onClick={() =>
+        window.open("https://market.solidflo.co.za", "_blank", "noopener,noreferrer")
+      }
+    >
+      + 20 more industries on the marketplace →
+    </span>
+
+  </div>
+</section>
         {/* ── Globe ── */}
         <section
           className="lp-globe"
