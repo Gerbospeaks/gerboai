@@ -1292,10 +1292,159 @@ const css = `
 }
 .mp-footer-legal a:hover { color: rgba(255,255,255,.55); }
 
-  /* ════════════════════════════════════
-     EMPTY STATE
-  ════════════════════════════════════ */
- .mp-empty {
+/* ── Ad sizing by breakpoint ── */
+.mp-ad-sidebar {
+  width: 300px;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: box-shadow .2s, transform .2s;
+  position: relative;
+  flex-shrink: 0;
+  margin: 12px auto 16px;
+  display: block;
+}
+.mp-ad-sidebar:hover {
+  box-shadow: 0 4px 20px rgba(99,102,241,.12);
+  transform: translateY(-2px);
+}
+.mp-ad-sidebar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.mp-ad-sidebar-caption {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 8px 12px 10px;
+  background: linear-gradient(to top, rgba(15,23,42,.85), transparent);
+  color: #fff;
+}
+.mp-ad-sidebar-caption strong {
+  font-size: 12px; display: block; margin-bottom: 1px; font-weight: 700;
+}
+.mp-ad-sidebar-caption span {
+  font-size: 10px; color: rgba(255,255,255,.6);
+}
+
+/* Leaderboard — 728×90 desktop */
+.mp-ad-banner {
+  width: 728px;
+  height: 90px;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  position: relative;
+  margin: 0 0 20px;
+  transition: box-shadow .2s, transform .2s;
+  display: flex;
+  align-items: center;
+}
+.mp-ad-banner:hover {
+  box-shadow: 0 4px 20px rgba(99,102,241,.12);
+  transform: translateY(-2px);
+}
+.mp-ad-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.mp-ad-banner-inner {
+  display: flex;
+  align-items: center;
+  width: 100%; height: 100%;
+  background: #fff;
+}
+.mp-ad-banner-img {
+  height: 90px;
+  width: 120px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.mp-ad-banner-text {
+  flex: 1;
+  padding: 0 16px;
+}
+.mp-ad-banner-text strong {
+  font-size: 13px; color: #0f172a;
+  display: block; margin-bottom: 2px; font-weight: 700;
+}
+.mp-ad-banner-text span {
+  font-size: 11px; color: #94a3b8;
+}
+.mp-ad-banner-cta {
+  padding: 0 16px;
+  flex-shrink: 0;
+  font-size: 11px; font-weight: 700;
+  color: #fff; background: #6366f1;
+  border-radius: 6px;
+  height: 34px;
+  display: flex; align-items: center;
+  margin-right: 12px;
+  text-transform: uppercase; letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+/* Tablet — 468×60 */
+@media (max-width: 1024px) {
+  .mp-ad-sidebar {
+    width: 250px;
+    height: 250px;
+    margin: 12px auto 16px;
+  }
+  .mp-ad-banner {
+    width: 468px;
+    height: 60px;
+  }
+  .mp-ad-banner-img {
+    height: 60px;
+    width: 80px;
+  }
+  .mp-ad-banner-text strong { font-size: 12px; }
+  .mp-ad-banner-text span { display: none; }
+  .mp-ad-banner-cta {
+    height: 28px;
+    font-size: 10px;
+    padding: 0 12px;
+  }
+}
+
+/* Mobile — 336×280 Large Rectangle */
+@media (max-width: 768px) {
+  .mp-ad-banner {
+    width: 336px;
+    height: 280px;
+    max-width: 100%;
+    flex-direction: column;
+    border-radius: 10px;
+    margin: 0 auto 20px;
+  }
+  .mp-ad-banner-inner {
+    flex-direction: column;
+    height: 100%;
+  }
+  .mp-ad-banner-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+  .mp-ad-banner-text {
+    padding: 10px 14px 6px;
+  }
+  .mp-ad-banner-text span { display: block; }
+  .mp-ad-banner-cta {
+    margin: 0 14px 12px;
+    height: 32px;
+    width: calc(100% - 28px);
+    justify-content: center;
+  }
+}
   text-align: center; padding: 80px 24px;
 }
 .mp-empty-icon {
@@ -2028,7 +2177,39 @@ function Badge({ label, type }) {
     </span>
   );
 }
+function AdSlot({ ad, variant = "sidebar" }) {
+  if (!ad) return null;
+  const isBanner = variant === "banner";
 
+  return (
+    <div
+      key={ad.src}
+      className={isBanner ? "mp-ad-banner mp-sidebar-ad-slot" : "mp-ad-sidebar mp-sidebar-ad-slot"}
+      onClick={() => window.open(ad.url, "_blank", "noopener,noreferrer")}
+    >
+      <span className="mp-sidebar-ad-tag">Sponsored</span>
+
+      {isBanner ? (
+        <div className="mp-ad-banner-inner">
+          <img src={ad.src} alt={ad.headline} className="mp-ad-banner-img" />
+          <div className="mp-ad-banner-text">
+            <strong>{ad.headline}</strong>
+            <span>{ad.sub}</span>
+          </div>
+          <div className="mp-ad-banner-cta">Learn More →</div>
+        </div>
+      ) : (
+        <>
+          <img src={ad.src} alt={ad.headline} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          <div className="mp-ad-sidebar-caption">
+            <strong>{ad.headline}</strong>
+            <span>{ad.sub}</span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 function SectionTitle({ children, count }) {
   return (
     <div className="mp-section-title">
@@ -2686,47 +2867,7 @@ useEffect(() => {
         <div className="mp-layout">
           {/* ── Sidebar (desktop only) ── */}
           <aside className="mp-sidebar">
-            {/* ── Rotating Ad Slot ── */}
-<div>
-  <div
-    key={currentAd}  /* key change triggers fade animation */
-    className="mp-sidebar-ad mp-sidebar-ad-slot"
-    onClick={() =>
-      window.open(ADS[currentAd].url, "_blank", "noopener,noreferrer")
-    }
-  >
-    <span className="mp-sidebar-ad-tag">Sponsored</span>
-
-    {ADS[currentAd].type === "image" ? (
-      <>
-        <img
-          src={ADS[currentAd].src}
-          alt={ADS[currentAd].alt}
-          className="mp-sidebar-ad-image"
-        />
-        <div className="mp-sidebar-ad-caption">
-          <strong>{ADS[currentAd].headline}</strong>
-          <span>{ADS[currentAd].sub}</span>
-        </div>
-      </>
-    ) : (
-      <div
-        className="mp-sidebar-ad-branded"
-        style={{ background: ADS[currentAd].bg }}
-      >
-        <div className="mp-sidebar-ad-branded-headline">
-          {ADS[currentAd].headline}
-        </div>
-        <div className="mp-sidebar-ad-branded-sub">
-          {ADS[currentAd].sub}
-        </div>
-        <button className="mp-sidebar-ad-branded-btn">
-          {ADS[currentAd].cta}
-        </button>
-      </div>
-    )}
-  </div>
-</div>
+<AdSlot ad={ADS[currentAd]} variant="sidebar" />
             <div className="mp-sidebar-header">
               <div className="mp-sidebar-title">Industries</div>
               <div className="mp-sidebar-search">
@@ -2760,46 +2901,7 @@ useEffect(() => {
                 </div>
               ))}
             </div>
-            {/* ── Bottom Sidebar Ad ── */}
-            <div style={{ padding: "12px 12px 16px" }}>
-              <div
-                key={`bottom-${currentAd}`}
-                className="mp-sidebar-ad mp-sidebar-ad-slot"
-                onClick={() =>
-                  window.open(ADS[currentAd].url, "_blank", "noopener,noreferrer")
-                }
-              >
-                <span className="mp-sidebar-ad-tag">Sponsored</span>
-                {ADS[currentAd].type === "image" ? (
-                  <>
-                    <img
-                      src={ADS[currentAd].src}
-                      alt={ADS[currentAd].alt}
-                      className="mp-sidebar-ad-image"
-                    />
-                    <div className="mp-sidebar-ad-caption">
-                      <strong>{ADS[currentAd].headline}</strong>
-                      <span>{ADS[currentAd].sub}</span>
-                    </div>
-                  </>
-                ) : (
-                  <div
-                    className="mp-sidebar-ad-branded"
-                    style={{ background: ADS[currentAd].bg }}
-                  >
-                    <div className="mp-sidebar-ad-branded-headline">
-                      {ADS[currentAd].headline}
-                    </div>
-                    <div className="mp-sidebar-ad-branded-sub">
-                      {ADS[currentAd].sub}
-                    </div>
-                    <button className="mp-sidebar-ad-branded-btn">
-                      {ADS[currentAd].cta}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+           <AdSlot ad={ADS[currentAd]} variant="sidebar" />
           </aside>
           {/* ── Main content ── */}
           <div className="mp-main">
