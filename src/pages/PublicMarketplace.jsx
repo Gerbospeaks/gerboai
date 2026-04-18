@@ -2561,12 +2561,13 @@ const ADS = [
     "src": "/ads/alex-bed-1.png"
   },
   {
-    type: "image",
-    src: "/ads/client-2.jpg",
-    alt: "Client Two Ad",
-    headline: "Client Two Headline",
-    sub: "Short supporting line.",
-    url: "https://client-two.co.za",
+    "type": "image",
+    "name": "AI Call answering",
+    "headline": "Gerbo Ai Call Answering",
+    "sub": "Never Loose A Call",
+    "url": "https://gerboai.com",
+    "status": "active",
+    "src": "/ads/gerbo-ad.png"
   },
   {
     type: "branded",                 // no image — uses styled card
