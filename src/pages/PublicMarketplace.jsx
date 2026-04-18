@@ -735,57 +735,174 @@ const css = `
   /* ════════════════════════════════════
      MODAL
   ════════════════════════════════════ */
-  .mp-modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(15,23,42,.75);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 1000; padding: 20px;
-    backdrop-filter: blur(6px);
-  }
-  .mp-modal {
-    background: var(--card-bg);
-    border-radius: 10px; padding: 36px;
-    width: 100%; max-width: 460px;
-    border: 1px solid var(--cream-dark);
-    box-shadow: 0 24px 60px rgba(15,23,42,.3);
-    position: relative;
-    animation: mp-up .3s ease;
-  }
-  .mp-modal-close {
-    position: absolute; top: 16px; right: 16px;
-    background: none; border: none; font-size: 20px;
-    color: var(--text-muted); cursor: pointer; line-height: 1;
-  }
-  .mp-modal-logo { display: flex; align-items: center; gap: 9px; margin-bottom: 22px; }
-  .mp-modal-logo-icon {
-    width: 30px; height: 30px; border-radius: 6px;
-    background: var(--red);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .mp-modal-logo-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 17px; font-weight: 700; color: var(--navy);
-  }
-  .mp-modal h2 {
-    font-size: 24px; color: var(--navy); margin-bottom: 10px;
-  }
-  .mp-modal-sub { font-size: 14px; color: var(--text-muted); line-height: 1.65; margin-bottom: 24px; }
-  .mp-modal-features { margin-bottom: 26px; display: flex; flex-direction: column; gap: 12px; }
-  .mp-modal-feature { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text); }
-  .mp-modal-feature-check { color: var(--green); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
-  .mp-modal-cta {
-    width: 100%; height: 48px;
-    background: var(--red); color: #fff;
-    border: none; border-radius: 4px;
-    font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
-    letter-spacing: .04em; text-transform: uppercase;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: all .15s;
-  }
-  .mp-modal-cta:hover { background: var(--red-hover); transform: translateY(-1px); }
-  .mp-modal-switch { text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-muted); }
-  .mp-modal-switch-link { color: var(--blue); font-weight: 700; cursor: pointer; }
-  .mp-modal-footnote { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 10px; }
+ .mp-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,.6);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px;
+  backdrop-filter: blur(8px);
+}
+.mp-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%; max-width: 680px;
+  display: grid; grid-template-columns: 220px 1fr;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(15,23,42,.25);
+  position: relative;
+  animation: mp-up .3s ease;
+}
+.mp-modal-close {
+  position: absolute; top: 14px; right: 16px; z-index: 10;
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2);
+  width: 28px; height: 28px; border-radius: 50%;
+  font-size: 12px; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+  line-height: 1;
+}
+.mp-modal-close:hover { background: rgba(255,255,255,.25); }
+
+/* ── Left panel ── */
+.mp-modal-left {
+  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 45%, #1e3a5f 100%);
+  padding: 32px 20px 28px;
+  display: flex; flex-direction: column;
+  align-items: flex-start; gap: 0;
+  position: relative; overflow: hidden;
+}
+.mp-modal-left::before {
+  content: '';
+  position: absolute; bottom: -40px; right: -40px;
+  width: 160px; height: 160px; border-radius: 50%;
+  background: rgba(99,102,241,.2);
+}
+.mp-modal-left::after {
+  content: '';
+  position: absolute; top: -20px; left: -20px;
+  width: 100px; height: 100px; border-radius: 50%;
+  background: rgba(14,165,233,.12);
+}
+.mp-modal-left-logo {
+  position: relative; z-index: 1; margin-bottom: 28px;
+}
+.mp-modal-trust {
+  position: relative; z-index: 1; margin-bottom: auto;
+}
+.mp-modal-trust-stars {
+  display: flex; gap: 3px; margin-bottom: 6px;
+}
+.mp-modal-trust-star {
+  width: 20px; height: 20px; border-radius: 3px;
+  background: #22c55e;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #fff;
+}
+.mp-modal-trust-score {
+  font-size: 12px; color: rgba(255,255,255,.6);
+  font-weight: 600; line-height: 1.5;
+}
+.mp-modal-trust-score strong { color: #fff; }
+
+/* illustration */
+.mp-modal-illustration {
+  position: relative; z-index: 1;
+  width: 100%; margin-top: 24px;
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 0;
+}
+.mp-modal-illus-circle {
+  width: 90px; height: 90px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  position: relative;
+}
+.mp-modal-illus-circle-a {
+  background: rgba(255,255,255,.12);
+  border: 2px solid rgba(255,255,255,.2);
+  z-index: 2;
+}
+.mp-modal-illus-circle-b {
+  background: rgba(99,102,241,.25);
+  border: 2px solid rgba(99,102,241,.35);
+  margin-left: -20px; z-index: 1;
+}
+.mp-modal-illus-rays {
+  position: absolute; inset: -8px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg, rgba(255,193,7,.35) 10deg, transparent 20deg,
+    transparent 40deg, rgba(255,193,7,.35) 50deg, transparent 60deg,
+    transparent 80deg, rgba(255,193,7,.35) 90deg, transparent 100deg,
+    transparent 120deg, rgba(255,193,7,.35) 130deg, transparent 140deg,
+    transparent 160deg, rgba(255,193,7,.35) 170deg, transparent 180deg,
+    transparent 200deg, rgba(255,193,7,.35) 210deg, transparent 220deg,
+    transparent 240deg, rgba(255,193,7,.35) 250deg, transparent 260deg,
+    transparent 280deg, rgba(255,193,7,.35) 290deg, transparent 300deg,
+    transparent 320deg, rgba(255,193,7,.35) 330deg, transparent 340deg,
+    transparent 360deg
+  );
+  border-radius: 50%;
+  animation: mp-spin 12s linear infinite;
+}
+@keyframes mp-spin { to { transform: rotate(360deg); } }
+
+/* ── Right panel ── */
+.mp-modal-right {
+  padding: 36px 32px 28px;
+  display: flex; flex-direction: column; gap: 0;
+}
+.mp-modal-right h2 {
+  font-size: 22px; color: #0f172a; margin-bottom: 10px; line-height: 1.2;
+}
+.mp-modal-sub {
+  font-size: 13px; color: #64748b; line-height: 1.65; margin-bottom: 22px;
+}
+.mp-modal-features {
+  margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px;
+}
+.mp-modal-feature {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: #334155; line-height: 1.4;
+}
+.mp-modal-feature-check {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #f0fdf4; border: 1px solid #bbf7d0;
+  color: #16a34a; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.mp-modal-cta {
+  width: 100%; height: 48px;
+  background: var(--red); color: #fff;
+  border: none; border-radius: 8px;
+  font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all .18s; margin-bottom: 14px;
+}
+.mp-modal-cta:hover {
+  background: var(--red-hover); transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(99,102,241,.35);
+}
+.mp-modal-switch {
+  text-align: center; font-size: 12px; color: #94a3b8;
+}
+.mp-modal-switch-link {
+  color: var(--red); font-weight: 700; cursor: pointer;
+}
+.mp-modal-switch-link:hover { text-decoration: underline; }
+.mp-modal-footnote {
+  text-align: center; font-size: 11px; color: #cbd5e1; margin-top: 8px;
+}
+
+/* responsive — stack on mobile */
+@media (max-width: 600px) {
+  .mp-modal { grid-template-columns: 1fr; max-width: 380px; }
+  .mp-modal-left { padding: 28px 24px 24px; flex-direction: row; flex-wrap: wrap; gap: 16px; }
+  .mp-modal-illustration { display: none; }
+  .mp-modal-close { color: #fff; }
+}
 
   /* ════════════════════════════════════
      FOOTER
@@ -1659,9 +1776,7 @@ function RegisterModal({ mode, providerName, onClose }) {
   const isLogin = mode === "login";
 
   useEffect(() => {
-    const h = (e) => {
-      if (e.key === "Escape") onClose();
-    };
+    const h = (e) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
   }, [onClose]);
@@ -1675,96 +1790,111 @@ function RegisterModal({ mode, providerName, onClose }) {
       ]
     : [
         "Post unlimited job requests to providers",
-        "Receive & compare quotes instantly",
-        "Manage invoices, jobs & payments in one place",
+        "Receive and compare quotes instantly",
+        "Manage invoices, jobs and payments in one place",
         "Starter plan — free forever, no credit card needed",
       ];
 
   return (
     <div className="mp-modal-overlay" onClick={onClose}>
       <div className="mp-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="mp-modal-close" onClick={onClose}>
-          ✕
-        </button>
 
-        <div className="mp-modal-logo">
-          
-           <img src={logo} alt="SolidFlo" style={{ height: 44 }} />
-        </div>
+        <button className="mp-modal-close" onClick={onClose}>✕</button>
 
-        <h2>
-          {isLogin
-            ? "Sign In to SolidFlo"
-            : providerName
-              ? `Book ${providerName}`
-              : "Create Your Free Account"}
-        </h2>
-        <p className="mp-modal-sub">
-          {isLogin
-            ? "Access your account to manage bookings, quotes and service requests."
-            : providerName
-              ? `To book ${providerName} and receive a quote, you need a free SolidFlo account.`
-              : "Join SolidFlo to post job requests, receive quotes from multiple providers, and manage your entire business in one place."}
-        </p>
+        {/* ── Left panel ── */}
+        <div className="mp-modal-left">
+          <div className="mp-modal-left-logo">
+            <img src={logo} alt="SolidFlo" style={{ height: 36 }} />
+          </div>
 
-        <div className="mp-modal-features">
-          {features.map((f, i) => (
-            <div key={i} className="mp-modal-feature">
-              <span className="mp-modal-feature-check">✓</span> {f}
+          <div className="mp-modal-trust">
+            <div className="mp-modal-trust-stars">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="mp-modal-trust-star">★</div>
+              ))}
             </div>
-          ))}
+            <div className="mp-modal-trust-score">
+              <strong>Rated 4.8</strong><br />
+              by 200+ Gauteng businesses
+            </div>
+          </div>
+
+          <div className="mp-modal-illustration">
+            <div className="mp-modal-illus-circle mp-modal-illus-circle-a">
+              <div className="mp-modal-illus-rays" />
+              🏗️
+            </div>
+            <div className="mp-modal-illus-circle mp-modal-illus-circle-b">
+              🤝
+            </div>
+          </div>
         </div>
 
-        <button
-          className="mp-modal-cta"
-          onClick={() => navigateTo(isLogin ? "/login" : "/register")}
-        >
-          {isLogin ? "Sign In at solidflo.co.za" : "Get Started Free"}
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-          >
-            <path d="M7 17L17 7M7 7h10v10" />
-          </svg>
-        </button>
+        {/* ── Right panel ── */}
+        <div className="mp-modal-right">
+          <h2>
+            {isLogin
+              ? "Welcome back"
+              : providerName
+                ? `Book ${providerName}`
+                : "Find the right provider, fast"}
+          </h2>
 
-        <p className="mp-modal-switch">
-          {isLogin ? (
-            <>
-              Don't have an account?{" "}
-              <span
-                className="mp-modal-switch-link"
-                onClick={() => navigateTo("/register")}
-              >
-                Register free
-              </span>
-            </>
-          ) : (
-            <>
-              Already have an account?{" "}
-              <span
-                className="mp-modal-switch-link"
-                onClick={() => navigateTo("/login")}
-              >
-                Sign in
-              </span>
-            </>
-          )}
-        </p>
-        {!isLogin && (
-          <p className="mp-modal-footnote">
-            ✓ No credit card required &nbsp;·&nbsp; ✓ Free to start
+          <p className="mp-modal-sub">
+            {isLogin
+              ? "Sign in to manage your bookings, quotes and service requests."
+              : providerName
+                ? `Create a free account to book ${providerName} and receive a quote directly.`
+                : "Join hundreds of Gauteng businesses already using SolidFlo to connect with verified service providers."}
           </p>
-        )}
+
+          <div className="mp-modal-features">
+            {features.map((f, i) => (
+              <div key={i} className="mp-modal-feature">
+                <span className="mp-modal-feature-check">✓</span> {f}
+              </div>
+            ))}
+          </div>
+
+          <button
+            className="mp-modal-cta"
+            onClick={() => navigateTo(isLogin ? "/login" : "/register")}
+          >
+            {isLogin ? "Sign In at solidflo.co.za" : "Get Started Free"}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M7 17L17 7M7 7h10v10" />
+            </svg>
+          </button>
+
+          <p className="mp-modal-switch">
+            {isLogin ? (
+              <>
+                Don't have an account?{" "}
+                <span className="mp-modal-switch-link" onClick={() => navigateTo("/register")}>
+                  Register free
+                </span>
+              </>
+            ) : (
+              <>
+                Already have an account?{" "}
+                <span className="mp-modal-switch-link" onClick={() => navigateTo("/login")}>
+                  Sign in
+                </span>
+              </>
+            )}
+          </p>
+
+          {!isLogin && (
+            <p className="mp-modal-footnote">
+              ✓ No credit card required &nbsp;·&nbsp; ✓ Free to start
+            </p>
+          )}
+        </div>
+
       </div>
     </div>
   );
 }
-
 // ── Hero ──────────────────────────────────────────────────────────────────────
 
 function Hero({ availCount, totalCount, onPostJob, onBrowse }) {
