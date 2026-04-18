@@ -227,7 +227,113 @@ const css = `
   0%   { transform: translateY(0); }
   100% { transform: translateY(-50%); }
 }
+/* ── Sidebar Ad ── */
+.mp-sidebar-ad {
+  margin: 12px 12px 16px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: box-shadow .2s, transform .2s;
+  flex-shrink: 0;
+  position: relative;
+}
+.mp-sidebar-ad:hover {
+  box-shadow: 0 4px 20px rgba(99,102,241,.12);
+  transform: translateY(-2px);
+}
 
+/* Rotation fade animation */
+@keyframes mp-ad-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mp-sidebar-ad-slot {
+  animation: mp-ad-fade .4s ease both;
+}
+
+/* Sponsored label */
+.mp-sidebar-ad-tag {
+  position: absolute; top: 8px; left: 8px; z-index: 3;
+  font-size: 9px; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase;
+  background: rgba(0,0,0,.45);
+  color: rgba(255,255,255,.7);
+  padding: 2px 7px; border-radius: 3px;
+  backdrop-filter: blur(4px);
+}
+
+/* Image variant */
+.mp-sidebar-ad-image {
+  width: 100%;
+  aspect-ratio: 6/5;      /* displays at ~376×313px from 300×250 source */
+  object-fit: cover;
+  display: block;
+}
+.mp-sidebar-ad-caption {
+  padding: 10px 12px 12px;
+  background: #fff;
+  border-top: 1px solid #f1f5f9;
+}
+.mp-sidebar-ad-caption strong {
+  font-size: 12px; color: #0f172a;
+  display: block; margin-bottom: 2px; font-weight: 700;
+}
+.mp-sidebar-ad-caption span {
+  font-size: 11px; color: #94a3b8; line-height: 1.4;
+}
+
+/* Branded card variant (no image) */
+.mp-sidebar-ad-branded {
+  padding: 18px 16px 16px;
+  position: relative; overflow: hidden;
+  min-height: 140px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+.mp-sidebar-ad-branded::before {
+  content: '';
+  position: absolute; top: -30px; right: -30px;
+  width: 110px; height: 110px; border-radius: 50%;
+  background: rgba(255,255,255,.07);
+}
+.mp-sidebar-ad-branded-headline {
+  font-size: 13px; font-weight: 700; color: #fff;
+  line-height: 1.35; margin-bottom: 5px;
+  position: relative; z-index: 1;
+}
+.mp-sidebar-ad-branded-sub {
+  font-size: 11px; color: rgba(255,255,255,.55);
+  line-height: 1.5; margin-bottom: 14px;
+  position: relative; z-index: 1;
+}
+.mp-sidebar-ad-branded-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase;
+  background: var(--red); color: #fff;
+  border: none; border-radius: 4px;
+  padding: 6px 12px; cursor: pointer;
+  transition: background .15s;
+  font-family: 'Lato', sans-serif;
+  width: fit-content;
+  position: relative; z-index: 1;
+}
+.mp-sidebar-ad-branded-btn:hover { background: var(--red-hover); }
+
+/* Dot indicators */
+.mp-sidebar-ad-dots {
+  display: flex; justify-content: center;
+  gap: 5px; padding: 8px 0 4px;
+}
+.mp-sidebar-ad-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #e2e8f0; border: none; padding: 0; cursor: pointer;
+  transition: background .2s, transform .2s;
+}
+.mp-sidebar-ad-dot.active {
+  background: var(--red);
+  transform: scale(1.3);
+}
 .mp-hero-mini-card {
   background: rgba(255,255,255,.07);
   border: 1px solid rgba(255,255,255,.1);
@@ -2442,7 +2548,41 @@ export default function PublicMarketplace() {
 
   // Active industry label for FAB
   const activeIndustry = INDUSTRIES.find((i) => i.id === activeFilter);
+const [currentAd, setCurrentAd] = useState(0);
 
+const ADS = [
+  {
+    type: "image",
+    src: "/ads/client-1.jpg",       // 300×250px
+    alt: "Client One Ad",
+    headline: "Client One Headline",
+    sub: "Short supporting line.",
+    url: "https://client-one.co.za",
+  },
+  {
+    type: "image",
+    src: "/ads/client-2.jpg",
+    alt: "Client Two Ad",
+    headline: "Client Two Headline",
+    sub: "Short supporting line.",
+    url: "https://client-two.co.za",
+  },
+  {
+    type: "branded",                 // no image — uses styled card
+    headline: "Manage invoices & quotes in one place",
+    sub: "Join 10,000+ businesses already using SolidFlo.",
+    cta: "Try Free →",
+    url: "https://solidflo.co.za",
+    bg: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
+  },
+];
+
+useEffect(() => {
+  const t = setInterval(() => {
+    setCurrentAd((prev) => (prev + 1) % ADS.length);
+  }, 6000); // rotates every 6 seconds
+  return () => clearInterval(t);
+}, []);
   // Scroll progress + nav scroll state
   useEffect(() => {
     const h = () => {
@@ -2543,6 +2683,58 @@ export default function PublicMarketplace() {
         <div className="mp-layout">
           {/* ── Sidebar (desktop only) ── */}
           <aside className="mp-sidebar">
+            {/* ── Rotating Ad Slot ── */}
+<div>
+  <div
+    key={currentAd}  /* key change triggers fade animation */
+    className="mp-sidebar-ad mp-sidebar-ad-slot"
+    onClick={() =>
+      window.open(ADS[currentAd].url, "_blank", "noopener,noreferrer")
+    }
+  >
+    <span className="mp-sidebar-ad-tag">Sponsored</span>
+
+    {ADS[currentAd].type === "image" ? (
+      <>
+        <img
+          src={ADS[currentAd].src}
+          alt={ADS[currentAd].alt}
+          className="mp-sidebar-ad-image"
+        />
+        <div className="mp-sidebar-ad-caption">
+          <strong>{ADS[currentAd].headline}</strong>
+          <span>{ADS[currentAd].sub}</span>
+        </div>
+      </>
+    ) : (
+      <div
+        className="mp-sidebar-ad-branded"
+        style={{ background: ADS[currentAd].bg }}
+      >
+        <div className="mp-sidebar-ad-branded-headline">
+          {ADS[currentAd].headline}
+        </div>
+        <div className="mp-sidebar-ad-branded-sub">
+          {ADS[currentAd].sub}
+        </div>
+        <button className="mp-sidebar-ad-branded-btn">
+          {ADS[currentAd].cta}
+        </button>
+      </div>
+    )}
+  </div>
+
+  {/* Dot indicators */}
+  <div className="mp-sidebar-ad-dots">
+    {ADS.map((_, i) => (
+      <button
+        key={i}
+        className={`mp-sidebar-ad-dot${i === currentAd ? " active" : ""}`}
+        onClick={() => setCurrentAd(i)}
+      />
+    ))}
+  </div>
+</div>
             <div className="mp-sidebar-header">
               <div className="mp-sidebar-title">Industries</div>
               <div className="mp-sidebar-search">
