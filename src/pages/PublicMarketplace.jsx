@@ -2551,13 +2551,14 @@ export default function PublicMarketplace() {
 const [currentAd, setCurrentAd] = useState(0);
 
 const ADS = [
-  {
-    type: "image",
-    src: "/ads/client-1.jpg",       // 300×250px
-    alt: "Client One Ad",
-    headline: "Client One Headline",
-    sub: "Short supporting line.",
-    url: "https://client-one.co.za",
+   {
+    "type": "image",
+    "name": "Alex Upholstery Hub d/bouble",
+    "headline": "Designer Collection",
+    "sub": "Experience the perfect blend of style",
+    "url": "https://alex-upholstery.co.za",
+    "status": "active",
+    "src": "/ads/alex-bed-1.png"
   },
   {
     type: "image",
