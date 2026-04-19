@@ -2170,7 +2170,7 @@ function MarketView({ onShowIncoming }) {
         ...listingData,
         ownerId:   user.uid,
         active:    true,
-        expiresAt,             // ← when it expires
+        expiresAt,
         updatedAt: serverTimestamp(),
       },
       { merge: true }
