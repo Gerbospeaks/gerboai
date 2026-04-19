@@ -1072,7 +1072,7 @@ const css = `
 }
 .mp-cta-perk {
   display: flex; align-items: center; gap: 6px;
-  font-size: 12px; color: rgba(255,255,255,.3);
+  font-size: 12px; color: rgb(0, 0, 0);
   font-weight: 600; letter-spacing: .02em;
 }
 .mp-cta-perk-check { color: #4ade80; }
