@@ -2255,7 +2255,20 @@ const INDUSTRY_ICON = {
   flooring: "🪵",
   windows: "🪟",
 };
-
+function normalizeProvider(p) {
+  return {
+    ...p,
+    available: p.available ?? p.avail ?? true,
+    location:  p.location  ?? p.loc  ?? "",
+    color:     p.color     ?? p.bg   ?? "#eef2ff",
+    textColor: p.textColor ?? p.tc   ?? "#4f46e5",
+    image:     p.image     ?? p.imageUrl ?? null,  // ✅ maps Firestore imageUrl → image
+    badges: (p.badges || []).map((b) => ({
+      label: b.label ?? b.l ?? "",
+      type:  b.type  ?? b.t ?? "blue",
+    })),
+  };
+}
 // ── Provider Card ─────────────────────────────────────────────────────────────
 
 function ProviderCard({ provider: p, onBook, delay = 0 }) {
@@ -2907,8 +2920,8 @@ const showToast = useCallback((msg) => {
   setTimeout(() => setToast(""), 3500);
 }, []);
  const { user }                        = useAuth();
-const { providers, loading, error }   = useProviders(activeFilter);
- 
+const { providers: rawProviders, loading, error } = useProviders(activeFilter);
+const providers = rawProviders.map(normalizeProvider);
 const featured   = providers.filter((p) => p.featured);
 const standard   = providers.filter((p) => !p.featured);
 const availCount = providers.filter((p) => p.avail).length;
