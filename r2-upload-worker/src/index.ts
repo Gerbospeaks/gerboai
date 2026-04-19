@@ -31,7 +31,9 @@ const worker = {
 		if (url.pathname === '/upload-pdf') {
 			return handlePdfUpload(request, env, corsHeaders);
 		}
-
+    if (url.pathname === '/upload-listing-image') {
+  return handleListingImageUpload(request, env, corsHeaders);
+}
 		if (url.pathname === '/ai') {
 			return handleAI(request, env, corsHeaders);
 		}
@@ -230,7 +232,57 @@ async function handleCleanupExpired(
     );
   }
 }
+async function handleListingImageUpload(
+  request: Request,
+  env: Env,
+  corsHeaders: Record<string, string>
+): Promise<Response> {
+  if (request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
+  }
+  try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
+    }
 
+    const idToken = authHeader.split('Bearer ')[1];
+    const payload = JSON.parse(atob(idToken.split('.')[1]));
+    const userId = payload.user_id;
+    if (!userId) {
+      return new Response('Invalid token', { status: 401, headers: corsHeaders });
+    }
+
+    const contentType = request.headers.get('Content-Type') || 'application/octet-stream';
+    if (!contentType.startsWith('image/')) {
+      return new Response('Only image files are allowed', { status: 415, headers: corsHeaders });
+    }
+
+    const fileBuffer = await request.arrayBuffer();
+    const timestamp = Date.now();
+    const extension = contentType.split('/')[1] || 'jpg';
+
+    // Saved under listings/ folder — separate from logos/
+    const fileName = `listings/${userId}/${timestamp}.${extension}`;
+
+    await env.LOGOS_BUCKET.put(fileName, fileBuffer, {
+      httpMetadata: { contentType },
+    });
+
+    const publicUrl = `https://${env.R2_PUBLIC_DOMAIN}/${fileName}`;
+
+    return new Response(JSON.stringify({ publicUrl }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  } catch (err: any) {
+    console.error('Listing image upload error:', err);
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+}
 // ── Get a Firebase auth token using a service account ──────────────────────
 async function getFirebaseToken(env: Env): Promise<string> {
   const now     = Math.floor(Date.now() / 1000);

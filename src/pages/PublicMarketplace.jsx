@@ -826,7 +826,7 @@ const css = `
  .mp-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px; margin-bottom: 8px;
+  gap: 18px; margin-bottom: 8px;
 }
 .mp-card {
   background: #fff;
@@ -2258,91 +2258,276 @@ const INDUSTRY_ICON = {
 
 // ── Provider Card ─────────────────────────────────────────────────────────────
 
-function ProviderCard({ provider: p, expanded, onToggle, onBook, delay }) {
+function ProviderCard({ provider: p, onBook, delay = 0 }) {
   const icon = INDUSTRY_ICON[p.industry] || "🏢";
+  const isAvail = p.avail ?? p.available;
+
   return (
     <div
-      className={`mp-card${p.featured ? " featured" : ""}`}
-      style={{ animationDelay: `${delay}ms` }}
-      onClick={() => onToggle(p.id)}
+      style={{
+        background: "#fff",
+        borderRadius: 12,
+        border: p.featured
+          ? `1.5px solid rgba(99,102,241,.4)`
+          : `1px solid #e2e8f0`,
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        transition: "box-shadow .2s, transform .2s",
+        position: "relative",
+        overflow: "hidden",
+        boxShadow: p.featured ? "0 2px 16px rgba(99,102,241,.08)" : "none",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = "0 10px 36px rgba(15,23,42,.1)";
+        e.currentTarget.style.transform = "translateY(-3px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = p.featured
+          ? "0 2px 16px rgba(99,102,241,.08)"
+          : "none";
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
     >
-      {/* ── Image-style banner ── */}
+      {/* ── Image / Fallback Banner ── */}
       <div
-        className="mp-card-banner"
         style={{
-          background: `linear-gradient(135deg, ${p.bg} 0%, ${p.bg}cc 100%)`,
+          width: "100%",
+          height: 160,
+          position: "relative",
+          overflow: "hidden",
+          flexShrink: 0,
+          background: `linear-gradient(135deg, ${p.bg || p.color || "#eef2ff"} 0%, ${p.bg || p.color || "#eef2ff"}cc 100%)`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <span className="mp-card-banner-initials" style={{ color: p.tc }}>
-          {p.initials}
-        </span>
-        <span className="mp-card-banner-icon">{icon}</span>
+        {/* If provider has an image, show it */}
+        {p.image ? (
+          <img
+            src={p.image}
+            alt={p.name}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+              position: "absolute",
+              inset: 0,
+            }}
+          />
+        ) : (
+          <>
+            {/* Fallback — large faint initials + emoji icon */}
+            <span
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: 52,
+                fontWeight: 900,
+                opacity: 0.15,
+                position: "absolute",
+                color: p.tc || p.textColor || "#4f46e5",
+                userSelect: "none",
+                letterSpacing: "-.03em",
+              }}
+            >
+              {p.initials}
+            </span>
+            <span
+              style={{
+                fontSize: 48,
+                position: "relative",
+                zIndex: 1,
+                filter: "drop-shadow(0 4px 12px rgba(0,0,0,.15))",
+              }}
+            >
+              {icon}
+            </span>
+          </>
+        )}
+
+        {/* Dark overlay on image for readability */}
+        {p.image && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(to top, rgba(15,23,42,.55) 0%, transparent 55%)",
+              zIndex: 1,
+            }}
+          />
+        )}
 
         {/* Available pill — top left */}
-        {p.avail && (
-          <span className="mp-card-avail-pip">
-            <span className="mp-card-avail-pip-dot" />
+        {isAvail && (
+          <span
+            style={{
+              position: "absolute", top: 10, left: 10, zIndex: 2,
+              display: "flex", alignItems: "center", gap: 5,
+              background: "rgba(255,255,255,.92)", borderRadius: 20,
+              padding: "4px 10px", fontSize: 10, fontWeight: 700,
+              color: "#16a34a", backdropFilter: "blur(6px)",
+            }}
+          >
+            <span
+              style={{
+                width: 6, height: 6, borderRadius: "50%",
+                background: "#4ade80", boxShadow: "0 0 6px #4ade80",
+              }}
+            />
             Available
           </span>
         )}
 
         {/* Top Rated badge — top right */}
         {p.featured && (
-          <span className="mp-card-featured-badge">⭐ Top Rated</span>
+          <span
+            style={{
+              position: "absolute", top: 10, right: 10, zIndex: 2,
+              fontSize: 10, fontWeight: 700,
+              background: "rgba(255,255,255,.92)", color: "#6366f1",
+              padding: "4px 10px", borderRadius: 20,
+              border: "1px solid rgba(99,102,241,.25)",
+              backdropFilter: "blur(6px)",
+            }}
+          >
+            ⭐ Top Rated
+          </span>
+        )}
+
+        {/* Name overlay on image */}
+        {p.image && (
+          <div
+            style={{
+              position: "absolute", bottom: 10, left: 12, right: 12,
+              zIndex: 2,
+              fontSize: 15, fontWeight: 800, color: "#fff",
+              fontFamily: "'Playfair Display', serif",
+              letterSpacing: "-.01em",
+              textShadow: "0 1px 6px rgba(0,0,0,.4)",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}
+          >
+            {p.name}
+          </div>
         )}
       </div>
 
-      {/* ── Card body ── */}
-      <div className="mp-card-body">
-        {/* Name + rate */}
-        <div className="mp-card-title-row">
-          <div className="mp-card-name">{p.name}</div>
-          <span className="mp-card-rate">{p.rate}</span>
-        </div>
+      {/* ── Card Body ── */}
+      <div style={{ padding: "16px 18px 14px", display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
 
-        {/* Location + industry */}
-        <div className="mp-card-meta">
-          {getIndustryLabel(p.industry)} · {p.loc}
-        </div>
+        {/* Top row — avatar + name (only shown when NO image) */}
+        {!p.image && (
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+            <div
+              style={{
+                width: 46, height: 46, borderRadius: 10, flexShrink: 0,
+                background: p.bg || p.color || "#eef2ff",
+                color: p.tc || p.textColor || "#4f46e5",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 12, fontWeight: 700,
+              }}
+            >
+              {p.initials}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 14, fontWeight: 700, color: "#0f172a",
+                  overflow: "hidden", textOverflow: "ellipsis",
+                  whiteSpace: "nowrap", marginBottom: 3,
+                }}
+              >
+                {p.name}
+              </div>
+              <div style={{ fontSize: 12, color: "#94a3b8" }}>
+                {getIndustryLabel(p.industry)} · {p.loc || p.location}
+              </div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, flexShrink: 0 }}>
+              {p.featured && (
+                <span style={{ fontSize: 10, fontWeight: 700, background: "#eef2ff", color: "#6366f1", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(99,102,241,.2)" }}>
+                  Top Rated
+                </span>
+              )}
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", whiteSpace: "nowrap" }}>
+                {p.rate}
+              </span>
+            </div>
+          </div>
+        )}
 
-        {/* About (always visible now) */}
-        <div className="mp-card-about">{p.about}</div>
+        {/* When image exists, show rate + location below banner */}
+        {p.image && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ fontSize: 12, color: "#94a3b8" }}>
+              {getIndustryLabel(p.industry)} · {p.loc || p.location}
+            </div>
+            <span
+              style={{
+                fontSize: 11, fontWeight: 700, color: "#6366f1",
+                background: "#eef2ff", border: "1px solid rgba(99,102,241,.18)",
+                padding: "3px 10px", borderRadius: 20, whiteSpace: "nowrap",
+              }}
+            >
+              {p.rate}
+            </span>
+          </div>
+        )}
 
         {/* Badges */}
-        <div className="mp-card-badges">
-          {p.badges.map((b, i) => (
-            <Badge key={i} label={b.l} type={b.t} />
+        <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+          {(p.badges || []).map((b, i) => (
+            <Badge key={i} label={b.l || b.label} type={b.t || b.type} />
           ))}
         </div>
 
         {/* Stats */}
-        <div className="mp-card-stats">
-          <span className="mp-card-stat">
-            <span style={{ color: "#f59e0b" }}>★</span> {p.rating} ({p.reviews}{" "}
-            reviews)
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12, color: "#94a3b8" }}>
+            <span style={{ color: "#f59e0b" }}>★</span> {p.rating} ({p.reviews})
           </span>
-          <span className="mp-card-stat">⏱ {p.response}</span>
-          {!p.avail && <span className="mp-card-unavail">Unavailable</span>}
+          <span style={{ fontSize: 12, color: "#94a3b8" }}>⏱ {p.response}</span>
+          {!isAvail && (
+            <span style={{ fontSize: 11, color: "#dc2626", fontWeight: 700 }}>Unavailable</span>
+          )}
+        </div>
+
+        {/* About */}
+        <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.65 }}>
+          {p.about}
         </div>
       </div>
 
-      {/* ── Shop-Now style footer link ── */}
-      <div className="mp-card-footer">
+      {/* ── CTA Button ── */}
+      <div style={{ padding: "0 18px 16px", borderTop: "1px solid #f1f5f9", paddingTop: 12 }}>
         <button
-          className={`mp-card-btn ${p.avail ? "mp-card-btn-avail" : "mp-card-btn-unavail"}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (p.avail) onBook(p);
+          onClick={(e) => { e.stopPropagation(); if (isAvail) onBook(p); }}
+          style={{
+            width: "100%", padding: "12px 0", borderRadius: 6,
+            fontSize: 12, fontWeight: 700, letterSpacing: ".05em",
+            textTransform: "uppercase",
+            cursor: isAvail ? "pointer" : "not-allowed",
+            background: isAvail ? "#0f172a" : "#f8fafc",
+            color: isAvail ? "#fff" : "#94a3b8",
+            border: isAvail ? "1px solid #0f172a" : "1px solid #e2e8f0",
+            transition: "all .18s",
+          }}
+          onMouseEnter={(e) => {
+            if (isAvail) {
+              e.currentTarget.style.background = "#6366f1";
+              e.currentTarget.style.borderColor = "#6366f1";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (isAvail) {
+              e.currentTarget.style.background = "#0f172a";
+              e.currentTarget.style.borderColor = "#0f172a";
+            }
           }}
         >
-          {p.avail ? (
-            <>
-              Book Now — Get a Quote
-              <span className="mp-card-btn-arrow">→</span>
-            </>
-          ) : (
-            "Currently Unavailable"
-          )}
+          {isAvail ? "Book Now — Get a Quote" : "Currently Unavailable"}
         </button>
       </div>
     </div>

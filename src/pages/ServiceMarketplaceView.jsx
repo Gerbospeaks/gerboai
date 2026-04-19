@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react";
 import BookingPanel from "../components/BookingPanel";
+import { getAuth } from "firebase/auth";
+import { uploadListingImageToR2 } from "../utils/uploadListingImageToR2";
 import {  Timestamp } from "firebase/firestore";
 import {
   sendBookingRequest,
@@ -1688,11 +1690,16 @@ function PostServiceModal({ onClose, onSubmit }) {
   const [industry, setIndustry]         = useState("mechanics");
   const [about, setAbout]               = useState("");
   const [rate, setRate]                 = useState("");
-  const [duration, setDuration] = useState(30);
+  const [duration, setDuration]         = useState(30);
   const [location, setLocation]         = useState("");
   const [response, setResponse]         = useState("~1 hr");
   const [badges, setBadges]             = useState("");
   const [saving, setSaving]             = useState(false);
+
+  // ── Image state ──
+  const [imageFile, setImageFile]       = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const inp = {
     width: "100%", padding: "9px 12px", fontSize: 13,
@@ -1706,35 +1713,64 @@ function PostServiceModal({ onClose, onSubmit }) {
     display: "block", marginBottom: 5,
   };
 
+  function handleImageChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return alert("Please select an image file.");
+    if (file.size > 5 * 1024 * 1024) return alert("Image must be under 5MB.");
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  }
+
   async function handleSubmit() {
     if (!businessName.trim() || !about.trim()) return;
     setSaving(true);
-    const expiresAt = Timestamp.fromDate(new Date(Date.now() + duration * 24 * 60 * 60 * 1000));
-    await onSubmit({
-      businessName,
-      name: businessName,
-      industry,
-      about,
-      rate:      rate     || "Quote on request",
-      location:  location || "",
-      response:  response || "~1 hr",
-      expiresAt,
-      // Convert comma-separated badge text into badge objects
-      badges: badges
-        .split(",")
-        .map(b => b.trim())
-        .filter(Boolean)
-        .map(b => ({ label: b, type: "blue" })),
-      initials:  businessName.slice(0, 2).toUpperCase(),
-      color:     "#eef2ff",
-      textColor: "#4f46e5",
-      rating:    0,
-      reviews:   0,
-      featured:  false,
-      active:    true,
-      available: true,
-    });
-    setSaving(false);
+    try {
+      let imageUrl = "";
+
+      // Upload image to Cloudflare R2 first if one was selected
+      if (imageFile) {
+        setUploadingImage(true);
+        const authUser = getAuth().currentUser;
+        imageUrl = await uploadListingImageToR2(imageFile, authUser);
+        setUploadingImage(false);
+      }
+
+      const expiresAt = Timestamp.fromDate(
+        new Date(Date.now() + duration * 24 * 60 * 60 * 1000)
+      );
+
+      await onSubmit({
+        businessName,
+        name: businessName,
+        industry,
+        about,
+        rate:      rate || "Quote on request",
+        location:  location || "",
+        response:  response || "~1 hr",
+        expiresAt,
+        imageUrl,           // ← Cloudflare R2 URL saved to Firestore
+        badges: badges
+          .split(",")
+          .map(b => b.trim())
+          .filter(Boolean)
+          .map(b => ({ label: b, type: "blue" })),
+        initials:  businessName.slice(0, 2).toUpperCase(),
+        color:     "#eef2ff",
+        textColor: "#4f46e5",
+        rating:    0,
+        reviews:   0,
+        featured:  false,
+        active:    true,
+        available: true,
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to publish: " + err.message);
+    } finally {
+      setSaving(false);
+      setUploadingImage(false);
+    }
   }
 
   return (
@@ -1762,6 +1798,64 @@ function PostServiceModal({ onClose, onSubmit }) {
             Your listing will appear on the marketplace for clients to book.
           </div>
         </div>
+
+        {/* ── Listing Image ── */}
+        <label style={lbl}>Listing Image</label>
+        <div
+          style={{
+            marginBottom: 14,
+            border: `2px dashed ${T.border}`,
+            borderRadius: 10,
+            overflow: "hidden",
+            cursor: "pointer",
+            position: "relative",
+          }}
+          onClick={() => document.getElementById("listing-img-upload").click()}
+        >
+          {imagePreview ? (
+            <img
+              src={imagePreview}
+              alt="Preview"
+              style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }}
+            />
+          ) : (
+            <div style={{
+              height: 120,
+              display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center",
+              gap: 8, color: T.textMuted,
+            }}>
+              <span style={{ fontSize: 28 }}>🖼️</span>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>
+                Click to upload a banner image
+              </span>
+              <span style={{ fontSize: 11 }}>PNG, JPG — max 5MB</span>
+            </div>
+          )}
+
+          {/* Change overlay when image exists */}
+          {imagePreview && (
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "rgba(15,23,42,.45)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              opacity: 0, transition: "opacity .2s",
+              color: "#fff", fontSize: 13, fontWeight: 700,
+            }}
+              onMouseEnter={e => e.currentTarget.style.opacity = 1}
+              onMouseLeave={e => e.currentTarget.style.opacity = 0}
+            >
+              Change Image
+            </div>
+          )}
+        </div>
+        <input
+          id="listing-img-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          style={{ display: "none" }}
+        />
 
         {/* Business Name */}
         <label style={lbl}>Business Name *</label>
@@ -1792,7 +1886,7 @@ function PostServiceModal({ onClose, onSubmit }) {
           onChange={e => setAbout(e.target.value)}
           placeholder="e.g. Specialist in fleet vehicle maintenance and roadworthy inspections."
         />
-          
+
         {/* Rate */}
         <label style={lbl}>Rate / Pricing</label>
         <input
@@ -1801,17 +1895,20 @@ function PostServiceModal({ onClose, onSubmit }) {
           onChange={e => setRate(e.target.value)}
           placeholder="e.g. R450/hr or Custom quote"
         />
+
+        {/* Duration */}
         <label style={lbl}>Listing Duration</label>
-<select
-  style={{ ...inp, cursor: "pointer" }}
-  value={duration}
-  onChange={e => setDuration(Number(e.target.value))}
->
-  <option value={7}>1 Week</option>
-  <option value={14}>2 Weeks</option>
-  <option value={30}>1 Month</option>
-  <option value={90}>3 Months</option>
-</select>
+        <select
+          style={{ ...inp, cursor: "pointer" }}
+          value={duration}
+          onChange={e => setDuration(Number(e.target.value))}
+        >
+          <option value={7}>1 Week</option>
+          <option value={14}>2 Weeks</option>
+          <option value={30}>1 Month</option>
+          <option value={90}>3 Months</option>
+        </select>
+
         {/* Location */}
         <label style={lbl}>Location</label>
         <input
@@ -1837,7 +1934,7 @@ function PostServiceModal({ onClose, onSubmit }) {
           <option>~4 hrs</option>
         </select>
 
-        {/* Badges / tags */}
+        {/* Tags */}
         <label style={lbl}>Service Tags</label>
         <input
           style={inp}
@@ -1870,7 +1967,7 @@ function PostServiceModal({ onClose, onSubmit }) {
               border: "none", cursor: "pointer", opacity: saving ? .6 : 1,
             }}
           >
-            {saving ? "Publishing..." : "Publish Listing"}
+            {uploadingImage ? "Uploading image..." : saving ? "Publishing..." : "Publish Listing"}
           </button>
         </div>
       </div>
