@@ -259,25 +259,26 @@ function GatewayRow({ gateway, saved, onSave }) {
 }
 async function createProviderProfile(user, businessInfo) {
   await setDoc(
-    doc(db, "serviceProviders", user.uid),
+    doc(db, "providers", user.uid),  
     {
-      uid: user.uid,
+      ownerId:      user.uid,         
+      active:       true,             
       businessName: businessInfo.businessName,
-      industry: businessInfo.industry,
-      location: businessInfo.location || "",
-      rate: businessInfo.rate || "Quote on request",
-      rating: 0,
-      reviewCount: 0,
-      responseTime: "TBD",
-      available: true,
-      featured: false,
-      initials: businessInfo.businessName.slice(0, 2).toUpperCase(),
-      about: "",
-      badges: [],
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      name:         businessInfo.businessName,
+      industry:     businessInfo.industry,
+      location:     businessInfo.location || "",
+      rate:         businessInfo.rate || "Quote on request",
+      rating:       0,
+      reviewCount:  0,
+      response:     "TBD",
+      available:    true,
+      featured:     false,
+      initials:     businessInfo.businessName.slice(0, 2).toUpperCase(),
+      about:        businessInfo.about || "",
+      badges:       [],
+      updatedAt:    serverTimestamp(),
     },
-    { merge: true },
+    { merge: true }
   );
 }
 // ─── Main modal ────────────────────────────────────────────────────────────────

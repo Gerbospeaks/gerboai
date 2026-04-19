@@ -8,8 +8,8 @@ import {
   useMyRequests,
   useIncomingRequests,
 } from "../hooks/useBookingRequests";
-import { useMyProviderListing } from "../hooks/useProviders";
-import { useAuth }              from "../contexts/AuthContext";
+import { useProviders, useMyProviderListing } from "../hooks/useProviders";
+import { useAuth } from "../contexts/AuthContext";
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const T = {
   navy: "#0f172a",
@@ -798,10 +798,10 @@ const INITIAL_MY_REQS = [
 ];
 
 const STATUS_PILL = {
-  new:      { bg: T.purpleLt, color: T.purple, label: "Awaiting quote" },
-  quoted:   { bg: T.amberLt,  color: T.amber,  label: "Quote received" },
-  accepted: { bg: T.greenLt,  color: T.green,  label: "Confirmed" },
-  declined: { bg: T.redLt,    color: T.red,     label: "Declined" },
+  new: { bg: T.purpleLt, color: T.purple, label: "Awaiting quote" },
+  quoted: { bg: T.amberLt, color: T.amber, label: "Quote received" },
+  accepted: { bg: T.greenLt, color: T.green, label: "Confirmed" },
+  declined: { bg: T.redLt, color: T.red, label: "Declined" },
 };
 
 const INC_STATUS = {
@@ -828,11 +828,6 @@ const BADGE_COLORS = {
 
 function getLabel(id) {
   return (INDUSTRIES.find((i) => i.id === id) || { label: id }).label;
-}
-
-function industryCount(id) {
-  if (id === "all") return PROVIDERS.length;
-  return PROVIDERS.filter((p) => p.industry === id).length;
 }
 
 // ── Shared primitives ─────────────────────────────────────────────────────────
@@ -1021,12 +1016,15 @@ function Topbar({ title, subtitle, icon, right, onBack }) {
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 
-function Sidebar({ active, onSelect }) {
+function Sidebar({ active, onSelect, providers = [] }) {
   const [search, setSearch] = useState("");
-  const filtered = INDUSTRIES.filter((i) =>
+  const filteredIndustries = INDUSTRIES.filter((i) =>
     i.label.toLowerCase().includes(search.toLowerCase()),
   );
-
+  function industryCount(id) {
+    if (id === "all") return providers.length;
+    return providers.filter((p) => p.industry === id).length;
+  }
   return (
     <aside
       style={{
@@ -1102,7 +1100,7 @@ function Sidebar({ active, onSelect }) {
           overflowY: "auto",
         }}
       >
-        {filtered.map((ind, i) => {
+        {filteredIndustries.map((ind, i) => {
           const isActive = active === ind.id;
           return (
             <div key={ind.id}>
@@ -1529,12 +1527,14 @@ function MyRequests({ reqs }) {
               }}
             >
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: T.textPri }}>
-  {req.providerName}   {/* was req.name */}
-</div>
-<div style={{ fontSize: 11, color: T.textMuted, marginTop: 2 }}>
-  {getLabel(req.providerIndustry)} · Requested {req.receivedAt}  
-</div>
+                <div
+                  style={{ fontSize: 13, fontWeight: 600, color: T.textPri }}
+                >
+                  {req.providerName} {/* was req.name */}
+                </div>
+                <div style={{ fontSize: 11, color: T.textMuted, marginTop: 2 }}>
+                  {getLabel(req.providerIndustry)} · Requested {req.receivedAt}
+                </div>
               </div>
               <span
                 style={{
@@ -1681,15 +1681,213 @@ function QuoteModal({ target, onClose, onSend }) {
     </div>
   );
 }
+function PostServiceModal({ onClose, onSubmit }) {
+  const [businessName, setBusinessName] = useState("");
+  const [industry, setIndustry]         = useState("mechanics");
+  const [about, setAbout]               = useState("");
+  const [rate, setRate]                 = useState("");
+  const [location, setLocation]         = useState("");
+  const [response, setResponse]         = useState("~1 hr");
+  const [badges, setBadges]             = useState("");
+  const [saving, setSaving]             = useState(false);
 
+  const inp = {
+    width: "100%", padding: "9px 12px", fontSize: 13,
+    border: `1px solid ${T.border}`, borderRadius: 8,
+    outline: "none", fontFamily: "'Lato', sans-serif",
+    marginBottom: 14, boxSizing: "border-box",
+  };
+  const lbl = {
+    fontSize: 11, fontWeight: 700, color: T.textMid,
+    textTransform: "uppercase", letterSpacing: ".05em",
+    display: "block", marginBottom: 5,
+  };
+
+  async function handleSubmit() {
+    if (!businessName.trim() || !about.trim()) return;
+    setSaving(true);
+    await onSubmit({
+      businessName,
+      name: businessName,
+      industry,
+      about,
+      rate:      rate     || "Quote on request",
+      location:  location || "",
+      response:  response || "~1 hr",
+      // Convert comma-separated badge text into badge objects
+      badges: badges
+        .split(",")
+        .map(b => b.trim())
+        .filter(Boolean)
+        .map(b => ({ label: b, type: "blue" })),
+      initials:  businessName.slice(0, 2).toUpperCase(),
+      color:     "#eef2ff",
+      textColor: "#4f46e5",
+      rating:    0,
+      reviews:   0,
+      featured:  false,
+      active:    true,
+      available: true,
+    });
+    setSaving(false);
+  }
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0,
+      background: "rgba(15,23,42,.55)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      zIndex: 1000, padding: 20, backdropFilter: "blur(6px)",
+    }}>
+      <div style={{
+        background: "#fff", borderRadius: 14, padding: 28,
+        width: "100%", maxWidth: 480,
+        boxShadow: "0 24px 60px rgba(15,23,42,.25)",
+        maxHeight: "90vh", overflowY: "auto",
+      }}>
+        {/* Header */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{
+            fontSize: 18, fontFamily: "'Playfair Display', serif",
+            fontWeight: 600, color: T.textPri, marginBottom: 4,
+          }}>
+            List Your Service
+          </div>
+          <div style={{ fontSize: 13, color: T.textMuted }}>
+            Your listing will appear on the marketplace for clients to book.
+          </div>
+        </div>
+
+        {/* Business Name */}
+        <label style={lbl}>Business Name *</label>
+        <input
+          style={inp}
+          value={businessName}
+          onChange={e => setBusinessName(e.target.value)}
+          placeholder="e.g. Jake's Motor Workshop"
+        />
+
+        {/* Industry */}
+        <label style={lbl}>Industry *</label>
+        <select
+          style={{ ...inp, cursor: "pointer" }}
+          value={industry}
+          onChange={e => setIndustry(e.target.value)}
+        >
+          {INDUSTRIES.filter(i => i.id !== "all").map(i => (
+            <option key={i.id} value={i.id}>{i.emoji} {i.label}</option>
+          ))}
+        </select>
+
+        {/* About */}
+        <label style={lbl}>Describe your service *</label>
+        <textarea
+          style={{ ...inp, resize: "vertical", minHeight: 80 }}
+          value={about}
+          onChange={e => setAbout(e.target.value)}
+          placeholder="e.g. Specialist in fleet vehicle maintenance and roadworthy inspections."
+        />
+
+        {/* Rate */}
+        <label style={lbl}>Rate / Pricing</label>
+        <input
+          style={inp}
+          value={rate}
+          onChange={e => setRate(e.target.value)}
+          placeholder="e.g. R450/hr or Custom quote"
+        />
+
+        {/* Location */}
+        <label style={lbl}>Location</label>
+        <input
+          style={inp}
+          value={location}
+          onChange={e => setLocation(e.target.value)}
+          placeholder="e.g. Randburg, JHB"
+        />
+
+        {/* Response time */}
+        <label style={lbl}>Typical Response Time</label>
+        <select
+          style={{ ...inp, cursor: "pointer" }}
+          value={response}
+          onChange={e => setResponse(e.target.value)}
+        >
+          <option>~15 min</option>
+          <option>~20 min</option>
+          <option>~30 min</option>
+          <option>~45 min</option>
+          <option>~1 hr</option>
+          <option>~2 hrs</option>
+          <option>~4 hrs</option>
+        </select>
+
+        {/* Badges / tags */}
+        <label style={lbl}>Service Tags</label>
+        <input
+          style={inp}
+          value={badges}
+          onChange={e => setBadges(e.target.value)}
+          placeholder="e.g. Available today, Fleet servicing, Diagnostics"
+        />
+        <div style={{ fontSize: 11, color: T.textMuted, marginBottom: 14, marginTop: -10 }}>
+          Comma-separated — shown as badges on your card
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+          <button
+            onClick={onClose}
+            style={{
+              fontSize: 13, fontWeight: 700, padding: "10px 18px",
+              borderRadius: 8, background: "#f8fafc",
+              color: T.textMid, border: `1px solid ${T.border}`, cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={saving || !businessName.trim() || !about.trim()}
+            style={{
+              flex: 1, fontSize: 13, fontWeight: 700, padding: 10,
+              borderRadius: 8, background: T.indigo, color: "#fff",
+              border: "none", cursor: "pointer", opacity: saving ? .6 : 1,
+            }}
+          >
+            {saving ? "Publishing..." : "Publish Listing"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 // ── MarketView ────────────────────────────────────────────────────────────────
+function normalizeProvider(p) {
+  return {
+    ...p,
+    available: p.available ?? p.avail ?? true,
+    location: p.location ?? p.loc ?? "",
+    color: p.color ?? p.bg ?? "#eef2ff",
+    textColor: p.textColor ?? p.tc ?? "#4f46e5",
+    badges: (p.badges || []).map((b) => ({
+      label: b.label ?? b.l ?? "",
+      type: b.type ?? b.t ?? "blue",
+    })),
+  };
+}
 
 function MarketView({ onShowIncoming }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [bookingProvider, setBookingProvider] = useState(null);
   const [expandedCards, setExpandedCards] = useState({});
-  const { user }        = useAuth();
-  const { requests: myReqs = [], loading: reqsLoading } = useMyRequests(user?.uid);
+  const [postingOpen, setPostingOpen] = useState(false);
+  const { providers: rawProviders, loading } = useProviders(activeCategory);
+  const providers = rawProviders.map(normalizeProvider);
+  const { user } = useAuth();
+  const { requests: myReqs = [], loading: reqsLoading } = useMyRequests(
+    user?.uid,
+  );
   const [toast, setToast] = useState("");
 
   const showToast = useCallback((msg) => {
@@ -1697,34 +1895,30 @@ function MarketView({ onShowIncoming }) {
     setTimeout(() => setToast(""), 3500);
   }, []);
 
-  const filtered =
-    activeCategory === "all"
-      ? PROVIDERS
-      : PROVIDERS.filter((p) => p.industry === activeCategory);
-  const featured = filtered.filter((p) => p.featured);
-  const standard = filtered.filter((p) => !p.featured);
-  const availCount = PROVIDERS.filter((p) => p.available).length;
+  const featured = providers.filter((p) => p.featured);
+  const standard = providers.filter((p) => !p.featured);
+  const availCount = providers.filter((p) => p.available || p.avail).length;
 
   const toggleCard = (id) =>
     setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
   const handleBook = (id) => {
-    const p = PROVIDERS.find((x) => x.id === id);
-    if (p?.available) setBookingProvider(p);
+    const p = providers.find((x) => x.id === id);
+    if (p?.available ?? p?.avail) setBookingProvider(p);
   };
-const handleSubmitBooking = useCallback(
-  async (provider, formData) => {
-    try {
-      await sendBookingRequest(formData, provider, user);
-      setBookingProvider(null);
-      showToast(`Booking sent to ${provider.name}!`);
-    } catch (err) {
-      console.error(err);
-      showToast("Failed to send booking. Please try again.");
-    }
-  },
-  [user],
-);
- 
+  const handleSubmitBooking = useCallback(
+    async (provider, formData) => {
+      try {
+        await sendBookingRequest(formData, provider, user);
+        setBookingProvider(null);
+        showToast(`Booking sent to ${provider.name}!`);
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to send booking. Please try again.");
+      }
+    },
+    [user],
+  );
+
   const handleFilterChange = (id) => {
     setActiveCategory(id);
     setBookingProvider(null);
@@ -1776,7 +1970,7 @@ const handleSubmitBooking = useCallback(
               Incoming Requests
             </button>
             <button
-              onClick={onShowIncoming}
+              onClick={() => setPostingOpen(true)}
               style={{
                 height: 36,
                 padding: "0 20px",
@@ -1793,7 +1987,7 @@ const handleSubmitBooking = useCallback(
                 gap: 6,
               }}
             >
-              <span>+</span> Post a Request
+              <span>+</span> List My Service
             </button>
           </div>
         }
@@ -1811,73 +2005,29 @@ const handleSubmitBooking = useCallback(
           margin: "0 auto",
         }}
       >
-        <Sidebar active={activeCategory} onSelect={handleFilterChange} />
+        <Sidebar
+          active={activeCategory}
+          onSelect={handleFilterChange}
+          providers={providers}
+        />
 
         {/* Main */}
+        {/* Main */}
         <div style={{ minWidth: 0 }}>
-          <AvailBanner
-            availNow={filtered.filter((p) => p.available).length}
-            total={filtered.length}
-          />
+          <AvailBanner availNow={availCount} total={providers.length} />
 
-          {/* Featured */}
-          {featured.length > 0 && (
-            <>
-              <SectionTitle count={featured.length}>
-                Recommended for you
-              </SectionTitle>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3,1fr)",
-                  gap: 18,
-                  marginBottom: 8,
-                }}
-              >
-                {featured.map((p) => (
-                  <ProviderCard
-                    key={p.id}
-                    provider={p}
-                    expanded={!!expandedCards[p.id]}
-                    onToggle={toggleCard}
-                    onBook={handleBook}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Standard */}
-          {standard.length > 0 && (
-            <>
-              {featured.length > 0 && (
-                <SectionTitle count={standard.length}>
-                  More providers
-                </SectionTitle>
-              )}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3,1fr)",
-                  gap: 18,
-                  marginBottom: 8,
-                }}
-              >
-                {standard.map((p) => (
-                  <ProviderCard
-                    key={p.id}
-                    provider={p}
-                    expanded={!!expandedCards[p.id]}
-                    onToggle={toggleCard}
-                    onBook={handleBook}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Empty */}
-          {filtered.length === 0 && (
+          {/* ── Content: loading / empty / grids ── */}
+          {loading ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "80px 24px",
+                color: T.textMuted,
+              }}
+            >
+              Loading providers...
+            </div>
+          ) : providers.length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px 24px" }}>
               <div
                 style={{
@@ -1910,9 +2060,67 @@ const handleSubmitBooking = useCallback(
                 Be the first to list your business in this category.
               </div>
             </div>
+          ) : (
+            <>
+              {/* Featured */}
+              {featured.length > 0 && (
+                <>
+                  <SectionTitle count={featured.length}>
+                    Recommended for you
+                  </SectionTitle>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(3,1fr)",
+                      gap: 18,
+                      marginBottom: 8,
+                    }}
+                  >
+                    {featured.map((p) => (
+                      <ProviderCard
+                        key={p.id}
+                        provider={p}
+                        expanded={!!expandedCards[p.id]}
+                        onToggle={toggleCard}
+                        onBook={handleBook}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Standard */}
+              {standard.length > 0 && (
+                <>
+                  {featured.length > 0 && (
+                    <SectionTitle count={standard.length}>
+                      More providers
+                    </SectionTitle>
+                  )}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(3,1fr)",
+                      gap: 18,
+                      marginBottom: 8,
+                    }}
+                  >
+                    {standard.map((p) => (
+                      <ProviderCard
+                        key={p.id}
+                        provider={p}
+                        expanded={!!expandedCards[p.id]}
+                        onToggle={toggleCard}
+                        onBook={handleBook}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
           )}
 
-          {/* Booking panel */}
+          {/* Booking panel — always outside the loading/empty/grid block */}
           {bookingProvider && (
             <div style={{ marginTop: 12 }}>
               <BookingPanel
@@ -1923,12 +2131,33 @@ const handleSubmitBooking = useCallback(
             </div>
           )}
 
-          {/* My requests */}
+          {/* My requests — always shown */}
           <div style={{ marginTop: 36 }}>
             <MyRequests reqs={myReqs} />
           </div>
         </div>
       </div>
+     {postingOpen && (
+  <PostServiceModal
+    onClose={() => setPostingOpen(false)}
+    onSubmit={async (listingData) => {
+      try {
+        const { setDoc, doc, serverTimestamp } = await import("firebase/firestore");
+        const { db } = await import("../firebase");
+        await setDoc(
+          doc(db, "providers", user.uid),
+          { ...listingData, ownerId: user.uid, updatedAt: serverTimestamp() },
+          { merge: true }
+        );
+        setPostingOpen(false);
+        showToast("Your service is now live on the marketplace!");
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to publish. Please try again.");
+      }
+    }}
+  />
+)}
 
       <Toast message={toast} />
     </div>
@@ -1938,9 +2167,11 @@ const handleSubmitBooking = useCallback(
 // ── IncomingView ──────────────────────────────────────────────────────────────
 
 function IncomingView({ onBack }) {
-  const { user }    = useAuth();
-const { listing } = useMyProviderListing(user?.uid);  // get their provider doc id
-const { requests: incReqs = [], loading: incLoading } = useIncomingRequests(listing?.id);
+  const { user } = useAuth();
+  const { listing } = useMyProviderListing(user?.uid); // get their provider doc id
+  const { requests: incReqs = [], loading: incLoading } = useIncomingRequests(
+    listing?.id,
+  );
   const [incFilter, setIncFilter] = useState("all");
   const [expandedInc, setExpandedInc] = useState({});
   const [quoteTarget, setQuoteTarget] = useState(null);
@@ -1958,9 +2189,16 @@ const { requests: incReqs = [], loading: incLoading } = useIncomingRequests(list
 
   const toggleInc = (id) =>
     setExpandedInc((prev) => ({ ...prev, [id]: !prev[id] }));
- const handleSendQuote  = async (id, amount, notes) => { await sendQuote(id, amount, notes);   setQuoteTarget(null); };
-const handleAccept     = async (id) => { await acceptRequest(id);  };
-const handleDecline    = async (id) => { await declineRequest(id); };
+  const handleSendQuote = async (id, amount, notes) => {
+    await sendQuote(id, amount, notes);
+    setQuoteTarget(null);
+  };
+  const handleAccept = async (id) => {
+    await acceptRequest(id);
+  };
+  const handleDecline = async (id) => {
+    await declineRequest(id);
+  };
 
   const tabs = [
     { id: "all", label: "All" },
@@ -2242,7 +2480,7 @@ const handleDecline    = async (id) => { await declineRequest(id); };
                             marginTop: 2,
                           }}
                         >
-                        Received {req.receivedAt}
+                          Received {req.receivedAt}
                         </div>
                       </div>
                       <span
@@ -2497,7 +2735,9 @@ const handleDecline    = async (id) => { await declineRequest(id); };
         <QuoteModal
           target={quoteTarget}
           onClose={() => setQuoteTarget(null)}
-          onSend={(amount, notes) => handleSendQuote(quoteTarget.id, amount, notes)}
+          onSend={(amount, notes) =>
+            handleSendQuote(quoteTarget.id, amount, notes)
+          }
         />
       )}
       <Toast message={toast} />
