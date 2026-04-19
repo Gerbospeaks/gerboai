@@ -1881,7 +1881,7 @@ function PostServiceModal({ onClose, onSubmit }) {
 function normalizeProvider(p) {
   return {
     ...p,
-    available: p.available !== false,
+    available: p.available ?? true,
     location: p.location ?? p.loc ?? "",
     color: p.color ?? p.bg ?? "#eef2ff",
     textColor: p.textColor ?? p.tc ?? "#4f46e5",

@@ -98,10 +98,10 @@ export function useMyProviderListing(uid) {
   return { listing, loading };
 }
 
-/** Toggle available/unavailable — updates live on the marketplace */
+
 export async function toggleAvailability(providerId, current) {
   await updateDoc(doc(db, "providers", providerId), {
-    avail: !current,
+    available: !current,   
     updatedAt: serverTimestamp(),
   });
 }
