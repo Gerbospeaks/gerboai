@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import BookingPanel from "../components/BookingPanel";
+import {  Timestamp } from "firebase/firestore";
 import {
   sendBookingRequest,
   sendQuote,
@@ -1686,6 +1687,7 @@ function PostServiceModal({ onClose, onSubmit }) {
   const [industry, setIndustry]         = useState("mechanics");
   const [about, setAbout]               = useState("");
   const [rate, setRate]                 = useState("");
+  const [duration, setDuration] = useState(30);
   const [location, setLocation]         = useState("");
   const [response, setResponse]         = useState("~1 hr");
   const [badges, setBadges]             = useState("");
@@ -1706,6 +1708,7 @@ function PostServiceModal({ onClose, onSubmit }) {
   async function handleSubmit() {
     if (!businessName.trim() || !about.trim()) return;
     setSaving(true);
+    const expiresAt = Timestamp.fromDate(new Date(Date.now() + duration * 24 * 60 * 60 * 1000));
     await onSubmit({
       businessName,
       name: businessName,
@@ -1714,6 +1717,7 @@ function PostServiceModal({ onClose, onSubmit }) {
       rate:      rate     || "Quote on request",
       location:  location || "",
       response:  response || "~1 hr",
+      expiresAt,
       // Convert comma-separated badge text into badge objects
       badges: badges
         .split(",")
@@ -1787,7 +1791,7 @@ function PostServiceModal({ onClose, onSubmit }) {
           onChange={e => setAbout(e.target.value)}
           placeholder="e.g. Specialist in fleet vehicle maintenance and roadworthy inspections."
         />
-
+          
         {/* Rate */}
         <label style={lbl}>Rate / Pricing</label>
         <input
@@ -1796,7 +1800,17 @@ function PostServiceModal({ onClose, onSubmit }) {
           onChange={e => setRate(e.target.value)}
           placeholder="e.g. R450/hr or Custom quote"
         />
-
+        <label style={lbl}>Listing Duration</label>
+<select
+  style={{ ...inp, cursor: "pointer" }}
+  value={duration}
+  onChange={e => setDuration(Number(e.target.value))}
+>
+  <option value={7}>1 Week</option>
+  <option value={14}>2 Weeks</option>
+  <option value={30}>1 Month</option>
+  <option value={90}>3 Months</option>
+</select>
         {/* Location */}
         <label style={lbl}>Location</label>
         <input
@@ -2141,21 +2155,34 @@ function MarketView({ onShowIncoming }) {
   <PostServiceModal
     onClose={() => setPostingOpen(false)}
     onSubmit={async (listingData) => {
-      try {
-        const { setDoc, doc, serverTimestamp } = await import("firebase/firestore");
-        const { db } = await import("../firebase");
-        await setDoc(
-          doc(db, "providers", user.uid),
-          { ...listingData, ownerId: user.uid, updatedAt: serverTimestamp() },
-          { merge: true }
-        );
-        setPostingOpen(false);
-        showToast("Your service is now live on the marketplace!");
-      } catch (err) {
-        console.error(err);
-        showToast("Failed to publish. Please try again.");
-      }
-    }}
+  try {
+    const { setDoc, doc, serverTimestamp, Timestamp } = await import("firebase/firestore");
+    const { db } = await import("../firebase");
+
+    // ✅ Set expiry — 30 days from now
+    const expiresAt = Timestamp.fromDate(
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    );
+
+    await setDoc(
+      doc(db, "serviceProviders", user.uid),
+      {
+        ...listingData,
+        ownerId:   user.uid,
+        active:    true,
+        expiresAt,             // ← when it expires
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    setPostingOpen(false);
+    showToast("Your service is now live for 30 days!");
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to publish. Please try again.");
+  }
+}}
   />
 )}
 

@@ -40,18 +40,26 @@ export function useProviders(industryFilter = "all") {
         : query(...base, where("industry", "==", industryFilter), orderBy("featured", "desc"), orderBy("rating", "desc"));
 
     const unsub = onSnapshot(
-      q,
-      (snap) => {
-        setProviders(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        setLoading(false);
-        setError(null);
-      },
-      (err) => {
-        console.error("useProviders:", err.message);
-        setError(err.message);
-        setLoading(false);
-      },
+  q,
+  (snap) => {
+    const now = new Date();
+    setProviders(
+      snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .filter((p) => {
+          if (!p.expiresAt) return true;             // no expiry = always show
+          return p.expiresAt.toDate() > now;          // hide if expired
+        })
     );
+    setLoading(false);
+    setError(null);
+  },
+  (err) => {
+    console.error("useProviders:", err.message);
+    setError(err.message);
+    setLoading(false);
+  },
+);
 
     return () => unsub();
   }, [industryFilter]);
@@ -72,11 +80,18 @@ export function useMyProviderListing(uid) {
 
     const q = query(collection(db, "providers"), where("ownerId", "==", uid));
     const unsub = onSnapshot(q, (snap) => {
-      setListing(
-        snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() },
-      );
-      setLoading(false);
+  if (snap.empty) {
+    setListing(null);
+  } else {
+    const data = { id: snap.docs[0].id, ...snap.docs[0].data() };
+    const now  = new Date();
+    setListing({
+      ...data,
+      isExpired: data.expiresAt ? data.expiresAt.toDate() < now : false,
     });
+  }
+  setLoading(false);
+});
     return () => unsub();
   }, [uid]);
 

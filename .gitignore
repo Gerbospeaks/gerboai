@@ -24,3 +24,6 @@ yarn-error.log*
 package-lock.json
 # Local Netlify folder
 .netlify
+*firebase-adminsdk*.json
+serviceAccountKey.json
+*-firebase-adminsdk-*.json

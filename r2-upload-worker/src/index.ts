@@ -4,6 +4,10 @@ export interface Env {
 	R2_PUBLIC_DOMAIN: string;
 	DOCUMENTS_PUBLIC_DOMAIN: string;
 	AI: Ai;
+	CLEANUP_SECRET:        string;
+  FIREBASE_PROJECT_ID:   string;
+  FIREBASE_CLIENT_EMAIL: string;
+  FIREBASE_PRIVATE_KEY_B64: string;
 }
 
 const worker = {
@@ -31,7 +35,9 @@ const worker = {
 		if (url.pathname === '/ai') {
 			return handleAI(request, env, corsHeaders);
 		}
-
+        if (url.pathname === '/cleanup-expired') {
+  return handleCleanupExpired(request, env, corsHeaders);
+}
 		return new Response('Not Found', { status: 404, headers: corsHeaders });
 	},
 };
@@ -122,7 +128,159 @@ async function handlePdfUpload(request: Request, env: Env, corsHeaders: Record<s
 		});
 	}
 }
+async function handleCleanupExpired(
+  request: Request,
+  env: Env,
+  corsHeaders: Record<string, string>
+): Promise<Response> {
+  // Secure it with a secret key so only you can trigger it
+  const authHeader = request.headers.get('Authorization');
+  if (authHeader !== `Bearer ${env.CLEANUP_SECRET}`) {
+    return new Response('Unauthorized', { status: 401, headers: corsHeaders });
+  }
 
+  try {
+    // Firestore REST API — no SDK needed in a Worker
+    const projectId = env.FIREBASE_PROJECT_ID;
+    const now       = new Date().toISOString();
+
+    // Query expired active listings
+    const queryRes = await fetch(
+      `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await getFirebaseToken(env)}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from:  [{ collectionId: 'serviceProviders' }],
+            where: {
+              compositeFilter: {
+                op: 'AND',
+                filters: [
+                  {
+                    fieldFilter: {
+                      field:  { fieldPath: 'active' },
+                      op:     'EQUAL',
+                      value:  { booleanValue: true },
+                    },
+                  },
+                  {
+                    fieldFilter: {
+                      field:  { fieldPath: 'expiresAt' },
+                      op:     'LESS_THAN_OR_EQUAL',
+                      value:  { timestampValue: now },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }),
+      }
+    );
+
+    const results = await queryRes.json() as any[];
+
+    // Filter out empty results
+    const expiredDocs = results.filter((r: any) => r.document);
+
+    if (expiredDocs.length === 0) {
+      return new Response(
+        JSON.stringify({ message: 'No expired listings found.' }),
+        { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    // Soft-delete each expired doc (set active: false)
+    const token    = await getFirebaseToken(env);
+    const patchJobs = expiredDocs.map((r: any) => {
+      const docName = r.document.name; // full path
+      return fetch(
+        `https://firestore.googleapis.com/v1/${docName}?updateMask.fieldPaths=active`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            fields: {
+              active: { booleanValue: false },
+            },
+          }),
+        }
+      );
+    });
+
+    await Promise.all(patchJobs);
+
+    return new Response(
+      JSON.stringify({ message: `Deactivated ${expiredDocs.length} expired listings.` }),
+      { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+
+  } catch (err: any) {
+    console.error('Cleanup error:', err);
+    return new Response(
+      JSON.stringify({ error: err.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+  }
+}
+
+// ── Get a Firebase auth token using a service account ──────────────────────
+async function getFirebaseToken(env: Env): Promise<string> {
+  const now     = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: env.FIREBASE_CLIENT_EMAIL,
+    sub: env.FIREBASE_CLIENT_EMAIL,
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: now + 3600,
+    scope: 'https://www.googleapis.com/auth/datastore',
+  };
+
+  // Sign JWT with private key
+  const key = await crypto.subtle.importKey(
+    'pkcs8',
+    strToArrayBuffer(atob(env.FIREBASE_PRIVATE_KEY_B64)),
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const header  = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+  const body    = btoa(JSON.stringify(payload));
+  const signing = `${header}.${body}`;
+
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    key,
+    new TextEncoder().encode(signing)
+  );
+
+  const jwt = `${signing}.${btoa(String.fromCharCode(...new Uint8Array(signature)))}`;
+
+  // Exchange JWT for access token
+  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+  });
+
+  const tokenData = await tokenRes.json() as any;
+  return tokenData.access_token;
+}
+
+function strToArrayBuffer(str: string): ArrayBuffer {
+  const buf  = new ArrayBuffer(str.length);
+  const view = new Uint8Array(buf);
+  for (let i = 0; i < str.length; i++) view[i] = str.charCodeAt(i);
+  return buf;
+}
 // ── AI handler ──
 async function handleAI(request: Request, env: Env, corsHeaders: Record<string, string>): Promise<Response> {
 	if (request.method !== 'POST') {
