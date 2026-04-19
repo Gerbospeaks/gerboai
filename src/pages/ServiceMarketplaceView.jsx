@@ -2159,20 +2159,30 @@ function MarketView({ onShowIncoming }) {
     const { setDoc, doc, serverTimestamp, Timestamp } = await import("firebase/firestore");
     const { db } = await import("../firebase");
 
-    // ✅ Set expiry — 30 days from now
     const expiresAt = Timestamp.fromDate(
       new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     );
 
+    const payload = {
+      ...listingData,
+      ownerId:   user.uid,
+      active:    true,
+      available: true,
+      expiresAt,
+      updatedAt: serverTimestamp(),
+    };
+
+    // 1️⃣ Save to serviceProviders (owner profile doc)
     await setDoc(
       doc(db, "serviceProviders", user.uid),
-      {
-        ...listingData,
-        ownerId:   user.uid,
-        active:    true,
-        expiresAt,
-        updatedAt: serverTimestamp(),
-      },
+      payload,
+      { merge: true }
+    );
+
+    // 2️⃣ Also save to providers (marketplace listing)
+    await setDoc(
+      doc(db, "providers", user.uid),
+      payload,
       { merge: true }
     );
 
