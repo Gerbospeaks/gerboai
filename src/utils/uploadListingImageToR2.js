@@ -1,26 +1,63 @@
-import { getAuth } from "firebase/auth";
+export const uploadListingImageToR2 = async (file, authUser) => {
+  console.log("=== LISTING IMAGE UPLOAD DEBUG START ===");
 
-const WORKER_URL = import.meta.env.VITE_WORKER_URL; // same worker, new route
+  if (!authUser) {
+    console.error("❌ No authUser");
+    throw new Error("Not authenticated");
+  }
+  console.log("✅ Auth user exists");
 
-export async function uploadListingImageToR2(file, authUser) {
-  if (!authUser) throw new Error("Not authenticated");
+  const apiUrl = process.env.REACT_APP_API_URL;
+  console.log("🔍 API URL from env:", apiUrl);
 
-  const idToken = await authUser.getIdToken();
-
-  const response = await fetch(`${WORKER_URL}/upload-listing-image`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${idToken}`,
-      "Content-Type": file.type,
-    },
-    body: file,
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error || `Upload failed: ${response.status}`);
+  if (!apiUrl) {
+    throw new Error("REACT_APP_API_URL is not defined in .env file");
   }
 
-  const { publicUrl } = await response.json();
-  return publicUrl;
-}
+  const baseUrl = apiUrl.replace(/\/(upload-logo\/?)?$/, "");
+  const uploadUrl = `${baseUrl}/upload-listing-image`;
+
+  console.log("📤 Uploading to:", uploadUrl);
+
+  try {
+    const token = await authUser.getIdToken();
+    console.log("✅ Got Firebase token:", token.substring(0, 20) + "...");
+
+    console.log("📤 File info:", {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
+
+    const res = await fetch(uploadUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": file.type,
+        "Authorization": `Bearer ${token}`,
+      },
+      body: file,
+    });
+
+    console.log("📥 Response:", {
+      status: res.status,
+      ok: res.ok,
+      statusText: res.statusText,
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("❌ Error response:", text);
+      throw new Error(text || `Upload failed: ${res.status}`);
+    }
+
+    const data = await res.json();
+    console.log("✅ Success! Public URL:", data.publicUrl);
+    return data.publicUrl;
+
+  } catch (fetchError) {
+    console.error("❌ FETCH ERROR:", fetchError.message);
+    throw fetchError;
+  }
+};
+
+export default uploadListingImageToR2;
