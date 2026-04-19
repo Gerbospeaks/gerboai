@@ -1,33 +1,18 @@
 export const uploadListingImageToR2 = async (file, authUser) => {
-  console.log("=== LISTING IMAGE UPLOAD DEBUG START ===");
-
-  if (!authUser) {
-    console.error("❌ No authUser");
-    throw new Error("Not authenticated");
-  }
-  console.log("✅ Auth user exists");
+  if (!authUser) throw new Error("Not authenticated");
 
   const apiUrl = process.env.REACT_APP_API_URL;
-  console.log("🔍 API URL from env:", apiUrl);
+  if (!apiUrl) throw new Error("REACT_APP_API_URL is not defined");
 
-  if (!apiUrl) {
-    throw new Error("REACT_APP_API_URL is not defined in .env file");
-  }
-
-  const baseUrl = apiUrl.replace(/\/(upload-logo\/?)?$/, "");
+  // ✅ Use URL parser — always gets the clean base regardless of
+  // what path REACT_APP_API_URL has (/, /upload-logo, nothing, etc.)
+  const baseUrl = new URL(apiUrl).origin;
   const uploadUrl = `${baseUrl}/upload-listing-image`;
 
-  console.log("📤 Uploading to:", uploadUrl);
+  console.log("📤 Listing image uploading to:", uploadUrl);
 
   try {
     const token = await authUser.getIdToken();
-    console.log("✅ Got Firebase token:", token.substring(0, 20) + "...");
-
-    console.log("📤 File info:", {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-    });
 
     const res = await fetch(uploadUrl, {
       method: "POST",
@@ -38,25 +23,19 @@ export const uploadListingImageToR2 = async (file, authUser) => {
       body: file,
     });
 
-    console.log("📥 Response:", {
-      status: res.status,
-      ok: res.ok,
-      statusText: res.statusText,
-    });
-
     if (!res.ok) {
       const text = await res.text();
-      console.error("❌ Error response:", text);
+      console.error("❌ Error:", text);
       throw new Error(text || `Upload failed: ${res.status}`);
     }
 
-    const data = await res.json();
-    console.log("✅ Success! Public URL:", data.publicUrl);
-    return data.publicUrl;
+    const { publicUrl } = await res.json();
+    console.log("✅ Listing image URL:", publicUrl);
+    return publicUrl;
 
-  } catch (fetchError) {
-    console.error("❌ FETCH ERROR:", fetchError.message);
-    throw fetchError;
+  } catch (err) {
+    console.error("❌ Upload error:", err.message);
+    throw err;
   }
 };
 
