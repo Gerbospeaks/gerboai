@@ -1013,16 +1013,14 @@ const css = `
      BOTTOM CTA SECTION
   ════════════════════════════════════ */
 .mp-cta {
-  background: #0f172a;
+  background: #ffffff;
   border-radius: 14px; padding: 72px 48px; margin-top: 64px;
   text-align: center; position: relative; overflow: hidden;
 }
 .mp-cta::before {
   content: '';
   position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 80% at 15% 50%, rgba(99,102,241,.22) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 60% at 85% 25%, rgba(14,165,233,.12) 0%, transparent 55%);
+  background: white;
 }
 .mp-cta::after {
   content: '';
@@ -1038,11 +1036,11 @@ const css = `
   text-transform: uppercase; color: #a5b4fc;
 }
 .mp-cta h2 {
-  font-size: clamp(1.9rem, 3vw, 2.8rem); color: #fff; margin-bottom: 14px; line-height: 1.12;
+  font-size: clamp(1.9rem, 3vw, 2.8rem); color: #000000; margin-bottom: 14px; line-height: 1.12;
 }
 .mp-cta h2 em { font-style: italic; color: #818cf8; }
 .mp-cta p {
-  font-size: 15px; color: rgba(255,255,255,.5);
+  font-size: 15px; color: rgba(17, 17, 17, 0.5);
   max-width: 480px; margin: 0 auto 40px; line-height: 1.75;
 }
 .mp-cta-btns { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
