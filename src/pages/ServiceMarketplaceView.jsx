@@ -80,6 +80,7 @@ const INDUSTRIES = [
   { id: "towing", label: "Towing", emoji: "🚗" },
   { id: "welding", label: "Welding", emoji: "🔥" },
   { id: "flooring", label: "Flooring", emoji: "🪵" },
+  { id: "virtual-services", label: "Virtual Services", emoji: "🤖" },
   { id: "window-repair", label: "Window Repair", emoji: "🪟" },
 ];
 
@@ -1880,7 +1881,7 @@ function PostServiceModal({ onClose, onSubmit }) {
 function normalizeProvider(p) {
   return {
     ...p,
-    available: p.available ?? p.avail ?? true,
+    available: p.available !== false,
     location: p.location ?? p.loc ?? "",
     color: p.color ?? p.bg ?? "#eef2ff",
     textColor: p.textColor ?? p.tc ?? "#4f46e5",
