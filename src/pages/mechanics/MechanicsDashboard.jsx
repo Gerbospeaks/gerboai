@@ -63,6 +63,8 @@ import HistoryView from "./HistoryView";
 import MechanicsSidebar from "./MechanicsSidebar";
 import NotesView from "./NotesView";
 import PartsInventory from "./PartsInventory";
+import { usePermissions } from "../../hooks/usePermissions";
+import SubUserManagement from "../SubUserManagement";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -124,6 +126,8 @@ const MechanicsDashboard = () => {
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const { can, isAdmin } = usePermissions();
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
     useState(null);
   const [useAI, setUseAI] = useState(false);
@@ -914,7 +918,7 @@ const handleSavePDF = async () => {
 
   // ── Header action buttons ─────────────────────────────────────────────────
   const headerActions = [
-    documentType === "quote" &&
+    can("createQuote") && documentType === "quote" &&
       jobCardId &&
       activeView !== "purchase-orders" && {
         label: "Convert to Invoice",
@@ -949,21 +953,21 @@ const handleSavePDF = async () => {
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    {
+    can("createInvoice") && {
       label: "Save PDF",
       icon: Download,
       onClick: handleSavePDF,
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    {
+     can("createInvoice") || can("createQuote") ?{
       label: activeView === "purchase-orders" ? "Save P.O." : "Save",
       icon: Save,
       onClick:
         activeView === "purchase-orders" ? handleSavePO : handleSaveJobCard,
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
+    } : null,
   ].filter(Boolean);
 
   const mobileDashboardActions = [
@@ -1457,6 +1461,8 @@ const handleSavePDF = async () => {
           isMobile={isMobile}
           logo={logo}
           newRequestCount={0}
+          isAdmin={isAdmin}
+          setShowUserManagement={setShowUserManagement}
         />
 
         {/* Main content */}
@@ -1492,7 +1498,9 @@ const handleSavePDF = async () => {
             existingCustomer={selectedCustomer}
             onCustomerSaved={handleCustomerSaved}
           />
-
+          {showUserManagement && (
+  <SubUserManagement onClose={() => setShowUserManagement(false)} />
+)}
           {showPaymentModal && selectedInvoiceForPayment && (
             <PaymentProcessor
               showModal={showPaymentModal}

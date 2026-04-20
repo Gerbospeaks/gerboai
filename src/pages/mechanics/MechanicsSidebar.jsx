@@ -7,6 +7,7 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
+  Shield,
   ShoppingBag,
   FileText,
   ClipboardList,
@@ -42,6 +43,8 @@ export default function MechanicsSidebar({
   documentType,
   handleLogout,
    newRequestCount,
+   isAdmin,
+  setShowUserManagement,
 }) {
   const [isJobCardsOpen, setIsJobCardsOpen] = useState(false);
   const [isCustomersOpen, setIsCustomersOpen] = useState(false);
@@ -225,7 +228,15 @@ export default function MechanicsSidebar({
   active={activeView === "reports"}
 />
       </div>
-
+{isAdmin && (
+  <button
+    onClick={() => setShowUserManagement(true)}
+    className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg w-full"
+  >
+    <Shield className="w-4 h-4" />
+    Manage Team
+  </button>
+)}
       {/* Footer */}
       <div className="border-t border-[#253347] px-4 py-3 flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -356,7 +367,15 @@ export default function MechanicsSidebar({
                 </button>
               ))}
             </div>
-
+{isAdmin && (
+  <button
+    onClick={() => setShowUserManagement(true)}
+    className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg w-full"
+  >
+    <Shield className="w-4 h-4" />
+    Manage Team
+  </button>
+)}
             <div className="mt-auto pb-2">
               <div className="w-9 h-9 bg-[#253347] rounded-full flex items-center justify-center ring-1 ring-[#334155] overflow-hidden">
                 {businessInfo?.logoUrl ? (
