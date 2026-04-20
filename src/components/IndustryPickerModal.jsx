@@ -175,6 +175,27 @@ export const INDUSTRIES = [
     subdomain: "welding",
   },
   {
+    id: "technology",
+    label: "Technology",
+    icon: "�",
+    desc: "IT services & software licensing",
+    subdomain: "technology",
+  },
+  {
+    id: "upholstery",
+    label: "Upholstery",
+    icon: "�️",
+    desc: "Furniture repair & customization",
+    subdomain: "upholstery",
+  },
+  {
+    id: "virtual-services",
+    label: "Virtual Services",
+    icon: "�",
+    desc: "Remote support & online consultations",
+    subdomain: "virtual-services",
+  },
+  {
     id: "pest-control",
     label: "Pest Control",
     icon: "🐛",

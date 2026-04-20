@@ -40,6 +40,31 @@ export const dashboards = [
     description: 'Patient & appointment management'
   },
   { 
+    id: 'technology',
+    name: 'Technology', 
+    path: '/technology',
+    icon: '💻', 
+    color: 'bg-gray-500',
+    description: 'IT services & software licensing'
+  },
+  { 
+    id: 'upholstery',
+    name: 'Upholstery', 
+    path: '/upholstery',
+    icon: '💺', 
+    color: 'bg-amber-500',
+    description: 'Furniture repair & customization'
+
+  },
+  { 
+    id: 'virtual',
+    name: 'Virtual Services', 
+    path: '/virtual',
+    icon: '🌐', 
+    color: 'bg-indigo-500',
+    description: 'Remote support & online consultations'
+  },
+  { 
     id: 'electrical',
     name: 'Electrical', 
     path: '/electrical',

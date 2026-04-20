@@ -12,8 +12,6 @@ import { getSubdomainFromHost } from "./utils/subdomain";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import PWAInstallPrompt from "./components/Pwainstallprompt";
-
-// ── Main site pages ───────────────────────────────────────────────────────────
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -58,6 +56,9 @@ import PublicMarketplace from "./pages/PublicMarketplace";
 // ── Industry dashboards ───────────────────────────────────────────────────────
 import MechanicsDashboard from "./pages/mechanics/MechanicsDashboard";
 import SecurityDashboard from "./pages/security/SecurityDashboard";
+import TechnologyDashboard from "./pages/technology/TechnologyDashboard";
+import UpholsteryDashboard from "./pages/upholstery/UpholsteryDashboard";
+import VirtualDashboard from "./pages/virtual/VirtualDashboard";
 import HealthcareDashboard from "./pages/health/HealthcareDashboard";
 import ElectricalDashboard from "./pages/electrical/ElectricalDashboard";
 import RestaurantDashboard from "./pages/restaurants/RestaurantDashboard";
@@ -94,8 +95,6 @@ import AppointmentsCalendar from "./pages/health/AppointmentsCalendar";
 import NotesView from "./pages/cleaning/NotesView";
 import ParentPortal from "./pages/education/ParentPortal";
 import StaffPortal from "./pages/education/StaffPortal";
-
-// ─── Detect subdomain once at module load — safe, doesn't change mid-session ──
 const IS_SUBDOMAIN = !!getSubdomainFromHost();
 
 const PUBLIC_ROUTES = new Set([
@@ -368,6 +367,30 @@ function DashboardRoutes() {
         element={
           <ProtectedRoute>
             <ConstructionDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/technology"
+        element={
+          <ProtectedRoute>
+            <TechnologyDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/upholstery"
+        element={
+          <ProtectedRoute>
+            <UpholsteryDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/virtual"
+        element={
+          <ProtectedRoute>
+            <VirtualDashboard />
           </ProtectedRoute>
         }
       />

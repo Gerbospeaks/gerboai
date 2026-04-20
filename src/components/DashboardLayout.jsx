@@ -14,6 +14,9 @@ import HotelSidebar from '../pages/hotel/HotelSidebar';
 import LegalSidebar from '../pages/legal/LegalSidebar';
 import PlumbingSidebar from '../pages/plumbing/PlumbingSidebar';
 import RetailSidebar from '../pages/retail/RetailSidebar';
+import TechnologySidebar from '../pages/technology/TechnologySidebar';
+import UpholsterySidebar from '../pages/upholstery/UpholsterySidebar';
+import VirtualSidebar from '../pages/virtual/VirtualSidebar';
 import LandscapingSidebar from '../pages/landscaping/LandscapingSidebar';
 import LogisticsSidebar from '../pages/logistics/LogisticsSidebar';
 import PhotographySidebar from '../pages/photography/PhotographySidebar';
@@ -51,6 +54,10 @@ const SIDEBAR_MAP = {
     towing:       { Component: TowingSidebar,       type: "towing"       },
     windowrepair: { Component: WindowrepairSidebar, type: "windowrepair" },
     welding:      { Component: WeldingSidebar,      type: "welding"      },
+    technology:   { Component: TechnologySidebar,   type: "technology"   },
+    upholstery:   { Component: UpholsterySidebar,   type: "upholstery"   },
+    virtual:      { Component: VirtualSidebar,      type: "virtual"      },
+    landscaping:  { Component: LandscapingSidebar,  type: "landscaping"  },
     flooring:     { Component: FlooringSidebar,     type: "flooring"     },
     painting:     { Component: PaintingSidebar,     type: "painting"     },
     accounting:   { Component: AccountingSidebar,   type: "accounting"   },
