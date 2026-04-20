@@ -10,7 +10,6 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AdminProvider } from "./contexts/AdminContext";
 import { getSubdomainFromHost } from "./utils/subdomain";
 import ProtectedRoute from "./components/ProtectedRoute";
-import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import PWAInstallPrompt from "./components/Pwainstallprompt";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
@@ -575,15 +574,6 @@ function DashboardRoutes() {
       <Route path="/parents/:portalSlug" element={<ParentPortal />} />
       <Route path="/staff/:portalSlug" element={<StaffPortal />} />
 
-      {/* ── Admin ── */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedAdminRoute>
-            <AdminDashboard />
-          </ProtectedAdminRoute>
-        }
-      />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
