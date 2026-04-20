@@ -54,7 +54,7 @@ import SolidSolar from "./pages/solar-installation/SubdomainLandingPage";
 import SolidTowing from "./pages/towing/SubdomainLandingPage";
 import SolidWindowRepair from "./pages/window-repair/SubdomainLandingPage";
 import SubdomainAuthPage from "./pages/SubdomainAuthPage";
-
+import PublicMarketplace from "./pages/PublicMarketplace";
 // ── Industry dashboards ───────────────────────────────────────────────────────
 import MechanicsDashboard from "./pages/mechanics/MechanicsDashboard";
 import SecurityDashboard from "./pages/security/SecurityDashboard";
@@ -618,7 +618,7 @@ function App() {
             // ── SUBDOMAIN (e.g. mechanics.solidflo.co.za) ──────────────────
             <Routes>
               <Route path="/" element={<SubdomainRoot />} />
-              <Route path="/:industry" element={<SolidMarket />} />
+
               {/* 
                 Login: SubdomainAuthPage reads pathname to show LoginView.
                 After successful Firebase sign-in it navigates to /dashboard.
@@ -646,7 +646,7 @@ function App() {
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/auth-action" element={<AuthAction />} />
-             
+              <Route path="/marketplace/:industry"    element={<PublicMarketplace />} />
               {/* PWAGate lives inside Router so useLocation works */}
               <Route
                 path="/*"
@@ -670,8 +670,8 @@ function App() {
               <Route path="/auth-action" element={<AuthAction />} />
 
               {/* Auth is subdomain-only — block direct access on main domain */}
-              <Route path="/login" element={<PublicOnlyRoute><SubdomainAuthPage /></PublicOnlyRoute>} />
-              <Route path="/register" element={<PublicOnlyRoute><SubdomainAuthPage /></PublicOnlyRoute>} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route path="/register" element={<Navigate to="/" replace />} />
 
               <Route
                 path="/*"
