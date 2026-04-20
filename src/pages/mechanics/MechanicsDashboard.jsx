@@ -2914,25 +2914,108 @@ const handleSavePDF = async () => {
                                                 key={index}
                                                 className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
                                               >
-                                                <td className="px-4 py-3">
-                                                  <span
-                                                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${item.type === "Labor" ? "bg-[#eff6ff] text-[#1d4ed8]" : "bg-[#f0fdf4] text-[#166534]"}`}
+                                                {/* Type */}
+                                                <td className="px-4 py-2">
+                                                  <select
+                                                    value={item.type}
+                                                    onChange={(e) =>
+                                                      handleUpdateItem(
+                                                        index,
+                                                        "type",
+                                                        e.target.value,
+                                                      )
+                                                    }
+                                                    className="text-xs font-semibold rounded px-2 py-1 border border-[#e2e8f0] focus:outline-none focus:ring-1 focus:ring-[#2563eb] cursor-pointer
+            bg-[#eff6ff] text-[#1d4ed8]"
+                                                    style={{
+                                                      background:
+                                                        item.type === "Labor"
+                                                          ? "#eff6ff"
+                                                          : "#f0fdf4",
+                                                      color:
+                                                        item.type === "Labor"
+                                                          ? "#1d4ed8"
+                                                          : "#166534",
+                                                    }}
                                                   >
-                                                    {item.type}
-                                                  </span>
+                                                    <option value="Labor">
+                                                      Labor
+                                                    </option>
+                                                    <option value="Parts">
+                                                      Parts
+                                                    </option>
+                                                  </select>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm font-medium text-[#374151]">
-                                                  {item.description}
+
+                                                {/* Description */}
+                                                <td className="px-4 py-2">
+                                                  <input
+                                                    type="text"
+                                                    value={item.description}
+                                                    onChange={(e) =>
+                                                      handleUpdateItem(
+                                                        index,
+                                                        "description",
+                                                        e.target.value,
+                                                      )
+                                                    }
+                                                    className="w-full text-sm font-medium text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors min-w-[140px]"
+                                                  />
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-[#374151]">
-                                                  R{item.rate.toFixed(2)}
+
+                                                {/* Rate */}
+                                                <td className="px-4 py-2">
+                                                  <div className="flex items-center gap-0.5">
+                                                    <span className="text-xs text-[#94a3b8]">
+                                                      R
+                                                    </span>
+                                                    <input
+                                                      type="number"
+                                                      value={item.rate}
+                                                      onChange={(e) =>
+                                                        handleUpdateItem(
+                                                          index,
+                                                          "rate",
+                                                          Number(
+                                                            e.target.value,
+                                                          ),
+                                                        )
+                                                      }
+                                                      className="w-20 text-sm text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors"
+                                                      min="0"
+                                                      step="0.01"
+                                                    />
+                                                  </div>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-[#374151]">
-                                                  {item.qty}
+
+                                                {/* Qty */}
+                                                <td className="px-4 py-2">
+                                                  <input
+                                                    type="number"
+                                                    value={item.qty}
+                                                    onChange={(e) =>
+                                                      handleUpdateItem(
+                                                        index,
+                                                        "qty",
+                                                        Number(e.target.value),
+                                                      )
+                                                    }
+                                                    className="w-14 text-sm text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors"
+                                                    min="1"
+                                                    step="1"
+                                                  />
                                                 </td>
-                                                <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
-                                                  R{item.amount.toFixed(2)}
+
+                                                {/* Amount — auto-calculated, read-only */}
+                                                <td className="px-4 py-3 text-sm font-semibold text-[#1e293b] whitespace-nowrap">
+                                                  R
+                                                  {(
+                                                    Number(item.rate) *
+                                                    Number(item.qty)
+                                                  ).toFixed(2)}
                                                 </td>
+
+                                                {/* Delete */}
                                                 <td className="px-4 py-3">
                                                   <button
                                                     onClick={() =>
