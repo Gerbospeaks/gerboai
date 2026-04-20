@@ -58,7 +58,7 @@ import MechanicsDashboard from "./pages/mechanics/MechanicsDashboard";
 import SecurityDashboard from "./pages/security/SecurityDashboard";
 import TechnologyDashboard from "./pages/technology/TechnologyDashboard";
 import UpholsteryDashboard from "./pages/upholstery/UpholsteryDashboard";
-import VirtualDashboard from "./pages/virtual/VirtualDashboard";
+import VirtualDashboard from "./pages/virtual-services/VirtualDashboard";
 import HealthcareDashboard from "./pages/health/HealthcareDashboard";
 import ElectricalDashboard from "./pages/electrical/ElectricalDashboard";
 import RestaurantDashboard from "./pages/restaurants/RestaurantDashboard";
