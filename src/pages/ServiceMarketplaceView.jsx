@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import BookingPanel from "../components/BookingPanel";
 import { getAuth } from "firebase/auth";
 import { uploadListingImageToR2 } from "../utils/uploadListingImageToR2";
-import {  Timestamp } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 import {
   sendBookingRequest,
   sendQuote,
@@ -13,7 +13,15 @@ import {
 } from "../hooks/useBookingRequests";
 import { useProviders, useMyProviderListing } from "../hooks/useProviders";
 import { useAuth } from "../contexts/AuthContext";
-// ── Design tokens ─────────────────────────────────────────────────────────────
+function useIsMobile() {
+  const [mobile, setMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const fn = () => setMobile(window.innerWidth < 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+  return mobile;
+}
 const T = {
   navy: "#0f172a",
   navyMid: "#1e293b",
@@ -936,16 +944,17 @@ function SectionTitle({ children, count }) {
 // ── Topbar ────────────────────────────────────────────────────────────────────
 
 function Topbar({ title, subtitle, icon, right, onBack }) {
+  const isMobile = useIsMobile();
   return (
     <div
       style={{
         background: T.navy,
-        height: 60,
-        padding: "0 32px",
+        height: 56,
+        padding: isMobile ? "0 16px" : "0 32px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: 12,
+        gap: 8,
         borderBottom: "1px solid rgba(255,255,255,.07)",
         position: "sticky",
         top: 0,
@@ -953,7 +962,7 @@ function Topbar({ title, subtitle, icon, right, onBack }) {
         boxShadow: "0 2px 20px rgba(0,0,0,.25)",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         {onBack && (
           <button
             onClick={onBack}
@@ -969,7 +978,6 @@ function Topbar({ title, subtitle, icon, right, onBack }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transition: "background .15s",
             }}
           >
             ←
@@ -977,8 +985,8 @@ function Topbar({ title, subtitle, icon, right, onBack }) {
         )}
         <div
           style={{
-            width: 32,
-            height: 32,
+            width: 28,
+            height: 28,
             borderRadius: 8,
             background: T.indigo,
             display: "flex",
@@ -992,7 +1000,7 @@ function Topbar({ title, subtitle, icon, right, onBack }) {
         <div>
           <div
             style={{
-              fontSize: 15,
+              fontSize: isMobile ? 13 : 15,
               fontWeight: 700,
               color: "#fff",
               letterSpacing: ".01em",
@@ -1000,7 +1008,7 @@ function Topbar({ title, subtitle, icon, right, onBack }) {
           >
             {title}
           </div>
-          {subtitle && (
+          {subtitle && !isMobile && (
             <div
               style={{
                 fontSize: 11,
@@ -1017,10 +1025,8 @@ function Topbar({ title, subtitle, icon, right, onBack }) {
     </div>
   );
 }
-
-// ── Sidebar ───────────────────────────────────────────────────────────────────
-
 function Sidebar({ active, onSelect, providers = [] }) {
+  const isMobile = useIsMobile();
   const [search, setSearch] = useState("");
   const filteredIndustries = INDUSTRIES.filter((i) =>
     i.label.toLowerCase().includes(search.toLowerCase()),
@@ -1029,6 +1035,57 @@ function Sidebar({ active, onSelect, providers = [] }) {
     if (id === "all") return providers.length;
     return providers.filter((p) => p.industry === id).length;
   }
+
+  // ── Mobile: horizontal pill strip ────────────────────────────────────────
+  if (isMobile) {
+    return (
+      <div
+        style={{
+          overflowX: "auto",
+          WebkitOverflowScrolling: "touch",
+          padding: "10px 16px",
+          display: "flex",
+          gap: 8,
+          background: "#fff",
+          borderBottom: `1px solid ${T.border}`,
+          scrollbarWidth: "none",
+        }}
+      >
+        <style>{`::-webkit-scrollbar{display:none}`}</style>
+        {INDUSTRIES.map((ind) => {
+          const isActive = active === ind.id;
+          return (
+            <button
+              key={ind.id}
+              onClick={() => onSelect(ind.id)}
+              style={{
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "6px 12px",
+                borderRadius: 20,
+                border: isActive
+                  ? `1.5px solid ${T.indigo}`
+                  : `1px solid ${T.border}`,
+                background: isActive ? T.indigoLt : "#f8fafc",
+                color: isActive ? T.indigo : T.textMid,
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span style={{ fontSize: 13 }}>{ind.emoji}</span>
+              {ind.label}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // ── Desktop: original sidebar ─────────────────────────────────────────────
   return (
     <aside
       style={{
@@ -1041,15 +1098,12 @@ function Sidebar({ active, onSelect, providers = [] }) {
         boxShadow: "0 1px 8px rgba(15,23,42,.06)",
       }}
     >
-      {/* Top gradient stripe */}
       <div
         style={{
           height: 3,
           background: "linear-gradient(90deg, #6366f1, #818cf8, #0ea5e9)",
         }}
       />
-
-      {/* Header */}
       <div
         style={{
           padding: "16px 16px 12px",
@@ -1095,8 +1149,6 @@ function Sidebar({ active, onSelect, providers = [] }) {
           />
         </div>
       </div>
-
-      {/* List */}
       <div
         style={{
           padding: "6px 0",
@@ -1104,7 +1156,7 @@ function Sidebar({ active, onSelect, providers = [] }) {
           overflowY: "auto",
         }}
       >
-        {filteredIndustries.map((ind, i) => {
+        {filteredIndustries.map((ind) => {
           const isActive = active === ind.id;
           return (
             <div key={ind.id}>
@@ -1175,24 +1227,25 @@ function Sidebar({ active, onSelect, providers = [] }) {
     </aside>
   );
 }
-
 // ── Availability banner ───────────────────────────────────────────────────────
 
 function AvailBanner({ availNow, total }) {
+  const isMobile = useIsMobile();
   return (
     <div
       style={{
         background: "#fff",
         border: `1px solid ${T.border}`,
-        borderRadius: 14,
-        padding: "22px 28px",
-        marginBottom: 32,
+        borderRadius: isMobile ? 10 : 14,
+        padding: isMobile ? "16px" : "22px 28px",
+        marginBottom: isMobile ? 16 : 32,
         display: "flex",
         alignItems: "center",
-        gap: 20,
+        gap: isMobile ? 12 : 20,
         position: "relative",
         overflow: "hidden",
         boxShadow: "0 1px 8px rgba(15,23,42,.06)",
+        flexWrap: "wrap",
       }}
     >
       <div
@@ -1217,22 +1270,28 @@ function AvailBanner({ availNow, total }) {
       />
       <span
         style={{
-          fontSize: 14,
+          fontSize: isMobile ? 12 : 14,
           color: T.textMid,
           fontWeight: 600,
           flex: 1,
           lineHeight: 1.5,
+          minWidth: 120,
         }}
       >
         <strong style={{ color: T.textPri }}>Live marketplace</strong> —
         verified service providers ready to quote across Gauteng.
       </span>
-      <div style={{ display: "flex" }}>
-        <div style={{ textAlign: "center", padding: "0 24px" }}>
+      <div style={{ display: "flex", marginLeft: "auto" }}>
+        <div
+          style={{
+            textAlign: "center",
+            padding: isMobile ? "0 12px" : "0 24px",
+          }}
+        >
           <span
             style={{
               fontFamily: "'Playfair Display', serif",
-              fontSize: 36,
+              fontSize: isMobile ? 24 : 36,
               fontWeight: 700,
               color: T.textPri,
               lineHeight: 1,
@@ -1257,14 +1316,14 @@ function AvailBanner({ availNow, total }) {
         <div
           style={{
             textAlign: "center",
-            padding: "0 24px",
+            padding: isMobile ? "0 12px" : "0 24px",
             borderLeft: `1px solid ${T.border}`,
           }}
         >
           <span
             style={{
               fontFamily: "'Playfair Display', serif",
-              fontSize: 36,
+              fontSize: isMobile ? 24 : 36,
               fontWeight: 700,
               color: T.textPri,
               lineHeight: 1,
@@ -1687,36 +1746,46 @@ function QuoteModal({ target, onClose, onSend }) {
 }
 function PostServiceModal({ onClose, onSubmit }) {
   const [businessName, setBusinessName] = useState("");
-  const [industry, setIndustry]         = useState("mechanics");
-  const [about, setAbout]               = useState("");
-  const [rate, setRate]                 = useState("");
-  const [duration, setDuration]         = useState(30);
-  const [location, setLocation]         = useState("");
-  const [response, setResponse]         = useState("~1 hr");
-  const [badges, setBadges]             = useState("");
-  const [saving, setSaving]             = useState(false);
-
+  const [industry, setIndustry] = useState("mechanics");
+  const [about, setAbout] = useState("");
+  const [rate, setRate] = useState("");
+  const [duration, setDuration] = useState(30);
+  const [location, setLocation] = useState("");
+  const [response, setResponse] = useState("~1 hr");
+  const [badges, setBadges] = useState("");
+  const [saving, setSaving] = useState(false);
+const isMobile = useIsMobile();
   // ── Image state ──
-  const [imageFile, setImageFile]       = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const inp = {
-    width: "100%", padding: "9px 12px", fontSize: 13,
-    border: `1px solid ${T.border}`, borderRadius: 8,
-    outline: "none", fontFamily: "'Lato', sans-serif",
-    marginBottom: 14, boxSizing: "border-box",
+    width: "100%",
+    padding: "9px 12px",
+    fontSize: 13,
+    border: `1px solid ${T.border}`,
+    borderRadius: 8,
+    outline: "none",
+    fontFamily: "'Lato', sans-serif",
+    marginBottom: 14,
+    boxSizing: "border-box",
   };
   const lbl = {
-    fontSize: 11, fontWeight: 700, color: T.textMid,
-    textTransform: "uppercase", letterSpacing: ".05em",
-    display: "block", marginBottom: 5,
+    fontSize: 11,
+    fontWeight: 700,
+    color: T.textMid,
+    textTransform: "uppercase",
+    letterSpacing: ".05em",
+    display: "block",
+    marginBottom: 5,
   };
 
   function handleImageChange(e) {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) return alert("Please select an image file.");
+    if (!file.type.startsWith("image/"))
+      return alert("Please select an image file.");
     if (file.size > 5 * 1024 * 1024) return alert("Image must be under 5MB.");
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
@@ -1737,7 +1806,7 @@ function PostServiceModal({ onClose, onSubmit }) {
       }
 
       const expiresAt = Timestamp.fromDate(
-        new Date(Date.now() + duration * 24 * 60 * 60 * 1000)
+        new Date(Date.now() + duration * 24 * 60 * 60 * 1000),
       );
 
       await onSubmit({
@@ -1745,23 +1814,23 @@ function PostServiceModal({ onClose, onSubmit }) {
         name: businessName,
         industry,
         about,
-        rate:      rate || "Quote on request",
-        location:  location || "",
-        response:  response || "~1 hr",
+        rate: rate || "Quote on request",
+        location: location || "",
+        response: response || "~1 hr",
         expiresAt,
-        imageUrl,           // ← Cloudflare R2 URL saved to Firestore
+        imageUrl, // ← Cloudflare R2 URL saved to Firestore
         badges: badges
           .split(",")
-          .map(b => b.trim())
+          .map((b) => b.trim())
           .filter(Boolean)
-          .map(b => ({ label: b, type: "blue" })),
-        initials:  businessName.slice(0, 2).toUpperCase(),
-        color:     "#eef2ff",
+          .map((b) => ({ label: b, type: "blue" })),
+        initials: businessName.slice(0, 2).toUpperCase(),
+        color: "#eef2ff",
         textColor: "#4f46e5",
-        rating:    0,
-        reviews:   0,
-        featured:  false,
-        active:    true,
+        rating: 0,
+        reviews: 0,
+        featured: false,
+        active: true,
         available: true,
       });
     } catch (err) {
@@ -1774,24 +1843,43 @@ function PostServiceModal({ onClose, onSubmit }) {
   }
 
   return (
-    <div style={{
-      position: "fixed", inset: 0,
-      background: "rgba(15,23,42,.55)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 1000, padding: 20, backdropFilter: "blur(6px)",
-    }}>
-      <div style={{
-        background: "#fff", borderRadius: 14, padding: 28,
-        width: "100%", maxWidth: 480,
-        boxShadow: "0 24px 60px rgba(15,23,42,.25)",
-        maxHeight: "90vh", overflowY: "auto",
-      }}>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(15,23,42,.55)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: 20,
+        backdropFilter: "blur(6px)",
+      }}
+    >
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: isMobile ? "14px 14px 0 0" : 14,
+          padding: 28,
+          width: "100%",
+          maxWidth: isMobile ? "100%" : 480,
+          boxShadow: "0 24px 60px rgba(15,23,42,.25)",
+          maxHeight: "90vh",
+          overflowY: "auto",
+          margin: isMobile ? "auto 0 0" : undefined,
+        }}
+      >
         {/* Header */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{
-            fontSize: 18, fontFamily: "'Playfair Display', serif",
-            fontWeight: 600, color: T.textPri, marginBottom: 4,
-          }}>
+          <div
+            style={{
+              fontSize: 18,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
+              color: T.textPri,
+              marginBottom: 4,
+            }}
+          >
             List Your Service
           </div>
           <div style={{ fontSize: 13, color: T.textMuted }}>
@@ -1816,15 +1904,25 @@ function PostServiceModal({ onClose, onSubmit }) {
             <img
               src={imagePreview}
               alt="Preview"
-              style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }}
+              style={{
+                width: "100%",
+                height: 160,
+                objectFit: "cover",
+                display: "block",
+              }}
             />
           ) : (
-            <div style={{
-              height: 120,
-              display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "center",
-              gap: 8, color: T.textMuted,
-            }}>
+            <div
+              style={{
+                height: 120,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: isMobile ? "flex-end" : "center",
+                justifyContent: "center",
+                gap: 8,
+                color: T.textMuted,
+              }}
+            >
               <span style={{ fontSize: 28 }}>🖼️</span>
               <span style={{ fontSize: 12, fontWeight: 600 }}>
                 Click to upload a banner image
@@ -1835,15 +1933,22 @@ function PostServiceModal({ onClose, onSubmit }) {
 
           {/* Change overlay when image exists */}
           {imagePreview && (
-            <div style={{
-              position: "absolute", inset: 0,
-              background: "rgba(15,23,42,.45)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              opacity: 0, transition: "opacity .2s",
-              color: "#fff", fontSize: 13, fontWeight: 700,
-            }}
-              onMouseEnter={e => e.currentTarget.style.opacity = 1}
-              onMouseLeave={e => e.currentTarget.style.opacity = 0}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(15,23,42,.45)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: 0,
+                transition: "opacity .2s",
+                color: "#fff",
+                fontSize: 13,
+                fontWeight: 700,
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = 1)}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = 0)}
             >
               Change Image
             </div>
@@ -1862,7 +1967,7 @@ function PostServiceModal({ onClose, onSubmit }) {
         <input
           style={inp}
           value={businessName}
-          onChange={e => setBusinessName(e.target.value)}
+          onChange={(e) => setBusinessName(e.target.value)}
           placeholder="e.g. Jake's Motor Workshop"
         />
 
@@ -1871,10 +1976,12 @@ function PostServiceModal({ onClose, onSubmit }) {
         <select
           style={{ ...inp, cursor: "pointer" }}
           value={industry}
-          onChange={e => setIndustry(e.target.value)}
+          onChange={(e) => setIndustry(e.target.value)}
         >
-          {INDUSTRIES.filter(i => i.id !== "all").map(i => (
-            <option key={i.id} value={i.id}>{i.emoji} {i.label}</option>
+          {INDUSTRIES.filter((i) => i.id !== "all").map((i) => (
+            <option key={i.id} value={i.id}>
+              {i.emoji} {i.label}
+            </option>
           ))}
         </select>
 
@@ -1883,7 +1990,7 @@ function PostServiceModal({ onClose, onSubmit }) {
         <textarea
           style={{ ...inp, resize: "vertical", minHeight: 80 }}
           value={about}
-          onChange={e => setAbout(e.target.value)}
+          onChange={(e) => setAbout(e.target.value)}
           placeholder="e.g. Specialist in fleet vehicle maintenance and roadworthy inspections."
         />
 
@@ -1892,7 +1999,7 @@ function PostServiceModal({ onClose, onSubmit }) {
         <input
           style={inp}
           value={rate}
-          onChange={e => setRate(e.target.value)}
+          onChange={(e) => setRate(e.target.value)}
           placeholder="e.g. R450/hr or Custom quote"
         />
 
@@ -1901,7 +2008,7 @@ function PostServiceModal({ onClose, onSubmit }) {
         <select
           style={{ ...inp, cursor: "pointer" }}
           value={duration}
-          onChange={e => setDuration(Number(e.target.value))}
+          onChange={(e) => setDuration(Number(e.target.value))}
         >
           <option value={7}>1 Week</option>
           <option value={14}>2 Weeks</option>
@@ -1914,7 +2021,7 @@ function PostServiceModal({ onClose, onSubmit }) {
         <input
           style={inp}
           value={location}
-          onChange={e => setLocation(e.target.value)}
+          onChange={(e) => setLocation(e.target.value)}
           placeholder="e.g. Randburg, JHB"
         />
 
@@ -1923,7 +2030,7 @@ function PostServiceModal({ onClose, onSubmit }) {
         <select
           style={{ ...inp, cursor: "pointer" }}
           value={response}
-          onChange={e => setResponse(e.target.value)}
+          onChange={(e) => setResponse(e.target.value)}
         >
           <option>~15 min</option>
           <option>~20 min</option>
@@ -1939,10 +2046,17 @@ function PostServiceModal({ onClose, onSubmit }) {
         <input
           style={inp}
           value={badges}
-          onChange={e => setBadges(e.target.value)}
+          onChange={(e) => setBadges(e.target.value)}
           placeholder="e.g. Available today, Fleet servicing, Diagnostics"
         />
-        <div style={{ fontSize: 11, color: T.textMuted, marginBottom: 14, marginTop: -10 }}>
+        <div
+          style={{
+            fontSize: 11,
+            color: T.textMuted,
+            marginBottom: 14,
+            marginTop: -10,
+          }}
+        >
           Comma-separated — shown as badges on your card
         </div>
 
@@ -1951,9 +2065,14 @@ function PostServiceModal({ onClose, onSubmit }) {
           <button
             onClick={onClose}
             style={{
-              fontSize: 13, fontWeight: 700, padding: "10px 18px",
-              borderRadius: 8, background: "#f8fafc",
-              color: T.textMid, border: `1px solid ${T.border}`, cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 700,
+              padding: "10px 18px",
+              borderRadius: 8,
+              background: "#f8fafc",
+              color: T.textMid,
+              border: `1px solid ${T.border}`,
+              cursor: "pointer",
             }}
           >
             Cancel
@@ -1962,12 +2081,23 @@ function PostServiceModal({ onClose, onSubmit }) {
             onClick={handleSubmit}
             disabled={saving || !businessName.trim() || !about.trim()}
             style={{
-              flex: 1, fontSize: 13, fontWeight: 700, padding: 10,
-              borderRadius: 8, background: T.indigo, color: "#fff",
-              border: "none", cursor: "pointer", opacity: saving ? .6 : 1,
+              flex: 1,
+              fontSize: 13,
+              fontWeight: 700,
+              padding: 10,
+              borderRadius: 8,
+              background: T.indigo,
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              opacity: saving ? 0.6 : 1,
             }}
           >
-            {uploadingImage ? "Uploading image..." : saving ? "Publishing..." : "Publish Listing"}
+            {uploadingImage
+              ? "Uploading image..."
+              : saving
+                ? "Publishing..."
+                : "Publish Listing"}
           </button>
         </div>
       </div>
@@ -1997,6 +2127,7 @@ function MarketView({ onShowIncoming }) {
   const { providers: rawProviders, loading } = useProviders(activeCategory);
   const providers = rawProviders.map(normalizeProvider);
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { requests: myReqs = [], loading: reqsLoading } = useMyRequests(
     user?.uid,
   );
@@ -2062,70 +2193,45 @@ function MarketView({ onShowIncoming }) {
             <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21h6" />
           </svg>
         }
-        right={
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <button
-              onClick={onShowIncoming}
-              style={{
-                height: 36,
-                padding: "0 18px",
-                background: "rgba(255,255,255,.08)",
-                border: "1px solid rgba(255,255,255,.15)",
-                color: "rgba(255,255,255,.8)",
-                borderRadius: 6,
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: "pointer",
-                letterSpacing: ".04em",
-              }}
-            >
-              Incoming Requests
-            </button>
-            <button
-              onClick={() => setPostingOpen(true)}
-              style={{
-                height: 36,
-                padding: "0 20px",
-                background: T.indigo,
-                color: "#fff",
-                border: "none",
-                borderRadius: 6,
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: "pointer",
-                letterSpacing: ".04em",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <span>+</span> List My Service
-            </button>
-          </div>
-        }
+       right={
+  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <button onClick={onShowIncoming} style={{
+      height: 32, padding: "0 10px",
+      background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.15)",
+      color: "rgba(255,255,255,.8)", borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: "pointer",
+    }}>
+      {isMobile ? "Requests" : "Incoming Requests"}
+    </button>
+    <button onClick={() => setPostingOpen(true)} style={{
+      height: 32, padding: "0 12px",
+      background: T.indigo, color: "#fff", border: "none",
+      borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: "pointer",
+      display: "flex", alignItems: "center", gap: 4,
+    }}>
+      <span>+</span>{isMobile ? "List" : "List My Service"}
+    </button>
+  </div>
+}
       />
 
-      {/* Layout */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "240px 1fr",
-          alignItems: "start",
-          padding: "28px 32px 80px",
-          gap: 24,
-          maxWidth: 1440,
-          margin: "0 auto",
-        }}
-      >
-        <Sidebar
-          active={activeCategory}
-          onSelect={handleFilterChange}
-          providers={providers}
-        />
+     {/* Mobile: sidebar above content; Desktop: sidebar beside content */}
+{isMobile ? (
+  <Sidebar active={activeCategory} onSelect={handleFilterChange} providers={providers} />
+) : null}
 
-        {/* Main */}
-        {/* Main */}
-        <div style={{ minWidth: 0 }}>
+<div style={{
+  display: isMobile ? "block" : "grid",
+  gridTemplateColumns: "240px 1fr",
+  alignItems: "start",
+  padding: isMobile ? "16px 12px 80px" : "28px 32px 80px",
+  gap: 24,
+  maxWidth: 1440,
+  margin: "0 auto",
+}}>
+  {!isMobile && (
+    <Sidebar active={activeCategory} onSelect={handleFilterChange} providers={providers} />
+  )}
+  <div style={{ minWidth: 0 }}>
           <AvailBanner availNow={availCount} total={providers.length} />
 
           {/* ── Content: loading / empty / grids ── */}
@@ -2183,7 +2289,7 @@ function MarketView({ onShowIncoming }) {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(3,1fr)",
+                      gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)",
                       gap: 18,
                       marginBottom: 8,
                     }}
@@ -2212,7 +2318,7 @@ function MarketView({ onShowIncoming }) {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(3,1fr)",
+                      gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)",
                       gap: 18,
                       marginBottom: 8,
                     }}
@@ -2249,50 +2355,47 @@ function MarketView({ onShowIncoming }) {
           </div>
         </div>
       </div>
-     {postingOpen && (
-  <PostServiceModal
-    onClose={() => setPostingOpen(false)}
-    onSubmit={async (listingData) => {
-  try {
-    const { setDoc, doc, serverTimestamp, Timestamp } = await import("firebase/firestore");
-    const { db } = await import("../firebase");
+      {postingOpen && (
+        <PostServiceModal
+          onClose={() => setPostingOpen(false)}
+          onSubmit={async (listingData) => {
+            try {
+              const { setDoc, doc, serverTimestamp, Timestamp } =
+                await import("firebase/firestore");
+              const { db } = await import("../firebase");
 
-    const expiresAt = Timestamp.fromDate(
-      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-    );
+              const expiresAt = Timestamp.fromDate(
+                new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+              );
 
-    const payload = {
-      ...listingData,
-      ownerId:   user.uid,
-      active:    true,
-      available: true,
-      expiresAt,
-      updatedAt: serverTimestamp(),
-    };
+              const payload = {
+                ...listingData,
+                ownerId: user.uid,
+                active: true,
+                available: true,
+                expiresAt,
+                updatedAt: serverTimestamp(),
+              };
 
-    // 1️⃣ Save to serviceProviders (owner profile doc)
-    await setDoc(
-      doc(db, "serviceProviders", user.uid),
-      payload,
-      { merge: true }
-    );
+              // 1️⃣ Save to serviceProviders (owner profile doc)
+              await setDoc(doc(db, "serviceProviders", user.uid), payload, {
+                merge: true,
+              });
 
-    // 2️⃣ Also save to providers (marketplace listing)
-    await setDoc(
-      doc(db, "providers", user.uid),
-      payload,
-      { merge: true }
-    );
+              // 2️⃣ Also save to providers (marketplace listing)
+              await setDoc(doc(db, "providers", user.uid), payload, {
+                merge: true,
+              });
 
-    setPostingOpen(false);
-    showToast("Your service is now live for 30 days!");
-  } catch (err) {
-    console.error(err);
-    showToast("Failed to publish. Please try again.");
-  }
-}}
-  />
-)}
+              setPostingOpen(false);
+              showToast("Your service is now live for 30 days!");
+            } catch (err) {
+              console.error(err);
+              showToast("Failed to publish. Please try again.");
+            }
+          }}
+        />
+      )}
 
       <Toast message={toast} />
     </div>
@@ -2311,7 +2414,7 @@ function IncomingView({ onBack }) {
   const [expandedInc, setExpandedInc] = useState({});
   const [quoteTarget, setQuoteTarget] = useState(null);
   const [toast, setToast] = useState("");
-
+  const isMobile = useIsMobile();
   const showToast = useCallback((msg) => {
     setToast(msg);
     setTimeout(() => setToast(""), 3500);
@@ -2443,7 +2546,7 @@ function IncomingView({ onBack }) {
       </div>
 
       <div
-        style={{ maxWidth: 900, margin: "0 auto", padding: "28px 32px 80px" }}
+        style={{ maxWidth: 900, margin: "0 auto", padding: isMobile ? "16px 12px 80px" : "28px 32px 80px" }}
       >
         {/* Stats row */}
         <div style={{ display: "flex", gap: 12, marginBottom: 28 }}>
@@ -2694,14 +2797,7 @@ function IncomingView({ onBack }) {
                       borderTop: `1px solid ${T.border}`,
                     }}
                   >
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: 16,
-                        margin: "16px 0",
-                      }}
-                    >
+                    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: 10, marginBottom: 20 }}>
                       <div>
                         <div
                           style={{
