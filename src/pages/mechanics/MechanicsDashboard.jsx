@@ -574,7 +574,19 @@ const MechanicsDashboard = () => {
   const handleRemoveItem = (index) => {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
-
+  const handleUpdateItem = (index, field, value) => {
+    setItems((prev) =>
+      prev.map((item, i) => {
+        if (i !== index) return item;
+        const updated = { ...item, [field]: value };
+        // Recalculate amount whenever rate or qty changes
+        if (field === "rate" || field === "qty") {
+          updated.amount = Number(updated.rate) * Number(updated.qty);
+        }
+        return updated;
+      }),
+    );
+  };
   // State
   const [customerName, setCustomerName] = useState("John Smith");
   const [merchant_code, setCustomerId] = useState("V*R-9890");
@@ -1662,16 +1674,16 @@ const MechanicsDashboard = () => {
             </div>
           )}
           {activeView === "marketplace" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
-  </div>
-)}
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
 
-{activeView === "incoming-requests" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceRequestsView user={user} businessInfo={businessInfo} />
-  </div>
-)}
+          {activeView === "incoming-requests" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceRequestsView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
           {activeView === "reports" && (
             <div className="flex-1 overflow-y-auto p-4">
               <ReportsView user={user} />
@@ -2200,51 +2212,125 @@ const MechanicsDashboard = () => {
                                             </tr>
                                           </thead>
                                           <tbody>
-                                            {poItems
-                                              .filter((i) => i.description)
-                                              .map((item, index) => (
-                                                <tr
-                                                  key={index}
-                                                  className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
-                                                >
-                                                  <td className="px-4 py-3 text-sm font-medium text-[#374151]">
-                                                    {item.description}
-                                                  </td>
-                                                  <td className="px-4 py-3 text-sm text-[#374151]">
-                                                    {item.qty}
-                                                  </td>
-                                                  <td className="px-4 py-3 text-sm text-[#374151]">
-                                                    {item.unit}
-                                                  </td>
-                                                  <td className="px-4 py-3 text-sm text-[#374151]">
-                                                    R
-                                                    {Number(
-                                                      item.unitPrice,
-                                                    ).toFixed(2)}
-                                                  </td>
-                                                  <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
-                                                    R
-                                                    {Number(
-                                                      item.amount,
-                                                    ).toFixed(2)}
-                                                  </td>
-                                                  <td className="px-4 py-3">
-                                                    <button
-                                                      onClick={() =>
-                                                        setPoItems((prev) =>
-                                                          prev.filter(
-                                                            (_, i) =>
-                                                              i !== index,
+                                            {items.map((item, index) => (
+                                              <tr
+                                                key={index}
+                                                className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
+                                              >
+                                                {/* Type */}
+                                                <td className="px-4 py-2">
+                                                  <select
+                                                    value={item.type}
+                                                    onChange={(e) =>
+                                                      handleUpdateItem(
+                                                        index,
+                                                        "type",
+                                                        e.target.value,
+                                                      )
+                                                    }
+                                                    className="text-xs font-semibold rounded px-2 py-1 border border-[#e2e8f0] focus:outline-none focus:ring-1 focus:ring-[#2563eb] cursor-pointer
+            bg-[#eff6ff] text-[#1d4ed8]"
+                                                    style={{
+                                                      background:
+                                                        item.type === "Labor"
+                                                          ? "#eff6ff"
+                                                          : "#f0fdf4",
+                                                      color:
+                                                        item.type === "Labor"
+                                                          ? "#1d4ed8"
+                                                          : "#166534",
+                                                    }}
+                                                  >
+                                                    <option value="Labor">
+                                                      Labor
+                                                    </option>
+                                                    <option value="Parts">
+                                                      Parts
+                                                    </option>
+                                                  </select>
+                                                </td>
+
+                                                {/* Description */}
+                                                <td className="px-4 py-2">
+                                                  <input
+                                                    type="text"
+                                                    value={item.description}
+                                                    onChange={(e) =>
+                                                      handleUpdateItem(
+                                                        index,
+                                                        "description",
+                                                        e.target.value,
+                                                      )
+                                                    }
+                                                    className="w-full text-sm font-medium text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors min-w-[140px]"
+                                                  />
+                                                </td>
+
+                                                {/* Rate */}
+                                                <td className="px-4 py-2">
+                                                  <div className="flex items-center gap-0.5">
+                                                    <span className="text-xs text-[#94a3b8]">
+                                                      R
+                                                    </span>
+                                                    <input
+                                                      type="number"
+                                                      value={item.rate}
+                                                      onChange={(e) =>
+                                                        handleUpdateItem(
+                                                          index,
+                                                          "rate",
+                                                          Number(
+                                                            e.target.value,
                                                           ),
                                                         )
                                                       }
-                                                      className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all"
-                                                    >
-                                                      <X className="w-3.5 h-3.5" />
-                                                    </button>
-                                                  </td>
-                                                </tr>
-                                              ))}
+                                                      className="w-20 text-sm text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors"
+                                                      min="0"
+                                                      step="0.01"
+                                                    />
+                                                  </div>
+                                                </td>
+
+                                                {/* Qty */}
+                                                <td className="px-4 py-2">
+                                                  <input
+                                                    type="number"
+                                                    value={item.qty}
+                                                    onChange={(e) =>
+                                                      handleUpdateItem(
+                                                        index,
+                                                        "qty",
+                                                        Number(e.target.value),
+                                                      )
+                                                    }
+                                                    className="w-14 text-sm text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors"
+                                                    min="1"
+                                                    step="1"
+                                                  />
+                                                </td>
+
+                                                {/* Amount — auto-calculated, read-only */}
+                                                <td className="px-4 py-3 text-sm font-semibold text-[#1e293b] whitespace-nowrap">
+                                                  R
+                                                  {(
+                                                    Number(item.rate) *
+                                                    Number(item.qty)
+                                                  ).toFixed(2)}
+                                                </td>
+
+                                                {/* Delete */}
+                                                <td className="px-4 py-3">
+                                                  <button
+                                                    onClick={() =>
+                                                      handleRemoveItem(index)
+                                                    }
+                                                    className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all"
+                                                  >
+                                                    <X className="w-3.5 h-3.5" />
+                                                  </button>
+                                                </td>
+                                              </tr>
+                                            ))}
                                           </tbody>
                                         </table>
                                       </div>
