@@ -6,6 +6,12 @@ import BookingPanel from "../components/BookingPanel";
 import { useProviders }        from "../hooks/useProviders";
 import { sendBookingRequest }  from "../hooks/useBookingRequests";
 import { useAuth }             from "../contexts/AuthContext"; 
+import {
+  MarketplaceSEO,
+  MarketplaceBreadcrumb,
+  IndustryFAQ,
+  useIndustryRoute,
+} from './SEO_MarketplaceMeta';
 const SOLIDFLO_URL = "https://solidflo.co.za";
 
 // ── CSS (mirrors LandingPage token system exactly) ────────────────────────────
@@ -2913,6 +2919,11 @@ export default function PublicMarketplace() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 const [bookingProvider, setBookingProvider] = useState(null);
 const [toast, setToast] = useState("");
+const [showVideoAd, setShowVideoAd] = useState(false);
+const [adDismissed, setAdDismissed] = useState(false);
+const idleTimerRef = useRef(null);
+const IDLE_DELAY = 60 * 1000; // 1 minute
+useIndustryRoute(activeFilter, setActiveFilter); 
 const showToast = useCallback((msg) => {
   setToast(msg);
   setTimeout(() => setToast(""), 3500);
@@ -2927,6 +2938,14 @@ const availCount = providers.filter((p) => p.avail).length;
   // Active industry label for FAB
   const activeIndustry = INDUSTRIES.find((i) => i.id === activeFilter);
 const [currentAd, setCurrentAd] = useState(0);
+const resetIdleTimer = useCallback(() => {
+  clearTimeout(idleTimerRef.current);
+  if (!adDismissed) {
+    idleTimerRef.current = setTimeout(() => {
+      setShowVideoAd(true);
+    }, IDLE_DELAY);
+  }
+}, [adDismissed]);
 
 const ADS = [
    {
@@ -2957,7 +2976,20 @@ const ADS = [
     "src": "/ads/videolid-ad.png"
   },
 ];
+useEffect(() => {
+  const events = ["scroll", "mousemove", "keydown", "touchstart", "click"];
+  events.forEach(e => window.addEventListener(e, resetIdleTimer, { passive: true }));
+  resetIdleTimer(); // start timer on mount
+  return () => {
+    events.forEach(e => window.removeEventListener(e, resetIdleTimer));
+    clearTimeout(idleTimerRef.current);
+  };
+}, [resetIdleTimer]);
 
+const handleCloseVideoAd = useCallback(() => {
+  setShowVideoAd(false);
+  setAdDismissed(true); // won't show again this session
+}, []);
 useEffect(() => {
   const t = setInterval(() => {
     setCurrentAd((prev) => (prev + 1) % ADS.length);
@@ -3032,7 +3064,7 @@ const handleSubmitBooking = useCallback(
   return (
     <div className="mp">
       <style>{css}</style>
-
+      <MarketplaceSEO activeFilter={activeFilter} providers={providers} />
       {/* Scroll progress */}
       <div className="mp-progress" style={{ width: `${scrollPct}%` }} />
 
@@ -3067,7 +3099,8 @@ const handleSubmitBooking = useCallback(
           </div>
         </div>
       </nav>
-
+      
+<MarketplaceBreadcrumb activeFilter={activeFilter} />
       {/* Hero */}
       <Hero
         availCount={availCount}
@@ -3172,7 +3205,7 @@ const handleSubmitBooking = useCallback(
         More providers
       </SectionTitle>
     )}
-
+     <IndustryFAQ activeFilter={activeFilter} />
     {/* ── Inline Ad Banner ── */}
     <div
       key={`inline-${currentAd}`}
@@ -3350,6 +3383,91 @@ const handleSubmitBooking = useCallback(
                 </div>
               </div>
             </div> 
+            {showVideoAd && (
+  <div
+    style={{
+      position: "fixed", inset: 0, zIndex: 2000,
+      background: "rgba(15,23,42,.75)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      backdropFilter: "blur(6px)",
+      animation: "mp-up .35s ease",
+    }}
+    onClick={handleCloseVideoAd}
+  >
+    <div
+      style={{
+        position: "relative", width: "min(680px, 92vw)",
+        borderRadius: 14, overflow: "hidden",
+        boxShadow: "0 32px 80px rgba(0,0,0,.4)",
+      }}
+      onClick={e => e.stopPropagation()}
+    >
+      {/* Sponsored tag */}
+      <span style={{
+        position: "absolute", top: 12, left: 12, zIndex: 3,
+        fontSize: 10, fontWeight: 700, letterSpacing: ".06em",
+        textTransform: "uppercase",
+        background: "rgba(0,0,0,.5)", color: "rgba(255,255,255,.75)",
+        padding: "3px 9px", borderRadius: 4, backdropFilter: "blur(4px)",
+      }}>
+        Sponsored
+      </span>
+
+      {/* Close button */}
+      <button
+        onClick={handleCloseVideoAd}
+        style={{
+          position: "absolute", top: 10, right: 12, zIndex: 3,
+          background: "rgba(0,0,0,.55)", border: "1px solid rgba(255,255,255,.2)",
+          width: 30, height: 30, borderRadius: "50%",
+          color: "#fff", fontSize: 13, cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          backdropFilter: "blur(4px)",
+        }}
+      >
+        ✕
+      </button>
+
+      {/* Video */}
+      <video
+        autoPlay
+        muted={false}
+        loop={false}
+        controls
+        playsInline
+        onEnded={handleCloseVideoAd}
+        style={{ width: "100%", display: "block", background: "#000" }}
+        src="/ads/your-video-ad.mp4"  // 👈 replace with your actual video path
+      />
+
+      {/* Caption bar */}
+      <div style={{
+        background: "#0f172a", padding: "12px 18px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 2 }}>
+            Your Ad Headline Here
+          </div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,.45)" }}>
+            yourwebsite.co.za
+          </div>
+        </div>
+        <button
+          onClick={() => window.open("https://yourwebsite.co.za", "_blank", "noopener,noreferrer")}
+          style={{
+            background: "#6366f1", color: "#fff", border: "none",
+            borderRadius: 6, padding: "8px 16px",
+            fontSize: 12, fontWeight: 700, letterSpacing: ".04em",
+            textTransform: "uppercase", cursor: "pointer",
+          }}
+        >
+          Learn More →
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       {/* Footer */}
       <footer className="mp-footer">
         <div className="mp-footer-upper">

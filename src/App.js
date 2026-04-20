@@ -646,7 +646,7 @@ function App() {
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/auth-action" element={<AuthAction />} />
-
+              <Route path="/market/:industry"    element={<SolidMarket />} />
               {/* PWAGate lives inside Router so useLocation works */}
               <Route
                 path="/*"

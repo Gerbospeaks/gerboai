@@ -1,3 +1,39 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+ 
+# Block auth and internal paths
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /api/
+ 
+# Allow all marketplace industry pages
+Allow: /mechanics
+Allow: /electrical
+Allow: /plumbing
+Allow: /carpentry
+Allow: /construction
+Allow: /accounting
+Allow: /cleaning
+Allow: /education
+Allow: /health
+Allow: /hospitality
+Allow: /hvac
+Allow: /landscaping
+Allow: /legal
+Allow: /logistics
+Allow: /painting
+Allow: /pest-control
+Allow: /photography
+Allow: /pool
+Allow: /realestate
+Allow: /restaurants
+Allow: /retail
+Allow: /security
+Allow: /solar
+Allow: /towing
+Allow: /welding
+Allow: /flooring
+Allow: /windows
+ 
+Sitemap: https://market.solidflo.co.za/market-sitemap.xml
