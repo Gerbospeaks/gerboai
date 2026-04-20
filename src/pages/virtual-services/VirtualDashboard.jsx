@@ -14,7 +14,7 @@ import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from "../SignatureStamp";
-import VirtualMultiStepForm from "./VirtualMultiStepFormMultiStepForm";
+import VirtualMultiStepForm from "./VirtualMultiStepForm";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
