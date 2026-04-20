@@ -753,6 +753,8 @@ const MechanicsDashboard = () => {
       registration: vehicleReg,
       vin: vehicleVin,
       mileage: vehicleMileage,
+      preAuth: preAuth,
+      authCode: authCode,
     },
     items,
     vatRate,
