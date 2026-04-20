@@ -3277,15 +3277,7 @@ const handleSubmitBooking = useCallback(
     </div>
   </>
 )} 
-{bookingProvider && (
-  <div style={{ marginTop: 12 }}>
-    <BookingPanel
-      provider={bookingProvider}
-      onClose={() => setBookingProvider(null)}
-      onSubmit={handleSubmitBooking}
-    />
-  </div>
-)}
+
             {/* Empty */}
             {providers.length === 0 && !loading && (
               <div className="mp-empty">
@@ -3553,6 +3545,31 @@ const handleSubmitBooking = useCallback(
           onClose={closeModal}
         />
       )}
+      {/* Booking Panel Overlay */}
+{bookingProvider && (
+  <div
+    style={{
+      position: "fixed", inset: 0, zIndex: 1000,
+      background: "rgba(15,23,42,.6)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "20px",
+      backdropFilter: "blur(8px)",
+      animation: "mp-up .25s ease",
+    }}
+    onClick={() => setBookingProvider(null)}  // click backdrop to close
+  >
+    <div
+      style={{ width: "100%", maxWidth: 560 }}
+      onClick={(e) => e.stopPropagation()}    // prevent backdrop close on inner click
+    >
+      <BookingPanel
+        provider={bookingProvider}
+        onClose={() => setBookingProvider(null)}
+        onSubmit={handleSubmitBooking}
+      />
+    </div>
+  </div>
+)}
        {/* Toast */}
       {toast && (
         <div style={{
