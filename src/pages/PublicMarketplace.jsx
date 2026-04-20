@@ -3100,7 +3100,6 @@ const handleSubmitBooking = useCallback(
         </div>
       </nav>
       
-<MarketplaceBreadcrumb activeFilter={activeFilter} />
       {/* Hero */}
       <Hero
         availCount={availCount}
@@ -3205,7 +3204,7 @@ const handleSubmitBooking = useCallback(
         More providers
       </SectionTitle>
     )}
-     <IndustryFAQ activeFilter={activeFilter} />
+    
     {/* ── Inline Ad Banner ── */}
     <div
       key={`inline-${currentAd}`}
@@ -3468,6 +3467,7 @@ const handleSubmitBooking = useCallback(
     </div>
   </div>
 )}
+ <IndustryFAQ activeFilter={activeFilter} />
       {/* Footer */}
       <footer className="mp-footer">
         <div className="mp-footer-upper">

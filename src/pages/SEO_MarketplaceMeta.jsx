@@ -713,7 +713,7 @@ export function MarketplaceBreadcrumb({ activeFilter }) {
           fontSize: 12,
           color: "#94a3b8",
           fontFamily: "'Lato', sans-serif",
-          background: "#f8fafc",
+          background: "transparent",
           borderBottom: "1px solid #e2e8f0",
         }}
       >

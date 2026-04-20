@@ -1336,8 +1336,8 @@ useEffect(() => {
               <a href="#faq">FAQ</a>
             </div>
             <div className="lp-nav-ctas">
-              <button className="lp-btn-ghost" onClick={() => open("register")}>
-  Register
+              <button className="lp-btn-ghost" onClick={() => open("login")}>
+  Login
 </button>
 
               <button className="lp-btn-primary" onClick={() => open("register")}>

@@ -670,8 +670,8 @@ function App() {
               <Route path="/auth-action" element={<AuthAction />} />
 
               {/* Auth is subdomain-only — block direct access on main domain */}
-              <Route path="/login" element={<Navigate to="/" replace />} />
-              <Route path="/register" element={<Navigate to="/" replace />} />
+              <Route path="/login" element={<PublicOnlyRoute><SubdomainAuthPage /></PublicOnlyRoute>} />
+              <Route path="/register" element={<PublicOnlyRoute><SubdomainAuthPage /></PublicOnlyRoute>} />
 
               <Route
                 path="/*"
