@@ -541,44 +541,105 @@ const MechanicsDashboard = () => {
     return snap.exists() ? snap.data() : null;
   };
 
-const handleSavePDF = async () => {
-  const element = activeView === "purchase-orders"
-    ? document.getElementById("po-printable")
-    : document.getElementById("invoice-printable");
+  const handleSavePDF = async () => {
+    const element =
+      activeView === "purchase-orders"
+        ? document.getElementById("po-printable")
+        : document.getElementById("invoice-printable");
 
-  if (!element) {
-    alert("No printable content found. Please ensure the document is visible.");
-    return;
-  }
+    if (!element) {
+      alert("No printable content found.");
+      return;
+    }
 
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: "#ffffff",
-  });
+    // Convert all external images to base64 first to avoid CORS issues
+    const images = element.querySelectorAll("img");
+    await Promise.all(
+      Array.from(images).map(async (img) => {
+        if (!img.src || img.src.startsWith("data:")) return;
+        try {
+          const response = await fetch(img.src, { mode: "cors" });
+          const blob = await response.blob();
+          const base64 = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          });
+          img.src = base64;
+          await new Promise((r) => setTimeout(r, 100)); // let DOM update
+        } catch (err) {
+          console.warn("Could not convert image to base64, skipping:", img.src);
+          img.style.display = "none"; // hide broken image so canvas doesn't crash
+        }
+      }),
+    );
 
-  const imgData = canvas.toDataURL("image/png");
-  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        logging: false,
+        imageTimeout: 15000,
+        onclone: (clonedDoc) => {
+          // Remove any elements with CSS gradients that could cause the
+          // "non-finite addColorStop" crash
+          const allElements = clonedDoc.querySelectorAll("*");
+          allElements.forEach((el) => {
+            const bg = window.getComputedStyle(el).backgroundImage;
+            if (bg && bg.includes("gradient")) {
+              el.style.backgroundImage = "none";
+            }
+          });
+        },
+      });
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = (canvas.height * pageWidth) / canvas.width;
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
 
-  pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = (canvas.height * pageWidth) / canvas.width;
 
-  // Filename reflects document type
-  const prefix =
-    activeView === "purchase-orders"
-      ? "PO"
-      : documentType === "quote"
-      ? "Quote"
-      : "Invoice";
+      // Handle multi-page if content is taller than A4
+      const a4Height = pdf.internal.pageSize.getHeight();
+      if (pageHeight <= a4Height) {
+        pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
+      } else {
+        let yOffset = 0;
+        let remainingHeight = pageHeight;
+        while (remainingHeight > 0) {
+          pdf.addImage(imgData, "PNG", 0, -yOffset, pageWidth, pageHeight);
+          remainingHeight -= a4Height;
+          yOffset += a4Height;
+          if (remainingHeight > 0) pdf.addPage();
+        }
+      }
 
-  const number = activeView === "purchase-orders"
-    ? poNumber || "draft"
-    : jobCardNumber || "draft";
+      const prefix =
+        activeView === "purchase-orders"
+          ? "PO"
+          : documentType === "quote"
+            ? "Quote"
+            : "Invoice";
 
-  pdf.save(`${prefix}-${number}.pdf`);
-};
+      const number =
+        activeView === "purchase-orders"
+          ? poNumber || "draft"
+          : jobCardNumber || "draft";
+
+      pdf.save(`${prefix}-${number}.pdf`);
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      alert(
+        "PDF generation failed. Try the Print button instead (Ctrl+P → Save as PDF).",
+      );
+    }
+  };
 
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
@@ -918,7 +979,8 @@ const handleSavePDF = async () => {
 
   // ── Header action buttons ─────────────────────────────────────────────────
   const headerActions = [
-    can("createQuote") && documentType === "quote" &&
+    can("createQuote") &&
+      documentType === "quote" &&
       jobCardId &&
       activeView !== "purchase-orders" && {
         label: "Convert to Invoice",
@@ -960,14 +1022,16 @@ const handleSavePDF = async () => {
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-     can("createInvoice") || can("createQuote") ?{
-      label: activeView === "purchase-orders" ? "Save P.O." : "Save",
-      icon: Save,
-      onClick:
-        activeView === "purchase-orders" ? handleSavePO : handleSaveJobCard,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    } : null,
+    can("createInvoice") || can("createQuote")
+      ? {
+          label: activeView === "purchase-orders" ? "Save P.O." : "Save",
+          icon: Save,
+          onClick:
+            activeView === "purchase-orders" ? handleSavePO : handleSaveJobCard,
+          className:
+            "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+        }
+      : null,
   ].filter(Boolean);
 
   const mobileDashboardActions = [
@@ -1397,20 +1461,20 @@ const handleSavePDF = async () => {
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
       <div
-      id="print-area"
-      className="hidden print:block bg-white"
-      style={{ width: "210mm", minHeight: "297mm" }}
-    >
-      {activeView === "purchase-orders" ? (
-        <div id="po-printable">
-          <POTemplateRenderer {...poTemplateProps} />
-        </div>
-      ) : (
-        <div id="invoice-printable">
-          <TemplateRenderer {...templateProps} />
-        </div>
-      )}
-    </div>
+        id="print-area"
+        className="hidden print:block bg-white"
+        style={{ width: "210mm", minHeight: "297mm" }}
+      >
+        {activeView === "purchase-orders" ? (
+          <div id="po-printable">
+            <POTemplateRenderer {...poTemplateProps} />
+          </div>
+        ) : (
+          <div id="invoice-printable">
+            <TemplateRenderer {...templateProps} />
+          </div>
+        )}
+      </div>
       {showAIWindow && (
         <AIInvoiceWindow
           user={user}
@@ -1499,8 +1563,8 @@ const handleSavePDF = async () => {
             onCustomerSaved={handleCustomerSaved}
           />
           {showUserManagement && (
-  <SubUserManagement onClose={() => setShowUserManagement(false)} />
-)}
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
           {showPaymentModal && selectedInvoiceForPayment && (
             <PaymentProcessor
               showModal={showPaymentModal}
