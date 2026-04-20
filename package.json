@@ -11,6 +11,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@vapi-ai/web": "^2.5.2",
     "ajv": "^8.0.0",
+    "cross-env": "^10.1.0",
     "dotenv": "^17.2.3",
     "firebase": "^12.7.0",
     "html2canvas": "^1.4.1",
@@ -30,7 +31,6 @@
     "workbox-expiration": "^6.6.0",
     "workbox-precaching": "^6.6.0",
     "workbox-routing": "^6.6.0",
-    "cross-env": "^10.1.0",
     "workbox-strategies": "^6.6.0"
   },
   "scripts": {

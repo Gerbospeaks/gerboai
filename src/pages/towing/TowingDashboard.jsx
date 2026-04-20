@@ -19,6 +19,9 @@ import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import PaymentReceipt from "../../components/dashboard/PaymentReceipt";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import TowingSidebar from "./TowingSidebar"; // adjust path as needed
 import {
   getFirestore,
@@ -120,6 +123,7 @@ const TowingDashboard = () => {
   const [activeView, setActiveView] = useState("home");
   const [currentJobCardId, setCurrentJobCardId] = useState(null);
   const [savedCustomers, setSavedCustomers] = useState([]);
+  const [poNumber, setPoNumber] = useState("");
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customers, setCustomers] = useState([]);
@@ -134,6 +138,24 @@ const TowingDashboard = () => {
   const [showAIWindow, setShowAIWindow] = useState(false);
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
   const [aiDocType, setAiDocType] = useState("invoice");
+  const [notes, setNotes] = useState("");
+    const [paymentTerms, setPaymentTerms] = useState("30 Days");
+    const [shippingMethod, setShippingMethod] = useState("");
+    const [stampSettings, setStampSettings] = useState("");
+    const [paymentStatus, setPaymentStatus] = useState({
+      totalPaid: 0,
+      balanceDue: 0,
+      status: "pending",
+    });
+     const [stats, setStats] = useState({
+        totalInvoices: 0,
+        totalQuotes: 0,
+        totalInvoiced: 0,
+        totalClients: 0,
+        pendingPayments: 0,
+        loading: true,
+      });
+    const [documentType, setDocumentType] = useState("invoice");
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
     useState(null);
   const [towLocation, setTowLocation] = useState("");
@@ -146,30 +168,25 @@ const TowingDashboard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [invoices, setInvoices] = useState([]);
-  const [stats, setStats] = useState({
-    totalInvoices: 0,
-    totalQuotes: 0,
-    totalInvoiced: 0,
-    totalClients: 0,
-    pendingPayments: 0,
-    loading: true,
+    const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
+    const [deliveryDate, setDeliveryDate] = useState("");
+    const [supplierName, setSupplierName] = useState("");
+    const [supplierContact, setSupplierContact] = useState("");
+    const [supplierEmail, setSupplierEmail] = useState("");
+    const [supplierPhone, setSupplierPhone] = useState("");
+    const [supplierAddress, setSupplierAddress] = useState("");
+    const [deliveryName, setDeliveryName] = useState("");
+    const [deliveryAddress, setDeliveryAddress] = useState("");
+    const [poItems, setPoItems] = useState([
+      { description: "", qty: 1, unit: "ea", unitPrice: 0, amount: 0 },
+    ]);
+  const [newPoItem, setNewPoItem] = useState({
+    description: "",
+    qty: 1,
+    unit: "ea",
+    unitPrice: 0,
   });
   const [showInvoicesList, setShowInvoicesList] = useState(false);
-
-  const [stampSettings, setStampSettings] = useState({
-    text: "APPROVED",
-    color: "#d32f2f",
-    showDate: false,
-    enabled: false,
-  });
-
-  const [paymentStatus, setPaymentStatus] = useState({
-    totalPaid: 0,
-    balanceDue: 0,
-    status: "pending",
-  });
-
-  const [documentType, setDocumentType] = useState("invoice");
 
   const location = useLocation();
   useEffect(() => {
@@ -307,7 +324,62 @@ const TowingDashboard = () => {
       setStats((p) => ({ ...p, loading: false }));
     }
   };
+    const poSubtotal = poItems.reduce(
+    (sum, item) => sum + Number(item.amount),
+    0,
+  );
+    const handleAddPoItem = () => {
+    if (!newPoItem.description || !newPoItem.qty) return;
+    const unitPrice = Number(newPoItem.unitPrice) || 0;
+    const qty = Number(newPoItem.qty);
+    setPoItems((prev) => [
+      ...prev.filter((i) => i.description),
+      {
+        description: newPoItem.description,
+        qty,
+        unit: newPoItem.unit,
+        unitPrice,
+        amount: unitPrice * qty,
+      },
+    ]);
+    setNewPoItem({ description: "", qty: 1, unit: "ea", unitPrice: 0 });
+  };
+  const poVat = poSubtotal * 0.15;
+  const poTotal = poSubtotal + poVat;
+ const handleSavePO = async () => {
+    if (!user?.uid) return;
+    try {
+      const db = getFirestore();
+      const poData = {
+        poNumber,
+        poDate,
+        deliveryDate,
+        supplierName,
+        supplierContact,
+        supplierEmail,
+        supplierPhone,
+        supplierAddress,
+        deliveryName,
+        deliveryAddress,
+        items: poItems.filter((i) => i.description),
+        totals: { subtotal: poSubtotal, vat: poVat, total: poTotal },
+        notes,
+        paymentTerms,
+        shippingMethod,
+        status: "pending",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
 
+      const posRef = collection(db, "users", user.uid, "purchaseOrders");
+      await addDoc(posRef, poData);
+
+      alert("Purchase Order saved successfully!");
+    } catch (error) {
+      console.error("Error saving PO:", error);
+      alert("Failed to save Purchase Order");
+    }
+  };
   // Responsive detection
   useEffect(() => {
     const handleResize = () => {
@@ -501,24 +573,44 @@ const TowingDashboard = () => {
     return snap.exists() ? snap.data() : null;
   };
 
-  const handleSavePDF = async () => {
-    const savedJobCard = await loadJobCardForExport();
-    if (!savedJobCard) {
-      alert(`Please save the ${documentType} before exporting PDF`);
-      return;
-    }
-    setJobCardNumber(savedJobCard.jobCardNumber);
-    setItems(savedJobCard.items);
-    setCustomerName(savedJobCard.customer.name);
-    setCustomerEmail(savedJobCard.customer.email);
-    setCustomerPhone(savedJobCard.customer.phone);
-    setCustomerAddress(savedJobCard.customer.address);
-    setVehicleMake(savedJobCard.vehicle.make);
-    setVehicleModel(savedJobCard.vehicle.model);
-    setVehicleYear(savedJobCard.vehicle.year);
-    setVehicleReg(savedJobCard.vehicle.registration);
-    setTimeout(() => window.print(), 300);
-  };
+ const handleSavePDF = async () => {
+  const element = activeView === "purchase-orders"
+    ? document.getElementById("po-printable")
+    : document.getElementById("invoice-printable");
+
+  if (!element) {
+    alert("No printable content found. Please ensure the document is visible.");
+    return;
+  }
+
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: "#ffffff",
+  });
+
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = (canvas.height * pageWidth) / canvas.width;
+
+  pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
+
+  // Filename reflects document type
+  const prefix =
+    activeView === "purchase-orders"
+      ? "PO"
+      : documentType === "quote"
+      ? "Quote"
+      : "Invoice";
+
+  const number = activeView === "purchase-orders"
+    ? poNumber || "draft"
+    : jobCardNumber || "draft";
+
+  pdf.save(`${prefix}-${number}.pdf`);
+};
 
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
@@ -1019,7 +1111,27 @@ const TowingDashboard = () => {
     showStampDate: stampSettings.showDate,
     showStamp: stampSettings.enabled,
   };
-
+ const poTemplateProps = {
+    templateId: selectedTemplate,
+    businessInfo,
+    poNumber,
+    poDate,
+    deliveryDate,
+    supplierName,
+    supplierContact,
+    supplierEmail,
+    supplierPhone,
+    supplierAddress,
+    deliveryName,
+    deliveryAddress,
+    items: poItems.filter((i) => i.description),
+    subtotal: poSubtotal,
+    vat: poVat,
+    total: poTotal,
+    notes,
+    paymentTerms,
+    shippingMethod,
+  };
   // ── Home view ──────────────────────────────────────────────────────────────
   const HomeViewLocal = () => (
     <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-4">
@@ -1273,12 +1385,20 @@ const TowingDashboard = () => {
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
       <div
-        id="print-area"
-        className="hidden print:block bg-white"
-        style={{ width: "210mm", minHeight: "297mm" }}
-      >
-        <TemplateRenderer {...templateProps} />
-      </div>
+  id="print-area"
+  className="hidden print:block bg-white"
+  style={{ width: "210mm", minHeight: "297mm" }}
+>
+  {activeView === "purchase-orders" ? (
+    <div id="po-printable">
+      <POTemplateRenderer {...poTemplateProps} />
+    </div>
+  ) : (
+    <div id="invoice-printable">
+      <TemplateRenderer {...templateProps} />
+    </div>
+  )}
+</div>
       {showAIWindow && (
         <AIInvoiceWindow
           user={user}

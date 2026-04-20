@@ -51,6 +51,8 @@ import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import HomeView from "../HomeView";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import AppHeader from "../AppHeader";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
@@ -535,24 +537,44 @@ const MechanicsDashboard = () => {
     return snap.exists() ? snap.data() : null;
   };
 
-  const handleSavePDF = async () => {
-    const savedJobCard = await loadJobCardForExport();
-    if (!savedJobCard) {
-      alert(`Please save the ${documentType} before exporting PDF`);
-      return;
-    }
-    setJobCardNumber(savedJobCard.jobCardNumber);
-    setItems(savedJobCard.items);
-    setCustomerName(savedJobCard.customer.name);
-    setCustomerEmail(savedJobCard.customer.email);
-    setCustomerPhone(savedJobCard.customer.phone);
-    setCustomerAddress(savedJobCard.customer.address);
-    setVehicleMake(savedJobCard.vehicle.make);
-    setVehicleModel(savedJobCard.vehicle.model);
-    setVehicleYear(savedJobCard.vehicle.year);
-    setVehicleReg(savedJobCard.vehicle.registration);
-    setTimeout(() => window.print(), 300);
-  };
+const handleSavePDF = async () => {
+  const element = activeView === "purchase-orders"
+    ? document.getElementById("po-printable")
+    : document.getElementById("invoice-printable");
+
+  if (!element) {
+    alert("No printable content found. Please ensure the document is visible.");
+    return;
+  }
+
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: "#ffffff",
+  });
+
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = (canvas.height * pageWidth) / canvas.width;
+
+  pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
+
+  // Filename reflects document type
+  const prefix =
+    activeView === "purchase-orders"
+      ? "PO"
+      : documentType === "quote"
+      ? "Quote"
+      : "Invoice";
+
+  const number = activeView === "purchase-orders"
+    ? poNumber || "draft"
+    : jobCardNumber || "draft";
+
+  pdf.save(`${prefix}-${number}.pdf`);
+};
 
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
@@ -1371,16 +1393,20 @@ const MechanicsDashboard = () => {
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
       <div
-        id="print-area"
-        className="hidden print:block bg-white"
-        style={{ width: "210mm", minHeight: "297mm" }}
-      >
-        {documentType === "purchase-order" ? (
+      id="print-area"
+      className="hidden print:block bg-white"
+      style={{ width: "210mm", minHeight: "297mm" }}
+    >
+      {activeView === "purchase-orders" ? (
+        <div id="po-printable">
           <POTemplateRenderer {...poTemplateProps} />
-        ) : (
+        </div>
+      ) : (
+        <div id="invoice-printable">
           <TemplateRenderer {...templateProps} />
-        )}
-      </div>
+        </div>
+      )}
+    </div>
       {showAIWindow && (
         <AIInvoiceWindow
           user={user}
