@@ -8,7 +8,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
-import CarpentrySidebar from "./CarpentrySidebar";
+import UpholsterySidebar from "./UpholsterySidebar";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -83,7 +83,7 @@ const generateQuoteNumber = async (userId, documentType) => {
 
 const functions = getFunctions();
 
-const CarpentryDashboard = () => {
+const UpholsteryDashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
   const totalSteps = 4;
@@ -169,15 +169,15 @@ const CarpentryDashboard = () => {
     phase: "Phase 1",
   });
   const [businessInfo, setBusinessInfo] = useState({
-    businessName: "MASTER CARPENTRY CO.",
+    businessName: "MASTER Upholstery CO.",
     addressLine1: "12 Workshop Lane",
     addressLine2: "Randburg",
     city: "Johannesburg",
     postalCode: "2194",
     primaryPhone: "+27 11 888 0001",
     secondaryPhone: "+27 11 888 0002",
-    email: "info@mastercarpentry.co.za",
-    website: "www.mastercarpentry.co.za",
+    email: "info@masterUpholstery.co.za",
+    website: "www.masterUpholstery.co.za",
     registrationNumber: "2023/098765/07",
     vatNumber: "4567891234",
     logoUrl: "",
@@ -720,7 +720,7 @@ const CarpentryDashboard = () => {
           businessInfo={businessInfo}
           documentType={documentType}
           onExit={() => setShowAIWindow(false)}
-          industry="carpentry"
+          industry="Upholstery"
           onNavigateTo={(view) => {
             setAiWindowOpen(false);
             setActiveView(view);
@@ -730,7 +730,7 @@ const CarpentryDashboard = () => {
       )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar */}
-        <CarpentrySidebar
+        <UpholsterySidebar
           user={user}
           activeView={activeView}
           setActiveView={setActiveView}
@@ -756,7 +756,7 @@ const CarpentryDashboard = () => {
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
-            dashboardType="carpentry"
+            dashboardType="Upholstery"
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
             onQuickCreate={handleQuickCreate}
@@ -1871,4 +1871,4 @@ const CarpentryDashboard = () => {
   );
 };
 
-export default CarpentryDashboard;
+export default UpholsteryDashboard;

@@ -14,7 +14,7 @@ import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from "../SignatureStamp";
-import PhotographyMultiStepForm from "./PhotographyMultiStepForm";
+import VirtualMultiStepForm from "./VirtualMultiStepFormMultiStepForm";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
@@ -1518,7 +1518,7 @@ const PhotographyDashboardInner = () => {
                           </div>
                         </div>
 
-                        <PhotographyMultiStepForm
+                        <VirtualMultiStepForm
                           customerName={customerName}
                           setCustomerName={setCustomerName}
                           customerId={customerId}

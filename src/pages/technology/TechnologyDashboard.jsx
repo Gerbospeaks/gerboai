@@ -14,7 +14,7 @@ import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from "../SignatureStamp";
-import PhotographyMultiStepForm from "./PhotographyMultiStepForm";
+import TechnologyMultiStepForm from "./TechnologyMultiStepForm";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
@@ -186,7 +186,7 @@ const SidebarItem = ({
 // ─────────────────────────────────────────────────────────────────────────────
 // Inner dashboard – consumes the plan context
 // ─────────────────────────────────────────────────────────────────────────────
-const PhotographyDashboardInner = () => {
+const TechnologyDashboardInner = () => {
   const { requirePlan, canAccess, currentPlan } = usePlan();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -245,7 +245,7 @@ const PhotographyDashboardInner = () => {
   );
 
   const [businessInfo, setBusinessInfo] = useState({
-    businessName: "PERFECT MOMENTS PHOTOGRAPHY",
+    businessName: "PERFECT MOMENTS TECHNOLOGY",
     addressLine1: "123 Studio Street",
     addressLine2: "Rosebank",
     city: "Johannesburg",
@@ -261,7 +261,7 @@ const PhotographyDashboardInner = () => {
     description: "",
     rate: "",
     qty: "",
-    type: "Photography",
+    type: "Technology",
   });
 
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
@@ -286,8 +286,8 @@ const PhotographyDashboardInner = () => {
     subtotal,
     vat,
     total,
-    documentType: "photography",
-    serviceType: "PHOTOGRAPHY",
+    documentType: "technology",
+    serviceType: "TECHNOLOGY",
     showStamp: stampSettings?.enabled || false,
     stampText: stampSettings?.text || "APPROVED",
     stampColor: stampSettings?.color || "#d32f2f",
@@ -591,13 +591,13 @@ const PhotographyDashboardInner = () => {
       ...prev,
       {
         description: newItem.description,
-        type: newItem.type || "Photography",
+        type: newItem.type || "Technology",
         rate,
         qty,
         amount: rate * qty,
       },
     ]);
-    setNewItem({ description: "", rate: "", qty: "", type: "Photography" });
+    setNewItem({ description: "", rate: "", qty: "", type: "Technology" });
   };
 
   const handleLogoUpload = async (e) => {
@@ -1406,7 +1406,7 @@ const PhotographyDashboardInner = () => {
                 businessInfo={businessInfo}
                 documentType={documentType}
                 onExit={() => setShowAIWindow(false)}
-                industry="photography"
+                industry="technology"
                 TemplateRenderer={TemplateRenderer}
               />
             )}
@@ -1518,7 +1518,7 @@ const PhotographyDashboardInner = () => {
                           </div>
                         </div>
 
-                        <PhotographyMultiStepForm
+                        <TechnologyMultiStepForm
                           customerName={customerName}
                           setCustomerName={setCustomerName}
                           customerId={customerId}
@@ -1646,12 +1646,12 @@ const PhotographyDashboardInner = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 // Exported component – wraps the dashboard in the plan provider
 // ─────────────────────────────────────────────────────────────────────────────
-const PhotographyDashboard = () => (
+const TechnologyDashboard = () => (
   // Replace initialPlan with the value fetched from your auth/firestore
   // e.g. initialPlan={user?.plan ?? "starter"}
   <PlanProvider initialPlan="starter">
-    <PhotographyDashboardInner />
+    <TechnologyDashboardInner />
   </PlanProvider>
 );
 
-export default PhotographyDashboard;
+export default TechnologyDashboard;
