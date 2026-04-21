@@ -2793,7 +2793,9 @@ function SidebarDrawer({
 function Hero({ availCount, totalCount, onPostJob, onBrowse }) {
   const [currentWord, setCurrentWord] = useState(0);
   const WORDS = ["Fast", "Simple", "Trusted", "Smart"];
-
+  const [activeFilter, setActiveFilter] = useState("all");
+  const { providers: rawProviders, loading, error } = useProviders(activeFilter);
+const providers = rawProviders.map(normalizeProvider);
   useEffect(() => {
     const t = setInterval(
       () => setCurrentWord((w) => (w + 1) % WORDS.length),
@@ -2822,7 +2824,7 @@ function Hero({ availCount, totalCount, onPostJob, onBrowse }) {
         <div>
           <div className="mp-hero-badge">
             <span className="mp-hero-badge-dot" />
-            {availCount} providers available now
+            {providers.length} providers available now
           </div>
 
           <h1>
