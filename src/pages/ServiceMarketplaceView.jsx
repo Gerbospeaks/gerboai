@@ -2339,15 +2339,7 @@ function MarketView({ onShowIncoming }) {
           )}
 
           {/* Booking panel — always outside the loading/empty/grid block */}
-          {bookingProvider && (
-            <div style={{ marginTop: 12 }}>
-              <BookingPanel
-                provider={bookingProvider}
-                onClose={() => setBookingProvider(null)}
-                onSubmit={handleSubmitBooking}
-              />
-            </div>
-          )}
+          
 
           {/* My requests — always shown */}
           <div style={{ marginTop: 36 }}>
@@ -2396,7 +2388,29 @@ function MarketView({ onShowIncoming }) {
           }}
         />
       )}
-
+ {/* Booking Panel Overlay */}
+      {bookingProvider && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 1000,
+            background: "rgba(15,23,42,.6)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "20px", backdropFilter: "blur(8px)",
+          }}
+          onClick={() => setBookingProvider(null)}
+        >
+          <div
+            style={{ width: "100%", maxWidth: 560 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <BookingPanel
+              provider={bookingProvider}
+              onClose={() => setBookingProvider(null)}
+              onSubmit={handleSubmitBooking}
+            />
+          </div>
+        </div>
+      )}
       <Toast message={toast} />
     </div>
   );
@@ -2971,6 +2985,7 @@ function IncomingView({ onBack }) {
           }
         />
       )}
+      
       <Toast message={toast} />
     </div>
   );
