@@ -573,17 +573,18 @@ const css = `
   flex-shrink: 0;
 }
 
-/* Drawer overlay */
 .mp-drawer-overlay {
   display: none;
   position: fixed; inset: 0; z-index: 300;
   background: rgba(15,23,42,.55);
   backdrop-filter: blur(4px);
   opacity: 0;
+  pointer-events: none;        /* ← ADD: invisible = non-blocking */
   transition: opacity .25s;
 }
 .mp-drawer-overlay.open {
   opacity: 1;
+  pointer-events: auto;        /* ← ADD: only capture events when visible */
 }
 
 /* Drawer panel */
@@ -720,6 +721,7 @@ const css = `
   }
   .mp-drawer-overlay {
     display: block;
+    pointer-events: none; 
   }
 }
  .mp-avail-banner {
