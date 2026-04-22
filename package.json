@@ -64,6 +64,7 @@
     ]
   },
   "devDependencies": {
+    "@cloudflare/puppeteer": "^1.1.0",
     "autoprefixer": "^10.5.0",
     "eslint": "^8.57.1",
     "postcss": "^8.5.10",

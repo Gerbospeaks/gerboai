@@ -71,7 +71,7 @@ import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import Vehicles from "./Vehicles";
-
+const WORKER_URL = import.meta.env.VITE_WORKER_URL;
 const generateJobCardNumber = async (userId, documentType) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
@@ -126,6 +126,7 @@ const MechanicsDashboard = () => {
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [isSavingPDF, setIsSavingPDF] = useState(false);
   const { can, isAdmin } = usePermissions();
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
@@ -169,7 +170,15 @@ const MechanicsDashboard = () => {
     status: "pending",
   });
   const [documentType, setDocumentType] = useState("invoice");
-
+  const DOC_CONFIG = {
+    invoice: { prefix: "Inv", folder: "invoices" },
+    quote: { prefix: "QT", folder: "quotes" },
+    purchase_order: { prefix: "PO", folder: "purchase_orders" },
+    sick_note: { prefix: "SN", folder: "sick_notes" },
+    jobcard: { prefix: "JC", folder: "jobcards" },
+    waybill: { prefix: "WB", folder: "waybills" },
+    // ... rest of your DOC_CONFIG
+  };
   const location = useLocation();
   useEffect(() => {
     if (location.state?.activeView) setActiveView(location.state.activeView);
@@ -541,44 +550,177 @@ const MechanicsDashboard = () => {
     return snap.exists() ? snap.data() : null;
   };
 
-const handleSavePDF = async () => {
-  const element = activeView === "purchase-orders"
-    ? document.getElementById("po-printable")
-    : document.getElementById("invoice-printable");
+  const handleSavePDF = async () => {
+    setIsSavingPDF(true); // add this state for loading UX
 
-  if (!element) {
-    alert("No printable content found. Please ensure the document is visible.");
-    return;
-  }
+    try {
+      // ── 1. Temporarily render a full-size capture target ─────────────────
+      // We create a off-screen div at full A4 size, render the template into it,
+      // capture it, then remove it — avoids the hidden/scaled element problems.
+      const captureDiv = document.createElement("div");
+      captureDiv.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: -9999px;
+      width: 794px;
+      min-height: 1123px;
+      background: white;
+      z-index: -1;
+    `;
+      document.body.appendChild(captureDiv);
 
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: "#ffffff",
-  });
+      // Render the correct template into it
+      const { createRoot } = await import("react-dom/client");
+      const root = createRoot(captureDiv);
 
-  const imgData = canvas.toDataURL("image/png");
-  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      await new Promise((resolve) => {
+        root.render(
+          activeView === "purchase-orders"
+            ? React.createElement(POTemplateRenderer, { ...poTemplateProps })
+            : React.createElement(TemplateRenderer, { ...templateProps }),
+        );
+        // Give React + fonts time to paint
+        setTimeout(resolve, 600);
+      });
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = (canvas.height * pageWidth) / canvas.width;
+      // ── 2. Fix CORS for the logo before capture ───────────────────────────
+      // Convert logo <img> tags to base64 to avoid R2 CORS issues
+      const images = captureDiv.querySelectorAll("img");
+      await Promise.all(
+        Array.from(images).map(
+          (img) =>
+            new Promise((resolve) => {
+              if (!img.src || img.src.startsWith("data:")) {
+                resolve();
+                return;
+              }
+              fetch(img.src, { mode: "cors" })
+                .then((r) => r.blob())
+                .then((blob) => {
+                  const reader = new FileReader();
+                  reader.onload = (e) => {
+                    img.src = e.target.result;
+                    resolve();
+                  };
+                  reader.onerror = resolve; // skip on error, don't block
+                  reader.readAsDataURL(blob);
+                })
+                .catch(resolve); // skip on CORS error, still proceed
+            }),
+        ),
+      );
 
-  pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
+      // ── 3. Capture with html2canvas ───────────────────────────────────────
+      const canvas = await html2canvas(captureDiv, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        width: 794,
+        windowWidth: 794,
+        ignoreElements: (el) => {
+          // Skip zero-size elements that cause the gradient crash
+          if (el === captureDiv) return false;
+          const r = el.getBoundingClientRect();
+          return r.width === 0 || r.height === 0;
+        },
+      });
 
-  // Filename reflects document type
-  const prefix =
-    activeView === "purchase-orders"
-      ? "PO"
-      : documentType === "quote"
-      ? "Quote"
-      : "Invoice";
+      // ── 4. Cleanup the temp DOM node ──────────────────────────────────────
+      root.unmount();
+      document.body.removeChild(captureDiv);
 
-  const number = activeView === "purchase-orders"
-    ? poNumber || "draft"
-    : jobCardNumber || "draft";
+      // ── 5. Build PDF blob ─────────────────────────────────────────────────
+      const prefix =
+        activeView === "purchase-orders"
+          ? "PO"
+          : documentType === "quote"
+            ? "Quote"
+            : "Invoice";
 
-  pdf.save(`${prefix}-${number}.pdf`);
-};
+      const number =
+        activeView === "purchase-orders"
+          ? poNumber || "draft"
+          : jobCardNumber || "draft";
+
+      const fileName = `${prefix}-${number}.pdf`;
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = (canvas.height * pageWidth) / canvas.width;
+      pdf.addImage(
+        canvas.toDataURL("image/jpeg", 0.95),
+        "JPEG",
+        0,
+        0,
+        pageWidth,
+        pageHeight,
+      );
+      const pdfBlob = pdf.output("blob");
+
+      // ── 6. Upload to R2 ───────────────────────────────────────────────────
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        alert("You must be logged in to save.");
+        return;
+      }
+
+      const token = await currentUser.getIdToken();
+      const uploadRes = await fetch(`${WORKER_URL}/upload-pdf`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/pdf",
+          "X-File-Name": fileName,
+        },
+        body: pdfBlob,
+      });
+
+      if (!uploadRes.ok) {
+        const err = await uploadRes.text();
+        throw new Error(`Upload failed: ${err}`);
+      }
+
+      const { publicUrl, key } = await uploadRes.json();
+
+      // ── 7. Save to Firestore ──────────────────────────────────────────────
+      const docType =
+        activeView === "purchase-orders"
+          ? "purchase_order"
+          : documentType === "quote"
+            ? "quote"
+            : "invoice";
+
+      const folder = DOC_CONFIG[docType]?.folder ?? docType;
+      const firestoreDb = getFirestore();
+
+      await setDoc(doc(firestoreDb, "users", user.uid, folder, number), {
+        fileName,
+        downloadUrl: publicUrl,
+        r2Key: key,
+        docType,
+        docNumber: number,
+        generatedAt: serverTimestamp(),
+        // Save useful metadata from current state
+        customerName,
+        vehicleReg,
+        total,
+      });
+
+      // ── 8. Done ───────────────────────────────────────────────────────────
+      window.open(publicUrl, "_blank");
+    } catch (err) {
+      console.error("PDF save error:", err);
+      alert("Failed to save PDF: " + err.message);
+    } finally {
+      setIsSavingPDF(false);
+    }
+  };
 
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
@@ -918,7 +1060,8 @@ const handleSavePDF = async () => {
 
   // ── Header action buttons ─────────────────────────────────────────────────
   const headerActions = [
-    can("createQuote") && documentType === "quote" &&
+    can("createQuote") &&
+      documentType === "quote" &&
       jobCardId &&
       activeView !== "purchase-orders" && {
         label: "Convert to Invoice",
@@ -954,20 +1097,26 @@ const handleSavePDF = async () => {
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
     can("createInvoice") && {
-      label: "Save PDF",
+      label: isSavingPDF ? "Saving..." : "Save PDF",
       icon: Download,
       onClick: handleSavePDF,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+      disabled: isSavingPDF,
+      className: `flex items-center gap-1.5 px-3 py-1.5 text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
+        isSavingPDF
+          ? "bg-[#64748b] cursor-not-allowed"
+          : "bg-[#0891b2] hover:bg-[#0e7490]"
+      }`,
     },
-     can("createInvoice") || can("createQuote") ?{
-      label: activeView === "purchase-orders" ? "Save P.O." : "Save",
-      icon: Save,
-      onClick:
-        activeView === "purchase-orders" ? handleSavePO : handleSaveJobCard,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    } : null,
+    can("createInvoice") || can("createQuote")
+      ? {
+          label: activeView === "purchase-orders" ? "Save P.O." : "Save",
+          icon: Save,
+          onClick:
+            activeView === "purchase-orders" ? handleSavePO : handleSaveJobCard,
+          className:
+            "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+        }
+      : null,
   ].filter(Boolean);
 
   const mobileDashboardActions = [
@@ -1397,20 +1546,20 @@ const handleSavePDF = async () => {
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
       <div
-      id="print-area"
-      className="hidden print:block bg-white"
-      style={{ width: "210mm", minHeight: "297mm" }}
-    >
-      {activeView === "purchase-orders" ? (
-        <div id="po-printable">
-          <POTemplateRenderer {...poTemplateProps} />
-        </div>
-      ) : (
-        <div id="invoice-printable">
-          <TemplateRenderer {...templateProps} />
-        </div>
-      )}
-    </div>
+        id="print-area"
+        className="hidden print:block bg-white"
+        style={{ width: "210mm", minHeight: "297mm" }}
+      >
+        {activeView === "purchase-orders" ? (
+          <div id="po-printable">
+            <POTemplateRenderer {...poTemplateProps} />
+          </div>
+        ) : (
+          <div id="invoice-printable">
+            <TemplateRenderer {...templateProps} />
+          </div>
+        )}
+      </div>
       {showAIWindow && (
         <AIInvoiceWindow
           user={user}
@@ -1499,8 +1648,8 @@ const handleSavePDF = async () => {
             onCustomerSaved={handleCustomerSaved}
           />
           {showUserManagement && (
-  <SubUserManagement onClose={() => setShowUserManagement(false)} />
-)}
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
           {showPaymentModal && selectedInvoiceForPayment && (
             <PaymentProcessor
               showModal={showPaymentModal}
@@ -3227,10 +3376,11 @@ const handleSavePDF = async () => {
                     </button>
                     <button
                       onClick={handleSavePDF}
-                      className="flex items-center gap-1 px-2.5 py-1.5 bg-[#059669] text-white text-xs font-medium rounded-lg hover:bg-[#047857] transition-colors"
+                      disabled={isSavingPDF}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-[#059669] text-white text-xs font-medium rounded-lg hover:bg-[#047857] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Download className="w-3 h-3" />
-                      PDF
+                      {isSavingPDF ? "Saving..." : "PDF"}
                     </button>
                   </div>
                 </div>
