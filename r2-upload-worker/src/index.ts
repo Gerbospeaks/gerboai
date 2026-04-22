@@ -8,7 +8,7 @@ export interface Env {
 	FIREBASE_PROJECT_ID: string;
 	FIREBASE_CLIENT_EMAIL: string;
 	FIREBASE_PRIVATE_KEY_B64: string;
-	MYBROWSER: Fetcher; // ← Puppeteer browser binding (add to wrangler.toml)
+	MYBROWSER: Fetcher; 
 }
 
 const DOC_CONFIG: Record<string, { prefix: string; folder: string }> = {

@@ -711,7 +711,26 @@ const MechanicsDashboard = () => {
         vehicleReg,
         total,
       });
+const collectionName = activeView === "purchase-orders"
+  ? "purchaseOrders"
+  : documentType === "quote"
+  ? "quotations"
+  : "invoices";
 
+// Patch downloadUrl onto the invoice so Recent list shows View button
+if (jobCardId) {
+  await updateDoc(
+    doc(firestoreDb, "users", user.uid, collectionName, jobCardId),
+    { downloadUrl: publicUrl }
+  );
+
+  // Also update local invoices state so button appears immediately
+  setInvoices(prev =>
+    prev.map(inv =>
+      inv.id === jobCardId ? { ...inv, downloadUrl: publicUrl } : inv
+    )
+  );
+}
       // ── 8. Done ───────────────────────────────────────────────────────────
       window.open(publicUrl, "_blank");
     } catch (err) {
@@ -1485,56 +1504,76 @@ const MechanicsDashboard = () => {
             </div>
           ) : (
             invoices.slice(0, 8).map((invoice) => (
-              <div
-                key={invoice.id}
-                onClick={() => loadJobCard(invoice)}
-                className="flex items-center justify-between px-5 py-3.5 hover:bg-[#f8fafc] cursor-pointer transition-colors"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-sm font-semibold text-[#1e293b] truncate">
-                      {invoice.jobCardNumber ||
-                        invoice.invoiceNumber ||
-                        invoice.id}
-                    </span>
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${statusBadge(invoice.status)}`}
-                    >
-                      {invoice.status === "partially_paid"
-                        ? "Partial"
-                        : invoice.status || "Draft"}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-[#64748b]">
-                    <span className="flex items-center gap-1 truncate">
-                      <Users className="w-3 h-3 flex-shrink-0" />
-                      {invoice.customer?.name || "No customer"}
-                    </span>
-                    <span className="flex items-center gap-1 truncate">
-                      <Car className="w-3 h-3 flex-shrink-0" />
-                      {[
-                        invoice.vehicle?.year,
-                        invoice.vehicle?.make,
-                        invoice.vehicle?.model,
-                      ]
-                        .filter(Boolean)
-                        .join(" ") || "No vehicle"}
-                    </span>
-                  </div>
-                </div>
-                <div className="text-right ml-4 flex-shrink-0">
-                  <div className="text-sm font-bold text-[#1e293b]">
-                    {formatCurrency(invoice.totals?.total || 0)}
-                  </div>
-                  {invoice.totals?.due > 0 &&
-                    invoice.totals?.due < invoice.totals?.total && (
-                      <div className="text-xs text-[#d97706]">
-                        Due: {formatCurrency(invoice.totals.due)}
-                      </div>
-                    )}
-                </div>
-              </div>
-            ))
+  <div
+    key={invoice.id}
+    className="flex items-center justify-between px-5 py-3.5 hover:bg-[#f8fafc] cursor-pointer transition-colors"
+  >
+    {/* Left — click to load into editor */}
+    <div
+      className="flex-1 min-w-0"
+      onClick={() => loadJobCard(invoice)}
+    >
+      <div className="flex items-center gap-2 mb-0.5">
+        <span className="text-sm font-semibold text-[#1e293b] truncate">
+          {invoice.jobCardNumber || invoice.invoiceNumber || invoice.id}
+        </span>
+        <span className={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${statusBadge(invoice.status)}`}>
+          {invoice.status === "partially_paid" ? "Partial" : invoice.status || "Draft"}
+        </span>
+      </div>
+      <div className="flex items-center gap-3 text-xs text-[#64748b]">
+        <span className="flex items-center gap-1 truncate">
+          <Users className="w-3 h-3 flex-shrink-0" />
+          {invoice.customer?.name || "No customer"}
+        </span>
+        <span className="flex items-center gap-1 truncate">
+          <Car className="w-3 h-3 flex-shrink-0" />
+          {[invoice.vehicle?.year, invoice.vehicle?.make, invoice.vehicle?.model]
+            .filter(Boolean).join(" ") || "No vehicle"}
+        </span>
+      </div>
+    </div>
+
+    {/* Right — amount + view button */}
+    <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+      <div className="text-right">
+        <div className="text-sm font-bold text-[#1e293b]">
+          {formatCurrency(invoice.totals?.total || 0)}
+        </div>
+        {invoice.totals?.due > 0 && invoice.totals?.due < invoice.totals?.total && (
+          <div className="text-xs text-[#d97706]">
+            Due: {formatCurrency(invoice.totals.due)}
+          </div>
+        )}
+      </div>
+
+      {/* View PDF button — only shows if PDF was saved */}
+      {invoice.downloadUrl ? (
+        <a
+          href={invoice.downloadUrl}
+          target="_blank"
+          rel="noreferrer"
+          onClick={e => e.stopPropagation()}
+          title="View saved PDF"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
+        >
+          <Eye className="w-3 h-3" />
+          {!isMobile && "View"}
+        </a>
+      ) : (
+        /* Save PDF button — shows when no PDF saved yet */
+        <button
+          onClick={e => { e.stopPropagation(); loadJobCard(invoice); handleSavePDF(); }}
+          title="Save as PDF"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#94a3b8] hover:text-[#059669] transition-all text-xs font-semibold"
+        >
+          <Download className="w-3 h-3" />
+          {!isMobile && "PDF"}
+        </button>
+      )}
+    </div>
+  </div>
+))
           )}
         </div>
       </div>
