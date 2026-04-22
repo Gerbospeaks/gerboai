@@ -71,7 +71,7 @@ import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import Vehicles from "./Vehicles";
-const WORKER_URL = import.meta.env.VITE_WORKER_URL;
+const WORKER_URL = process.env.REACT_APP_API_URL;
 const generateJobCardNumber = async (userId, documentType) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
