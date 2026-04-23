@@ -15,7 +15,7 @@ import {
   X,
   Clock,
   LayoutDashboard,
-  Menu,
+  Menu,Eye, Download,
 } from "lucide-react";
 
 /* ─── Zoho design tokens ─────────────────────────────────────────────────── */
@@ -213,7 +213,7 @@ const css = `
     color: ${Z.textMid}; text-transform: uppercase; letter-spacing: .06em;
     white-space: nowrap; position: sticky; top: 0; z-index: 1;
   }
-  .zh-inv-thead th:last-child { text-align: right; }
+  .zh-inv-thead th:last-child { text-align: left; }
   .zh-inv-row { border-bottom: 1px solid ${Z.border}; transition: background .1s; cursor: pointer; }
   .zh-inv-row:last-child { border-bottom: none; }
   .zh-inv-row:hover { background: #f7f9fc; }
@@ -377,28 +377,7 @@ const KPI = ({
   </div>
 );
 
-/* ─── Component ──────────────────────────────────────────────────────────── */
-/**
- * Props (all optional — used when Home is rendered inside a dashboard):
- *
- *   onNavigate(view, documentType?)
- *     Called by Quick Actions instead of react-router navigate.
- *     `view` matches the dashboard's setActiveView values: "invoice", "quote",
- *     "estimate", "jobcard", etc.
- *     `documentType` is passed so the dashboard can pre-set its document type
- *     before switching views (e.g. "invoice" vs "quote" on the same view).
- *
- *   onGoToDashboard()
- *     Called by the "Go to Dashboard" quick-action button.
- *     If not provided, falls back to react-router navigate.
- *
- *   onSidebarToggle()
- *     Called by the hamburger button in the top bar.
- *     If not provided the button is hidden.
- *
- *   sidebarOpen (bool)
- *     Current sidebar state — used only to show/hide the hamburger icon.
- */
+
 export default function Home({
   onNavigate,
   onGoToDashboard,
@@ -705,33 +684,97 @@ export default function Home({
                       <th>Date</th>
                       <th>Status</th>
                       <th>Amount</th>
+                      <th>PDF</th>
                     </tr>
                   </thead>
                   <tbody>
                     {invoices.slice(0, 10).map((inv) => (
                       <tr key={inv.id} className="zh-inv-row">
-                        <td className="zh-inv-num">
-                          {inv.quoteNumber || inv.invoiceNumber || inv.id}
-                        </td>
-                        <td className="zh-inv-client">
-                          {inv.customer?.name || inv.customerName || "—"}
-                        </td>
-                        <td>
-                          {inv.dates?.invoiceDate || inv.date
-                            ? new Date(
-                                inv.dates?.invoiceDate || inv.date,
-                              ).toLocaleDateString("en-ZA")
-                            : "—"}
-                        </td>
-                        <td>
-                          <span className={badgeClass(inv.status)}>
-                            {inv.status || "Draft"}
-                          </span>
-                        </td>
-                        <td className="zh-inv-amount">
-                          {fmtCurrency(inv.totals?.total || inv.total || 0)}
-                        </td>
-                      </tr>
+    <td className="zh-inv-num">
+      {inv.jobCardNumber || inv.quoteNumber || inv.invoiceNumber || inv.id}
+    </td>
+    <td className="zh-inv-client">
+      {inv.customer?.name || inv.customerName || "—"}
+    </td>
+    <td>
+      {inv.dates?.invoiceDate || inv.date
+        ? new Date(inv.dates?.invoiceDate || inv.date).toLocaleDateString("en-ZA")
+        : "—"}
+    </td>
+    <td>
+      <span className={badgeClass(inv.status)}>
+        {inv.status || "Draft"}
+      </span>
+    </td>
+    <td className="zh-inv-amount">
+      {fmtCurrency(inv.totals?.total || inv.total || 0)}
+    </td>
+
+    {/* ── PDF column ── */}
+    <td onClick={(e) => e.stopPropagation()} style={{ whiteSpace: "nowrap" }}>
+      {inv.downloadUrl ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <a
+            href={inv.downloadUrl}
+            target="_blank"
+            rel="noreferrer"
+            title="View PDF"
+            style={{
+              display: "flex", alignItems: "center", gap: 4,
+              padding: "3px 8px", borderRadius: 3,
+              border: `1px solid ${Z.border}`, background: Z.bg,
+              color: Z.textMid, fontSize: 11, fontWeight: 700,
+              textDecoration: "none", transition: "all .15s",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = Z.blueLight;
+              e.currentTarget.style.color = Z.blue;
+              e.currentTarget.style.borderColor = "#93c5fd";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = Z.bg;
+              e.currentTarget.style.color = Z.textMid;
+              e.currentTarget.style.borderColor = Z.border;
+            }}
+          >
+            <Eye size={11} /> View
+          </a>
+          
+           <a href={inv.downloadUrl}
+            download
+            title="Download PDF"
+            style={{
+              display: "flex", alignItems: "center", gap: 4,
+              padding: "3px 8px", borderRadius: 3,
+              border: `1px solid ${Z.border}`, background: Z.bg,
+              color: Z.textMid, fontSize: 11, fontWeight: 700,
+              textDecoration: "none", transition: "all .15s",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = Z.greenLight;
+              e.currentTarget.style.color = Z.green;
+              e.currentTarget.style.borderColor = "#86efac";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = Z.bg;
+              e.currentTarget.style.color = Z.textMid;
+              e.currentTarget.style.borderColor = Z.border;
+            }}
+          >
+            <Download size={11} /> Save
+          </a>
+        </div>
+      ) : (
+        <span style={{
+          fontSize: 10, color: Z.textMuted,
+          padding: "3px 8px", borderRadius: 3,
+          border: `1px solid ${Z.border}`, background: Z.bg,
+        }}>
+          No PDF
+        </span>
+      )}
+    </td>
+  </tr>
                     ))}
                   </tbody>
                 </table>
@@ -786,33 +829,97 @@ export default function Home({
                       <th>Date</th>
                       <th>Status</th>
                       <th>Amount</th>
+                      <th>PDF</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {invoices.map((inv) => (
-                      <tr key={inv.id} className="zh-inv-row">
-                        <td className="zh-inv-num">
-                          {inv.quoteNumber || inv.invoiceNumber || inv.id}
-                        </td>
-                        <td className="zh-inv-client">
-                          {inv.customer?.name || inv.customerName || "—"}
-                        </td>
-                        <td>
-                          {inv.dates?.invoiceDate || inv.date
-                            ? new Date(
-                                inv.dates?.invoiceDate || inv.date,
-                              ).toLocaleDateString("en-ZA")
-                            : "—"}
-                        </td>
-                        <td>
-                          <span className={badgeClass(inv.status)}>
-                            {inv.status || "Draft"}
-                          </span>
-                        </td>
-                        <td className="zh-inv-amount">
-                          {fmtCurrency(inv.totals?.total || inv.total || 0)}
-                        </td>
-                      </tr>
+                    {invoices.slice(0, 10).map((inv) => (
+                       <tr key={inv.id} className="zh-inv-row">
+    <td className="zh-inv-num">
+      {inv.jobCardNumber || inv.quoteNumber || inv.invoiceNumber || inv.id}
+    </td>
+    <td className="zh-inv-client">
+      {inv.customer?.name || inv.customerName || "—"}
+    </td>
+    <td>
+      {inv.dates?.invoiceDate || inv.date
+        ? new Date(inv.dates?.invoiceDate || inv.date).toLocaleDateString("en-ZA")
+        : "—"}
+    </td>
+    <td>
+      <span className={badgeClass(inv.status)}>
+        {inv.status || "Draft"}
+      </span>
+    </td>
+    <td className="zh-inv-amount">
+      {fmtCurrency(inv.totals?.total || inv.total || 0)}
+    </td>
+
+    {/* ── PDF column ── */}
+    <td onClick={(e) => e.stopPropagation()} style={{ whiteSpace: "nowrap" }}>
+      {inv.downloadUrl ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <a
+            href={inv.downloadUrl}
+            target="_blank"
+            rel="noreferrer"
+            title="View PDF"
+            style={{
+              display: "flex", alignItems: "center", gap: 4,
+              padding: "3px 8px", borderRadius: 3,
+              border: `1px solid ${Z.border}`, background: Z.bg,
+              color: Z.textMid, fontSize: 11, fontWeight: 700,
+              textDecoration: "none", transition: "all .15s",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = Z.blueLight;
+              e.currentTarget.style.color = Z.blue;
+              e.currentTarget.style.borderColor = "#93c5fd";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = Z.bg;
+              e.currentTarget.style.color = Z.textMid;
+              e.currentTarget.style.borderColor = Z.border;
+            }}
+          >
+            <Eye size={11} /> View
+          </a>
+          
+           <a href={inv.downloadUrl}
+            download
+            title="Download PDF"
+            style={{
+              display: "flex", alignItems: "center", gap: 4,
+              padding: "3px 8px", borderRadius: 3,
+              border: `1px solid ${Z.border}`, background: Z.bg,
+              color: Z.textMid, fontSize: 11, fontWeight: 700,
+              textDecoration: "none", transition: "all .15s",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = Z.greenLight;
+              e.currentTarget.style.color = Z.green;
+              e.currentTarget.style.borderColor = "#86efac";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = Z.bg;
+              e.currentTarget.style.color = Z.textMid;
+              e.currentTarget.style.borderColor = Z.border;
+            }}
+          >
+            <Download size={11} /> Save
+          </a>
+        </div>
+      ) : (
+        <span style={{
+          fontSize: 10, color: Z.textMuted,
+          padding: "3px 8px", borderRadius: 3,
+          border: `1px solid ${Z.border}`, background: Z.bg,
+        }}>
+          No PDF
+        </span>
+      )}
+    </td>
+  </tr>
                     ))}
                   </tbody>
                 </table>
