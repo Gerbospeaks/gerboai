@@ -386,7 +386,7 @@ export default function Home({
 }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-
+  const [pdfViewer, setPdfViewer] = useState(null); 
   const [showSettings, setShowSettings] = useState(false);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [invoices, setInvoices] = useState([]);
