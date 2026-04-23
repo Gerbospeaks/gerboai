@@ -32,7 +32,7 @@ const auth = admin.auth();
 
 // ── Express setup ─────────────────────────────────────────────────
 const app  = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors({ origin: "http://localhost:5173" })); // ← your Vite dev URL
 app.use(express.json());
@@ -75,7 +75,12 @@ function sseStart(res) {
   res.setHeader("Connection",    "keep-alive");
   res.flushHeaders();
 }
-
+app.get("/", (_req, res) => {
+  res.json({ 
+    status: "SolidFlo seed server running",
+    endpoints: ["/ping", "/auto-seed", "/create-accounts", "/seed-listings"]
+  });
+});
 // ── Route: health check ───────────────────────────────────────────
 app.get("/ping", (_req, res) => res.json({ ok: true }));
 

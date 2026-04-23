@@ -233,6 +233,14 @@ function DashboardRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/home" element={<Navigate to="/dashboard" replace />} />
 
       <Route
@@ -574,7 +582,6 @@ function DashboardRoutes() {
       <Route path="/parents/:portalSlug" element={<ParentPortal />} />
       <Route path="/staff/:portalSlug" element={<StaffPortal />} />
 
-
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -659,7 +666,10 @@ function App() {
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/auth-action" element={<AuthAction />} />
-              <Route path="/marketplace/:industry"    element={<PublicMarketplace />} />
+              <Route
+                path="/marketplace/:industry"
+                element={<PublicMarketplace />}
+              />
               {/* PWAGate lives inside Router so useLocation works */}
               <Route
                 path="/*"

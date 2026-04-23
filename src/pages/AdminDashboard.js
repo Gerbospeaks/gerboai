@@ -21,7 +21,9 @@ import InvoicesList   from "../components/admin/InvoicesList";
 import InvoicePreview from "../components/admin/InvoicePreview";
 
 // ── Seed server ───────────────────────────────────────────────────
-const SERVER = "https://solidflo.co.za";
+const SERVER = import.meta.env.DEV
+  ? "http://localhost:3001"
+  : "https://api.solidflo.co.za";
 
 const ALL_INDUSTRIES = [
   "mechanics","healthcare","security","electrical","restaurant",

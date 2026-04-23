@@ -551,41 +551,33 @@ const MechanicsDashboard = () => {
   };
 
   const handleSavePDF = async () => {
-    setIsSavingPDF(true); // add this state for loading UX
-
+    setIsSavingPDF(true);
     try {
-      // ── 1. Temporarily render a full-size capture target ─────────────────
-      // We create a off-screen div at full A4 size, render the template into it,
-      // capture it, then remove it — avoids the hidden/scaled element problems.
-      const captureDiv = document.createElement("div");
-      captureDiv.style.cssText = `
+      // ── 1. Grab the already-rendered, already-styled print area ──────────
+      const printArea = document.getElementById("print-area");
+      if (!printArea) throw new Error("Print area not found");
+
+      // Temporarily make it visible for html2canvas (but off-screen)
+      const prevStyle = printArea.getAttribute("style") || "";
+      printArea.style.cssText = `
+      display: block !important;
       position: fixed;
       top: 0;
       left: -9999px;
       width: 794px;
       min-height: 1123px;
       background: white;
-      z-index: -1;
+      z-index: 9999;
+      visibility: visible;
     `;
-      document.body.appendChild(captureDiv);
+      // Remove the Tailwind hidden class temporarily
+      printArea.classList.remove("hidden");
 
-      // Render the correct template into it
-      const { createRoot } = await import("react-dom/client");
-      const root = createRoot(captureDiv);
+      // Give browser a frame to paint
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-      await new Promise((resolve) => {
-        root.render(
-          activeView === "purchase-orders"
-            ? React.createElement(POTemplateRenderer, { ...poTemplateProps })
-            : React.createElement(TemplateRenderer, { ...templateProps }),
-        );
-        // Give React + fonts time to paint
-        setTimeout(resolve, 600);
-      });
-
-      // ── 2. Fix CORS for the logo before capture ───────────────────────────
-      // Convert logo <img> tags to base64 to avoid R2 CORS issues
-      const images = captureDiv.querySelectorAll("img");
+      // ── 2. Fix CORS for logo images ───────────────────────────────────────
+      const images = printArea.querySelectorAll("img");
       await Promise.all(
         Array.from(images).map(
           (img) =>
@@ -602,35 +594,29 @@ const MechanicsDashboard = () => {
                     img.src = e.target.result;
                     resolve();
                   };
-                  reader.onerror = resolve; // skip on error, don't block
+                  reader.onerror = resolve;
                   reader.readAsDataURL(blob);
                 })
-                .catch(resolve); // skip on CORS error, still proceed
+                .catch(resolve);
             }),
         ),
       );
 
-      // ── 3. Capture with html2canvas ───────────────────────────────────────
-      const canvas = await html2canvas(captureDiv, {
+      // ── 3. Capture ────────────────────────────────────────────────────────
+      const canvas = await html2canvas(printArea, {
         scale: 2,
         useCORS: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
         width: 794,
         windowWidth: 794,
-        ignoreElements: (el) => {
-          // Skip zero-size elements that cause the gradient crash
-          if (el === captureDiv) return false;
-          const r = el.getBoundingClientRect();
-          return r.width === 0 || r.height === 0;
-        },
       });
 
-      // ── 4. Cleanup the temp DOM node ──────────────────────────────────────
-      root.unmount();
-      document.body.removeChild(captureDiv);
+      // ── 4. Restore original hidden state ──────────────────────────────────
+      printArea.classList.add("hidden");
+      printArea.setAttribute("style", prevStyle);
 
-      // ── 5. Build PDF blob ─────────────────────────────────────────────────
+      // ── 5. Build PDF ──────────────────────────────────────────────────────
       const prefix =
         activeView === "purchase-orders"
           ? "PO"
@@ -681,10 +667,8 @@ const MechanicsDashboard = () => {
         body: pdfBlob,
       });
 
-      if (!uploadRes.ok) {
-        const err = await uploadRes.text();
-        throw new Error(`Upload failed: ${err}`);
-      }
+      if (!uploadRes.ok)
+        throw new Error(`Upload failed: ${await uploadRes.text()}`);
 
       const { publicUrl, key } = await uploadRes.json();
 
@@ -706,32 +690,47 @@ const MechanicsDashboard = () => {
         docType,
         docNumber: number,
         generatedAt: serverTimestamp(),
-        // Save useful metadata from current state
         customerName,
         vehicleReg,
         total,
       });
-const collectionName = activeView === "purchase-orders"
-  ? "purchaseOrders"
-  : documentType === "quote"
-  ? "quotations"
-  : "invoices";
 
-// Patch downloadUrl onto the invoice so Recent list shows View button
-if (jobCardId) {
-  await updateDoc(
-    doc(firestoreDb, "users", user.uid, collectionName, jobCardId),
-    { downloadUrl: publicUrl }
-  );
+      const collectionName =
+        activeView === "purchase-orders"
+          ? "purchaseOrders"
+          : documentType === "quote"
+            ? "quotations"
+            : "invoices";
 
-  // Also update local invoices state so button appears immediately
-  setInvoices(prev =>
-    prev.map(inv =>
-      inv.id === jobCardId ? { ...inv, downloadUrl: publicUrl } : inv
-    )
-  );
-}
-      // ── 8. Done ───────────────────────────────────────────────────────────
+      // ── Ensure the invoice doc exists before patching downloadUrl ─────────
+      let activeJobCardId = jobCardId;
+
+      if (!activeJobCardId && activeView !== "purchase-orders") {
+        // Invoice was never saved — auto-save it now to get a Firestore ID
+        const ref = await addDoc(
+          collection(firestoreDb, "users", user.uid, collectionName),
+          buildJobCardPayload(jobCardNumber),
+        );
+        activeJobCardId = ref.id;
+        setJobCardId(ref.id);
+        loadSavedJobCards(); // refresh the list with the new record
+      }
+
+      // Patch downloadUrl so the Recent list shows the View/Save buttons
+      if (activeJobCardId) {
+        await updateDoc(
+          doc(firestoreDb, "users", user.uid, collectionName, activeJobCardId),
+          { downloadUrl: publicUrl },
+        );
+        setInvoices((prev) =>
+          prev.map((inv) =>
+            inv.id === activeJobCardId
+              ? { ...inv, downloadUrl: publicUrl }
+              : inv,
+          ),
+        );
+      }
+
       window.open(publicUrl, "_blank");
     } catch (err) {
       console.error("PDF save error:", err);
@@ -740,7 +739,6 @@ if (jobCardId) {
       setIsSavingPDF(false);
     }
   };
-
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
     const rate = Number(newItem.rate) || 0;
@@ -1504,76 +1502,108 @@ if (jobCardId) {
             </div>
           ) : (
             invoices.slice(0, 8).map((invoice) => (
-  <div
-    key={invoice.id}
-    className="flex items-center justify-between px-5 py-3.5 hover:bg-[#f8fafc] cursor-pointer transition-colors"
-  >
-    {/* Left — click to load into editor */}
-    <div
-      className="flex-1 min-w-0"
-      onClick={() => loadJobCard(invoice)}
-    >
-      <div className="flex items-center gap-2 mb-0.5">
-        <span className="text-sm font-semibold text-[#1e293b] truncate">
-          {invoice.jobCardNumber || invoice.invoiceNumber || invoice.id}
-        </span>
-        <span className={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${statusBadge(invoice.status)}`}>
-          {invoice.status === "partially_paid" ? "Partial" : invoice.status || "Draft"}
-        </span>
-      </div>
-      <div className="flex items-center gap-3 text-xs text-[#64748b]">
-        <span className="flex items-center gap-1 truncate">
-          <Users className="w-3 h-3 flex-shrink-0" />
-          {invoice.customer?.name || "No customer"}
-        </span>
-        <span className="flex items-center gap-1 truncate">
-          <Car className="w-3 h-3 flex-shrink-0" />
-          {[invoice.vehicle?.year, invoice.vehicle?.make, invoice.vehicle?.model]
-            .filter(Boolean).join(" ") || "No vehicle"}
-        </span>
-      </div>
-    </div>
+              <div
+                key={invoice.id}
+                className="flex items-center justify-between px-5 py-3.5 hover:bg-[#f8fafc] cursor-pointer transition-colors"
+              >
+                {/* Left — click to load into editor */}
+                <div
+                  className="flex-1 min-w-0"
+                  onClick={() => loadJobCard(invoice)}
+                >
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-sm font-semibold text-[#1e293b] truncate">
+                      {invoice.jobCardNumber ||
+                        invoice.invoiceNumber ||
+                        invoice.id}
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${statusBadge(invoice.status)}`}
+                    >
+                      {invoice.status === "partially_paid"
+                        ? "Partial"
+                        : invoice.status || "Draft"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-[#64748b]">
+                    <span className="flex items-center gap-1 truncate">
+                      <Users className="w-3 h-3 flex-shrink-0" />
+                      {invoice.customer?.name || "No customer"}
+                    </span>
+                    <span className="flex items-center gap-1 truncate">
+                      <Car className="w-3 h-3 flex-shrink-0" />
+                      {[
+                        invoice.vehicle?.year,
+                        invoice.vehicle?.make,
+                        invoice.vehicle?.model,
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || "No vehicle"}
+                    </span>
+                  </div>
+                </div>
 
-    {/* Right — amount + view button */}
-    <div className="flex items-center gap-3 ml-4 flex-shrink-0">
-      <div className="text-right">
-        <div className="text-sm font-bold text-[#1e293b]">
-          {formatCurrency(invoice.totals?.total || 0)}
-        </div>
-        {invoice.totals?.due > 0 && invoice.totals?.due < invoice.totals?.total && (
-          <div className="text-xs text-[#d97706]">
-            Due: {formatCurrency(invoice.totals.due)}
-          </div>
-        )}
-      </div>
+                {/* Right — amount + view button */}
+                <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+                  <div className="text-right">
+                    <div className="text-sm font-bold text-[#1e293b]">
+                      {formatCurrency(invoice.totals?.total || 0)}
+                    </div>
+                    {invoice.totals?.due > 0 &&
+                      invoice.totals?.due < invoice.totals?.total && (
+                        <div className="text-xs text-[#d97706]">
+                          Due: {formatCurrency(invoice.totals.due)}
+                        </div>
+                      )}
+                  </div>
 
-      {/* View PDF button — only shows if PDF was saved */}
-      {invoice.downloadUrl ? (
-        <a
-          href={invoice.downloadUrl}
-          target="_blank"
-          rel="noreferrer"
-          onClick={e => e.stopPropagation()}
-          title="View saved PDF"
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
-        >
-          <Eye className="w-3 h-3" />
-          {!isMobile && "View"}
-        </a>
-      ) : (
-        /* Save PDF button — shows when no PDF saved yet */
-        <button
-          onClick={e => { e.stopPropagation(); loadJobCard(invoice); handleSavePDF(); }}
-          title="Save as PDF"
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#94a3b8] hover:text-[#059669] transition-all text-xs font-semibold"
-        >
-          <Download className="w-3 h-3" />
-          {!isMobile && "PDF"}
-        </button>
-      )}
-    </div>
-  </div>
-))
+                  {/* View PDF button — only shows if PDF was saved */}
+                  {invoice.downloadUrl ? (
+                    <div className="flex items-center gap-1.5">
+                      {/* View PDF */}
+                      <a
+                        href={invoice.downloadUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        title="View PDF"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
+                      >
+                        <Eye className="w-3 h-3" />
+                        {!isMobile && <span>View</span>}
+                      </a>
+
+                      {/* Download PDF */}
+
+                      <a
+                        href={invoice.downloadUrl}
+                        download
+                        onClick={(e) => e.stopPropagation()}
+                        title="Download PDF"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#64748b] hover:text-[#059669] transition-all text-xs font-semibold"
+                      >
+                        <Download className="w-3 h-3" />
+                        {!isMobile && <span>Save</span>}
+                      </a>
+                    </div>
+                  ) : (
+                    /* No PDF yet — offer to generate one */
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        loadJobCard(invoice);
+                        handleSavePDF();
+                      }}
+                      title="Save as PDF"
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#94a3b8] hover:text-[#059669] transition-all text-xs font-semibold"
+                    >
+                      <Download className="w-3 h-3" />
+                      {!isMobile && <span>PDF</span>}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>
@@ -1737,6 +1767,7 @@ if (jobCardId) {
                             "Total",
                             "Paid",
                             "Status",
+                            "PDF",
                           ].map((h) => (
                             <th
                               key={h}
@@ -1786,6 +1817,48 @@ if (jobCardId) {
                                   ? "Partial"
                                   : card.status || "Pending"}
                               </span>
+                            </td>
+                            <td
+                              className="px-5 py-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {card.downloadUrl ? (
+                                <div className="flex items-center gap-1.5">
+                                  <a
+                                    href={card.downloadUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    title="View PDF"
+                                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
+                                  >
+                                    <Eye className="w-3 h-3" />
+                                    View
+                                  </a>
+                                  <a
+                                    href={card.downloadUrl}
+                                    download
+                                    title="Download PDF"
+                                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#64748b] hover:text-[#059669] transition-all text-xs font-semibold"
+                                  >
+                                    {" "}
+                                    <Download className="w-3 h-3" />
+                                    Save
+                                  </a>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    loadJobCard(card);
+                                    setShowJobCardsList(false);
+                                    handleSavePDF();
+                                  }}
+                                  title="Generate PDF"
+                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#94a3b8] hover:text-[#059669] transition-all text-xs font-semibold"
+                                >
+                                  <Download className="w-3 h-3" />
+                                  PDF
+                                </button>
+                              )}
                             </td>
                           </tr>
                         ))}
