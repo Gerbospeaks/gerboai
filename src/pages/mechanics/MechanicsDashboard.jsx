@@ -838,12 +838,30 @@ const MechanicsDashboard = () => {
         const data = docSnap.data();
         setBusinessInfo(data);
         if (data.stampSettings) setStampSettings(data.stampSettings);
+        if (data.logoUrl) {
+        const b64 = await toBase64(data.logoUrl);
+        setLogoBase64(b64);
+      }
       }
     } catch (error) {
       console.error("Error loading business info:", error);
     }
   };
+const toBase64 = (url) =>
+  fetch(url, { mode: "cors" })
+    .then((r) => r.blob())
+    .then(
+      (blob) =>
+        new Promise((res, rej) => {
+          const reader = new FileReader();
+          reader.onload = () => res(reader.result);
+          reader.onerror = rej;
+          reader.readAsDataURL(blob);
+        })
+    )
+    .catch(() => url); // fall back to original URL if CORS fails
 
+const [logoBase64, setLogoBase64] = useState("");
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || !user?.uid || !authUser) return;
@@ -858,6 +876,7 @@ const MechanicsDashboard = () => {
     try {
       setBusinessInfo((prev) => ({ ...prev, uploading: true }));
       const logoUrl = await uploadLogoToR2(file, authUser);
+      const b64 = await toBase64(logoUrl);
       setBusinessInfo((prev) => ({ ...prev, logoUrl, uploading: false }));
       const db = getFirestore();
       await setDoc(
@@ -866,6 +885,8 @@ const MechanicsDashboard = () => {
         { merge: true },
       );
       alert("Logo uploaded successfully!");
+      setLogoBase64(b64);
+
     } catch (error) {
       alert("Failed to upload logo: " + error.message);
       setBusinessInfo((prev) => ({ ...prev, uploading: false }));
@@ -1258,7 +1279,6 @@ const MechanicsDashboard = () => {
 
   const templateProps = {
     templateId: selectedTemplate,
-    businessInfo,
     loading,
     jobCardNumber,
     customerName,
@@ -1290,6 +1310,10 @@ const MechanicsDashboard = () => {
     stampColor: stampSettings.color,
     showStampDate: stampSettings.showDate,
     showStamp: stampSettings.enabled,
+    businessInfo: {
+    ...businessInfo,
+    logoUrl: logoBase64 || businessInfo.logoUrl,
+  },
   };
   const poTemplateProps = {
     templateId: selectedTemplate,
