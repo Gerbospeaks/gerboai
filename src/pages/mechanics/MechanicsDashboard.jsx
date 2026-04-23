@@ -144,6 +144,7 @@ const MechanicsDashboard = () => {
     pendingPayments: 0,
     loading: true,
   });
+  const [pdfViewer, setPdfViewer] = useState(null); 
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
   const [aiDocType, setAiDocType] = useState("invoice");
   const [showAIWindow, setShowAIWindow] = useState(false);
@@ -755,7 +756,23 @@ const MechanicsDashboard = () => {
     ]);
     setNewItem({ description: "", rate: "", qty: "", type: "Labor" });
   };
-
+const downloadPDF = async (url, fileName) => {
+  try {
+    const res = await fetch(url, { mode: "cors" });
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = fileName || "document.pdf";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  } catch (err) {
+    console.error("Download failed:", err);
+    alert("Download failed: " + err.message);
+  }
+};
   const handleRemoveItem = (index) => {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
@@ -1848,26 +1865,18 @@ const [logoBase64, setLogoBase64] = useState("");
                             >
                               {card.downloadUrl ? (
                                 <div className="flex items-center gap-1.5">
-                                  <a
-                                    href={card.downloadUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    title="View PDF"
-                                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
-                                  >
-                                    <Eye className="w-3 h-3" />
-                                    View
-                                  </a>
-                                  <a
-                                    href={card.downloadUrl}
-                                    download
-                                    title="Download PDF"
-                                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#64748b] hover:text-[#059669] transition-all text-xs font-semibold"
-                                  >
-                                    {" "}
-                                    <Download className="w-3 h-3" />
-                                    Save
-                                  </a>
+                                   <button
+      onClick={e => { e.stopPropagation(); setPdfViewer({ url: card.downloadUrl, fileName: (card.jobCardNumber || card.id) + ".pdf" }); }}
+      className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
+    >
+      <Eye className="w-3 h-3" /> View
+    </button>
+                                  <button
+      onClick={e => { e.stopPropagation(); downloadPDF(card.downloadUrl, (card.jobCardNumber || card.id) + ".pdf"); }}
+      className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#64748b] hover:text-[#059669] transition-all text-xs font-semibold"
+    >
+      <Download className="w-3 h-3" /> Save
+    </button>
                                 </div>
                               ) : (
                                 <button
@@ -3545,6 +3554,90 @@ const [logoBase64, setLogoBase64] = useState("");
           )}
         </div>
       </div>
+    {pdfViewer && (
+  <div
+    style={{
+      position: "fixed", inset: 0, zIndex: 9999,
+      background: "rgba(0,0,0,0.75)",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+    }}
+    onClick={() => setPdfViewer(null)}
+  >
+    <div
+      style={{
+        width: "90vw", maxWidth: 900,
+        height: "90vh", background: "#fff",
+        borderRadius: 12, overflow: "hidden",
+        display: "flex", flexDirection: "column",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Header */}
+      <div style={{
+        display: "flex", alignItems: "center",
+        justifyContent: "space-between",
+        padding: "12px 18px",
+        background: "#0f172a", flexShrink: 0,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: "50%",
+            background: "#2563eb", display: "flex",
+            alignItems: "center", justifyContent: "center",
+          }}>
+            <Eye className="w-3.5 h-3.5" style={{ color: "#fff", width: 14, height: 14 }} />
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#fff" }}>
+              {pdfViewer.fileName}
+            </p>
+            <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.45)" }}>
+              PDF Preview
+            </p>
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {/* Download from viewer */}
+          <button
+            onClick={() => downloadPDF(pdfViewer.url, pdfViewer.fileName)}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 14px", borderRadius: 7,
+              background: "#059669", border: "none",
+              color: "#fff", fontSize: 12, fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            <Download style={{ width: 13, height: 13 }} />
+            Download
+          </button>
+          <button
+            onClick={() => setPdfViewer(null)}
+            style={{
+              background: "rgba(255,255,255,0.1)", border: "none",
+              color: "#fff", cursor: "pointer", borderRadius: 7,
+              width: 32, height: 32,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            <X style={{ width: 16, height: 16 }} />
+          </button>
+        </div>
+      </div>
+
+      {/* PDF iframe canvas */}
+      <div style={{ flex: 1, background: "#e2e8f0", overflow: "hidden" }}>
+        <iframe
+          src={`${pdfViewer.url}#toolbar=0&navpanes=0&scrollbar=1`}
+          style={{ width: "100%", height: "100%", border: "none" }}
+          title="PDF Preview"
+        />
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };

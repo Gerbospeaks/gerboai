@@ -714,31 +714,12 @@ export default function Home({
     <td onClick={(e) => e.stopPropagation()} style={{ whiteSpace: "nowrap" }}>
       {inv.downloadUrl ? (
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <a
-            href={inv.downloadUrl}
-            target="_blank"
-            rel="noreferrer"
-            title="View PDF"
-            style={{
-              display: "flex", alignItems: "center", gap: 4,
-              padding: "3px 8px", borderRadius: 3,
-              border: `1px solid ${Z.border}`, background: Z.bg,
-              color: Z.textMid, fontSize: 11, fontWeight: 700,
-              textDecoration: "none", transition: "all .15s",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = Z.blueLight;
-              e.currentTarget.style.color = Z.blue;
-              e.currentTarget.style.borderColor = "#93c5fd";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = Z.bg;
-              e.currentTarget.style.color = Z.textMid;
-              e.currentTarget.style.borderColor = Z.border;
-            }}
-          >
-            <Eye size={11} /> View
-          </a>
+         <button
+      onClick={e => { e.stopPropagation(); setPdfViewer({ url: inv.downloadUrl, fileName: inv.jobCardNumber + ".pdf" }); }}
+      className="... your existing View button classes ..."
+    >
+      <Eye className="w-3 h-3" /> View
+    </button>
           
            <a href={inv.downloadUrl}
             download
