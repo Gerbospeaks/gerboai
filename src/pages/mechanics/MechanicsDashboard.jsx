@@ -731,7 +731,7 @@ const MechanicsDashboard = () => {
         );
       }
 
-      window.open(publicUrl, "_blank");
+     alert("✅ Invoice saved as PDF successfully!");
     } catch (err) {
       console.error("PDF save error:", err);
       alert("Failed to save PDF: " + err.message);

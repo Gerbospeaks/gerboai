@@ -1195,6 +1195,7 @@ export const TemplateRenderer = ({
     stampColor,
     showStampDate,
     showStamp,
+    
   };
   switch (templateId) {
     case "default":
