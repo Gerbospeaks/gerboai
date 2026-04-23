@@ -81,25 +81,23 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+  const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    try {
       if (firebaseUser) {
         setAuthUser(firebaseUser);
-
         const userDocRef = doc(db, "users", firebaseUser.uid);
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
           const userData = userDoc.data();
-
           setUser({
             uid: firebaseUser.uid,
             email: firebaseUser.email,
             name: userData.name,
             emailVerified: firebaseUser.emailVerified,
             dashboardId: userData.dashboardId,
-            portalSlug: userData.portalSlug || " ", // ← expose slug to dashboard
+            portalSlug: userData.portalSlug || null,
           });
-
           setUserDashboard(userData.dashboardId);
           setIsAdmin(userData.isAdmin === true);
         }
@@ -107,12 +105,17 @@ export const AuthProvider = ({ children }) => {
         setAuthUser(null);
         setUser(null);
         setUserDashboard(null);
+        setIsAdmin(false); 
       }
-      setLoading(false);
-    });
+    } catch (error) {
+      console.error("Auth state error:", error);
+    } finally {
+      setLoading(false); // ← always runs, never hangs
+    }
+  });
 
-    return () => unsubscribe();
-  }, []);
+  return () => unsubscribe();
+}, []);
 
   const register = async (name, email, password, dashboardId, companyInfo) => {
     try {
@@ -386,8 +389,11 @@ const refreshUser = async () => {
       dashboardId: userData.dashboardId,
       portalSlug: userData.portalSlug || null,
     });
+    setUserDashboard(userData.dashboardId);
+    setIsAdmin(userData.isAdmin === true);
   }
-};
+};                          
+
   return (
     <AuthContext.Provider
       value={{
@@ -407,4 +413,4 @@ const refreshUser = async () => {
       {children}
     </AuthContext.Provider>
   );
-};
+};                          // ← closes AuthProvider
