@@ -123,8 +123,7 @@ const statusBadge = (active) =>
     ? { bg: "#dcfce7", color: "#166534", label: "Active" }
     : { bg: "#fef2f2", color: "#991b1b", label: "Inactive" };
 
-const getRoleMeta = (role) =>
-  ROLES.find((r) => r.value === role) ?? ROLES[3];
+const getRoleMeta = (role) => ROLES.find((r) => r.value === role) ?? ROLES[3];
 
 // ── Main component ─────────────────────────────────────────────────────────
 const SubUserManagement = ({ onClose }) => {
@@ -157,7 +156,7 @@ const SubUserManagement = ({ onClose }) => {
     setLoading(true);
     try {
       const snap = await getDocs(
-        collection(db, "users", parentUid, "subusers")
+        collection(db, "users", parentUid, "subusers"),
       );
       setSubUsers(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     } catch (e) {
@@ -223,8 +222,10 @@ const SubUserManagement = ({ onClose }) => {
       // 2. Create the Firebase Auth user
       // Use a secondary auth instance to avoid signing out the current admin
       const { initializeApp, getApps } = await import("firebase/app");
-      const { getAuth: getSecondaryAuth, createUserWithEmailAndPassword: createSecondary } =
-        await import("firebase/auth");
+      const {
+        getAuth: getSecondaryAuth,
+        createUserWithEmailAndPassword: createSecondary,
+      } = await import("firebase/auth");
 
       const secondaryApp =
         getApps().find((a) => a.name === "secondary") ??
@@ -234,22 +235,28 @@ const SubUserManagement = ({ onClose }) => {
             authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
             projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
             storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-            messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+            messagingSenderId:
+              process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
             appId: process.env.REACT_APP_FIREBASE_APP_ID,
           },
-          "secondary"
+          "secondary",
         );
 
       const secondaryAuth = getSecondaryAuth(secondaryApp);
       const cred = await createSecondary(
         secondaryAuth,
         form.email.trim(),
-        form.password
+        form.password,
       );
       const newUid = cred.user.uid;
 
       // Sign out from secondary instance immediately
       await secondaryAuth.signOut();
+
+      // 3. Fetch parent's dashboardId so sub-user can route correctly
+      const { getDoc: getParentDoc } = await import("firebase/firestore");
+      const parentSnap = await getParentDoc(doc(db, "users", parentUid));
+      const parentData = parentSnap.exists() ? parentSnap.data() : {};
 
       const subUserData = {
         name: form.name.trim(),
@@ -258,21 +265,26 @@ const SubUserManagement = ({ onClose }) => {
         permissions: form.permissions,
         active: form.active,
         parentUid,
+        isSubUser: true,
+        // Inherit from parent so login routing works without an extra fetch
+        dashboardId: parentData.dashboardId || null,
+        industry: parentData.industry || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
 
-      // 3. Write into parent's subusers sub-collection
+      // 4. Write into parent's subusers sub-collection
+      //    Path: users/{parentUid}/subusers/{newUid}
       await setDoc(
         doc(db, "users", parentUid, "subusers", newUid),
-        subUserData
+        subUserData,
       );
 
-      // 4. Write top-level profile so useSubAccount can resolve parentUid
+      // 5. Write top-level profile so useSubAccount + AuthContext can resolve parentUid
+      //    Path: users/{newUid}
       await setDoc(doc(db, "users", newUid), {
         ...subUserData,
         uid: newUid,
-        isSubUser: true,
       });
 
       showToast(`${form.name} added to your team!`);
@@ -285,8 +297,8 @@ const SubUserManagement = ({ onClose }) => {
         e.code === "auth/email-already-in-use"
           ? "That email is already registered"
           : e.code === "auth/invalid-email"
-          ? "Invalid email address"
-          : "Failed to create account: " + e.message;
+            ? "Invalid email address"
+            : "Failed to create account: " + e.message;
       showToast(msg, "error");
     } finally {
       setSaving(false);
@@ -309,7 +321,7 @@ const SubUserManagement = ({ onClose }) => {
       // Update sub-collection record
       await updateDoc(
         doc(db, "users", parentUid, "subusers", editingUser.id),
-        payload
+        payload,
       );
 
       // Update top-level profile too
