@@ -7,6 +7,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   getFirestore,
   serverTimestamp,
@@ -253,9 +254,7 @@ const SubUserManagement = ({ onClose }) => {
       // Sign out from secondary instance immediately
       await secondaryAuth.signOut();
 
-      // 3. Fetch parent's dashboardId so sub-user can route correctly
-      const { getDoc: getParentDoc } = await import("firebase/firestore");
-      const parentSnap = await getParentDoc(doc(db, "users", parentUid));
+      const parentSnap = await getDoc(doc(db, "users", parentUid));
       const parentData = parentSnap.exists() ? parentSnap.data() : {};
 
       const subUserData = {

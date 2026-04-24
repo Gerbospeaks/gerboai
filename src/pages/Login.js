@@ -137,6 +137,7 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   disabled={isSubmitting}
+                  autoComplete="current-password"
                   className="w-full px-4 py-3 pr-11 bg-white border border-[#d1d5db] text-[#111827] rounded-lg text-sm
                     focus:outline-none focus:ring-2 focus:ring-[#1655e0]/30 focus:border-[#1655e0]
                     disabled:bg-[#f9fafb] disabled:text-[#9ca3af] placeholder:text-[#c0c4ce] transition-all"
