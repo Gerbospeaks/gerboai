@@ -20,7 +20,7 @@ import { auth, db } from "../firebase";
 
 const AuthContext = createContext({
   user: null,
-  loading: true,   
+  loading: true,
   login: () => {},
   logout: () => {},
 });
@@ -60,13 +60,12 @@ export const updatePortalSlug = async (uid, businessName) => {
     });
 
     batch.update(userDocRef, {
-  portalSlug: newSlug,
-});
+      portalSlug: newSlug,
+    });
 
     await batch.commit();
     console.log(`Portal slug updated: /parents/${newSlug}`);
     return newSlug;
-
   } catch (error) {
     console.error("Error updating portal slug:", error);
     return null;
@@ -81,41 +80,58 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-    try {
-      if (firebaseUser) {
-        setAuthUser(firebaseUser);
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      try {
+        if (firebaseUser) {
+          setAuthUser(firebaseUser);
+          const userDocRef = doc(db, "users", firebaseUser.uid);
+          const userDoc = await getDoc(userDocRef);
 
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            name: userData.name,
-            emailVerified: firebaseUser.emailVerified,
-            dashboardId: userData.dashboardId,
-            portalSlug: userData.portalSlug || null,
-          });
-          setUserDashboard(userData.dashboardId);
-          setIsAdmin(userData.isAdmin === true);
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+
+            // ── Sub-user: inherit dashboardId from parent ──────────────
+            let dashboardId = userData.dashboardId || null;
+            if (userData.isSubUser && userData.parentUid) {
+              const parentSnap = await getDoc(
+                doc(db, "users", userData.parentUid),
+              );
+              if (parentSnap.exists()) {
+                dashboardId = parentSnap.data().dashboardId || null;
+              }
+            }
+            // ───────────────────────────────────────────────────────────
+
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              name: userData.name,
+              emailVerified: firebaseUser.emailVerified,
+              dashboardId, // ← resolved for sub-users
+              portalSlug: userData.portalSlug || null,
+              isSubUser: userData.isSubUser || false,
+              parentUid: userData.parentUid || null,
+              role: userData.role || "owner",
+              permissions: userData.permissions || [],
+            });
+            setUserDashboard(dashboardId);
+            setIsAdmin(userData.isAdmin === true);
+          }
+        } else {
+          setAuthUser(null);
+          setUser(null);
+          setUserDashboard(null);
+          setIsAdmin(false);
         }
-      } else {
-        setAuthUser(null);
-        setUser(null);
-        setUserDashboard(null);
-        setIsAdmin(false); 
+      } catch (error) {
+        console.error("Auth state error:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Auth state error:", error);
-    } finally {
-      setLoading(false); // ← always runs, never hangs
-    }
-  });
+    });
 
-  return () => unsubscribe();
-}, []);
+    return () => unsubscribe();
+  }, []);
 
   const register = async (name, email, password, dashboardId, companyInfo) => {
     try {
@@ -148,7 +164,7 @@ export const AuthProvider = ({ children }) => {
         role: "user",
         isAdmin: false,
         seeded: false,
-        ...(dashboardId === 'education' && { portalSlug: null })
+        ...(dashboardId === "education" && { portalSlug: null }),
       });
       console.log("User document created");
 
@@ -228,11 +244,10 @@ export const AuthProvider = ({ children }) => {
           const ref = doc(db, "users", user.uid, colName, "_init");
           batch.set(ref, { _placeholder: true, createdAt: serverTimestamp() });
         });
-  
       }
       // ───────────────────────────────────────────────────────────────────
 
-       console.log("7. Seeding default template settings...");
+      console.log("7. Seeding default template settings...");
       const templateSettingsRef = doc(
         db,
         "users",
@@ -241,10 +256,10 @@ export const AuthProvider = ({ children }) => {
         "templateSettings",
       );
       batch.set(templateSettingsRef, {
-        purchased:      ["professional"],
+        purchased: ["professional"],
         activeTemplate: "professional",
-        createdAt:      serverTimestamp(),
-        updatedAt:      serverTimestamp(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
 
       console.log("8. Committing batch...");
@@ -252,19 +267,19 @@ export const AuthProvider = ({ children }) => {
       console.log("Batch committed successfully");
 
       console.log("9. Creating marketplace listing...");
-if (companyInfo?.createMarketplaceListing) {
-  await createProviderListing(user.uid, {
-    companyName: companyInfo.companyName || name,
-    industry:    companyInfo.industry    || dashboardId,
-    location:    companyInfo.location    || "",
-    rate:        companyInfo.rate        || "Get a quote",
-    about:       companyInfo.about       || "",
-    phone:       companyInfo.phone       || "",
-  });
-}
- 
-console.log("10. Signing out...");
-await signOut(auth);
+      if (companyInfo?.createMarketplaceListing) {
+        await createProviderListing(user.uid, {
+          companyName: companyInfo.companyName || name,
+          industry: companyInfo.industry || dashboardId,
+          location: companyInfo.location || "",
+          rate: companyInfo.rate || "Get a quote",
+          about: companyInfo.about || "",
+          phone: companyInfo.phone || "",
+        });
+      }
+
+      console.log("10. Signing out...");
+      await signOut(auth);
       console.log("Signed out successfully");
 
       return {
@@ -296,7 +311,14 @@ await signOut(auth);
         password,
       );
 
-      if (!userCredential.user.emailVerified) {
+      const userDocRef = doc(db, "users", userCredential.user.uid);
+      const userDoc = await getDoc(userDocRef);
+      const userData = userDoc.data();
+
+      // ── Skip email verification for sub-users ──────────────────────
+      const isSubUser = userData?.isSubUser === true;
+
+      if (!isSubUser && !userCredential.user.emailVerified) {
         await signOut(auth);
         return {
           success: false,
@@ -305,20 +327,35 @@ await signOut(auth);
         };
       }
 
-      const userDocRef = doc(db, "users", userCredential.user.uid);
-      const userDoc = await getDoc(userDocRef);
-      const userData = userDoc.data();
+      // ── Block inactive sub-users ───────────────────────────────────
+      if (isSubUser && userData?.active === false) {
+        await signOut(auth);
+        return {
+          success: false,
+          message:
+            "Your account has been deactivated. Contact your administrator.",
+        };
+      }
+      // ──────────────────────────────────────────────────────────────
+
+      // Resolve dashboardId for sub-users
+      let dashboardId = userData?.dashboardId;
+      if (isSubUser && userData?.parentUid) {
+        const parentSnap = await getDoc(doc(db, "users", userData.parentUid));
+        if (parentSnap.exists()) {
+          dashboardId = parentSnap.data().dashboardId;
+        }
+      }
 
       return {
         success: true,
         isAdmin: userData?.isAdmin === true,
-        dashboardId: userData?.dashboardId,
+        dashboardId,
       };
     } catch (error) {
       return { success: false, message: error.message };
     }
   };
-
   const logout = async () => {
     try {
       await signOut(auth);
@@ -376,23 +413,36 @@ await signOut(auth);
       return { success: false, message: errorMessage };
     }
   };
-const refreshUser = async () => {
-  if (!authUser) return;
-  const userDoc = await getDoc(doc(db, "users", authUser.uid));
-  if (userDoc.exists()) {
-    const userData = userDoc.data();
-    setUser({
-      uid: authUser.uid,
-      email: authUser.email,
-      name: userData.name,
-      emailVerified: authUser.emailVerified,
-      dashboardId: userData.dashboardId,
-      portalSlug: userData.portalSlug || null,
-    });
-    setUserDashboard(userData.dashboardId);
-    setIsAdmin(userData.isAdmin === true);
-  }
-};                          
+  const refreshUser = async () => {
+    if (!authUser) return;
+    const userDoc = await getDoc(doc(db, "users", authUser.uid));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+
+      let dashboardId = userData.dashboardId || null;
+      if (userData.isSubUser && userData.parentUid) {
+        const parentSnap = await getDoc(doc(db, "users", userData.parentUid));
+        if (parentSnap.exists()) {
+          dashboardId = parentSnap.data().dashboardId || null;
+        }
+      }
+
+      setUser({
+        uid: authUser.uid,
+        email: authUser.email,
+        name: userData.name,
+        emailVerified: authUser.emailVerified,
+        dashboardId,
+        portalSlug: userData.portalSlug || null,
+        isSubUser: userData.isSubUser || false,
+        parentUid: userData.parentUid || null,
+        role: userData.role || "owner",
+        permissions: userData.permissions || [],
+      });
+      setUserDashboard(dashboardId);
+      setIsAdmin(userData.isAdmin === true);
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -413,4 +463,4 @@ const refreshUser = async () => {
       {children}
     </AuthContext.Provider>
   );
-};                          // ← closes AuthProvider
+}; // ← closes AuthProvider
