@@ -106,7 +106,7 @@ export const AuthProvider = ({ children }) => {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               name: userData.name,
-              emailVerified: firebaseUser.emailVerified,
+              emailVerified: userData.isSubUser ? true : firebaseUser.emailVerified,
               dashboardId, // ← resolved for sub-users
               portalSlug: userData.portalSlug || null,
               isSubUser: userData.isSubUser || false,
