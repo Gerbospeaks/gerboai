@@ -1745,6 +1745,7 @@ const MechanicsDashboard = () => {
             actions={headerActions}
             mobileActions={mobileDashboardActions}
             onSettingsOpen={() => setShowSettings(true)}
+            onTeamOpen={() => setShowUserManagement(true)} 
             dashboardType="mechanics" // adapts Quick Create menu + accent colour
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}

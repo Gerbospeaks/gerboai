@@ -719,6 +719,7 @@ const AppHeader = ({
   mobileActions = [],
   showActions = true,
   onSettingsOpen,
+  onTeamOpen,
   notifications = [],
   pageTitle = "",
   plan = "pro",
@@ -1224,20 +1225,19 @@ const AppHeader = ({
                     <LayoutDashboard size={14} color={Z.textMuted} /> Dashboard
                   </span>
                 </button>
-                <button
-                  className="zah-drop-item"
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    navigate("/invoices");
-                  }}
-                >
-                  <span className="zah-drop-item-left">
-                    <FileText size={14} color={Z.textMuted} />
-                    {dashboardType === "mechanics"
-                      ? "My Job Cards"
-                      : "My Documents"}
-                  </span>
-                </button>
+                 {onTeamOpen && (
+                  <button
+                    className="zah-drop-item"
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      onTeamOpen();
+                    }}
+                  >
+                    <span className="zah-drop-item-left">
+                      <Users size={14} color={Z.textMuted} /> Manage Team
+                    </span>
+                  </button>
+                )}
                 {onSettingsOpen && (
                   <button
                     className="zah-drop-item"
