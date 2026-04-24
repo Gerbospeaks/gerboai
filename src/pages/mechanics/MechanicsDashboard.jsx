@@ -231,16 +231,17 @@ const MechanicsDashboard = () => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
+await setDoc(
+      doc(db, "users", user.uid, "purchaseOrders", poNumber),
+      poData,
+      { merge: true }
+    );
 
-      const posRef = collection(db, "users", user.uid, "purchaseOrders");
-      await addDoc(posRef, poData);
-
-      alert("Purchase Order saved successfully!");
-    } catch (error) {
-      console.error("Error saving PO:", error);
-      alert("Failed to save Purchase Order");
-    }
-  };
+    alert("Purchase Order saved successfully!");
+  } catch (error) {
+    alert("Failed to save Purchase Order");
+  }
+};
   const poSubtotal = poItems.reduce(
     (sum, item) => sum + Number(item.amount),
     0,
@@ -707,15 +708,15 @@ const MechanicsDashboard = () => {
       let activeJobCardId = jobCardId;
 
       if (!activeJobCardId && activeView !== "purchase-orders") {
-        // Invoice was never saved — auto-save it now to get a Firestore ID
-        const ref = await addDoc(
-          collection(firestoreDb, "users", user.uid, collectionName),
-          buildJobCardPayload(jobCardNumber),
-        );
-        activeJobCardId = ref.id;
-        setJobCardId(ref.id);
-        loadSavedJobCards(); // refresh the list with the new record
-      }
+  // ✅ use the job card number as the ID
+  await setDoc(
+    doc(firestoreDb, "users", user.uid, collectionName, jobCardNumber),
+    buildJobCardPayload(jobCardNumber)
+  );
+  activeJobCardId = jobCardNumber;
+  setJobCardId(jobCardNumber);
+  loadSavedJobCards();
+}
 
       // Patch downloadUrl so the Recent list shows the View/Save buttons
       if (activeJobCardId) {
@@ -997,34 +998,29 @@ const MechanicsDashboard = () => {
     updatedAt: serverTimestamp(),
   });
 
-  const handleSaveJobCard = async () => {
-    if (!user?.uid) return;
-    const db = getFirestore();
-    let numberToUse = jobCardNumber;
-    if (!jobCardId) {
-      numberToUse = await generateJobCardNumber(user.uid, documentType);
-      setJobCardNumber(numberToUse);
-    }
-    const jobCardData = buildJobCardPayload(numberToUse);
-    const collectionName = documentType === "quote" ? "quotations" : "invoices";
-    if (jobCardId) {
-      await updateDoc(doc(db, "users", user.uid, collectionName, jobCardId), {
-        ...jobCardData,
-        updatedAt: serverTimestamp(),
-      });
-    } else {
-      const ref = await addDoc(
-        collection(db, "users", user.uid, collectionName),
-        jobCardData,
-      );
-      setJobCardId(ref.id);
-    }
-    alert(
-      `${documentType === "quote" ? "Quote" : "Job card"} saved and locked`,
-    );
-    loadSavedJobCards();
-    fetchBusinessStats();
-  };
+ const handleSaveJobCard = async () => {
+  if (!user?.uid) return;
+  const db = getFirestore();
+  let numberToUse = jobCardNumber;
+  if (!jobCardId) {
+    numberToUse = await generateJobCardNumber(user.uid, documentType);
+    setJobCardNumber(numberToUse);
+  }
+  const jobCardData = buildJobCardPayload(numberToUse);
+  const collectionName = documentType === "quote" ? "quotations" : "invoices";
+
+  // ✅ setDoc with number as ID (works for both create and update)
+  await setDoc(
+    doc(db, "users", user.uid, collectionName, numberToUse),
+    { ...jobCardData, updatedAt: serverTimestamp() },
+    { merge: true }   // merge:true makes it safe to call on existing docs too
+  );
+
+  setJobCardId(numberToUse);  // ← ID is now the number string
+  alert(`${documentType === "quote" ? "Quote" : "Job card"} saved — ${numberToUse}`);
+  loadSavedJobCards();
+  fetchBusinessStats();
+};
 
   const handleConvertToInvoice = async () => {
     if (!user?.uid) return;
@@ -1041,23 +1037,29 @@ const MechanicsDashboard = () => {
       invoiceData.convertedFromQuote = jobCardId;
       invoiceData.convertedFromQuoteNumber = jobCardNumber;
       invoiceData.convertedAt = serverTimestamp();
-      const invoiceRef = await addDoc(
-        collection(db, "users", user.uid, "invoices"),
-        invoiceData,
-      );
-      await updateDoc(doc(db, "users", user.uid, "quotations", jobCardId), {
-        convertedToInvoice: true,
-        convertedToInvoiceId: invoiceRef.id,
-        convertedToInvoiceNumber: newInvoiceNumber,
-        convertedAt: serverTimestamp(),
-        status: "converted",
-      });
-      setDocumentType("invoice");
-      setJobCardId(invoiceRef.id);
-      setJobCardNumber(newInvoiceNumber);
-      alert(`Quote successfully converted to Invoice ${newInvoiceNumber}`);
-      loadSavedJobCards();
-    } catch (error) {
+      await setDoc(
+    doc(db, "users", user.uid, "invoices", newInvoiceNumber),
+    invoiceData
+  );
+
+  // update the old quote — jobCardId is already its number
+  await updateDoc(
+    doc(db, "users", user.uid, "quotations", jobCardId),
+    {
+      convertedToInvoice: true,
+      convertedToInvoiceId: newInvoiceNumber,
+      convertedToInvoiceNumber: newInvoiceNumber,
+      convertedAt: serverTimestamp(),
+      status: "converted",
+    }
+  );
+
+  setDocumentType("invoice");
+  setJobCardId(newInvoiceNumber);
+  setJobCardNumber(newInvoiceNumber);
+  alert(`Converted to Invoice ${newInvoiceNumber}`);
+  loadSavedJobCards();
+}catch (error) {
       alert("Failed to convert quote to invoice");
     }
   };
