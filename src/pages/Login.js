@@ -5,6 +5,7 @@ import logo from "../assets/img/solidflo.png";
 import slide1 from "../assets/img/slide1.avif";
 import slide2 from "../assets/img/slide2.avif";
 import slide3 from "../assets/img/slide3.jpg";
+import { getDashboardRoute } from "../utils/dashboardRoutes";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import "tailwindcss";
 const slides = [
@@ -45,21 +46,29 @@ export default function Login() {
   }, []);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    if (!email || !password) {
-      setError("Please fill in all fields");
-      return;
-    }
-    setIsSubmitting(true);
-    const result = await login(email, password);
-    setIsSubmitting(false);
-    if (result.success) {
-      navigate(result.isAdmin ? "/admin" : "/dashboard");
+  e.preventDefault();
+  setError("");
+  if (!email || !password) {
+    setError("Please fill in all fields");
+    return;
+  }
+  setIsSubmitting(true);
+  const result = await login(email, password);
+  setIsSubmitting(false);
+
+  if (result.success) {
+    if (result.isAdmin) {
+      navigate("/admin");
     } else {
-      setError(result.message);
+      // getDashboardRoute maps dashboardId → the correct path
+      // works for both owners and sub-users since login() now
+      // resolves dashboardId from the parent for sub-users
+      navigate(getDashboardRoute(result.dashboardId));
     }
-  };
+  } else {
+    setError(result.message);
+  }
+};
 
   return (
     <div
