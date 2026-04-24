@@ -1737,7 +1737,6 @@ const MechanicsDashboard = () => {
           logo={logo}
           newRequestCount={0}
           isAdmin={isAdmin}
-          setShowUserManagement={setShowUserManagement}
         />
 
         {/* Main content */}

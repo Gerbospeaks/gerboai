@@ -6,6 +6,7 @@ import AppHeader from "../AppHeader";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
+import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -212,6 +213,8 @@ const TechnologyDashboardInner = () => {
   const [customers, setCustomers] = useState([]);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
     useState(null);
+  const { can, isAdmin } = usePermissions();
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -709,6 +712,13 @@ const TechnologyDashboardInner = () => {
         className:
           "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-lg hover:from-purple-700 transition-colors shadow-sm whitespace-nowrap",
       },
+    isAdmin && {
+      label: "Team",
+      icon: Users,
+      onClick: () => setShowUserManagement(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
     {
       label: "Preview",
       icon: Eye,

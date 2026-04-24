@@ -8,6 +8,7 @@ import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import logo from "../../assets/img/solidflo-logo.png";
 import FinancialOverview from "../FinancialOverview";
+import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -126,6 +127,8 @@ const HvacDashboard = () => {
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const { can, isAdmin } = usePermissions();
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [invoices, setInvoices] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
@@ -637,6 +640,13 @@ const HvacDashboard = () => {
         className:
           "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
       },
+    isAdmin && {
+      label: "Team",
+      icon: Users,
+      onClick: () => setShowUserManagement(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
     {
       label: "Preview",
       icon: Eye,

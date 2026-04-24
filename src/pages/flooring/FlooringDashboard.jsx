@@ -9,6 +9,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
+import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -114,7 +115,8 @@ const functions = getFunctions();
 const FlooringDashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
-
+  const { can, isAdmin } = usePermissions();
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -653,6 +655,13 @@ const FlooringDashboard = () => {
         className:
           "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
       },
+    isAdmin && {
+      label: "Team",
+      icon: Users,
+      onClick: () => setShowUserManagement(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
     {
       label: "Preview",
       icon: Eye,

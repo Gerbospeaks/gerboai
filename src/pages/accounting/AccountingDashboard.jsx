@@ -19,6 +19,7 @@ import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import DebtorsAgeAnalysis from "./DebtorsAgeAnalysis";
 import RecurringInvoices from "./RecurringInvoices";
+import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -104,6 +105,8 @@ const AccountingDashboard = () => {
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+  const { can, isAdmin } = usePermissions();
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [activeView, setActiveView] = useState("home");
   const handleQuickCreate = ({ view, action }) => {
     if (action === "newInvoice") {
@@ -656,6 +659,13 @@ const handleNewInvoiceDoc = () => {
         className:
           "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
       },
+    isAdmin && {
+      label: "Team",
+      icon: Users,
+      onClick: () => setShowUserManagement(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
     {
       label: "Preview",
       icon: Eye,

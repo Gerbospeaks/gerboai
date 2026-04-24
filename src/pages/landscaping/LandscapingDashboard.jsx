@@ -4,6 +4,7 @@ import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
+import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -96,8 +97,8 @@ const LandscapingDashboard = () => {
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [invoices, setInvoices] = useState([]);
-
-  // Modals
+  const { can, isAdmin } = usePermissions();
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
@@ -531,6 +532,13 @@ const LandscapingDashboard = () => {
         className:
           "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
       },
+    isAdmin && {
+      label: "Team",
+      icon: Users,
+      onClick: () => setShowUserManagement(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
     {
       label: "Preview",
       icon: Eye,

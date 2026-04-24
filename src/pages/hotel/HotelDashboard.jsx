@@ -26,6 +26,7 @@ import {
 import { Printer, Download, Sparkles } from "lucide-react";
 import { db } from "../../firebase";
 import GuestModal from "./GuestModal";
+import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";

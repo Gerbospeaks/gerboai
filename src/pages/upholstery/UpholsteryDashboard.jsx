@@ -10,6 +10,7 @@ import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import UpholsterySidebar from "./UpholsterySidebar";
+import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -114,6 +115,8 @@ const UpholsteryDashboard = () => {
   const [documentType, setDocumentType] = useState("quote");
   const [showSettings, setShowSettings] = useState(false);
   const [activeView, setActiveView] = useState("home");
+  const { can, isAdmin } = usePermissions();
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -623,6 +626,13 @@ const UpholsteryDashboard = () => {
         className:
           "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
       },
+    isAdmin && {
+      label: "Team",
+      icon: Users,
+      onClick: () => setShowUserManagement(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
     {
       label: "Preview",
       icon: Eye,

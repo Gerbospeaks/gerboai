@@ -10,6 +10,7 @@ import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import CleaningSidebar from "./CleaningSidebar";
+import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -121,6 +122,8 @@ const CleaningDashboard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
   const [aiDocType, setAiDocType] = useState('invoice');
+  const { can, isAdmin } = usePermissions();
+  const [showUserManagement, setShowUserManagement] = useState(false);
   // ── Auth ──────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
   const location = useLocation();
@@ -647,6 +650,13 @@ const CleaningDashboard = () => {
       label: "Convert to Invoice",
       icon: FileText,
       onClick: handleConvertToInvoice,
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
+    isAdmin && {
+      label: "Team",
+      icon: Users,
+      onClick: () => setShowUserManagement(true),
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },

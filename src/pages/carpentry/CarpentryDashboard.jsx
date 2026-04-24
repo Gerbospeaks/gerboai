@@ -10,6 +10,7 @@ import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import CarpentrySidebar from "./CarpentrySidebar";
+import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -18,6 +19,7 @@ import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { getFunctions, httpsCallable } from "firebase/functions";
+
 import {
   getFirestore,
   collection,
@@ -122,6 +124,8 @@ const CarpentryDashboard = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [inputMode, setInputMode] = useState("manual");
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
+  const { can, isAdmin } = usePermissions();
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
     balanceDue: 0,
@@ -623,6 +627,13 @@ const CarpentryDashboard = () => {
         className:
           "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
       },
+    isAdmin && {
+      label: "Team",
+      icon: Users,
+      onClick: () => setShowUserManagement(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
     {
       label: "Preview",
       icon: Eye,

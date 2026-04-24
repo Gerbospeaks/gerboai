@@ -6,6 +6,7 @@ import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import logo from "../../assets/img/solidflo-logo.png";
+import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
