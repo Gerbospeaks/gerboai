@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";

@@ -51,6 +51,7 @@ import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import HomeView from "../HomeView";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import AppHeader from "../AppHeader";
+import SubUserManagement from "../SubUserManagement";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import BusinessSettingsModal from "../BusinessSettingsModal";
@@ -64,7 +65,6 @@ import MechanicsSidebar from "./MechanicsSidebar";
 import NotesView from "./NotesView";
 import PartsInventory from "./PartsInventory";
 import { usePermissions } from "../../hooks/usePermissions";
-import SubUserManagement from "../SubUserManagement";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -144,7 +144,7 @@ const MechanicsDashboard = () => {
     pendingPayments: 0,
     loading: true,
   });
-  const [pdfViewer, setPdfViewer] = useState(null); 
+  const [pdfViewer, setPdfViewer] = useState(null);
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
   const [aiDocType, setAiDocType] = useState("invoice");
   const [showAIWindow, setShowAIWindow] = useState(false);
@@ -732,7 +732,7 @@ const MechanicsDashboard = () => {
         );
       }
 
-     alert("✅ Invoice saved as PDF successfully!");
+      alert("✅ Invoice saved as PDF successfully!");
     } catch (err) {
       console.error("PDF save error:", err);
       alert("Failed to save PDF: " + err.message);
@@ -756,23 +756,23 @@ const MechanicsDashboard = () => {
     ]);
     setNewItem({ description: "", rate: "", qty: "", type: "Labor" });
   };
-const downloadPDF = async (url, fileName) => {
-  try {
-    const res = await fetch(url, { mode: "cors" });
-    const blob = await res.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = blobUrl;
-    a.download = fileName || "document.pdf";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(blobUrl);
-  } catch (err) {
-    console.error("Download failed:", err);
-    alert("Download failed: " + err.message);
-  }
-};
+  const downloadPDF = async (url, fileName) => {
+    try {
+      const res = await fetch(url, { mode: "cors" });
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName || "document.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Download failed:", err);
+      alert("Download failed: " + err.message);
+    }
+  };
   const handleRemoveItem = (index) => {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
@@ -856,29 +856,29 @@ const downloadPDF = async (url, fileName) => {
         setBusinessInfo(data);
         if (data.stampSettings) setStampSettings(data.stampSettings);
         if (data.logoUrl) {
-        const b64 = await toBase64(data.logoUrl);
-        setLogoBase64(b64);
-      }
+          const b64 = await toBase64(data.logoUrl);
+          setLogoBase64(b64);
+        }
       }
     } catch (error) {
       console.error("Error loading business info:", error);
     }
   };
-const toBase64 = (url) =>
-  fetch(url, { mode: "cors" })
-    .then((r) => r.blob())
-    .then(
-      (blob) =>
-        new Promise((res, rej) => {
-          const reader = new FileReader();
-          reader.onload = () => res(reader.result);
-          reader.onerror = rej;
-          reader.readAsDataURL(blob);
-        })
-    )
-    .catch(() => url); // fall back to original URL if CORS fails
+  const toBase64 = (url) =>
+    fetch(url, { mode: "cors" })
+      .then((r) => r.blob())
+      .then(
+        (blob) =>
+          new Promise((res, rej) => {
+            const reader = new FileReader();
+            reader.onload = () => res(reader.result);
+            reader.onerror = rej;
+            reader.readAsDataURL(blob);
+          }),
+      )
+      .catch(() => url); // fall back to original URL if CORS fails
 
-const [logoBase64, setLogoBase64] = useState("");
+  const [logoBase64, setLogoBase64] = useState("");
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || !user?.uid || !authUser) return;
@@ -903,7 +903,6 @@ const [logoBase64, setLogoBase64] = useState("");
       );
       alert("Logo uploaded successfully!");
       setLogoBase64(b64);
-
     } catch (error) {
       alert("Failed to upload logo: " + error.message);
       setBusinessInfo((prev) => ({ ...prev, uploading: false }));
@@ -1125,6 +1124,13 @@ const [logoBase64, setLogoBase64] = useState("");
         className:
           "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
       },
+    isAdmin && {
+      label: "Team",
+      icon: Users,
+      onClick: () => setShowUserManagement(true),
+      className:
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+    },
     {
       label: "Preview",
       icon: Eye,
@@ -1328,9 +1334,9 @@ const [logoBase64, setLogoBase64] = useState("");
     showStampDate: stampSettings.showDate,
     showStamp: stampSettings.enabled,
     businessInfo: {
-    ...businessInfo,
-    logoUrl: logoBase64 || businessInfo.logoUrl,
-  },
+      ...businessInfo,
+      logoUrl: logoBase64 || businessInfo.logoUrl,
+    },
   };
   const poTemplateProps = {
     templateId: selectedTemplate,
@@ -1462,6 +1468,16 @@ const [logoBase64, setLogoBase64] = useState("");
                 border: "border-[#bbf7d0]",
                 iconBg: "bg-[#059669]",
                 text: "text-[#166534]",
+              },
+              {
+                label: "Team",
+                icon: Users,
+                onClick: () => setShowUserManagement(true),
+                bg: "bg-[#faf5ff]",
+                hover: "hover:bg-[#ede9fe]",
+                border: "border-[#ddd6fe]",
+                iconBg: "bg-[#7c3aed]",
+                text: "text-[#5b21b6]",
               },
             ].map(
               ({
@@ -1865,18 +1881,33 @@ const [logoBase64, setLogoBase64] = useState("");
                             >
                               {card.downloadUrl ? (
                                 <div className="flex items-center gap-1.5">
-                                   <button
-      onClick={e => { e.stopPropagation(); setPdfViewer({ url: card.downloadUrl, fileName: (card.jobCardNumber || card.id) + ".pdf" }); }}
-      className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
-    >
-      <Eye className="w-3 h-3" /> View
-    </button>
                                   <button
-      onClick={e => { e.stopPropagation(); downloadPDF(card.downloadUrl, (card.jobCardNumber || card.id) + ".pdf"); }}
-      className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#64748b] hover:text-[#059669] transition-all text-xs font-semibold"
-    >
-      <Download className="w-3 h-3" /> Save
-    </button>
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPdfViewer({
+                                        url: card.downloadUrl,
+                                        fileName:
+                                          (card.jobCardNumber || card.id) +
+                                          ".pdf",
+                                      });
+                                    }}
+                                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
+                                  >
+                                    <Eye className="w-3 h-3" /> View
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      downloadPDF(
+                                        card.downloadUrl,
+                                        (card.jobCardNumber || card.id) +
+                                          ".pdf",
+                                      );
+                                    }}
+                                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#64748b] hover:text-[#059669] transition-all text-xs font-semibold"
+                                  >
+                                    <Download className="w-3 h-3" /> Save
+                                  </button>
                                 </div>
                               ) : (
                                 <button
@@ -3554,90 +3585,136 @@ const [logoBase64, setLogoBase64] = useState("");
           )}
         </div>
       </div>
-    {pdfViewer && (
-  <div
-    style={{
-      position: "fixed", inset: 0, zIndex: 9999,
-      background: "rgba(0,0,0,0.75)",
-      display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-    }}
-    onClick={() => setPdfViewer(null)}
-  >
-    <div
-      style={{
-        width: "90vw", maxWidth: 900,
-        height: "90vh", background: "#fff",
-        borderRadius: 12, overflow: "hidden",
-        display: "flex", flexDirection: "column",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
-      }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center",
-        justifyContent: "space-between",
-        padding: "12px 18px",
-        background: "#0f172a", flexShrink: 0,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 28, height: 28, borderRadius: "50%",
-            background: "#2563eb", display: "flex",
-            alignItems: "center", justifyContent: "center",
-          }}>
-            <Eye className="w-3.5 h-3.5" style={{ color: "#fff", width: 14, height: 14 }} />
-          </div>
-          <div>
-            <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#fff" }}>
-              {pdfViewer.fileName}
-            </p>
-            <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.45)" }}>
-              PDF Preview
-            </p>
-          </div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {/* Download from viewer */}
-          <button
-            onClick={() => downloadPDF(pdfViewer.url, pdfViewer.fileName)}
+      {pdfViewer && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(0,0,0,0.75)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => setPdfViewer(null)}
+        >
+          <div
             style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 14px", borderRadius: 7,
-              background: "#059669", border: "none",
-              color: "#fff", fontSize: 12, fontWeight: 600,
-              cursor: "pointer",
+              width: "90vw",
+              maxWidth: 900,
+              height: "90vh",
+              background: "#fff",
+              borderRadius: 12,
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <Download style={{ width: 13, height: 13 }} />
-            Download
-          </button>
-          <button
-            onClick={() => setPdfViewer(null)}
-            style={{
-              background: "rgba(255,255,255,0.1)", border: "none",
-              color: "#fff", cursor: "pointer", borderRadius: 7,
-              width: 32, height: 32,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}
-          >
-            <X style={{ width: 16, height: 16 }} />
-          </button>
-        </div>
-      </div>
+            {/* Header */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "12px 18px",
+                background: "#0f172a",
+                flexShrink: 0,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: "#2563eb",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Eye
+                    className="w-3.5 h-3.5"
+                    style={{ color: "#fff", width: 14, height: 14 }}
+                  />
+                </div>
+                <div>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "#fff",
+                    }}
+                  >
+                    {pdfViewer.fileName}
+                  </p>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 11,
+                      color: "rgba(255,255,255,0.45)",
+                    }}
+                  >
+                    PDF Preview
+                  </p>
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {/* Download from viewer */}
+                <button
+                  onClick={() => downloadPDF(pdfViewer.url, pdfViewer.fileName)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "6px 14px",
+                    borderRadius: 7,
+                    background: "#059669",
+                    border: "none",
+                    color: "#fff",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  <Download style={{ width: 13, height: 13 }} />
+                  Download
+                </button>
+                <button
+                  onClick={() => setPdfViewer(null)}
+                  style={{
+                    background: "rgba(255,255,255,0.1)",
+                    border: "none",
+                    color: "#fff",
+                    cursor: "pointer",
+                    borderRadius: 7,
+                    width: 32,
+                    height: 32,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <X style={{ width: 16, height: 16 }} />
+                </button>
+              </div>
+            </div>
 
-      {/* PDF iframe canvas */}
-      <div style={{ flex: 1, background: "#e2e8f0", overflow: "hidden" }}>
-        <iframe
-          src={`${pdfViewer.url}#toolbar=0&navpanes=0&scrollbar=1`}
-          style={{ width: "100%", height: "100%", border: "none" }}
-          title="PDF Preview"
-        />
-      </div>
-    </div>
-  </div>
-)}
+            {/* PDF iframe canvas */}
+            <div style={{ flex: 1, background: "#e2e8f0", overflow: "hidden" }}>
+              <iframe
+                src={`${pdfViewer.url}#toolbar=0&navpanes=0&scrollbar=1`}
+                style={{ width: "100%", height: "100%", border: "none" }}
+                title="PDF Preview"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

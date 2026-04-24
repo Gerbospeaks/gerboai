@@ -94,6 +94,8 @@ import AppointmentsCalendar from "./pages/health/AppointmentsCalendar";
 import NotesView from "./pages/cleaning/NotesView";
 import ParentPortal from "./pages/education/ParentPortal";
 import StaffPortal from "./pages/education/StaffPortal";
+import { useSubAccount } from "./hooks/useSubAccount";
+import SubAccountDashboard from "./pages/mechanics/SubAccountDashboard";
 const IS_SUBDOMAIN = !!getSubdomainFromHost();
 
 const PUBLIC_ROUTES = new Set([
@@ -108,8 +110,7 @@ const PUBLIC_ROUTES = new Set([
   "/auth-action",
 ]);
 
-// ─── Map dashboardId → the route path DashboardRouter should navigate to ─────
-// This must match the paths defined in DashboardRoutes below
+
 export const DASHBOARD_ID_TO_PATH = {
   mechanics: "/mechanics",
   healthcare: "/healthcare",
@@ -216,7 +217,20 @@ function useSecurityLock() {
   }, []);
 }
 
-// ─── All protected dashboard routes ──────────────────────────────────────────
+function ProtectedDashboard() {
+  const { authUser } = useAuth();              // grab authUser from your existing AuthContext
+  const { parentUid, loading } = useSubAccount(authUser);
+
+  if (loading) return <AppLoader />;           // reuse your existing spinner
+
+  if (parentUid) {
+    // Sub-user → stripped-down restricted dashboard
+    return <SubAccountDashboard parentUid={parentUid} subUser={authUser} />;
+  }
+
+  // Main account owner → full dashboard
+  return <MechanicsDashboard />;
+}
 function DashboardRoutes() {
   return (
     <Routes>
@@ -265,7 +279,7 @@ function DashboardRoutes() {
         path="/mechanics"
         element={
           <ProtectedRoute>
-            <MechanicsDashboard />
+           <ProtectedDashboard />
           </ProtectedRoute>
         }
       />
