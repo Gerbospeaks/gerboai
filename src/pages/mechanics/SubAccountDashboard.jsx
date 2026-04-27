@@ -813,9 +813,7 @@ useEffect(() => {
   <div className="flex items-center justify-between px-3 py-4 border-b border-white/10">
     {/* Always show logo area on mobile (sidebar is full-width when open) */}
     <div className={`flex items-center gap-2 min-w-0 ${sidebarOpen ? "flex" : "hidden lg:hidden"}`}>
-      <div className="w-7 h-7 bg-[#2563eb] rounded-lg flex items-center justify-center flex-shrink-0">
-        <FileText className="w-4 h-4 text-white" />
-      </div>
+     
       <div className="min-w-0">
         <p className="text-xs font-bold text-white truncate leading-tight">
           {businessInfo.businessName || "SubAccount"}
@@ -826,12 +824,7 @@ useEffect(() => {
       </div>
     </div>
 
-    <button
-      onClick={() => setSidebarOpen((p) => !p)}
-      className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0 ml-auto"
-    >
-      <Menu className="w-4 h-4" />
-    </button>
+    
   </div>
 
   {/* Nav items */}

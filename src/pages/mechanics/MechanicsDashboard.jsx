@@ -127,6 +127,8 @@ const MechanicsDashboard = () => {
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [isSavingPDF, setIsSavingPDF] = useState(false);
+  const [savedDocId, setSavedDocId] = useState(null);
+  const [savedDocType, setSavedDocType] = useState(null);
   const { can, isAdmin } = usePermissions();
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
@@ -231,17 +233,18 @@ const MechanicsDashboard = () => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
-await setDoc(
-      doc(db, "users", user.uid, "purchaseOrders", poNumber),
-      poData,
-      { merge: true }
-    );
 
-    alert("Purchase Order saved successfully!");
-  } catch (error) {
-    alert("Failed to save Purchase Order");
-  }
-};
+      await setDoc(
+        doc(db, "users", user.uid, "purchaseOrders", poNumber),
+        poData,
+        { merge: true },
+      );
+
+      alert("Purchase Order saved successfully!");
+    } catch (error) {
+      alert("Failed to save Purchase Order");
+    }
+  };
   const poSubtotal = poItems.reduce(
     (sum, item) => sum + Number(item.amount),
     0,
@@ -708,15 +711,15 @@ await setDoc(
       let activeJobCardId = jobCardId;
 
       if (!activeJobCardId && activeView !== "purchase-orders") {
-  // ✅ use the job card number as the ID
-  await setDoc(
-    doc(firestoreDb, "users", user.uid, collectionName, jobCardNumber),
-    buildJobCardPayload(jobCardNumber)
-  );
-  activeJobCardId = jobCardNumber;
-  setJobCardId(jobCardNumber);
-  loadSavedJobCards();
-}
+        // ✅ use the job card number as the ID
+        await setDoc(
+          doc(firestoreDb, "users", user.uid, collectionName, jobCardNumber),
+          buildJobCardPayload(jobCardNumber),
+        );
+        activeJobCardId = jobCardNumber;
+        setJobCardId(jobCardNumber);
+        loadSavedJobCards();
+      }
 
       // Patch downloadUrl so the Recent list shows the View/Save buttons
       if (activeJobCardId) {
@@ -998,29 +1001,31 @@ await setDoc(
     updatedAt: serverTimestamp(),
   });
 
- const handleSaveJobCard = async () => {
-  if (!user?.uid) return;
-  const db = getFirestore();
-  let numberToUse = jobCardNumber;
-  if (!jobCardId) {
-    numberToUse = await generateJobCardNumber(user.uid, documentType);
-    setJobCardNumber(numberToUse);
-  }
-  const jobCardData = buildJobCardPayload(numberToUse);
-  const collectionName = documentType === "quote" ? "quotations" : "invoices";
+  const handleSaveJobCard = async () => {
+    if (!user?.uid) return;
+    const db = getFirestore();
+    let numberToUse = jobCardNumber;
+    if (!jobCardId) {
+      numberToUse = await generateJobCardNumber(user.uid, documentType);
+      setJobCardNumber(numberToUse);
+    }
+    const jobCardData = buildJobCardPayload(numberToUse);
+    const collectionName = documentType === "quote" ? "quotations" : "invoices";
 
-  // ✅ setDoc with number as ID (works for both create and update)
-  await setDoc(
-    doc(db, "users", user.uid, collectionName, numberToUse),
-    { ...jobCardData, updatedAt: serverTimestamp() },
-    { merge: true }   // merge:true makes it safe to call on existing docs too
-  );
+    // ✅ setDoc with number as ID (works for both create and update)
+    await setDoc(
+      doc(db, "users", user.uid, collectionName, numberToUse),
+      { ...jobCardData, updatedAt: serverTimestamp() },
+      { merge: true }, // merge:true makes it safe to call on existing docs too
+    );
 
-  setJobCardId(numberToUse);  // ← ID is now the number string
-  alert(`${documentType === "quote" ? "Quote" : "Job card"} saved — ${numberToUse}`);
-  loadSavedJobCards();
-  fetchBusinessStats();
-};
+    setJobCardId(numberToUse); // ← ID is now the number string
+    alert(
+      `${documentType === "quote" ? "Quote" : "Job card"} saved — ${numberToUse}`,
+    );
+    loadSavedJobCards();
+    fetchBusinessStats();
+  };
 
   const handleConvertToInvoice = async () => {
     if (!user?.uid) return;
@@ -1038,28 +1043,25 @@ await setDoc(
       invoiceData.convertedFromQuoteNumber = jobCardNumber;
       invoiceData.convertedAt = serverTimestamp();
       await setDoc(
-    doc(db, "users", user.uid, "invoices", newInvoiceNumber),
-    invoiceData
-  );
+        doc(db, "users", user.uid, "invoices", newInvoiceNumber),
+        invoiceData,
+      );
 
-  // update the old quote — jobCardId is already its number
-  await updateDoc(
-    doc(db, "users", user.uid, "quotations", jobCardId),
-    {
-      convertedToInvoice: true,
-      convertedToInvoiceId: newInvoiceNumber,
-      convertedToInvoiceNumber: newInvoiceNumber,
-      convertedAt: serverTimestamp(),
-      status: "converted",
-    }
-  );
+      // update the old quote — jobCardId is already its number
+      await updateDoc(doc(db, "users", user.uid, "quotations", jobCardId), {
+        convertedToInvoice: true,
+        convertedToInvoiceId: newInvoiceNumber,
+        convertedToInvoiceNumber: newInvoiceNumber,
+        convertedAt: serverTimestamp(),
+        status: "converted",
+      });
 
-  setDocumentType("invoice");
-  setJobCardId(newInvoiceNumber);
-  setJobCardNumber(newInvoiceNumber);
-  alert(`Converted to Invoice ${newInvoiceNumber}`);
-  loadSavedJobCards();
-}catch (error) {
+      setDocumentType("invoice");
+      setJobCardId(newInvoiceNumber);
+      setJobCardNumber(newInvoiceNumber);
+      alert(`Converted to Invoice ${newInvoiceNumber}`);
+      loadSavedJobCards();
+    } catch (error) {
       alert("Failed to convert quote to invoice");
     }
   };
@@ -1119,7 +1121,7 @@ await setDoc(
     can("createQuote") &&
       documentType === "quote" &&
       jobCardId &&
-      activeView !== "purchase-orders" && {
+      activeView === "invoice" && {
         label: "Convert to Invoice",
         icon: FileText,
         onClick: handleConvertToInvoice,
@@ -1172,7 +1174,12 @@ await setDoc(
     },
     can("createInvoice") || can("createQuote")
       ? {
-          label: activeView === "purchase-orders" ? "Save P.O." : "Save",
+          label:
+            activeView === "purchase-orders"
+              ? "Save P.O."
+              : documentType === "quote"
+                ? "Save Quote"
+                : "Save Invoice",
           icon: Save,
           onClick:
             activeView === "purchase-orders" ? handleSavePO : handleSaveJobCard,
@@ -1193,7 +1200,12 @@ await setDoc(
           "flex items-center gap-1.5 px-3 py-2 bg-[#7c3aed] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
       },
     {
-      label: activeView === "purchase-orders" ? "Save P.O." : "Save",
+      label:
+        activeView === "purchase-orders"
+          ? "Save P.O."
+          : documentType === "quote"
+            ? "Save Quote"
+            : "Save Invoice",
       icon: Save,
       onClick:
         activeView === "purchase-orders" ? handleSavePO : handleSaveJobCard,
@@ -1743,19 +1755,21 @@ await setDoc(
 
         {/* Main content */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          <AppHeader
-            actions={headerActions}
-            mobileActions={mobileDashboardActions}
-            onSettingsOpen={() => setShowSettings(true)}
-            onTeamOpen={() => setShowUserManagement(true)} 
-            dashboardType="mechanics" // adapts Quick Create menu + accent colour
-            sidebarOpen={sidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-            onQuickCreate={handleQuickCreate}
-            pageTitle="Job Cards" // optional breadcrumb
-            plan="pro"
-            notifications={notifications}
-          />
+         <AppHeader
+  actions={headerActions}
+  mobileActions={mobileDashboardActions}
+  onSettingsOpen={() => setShowSettings(true)}
+  onTeamOpen={() => setShowUserManagement(true)}
+  dashboardType="mechanics"
+  sidebarOpen={sidebarOpen}
+  setSidebarOpen={setSidebarOpen}
+  onQuickCreate={handleQuickCreate}
+  pageTitle="Job Cards"
+  plan="pro"
+  notifications={notifications}
+  showConvertButton={documentType === "quote" && !!jobCardId && activeView === "invoice"}  
+  onConvert={handleConvertToInvoice}  
+/>
 
           {/* Modals */}
           {showSettings && (
@@ -3525,7 +3539,9 @@ await setDoc(
                               <Save className="w-4 h-4" />
                               {activeView === "purchase-orders"
                                 ? "Save P.O."
-                                : "Save Invoice"}
+                                : documentType === "quote"
+                                  ? "Save Quote"
+                                  : "Save Invoice"}
                             </button>
                           )}
                         </div>

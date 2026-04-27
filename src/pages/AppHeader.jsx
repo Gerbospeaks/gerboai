@@ -723,6 +723,8 @@ const AppHeader = ({
   notifications = [],
   pageTitle = "",
   plan = "pro",
+  showConvertButton = false,   // ← add
+  onConvert = () => {},         // ← add
 }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -924,16 +926,41 @@ const AppHeader = ({
         {/* Right */}
         <div className="zah-right">
           {/* Search — desktop only */}
-          <button
-            className="zah-search-pill"
-            onClick={() => setShowSearch(true)}
-            aria-label="Search"
-          >
-            <Search size={13} />
-            <span className="zah-search-label">Search…</span>
-            <span className="zah-kbd">⌘K</span>
-          </button>
-
+         {showConvertButton ? (
+  <button
+    onClick={onConvert}
+    style={{
+      height: 30,
+      padding: "0 12px",
+      background: "#7c3aed",
+      color: "#fff",
+      border: "none",
+      borderRadius: 4,
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      gap: 5,
+      fontFamily: "'Lato',sans-serif",
+      whiteSpace: "nowrap",
+      flexShrink: 0,
+    }}
+  >
+    <FileText size={13} />
+    Convert to Invoice
+  </button>
+) : (
+  <button
+    className="zah-search-pill"
+    onClick={() => setShowSearch(true)}
+    aria-label="Search"
+  >
+    <Search size={13} />
+    <span className="zah-search-label">Search…</span>
+    <span className="zah-kbd">⌘K</span>
+  </button>
+)}
           {/* + Create */}
           <div style={{ position: "relative" }} ref={quickCreateRef}>
             <button
