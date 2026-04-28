@@ -1,4 +1,5 @@
 import { getAuth, signOut } from "firebase/auth";
+import JobCardTemplate from "./JobCardTemplate";
 import {
   addDoc,
   collection,
@@ -24,6 +25,7 @@ import {
   CreditCard,
   Download,
   Eye,
+  ClipboardList,
   FileText,
   MapPin,
   Package,
@@ -107,6 +109,14 @@ const MechanicsDashboard = () => {
   const [activeTab, setActiveTab] = useState("JobCard");
   const [showJobCard, setShowJobCard] = useState(false);
   const { user, authUser } = useAuth();
+  const [technicianName, setTechnicianName]     = useState("");
+const [bayNumber, setBayNumber]               = useState("");
+const [estimatedHours, setEstimatedHours]     = useState("");
+const [faultDescription, setFaultDescription] = useState("");
+const [diagnosisNotes, setDiagnosisNotes]     = useState("");
+const [workPerformed, setWorkPerformed]       = useState("");
+const [customerApproved, setCustomerApproved] = useState(false);
+const [partsChecklist, setPartsChecklist]     = useState([]);
   const [jobCardNumber, setJobCardNumber] = useState("");
   const [jobCardId, setJobCardId] = useState(null);
   const [savedJobCards, setSavedJobCards] = useState([]);
@@ -180,7 +190,7 @@ const MechanicsDashboard = () => {
     sick_note: { prefix: "SN", folder: "sick_notes" },
     jobcard: { prefix: "JC", folder: "jobcards" },
     waybill: { prefix: "WB", folder: "waybills" },
-    // ... rest of your DOC_CONFIG
+    
   };
   const location = useLocation();
   useEffect(() => {
@@ -928,8 +938,16 @@ const MechanicsDashboard = () => {
     }
   };
 
-  const printStyles = `@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } html,body { margin:0!important;padding:0!important;width:210mm!important;background:white!important; } body * { visibility:hidden!important; } #print-area,#print-area * { visibility:visible!important; } #print-area { display:block!important;position:absolute!important;left:0!important;top:0!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;background:white!important; } @page { size:A4 portrait;margin:40px!important; } }`;
-
+const printStyles = `@media print { 
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
+  html,body { margin:0!important;padding:0!important;width:210mm!important;background:white!important; } 
+  body * { visibility:hidden!important; } 
+  #print-area,#print-area * { visibility:visible!important; } 
+  #print-area { display:block!important;position:absolute!important;left:0!important;top:0!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;background:white!important; } 
+  #jobcard-printable { padding: 40px 0 !important; box-sizing: border-box !important; width: 210mm !important; }
+  #jobcard-printable * { box-sizing: border-box !important; }
+  @page { size:A4 portrait; margin: 40px 0 !important; } 
+}`;
   const handlePrint = () => {
     const styleSheet = document.createElement("style");
     styleSheet.textContent = printStyles;
@@ -999,6 +1017,16 @@ const MechanicsDashboard = () => {
     totals: { subtotal, vat, total, paid: 0, due: total },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+     workshop: {
+    technicianName,
+    bayNumber,
+    estimatedHours,
+    faultDescription,
+    diagnosisNotes,
+    workPerformed,
+    partsChecklist,
+    customerApproved,
+  },
   });
 
   const handleSaveJobCard = async () => {
@@ -1297,9 +1325,17 @@ const MechanicsDashboard = () => {
   );
 
   // ── Step definitions ──────────────────────────────────────────────────────
-  const steps =
-    activeView === "purchase-orders"
-      ? [
+ const steps = documentType === "jobcard"
+  ? [
+      { number: 1, title: "Invoice To",  icon: Users      },
+      { number: 2, title: "Bill To",     icon: FileText   },
+      { number: 3, title: "Vehicle",     icon: Car        },
+      { number: 4, title: "Workshop",    icon: Wrench     },  
+      { number: 5, title: "Services",    icon: Package    },
+      { number: 6, title: "Sign-off",    icon: CheckSquare},
+    ]
+     : activeView === "purchase-orders"
+  ? [
           { number: 1, title: "Supplier", icon: Truck },
           { number: 2, title: "Delivery", icon: MapPin },
           { number: 3, title: "Items", icon: Package },
@@ -1352,6 +1388,18 @@ const MechanicsDashboard = () => {
       logoUrl: logoBase64 || businessInfo.logoUrl,
     },
   };
+  const jobCardTemplateProps = {
+  ...templateProps, // inherit all base template props
+  technicianName,
+  bayNumber,
+  estimatedHours,
+  faultDescription,
+  diagnosisNotes,
+  workPerformed,
+  partsChecklist,
+  customerApproved,
+  sourceQuoteNumber: "",
+};
   const poTemplateProps = {
     templateId: selectedTemplate,
     businessInfo,
@@ -1686,20 +1734,53 @@ const MechanicsDashboard = () => {
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
       <div
-        id="print-area"
-        className="hidden print:block bg-white"
-        style={{ width: "210mm", minHeight: "297mm" }}
-      >
-        {activeView === "purchase-orders" ? (
-          <div id="po-printable">
-            <POTemplateRenderer {...poTemplateProps} />
-          </div>
-        ) : (
-          <div id="invoice-printable">
-            <TemplateRenderer {...templateProps} />
-          </div>
-        )}
-      </div>
+  id="print-area"
+  className="hidden print:block bg-white"
+  style={{ width: "210mm", minHeight: "297mm" }}
+>
+  {activeView === "purchase-orders" ? (
+    <div id="po-printable">
+      <POTemplateRenderer {...poTemplateProps} />
+    </div>
+  ) : (
+    <div id="invoice-printable">
+      <TemplateRenderer {...templateProps} />
+    </div>
+  )}
+  {documentType === "jobcard" && (
+   <div 
+  id="jobcard-printable"
+  style={{ 
+    pageBreakBefore: "always", 
+    breakBefore: "page",
+    padding: "40px 0",
+    boxSizing: "border-box",
+    width: "210mm",
+  }}
+>
+  <JobCardTemplate
+    jobCardNumber={jobCardNumber}
+    businessInfo={businessInfo}
+    customer={{ name: customerName, email: customerEmail, phone: customerPhone, address: customerAddress }}
+    vehicle={{ make: vehicleMake, model: vehicleModel, year: vehicleYear, registration: vehicleReg, vin: vehicleVin, mileage: vehicleMileage }}
+    technicianName={technicianName}
+    bayNumber={bayNumber}
+    estimatedHours={estimatedHours}
+    faultDescription={faultDescription}
+    diagnosisNotes={diagnosisNotes}
+    workPerformed={workPerformed}
+    items={items}
+    partsChecklist={partsChecklist}
+    customerApproved={customerApproved}
+    subtotal={subtotal}
+    vat={vat}
+    total={total}
+    logoBase64={logoBase64}
+    sourceQuoteNumber={""}
+  />
+</div>
+  )}
+</div>
       {showAIWindow && (
         <AIInvoiceWindow
           user={user}
@@ -1713,6 +1794,7 @@ const MechanicsDashboard = () => {
           industry="mechanics"
           TemplateRenderer={TemplateRenderer}
         />
+
       )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar */}
@@ -1882,6 +1964,20 @@ const MechanicsDashboard = () => {
                             <td className="px-5 py-3 text-sm text-[#059669] font-medium">
                               {formatCurrency(card.totals?.paid || 0)}
                             </td>
+                            <td className="px-5 py-3" onClick={e => e.stopPropagation()}>
+  {card.documentType === "quote" && (
+    <button
+      onClick={() => {
+        loadJobCard(card);
+        setDocumentType("jobcard");  // switch type
+        setActiveView("invoice");    // reuse the form
+      }}
+      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#fed7aa] bg-[#fff7ed] text-[#ea580c] hover:bg-[#ffedd5] text-xs font-semibold transition-all">
+      <ClipboardList className="w-3 h-3" />
+      Job Card
+    </button>
+  )}
+</td>
                             <td className="px-5 py-3">
                               <span
                                 className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${statusBadge(card.status)}`}
@@ -3125,7 +3221,7 @@ const MechanicsDashboard = () => {
                                   </div>
                                 </div>
                               )}
-
+                             
                               {/* Step 4 – Services & Parts */}
                               {currentStep === 4 && (
                                 <div>
@@ -3439,9 +3535,61 @@ const MechanicsDashboard = () => {
                                   )}
                                 </div>
                               )}
+                              {currentStep === 5 && documentType === "jobcard" && (
+  <div>
+    <div className="flex items-center gap-3 mb-5">
+      <div className="w-9 h-9 bg-[#f0fdf4] rounded-lg flex items-center justify-center">
+        <CheckSquare className="w-5 h-5 text-[#059669]" />
+      </div>
+      <div>
+        <h2 className="text-base font-semibold text-[#1e293b]">Customer Sign-off</h2>
+        <p className="text-xs text-[#64748b]">Confirm work authorisation and completion</p>
+      </div>
+    </div>
 
+    {/* Parts checklist — auto-generated from line items */}
+    <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-4 mb-5">
+      <p className="text-sm font-semibold text-[#374151] mb-3">Parts & Services Checklist</p>
+      {items.map((item, i) => (
+        <label key={i} className="flex items-center gap-3 py-2 border-b border-[#f1f5f9] cursor-pointer">
+          <input
+            type="checkbox"
+            checked={partsChecklist[i] ?? false}
+            onChange={e => {
+              const updated = [...partsChecklist];
+              updated[i] = e.target.checked;
+              setPartsChecklist(updated);
+            }}
+            className="w-4 h-4 accent-[#059669]"
+          />
+          <span className="text-sm text-[#374151] flex-1">{item.description}</span>
+          <span className="text-xs text-[#64748b]">{item.type} — R{item.amount?.toFixed(2)}</span>
+        </label>
+      ))}
+    </div>
+
+    {/* Approval toggle */}
+    <div className={`flex items-center justify-between p-4 rounded-xl border ${
+      customerApproved ? "bg-[#f0fdf4] border-[#bbf7d0]" : "bg-[#fff7ed] border-[#fed7aa]"}`}>
+      <div>
+        <p className="text-sm font-semibold text-[#1e293b]">Customer Authorisation</p>
+        <p className="text-xs text-[#64748b] mt-0.5">
+          {customerApproved ? "Customer has approved all work" : "Pending customer approval"}
+        </p>
+      </div>
+      <button
+        onClick={() => setCustomerApproved(p => !p)}
+        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          customerApproved
+            ? "bg-[#059669] text-white hover:bg-[#047857]"
+            : "bg-white border border-[#e2e8f0] text-[#374151] hover:bg-[#f8fafc]"}`}>
+        {customerApproved ? "✓ Approved" : "Mark Approved"}
+      </button>
+    </div>
+  </div>
+)}
                               {/* Step 5 – Payment */}
-                              {currentStep === 5 && (
+                              {currentStep === 6 && (
                                 <div>
                                   <div className="flex items-center gap-3 mb-5">
                                     <div className="w-9 h-9 bg-[#faf5ff] rounded-lg flex items-center justify-center">
@@ -3591,11 +3739,13 @@ const MechanicsDashboard = () => {
                       marginBottom: `calc((297mm * 0.44) - 297mm)`,
                     }}
                   >
-                    {activeView === "purchase-orders" ? (
-                      <POTemplateRenderer {...poTemplateProps} />
-                    ) : (
-                      <TemplateRenderer {...templateProps} />
-                    )}
+                   {documentType === "jobcard" ? (
+  <JobCardTemplate {...jobCardTemplateProps} />
+) : activeView === "purchase-orders" ? (
+  <POTemplateRenderer {...poTemplateProps} />
+) : (
+  <TemplateRenderer {...templateProps} />
+)}
                   </div>
                 </div>
               </div>

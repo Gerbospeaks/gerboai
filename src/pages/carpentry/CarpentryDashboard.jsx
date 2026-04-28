@@ -3,7 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
-import SubUserManagement from "../SubUserManagement";
+import SubUserManagement from "../SubUserManagement"; // ✅ ADDED
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
@@ -19,6 +19,8 @@ import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import jsPDF from "jspdf"; // ✅ ADDED
+import html2canvas from "html2canvas"; // ✅ ADDED
 
 import {
   getFirestore,
@@ -33,7 +35,16 @@ import {
   limit,
   getDocs,
 } from "firebase/firestore";
-import { Printer, Download, Sparkles, Trash2, Hammer } from "lucide-react";
+import {
+  Printer,
+  Download,
+  Sparkles,
+  Trash2,
+  Hammer,
+  Eye, // ✅ ADDED
+  TrendingUp, // ✅ ADDED
+  TrendingDown, // ✅ ADDED
+} from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
@@ -46,14 +57,12 @@ import ProjectsView from "./ProjectsView";
 import {
   ChevronLeft,
   ChevronRight,
-  Eye,
   Users,
   X,
   FileText,
   Plus,
   Send,
   Save,
-  LogOut,
   CheckSquare,
   CreditCard,
   Receipt,
@@ -65,6 +74,9 @@ import {
   MapPin,
   Wrench,
 } from "lucide-react";
+
+// ✅ ADDED — matches MechanicsDashboard
+const WORKER_URL = process.env.REACT_APP_API_URL;
 
 const generateQuoteNumber = async (userId, documentType) => {
   const db = getFirestore();
@@ -86,6 +98,12 @@ const generateQuoteNumber = async (userId, documentType) => {
 
 const functions = getFunctions();
 
+// ✅ ADDED — doc-type → Firestore folder map (mirrors MechanicsDashboard)
+const DOC_CONFIG = {
+  invoice: { prefix: "INV", folder: "invoices" },
+  quote: { prefix: "QTE", folder: "quotes" },
+};
+
 const CarpentryDashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
@@ -93,6 +111,7 @@ const CarpentryDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { user, authUser } = useAuth();
+
   const handleQuickCreate = ({ view, action }) => {
     if (action === "newInvoice") {
       handleNewInvoice();
@@ -109,6 +128,7 @@ const CarpentryDashboard = () => {
       setActiveView(view);
     }
   };
+
   const [quoteNumber, setQuoteNumber] = useState("");
   const [quoteId, setQuoteId] = useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
@@ -120,16 +140,29 @@ const CarpentryDashboard = () => {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [customers, setCustomers] = useState([]);
+  const [savedCustomers, setSavedCustomers] = useState([]); // ✅ ADDED
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [inputMode, setInputMode] = useState("manual");
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
   const { can, isAdmin } = usePermissions();
-  const [showUserManagement, setShowUserManagement] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false); // ✅ ADDED
+  const [isSavingPDF, setIsSavingPDF] = useState(false); // ✅ ADDED
+  const [pdfViewer, setPdfViewer] = useState(null); // ✅ ADDED
+  const [invoices, setInvoices] = useState([]); // ✅ ADDED
   const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
     balanceDue: 0,
     status: "pending",
+  });
+  // ✅ ADDED — business stats (mirrors MechanicsDashboard)
+  const [stats, setStats] = useState({
+    totalInvoices: 0,
+    totalQuotes: 0,
+    totalInvoiced: 0,
+    totalClients: 0,
+    pendingPayments: 0,
+    loading: true,
   });
   const [stampSettings, setStampSettings] = useState({
     text: "PAID",
@@ -139,13 +172,11 @@ const CarpentryDashboard = () => {
   });
   const [showAIWindow, setShowAIWindow] = useState(false);
   const location = useLocation();
-  const [aiWindowOpen, setAiWindowOpen] = useState(false);
-  const [aiDocType, setAiDocType] = useState("invoice");
   useEffect(() => {
     if (location.state?.activeView) setActiveView(location.state.activeView);
   }, [location.state]);
 
-  // ── Design tokens (matching MechanicsDashboard) ───────────────────────────
+  // ── Design tokens ─────────────────────────────────────────────────────────
   const inputCls =
     "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
   const labelCls =
@@ -188,6 +219,7 @@ const CarpentryDashboard = () => {
     logoUrl: "",
   });
   const [loading, setLoading] = useState(true);
+  const [logoBase64, setLogoBase64] = useState(""); // ✅ ADDED
 
   const subtotal = items.reduce((s, i) => s + i.amount, 0);
   const totalTax = items.reduce((s, i) => s + i.taxAmount, 0);
@@ -218,6 +250,76 @@ const CarpentryDashboard = () => {
     load();
     loadSavedQuotes();
   }, [user, documentType]);
+
+  // ✅ ADDED — fetch business stats on mount (mirrors MechanicsDashboard)
+  useEffect(() => {
+    if (user?.uid) fetchBusinessStats();
+  }, [user]);
+
+  // ✅ ADDED — full stats fetch matching MechanicsDashboard
+  const fetchBusinessStats = async () => {
+    if (!user?.uid) return;
+    try {
+      const db = getFirestore();
+      const invoicesSnap = await getDocs(
+        collection(db, "users", user.uid, "invoices"),
+      );
+      let totalInvoiced = 0,
+        pendingPayments = 0,
+        invoiceCount = 0;
+      const invoicesList = [];
+      invoicesSnap.forEach((docSnap) => {
+        const d = docSnap.data();
+        invoiceCount++;
+        const amount = parseFloat(d.totals?.total || d.total || 0);
+        totalInvoiced += amount;
+        if (["pending", "unpaid", "partially_paid"].includes(d.status))
+          pendingPayments += parseFloat(
+            d.totals?.due || d.totals?.total || d.total || 0,
+          );
+        invoicesList.push({ id: docSnap.id, ...d });
+      });
+      invoicesList.sort((a, b) => {
+        const t = (x) => {
+          const v =
+            x.dates?.quoteDate || x.createdAt?.toDate?.() || new Date(0);
+          return typeof v === "string"
+            ? new Date(v).getTime()
+            : v.getTime?.() || 0;
+        };
+        return t(b) - t(a);
+      });
+      setInvoices(invoicesList);
+
+      let quoteCount = 0;
+      try {
+        const qSnap = await getDocs(
+          collection(db, "users", user.uid, "quotes"),
+        );
+        quoteCount = qSnap.docs.length;
+      } catch (_) {}
+
+      let clientCount = 0;
+      try {
+        const cSnap = await getDocs(
+          collection(db, "users", user.uid, "clients"),
+        );
+        clientCount = cSnap.docs.length;
+        setSavedCustomers(cSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      } catch (_) {}
+
+      setStats({
+        totalInvoices: invoiceCount,
+        totalQuotes: quoteCount,
+        totalInvoiced,
+        totalClients: clientCount,
+        pendingPayments,
+        loading: false,
+      });
+    } catch (e) {
+      setStats((p) => ({ ...p, loading: false }));
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -298,11 +400,31 @@ const CarpentryDashboard = () => {
         const d = snap.data();
         setBusinessInfo(d);
         if (d.stampSettings) setStampSettings(d.stampSettings);
+        // ✅ ADDED — load logo as base64 (mirrors MechanicsDashboard)
+        if (d.logoUrl) {
+          const b64 = await toBase64(d.logoUrl);
+          setLogoBase64(b64);
+        }
       }
     } catch (e) {
       console.error(e);
     }
   };
+
+  // ✅ ADDED — base64 helper (mirrors MechanicsDashboard)
+  const toBase64 = (url) =>
+    fetch(url, { mode: "cors" })
+      .then((r) => r.blob())
+      .then(
+        (blob) =>
+          new Promise((res, rej) => {
+            const reader = new FileReader();
+            reader.onload = () => res(reader.result);
+            reader.onerror = rej;
+            reader.readAsDataURL(blob);
+          }),
+      )
+      .catch(() => url);
 
   const loadPaymentStatus = async () => {
     if (!user?.uid || !quoteId) {
@@ -338,6 +460,25 @@ const CarpentryDashboard = () => {
     return snap.exists() ? snap.data() : null;
   };
 
+  // ✅ ADDED — blob download helper (mirrors MechanicsDashboard)
+  const downloadPDF = async (url, fileName) => {
+    try {
+      const res = await fetch(url, { mode: "cors" });
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName || "document.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Download failed:", err);
+      alert("Download failed: " + err.message);
+    }
+  };
+
   const handleAddNewCustomer = () => {
     setSelectedCustomer(null);
     setShowCustomerModal(true);
@@ -371,6 +512,7 @@ const CarpentryDashboard = () => {
       balanceDue: quote.totals?.due || quote.totals?.total || 0,
       status: quote.status || "pending",
     });
+    setActiveView("quote");
   };
 
   const buildQuotePayload = (numberToUse) => ({
@@ -423,6 +565,7 @@ const CarpentryDashboard = () => {
       `${documentType === "quote" ? "Quote" : "Invoice"} saved successfully`,
     );
     loadSavedQuotes();
+    fetchBusinessStats(); // ✅ ADDED — refresh stats after save
   };
 
   const handleConvertToInvoice = async () => {
@@ -550,23 +693,178 @@ const CarpentryDashboard = () => {
     const s = document.createElement("style");
     s.textContent = printStyles;
     document.head.appendChild(s);
-    window.print();
-    setTimeout(() => document.head.removeChild(s), 1000);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        window.print();
+      }, 300);
+    });
+    window.onafterprint = () => {
+      document.head.removeChild(s);
+      window.onafterprint = null;
+    };
   };
 
+  // ✅ REPLACED — full R2 upload + Firestore patch (mirrors MechanicsDashboard)
   const handleSavePDF = async () => {
-    const saved = await loadQuoteForExport();
-    if (!saved) {
-      alert(`Please save the ${documentType} before exporting PDF`);
-      return;
+    setIsSavingPDF(true);
+    try {
+      const printArea = document.getElementById("print-area");
+      if (!printArea) throw new Error("Print area not found");
+
+      const prevStyle = printArea.getAttribute("style") || "";
+      printArea.style.cssText = `
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: -9999px;
+        width: 794px;
+        min-height: 1123px;
+        background: white;
+        z-index: 9999;
+        visibility: visible;
+      `;
+      printArea.classList.remove("hidden");
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const images = printArea.querySelectorAll("img");
+      await Promise.all(
+        Array.from(images).map(
+          (img) =>
+            new Promise((resolve) => {
+              if (!img.src || img.src.startsWith("data:")) {
+                resolve();
+                return;
+              }
+              fetch(img.src, { mode: "cors" })
+                .then((r) => r.blob())
+                .then((blob) => {
+                  const reader = new FileReader();
+                  reader.onload = (e) => {
+                    img.src = e.target.result;
+                    resolve();
+                  };
+                  reader.onerror = resolve;
+                  reader.readAsDataURL(blob);
+                })
+                .catch(resolve);
+            }),
+        ),
+      );
+
+      const canvas = await html2canvas(printArea, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        width: 794,
+        windowWidth: 794,
+      });
+
+      printArea.classList.add("hidden");
+      printArea.setAttribute("style", prevStyle);
+
+      const prefix = documentType === "quote" ? "Quote" : "Invoice";
+      const number = quoteNumber || "draft";
+      const fileName = `${prefix}-${number}.pdf`;
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = (canvas.height * pageWidth) / canvas.width;
+      pdf.addImage(
+        canvas.toDataURL("image/jpeg", 0.95),
+        "JPEG",
+        0,
+        0,
+        pageWidth,
+        pageHeight,
+      );
+      const pdfBlob = pdf.output("blob");
+
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        alert("You must be logged in to save.");
+        return;
+      }
+
+      const token = await currentUser.getIdToken();
+      const uploadRes = await fetch(`${WORKER_URL}/upload-pdf`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/pdf",
+          "X-File-Name": fileName,
+        },
+        body: pdfBlob,
+      });
+
+      if (!uploadRes.ok)
+        throw new Error(`Upload failed: ${await uploadRes.text()}`);
+      const { publicUrl, key } = await uploadRes.json();
+
+      const docType = documentType === "quote" ? "quote" : "invoice";
+      const folder = DOC_CONFIG[docType]?.folder ?? docType;
+      const firestoreDb = getFirestore();
+
+      await setDoc(doc(firestoreDb, "users", user.uid, folder, number), {
+        fileName,
+        downloadUrl: publicUrl,
+        r2Key: key,
+        docType,
+        docNumber: number,
+        generatedAt: serverTimestamp(),
+        customerName,
+        total,
+      });
+
+      const collectionName = documentType === "quote" ? "quotes" : "invoices";
+      let activeQuoteId = quoteId;
+
+      if (!activeQuoteId) {
+        await addDoc(
+          collection(firestoreDb, "users", user.uid, collectionName),
+          buildQuotePayload(quoteNumber),
+        );
+        // Re-fetch to get the newly saved doc id
+        const freshSnap = await getDocs(
+          query(
+            collection(firestoreDb, "users", user.uid, collectionName),
+            orderBy("createdAt", "desc"),
+            limit(1),
+          ),
+        );
+        if (!freshSnap.empty) {
+          activeQuoteId = freshSnap.docs[0].id;
+          setQuoteId(activeQuoteId);
+        }
+        loadSavedQuotes();
+      }
+
+      if (activeQuoteId) {
+        await updateDoc(
+          doc(firestoreDb, "users", user.uid, collectionName, activeQuoteId),
+          {
+            downloadUrl: publicUrl,
+          },
+        );
+        setInvoices((prev) =>
+          prev.map((inv) =>
+            inv.id === activeQuoteId ? { ...inv, downloadUrl: publicUrl } : inv,
+          ),
+        );
+      }
+
+      alert("✅ Saved as PDF successfully!");
+    } catch (err) {
+      console.error("PDF save error:", err);
+      alert("Failed to save PDF: " + err.message);
+    } finally {
+      setIsSavingPDF(false);
     }
-    setQuoteNumber(saved.quoteNumber);
-    setItems(saved.items);
-    setCustomerName(saved.customer.name);
-    setCustomerEmail(saved.customer.email);
-    setCustomerPhone(saved.customer.phone);
-    setPropertyAddress(saved.customer.address);
-    setTimeout(() => window.print(), 300);
   };
 
   const handleAIDataExtracted = (extractedData) => {
@@ -590,10 +888,19 @@ const CarpentryDashboard = () => {
     }
   };
 
-  // ── Shared template props ─────────────────────────────────────────────────
+  const formatCurrency = (n) =>
+    new Intl.NumberFormat("en-ZA", {
+      style: "currency",
+      currency: "ZAR",
+    }).format(n);
+
+  // ── Shared template props ──────────────────────────────────────────────────
   const templateProps = {
     templateId: selectedTemplate,
-    businessInfo,
+    businessInfo: {
+      ...businessInfo,
+      logoUrl: logoBase64 || businessInfo.logoUrl,
+    }, // ✅ use base64
     loading,
     invoiceNumber: quoteNumber,
     customerName,
@@ -617,6 +924,63 @@ const CarpentryDashboard = () => {
     paymentStatus,
   };
 
+  // ── Status badge helper ───────────────────────────────────────────────────
+  const statusBadge = (s) =>
+    s === "paid"
+      ? "bg-[#dcfce7] text-[#166534]"
+      : s === "partially_paid"
+        ? "bg-[#fef3c7] text-[#92400e]"
+        : s === "pending"
+          ? "bg-[#dbeafe] text-[#1e40af]"
+          : "bg-[#fef2f2] text-[#991b1b]";
+
+  // ✅ ADDED — Stat card component (mirrors MechanicsDashboard HomeViewLocal)
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    iconBg,
+    iconColor,
+    subtitle,
+    loading: l,
+    trend,
+  }) => (
+    <div className="bg-white rounded-xl p-4 border border-[#e2e8f0] shadow-sm flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-3">
+        <div
+          className={`w-9 h-9 rounded-lg flex items-center justify-center ${iconBg}`}
+        >
+          <Icon className={`w-4 h-4 ${iconColor}`} />
+        </div>
+        {trend !== undefined && (
+          <span
+            className={`flex items-center gap-0.5 text-xs font-semibold ${trend > 0 ? "text-[#059669]" : "text-[#dc2626]"}`}
+          >
+            {trend > 0 ? (
+              <TrendingUp className="w-3 h-3" />
+            ) : (
+              <TrendingDown className="w-3 h-3" />
+            )}
+            {Math.abs(trend)}%
+          </span>
+        )}
+      </div>
+      <div>
+        <p className="text-xs text-[#64748b] mb-0.5">{title}</p>
+        {l ? (
+          <div className="h-6 bg-[#f1f5f9] rounded animate-pulse" />
+        ) : (
+          <>
+            <p className="text-lg font-bold text-[#1e293b] truncate">{value}</p>
+            {subtitle && (
+              <p className="text-xs text-[#94a3b8] mt-0.5">{subtitle}</p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+
   // ── Header actions ────────────────────────────────────────────────────────
   const headerActions = [
     documentType === "quote" &&
@@ -627,6 +991,7 @@ const CarpentryDashboard = () => {
         className:
           "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
       },
+    // ✅ ADDED — Team button
     isAdmin && {
       label: "Team",
       icon: Users,
@@ -660,12 +1025,17 @@ const CarpentryDashboard = () => {
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
+    // ✅ FIXED — now has isSavingPDF state + disabled styling
     {
-      label: "Save PDF",
+      label: isSavingPDF ? "Saving..." : "Save PDF",
       icon: Download,
       onClick: handleSavePDF,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+      disabled: isSavingPDF,
+      className: `flex items-center gap-1.5 px-3 py-1.5 text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
+        isSavingPDF
+          ? "bg-[#64748b] cursor-not-allowed"
+          : "bg-[#0891b2] hover:bg-[#0e7490]"
+      }`,
     },
     {
       label: "Save",
@@ -690,12 +1060,13 @@ const CarpentryDashboard = () => {
       className:
         "flex items-center gap-1.5 px-3 py-2 bg-[#059669] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
     },
+    // ✅ FIXED — isSavingPDF state wired up
     {
-      label: "PDF",
+      label: isSavingPDF ? "Saving..." : "PDF",
       icon: Download,
       onClick: handleSavePDF,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-[#0891b2] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
+      disabled: isSavingPDF,
+      className: `flex items-center gap-1.5 px-3 py-2 text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap ${isSavingPDF ? "bg-[#64748b]" : "bg-[#0891b2]"}`,
     },
     {
       label: "Print",
@@ -706,16 +1077,7 @@ const CarpentryDashboard = () => {
     },
   ].filter(Boolean);
 
-  const statusBadge = (s) =>
-    s === "paid"
-      ? "bg-[#dcfce7] text-[#166534]"
-      : s === "partially_paid"
-        ? "bg-[#fef3c7] text-[#92400e]"
-        : s === "pending"
-          ? "bg-[#dbeafe] text-[#1e40af]"
-          : "bg-[#fef2f2] text-[#991b1b]";
-
-  // ── RENDER ────────────────────────────────────────────────────────────────
+  // ── RENDER ─────────────────────────────────────────────────────────────────
   return (
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
@@ -726,6 +1088,7 @@ const CarpentryDashboard = () => {
       >
         <TemplateRenderer {...templateProps} />
       </div>
+
       {showAIWindow && (
         <AIInvoiceWindow
           user={user}
@@ -734,12 +1097,12 @@ const CarpentryDashboard = () => {
           onExit={() => setShowAIWindow(false)}
           industry="carpentry"
           onNavigateTo={(view) => {
-            setAiWindowOpen(false);
             setActiveView(view);
           }}
           TemplateRenderer={TemplateRenderer}
         />
       )}
+
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar */}
         <CarpentrySidebar
@@ -753,7 +1116,7 @@ const CarpentryDashboard = () => {
           handleNewQuote={handleNewQuote}
           businessInfo={businessInfo}
           savedQuotes={savedQuotes}
-          savedCustomers={customers}
+          savedCustomers={savedCustomers} // ✅ now populated
           handleLogout={handleLogout}
           showQuotesList={showQuotesList}
           setShowQuotesList={setShowQuotesList}
@@ -761,6 +1124,7 @@ const CarpentryDashboard = () => {
           handleAddNewCustomer={handleAddNewCustomer}
           documentType={documentType}
           newRequestCount={0}
+          isAdmin={isAdmin} // ✅ ADDED
         />
 
         {/* Main content */}
@@ -773,13 +1137,19 @@ const CarpentryDashboard = () => {
             setSidebarOpen={setSidebarOpen}
             onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
+            onTeamOpen={() => setShowUserManagement(true)} // ✅ ADDED
             plan="pro"
+            showConvertButton={
+              documentType === "quote" && !!quoteId && activeView === "quote"
+            } // ✅ ADDED
+            onConvert={handleConvertToInvoice} // ✅ ADDED
           />
 
           {/* Modals */}
           {showSettings && (
             <BusinessSettingsModal onClose={() => setShowSettings(false)} />
           )}
+
           <CustomersListModal
             showModal={showCustomersListModal}
             setShowModal={setShowCustomersListModal}
@@ -803,6 +1173,11 @@ const CarpentryDashboard = () => {
               user={user}
               businessInfo={businessInfo}
             />
+          )}
+
+          {/* ✅ ADDED — SubUserManagement modal */}
+          {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
           )}
 
           {/* Quotes list modal */}
@@ -835,16 +1210,21 @@ const CarpentryDashboard = () => {
                     <table className="w-full">
                       <thead>
                         <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
-                          {["Number", "Client", "Total", "Paid", "Status"].map(
-                            (h) => (
-                              <th
-                                key={h}
-                                className="px-5 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
-                              >
-                                {h}
-                              </th>
-                            ),
-                          )}
+                          {[
+                            "Number",
+                            "Client",
+                            "Total",
+                            "Paid",
+                            "Status",
+                            "PDF",
+                          ].map((h) => (
+                            <th
+                              key={h}
+                              className="px-5 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
+                            >
+                              {h}
+                            </th>
+                          ))}
                         </tr>
                       </thead>
                       <tbody>
@@ -874,6 +1254,53 @@ const CarpentryDashboard = () => {
                                   ? "Partial"
                                   : q.status || "Pending"}
                               </span>
+                            </td>
+                            {/* ✅ ADDED — PDF view/download column (mirrors MechanicsDashboard) */}
+                            <td
+                              className="px-5 py-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {q.downloadUrl ? (
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPdfViewer({
+                                        url: q.downloadUrl,
+                                        fileName:
+                                          (q.quoteNumber || q.id) + ".pdf",
+                                      });
+                                    }}
+                                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
+                                  >
+                                    <Eye className="w-3 h-3" /> View
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      downloadPDF(
+                                        q.downloadUrl,
+                                        (q.quoteNumber || q.id) + ".pdf",
+                                      );
+                                    }}
+                                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#64748b] hover:text-[#059669] transition-all text-xs font-semibold"
+                                  >
+                                    <Download className="w-3 h-3" /> Save
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    loadQuote(q);
+                                    setShowQuotesList(false);
+                                    handleSavePDF();
+                                  }}
+                                  title="Generate PDF"
+                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#94a3b8] hover:text-[#059669] transition-all text-xs font-semibold"
+                                >
+                                  <Download className="w-3 h-3" /> PDF
+                                </button>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -908,15 +1335,13 @@ const CarpentryDashboard = () => {
                       onClick={handlePrint}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
                     >
-                      <Printer className="w-3.5 h-3.5" />
-                      Print
+                      <Printer className="w-3.5 h-3.5" /> Print
                     </button>
                     <button
                       onClick={handleSavePDF}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
                     >
-                      <Download className="w-3.5 h-3.5" />
-                      Save PDF
+                      <Download className="w-3.5 h-3.5" /> Save PDF
                     </button>
                     <button
                       onClick={() => setShowPreview(false)}
@@ -959,20 +1384,296 @@ const CarpentryDashboard = () => {
               <Templates user={user} />
             </div>
           )}
+
+          {/* ✅ ADDED — HomeView with stats panel (mirrors MechanicsDashboard) */}
           {activeView === "home" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <HomeView
-                user={user}
-                onNavigate={(view, docType) => {
-                  if (docType) setDocumentType(docType);
-                  setActiveView(view);
-                }}
-                onGoToDashboard={() => setActiveView("quote")}
-                onSidebarToggle={() => setSidebarOpen((p) => !p)}
-                sidebarOpen={sidebarOpen}
-              />
+            <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-4">
+              {/* Stat cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <StatCard
+                  title="Invoices"
+                  value={stats.totalInvoices}
+                  icon={FileText}
+                  iconBg="bg-[#eff6ff]"
+                  iconColor="text-[#2563eb]"
+                  subtitle="All time"
+                  loading={stats.loading}
+                  trend={12}
+                />
+                <StatCard
+                  title="Quotes"
+                  value={stats.totalQuotes}
+                  icon={Receipt}
+                  iconBg="bg-[#f0fdfa]"
+                  iconColor="text-[#0d9488]"
+                  subtitle="Generated"
+                  loading={stats.loading}
+                />
+                <StatCard
+                  title="Revenue"
+                  value={formatCurrency(stats.totalInvoiced)}
+                  icon={TrendingUp}
+                  iconBg="bg-[#f0fdf4]"
+                  iconColor="text-[#059669]"
+                  subtitle="Total invoiced"
+                  loading={stats.loading}
+                  trend={8}
+                />
+                <StatCard
+                  title="Clients"
+                  value={stats.totalClients}
+                  icon={Users}
+                  iconBg="bg-[#fff7ed]"
+                  iconColor="text-[#ea580c]"
+                  subtitle="Active"
+                  loading={stats.loading}
+                />
+              </div>
+
+              {/* Pending + Quick actions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm flex items-center gap-4">
+                  <div className="w-10 h-10 bg-[#fff7ed] rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Receipt className="w-5 h-5 text-[#ea580c]" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#64748b] mb-0.5">
+                      Pending Payments
+                    </p>
+                    {stats.loading ? (
+                      <div className="h-6 bg-[#f1f5f9] rounded animate-pulse w-32" />
+                    ) : (
+                      <>
+                        <p className="text-xl font-bold text-[#ea580c]">
+                          {formatCurrency(stats.pendingPayments)}
+                        </p>
+                        <p className="text-xs text-[#94a3b8]">
+                          Outstanding invoices
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
+                  <p className="text-xs font-semibold text-[#94a3b8] uppercase tracking-widest mb-3">
+                    Quick Actions
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    {[
+                      {
+                        label: "New Invoice",
+                        icon: FileText,
+                        onClick: () => {
+                          handleNewInvoice();
+                          setActiveView("quote");
+                        },
+                        bg: "bg-[#eff6ff]",
+                        hover: "hover:bg-[#dbeafe]",
+                        border: "border-[#bfdbfe]",
+                        iconBg: "bg-[#2563eb]",
+                        text: "text-[#1e40af]",
+                      },
+                      {
+                        label: "New Quote",
+                        icon: Receipt,
+                        onClick: () => {
+                          handleNewQuote();
+                          setActiveView("quote");
+                        },
+                        bg: "bg-[#f0fdfa]",
+                        hover: "hover:bg-[#ccfbf1]",
+                        border: "border-[#99f6e4]",
+                        iconBg: "bg-[#0d9488]",
+                        text: "text-[#0f766e]",
+                      },
+                      {
+                        label: "Customers",
+                        icon: Users,
+                        onClick: () => setShowCustomersListModal(true),
+                        bg: "bg-[#f0fdf4]",
+                        hover: "hover:bg-[#dcfce7]",
+                        border: "border-[#bbf7d0]",
+                        iconBg: "bg-[#059669]",
+                        text: "text-[#166534]",
+                      },
+                      {
+                        label: "Team",
+                        icon: Users,
+                        onClick: () => setShowUserManagement(true),
+                        bg: "bg-[#faf5ff]",
+                        hover: "hover:bg-[#ede9fe]",
+                        border: "border-[#ddd6fe]",
+                        iconBg: "bg-[#7c3aed]",
+                        text: "text-[#5b21b6]",
+                      },
+                    ].map(
+                      ({
+                        label,
+                        icon: Icon,
+                        onClick,
+                        bg,
+                        hover,
+                        border,
+                        iconBg,
+                        text,
+                      }) => (
+                        <button
+                          key={label}
+                          onClick={onClick}
+                          className={`flex-1 flex items-center justify-between px-3 py-2.5 ${bg} ${hover} border ${border} rounded-lg transition-all group`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-6 h-6 ${iconBg} rounded flex items-center justify-center flex-shrink-0`}
+                            >
+                              <Icon className="w-3 h-3 text-white" />
+                            </div>
+                            <span className={`text-xs font-semibold ${text}`}>
+                              {label}
+                            </span>
+                          </div>
+                        </button>
+                      ),
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* ✅ ADDED — Recent invoices list with View/Save PDF buttons */}
+              <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
+                  <h3 className="text-sm font-semibold text-[#1e293b]">
+                    Recent Invoices & Quotes
+                  </h3>
+                  <button
+                    onClick={() => setShowQuotesList(true)}
+                    className="text-xs text-[#2563eb] hover:text-[#1d4ed8] font-medium"
+                  >
+                    View all
+                  </button>
+                </div>
+                <div className="divide-y divide-[#f1f5f9]">
+                  {stats.loading ? (
+                    [1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="h-14 bg-[#f8fafc] animate-pulse m-3 rounded-lg"
+                      />
+                    ))
+                  ) : invoices.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="w-10 h-10 mb-3 bg-[#f1f5f9] rounded-full flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-[#94a3b8]" />
+                      </div>
+                      <p className="text-sm font-medium text-[#374151] mb-1">
+                        No invoices yet
+                      </p>
+                      <p className="text-xs text-[#94a3b8] mb-3">
+                        Create your first invoice to get started
+                      </p>
+                      <button
+                        onClick={() => {
+                          handleNewInvoice();
+                          setActiveView("quote");
+                        }}
+                        className="px-4 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-lg text-xs font-medium transition-colors"
+                      >
+                        Create Invoice
+                      </button>
+                    </div>
+                  ) : (
+                    invoices.slice(0, 8).map((invoice) => (
+                      <div
+                        key={invoice.id}
+                        className="flex items-center justify-between px-5 py-3.5 hover:bg-[#f8fafc] cursor-pointer transition-colors"
+                      >
+                        <div
+                          className="flex-1 min-w-0"
+                          onClick={() => loadQuote(invoice)}
+                        >
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-sm font-semibold text-[#1e293b] truncate">
+                              {invoice.quoteNumber ||
+                                invoice.invoiceNumber ||
+                                invoice.id}
+                            </span>
+                            <span
+                              className={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${statusBadge(invoice.status)}`}
+                            >
+                              {invoice.status === "partially_paid"
+                                ? "Partial"
+                                : invoice.status || "Draft"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-[#64748b]">
+                            <span className="flex items-center gap-1 truncate">
+                              <Users className="w-3 h-3 flex-shrink-0" />
+                              {invoice.customer?.name || "No customer"}
+                            </span>
+                            <span className="flex items-center gap-1 truncate">
+                              <Hammer className="w-3 h-3 flex-shrink-0" />
+                              {invoice.projectDetails?.type ||
+                                "No project type"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+                          <div className="text-right">
+                            <div className="text-sm font-bold text-[#1e293b]">
+                              {formatCurrency(invoice.totals?.total || 0)}
+                            </div>
+                            {invoice.totals?.due > 0 &&
+                              invoice.totals?.due < invoice.totals?.total && (
+                                <div className="text-xs text-[#d97706]">
+                                  Due: {formatCurrency(invoice.totals.due)}
+                                </div>
+                              )}
+                          </div>
+                          {invoice.downloadUrl ? (
+                            <div className="flex items-center gap-1.5">
+                              <a
+                                href={invoice.downloadUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
+                              >
+                                <Eye className="w-3 h-3" />
+                                {!isMobile && <span>View</span>}
+                              </a>
+                              <a
+                                href={invoice.downloadUrl}
+                                download
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#64748b] hover:text-[#059669] transition-all text-xs font-semibold"
+                              >
+                                <Download className="w-3 h-3" />
+                                {!isMobile && <span>Save</span>}
+                              </a>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                loadQuote(invoice);
+                                handleSavePDF();
+                              }}
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#94a3b8] hover:text-[#059669] transition-all text-xs font-semibold"
+                            >
+                              <Download className="w-3 h-3" />
+                              {!isMobile && <span>PDF</span>}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
           )}
+
           {activeView === "purchase-orders" && (
             <div className="flex-1 overflow-y-auto p-6">
               <PurchaseOrders user={user} />
@@ -996,20 +1697,20 @@ const CarpentryDashboard = () => {
             </div>
           )}
           {activeView === "marketplace" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
-  </div>
-)}
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
+          {activeView === "incoming-requests" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceRequestsView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
 
-{activeView === "incoming-requests" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceRequestsView user={user} businessInfo={businessInfo} />
-  </div>
-)}
-          {/* ── Quote/Invoice builder — split layout ───────────────────────── */}
+          {/* ── Quote/Invoice builder ───────────────────────────────────────── */}
           {activeView === "quote" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
-              {/* ── LEFT: Form panel ──────────────────────────────────────── */}
+              {/* LEFT: Form panel */}
               <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
                 <div className="space-y-5">
                   {/* Summary stat cards */}
@@ -1116,8 +1817,7 @@ const CarpentryDashboard = () => {
                           onClick={handleProcessPayment}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-sm font-medium rounded-lg hover:bg-[#f8fafc] transition-colors shadow-sm"
                         >
-                          <CreditCard className="w-4 h-4" />
-                          Record Payment
+                          <CreditCard className="w-4 h-4" /> Record Payment
                         </button>
                       )}
                     </div>
@@ -1125,37 +1825,19 @@ const CarpentryDashboard = () => {
 
                   {/* Main form card */}
                   <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
-                    {/* Input mode tabs */}
+                    {/* Input mode / AI button */}
                     <div className="flex border-b border-[#e2e8f0] bg-[#f8fafc]">
                       <button
                         onClick={() => setInputMode("manual")}
                         className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "manual" ? "border-[#2563eb] text-[#2563eb] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
                         Manual Entry
                       </button>
                       <button
                         onClick={() => setShowAIWindow(true)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto
-    bg-gradient-to-r from-[#7c3aed] to-[#5b21b6]
-    text-white shadow-md shadow-[#7c3aed]/30
-    hover:shadow-lg hover:shadow-[#7c3aed]/40 hover:scale-[1.02]
-    active:scale-[0.98]"
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto bg-gradient-to-r from-[#7c3aed] to-[#5b21b6] text-white shadow-md shadow-[#7c3aed]/30 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
                       >
-                        <Sparkles className="w-4 h-4" />
-                        AI Mode
+                        <Sparkles className="w-4 h-4" /> AI Mode
                       </button>
                     </div>
 
@@ -1274,7 +1956,7 @@ const CarpentryDashboard = () => {
                                     onChange={(e) =>
                                       setPropertyAddress(e.target.value)
                                     }
-                                    placeholder="45 Corporate Boulevard, Sandton, Johannesburg"
+                                    placeholder="45 Corporate Boulevard, Sandton"
                                     className={inputCls}
                                   />
                                 </div>
@@ -1294,8 +1976,7 @@ const CarpentryDashboard = () => {
                                     Project Details
                                   </h2>
                                   <p className="text-xs text-[#64748b]">
-                                    Provide project specifications for an
-                                    accurate quote
+                                    Provide project specifications
                                   </p>
                                 </div>
                               </div>
@@ -1399,15 +2080,13 @@ const CarpentryDashboard = () => {
                                     Items & Materials
                                   </h2>
                                   <p className="text-xs text-[#64748b]">
-                                    Add work items and materials to the quote
+                                    Add work items and materials
                                   </p>
                                 </div>
                               </div>
-
-                              {/* Add item form */}
                               <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-5">
                                 <h3 className="text-sm font-semibold text-[#374151] mb-4 flex items-center gap-2">
-                                  <Plus className="w-4 h-4 text-[#2563eb]" />
+                                  <Plus className="w-4 h-4 text-[#2563eb]" />{" "}
                                   Add Work Item
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -1417,7 +2096,7 @@ const CarpentryDashboard = () => {
                                     </label>
                                     <input
                                       type="text"
-                                      placeholder="Work item / material description"
+                                      placeholder="Work item description"
                                       value={newItem.description}
                                       onChange={(e) =>
                                         setNewItem({
@@ -1517,12 +2196,9 @@ const CarpentryDashboard = () => {
                                   onClick={handleAddItem}
                                   className="flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors"
                                 >
-                                  <Plus className="w-4 h-4" />
-                                  Add Item
+                                  <Plus className="w-4 h-4" /> Add Item
                                 </button>
                               </div>
-
-                              {/* Items table */}
                               {items.length > 0 ? (
                                 <div className="border border-[#e2e8f0] rounded-xl overflow-hidden mb-5">
                                   <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center justify-between">
@@ -1602,7 +2278,6 @@ const CarpentryDashboard = () => {
                                       </tbody>
                                     </table>
                                   </div>
-                                  {/* Totals footer */}
                                   <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
                                     <div className="flex flex-col items-end gap-1 text-sm">
                                       <div className="flex justify-between w-48 text-[#64748b]">
@@ -1612,7 +2287,7 @@ const CarpentryDashboard = () => {
                                         </span>
                                       </div>
                                       <div className="flex justify-between w-48 text-[#64748b]">
-                                        <span>VAT (15%)</span>
+                                        <span>VAT</span>
                                         <span className="font-medium text-[#374151]">
                                           R{totalTax.toFixed(2)}
                                         </span>
@@ -1652,12 +2327,10 @@ const CarpentryDashboard = () => {
                                     Schedule & Payment Terms
                                   </h2>
                                   <p className="text-xs text-[#64748b]">
-                                    Review quote details and payment information
+                                    Review and process payment
                                   </p>
                                 </div>
                               </div>
-
-                              {/* Summary cards */}
                               <div className="grid grid-cols-3 gap-3 mb-5">
                                 {[
                                   {
@@ -1702,7 +2375,6 @@ const CarpentryDashboard = () => {
                                   ),
                                 )}
                               </div>
-
                               <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm mb-5">
                                 <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
                                   <span className="text-sm font-semibold text-[#374151]">
@@ -1736,59 +2408,17 @@ const CarpentryDashboard = () => {
                                   ))}
                                 </div>
                               </div>
-
-                              {/* Quote summary */}
-                              <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-4">
-                                <h3 className="text-sm font-semibold text-[#374151] mb-3">
-                                  Quote Summary
-                                </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-[#64748b]">
-                                  <div className="space-y-1">
-                                    <p className="font-semibold text-[#1e293b]">
-                                      {customerName}
-                                    </p>
-                                    <p>{customerEmail}</p>
-                                    <p>{customerPhone}</p>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <p>
-                                      <span className="font-semibold text-[#374151]">
-                                        Type:
-                                      </span>{" "}
-                                      {projectType}
-                                    </p>
-                                    <p>
-                                      <span className="font-semibold text-[#374151]">
-                                        Area:
-                                      </span>{" "}
-                                      {projectSize} sqm
-                                    </p>
-                                    <p>
-                                      <span className="font-semibold text-[#374151]">
-                                        Wood:
-                                      </span>{" "}
-                                      {woodType} |{" "}
-                                      <span className="font-semibold text-[#374151]">
-                                        Finish:
-                                      </span>{" "}
-                                      {finishType}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {quoteId && (
+                              {quoteId ? (
                                 <button
                                   onClick={handleProcessPayment}
                                   className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-medium transition-colors shadow-sm"
                                 >
-                                  <CreditCard className="w-4 h-4" />
-                                  Process Payment
+                                  <CreditCard className="w-4 h-4" /> Process
+                                  Payment
                                 </button>
-                              )}
-                              {!quoteId && (
+                              ) : (
                                 <div className="flex items-center gap-2 px-4 py-3 bg-[#fff7ed] border border-[#fed7aa] rounded-lg text-sm text-[#9a3412]">
-                                  <Receipt className="w-4 h-4 flex-shrink-0" />
+                                  <Receipt className="w-4 h-4 flex-shrink-0" />{" "}
                                   Save the quote first to process payment
                                 </div>
                               )}
@@ -1822,8 +2452,7 @@ const CarpentryDashboard = () => {
                               onClick={handleSaveQuote}
                               className="flex items-center gap-1.5 px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
                             >
-                              <Save className="w-4 h-4" />
-                              Save{" "}
+                              <Save className="w-4 h-4" /> Save{" "}
                               {documentType === "quote" ? "Quote" : "Invoice"}
                             </button>
                           )}
@@ -1834,32 +2463,34 @@ const CarpentryDashboard = () => {
                 </div>
               </div>
 
-              {/* ── RIGHT: Live preview panel ──────────────────────────── */}
+              {/* RIGHT: Live preview panel */}
               <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
-                {/* Panel header */}
                 <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
                   <div className="flex items-center gap-2">
-                    <TemplateSelector />
+                    <TemplateSelector
+                      user={user}
+                      selectedTemplate={selectedTemplate}
+                      onTemplateChange={setSelectedTemplate}
+                    />
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={handlePrint}
                       className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-xs font-medium rounded-lg hover:bg-[#f1f5f9] transition-colors"
                     >
-                      <Printer className="w-3 h-3" />
-                      Print
+                      <Printer className="w-3 h-3" /> Print
                     </button>
+                    {/* ✅ FIXED — isSavingPDF state wired into preview panel button */}
                     <button
                       onClick={handleSavePDF}
-                      className="flex items-center gap-1 px-2.5 py-1.5 bg-[#059669] text-white text-xs font-medium rounded-lg hover:bg-[#047857] transition-colors"
+                      disabled={isSavingPDF}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-[#059669] text-white text-xs font-medium rounded-lg hover:bg-[#047857] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Download className="w-3 h-3" />
-                      PDF
+                      {isSavingPDF ? "Saving..." : "PDF"}
                     </button>
                   </div>
                 </div>
-
-                {/* Scrollable preview canvas */}
                 <div className="flex-1 overflow-y-auto p-4">
                   <div
                     className="bg-white shadow-lg rounded origin-top"
@@ -1879,6 +2510,130 @@ const CarpentryDashboard = () => {
           )}
         </div>
       </div>
+
+      {/* ✅ ADDED — PDF viewer modal (mirrors MechanicsDashboard) */}
+      {pdfViewer && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(0,0,0,0.75)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => setPdfViewer(null)}
+        >
+          <div
+            style={{
+              width: "90vw",
+              maxWidth: 900,
+              height: "90vh",
+              background: "#fff",
+              borderRadius: 12,
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "12px 18px",
+                background: "#0f172a",
+                flexShrink: 0,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: "#2563eb",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Eye style={{ color: "#fff", width: 14, height: 14 }} />
+                </div>
+                <div>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "#fff",
+                    }}
+                  >
+                    {pdfViewer.fileName}
+                  </p>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 11,
+                      color: "rgba(255,255,255,0.45)",
+                    }}
+                  >
+                    PDF Preview
+                  </p>
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <button
+                  onClick={() => downloadPDF(pdfViewer.url, pdfViewer.fileName)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "6px 14px",
+                    borderRadius: 7,
+                    background: "#059669",
+                    border: "none",
+                    color: "#fff",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  <Download style={{ width: 13, height: 13 }} /> Download
+                </button>
+                <button
+                  onClick={() => setPdfViewer(null)}
+                  style={{
+                    background: "rgba(255,255,255,0.1)",
+                    border: "none",
+                    color: "#fff",
+                    cursor: "pointer",
+                    borderRadius: 7,
+                    width: 32,
+                    height: 32,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <X style={{ width: 16, height: 16 }} />
+                </button>
+              </div>
+            </div>
+            <div style={{ flex: 1, background: "#e2e8f0", overflow: "hidden" }}>
+              <iframe
+                src={`${pdfViewer.url}#toolbar=0&navpanes=0&scrollbar=1`}
+                style={{ width: "100%", height: "100%", border: "none" }}
+                title="PDF Preview"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

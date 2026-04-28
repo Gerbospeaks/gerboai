@@ -135,6 +135,7 @@ export default function MechanicsSidebar({
           isOpen={isJobCardsOpen}
           onToggle={() => setIsJobCardsOpen((p) => !p)}
         >
+          
           <SubItem
             dot="bg-[#2563eb]"
             label="Create Quote"
