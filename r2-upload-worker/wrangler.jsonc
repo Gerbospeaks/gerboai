@@ -30,6 +30,7 @@
   },
   "vars": {
     "R2_PUBLIC_DOMAIN": "pub-69fb6c18938046458efbd268503903d8.r2.dev",
-    "DOCUMENTS_PUBLIC_DOMAIN": "pub-4e1973e713064e3fa5c7930751295d5a.r2.dev"
+    "DOCUMENTS_PUBLIC_DOMAIN": "pub-4e1973e713064e3fa5c7930751295d5a.r2.dev",
+    "FIREBASE_PROJECT_ID": "solidflow-1f753"
   }
 }

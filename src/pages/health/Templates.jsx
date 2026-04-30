@@ -2187,30 +2187,7 @@ const Templates = ({ user }) => {
   return (
     <div className="space-y-6 bg-gray-300">
       {/* Header */}
-      <div className="bg-gray-400 rounded-lg p-8 text-gray-800">
-        <div className="flex items-center gap-3 mb-3">
-          <Heart className="w-8 h-8" />
-          <h1 className="text-3xl font-bold">Invoice Templates</h1>
-        </div>
-        <p className="text-teal-50 text-lg">
-          Professional invoice designs crafted specifically for healthcare
-          providers and medical practices
-        </p>
-        <div className="mt-4 flex items-center gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            <span>One-time purchase</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            <span>Lifetime access</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            <span>Print ready</span>
-          </div>
-        </div>
-      </div>
+     
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

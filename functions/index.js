@@ -715,7 +715,7 @@ exports.onNewIncomingRequest = functions.firestore
       // Get provider FCM token
       const providerDoc = await admin
           .firestore()
-          .doc(`serviceProviders/${providerId}`)
+          .doc(`solidfloServiceProviders/${providerId}`)
           .get();
       const fcmToken = providerDoc.data()?.fcmToken;
 

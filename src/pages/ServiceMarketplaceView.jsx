@@ -2369,8 +2369,8 @@ function MarketView({ onShowIncoming }) {
                 updatedAt: serverTimestamp(),
               };
 
-              // 1️⃣ Save to serviceProviders (owner profile doc)
-              await setDoc(doc(db, "serviceProviders", user.uid), payload, {
+              // 1️⃣ Save to solidfloServiceProviders (owner profile doc)
+              await setDoc(doc(db, "solidfloServiceProviders", user.uid), payload, {
                 merge: true,
               });
 

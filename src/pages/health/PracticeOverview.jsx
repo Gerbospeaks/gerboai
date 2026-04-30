@@ -114,13 +114,7 @@ const PracticeOverview = ({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gray-400 rounded-lg p-6 text-gray-800">
-        <h1 className="text-3xl font-bold mb-2">Practice Overview</h1>
-        <p className="text-blue-100">
-          Real-time insights into your healthcare practice
-        </p>
-      </div>
+     
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

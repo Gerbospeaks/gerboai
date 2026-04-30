@@ -1,3 +1,4 @@
+
 export interface Env {
 	LOGOS_BUCKET: R2Bucket;
 	DOCUMENTS_BUCKET: R2Bucket;
@@ -181,7 +182,7 @@ async function handleGeneratePdf(request: Request, env: Env, corsHeaders: Record
 		// ── 5. Save PDF to DOCUMENTS_BUCKET ──────────────────────────────────
 		// Stored alongside your existing uploads: users/{uid}/{folder}/{prefix}-{docNumber}.pdf
 		const fileName = `${config.prefix}-${docNumber}.pdf`;
-		const r2Key = `users/${userId}/${config.folder}/${fileName}`;
+		const r2Key = `solidflo/users/${userId}/${config.folder}/${fileName}`;
 
 		await env.DOCUMENTS_BUCKET.put(r2Key, pdfBuffer, {
 			httpMetadata: {
@@ -230,7 +231,7 @@ async function handleGeneratePdf(request: Request, env: Env, corsHeaders: Record
 async function saveDocumentRecord(env: Env, uid: string, folder: string, docNumber: string, data: Record<string, any>): Promise<void> {
 	const projectId = env.FIREBASE_PROJECT_ID;
 	const firestoreUrl =
-		`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents` + `/users/${uid}/${folder}/${docNumber}`;
+		`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents` + `/solidflo/users/${uid}/${folder}/${docNumber}`;
 
 	// Convert plain object → Firestore field map
 	const fields: Record<string, any> = {};
@@ -840,7 +841,7 @@ async function handleLogoUpload(request: Request, env: Env, corsHeaders: Record<
 		const fileBuffer = await request.arrayBuffer();
 		const timestamp = Date.now();
 		const extension = contentType.split('/')[1] || 'bin';
-		const fileName = `logos/${userId}/${timestamp}.${extension}`;
+		const fileName = `solidflo/logos/${userId}/${timestamp}.${extension}`;
 		await env.LOGOS_BUCKET.put(fileName, fileBuffer, {
 			httpMetadata: { contentType },
 		});
@@ -889,7 +890,7 @@ const folderMap: Record<string, string> = {
 };
 const prefix = safeName.split('-')[0];
 const folder = folderMap[prefix] ?? 'documents';
-const key = `users/${userId}/${folder}/${safeName}`;
+const key = `solidflo/users/${userId}/${folder}/${safeName}`;
 		await env.DOCUMENTS_BUCKET.put(key, fileBuffer, {
 			httpMetadata: { contentType: 'application/pdf' },
 			customMetadata: { userId, originalName },
@@ -924,7 +925,7 @@ async function handleCleanupExpired(request: Request, env: Env, corsHeaders: Rec
 			},
 			body: JSON.stringify({
 				structuredQuery: {
-					from: [{ collectionId: 'serviceProviders' }],
+					from: [{ collectionId: 'solidfloServiceProviders' }],
 					where: {
 						compositeFilter: {
 							op: 'AND',
@@ -990,7 +991,7 @@ async function handleListingImageUpload(request: Request, env: Env, corsHeaders:
 		const fileBuffer = await request.arrayBuffer();
 		const timestamp = Date.now();
 		const extension = contentType.split('/')[1] || 'jpg';
-		const fileName = `listings/${userId}/${timestamp}.${extension}`;
+		const fileName = `solidflo/listings/${userId}/${timestamp}.${extension}`;
 		await env.LOGOS_BUCKET.put(fileName, fileBuffer, { httpMetadata: { contentType } });
 		const publicUrl = `https://${env.R2_PUBLIC_DOMAIN}/${fileName}`;
 		return new Response(JSON.stringify({ publicUrl }), {
