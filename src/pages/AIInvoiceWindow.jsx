@@ -481,7 +481,7 @@ function DocSidebar({
           // Badge counts
           const badge = item.id === "invoices"
             ? userData?.recentInvoices?.filter(i => i.documentType === "invoice" || !i.documentType).length || null
-            : item.id === "quotes"
+            : item.id === "quotations"
             ? userData?.recentInvoices?.filter(i => i.documentType === "estimate").length || null
             : item.id === "recents"
             ? Math.min(userData?.recentInvoices?.length || 0, 5) || null
