@@ -55,7 +55,13 @@ const DOC_TYPES = [
   { id: "estimate",       label: "New Quote",          sublabel: "Send a quote",        icon: Receipt,     color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe" },
   { id: "purchase_order", label: "New Purchase Order", sublabel: "Order from supplier", icon: ShoppingCart,color: "#059669", bg: "#f0fdf4", border: "#bbf7d0" },
 ];
-
+const NAV_ITEMS = [
+  { id: "search",   label: "Search",   icon: Search  },
+  { id: "chats",    label: "Chats",    icon: MessageSquare },
+  { id: "invoices", label: "Invoices", icon: FileText },
+  { id: "quotes",   label: "Quotes",   icon: Receipt },
+  { id: "recents",  label: "Recents",  icon: List    },
+];
 const SUGGESTIONS = {
   invoice: [
     "Invoice my last client for bookkeeping — 8hrs at R650/hr",
