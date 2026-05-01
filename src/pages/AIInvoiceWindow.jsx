@@ -600,16 +600,16 @@ function DocListPanel({ activeNav, userData, searchQuery, setSearchQuery, onSele
 
   return (
     <div style={{
-      width: 280, flexShrink: 0, borderRight: "1px solid #e5e7eb",
-      background: "#f8fafc", display: "flex", flexDirection: "column", height: "100%",
+      width: 280, flexShrink: 0, borderRight: "1px solid rgba(255,255,255,.07)",
+      background: "#0f172a", display: "flex", flexDirection: "column", height: "100%",
     }}>
       {/* Header */}
       <div style={{
-        height: 48, padding: "0 16px", borderBottom: "1px solid #e5e7eb",
+        height: 48, padding: "0 16px", borderBottom: "1px solid rgba(255,255,255,.07)",
         display: "flex", alignItems: "center", gap: 8, flexShrink: 0,
-        background: "#fff",
+        background: "#0f172a",
       }}>
-        <span style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", flex: 1 }}>{title}</span>
+        <span style={{ fontSize: 14, fontWeight: 700, color: "#fff", flex: 1 }}>{title}</span>
         <span style={{
           fontSize: 11, fontWeight: 700, color: "#6b7280",
           background: "#f1f5f9", padding: "2px 8px", borderRadius: 10,
@@ -617,11 +617,11 @@ function DocListPanel({ activeNav, userData, searchQuery, setSearchQuery, onSele
       </div>
 
       {/* Search bar */}
-      <div style={{ padding: "10px 12px", borderBottom: "1px solid #e5e7eb", background: "#fff" }}>
+      <div style={{ padding: "10px 12px", borderBottom: "1px solid #e5e7eb", background: "rgba(255,255,255,.06)" }}>
         <div style={{
           display: "flex", alignItems: "center", gap: 8,
-          background: "#f1f5f9", borderRadius: 10, padding: "7px 12px",
-          border: "1px solid #e2e8f0",
+          background: "rgba(255,255,255,.06)", borderRadius: 10, padding: "7px 12px",
+          border: "1px solid rgba(255,255,255,.1)",
         }}>
           <Search size={13} color="#94a3b8" />
           <input
@@ -630,7 +630,7 @@ function DocListPanel({ activeNav, userData, searchQuery, setSearchQuery, onSele
             placeholder={`Search ${title.toLowerCase()}...`}
             style={{
               flex: 1, border: "none", background: "none", outline: "none",
-              fontSize: 13, color: "#0f172a", fontFamily: "inherit",
+              fontSize: 13, color: "#fff", fontFamily: "inherit",
             }}
           />
         </div>
@@ -665,8 +665,8 @@ function DocListPanel({ activeNav, userData, searchQuery, setSearchQuery, onSele
               <button key={doc.id || i} onClick={() => onSelectDoc(doc)}
                 style={{
                   width: "100%", padding: "12px 16px", textAlign: "left",
-                  background: isSelected ? "#eff6ff" : "transparent",
-                  border: "none", borderBottom: "1px solid #f1f5f9",
+                  background: isSelected ? "rgba(22,85,224,.2)" : "transparent",
+                  border: "none", borderBottom: "1px solid rgba(255,255,255,.05)",
                   borderLeft: isSelected ? "3px solid #2563eb" : "3px solid transparent",
                   cursor: "pointer", transition: "all .12s",
                 }}
@@ -674,7 +674,7 @@ function DocListPanel({ activeNav, userData, searchQuery, setSearchQuery, onSele
                 onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
                     {doc.customer?.name || "Unknown Client"}
                   </div>
                   <div style={{
@@ -683,10 +683,10 @@ function DocListPanel({ activeNav, userData, searchQuery, setSearchQuery, onSele
                   }}>{statusLabel}</div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ fontSize: 11, color: "#6b7280" }}>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,.5)" }}>
                     #{doc.invoiceNumber || "—"} · {date}
                   </div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#1e293b" }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#fff" }}>
                     R{(doc.total || 0).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
                   </div>
                 </div>
@@ -1430,7 +1430,7 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        background: "#f8fafc",
+        background: "#0f172a",
       }}
     >
       {/* Desktop top bar — hidden on mobile (mobile uses bottom nav) */}
@@ -1438,13 +1438,13 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
         <div
           style={{
             height: 48,
-            background: "#ffffff",
+            background: "#0f172a",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             padding: "0 14px",
             flexShrink: 0,
-            borderBottom: "1px solid #e5e7eb",
+            borderBottom: "1px solid rgba(255,255,255,.07)",
           }}
         >
           <button
@@ -1455,7 +1455,7 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
               gap: 6,
               padding: "5px 12px",
               borderRadius: 8,
-              background: "rgb(77,140,191)",
+              background: "rgba(255,255,255,.08)",
               border: "1px solid rgba(255,255,255,.12)",
               color: "rgba(255,255,255,.7)",
               cursor: "pointer",
@@ -1615,7 +1615,8 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
           overflowY: "auto",
           padding: isMobile ? "16px 14px 8px" : "20px 18px 8px",
           scrollbarWidth: "thin",
-          scrollbarColor: "#e2e8f0 transparent",
+          background: "#0f172a",
+          scrollbarColor: "#858585 transparent",
         }}
       >
         {messages.length <= 1 && (
@@ -1651,11 +1652,11 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
                       style={{
                         padding: "5px 12px",
                         borderRadius: 20,
-                        background: "#fff",
+                        background: "rgba(255,255,255,.05)",
                         border: "1px solid #e5e7eb",
                         cursor: "pointer",
                         fontSize: 12,
-                        color: "#374151",
+                        color: "rgba(255,255,255,.8)",
                         fontFamily: "inherit",
                         transition: "all .15s",
                       }}
@@ -1740,8 +1741,8 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
       <div
         style={{
           padding: isMobile ? "8px 12px 12px" : "10px 14px 14px",
-          background: "#fff",
-          borderTop: "1px solid #e5e7eb",
+          background: "#0f172a",
+          borderTop: "1px solid rgba(255,255,255,.07)",
           flexShrink: 0,
         }}
       >
@@ -1765,7 +1766,7 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
                 flexShrink: 0,
               }}
             />
-            <span style={{ fontSize: 10, color: "#15803d", fontWeight: 700 }}>
+            <span style={{ fontSize: 10, color: "#4ade80", fontWeight: 700 }}>
               Loaded
             </span>
             {[
@@ -1783,10 +1784,10 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
                   style={{
                     padding: "1px 7px",
                     borderRadius: 10,
-                    background: "#dcfce7",
-                    border: "1px solid #bbf7d0",
+                    background: "rgba(74,222,128,.1)",
+                    border: "1px solid rgba(74,222,128,.2)",
                     fontSize: 10,
-                    color: "#166534",
+                    color: "#4ade80",
                     fontWeight: 600,
                   }}
                 >
@@ -1816,8 +1817,8 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
             display: "flex",
             gap: 8,
             alignItems: "flex-end",
-            background: "#f8fafc",
-            border: "1.5px solid #d1d5db",
+            background: "rgba(255,255,255,.06)",
+            border: "1.5px solid rgba(255,255,255,.12)",
             borderRadius: 16,
             padding: "9px 9px 9px 14px",
             boxShadow: "0 1px 3px rgba(0,0,0,.05)",
@@ -1841,7 +1842,7 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
               outline: "none",
               resize: "none",
               fontSize: isMobile ? 14 : 13.5,
-              color: "#0f172a",
+              color: "#fff",
               fontFamily: "inherit",
               lineHeight: 1.6,
               maxHeight: 110,
@@ -1938,7 +1939,7 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        background: "#e2e8f0",
+        background: "#0f172a",
       }}
     >
       <div
@@ -1964,7 +1965,7 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
         >
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
             <activeDt.icon size={15} color={activeDt.color} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#1e293b" }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
               {activeDt.label} preview
             </span>
           </div>
@@ -2011,9 +2012,9 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
               gap: 6,
               padding: "6px 14px",
               borderRadius: 8,
-              background: "#fff",
-              border: "1px solid #e2e8f0",
-              color: "#374151",
+              background: "rgba(255,255,255,.08)",
+              border: "1px solid rgba(255,255,255,.12)",
+              color: "rgba(255,255,255,.8)",
               cursor: "pointer",
               fontSize: 12,
               fontWeight: 600,
@@ -2050,6 +2051,7 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
           padding: isMobile ? "16px 12px" : "24px 20px",
           display: "flex",
           justifyContent: "center",
+          background: "#0f172a",
         }}
       >
         {!hasContent ? (
@@ -2150,7 +2152,7 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
         <div
           style={{
             height: 38,
-            background: "#f8fafc",
+            background: "#0f172a",
             borderTop: "1px solid #e5e7eb",
             display: "flex",
             alignItems: "center",
@@ -2448,7 +2450,7 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
         <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#e2e8f0" }}>
           {/* Toolbar */}
           <div style={{
-            height: 48, background: "#f8fafc", borderBottom: "1px solid #e5e7eb",
+            height: isMobile ? 52 : 48, background: "#0f172a", borderBottom: "1px solid rgba(255,255,255,.07)",
             display: "flex", alignItems: "center", padding: "0 16px", gap: 12, flexShrink: 0,
           }}>
             <button onClick={() => setSelectedDoc(null)} style={{
