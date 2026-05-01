@@ -1945,8 +1945,8 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
       <div
         style={{
           height: isMobile ? 52 : 48,
-          background: "#f8fafc",
-          borderBottom: "1px solid #e5e7eb",
+          background: "#0f172a",
+          borderBottom: "1px solid #0f172a",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
