@@ -1527,7 +1527,13 @@ export default function AIInvoiceWindow({
   }, []);
 
   const send = async (override) => {
-    const userToken = await user.getIdToken();
+    const firebaseUser = getAuth().currentUser;
+const userToken = firebaseUser ? await firebaseUser.getIdToken() : null;
+
+if (!userToken) {
+  setError("Session expired. Please sign in again.");
+  return;
+}
     const trimmed = (override || input).trim();
     if (!trimmed || loading) return;
     setInput("");
@@ -1582,10 +1588,8 @@ const [rawText, extractedDirect] = await Promise.all([
   callClaude({
     system: buildPrompt(userData, documentType, industry),
     messages: historyRef.current,
-  },
-userToken
-),
-extractInvoiceData(trimmed, userToken),
+  }),
+extractInvoiceData(trimmed),
 ]);
 
 const { reply, data: extracted } = parseResponse(rawText);
