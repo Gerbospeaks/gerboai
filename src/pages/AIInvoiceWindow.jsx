@@ -19,6 +19,7 @@ import {
   Send,
   RotateCcw,
   User,
+  Search,
   Copy,
   Check,
   AlertCircle,
@@ -50,33 +51,9 @@ import {
 import CustomerModal from "./CustomerModal";
 
 const DOC_TYPES = [
-  {
-    id: "invoice",
-    label: "Invoice",
-    sublabel: "Bill a client",
-    icon: FileText,
-    color: "#2563eb",
-    bg: "#eff6ff",
-    border: "#bfdbfe",
-  },
-  {
-    id: "estimate",
-    label: "Quotation",
-    sublabel: "Send a quote",
-    icon: Receipt,
-    color: "#7c3aed",
-    bg: "#f5f3ff",
-    border: "#ddd6fe",
-  },
-  {
-    id: "purchase_order",
-    label: "Purchase Order",
-    sublabel: "Order from supplier",
-    icon: ShoppingCart,
-    color: "#059669",
-    bg: "#f0fdf4",
-    border: "#bbf7d0",
-  },
+  { id: "invoice",        label: "New Invoice",        sublabel: "Bill a client",       icon: FileText,    color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
+  { id: "estimate",       label: "New Quote",          sublabel: "Send a quote",        icon: Receipt,     color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe" },
+  { id: "purchase_order", label: "New Purchase Order", sublabel: "Order from supplier", icon: ShoppingCart,color: "#059669", bg: "#f0fdf4", border: "#bbf7d0" },
 ];
 
 const SUGGESTIONS = {
@@ -374,7 +351,6 @@ function TypingDots() {
   );
 }
 
-/* ── Desktop Sidebar ── */
 function DocSidebar({
   activeType,
   onChange,
@@ -384,417 +360,94 @@ function DocSidebar({
   user,
   onLogout,
   userData,
-  onNavigate,
+  activeNav,
+  onNavSelect,
 }) {
-  const overdueCount =
-    userData?.recentInvoices?.filter((inv) => {
-      if (!inv.dueDate || inv.paymentStatus?.status === "paid") return false;
-      return (
-        new Date(
-          inv.dueDate.seconds ? inv.dueDate.seconds * 1000 : inv.dueDate,
-        ) < new Date()
-      );
-    }).length || 0;
-  const draftsCount =
-    userData?.recentInvoices?.filter((inv) => inv.isDraft).length || 0;
-  const monthlyTotal =
-    userData?.recentInvoices
-      ?.filter((inv) => {
-        const d = inv.createdAt?.seconds
-          ? new Date(inv.createdAt.seconds * 1000)
-          : null;
-        return (
-          d &&
-          d.getMonth() === new Date().getMonth() &&
-          d.getFullYear() === new Date().getFullYear()
-        );
-      })
-      .reduce((sum, inv) => sum + (inv.total || 0), 0) || 0;
-  const firstOverdue = userData?.recentInvoices?.find((inv) => {
-    if (!inv.dueDate || inv.paymentStatus?.status === "paid") return false;
-    return (
-      new Date(inv.dueDate.seconds ? inv.dueDate.seconds * 1000 : inv.dueDate) <
-      new Date()
-    );
-  });
-  const overdueDays = firstOverdue?.dueDate
-    ? Math.floor(
-        (new Date() -
-          new Date(
-            firstOverdue.dueDate.seconds
-              ? firstOverdue.dueDate.seconds * 1000
-              : firstOverdue.dueDate,
-          )) /
-          86400000,
-      )
-    : 0;
-
-  const NAV_ITEMS = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    {
-      id: "clients",
-      label: "Clients",
-      icon: Users,
-      badge: userData?.clients?.length || null,
-      badgeColor: "#93c5fd",
-      badgeBg: "rgba(22,85,224,.25)",
-    },
-    {
-      id: "invoices",
-      label: "All invoices",
-      icon: List,
-      badge: overdueCount ? `${overdueCount} due` : null,
-      badgeColor: "#fca5a5",
-      badgeBg: "rgba(239,68,68,.2)",
-    },
-    { id: "reports", label: "Reports", icon: BarChart2 },
-  ];
-  const SETTING_ITEMS = [
-    { id: "templates", label: "Templates", icon: Layers },
-    { id: "settings", label: "Settings", icon: Settings },
-  ];
-
-  const SidebarItem = ({ item, onClick }) => {
-    const Icon = item.icon;
-    return (
-      <button
-        onClick={onClick}
-        title={collapsed ? item.label : undefined}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: collapsed ? "10px 0" : "8px 12px",
-          justifyContent: collapsed ? "center" : "flex-start",
-          borderRadius: 9,
-          border: "1px solid transparent",
-          background: "transparent",
-          cursor: "pointer",
-          transition: "background .15s",
-        }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.background = "rgba(255,255,255,.06)")
-        }
-        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-      >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: "rgba(255,255,255,.08)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <Icon size={14} color="rgba(255,255,255,.45)" />
-        </div>
-        {!collapsed && (
-          <>
-            <div
-              style={{
-                flex: 1,
-                fontSize: 12,
-                fontWeight: 700,
-                color: "rgba(255,255,255,.65)",
-                whiteSpace: "nowrap",
-                textAlign: "left",
-              }}
-            >
-              {item.label}
-            </div>
-            {item.badge && (
-              <div
-                style={{
-                  padding: "2px 7px",
-                  borderRadius: 10,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  background: item.badgeBg,
-                  color: item.badgeColor,
-                  flexShrink: 0,
-                }}
-              >
-                {item.badge}
-              </div>
-            )}
-          </>
-        )}
-      </button>
-    );
-  };
-
   return (
-    <div
-      style={{
-        width: collapsed ? 64 : 220,
-        flexShrink: 0,
-        background: "#0f172a",
+    <div style={{
+      width: collapsed ? 64 : 220,
+      flexShrink: 0,
+      background: "#0f172a",
+      display: "flex",
+      flexDirection: "column",
+      borderRight: "1px solid rgba(255,255,255,.07)",
+      transition: "width .25s ease",
+      overflow: "hidden",
+    }}>
+      {/* ── Header ── */}
+      <div style={{
+        height: 52,
         display: "flex",
-        flexDirection: "column",
-        borderRight: "1px solid rgba(255,255,255,.07)",
-        transition: "width .25s ease",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          height: 52,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: collapsed ? "center" : "space-between",
-          padding: collapsed ? 0 : "0 14px",
-          borderBottom: "1px solid rgba(255,255,255,.07)",
-          flexShrink: 0,
-        }}
-      >
+        alignItems: "center",
+        justifyContent: collapsed ? "center" : "space-between",
+        padding: collapsed ? 0 : "0 14px",
+        borderBottom: "1px solid rgba(255,255,255,.07)",
+        flexShrink: 0,
+      }}>
         {!collapsed && (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 7,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <img
-                src={logo}
-                alt="SolidFlo"
-                style={{ width: 16, height: 16 }}
-              />
-            </div>
-            <span
-              style={{
-                fontSize: 12,
-                fontWeight: 700,
-                color: "#fff",
-                whiteSpace: "nowrap",
-              }}
-            >
-              SolidFlo AI
-            </span>
+            <img src={logo} alt="SolidFlo" style={{ width: 18, height: 18 }} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>SolidFlo</span>
           </div>
         )}
-        <button
-          onClick={onToggle}
-          style={{
-            background: "rgba(255,255,255,.07)",
-            border: "1px solid rgba(255,255,255,.1)",
-            borderRadius: 7,
-            color: "rgba(255,255,255,.6)",
-            cursor: "pointer",
-            width: 28,
-            height: 28,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
+        <button onClick={onToggle} style={{
+          background: "rgba(255,255,255,.07)",
+          border: "1px solid rgba(255,255,255,.1)",
+          borderRadius: 7, color: "rgba(255,255,255,.6)",
+          cursor: "pointer", width: 28, height: 28,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
           {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
         </button>
       </div>
 
-      {!collapsed && businessInfo?.businessName && (
-        <div
-          style={{
-            padding: "10px 14px 6px",
-            borderBottom: "1px solid rgba(255,255,255,.05)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-              color: "rgba(255,255,255,.3)",
-              letterSpacing: ".08em",
-              textTransform: "uppercase",
-              marginBottom: 3,
-            }}
-          >
-            Account
-          </div>
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "rgba(255,255,255,.7)",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {businessInfo.businessName}
-          </div>
-        </div>
-      )}
-
-      {!collapsed && (
-        <div style={{ display: "flex", gap: 6, padding: "8px 14px" }}>
-          {[
-            {
-              val: `R${monthlyTotal >= 1000 ? (monthlyTotal / 1000).toFixed(0) + "k" : monthlyTotal.toFixed(0)}`,
-              lbl: "This month",
-            },
-            { val: overdueCount, lbl: "Overdue", alert: overdueCount > 0 },
-            { val: draftsCount, lbl: "Drafts" },
-          ].map((s, i) => (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                background: "rgba(255,255,255,.05)",
-                borderRadius: 8,
-                padding: "7px 8px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: s.alert ? "#fca5a5" : "#fff",
-                }}
-              >
-                {s.val}
-              </div>
-              <div
-                style={{
-                  fontSize: 9,
-                  color: "rgba(255,255,255,.35)",
-                  fontWeight: 600,
-                  marginTop: 2,
-                  textTransform: "uppercase",
-                  letterSpacing: ".05em",
-                }}
-              >
-                {s.lbl}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div
-        style={{
-          height: 1,
-          background: "rgba(255,255,255,.06)",
-          margin: "4px 0",
-        }}
-      />
-
-      {!collapsed && (
-        <div style={{ padding: "10px 14px 5px" }}>
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-              color: "rgba(255,255,255,.3)",
-              letterSpacing: ".08em",
-              textTransform: "uppercase",
-            }}
-          >
-            Document type
-          </div>
-        </div>
-      )}
-
-      <div
-        style={{
-          padding: collapsed ? "12px 8px" : "0 8px 8px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
+      {/* ── Create New ── */}
+      <div style={{ padding: collapsed ? "12px 8px" : "12px 8px 4px" }}>
+        {!collapsed && (
+          <div style={{
+            fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,.3)",
+            letterSpacing: ".08em", textTransform: "uppercase",
+            marginBottom: 6, paddingLeft: 4,
+          }}>Create New</div>
+        )}
         {DOC_TYPES.map((item) => {
           const Icon = item.icon;
-          const active = activeType === item.id;
+          const active = activeType === item.id && !activeNav;
           return (
-            <button
-              key={item.id}
-              onClick={() => onChange(item.id)}
+            <button key={item.id} onClick={() => { onChange(item.id); onNavSelect(null); }}
               title={collapsed ? item.label : undefined}
               style={{
-                position: "relative",
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: collapsed ? "10px 0" : "9px 12px",
+                width: "100%", display: "flex", alignItems: "center",
+                gap: 10, padding: collapsed ? "10px 0" : "8px 12px",
                 justifyContent: collapsed ? "center" : "flex-start",
-                borderRadius: 10,
-                border: active
-                  ? `1px solid ${item.color}40`
-                  : "1px solid transparent",
+                borderRadius: 10, marginBottom: 2,
+                border: active ? `1px solid ${item.color}40` : "1px solid transparent",
                 background: active ? `${item.color}20` : "transparent",
-                cursor: "pointer",
-                transition: "all .15s",
+                cursor: "pointer", transition: "all .15s", position: "relative",
               }}
-              onMouseEnter={(e) => {
-                if (!active)
-                  e.currentTarget.style.background = "rgba(255,255,255,.05)";
-              }}
-              onMouseLeave={(e) => {
-                if (!active) e.currentTarget.style.background = "transparent";
-              }}
+              onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(255,255,255,.05)"; }}
+              onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
             >
               {collapsed && active && (
-                <div
-                  style={{
-                    position: "absolute",
-                    left: 4,
-                    width: 3,
-                    height: 20,
-                    borderRadius: 2,
-                    background: item.color,
-                  }}
-                />
+                <div style={{
+                  position: "absolute", left: 4, width: 3, height: 20,
+                  borderRadius: 2, background: item.color,
+                }} />
               )}
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  background: active ? item.color : "rgba(255,255,255,.08)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  transition: "background .15s",
-                }}
-              >
-                <Icon
-                  size={15}
-                  color={active ? "#fff" : "rgba(255,255,255,.5)"}
-                />
+              <div style={{
+                width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                background: active ? item.color : "rgba(255,255,255,.08)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "background .15s",
+              }}>
+                <Icon size={15} color={active ? "#fff" : "rgba(255,255,255,.5)"} />
               </div>
               {!collapsed && (
                 <div style={{ textAlign: "left", minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 700,
-                      color: active ? "#fff" : "rgba(255,255,255,.65)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                  <div style={{ fontSize: 12, fontWeight: 700, color: active ? "#fff" : "rgba(255,255,255,.65)", whiteSpace: "nowrap" }}>
                     {item.label}
                   </div>
-                  <div
-                    style={{
-                      fontSize: 10,
-                      color: active
-                        ? "rgba(255,255,255,.5)"
-                        : "rgba(255,255,255,.3)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                  <div style={{ fontSize: 10, color: active ? "rgba(255,255,255,.5)" : "rgba(255,255,255,.3)", whiteSpace: "nowrap" }}>
                     {item.sublabel}
                   </div>
                 </div>
@@ -804,240 +457,106 @@ function DocSidebar({
         })}
       </div>
 
-      <div
-        style={{
-          height: 1,
-          background: "rgba(255,255,255,.06)",
-          margin: "4px 0",
-        }}
-      />
+      <div style={{ height: 1, background: "rgba(255,255,255,.06)", margin: "6px 0" }} />
 
-      {!collapsed && (
-        <div style={{ padding: "8px 14px 4px" }}>
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-              color: "rgba(255,255,255,.3)",
-              letterSpacing: ".08em",
-              textTransform: "uppercase",
-            }}
-          >
-            Navigate
-          </div>
-        </div>
-      )}
-      <div
-        style={{
-          padding: collapsed ? "4px 8px" : "0 8px 4px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        {NAV_ITEMS.map((item) => (
-          <SidebarItem
-            key={item.id}
-            item={item}
-            onClick={() => onNavigate?.(item.id)}
-          />
-        ))}
-      </div>
+      {/* ── Navigation ── */}
+      <div style={{ padding: collapsed ? "4px 8px" : "4px 8px", flex: 1 }}>
+        {!collapsed && (
+          <div style={{
+            fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,.3)",
+            letterSpacing: ".08em", textTransform: "uppercase",
+            marginBottom: 6, paddingLeft: 4,
+          }}>Library</div>
+        )}
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const active = activeNav === item.id;
 
-      <div
-        style={{
-          height: 1,
-          background: "rgba(255,255,255,.06)",
-          margin: "4px 0",
-        }}
-      />
+          // Badge counts
+          const badge = item.id === "invoices"
+            ? userData?.recentInvoices?.filter(i => i.documentType === "invoice" || !i.documentType).length || null
+            : item.id === "quotes"
+            ? userData?.recentInvoices?.filter(i => i.documentType === "estimate").length || null
+            : item.id === "recents"
+            ? Math.min(userData?.recentInvoices?.length || 0, 5) || null
+            : null;
 
-      {!collapsed && firstOverdue && (
-        <div
-          style={{
-            margin: "0 8px 6px",
-            padding: "7px 10px",
-            borderRadius: 8,
-            background: "rgba(251,191,36,.08)",
-            border: "1px solid rgba(251,191,36,.18)",
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 8,
-          }}
-        >
-          <div
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: "#fbbf24",
-              flexShrink: 0,
-              marginTop: 3,
-            }}
-          />
-          <div
-            style={{
-              fontSize: 11,
-              color: "rgba(255,255,255,.55)",
-              lineHeight: 1.4,
-            }}
-          >
-            <span style={{ color: "rgba(255,255,255,.8)", fontWeight: 700 }}>
-              {firstOverdue.customer?.name || "A client"}
-            </span>{" "}
-            invoice overdue by {overdueDays}d
-          </div>
-        </div>
-      )}
-
-      {!collapsed && (
-        <div style={{ padding: "6px 14px 4px" }}>
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-              color: "rgba(255,255,255,.3)",
-              letterSpacing: ".08em",
-              textTransform: "uppercase",
-            }}
-          >
-            Settings
-          </div>
-        </div>
-      )}
-      <div
-        style={{
-          padding: collapsed ? "4px 8px" : "0 8px 6px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        {SETTING_ITEMS.map((item) => (
-          <SidebarItem
-            key={item.id}
-            item={item}
-            onClick={() => onNavigate?.(item.id)}
-          />
-        ))}
-      </div>
-
-      <div
-        style={{
-          height: 1,
-          background: "rgba(255,255,255,.06)",
-          margin: "4px 0",
-        }}
-      />
-
-      {!collapsed && (
-        <div
-          style={{
-            padding: "10px 14px 14px",
-            borderTop: "1px solid rgba(255,255,255,.08)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 8,
-            }}
-          >
-            <div
+          return (
+            <button key={item.id} onClick={() => onNavSelect(item.id)}
+              title={collapsed ? item.label : undefined}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                minWidth: 0,
+                width: "100%", display: "flex", alignItems: "center",
+                gap: 10, padding: collapsed ? "10px 0" : "8px 12px",
+                justifyContent: collapsed ? "center" : "flex-start",
+                borderRadius: 10, marginBottom: 2,
+                border: active ? "1px solid rgba(22,85,224,.4)" : "1px solid transparent",
+                background: active ? "rgba(22,85,224,.2)" : "transparent",
+                cursor: "pointer", transition: "all .15s",
               }}
+              onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(255,255,255,.05)"; }}
+              onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
             >
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  flexShrink: 0,
-                  background: "linear-gradient(135deg,#1655e0,#7c3aed)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "#fff",
-                }}
-              >
+              <div style={{
+                width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                background: active ? "rgba(22,85,224,.4)" : "rgba(255,255,255,.08)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <Icon size={15} color={active ? "#93c5fd" : "rgba(255,255,255,.5)"} />
+              </div>
+              {!collapsed && (
+                <>
+                  <div style={{ flex: 1, fontSize: 12, fontWeight: 700, color: active ? "#fff" : "rgba(255,255,255,.65)", textAlign: "left" }}>
+                    {item.label}
+                  </div>
+                  {badge && (
+                    <div style={{
+                      padding: "2px 7px", borderRadius: 10, fontSize: 10,
+                      fontWeight: 700, background: "rgba(22,85,224,.25)", color: "#93c5fd",
+                    }}>{badge}</div>
+                  )}
+                </>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ height: 1, background: "rgba(255,255,255,.06)", margin: "4px 0" }} />
+
+      {/* ── User ── */}
+      {!collapsed && (
+        <div style={{ padding: "10px 14px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
+                background: "linear-gradient(135deg,#1655e0,#7c3aed)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 11, fontWeight: 700, color: "#fff",
+              }}>
                 {(user?.name || user?.email || "?")[0].toUpperCase()}
               </div>
               <div style={{ minWidth: 0 }}>
-                {user?.name && (
-                  <div
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: "rgba(255,255,255,.8)",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      maxWidth: 120,
-                    }}
-                  >
-                    {user.name}
+                {businessInfo?.businessName && (
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,.8)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 120 }}>
+                    {businessInfo.businessName}
                   </div>
                 )}
-                <div
-                  style={{
-                    fontSize: 10,
-                    color: "rgba(255,255,255,.35)",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    maxWidth: 120,
-                  }}
-                >
-                  {user?.email || "Signed in"}
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.35)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 120 }}>
+                  {user?.email}
                 </div>
               </div>
             </div>
-            <button
-              onClick={onLogout}
-              title="Sign out"
-              style={{
-                background: "rgba(255,255,255,.06)",
-                border: "1px solid rgba(255,255,255,.1)",
-                borderRadius: 7,
-                cursor: "pointer",
-                width: 28,
-                height: 28,
-                flexShrink: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "rgba(255,255,255,.4)",
-                transition: "all .15s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(232,68,42,.2)";
-                e.currentTarget.style.borderColor = "rgba(232,68,42,.4)";
-                e.currentTarget.style.color = "#f87171";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,.06)";
-                e.currentTarget.style.borderColor = "rgba(255,255,255,.1)";
-                e.currentTarget.style.color = "rgba(255,255,255,.4)";
-              }}
+            <button onClick={onLogout} title="Sign out" style={{
+              background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)",
+              borderRadius: 7, cursor: "pointer", width: 28, height: 28, flexShrink: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: "rgba(255,255,255,.4)", transition: "all .15s",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(232,68,42,.2)"; e.currentTarget.style.color = "#f87171"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.06)"; e.currentTarget.style.color = "rgba(255,255,255,.4)"; }}
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                 <polyline points="16 17 21 12 16 7" />
                 <line x1="21" y1="12" x2="9" y2="12" />
@@ -1049,7 +568,130 @@ function DocSidebar({
     </div>
   );
 }
+function DocListPanel({ activeNav, userData, searchQuery, setSearchQuery, onSelectDoc, selectedDoc }) {
+  const allDocs = userData?.recentInvoices || [];
 
+  const filtered = allDocs.filter(doc => {
+    const matchNav =
+      activeNav === "invoices" ? (doc.documentType === "invoice" || !doc.documentType) :
+      activeNav === "quotes"   ? doc.documentType === "estimate" :
+      activeNav === "recents"  ? true :
+      activeNav === "chats"    ? true : true;
+
+    const matchSearch = !searchQuery || [
+      doc.customer?.name, doc.invoiceNumber, doc.total?.toString()
+    ].some(f => f?.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    return matchNav && matchSearch;
+  }).slice(0, activeNav === "recents" ? 10 : 50);
+
+  const title =
+    activeNav === "invoices" ? "Invoices" :
+    activeNav === "quotes"   ? "Quotes" :
+    activeNav === "recents"  ? "Recent Documents" :
+    activeNav === "search"   ? "Search" :
+    activeNav === "chats"    ? "Chats" : "Documents";
+
+  return (
+    <div style={{
+      width: 280, flexShrink: 0, borderRight: "1px solid #e5e7eb",
+      background: "#f8fafc", display: "flex", flexDirection: "column", height: "100%",
+    }}>
+      {/* Header */}
+      <div style={{
+        height: 48, padding: "0 16px", borderBottom: "1px solid #e5e7eb",
+        display: "flex", alignItems: "center", gap: 8, flexShrink: 0,
+        background: "#fff",
+      }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", flex: 1 }}>{title}</span>
+        <span style={{
+          fontSize: 11, fontWeight: 700, color: "#6b7280",
+          background: "#f1f5f9", padding: "2px 8px", borderRadius: 10,
+        }}>{filtered.length}</span>
+      </div>
+
+      {/* Search bar */}
+      <div style={{ padding: "10px 12px", borderBottom: "1px solid #e5e7eb", background: "#fff" }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          background: "#f1f5f9", borderRadius: 10, padding: "7px 12px",
+          border: "1px solid #e2e8f0",
+        }}>
+          <Search size={13} color="#94a3b8" />
+          <input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder={`Search ${title.toLowerCase()}...`}
+            style={{
+              flex: 1, border: "none", background: "none", outline: "none",
+              fontSize: 13, color: "#0f172a", fontFamily: "inherit",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* List */}
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        {filtered.length === 0 ? (
+          <div style={{
+            display: "flex", flexDirection: "column", alignItems: "center",
+            justifyContent: "center", height: 200, gap: 8,
+          }}>
+            <FileText size={28} color="#d1d5db" />
+            <p style={{ fontSize: 13, color: "#9ca3af" }}>No {title.toLowerCase()} yet</p>
+          </div>
+        ) : (
+          filtered.map((doc, i) => {
+            const isSelected = selectedDoc?.id === doc.id;
+            const isPaid = doc.paymentStatus?.status === "paid";
+            const isOverdue = doc.dueDate && !isPaid &&
+              new Date(doc.dueDate?.seconds ? doc.dueDate.seconds * 1000 : doc.dueDate) < new Date();
+
+            const statusColor = isPaid ? "#16a34a" : isOverdue ? "#dc2626" : "#d97706";
+            const statusBg = isPaid ? "#dcfce7" : isOverdue ? "#fef2f2" : "#fef9c3";
+            const statusLabel = isPaid ? "Paid" : isOverdue ? "Overdue" : "Pending";
+
+            const date = doc.createdAt?.seconds
+              ? new Date(doc.createdAt.seconds * 1000).toLocaleDateString("en-ZA")
+              : "—";
+
+            return (
+              <button key={doc.id || i} onClick={() => onSelectDoc(doc)}
+                style={{
+                  width: "100%", padding: "12px 16px", textAlign: "left",
+                  background: isSelected ? "#eff6ff" : "transparent",
+                  border: "none", borderBottom: "1px solid #f1f5f9",
+                  borderLeft: isSelected ? "3px solid #2563eb" : "3px solid transparent",
+                  cursor: "pointer", transition: "all .12s",
+                }}
+                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = "#f8fafc"; }}
+                onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>
+                    {doc.customer?.name || "Unknown Client"}
+                  </div>
+                  <div style={{
+                    fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 8,
+                    background: statusBg, color: statusColor,
+                  }}>{statusLabel}</div>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ fontSize: 11, color: "#6b7280" }}>
+                    #{doc.invoiceNumber || "—"} · {date}
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#1e293b" }}>
+                    R{(doc.total || 0).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+              </button>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
 /* ── Mobile Menu Drawer ── */
 function MobileMenuDrawer({
   open,
@@ -1369,6 +1011,9 @@ export default function AIInvoiceWindow({
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [taxId, setTaxId] = useState("");
+  const [activeNav, setActiveNav] = useState(null);         
+const [selectedDoc, setSelectedDoc] = useState(null);     
+const [searchQuery, setSearchQuery] = useState(""); 
   const [billName, setBillName] = useState("");
   const [billEmail, setBillEmail] = useState("");
   const [billPhone, setBillPhone] = useState("");
@@ -2732,61 +2377,130 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
         <div
           style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}
         >
-          <DocSidebar
-            activeType={documentType}
-            onChange={(type) => {
-              setDocumentType(type);
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: `sys-${Date.now()}`,
-                  role: "assistant",
-                  content: `Switched to ${DOC_TYPES.find((d) => d.id === type)?.label}. What would you like to create?`,
-                },
-              ]);
-            }}
-            onNavigate={(id) => {
-              onExit();
-              onNavigateTo?.(id);
-            }}
-            collapsed={sidebarCollapsed}
-            onToggle={() => setSidebarCollapsed((o) => !o)}
-            businessInfo={bizInfo}
-            user={user}
-            onLogout={() => signOut(getAuth())}
-            userData={userData}
-          />
-
+         <DocSidebar
+    activeType={documentType}
+    onChange={(type) => {
+      setDocumentType(type);
+      setActiveNav(null);
+      setSelectedDoc(null);
+      setMessages(prev => [...prev, {
+        id: `sys-${Date.now()}`, role: "assistant",
+        content: `Switched to ${DOC_TYPES.find(d => d.id === type)?.label}. What would you like to create?`,
+      }]);
+    }}
+    collapsed={sidebarCollapsed}
+    onToggle={() => setSidebarCollapsed(o => !o)}
+    businessInfo={bizInfo}
+    user={user}
+    onLogout={() => signOut(getAuth())}
+    userData={userData}
+    activeNav={activeNav}
+    onNavSelect={(id) => {
+      setActiveNav(id);
+      setSelectedDoc(null);
+      // Search and Chats don't show the list panel, just stay in chat
+      if (id === "search" || id === "chats") {
+        setActiveNav(null);
+        inputRef.current?.focus();
+      }
+    }}
+  />
+{activeNav && ["invoices", "quotes", "recents"].includes(activeNav) && (
+    <DocListPanel
+      activeNav={activeNav}
+      userData={userData}
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
+      onSelectDoc={(doc) => {
+        setSelectedDoc(doc);
+        setPreviewOpen(true);
+      }}
+      selectedDoc={selectedDoc}
+    />
+  )}
           {/* Chat */}
-          <div
-            style={{
-              width: previewOpen ? "42%" : "calc(100% - 64px)",
-              minWidth: 320,
-              display: "flex",
-              flexDirection: "column",
-              borderRight: previewOpen ? "1px solid #e5e7eb" : "none",
-              transition: "width .3s ease",
-              flexShrink: 0,
-              overflow: "hidden",
-            }}
-          >
-            {ChatPanel}
-          </div>
+          {!selectedDoc && (
+    <div style={{
+      width: previewOpen ? "42%" : "100%",
+      minWidth: 320,
+      display: "flex",
+      flexDirection: "column",
+      borderRight: previewOpen ? "1px solid #e5e7eb" : "none",
+      transition: "width .3s ease",
+      flexShrink: 0,
+      overflow: "hidden",
+    }}>
+      {ChatPanel}
+    </div>
+  )}
 
           {/* Preview */}
-          {previewOpen && (
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                minWidth: 0,
-              }}
-            >
-              {PreviewPanel}
+          {(previewOpen || selectedDoc) && (
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
+      {selectedDoc ? (
+        // ── Selected doc from list ──
+        <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#e2e8f0" }}>
+          {/* Toolbar */}
+          <div style={{
+            height: 48, background: "#f8fafc", borderBottom: "1px solid #e5e7eb",
+            display: "flex", alignItems: "center", padding: "0 16px", gap: 12, flexShrink: 0,
+          }}>
+            <button onClick={() => setSelectedDoc(null)} style={{
+              display: "flex", alignItems: "center", gap: 6, padding: "5px 12px",
+              borderRadius: 8, background: "#fff", border: "1px solid #e2e8f0",
+              color: "#374151", cursor: "pointer", fontSize: 12, fontWeight: 600,
+            }}>
+              <ArrowLeft size={13} /> Back to chat
+            </button>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", flex: 1 }}>
+              {selectedDoc.customer?.name} · #{selectedDoc.invoiceNumber}
+            </span>
+            <button onClick={handlePrint} style={{
+              display: "flex", alignItems: "center", gap: 6, padding: "6px 14px",
+              borderRadius: 8, background: "#fff", border: "1px solid #e2e8f0",
+              color: "#374151", cursor: "pointer", fontSize: 12, fontWeight: 600,
+            }}>
+              <Download size={13} /> Download PDF
+            </button>
+          </div>
+          {/* Render selected doc */}
+          <div style={{ flex: 1, overflowY: "auto", padding: "24px 20px", display: "flex", justifyContent: "center" }}>
+            <div style={{
+              width: "100%", maxWidth: 760, background: "#fff",
+              borderRadius: 8, boxShadow: "0 4px 24px rgba(0,0,0,.1)", overflow: "hidden",
+            }}>
+              {TemplateRenderer ? (
+                <TemplateRenderer
+                  {...templateProps}
+                  // Override with selected doc's data
+                  customerName={selectedDoc.customer?.name || ""}
+                  customerEmail={selectedDoc.customer?.email || ""}
+                  customerPhone={selectedDoc.customer?.phone || ""}
+                  customerAddress={selectedDoc.customer?.address || ""}
+                  items={selectedDoc.items || []}
+                  subtotal={selectedDoc.subtotal || 0}
+                  totalTax={selectedDoc.totalTax || 0}
+                  total={selectedDoc.total || 0}
+                  invoiceNumber={selectedDoc.invoiceNumber || ""}
+                  documentType={selectedDoc.documentType || "invoice"}
+                  paymentStatus={selectedDoc.paymentStatus || { status: "pending" }}
+                  showStamp={selectedDoc.paymentStatus?.status === "paid"}
+                  stampText="PAID"
+                  stampColor="#16a34a"
+                />
+              ) : (
+                <div style={{ padding: 40, textAlign: "center", color: "#94a3b8" }}>
+                  No template renderer provided
+                </div>
+              )}
             </div>
-          )}
+          </div>
+        </div>
+      ) : (
+        PreviewPanel
+      )}
+    </div>
+  )}
         </div>
       )}
     </div>
