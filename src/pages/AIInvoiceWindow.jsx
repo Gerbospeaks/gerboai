@@ -13,6 +13,7 @@ import {
 import { getAuth, signOut } from "firebase/auth";
 import logo from "../assets/img/solidflo-logo.png";
 import { getIndustryConfig } from "../utils/industryConfig";
+import { callClaude, extractInvoiceData } from "../utils/api";
 import {
   Sparkles,
   Send,
@@ -46,7 +47,6 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { callClaude } from "../utils/api";
 import CustomerModal from "./CustomerModal";
 
 const DOC_TYPES = [
@@ -1527,6 +1527,7 @@ export default function AIInvoiceWindow({
   }, []);
 
   const send = async (override) => {
+    const userToken = await user.getIdToken();
     const trimmed = (override || input).trim();
     if (!trimmed || loading) return;
     setInput("");
@@ -1575,11 +1576,38 @@ export default function AIInvoiceWindow({
         if (last.items?.length) applyItems(last.items);
       }
 
-      const rawText = await callClaude({
-        system: buildPrompt(userData, documentType, industry),
-        messages: historyRef.current,
-      });
-      const { reply, data: extracted } = parseResponse(rawText);
+     // Run both in parallel — chat reply + structured extraction
+const [rawText, extractedDirect] = await Promise.all([
+  // 1. Existing chat flow (for the conversational reply)
+  callClaude({
+    system: buildPrompt(userData, documentType, industry),
+    messages: historyRef.current,
+  },
+userToken
+),
+extractInvoiceData(trimmed, userToken),
+]);
+
+const { reply, data: extracted } = parseResponse(rawText);
+
+// Merge extracted data — direct extraction takes priority for items/client
+if (extractedDirect?.line_items?.length) {
+  applyItems(extractedDirect.line_items.map(i => ({
+    description: i.description,
+    rate: i.rate,
+    qty: i.quantity,
+    amount: i.amount,
+    taxRate: 15,
+    category: "Service",
+  })));
+}
+if (extractedDirect?.client_name && !extracted?.matchedClientId) {
+  setCustomerName(extractedDirect.client_name);
+  setCustomerEmail(extractedDirect.client_email || "");
+  setCustomerPhone(extractedDirect.client_phone || "");
+  setCustomerAddress(extractedDirect.client_address || "");
+}
+     
       let appliedItems = 0;
 
       if (extracted) {

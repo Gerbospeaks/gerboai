@@ -1,35 +1,39 @@
 // src/utils/api.js
-const OLLAMA_BASE_URL = import.meta.env.VITE_OLLAMA_BASE_URL || 'http://localhost:11434';
-const MODEL = 'llama3.2:1b'; // or 'llama3.1', 'llama3', etc.
+const WORKER_URL = import.meta.env.VITE_WORKER_URL || 'https://r2-upload-worker.v8-auto.workers.dev';
 
-export async function callClaude({ system, messages, max_tokens = 1000 }) {
-  // Prepend system message into the messages array (Ollama uses role: 'system')
-  const ollamaMessages = [
-    { role: 'system', content: system },
-    ...messages.map(m => ({
-      role: m.role, // 'user' or 'assistant' — Ollama uses same names
-      content: m.content,
-    })),
-  ];
-
-  const res = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
+export async function callClaude({ system, messages, max_tokens = 1000 }, userToken) {
+  const res = await fetch(`${WORKER_URL}/ai`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${userToken}`,
+    },
     body: JSON.stringify({
-      model: MODEL,
-      messages: ollamaMessages,
-      stream: false,
-      options: {
-        num_predict: max_tokens,
-      },
+      system,
+      messages,
+      max_tokens,
     }),
   });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `Ollama error ${res.status}`);
+    throw new Error(err.error || `Worker error ${res.status}`);
   }
 
   const data = await res.json();
-  return data.message?.content || '';
+  return data.text || '';
+}
+
+export async function extractInvoiceData(prompt, userToken) {
+  const res = await fetch(`${WORKER_URL}/invoice-extract`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${userToken}`,
+    },
+    body: JSON.stringify({ prompt }),
+  });
+
+  if (!res.ok) return null;
+  return await res.json().catch(() => null);
 }

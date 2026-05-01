@@ -99,6 +99,9 @@ const worker = {
 		if (url.pathname === '/generate-pdf') {
 			return handleGeneratePdf(request, env, corsHeaders);
 		}
+		if (url.pathname === '/invoice-extract') {
+      return handleInvoiceExtract(request, env, corsHeaders);
+}
 
 		return new Response('Not Found', { status: 404, headers: corsHeaders });
 	},
@@ -224,7 +227,91 @@ async function handleGeneratePdf(request: Request, env: Env, corsHeaders: Record
 		});
 	}
 }
+async function handleInvoiceExtract(
+    request: Request,
+    env: Env,
+    corsHeaders: Record<string, string>
+): Promise<Response> {
+    if (request.method !== 'POST') {
+        return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
+    }
 
+    try {
+        // ── Auth (same pattern as your other handlers) ────────────────────
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader?.startsWith('Bearer ')) {
+            return new Response('Unauthorized', { status: 401, headers: corsHeaders });
+        }
+
+        // ── Parse prompt from body ────────────────────────────────────────
+        const { prompt } = (await request.json()) as { prompt: string };
+        if (!prompt) {
+            return new Response(JSON.stringify({ error: 'Missing prompt' }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json', ...corsHeaders },
+            });
+        }
+
+        // ── Call AI (reuses your existing env.AI binding) ─────────────────
+        const aiResponse = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+            messages: [
+                {
+                    role: 'system',
+                    content: `You extract invoice data from natural language descriptions.
+Return ONLY valid JSON — no explanation, no markdown, no code fences.
+Schema:
+{
+  "client_name": "string",
+  "client_email": "string or null",
+  "client_phone": "string or null",
+  "client_address": "string or null",
+  "line_items": [
+    {
+      "description": "string",
+      "quantity": number,
+      "rate": number,
+      "amount": number
+    }
+  ],
+  "due_days": number,
+  "notes": "string or null"
+}
+Rules:
+- amount = quantity * rate
+- If quantity is not mentioned, default to 1
+- If due date not mentioned, default due_days to 30
+- Extract ALL line items mentioned
+- Return null for fields not mentioned`,
+                },
+                {
+                    role: 'user',
+                    content: prompt,
+                },
+            ],
+            max_tokens: 1000,
+        });
+
+        // ── Parse JSON from AI response ────────────────────────────────────
+        const rawText = typeof aiResponse === 'string'
+            ? aiResponse
+            : ((aiResponse as any).response ?? '');
+
+        const cleaned = rawText.replace(/```json|```/g, '').trim();
+        const invoiceData = JSON.parse(cleaned);
+
+        return new Response(JSON.stringify(invoiceData), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+
+    } catch (err: any) {
+        console.error('invoice-extract error:', err);
+        return new Response(JSON.stringify({ error: err.message }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+    }
+}
 // ─────────────────────────────────────────────────────────────────────────────
 // Firestore: write document record under users/{uid}/{folder}/{docNumber}
 // ─────────────────────────────────────────────────────────────────────────────
