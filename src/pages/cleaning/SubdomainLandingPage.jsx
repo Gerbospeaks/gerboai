@@ -240,16 +240,7 @@ function Hero({ config, onRegister }) {
         justifyContent: "center",
       }}
     >
-      {/* Grid texture */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          opacity: 0.04,
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)`,
-          backgroundSize: "48px 48px",
-        }}
-      />
+     
       {/* Glow blob */}
       <div
         style={{

@@ -9,6 +9,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import FinancialOverview from "../FinancialOverview";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
+import LogisticsSidebar from "./LogisticsSidebar";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
@@ -133,14 +134,15 @@ const LogisticsDashboard = () => {
   const [savedCustomers, setSavedCustomers] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [waybills, setWaybills] = useState([]);
+  const [showWaybillsList, setShowWaybillsList] = useState(false);
 
-  // Modals
+  const [showInTransitModal, setShowInTransitModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
-  const [showWaybillsList, setShowWaybillsList] = useState(false);
+
   const [showPreview, setShowPreview] = useState(false);
-  const [showInTransitModal, setShowInTransitModal] = useState(false);
+
   const [showWaybillSticker, setShowWaybillSticker] = useState(false);
   const [savedWaybillData, setSavedWaybillData] = useState(null);
 
@@ -1088,18 +1090,15 @@ const LogisticsDashboard = () => {
   );
 
   // ── RENDER ────────────────────────────────────────────────────────────────
-  return (
-    <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
-      {/* Print area */}
-      <div
-        id="print-area"
-        className="hidden print:block bg-white"
-        style={{ width: "210mm", minHeight: "297mm" }}
-      >
-        <TemplateRenderer {...templateProps} />
-      </div>
+ return (
+  <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
+    {/* Print area */}
+    <div id="print-area" className="hidden print:block bg-white"
+      style={{ width: "210mm", minHeight: "297mm" }}>
+      <TemplateRenderer {...templateProps} />
+    </div>
 
-      {showAIWindow && (
+    {showAIWindow && (
         <AIInvoiceWindow
           user={user}
           businessInfo={businessInfo}
@@ -1114,494 +1113,528 @@ const LogisticsDashboard = () => {
         />
       )}
 
-      <div className="flex-1 flex overflow-hidden min-h-0">
-       
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        <LogisticsSidebar
+          navigate={() => {}} // pass your router's navigate if using React Router
+          user={user}
+          activeView={activeView}
+          setActiveView={setActiveView}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          setShowSettings={setShowSettings}
+          handleNewWaybill={handleNewWaybill} // was () => {}
+          handleLogout={handleLogout} // was () => {}
+          handleAddNewCustomer={handleAddNewCustomer}
+          businessInfo={businessInfo}
+          savedWaybills={savedWaybills}
+          savedCustomers={savedCustomers}
+          showWaybillsList={showWaybillsList}
+          setShowWaybillsList={setShowWaybillsList}
+          setShowCustomersListModal={setShowCustomersListModal}
+          setShowInTransitModal={setShowInTransitModal}
+          newRequestCount={0}
+        />
         {/* ── Main content ───────────────────────────────────────────────── */}
-        <div className="flex-1 overflow-hidden flex flex-col min-h-0 min-w-0">
+   <div className={`flex flex-col min-w-0 overflow-hidden transition-all duration-300 ${
+    sidebarOpen ? "flex-1" : "flex-1 md:ml-0"
+  }`}>
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
             onSettingsOpen={() => setShowSettings(true)}
+            dashboardType="mechanics"
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            pageTitle="Job Cards"
+            plan="pro"
+            showConvertButton={
+              documentType === "quote" &&
+              !!waybillId &&
+              activeView === "invoice"
+            }
+            onConvert={handleConvertToInvoice}
           />
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {/* ── Modals ─────────────────────────────────────────────────── */}
+            {showSettings && (
+              <BusinessSettingsModal onClose={() => setShowSettings(false)} />
+            )}
 
-          {/* ── Modals ─────────────────────────────────────────────────── */}
-          {showSettings && (
-            <BusinessSettingsModal onClose={() => setShowSettings(false)} />
-          )}
+            <CustomersListModal
+              showModal={showCustomersListModal}
+              setShowModal={setShowCustomersListModal}
+              customers={customers}
+              onLoadCustomer={loadCustomer}
+              onEditCustomer={handleEditCustomer}
+              onAddNewCustomer={handleAddNewCustomer}
+            />
+            <CustomerModal
+              showModal={showCustomerModal}
+              setShowModal={setShowCustomerModal}
+              existingCustomer={selectedCustomer}
+              onCustomerSaved={handleCustomerSaved}
+            />
 
-          <CustomersListModal
-            showModal={showCustomersListModal}
-            setShowModal={setShowCustomersListModal}
-            customers={customers}
-            onLoadCustomer={loadCustomer}
-            onEditCustomer={handleEditCustomer}
-            onAddNewCustomer={handleAddNewCustomer}
-          />
-          <CustomerModal
-            showModal={showCustomerModal}
-            setShowModal={setShowCustomerModal}
-            existingCustomer={selectedCustomer}
-            onCustomerSaved={handleCustomerSaved}
-          />
+            <WaybillStickerModal
+              isOpen={showWaybillSticker}
+              onClose={() => setShowWaybillSticker(false)}
+              waybillData={savedWaybillData}
+              businessInfo={businessInfo}
+            />
+            <InTransitModal
+              isOpen={showInTransitModal}
+              onClose={() => setShowInTransitModal(false)}
+              user={user}
+              onViewDetails={handleViewWaybillDetails}
+              onPrintLabel={handlePrintWaybillLabel}
+            />
 
-          <WaybillStickerModal
-            isOpen={showWaybillSticker}
-            onClose={() => setShowWaybillSticker(false)}
-            waybillData={savedWaybillData}
-            businessInfo={businessInfo}
-          />
-          <InTransitModal
-            isOpen={showInTransitModal}
-            onClose={() => setShowInTransitModal(false)}
-            user={user}
-            onViewDetails={handleViewWaybillDetails}
-            onPrintLabel={handlePrintWaybillLabel}
-          />
-
-          {/* All waybills modal */}
-          {showWaybillsList && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-[#e2e8f0]">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
-                  <div>
-                    <h2 className="text-base font-semibold text-[#1e293b]">
-                      All Waybills
-                    </h2>
-                    <p className="text-xs text-[#64748b] mt-0.5">
-                      {savedWaybills.length} records
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setShowWaybillsList(false)}
-                    className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  {savedWaybills.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <Truck className="w-10 h-10 text-[#cbd5e1] mb-3" />
-                      <p className="text-sm text-[#94a3b8]">
-                        No waybills found
-                      </p>
-                    </div>
-                  ) : (
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
-                          {[
-                            "Waybill #",
-                            "Sender",
-                            "Receiver",
-                            "Route",
-                            "Total",
-                            "Status",
-                            "",
-                          ].map((h) => (
-                            <th
-                              key={h}
-                              className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
-                            >
-                              {h}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {savedWaybills.map((wb) => (
-                          <tr
-                            key={wb.id}
-                            className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
-                          >
-                            <td
-                              className="px-4 py-3 text-sm font-semibold text-[#ea580c] cursor-pointer"
-                              onClick={() => {
-                                loadWaybill(wb);
-                                setShowWaybillsList(false);
-                              }}
-                            >
-                              {wb.waybillNumber || "N/A"}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-[#374151]">
-                              {wb.sender?.name || "N/A"}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-[#374151]">
-                              {wb.receiver?.name || "N/A"}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-[#374151]">
-                              {wb.shipment?.origin || "?"} →{" "}
-                              {wb.shipment?.destination || "?"}
-                            </td>
-                            <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
-                              {formatCurrency(wb.totals?.total || 0)}
-                            </td>
-                            <td className="px-4 py-3">
-                              <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${statusBadge(wb.status)}`}
-                              >
-                                {wb.status === "in_transit"
-                                  ? "In Transit"
-                                  : wb.status || "Pending"}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <button
-                                onClick={() => {
-                                  setSavedWaybillData(wb);
-                                  setShowWaybillSticker(true);
-                                }}
-                                className="text-xs px-2.5 py-1.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#374151] rounded-lg transition-colors font-medium"
-                              >
-                                Label
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Preview modal */}
-          {showPreview && (
-            <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
-              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
-                      <Eye className="w-4 h-4 text-white" />
-                    </div>
+            {/* All waybills modal */}
+            {showWaybillsList && (
+              <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-[#e2e8f0]">
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
                     <div>
-                      <h2 className="text-sm font-semibold text-[#1e293b]">
-                        Waybill Preview
+                      <h2 className="text-base font-semibold text-[#1e293b]">
+                        All Waybills
                       </h2>
-                      <p className="text-xs text-[#64748b]">
-                        {waybillNumber || "Draft"}
+                      <p className="text-xs text-[#64748b] mt-0.5">
+                        {savedWaybills.length} records
                       </p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
                     <button
-                      onClick={handlePrint}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
-                    >
-                      <Printer className="w-3.5 h-3.5" />
-                      Print
-                    </button>
-                    <button
-                      onClick={handleSavePDF}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      Save PDF
-                    </button>
-                    <button
-                      onClick={() => setShowPreview(false)}
+                      onClick={() => setShowWaybillsList(false)}
                       className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
-                </div>
-                <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
-                  <div
-                    className="mx-auto bg-white shadow-xl"
-                    style={{ width: "210mm", minHeight: "297mm" }}
-                  >
-                    <TemplateRenderer {...templateProps} />
+                  <div className="flex-1 overflow-y-auto">
+                    {savedWaybills.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <Truck className="w-10 h-10 text-[#cbd5e1] mb-3" />
+                        <p className="text-sm text-[#94a3b8]">
+                          No waybills found
+                        </p>
+                      </div>
+                    ) : (
+                      <table className="w-full">
+                        <thead>
+                          <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                            {[
+                              "Waybill #",
+                              "Sender",
+                              "Receiver",
+                              "Route",
+                              "Total",
+                              "Status",
+                              "",
+                            ].map((h) => (
+                              <th
+                                key={h}
+                                className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
+                              >
+                                {h}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {savedWaybills.map((wb) => (
+                            <tr
+                              key={wb.id}
+                              className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
+                            >
+                              <td
+                                className="px-4 py-3 text-sm font-semibold text-[#ea580c] cursor-pointer"
+                                onClick={() => {
+                                  loadWaybill(wb);
+                                  setShowWaybillsList(false);
+                                }}
+                              >
+                                {wb.waybillNumber || "N/A"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-[#374151]">
+                                {wb.sender?.name || "N/A"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-[#374151]">
+                                {wb.receiver?.name || "N/A"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-[#374151]">
+                                {wb.shipment?.origin || "?"} →{" "}
+                                {wb.shipment?.destination || "?"}
+                              </td>
+                              <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
+                                {formatCurrency(wb.totals?.total || 0)}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span
+                                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${statusBadge(wb.status)}`}
+                                >
+                                  {wb.status === "in_transit"
+                                    ? "In Transit"
+                                    : wb.status || "Pending"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <button
+                                  onClick={() => {
+                                    setSavedWaybillData(wb);
+                                    setShowWaybillSticker(true);
+                                  }}
+                                  className="text-xs px-2.5 py-1.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#374151] rounded-lg transition-colors font-medium"
+                                >
+                                  Label
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* ── Views ─────────────────────────────────────────────────── */}
-          {activeView === "home" && (
-                      <div className="flex-1 overflow-y-auto p-4">
-                        <HomeView
-                          user={user}
-                          onNavigate={(view, docType) => {
-                            if (docType) setDocumentType(docType);
-                            setActiveView(view);
-                          }}
-                          onGoToDashboard={() => setActiveView("quote")}
-                          onSidebarToggle={() => setSidebarOpen((p) => !p)}
-                          sidebarOpen={sidebarOpen}
-                        />
+            {/* Preview modal */}
+            {showPreview && (
+              <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
+                        <Eye className="w-4 h-4 text-white" />
                       </div>
-                    )}
-          {activeView === "templates" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <Templates user={user} />
-            </div>
-          )}
-          {activeView === "financial-overview" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <FinancialOverview user={user} />
-            </div>
-          )}
-          {activeView === "purchase-orders" && (
-            <div className="flex-1 overflow-y-auto p-6">
-              <PurchaseOrders user={user} />
-            </div>
-          )}
-
-          {/* ── New sections ── */}
-          {activeView === "fleet" && <FleetView />}
-          {activeView === "routes" && <RoutePlannerView />}
-          {activeView === "tracking" && <TrackingView />}
-          {activeView === "warehouse" && <WarehouseView />}
-          {activeView === "analytics" && <AnalyticsView />}
-          {activeView === "schedule" && <ScheduleView />}
-
-          {/* ── Placeholder views for future sections ── */}
-          {activeView === "invoices" && (
-            <PlaceholderView
-              title="Invoices"
-              icon={Receipt}
-              description="Manage, send, and track all invoices. Connect your accounting integration to auto-sync."
-            />
-          )}
-          {activeView === "payments" && (
-            <PlaceholderView
-              title="Payments"
-              icon={CreditCard}
-              description="Process payments, view history, and manage overdue accounts."
-            />
-          )}
-          {activeView === "marketplace" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
-  </div>
-)}
-
-{activeView === "incoming-requests" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceRequestsView user={user} businessInfo={businessInfo} />
-  </div>
-)}
-          {/* ── Waybill builder — split layout ──────────────────────────── */}
-          {activeView === "invoice" && (
-            <div className="flex-1 overflow-hidden flex min-h-0">
-              {/* LEFT: Form panel */}
-              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
-                <div className="space-y-5">
-                  {/* In-transit status banner */}
-                  <div className="flex items-center gap-3 px-4 py-3 bg-[#eff6ff] border border-[#bfdbfe] rounded-xl">
-                    <div className="w-2 h-2 bg-[#2563eb] rounded-full animate-pulse flex-shrink-0" />
-                    <span className="text-sm font-semibold text-[#1e40af]">
-                      Shipment Status
-                    </span>
-                    <span className="text-sm text-[#2563eb]">
-                      · Ready to Dispatch
-                    </span>
-                    {trackingNumber && (
-                      <span className="ml-auto text-xs font-mono text-[#64748b]">
-                        {trackingNumber}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Summary stat cards */}
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      {
-                        label: "Total Amount",
-                        value: `R${total.toFixed(2)}`,
-                        icon: Receipt,
-                        iconBg: "bg-[#fff7ed]",
-                        iconColor: "text-[#ea580c]",
-                        textColor: "text-[#1e293b]",
-                      },
-                      {
-                        label: "Paid",
-                        value: `R${paymentStatus.totalPaid.toFixed(2)}`,
-                        icon: CheckSquare,
-                        iconBg:
-                          paymentStatus.totalPaid > 0
-                            ? "bg-[#dcfce7]"
-                            : "bg-[#f1f5f9]",
-                        iconColor:
-                          paymentStatus.totalPaid > 0
-                            ? "text-[#059669]"
-                            : "text-[#94a3b8]",
-                        textColor:
-                          paymentStatus.totalPaid > 0
-                            ? "text-[#059669]"
-                            : "text-[#1e293b]",
-                      },
-                      {
-                        label: "Balance Due",
-                        value: `R${paymentStatus.balanceDue.toFixed(2)}`,
-                        icon: Wallet,
-                        iconBg:
-                          paymentStatus.balanceDue <= 0
-                            ? "bg-[#dcfce7]"
-                            : "bg-[#fef2f2]",
-                        iconColor:
-                          paymentStatus.balanceDue <= 0
-                            ? "text-[#059669]"
-                            : "text-[#dc2626]",
-                        textColor:
-                          paymentStatus.balanceDue <= 0
-                            ? "text-[#059669]"
-                            : "text-[#dc2626]",
-                      },
-                    ].map(
-                      ({
-                        label,
-                        value,
-                        icon: Icon,
-                        iconBg,
-                        iconColor,
-                        textColor,
-                      }) => (
-                        <div
-                          key={label}
-                          className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm"
-                        >
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">
-                              {label}
-                            </span>
-                            <div
-                              className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center`}
-                            >
-                              <Icon className={`w-4 h-4 ${iconColor}`} />
-                            </div>
-                          </div>
-                          <div className={`text-xl font-bold ${textColor}`}>
-                            {value}
-                          </div>
-                        </div>
-                      ),
-                    )}
-                  </div>
-
-                  {/* Main input card */}
-                  <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
-                    <div className="flex border-b border-[#e2e8f0] bg-[#f8fafc]">
+                      <div>
+                        <h2 className="text-sm font-semibold text-[#1e293b]">
+                          Waybill Preview
+                        </h2>
+                        <p className="text-xs text-[#64748b]">
+                          {waybillNumber || "Draft"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setInputMode("manual")}
-                        className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "manual" ? "border-[#ea580c] text-[#ea580c] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
+                        onClick={handlePrint}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
-                        Manual Entry
+                        <Printer className="w-3.5 h-3.5" />
+                        Print
                       </button>
                       <button
-                        onClick={() => setShowAIWindow(true)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto bg-gradient-to-r from-[#7c3aed] to-[#5b21b6] text-white shadow-md shadow-[#7c3aed]/30 hover:shadow-lg hover:shadow-[#7c3aed]/40 hover:scale-[1.02] active:scale-[0.98]"
+                        onClick={handleSavePDF}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
                       >
-                        <Sparkles className="w-4 h-4" />
-                        AI Mode
+                        <Download className="w-3.5 h-3.5" />
+                        Save PDF
+                      </button>
+                      <button
+                        onClick={() => setShowPreview(false)}
+                        className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
+                      >
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
+                  </div>
+                  <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
+                    <div
+                      className="mx-auto bg-white shadow-xl"
+                      style={{ width: "210mm", minHeight: "297mm" }}
+                    >
+                      <TemplateRenderer {...templateProps} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
-                    {inputMode === "manual" && (
-                      <div className="p-6">
-                        <FreightMultiStepForm
-                          senderName={senderName}
-                          setSenderName={setSenderName}
-                          customerId={customerId}
-                          setCustomerId={setCustomerId}
-                          senderEmail={senderEmail}
-                          setSenderEmail={setSenderEmail}
-                          senderPhone={senderPhone}
-                          setSenderPhone={setSenderPhone}
-                          senderAddress={senderAddress}
-                          setSenderAddress={setSenderAddress}
-                          receiverName={receiverName}
-                          setReceiverName={setReceiverName}
-                          receiverEmail={receiverEmail}
-                          setReceiverEmail={setReceiverEmail}
-                          receiverPhone={receiverPhone}
-                          setReceiverPhone={setReceiverPhone}
-                          receiverAddress={receiverAddress}
-                          setReceiverAddress={setReceiverAddress}
-                          origin={origin}
-                          setOrigin={setOrigin}
-                          destination={destination}
-                          setDestination={setDestination}
-                          cargoType={cargoType}
-                          setCargoType={setCargoType}
-                          weight={weight}
-                          setWeight={setWeight}
-                          dimensions={dimensions}
-                          setDimensions={setDimensions}
-                          trackingNumber={trackingNumber}
-                          setTrackingNumber={setTrackingNumber}
-                          items={items}
-                          newItem={newItem}
-                          setNewItem={setNewItem}
-                          handleAddItem={handleAddItem}
-                        />
+            {/* ── Views ─────────────────────────────────────────────────── */}
+            {activeView === "home" && (
+              <div className="flex-1 overflow-y-auto p-4">
+                <HomeView
+                  user={user}
+                  onNavigate={(view, docType) => {
+                    if (docType) setDocumentType(docType);
+                    setActiveView(view);
+                  }}
+                  onGoToDashboard={() => setActiveView("quote")}
+                  onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                  sidebarOpen={sidebarOpen}
+                />
+              </div>
+            )}
+            {activeView === "templates" && (
+              <div className="flex-1 overflow-y-auto p-4">
+                <Templates user={user} />
+              </div>
+            )}
+            {activeView === "financial-overview" && (
+              <div className="flex-1 overflow-y-auto p-4">
+                <FinancialOverview user={user} />
+              </div>
+            )}
+            {activeView === "purchase-orders" && (
+              <div className="flex-1 overflow-y-auto p-6">
+                <PurchaseOrders user={user} />
+              </div>
+            )}
+
+            {/* ── New sections ── */}
+            {activeView === "fleet" && <FleetView />}
+            {activeView === "routes" && <RoutePlannerView />}
+            {activeView === "tracking" && <TrackingView />}
+            {activeView === "warehouse" && <WarehouseView />}
+            {activeView === "analytics" && <AnalyticsView />}
+            {activeView === "schedule" && <ScheduleView />}
+
+            {/* ── Placeholder views for future sections ── */}
+            {activeView === "invoices" && (
+              <PlaceholderView
+                title="Invoices"
+                icon={Receipt}
+                description="Manage, send, and track all invoices. Connect your accounting integration to auto-sync."
+              />
+            )}
+            {activeView === "payments" && (
+              <PlaceholderView
+                title="Payments"
+                icon={CreditCard}
+                description="Process payments, view history, and manage overdue accounts."
+              />
+            )}
+            {activeView === "marketplace" && (
+              <div className="flex-1 overflow-y-auto p-6">
+                <ServiceMarketplaceView
+                  user={user}
+                  businessInfo={businessInfo}
+                />
+              </div>
+            )}
+
+            {activeView === "incoming-requests" && (
+              <div className="flex-1 overflow-y-auto p-6">
+                <ServiceRequestsView user={user} businessInfo={businessInfo} />
+              </div>
+            )}
+            {/* ── Waybill builder — split layout ──────────────────────────── */}
+            {activeView === "invoice" && (
+              <div className="flex-1 overflow-hidden flex min-h-0">
+                {/* LEFT: Form panel */}
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+                  <div className="space-y-5">
+                    {/* In-transit status banner */}
+                    <div className="flex items-center gap-3 px-4 py-3 bg-[#eff6ff] border border-[#bfdbfe] rounded-xl">
+                      <div className="w-2 h-2 bg-[#2563eb] rounded-full animate-pulse flex-shrink-0" />
+                      <span className="text-sm font-semibold text-[#1e40af]">
+                        Shipment Status
+                      </span>
+                      <span className="text-sm text-[#2563eb]">
+                        · Ready to Dispatch
+                      </span>
+                      {trackingNumber && (
+                        <span className="ml-auto text-xs font-mono text-[#64748b]">
+                          {trackingNumber}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Summary stat cards */}
+                    <div className="grid grid-cols-3 gap-4">
+                      {[
+                        {
+                          label: "Total Amount",
+                          value: `R${total.toFixed(2)}`,
+                          icon: Receipt,
+                          iconBg: "bg-[#fff7ed]",
+                          iconColor: "text-[#ea580c]",
+                          textColor: "text-[#1e293b]",
+                        },
+                        {
+                          label: "Paid",
+                          value: `R${paymentStatus.totalPaid.toFixed(2)}`,
+                          icon: CheckSquare,
+                          iconBg:
+                            paymentStatus.totalPaid > 0
+                              ? "bg-[#dcfce7]"
+                              : "bg-[#f1f5f9]",
+                          iconColor:
+                            paymentStatus.totalPaid > 0
+                              ? "text-[#059669]"
+                              : "text-[#94a3b8]",
+                          textColor:
+                            paymentStatus.totalPaid > 0
+                              ? "text-[#059669]"
+                              : "text-[#1e293b]",
+                        },
+                        {
+                          label: "Balance Due",
+                          value: `R${paymentStatus.balanceDue.toFixed(2)}`,
+                          icon: Wallet,
+                          iconBg:
+                            paymentStatus.balanceDue <= 0
+                              ? "bg-[#dcfce7]"
+                              : "bg-[#fef2f2]",
+                          iconColor:
+                            paymentStatus.balanceDue <= 0
+                              ? "text-[#059669]"
+                              : "text-[#dc2626]",
+                          textColor:
+                            paymentStatus.balanceDue <= 0
+                              ? "text-[#059669]"
+                              : "text-[#dc2626]",
+                        },
+                      ].map(
+                        ({
+                          label,
+                          value,
+                          icon: Icon,
+                          iconBg,
+                          iconColor,
+                          textColor,
+                        }) => (
+                          <div
+                            key={label}
+                            className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm"
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+                                {label}
+                              </span>
+                              <div
+                                className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center`}
+                              >
+                                <Icon className={`w-4 h-4 ${iconColor}`} />
+                              </div>
+                            </div>
+                            <div className={`text-xl font-bold ${textColor}`}>
+                              {value}
+                            </div>
+                          </div>
+                        ),
+                      )}
+                    </div>
+
+                    {/* Main input card */}
+                    <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
+                      <div className="flex border-b border-[#e2e8f0] bg-[#f8fafc]">
+                        <button
+                          onClick={() => setInputMode("manual")}
+                          className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "manual" ? "border-[#ea580c] text-[#ea580c] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                          Manual Entry
+                        </button>
+                        <button
+                          onClick={() => setShowAIWindow(true)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto bg-gradient-to-r from-[#7c3aed] to-[#5b21b6] text-white shadow-md shadow-[#7c3aed]/30 hover:shadow-lg hover:shadow-[#7c3aed]/40 hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          AI Mode
+                        </button>
                       </div>
-                    )}
+
+                      {inputMode === "manual" && (
+                        <div className="p-6">
+                          <FreightMultiStepForm
+                            senderName={senderName}
+                            setSenderName={setSenderName}
+                            customerId={customerId}
+                            setCustomerId={setCustomerId}
+                            senderEmail={senderEmail}
+                            setSenderEmail={setSenderEmail}
+                            senderPhone={senderPhone}
+                            setSenderPhone={setSenderPhone}
+                            senderAddress={senderAddress}
+                            setSenderAddress={setSenderAddress}
+                            receiverName={receiverName}
+                            setReceiverName={setReceiverName}
+                            receiverEmail={receiverEmail}
+                            setReceiverEmail={setReceiverEmail}
+                            receiverPhone={receiverPhone}
+                            setReceiverPhone={setReceiverPhone}
+                            receiverAddress={receiverAddress}
+                            setReceiverAddress={setReceiverAddress}
+                            origin={origin}
+                            setOrigin={setOrigin}
+                            destination={destination}
+                            setDestination={setDestination}
+                            cargoType={cargoType}
+                            setCargoType={setCargoType}
+                            weight={weight}
+                            setWeight={setWeight}
+                            dimensions={dimensions}
+                            setDimensions={setDimensions}
+                            trackingNumber={trackingNumber}
+                            setTrackingNumber={setTrackingNumber}
+                            items={items}
+                            newItem={newItem}
+                            setNewItem={setNewItem}
+                            handleAddItem={handleAddItem}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* RIGHT: Live preview panel */}
+                <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
+                    <TemplateSelector
+                      user={user}
+                      selectedTemplate={selectedTemplate}
+                      onTemplateChange={setSelectedTemplate}
+                    />
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={handlePrint}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-xs font-medium rounded-lg hover:bg-[#f1f5f9] transition-colors"
+                      >
+                        <Printer className="w-3 h-3" />
+                        Print
+                      </button>
+                      <button
+                        onClick={handleSavePDF}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-[#ea580c] text-white text-xs font-medium rounded-lg hover:bg-[#c2410c] transition-colors"
+                      >
+                        <Download className="w-3 h-3" />
+                        PDF
+                      </button>
+                    </div>
                   </div>
 
-                 
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <div
+                      className="bg-white shadow-lg rounded origin-top"
+                      style={{
+                        width: "210mm",
+                        minHeight: "297mm",
+                        transform: "scale(0.44)",
+                        transformOrigin: "top left",
+                        marginBottom: `calc((297mm * 0.44) - 297mm)`,
+                      }}
+                    >
+                      <TemplateRenderer {...templateProps} />
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* RIGHT: Live preview panel */}
-              <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
-                  <TemplateSelector
-                    user={user}
-                    selectedTemplate={selectedTemplate}
-                    onTemplateChange={setSelectedTemplate}
-                  />
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={handlePrint}
-                      className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-xs font-medium rounded-lg hover:bg-[#f1f5f9] transition-colors"
-                    >
-                      <Printer className="w-3 h-3" />
-                      Print
-                    </button>
-                    <button
-                      onClick={handleSavePDF}
-                      className="flex items-center gap-1 px-2.5 py-1.5 bg-[#ea580c] text-white text-xs font-medium rounded-lg hover:bg-[#c2410c] transition-colors"
-                    >
-                      <Download className="w-3 h-3" />
-                      PDF
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-4">
-                  <div
-                    className="bg-white shadow-lg rounded origin-top"
-                    style={{
-                      width: "210mm",
-                      minHeight: "297mm",
-                      transform: "scale(0.44)",
-                      transformOrigin: "top left",
-                      marginBottom: `calc((297mm * 0.44) - 297mm)`,
-                    }}
-                  >
-                    <TemplateRenderer {...templateProps} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

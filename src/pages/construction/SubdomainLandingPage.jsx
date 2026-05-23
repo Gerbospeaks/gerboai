@@ -568,16 +568,7 @@ function Hero({ onRegister }) {
         justifyContent: "center",
       }}
     >
-      {/* Grid texture */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          opacity: 0.04,
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)`,
-          backgroundSize: "48px 48px",
-        }}
-      />
+  
       {/* Glow */}
       <div
         style={{
@@ -1183,7 +1174,7 @@ function Pricing({ onRegister }) {
     },
     {
       name: "Contractor",
-      price: "R449",
+      price: "R115",
       period: "/month",
       desc: "The sweet spot for growing construction businesses",
       highlight: true,
@@ -1200,7 +1191,7 @@ function Pricing({ onRegister }) {
     },
     {
       name: "Enterprise",
-      price: "R999",
+      price: "R200",
       period: "/month",
       desc: "Multi-site contractors & construction companies",
       features: [

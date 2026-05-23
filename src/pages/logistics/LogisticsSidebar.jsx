@@ -89,11 +89,11 @@ export default function LogisticsSidebar({
           </div>
         </div>
         <button
-          onClick={() => setSidebarOpen(false)}
-          className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#1a2535] rounded-lg transition-all flex-shrink-0"
-        >
-          <X className="w-4 h-4" />
-        </button>
+  onClick={() => setSidebarOpen(false)}
+  className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#1a2535] rounded-lg transition-all flex-shrink-0"
+>
+  <X className="w-4 h-4" />
+</button>
       </div>
 
       {/* Scrollable nav */}
@@ -353,7 +353,7 @@ export default function LogisticsSidebar({
       </div>
     </div>
   );
-
+console.log("sidebarOpen:", sidebarOpen);
   return (
     <>
       {/* ════════════════════════════════════════════════════════════════
@@ -363,12 +363,12 @@ export default function LogisticsSidebar({
         {/* Hamburger */}
         {!sidebarOpen && (
           <button
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open menu"
-            className="fixed top-3 left-3 z-50 w-9 h-9 bg-[#0d1520] border border-[#1a2535] text-[#94a3b8] hover:text-white hover:bg-[#1a2535] rounded-lg flex items-center justify-center shadow-lg transition-all"
-          >
-            <Menu className="w-4 h-4" />
-          </button>
+  onClick={() => setSidebarOpen(true)}  
+  title="Expand"
+  className="p-2 text-[#64748b] hover:text-white hover:bg-[#1a2535] rounded-lg transition-all"
+>
+  <ChevronRight className="w-5 h-5" />
+</button>
         )}
 
         {/* Dim overlay */}

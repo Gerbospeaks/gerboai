@@ -1,73 +1,138 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import heroVideo from "../../assets/videos/education.mp4";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
-import logo from "../../assets/img/educare-logo.png"
+import logo from "../../assets/img/educare-logo.png";
+
 const fontStyle = `
-  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap');
 `;
 
-/* ─── Shared tokens (layout / neutral) ─────────────────────────────────── */
+/* ─── Design tokens ─────────────────────────────────────────────────────── */
 const T = {
   white: "#FFFFFF",
-  surface: "#F4F7FA",
-  border: "#E2E8F0",
-  text: "#1E293B",
-  muted: "#64748B",
+  bg: "#F7F9FC", // Zoho-style off-white page bg
+  bgAlt: "#EEF3FB", // subtle blue-tinted alternate section
+  border: "#DDE3EE",
+  borderL: "#E8ECF4",
+  text: "#1B2A3D",
+  sub: "#4A5568",
+  muted: "#718096",
+  shadow: "rgba(27,42,61,0.07)",
 };
 
 /* ─── Scroll helper ─────────────────────────────────────────────────────── */
 const scrollTo = (id) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
-/* ─── Mock Invoice ──────────────────────────────────────────────────────── */
+/* ─── Chip / pill ───────────────────────────────────────────────────────── */
+function Chip({ children, accent }) {
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        background: `${accent}14`,
+        border: `1px solid ${accent}30`,
+        color: accent,
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        padding: "4px 12px",
+        borderRadius: 4,
+        fontFamily: "'Barlow', sans-serif",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+/* ─── Section header ────────────────────────────────────────────────────── */
+function SectionHead({ overline, title, sub, accent, center = true }) {
+  return (
+    <div style={{ textAlign: center ? "center" : "left", marginBottom: 48 }}>
+      <Chip accent={accent}>{overline}</Chip>
+      <h2
+        style={{
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 900,
+          fontSize: "clamp(26px,3.5vw,42px)",
+          color: T.text,
+          margin: "12px 0 10px",
+          letterSpacing: "-0.3px",
+          lineHeight: 1.1,
+        }}
+      >
+        {title}
+      </h2>
+      {sub && (
+        <p
+          style={{
+            color: T.muted,
+            fontSize: 15,
+            lineHeight: 1.7,
+            maxWidth: 540,
+            margin: center ? "0 auto" : 0,
+            fontFamily: "'Barlow', sans-serif",
+          }}
+        >
+          {sub}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ─── MockInvoice (unchanged logic, restyled) ───────────────────────────── */
 function MockInvoice({ config }) {
   const lineItems = config.mockLineItems || [
     {
-      desc: "Labour – Standard Service",
+      desc: "Term 1 – Tuition Fee",
       qty: 1,
-      unit: "R650.00",
-      total: "R650.00",
+      unit: "R2 200.00",
+      total: "R2 200.00",
     },
-    { desc: "Parts & Materials", qty: 2, unit: "R280.00", total: "R560.00" },
-    { desc: "Consumables", qty: 1, unit: "R120.00", total: "R120.00" },
-    { desc: "Call-out / Site Fee", qty: 1, unit: "R385.00", total: "R385.00" },
+    { desc: "Activity Programme", qty: 1, unit: "R380.00", total: "R380.00" },
+    { desc: "School Meal Plan", qty: 1, unit: "R650.00", total: "R650.00" },
+    { desc: "Admin & Resources", qty: 1, unit: "R250.00", total: "R250.00" },
   ];
-  const subtotal = config.mockSubtotal || "R1 715.00";
-  const vat = config.mockVat || "R257.25";
-  const total = config.mockTotal || "R1 972.25";
+  const subtotal = config.mockSubtotal || "R3 480.00";
+  const vat = config.mockVat || "R522.00";
+  const total = config.mockTotal || "R4 002.00";
   const refNo = config.mockRef || "INV-0042";
-  const bizName = config.mockBizName || `${config.label} Business`;
+  const bizName = config.mockBizName || `${config.label} Centre`;
 
   return (
     <div
       style={{
         background: T.white,
-        borderRadius: 16,
-        boxShadow: `0 32px 80px ${config.color}38`,
+        borderRadius: 12,
+        border: `1px solid ${T.border}`,
         overflow: "hidden",
         fontFamily: "'Barlow', sans-serif",
-        border: `1px solid ${T.border}`,
-        maxWidth: 520,
         width: "100%",
+        maxWidth: 480,
+        boxShadow: `0 20px 60px ${T.shadow}`,
       }}
     >
       {/* Chrome bar */}
       <div
         style={{
           background: "#F1F5F9",
-          padding: "10px 16px",
+          padding: "9px 14px",
           display: "flex",
           alignItems: "center",
-          gap: 6,
+          gap: 5,
         }}
       >
         {["#FF5F57", "#FEBC2E", "#28C840"].map((c) => (
           <span
             key={c}
             style={{
-              width: 12,
-              height: 12,
+              width: 11,
+              height: 11,
               borderRadius: "50%",
               background: c,
               display: "inline-block",
@@ -78,24 +143,24 @@ function MockInvoice({ config }) {
           style={{
             flex: 1,
             background: T.white,
-            borderRadius: 6,
-            height: 22,
-            margin: "0 12px",
+            borderRadius: 4,
+            height: 20,
+            margin: "0 10px",
             display: "flex",
             alignItems: "center",
-            paddingLeft: 10,
+            paddingLeft: 9,
           }}
         >
-          <span style={{ fontSize: 11, color: T.muted }}>
-            solidflo.co.za/jobs/{refNo}
+          <span style={{ fontSize: 10, color: T.muted }}>
+            solidflo.co.za/invoice/{refNo}
           </span>
         </div>
       </div>
 
-      {/* Invoice header */}
+      {/* Header */}
       <div
         style={{
-          padding: "20px 24px 16px",
+          padding: "18px 22px 14px",
           borderBottom: `2px solid ${config.accent}`,
         }}
       >
@@ -107,50 +172,34 @@ function MockInvoice({ config }) {
           }}
         >
           <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 6,
-              }}
-            >
-              <span style={{ fontSize: 20 }}>
-                <img src={logo} width={80} alt="" />
-              </span>
-             
-            </div>
-            <p style={{ fontSize: 12, color: T.muted, margin: 0 }}>{bizName}</p>
-            <p style={{ fontSize: 11, color: T.muted, margin: 0 }}>
-              South Africa
-            </p>
+            <img src={logo} width={72} alt="" style={{ marginBottom: 5 }} />
+            <p style={{ fontSize: 11, color: T.muted, margin: 0 }}>{bizName}</p>
           </div>
           <div style={{ textAlign: "right" }}>
-            <div
+            <span
               style={{
                 background: "#DCFCE7",
                 color: "#16A34A",
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: 700,
-                padding: "3px 10px",
-                borderRadius: 99,
-                marginBottom: 6,
+                padding: "2px 9px",
+                borderRadius: 3,
               }}
             >
               PAID
-            </div>
+            </span>
             <p
               style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 800,
-                fontSize: 20,
+                fontSize: 18,
                 color: config.color,
-                margin: 0,
+                margin: "5px 0 0",
               }}
             >
               {refNo}
             </p>
-            <p style={{ fontSize: 11, color: T.muted, margin: 0 }}>
+            <p style={{ fontSize: 10, color: T.muted, margin: 0 }}>
               Issued 28 Mar 2025
             </p>
           </div>
@@ -158,21 +207,21 @@ function MockInvoice({ config }) {
       </div>
 
       {/* Line items */}
-      <div style={{ padding: "0 24px" }}>
+      <div style={{ padding: "0 22px" }}>
         <table
-          style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}
+          style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}
         >
           <thead>
-            <tr style={{ borderBottom: `1px solid ${T.border}` }}>
-              {["Description", "Qty", "Unit Price", "Total"].map((h) => (
+            <tr style={{ borderBottom: `1px solid ${T.borderL}` }}>
+              {["Description", "Qty", "Unit", "Total"].map((h) => (
                 <th
                   key={h}
                   style={{
-                    padding: "10px 0 8px",
+                    padding: "9px 0 7px",
                     color: T.muted,
                     fontWeight: 600,
                     textAlign: h === "Description" ? "left" : "right",
-                    fontSize: 11,
+                    fontSize: 10,
                   }}
                 >
                   {h}
@@ -182,11 +231,11 @@ function MockInvoice({ config }) {
           </thead>
           <tbody>
             {lineItems.map((r, i) => (
-              <tr key={i} style={{ borderBottom: `1px solid ${T.border}` }}>
-                <td style={{ padding: "9px 0", color: T.text }}>{r.desc}</td>
+              <tr key={i} style={{ borderBottom: `1px solid ${T.borderL}` }}>
+                <td style={{ padding: "8px 0", color: T.text }}>{r.desc}</td>
                 <td
                   style={{
-                    padding: "9px 0",
+                    padding: "8px 0",
                     textAlign: "right",
                     color: T.muted,
                   }}
@@ -195,7 +244,7 @@ function MockInvoice({ config }) {
                 </td>
                 <td
                   style={{
-                    padding: "9px 0",
+                    padding: "8px 0",
                     textAlign: "right",
                     color: T.muted,
                   }}
@@ -204,7 +253,7 @@ function MockInvoice({ config }) {
                 </td>
                 <td
                   style={{
-                    padding: "9px 0",
+                    padding: "8px 0",
                     textAlign: "right",
                     fontWeight: 600,
                     color: config.color,
@@ -221,7 +270,7 @@ function MockInvoice({ config }) {
       {/* Totals */}
       <div
         style={{
-          padding: "12px 24px 20px",
+          padding: "10px 22px 18px",
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-end",
@@ -232,9 +281,9 @@ function MockInvoice({ config }) {
           ["Subtotal", subtotal],
           ["VAT (15%)", vat],
         ].map(([l, v]) => (
-          <div key={l} style={{ display: "flex", gap: 32, fontSize: 12 }}>
+          <div key={l} style={{ display: "flex", gap: 28, fontSize: 11 }}>
             <span style={{ color: T.muted }}>{l}</span>
-            <span style={{ color: T.text, minWidth: 80, textAlign: "right" }}>
+            <span style={{ color: T.text, minWidth: 72, textAlign: "right" }}>
               {v}
             </span>
           </div>
@@ -242,17 +291,17 @@ function MockInvoice({ config }) {
         <div
           style={{
             display: "flex",
-            gap: 32,
+            gap: 28,
             background: config.color,
-            borderRadius: 8,
-            padding: "6px 14px",
-            marginTop: 6,
+            borderRadius: 6,
+            padding: "5px 12px",
+            marginTop: 5,
           }}
         >
           <span
             style={{
               color: "rgba(255,255,255,0.7)",
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 600,
             }}
           >
@@ -262,8 +311,8 @@ function MockInvoice({ config }) {
             style={{
               color: T.white,
               fontWeight: 800,
-              fontSize: 15,
-              minWidth: 80,
+              fontSize: 14,
+              minWidth: 72,
               textAlign: "right",
             }}
           >
@@ -281,97 +330,104 @@ function Navbar({ config, onLogin, onRegister }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20);
+    const fn = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  const links = ["features", "pricing", "testimonials", "faq"];
+  const links = [
+    { id: "features", label: "Features" },
+    { id: "dashboard", label: "Platform" },
+    { id: "pricing", label: "Pricing" },
+    { id: "testimonials", label: "Reviews" },
+    { id: "faq", label: "FAQ" },
+  ];
+
+  const navBg = scrolled ? T.white : "transparent";
+  const navBorder = scrolled
+    ? `1px solid ${T.border}`
+    : "1px solid rgba(255,255,255,0.12)";
+  const linkColor = scrolled ? T.sub : "rgba(255,255,255,0.7)";
+  const linkHover = scrolled ? T.text : T.white;
 
   return (
     <nav
       style={{
         position: "sticky",
         top: 0,
-        zIndex: 50,
-        background: config.color,
-        borderBottom: `1px solid rgba(255,255,255,0.06)`,
-        transition: "box-shadow .2s",
-        boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.3)" : "none",
+        zIndex: 100,
+        background: scrolled ? T.white : config.color,
+        borderBottom: navBorder,
+        boxShadow: scrolled ? `0 1px 12px ${T.shadow}` : "none",
+        transition: "background 0.3s, box-shadow 0.3s",
       }}
     >
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
-          padding: "0 24px",
+          padding: "0 28px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          height: 60,
+          height: 62,
         }}
       >
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              background: "transparent",
-              width: 160,
-             
-              borderRadius: 8,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 17,
-            }}
-          >
-            <img src={logo} alt="Educare Logo" style={{ width: "100%", height: "auto" }} />
-          </div>
-          <div>
-           
-          </div>
-        </div>
+        <img
+          src={logo}
+          alt="Logo"
+          style={{ height: 36, objectFit: "contain" }}
+        />
 
         {/* Desktop links */}
-        <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
-          {links.map((s) => (
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          {links.map((l) => (
             <button
-              key={s}
-              onClick={() => scrollTo(s)}
+              key={l.id}
+              onClick={() => scrollTo(l.id)}
               style={{
                 background: "none",
                 border: "none",
                 cursor: "pointer",
-                color: "rgba(255,255,255,0.55)",
-                fontSize: 14,
+                color: linkColor,
+                fontSize: 13.5,
                 fontFamily: "'Barlow', sans-serif",
                 fontWeight: 500,
-                textTransform: "capitalize",
-                transition: "color .2s",
+                padding: "6px 12px",
+                borderRadius: 6,
+                transition: "color 0.2s, background 0.2s",
               }}
-              onMouseEnter={(e) => (e.target.style.color = T.white)}
-              onMouseLeave={(e) =>
-                (e.target.style.color = "rgba(255,255,255,0.55)")
-              }
+              onMouseEnter={(e) => {
+                e.target.style.color = linkHover;
+                e.target.style.background = scrolled
+                  ? T.bg
+                  : "rgba(255,255,255,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = linkColor;
+                e.target.style.background = "transparent";
+              }}
             >
-              {s}
+              {l.label}
             </button>
           ))}
         </div>
 
-        {/* Desktop CTA */}
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        {/* CTAs */}
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <button
             onClick={onLogin}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: 8,
+              border: `1px solid ${scrolled ? T.border : "rgba(255,255,255,0.25)"}`,
+              borderRadius: 6,
               padding: "7px 18px",
-              color: "rgba(255,255,255,0.75)",
+              color: scrolled ? T.sub : "rgba(255,255,255,0.8)",
               fontSize: 13,
               fontFamily: "'Barlow', sans-serif",
               cursor: "pointer",
+              transition: "all 0.2s",
             }}
           >
             Sign In
@@ -381,119 +437,29 @@ function Navbar({ config, onLogin, onRegister }) {
             style={{
               background: config.accent,
               border: "none",
-              borderRadius: 8,
+              borderRadius: 6,
               padding: "8px 20px",
               color: T.white,
               fontSize: 13,
               fontWeight: 700,
               fontFamily: "'Barlow', sans-serif",
               cursor: "pointer",
-              boxShadow: `0 4px 12px ${config.accent}66`,
+              boxShadow: `0 2px 8px ${config.accent}50`,
+              transition: "transform 0.15s, box-shadow 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow = `0 4px 14px ${config.accent}60`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = `0 2px 8px ${config.accent}50`;
             }}
           >
-            {config.cta} →
+            Get Started Free
           </button>
         </div>
-
-        {/* Mobile hamburger */}
-        <button
-          onClick={() => setOpen(!open)}
-          style={{
-            display: "none",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "rgba(255,255,255,0.6)",
-            padding: 8,
-          }}
-        >
-          <svg
-            width="20"
-            height="20"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            {open ? (
-              <path d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
       </div>
-
-      {/* Mobile menu */}
-      {open && (
-        <div
-          style={{
-            background: config.color,
-            borderTop: "1px solid rgba(255,255,255,0.1)",
-            padding: "8px 24px 16px",
-          }}
-        >
-          {links.map((s) => (
-            <button
-              key={s}
-              onClick={() => {
-                scrollTo(s);
-                setOpen(false);
-              }}
-              style={{
-                display: "block",
-                width: "100%",
-                textAlign: "left",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "rgba(255,255,255,0.6)",
-                padding: "8px 0",
-                fontSize: 14,
-                fontFamily: "'Barlow', sans-serif",
-                textTransform: "capitalize",
-              }}
-            >
-              {s}
-            </button>
-          ))}
-          <div style={{ display: "flex", gap: 8, paddingTop: 8 }}>
-            <button
-              onClick={onLogin}
-              style={{
-                flex: 1,
-                padding: "10px",
-                background: "none",
-                border: "1px solid rgba(255,255,255,0.2)",
-                borderRadius: 8,
-                color: T.white,
-                fontSize: 13,
-                fontFamily: "'Barlow', sans-serif",
-                cursor: "pointer",
-              }}
-            >
-              Sign In
-            </button>
-            <button
-              onClick={onRegister}
-              style={{
-                flex: 1,
-                padding: "10px",
-                background: config.accent,
-                border: "none",
-                borderRadius: 8,
-                color: T.white,
-                fontSize: 13,
-                fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                cursor: "pointer",
-              }}
-            >
-              Sign Up Free
-            </button>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }
@@ -501,22 +467,22 @@ function Navbar({ config, onLogin, onRegister }) {
 /* ─── Hero ──────────────────────────────────────────────────────────────── */
 function Hero({ config, onRegister }) {
   const stats = config.heroStats || [
-    ["R 42 800", "This Month"],
-    ["18", "Open Jobs"],
-    ["4.9★", "Client Rating"],
+    ["500+", "Schools"],
+    ["98%", "Satisfaction"],
+    ["< 60s", "Invoice time"],
   ];
   const trustedBy = config.trustedBy || [
-    "Cape Business Co.",
-    "Joburg Professionals",
-    "Pretoria Services",
-    "Durban Trade Centre",
+    "Edu-Stars Academy",
+    "Sunrise Learning Centre",
+    "BrightPath Pre-Primary",
+    "Cape Town Tuition Hub",
   ];
 
   return (
     <section
       style={{
-        background: `linear-gradient(135deg, ${config.color} 0%, ${config.colorMid || config.color} 60%, ${config.colorDark || config.color} 100%)`,
-        padding: "72px 24px 80px",
+        background: `linear-gradient(150deg, ${config.color} 0%, ${config.colorMid || config.color} 55%, ${config.colorDark || config.color} 100%)`,
+        padding: "80px 28px 90px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -525,55 +491,75 @@ function Hero({ config, onRegister }) {
         justifyContent: "center",
       }}
     >
-      {/* Grid texture */}
+      {/* Video background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        poster={config.heroPoster}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          zIndex: 0,
+        }}
+      >
+        <source src={heroVideo} type="video/mp4" />
+      </video>
+
+      {/* Overlay */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          opacity: 0.04,
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)`,
-          backgroundSize: "48px 48px",
-        }}
-      />
-      {/* Glow */}
-      <div
-        style={{
-          position: "absolute",
-          top: -60,
-          right: -80,
-          width: 500,
-          height: 500,
-          borderRadius: "50%",
-          background: config.accent,
-          opacity: 0.07,
-          filter: "blur(80px)",
+          zIndex: 1,
+          background: `linear-gradient(150deg, ${config.color}D9 0%, ${config.colorDark || config.color}F0 100%)`,
         }}
       />
 
+      {/* Subtle grid pattern overlay */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 2,
+          opacity: 0.04,
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
+
+      {/* Content */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
+          zIndex: 3,
+          width: "100%",
           display: "flex",
           alignItems: "center",
-          gap: 60,
+          gap: 64,
           flexWrap: "wrap",
-          width: "100%",
         }}
       >
-        {/* Left */}
+        {/* LEFT */}
         <div style={{ flex: "1 1 420px" }}>
+          {/* Badge */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 8,
-              background: `${config.accent}1F`,
-              border: `1px solid ${config.accent}4D`,
-              borderRadius: 99,
+              gap: 7,
+              background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              borderRadius: 4,
               padding: "5px 14px",
-              marginBottom: 22,
+              marginBottom: 24,
             }}
           >
             <span
@@ -587,10 +573,11 @@ function Hero({ config, onRegister }) {
             />
             <span
               style={{
-                color: config.accent,
+                color: "rgba(255,255,255,0.9)",
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 600,
                 fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.05em",
               }}
             >
               Built for {config.label} Businesses
@@ -601,10 +588,10 @@ function Hero({ config, onRegister }) {
             style={{
               fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 900,
-              fontSize: "clamp(40px, 5vw, 64px)",
-              lineHeight: 1.05,
+              fontSize: "clamp(38px,5vw,66px)",
+              lineHeight: 1.02,
               color: T.white,
-              margin: "0 0 20px",
+              margin: "0 0 18px",
               letterSpacing: "-0.5px",
             }}
           >
@@ -613,9 +600,9 @@ function Hero({ config, onRegister }) {
 
           <p
             style={{
-              color: "rgba(255,255,255,0.55)",
-              fontSize: 17,
-              lineHeight: 1.7,
+              color: "rgba(255,255,255,0.6)",
+              fontSize: 16,
+              lineHeight: 1.75,
               margin: "0 0 36px",
               fontFamily: "'Barlow', sans-serif",
               maxWidth: 460,
@@ -624,63 +611,64 @@ function Hero({ config, onRegister }) {
             {config.subheadline}
           </p>
 
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          {/* CTA row */}
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              flexWrap: "wrap",
+              marginBottom: 36,
+            }}
+          >
             <button
               onClick={onRegister}
               style={{
                 background: config.accent,
                 border: "none",
-                borderRadius: 10,
-                padding: "14px 28px",
+                borderRadius: 7,
+                padding: "13px 28px",
                 color: T.white,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: 700,
                 fontFamily: "'Barlow', sans-serif",
                 cursor: "pointer",
-                boxShadow: `0 8px 24px ${config.accent}66`,
-                transition: "transform .15s",
+                boxShadow: `0 6px 20px ${config.accent}55`,
+                transition: "transform 0.15s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.03)")
+                (e.currentTarget.style.transform = "translateY(-2px)")
               }
               onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
+                (e.currentTarget.style.transform = "translateY(0)")
               }
             >
-              {config.cta}
+              {config.cta || "Start for Free"} →
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: 10,
-                padding: "14px 24px",
-                color: "rgba(255,255,255,0.75)",
-                fontSize: 15,
-                fontWeight: 600,
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: 7,
+                padding: "13px 22px",
+                color: "rgba(255,255,255,0.8)",
+                fontSize: 14,
+                fontWeight: 500,
                 fontFamily: "'Barlow', sans-serif",
                 cursor: "pointer",
               }}
             >
-              See How It Works →
+              Explore Features
             </button>
           </div>
 
           {/* Trust badges */}
-          <div
-            style={{
-              display: "flex",
-              gap: 24,
-              marginTop: 32,
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 18 }}>
             {(
               config.trustBadges || [
-                "Free plan forever",
+                "Free forever plan",
                 "VAT-compliant invoices",
-                "WhatsApp invoicing",
+                "WhatsApp delivery",
                 "SA-built & hosted",
               ]
             ).map((t) => (
@@ -690,14 +678,14 @@ function Hero({ config, onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(255,255,255,0.35)",
+                  color: "rgba(255,255,255,0.4)",
                   fontSize: 12,
                   fontFamily: "'Barlow', sans-serif",
                 }}
               >
                 <svg
-                  width="13"
-                  height="13"
+                  width="12"
+                  height="12"
                   viewBox="0 0 20 20"
                   fill={config.accent}
                 >
@@ -713,7 +701,7 @@ function Hero({ config, onRegister }) {
           </div>
         </div>
 
-        {/* Right: Invoice preview */}
+        {/* RIGHT — Invoice card */}
         <div
           style={{
             flex: "1 1 340px",
@@ -721,41 +709,41 @@ function Hero({ config, onRegister }) {
             justifyContent: "center",
           }}
         >
-          <div style={{ position: "relative" }}>
-            {/* Floating badge */}
+          <div style={{ position: "relative", width: "100%", maxWidth: 480 }}>
+            {/* Floating payment badge */}
             <div
               style={{
                 position: "absolute",
-                top: -18,
-                right: -18,
+                top: -16,
+                right: -10,
                 zIndex: 2,
                 background: "#16A34A",
                 color: T.white,
-                borderRadius: 10,
-                padding: "8px 14px",
+                borderRadius: 8,
+                padding: "7px 14px",
                 fontSize: 12,
                 fontWeight: 700,
                 fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                boxShadow: "0 6px 18px rgba(22,163,74,0.35)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
               }}
             >
-              <span>💰</span> Payment received!
+              💰 Payment received!
             </div>
             <MockInvoice config={config} />
-            {/* Stats row */}
-            <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
+            {/* Mini stats */}
+            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
               {stats.map(([v, l]) => (
                 <div
                   key={l}
                   style={{
                     flex: 1,
-                    background: "rgba(255,255,255,0.06)",
+                    background: "rgba(255,255,255,0.07)",
                     border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 10,
-                    padding: "10px 12px",
+                    borderRadius: 8,
+                    padding: "10px 10px",
                     textAlign: "center",
                   }}
                 >
@@ -763,7 +751,7 @@ function Hero({ config, onRegister }) {
                     style={{
                       fontFamily: "'Barlow Condensed', sans-serif",
                       fontWeight: 800,
-                      fontSize: 18,
+                      fontSize: 17,
                       color: T.white,
                     }}
                   >
@@ -789,23 +777,28 @@ function Hero({ config, onRegister }) {
       <div
         style={{
           maxWidth: 1200,
-          margin: "48px auto 0",
-          borderTop: "1px solid rgba(255,255,255,0.07)",
-          paddingTop: 28,
+          margin: "56px auto 0",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          paddingTop: 26,
           display: "flex",
-          gap: 40,
+          gap: 36,
           flexWrap: "wrap",
           alignItems: "center",
+          position: "relative",
+          zIndex: 3,
         }}
       >
         <span
           style={{
-            color: "rgba(255,255,255,0.3)",
-            fontSize: 13,
+            color: "rgba(255,255,255,0.28)",
+            fontSize: 11,
             fontFamily: "'Barlow', sans-serif",
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
           }}
         >
-          TRUSTED BY SA {config.label.toUpperCase()} BUSINESSES
+          Trusted by SA schools
         </span>
         {trustedBy.map((b) => (
           <span
@@ -813,9 +806,9 @@ function Hero({ config, onRegister }) {
             style={{
               fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 700,
-              fontSize: 15,
-              color: "rgba(255,255,255,0.25)",
-              letterSpacing: 0.5,
+              fontSize: 14,
+              color: "rgba(255,255,255,0.2)",
+              letterSpacing: 0.4,
             }}
           >
             {b}
@@ -826,105 +819,95 @@ function Hero({ config, onRegister }) {
   );
 }
 
-/* ─── How It Works ─────────────────────────────────────────────────────── */
+/* ─── How It Works ── horizontal steps (Zoho style) ────────────────────── */
 function HowItWorks({ config }) {
   const steps = config.howItWorks || [
     {
       icon: "📋",
       title: "Create a Job Card",
-      desc: "Log the client details and work required. Add parts or services and set your rates.",
+      desc: "Log client details and work required. Add parts, services and your rates.",
     },
     {
       icon: "📩",
       title: "Send the Invoice",
-      desc: "One tap sends a professional VAT invoice via email, SMS, or WhatsApp PDF — directly to your client.",
+      desc: "One tap sends a professional VAT invoice via email, SMS or WhatsApp.",
     },
     {
       icon: "💳",
       title: "Get Paid Instantly",
-      desc: "Clients pay via EFT, card, or instant EFT. You get notified the moment money hits your account.",
+      desc: "Clients pay via EFT or card. You're notified the moment funds arrive.",
     },
   ];
 
   return (
-    <section style={{ background: T.white, padding: "80px 24px" }}>
+    <section
+      style={{
+        background: T.white,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
+    >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 52 }}>
-          <p
-            style={{
-              color: config.accent,
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: 3,
-              textTransform: "uppercase",
-              fontFamily: "'Barlow', sans-serif",
-              marginBottom: 10,
-            }}
-          >
-            How It Works
-          </p>
-          <h2
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(30px,4vw,48px)",
-              color: config.color,
-              margin: 0,
-              letterSpacing: -0.5,
-            }}
-          >
-            Invoice in 60 seconds, flat.
-          </h2>
-        </div>
-
+        <SectionHead
+          overline="How It Works"
+          accent={config.accent}
+          title="Invoice in 60 seconds, flat."
+          sub="Three simple steps from job to payment — no accounting degree required."
+        />
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: 24,
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))",
+            gap: 0,
+            position: "relative",
           }}
         >
           {steps.map((s, i) => (
             <div
               key={i}
               style={{
-                background: i === 1 ? config.color : T.surface,
-                borderRadius: 16,
-                padding: "36px 32px",
-                border: `1px solid ${i === 1 ? "transparent" : T.border}`,
+                padding: "32px 28px",
                 position: "relative",
+                borderLeft: i > 0 ? `1px solid ${T.border}` : "none",
               }}
             >
+              {/* Step number */}
               <div
                 style={{
-                  position: "absolute",
-                  top: 24,
-                  right: 24,
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  background:
+                    i === 0 ? config.color : i === 1 ? config.accent : T.bg,
+                  border: `2px solid ${i === 2 ? T.border : "transparent"}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 900,
-                  fontSize: 48,
-                  color:
-                    i === 1 ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
-                  lineHeight: 1,
+                  fontSize: 15,
+                  color: i === 2 ? T.muted : T.white,
+                  marginBottom: 18,
+                  flexShrink: 0,
                 }}
               >
-                0{i + 1}
+                {String(i + 1).padStart(2, "0")}
               </div>
-              <div style={{ fontSize: 32, marginBottom: 16 }}>{s.icon}</div>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>{s.icon}</div>
               <h3
                 style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 800,
-                  fontSize: 22,
-                  color: i === 1 ? T.white : config.color,
-                  margin: "0 0 10px",
+                  fontSize: 20,
+                  color: T.text,
+                  margin: "0 0 8px",
                 }}
               >
                 {s.title}
               </h3>
               <p
                 style={{
-                  color: i === 1 ? "rgba(255,255,255,0.55)" : T.muted,
+                  color: T.muted,
                   fontSize: 14,
                   lineHeight: 1.7,
                   margin: 0,
@@ -933,21 +916,28 @@ function HowItWorks({ config }) {
               >
                 {s.desc}
               </p>
-              {i === 1 && (
+              {/* Connector arrow */}
+              {i < steps.length - 1 && (
                 <div
                   style={{
-                    marginTop: 20,
-                    display: "inline-block",
-                    background: config.accent,
-                    borderRadius: 6,
-                    padding: "5px 14px",
+                    position: "absolute",
+                    top: "50%",
+                    right: -14,
+                    transform: "translateY(-50%)",
+                    width: 28,
+                    height: 28,
+                    background: T.white,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1,
                     fontSize: 12,
-                    fontWeight: 700,
-                    color: T.white,
-                    fontFamily: "'Barlow', sans-serif",
+                    color: T.muted,
                   }}
                 >
-                  Most Popular Step
+                  →
                 </div>
               )}
             </div>
@@ -958,117 +948,457 @@ function HowItWorks({ config }) {
   );
 }
 
-/* ─── Features ─────────────────────────────────────────────────────────── */
+/* ─── Dashboard Features ── Zoho-style tabbed platform showcase ─────────── */
+function DashboardFeatures({ config, onRegister }) {
+  const [activeTab, setActiveTab] = useState("all");
+
+  const allFeatures = config.dashboardFeatures || [
+    {
+      category: "academic",
+      icon: "📋",
+      title: "Report Cards",
+      desc: "Generate and share professional learner report cards in seconds. Attach grades, comments and certificates automatically.",
+      tags: ["PDF export", "Templates"],
+    },
+    {
+      category: "academic",
+      icon: "✏️",
+      title: "Assessments",
+      desc: "Create and manage tests, assignments and formative assessments. Track performance by subject, term and learner over time.",
+      tags: ["Grade tracking", "Term summaries"],
+    },
+    {
+      category: "academic",
+      icon: "📚",
+      title: "Curriculum Manager",
+      desc: "Align lesson plans to your curriculum. Organise by grade, subject and term with a clear visual planner.",
+      tags: ["CAPS-aligned", "Lesson plans"],
+    },
+    {
+      category: "academic",
+      icon: "📖",
+      title: "Homework Tracker",
+      desc: "Set and track homework per class or subject. Parents and learners see due dates, status and feedback in one place.",
+      tags: ["Due date alerts", "Parent view"],
+    },
+    {
+      category: "academic",
+      icon: "🗓️",
+      title: "Timetable",
+      desc: "Build and publish class timetables for staff and students. Drag-and-drop scheduling with automatic clash detection.",
+      tags: ["Clash detection", "Printable PDF"],
+    },
+    {
+      category: "academic",
+      icon: "📕",
+      title: "Library",
+      desc: "Manage your school library digitally. Track checkouts, returns and overdue items with per-learner borrowing history.",
+      tags: ["Book catalogue", "Borrowing log"],
+    },
+    {
+      category: "admin",
+      icon: "🏫",
+      title: "School Overview",
+      desc: "A live dashboard showing enrolment numbers, today's attendance rate, outstanding fees and upcoming events at a glance.",
+      tags: ["Live stats", "At-a-glance"],
+    },
+    {
+      category: "admin",
+      icon: "👩‍🎓",
+      title: "Student Profiles",
+      desc: "Detailed profiles per learner — contact info, medical notes, previous reports and full attendance history.",
+      tags: ["Medical notes", "Full history"],
+    },
+    {
+      category: "admin",
+      icon: "👩‍🏫",
+      title: "Staff Management",
+      desc: "Onboard and manage all staff. Store qualifications, class assignments and payroll details securely in one place.",
+      tags: ["Qualifications", "Class roster"],
+    },
+    {
+      category: "admin",
+      icon: "✅",
+      title: "Attendance Register",
+      desc: "Take daily or per-period attendance on any device. Flag absenteeism trends and generate SACE-ready reports.",
+      tags: ["Per-period", "Absence alerts"],
+    },
+    {
+      category: "communication",
+      icon: "📢",
+      title: "School Notices",
+      desc: "Publish notices to specific grades or the whole school. Parents get instant WhatsApp or email notifications — no app required.",
+      tags: ["WhatsApp delivery", "Targeted"],
+    },
+    {
+      category: "communication",
+      icon: "📅",
+      title: "Events Calendar",
+      desc: "Create and publish events, sport days, exams and parent evenings. Sync to parent calendars with automated reminders.",
+      tags: ["Calendar sync", "Reminders"],
+    },
+    {
+      category: "compliance",
+      icon: "🛡️",
+      title: "Documents & Compliance",
+      desc: "Store SACE certificates, POPI consents, inspection reports and policies. Expiry reminders so nothing lapses.",
+      tags: ["POPI compliant", "Expiry alerts"],
+    },
+    {
+      category: "compliance",
+      icon: "🏅",
+      title: "Certificates & Awards",
+      desc: "Generate achievement and completion certificates branded with your school logo. Bulk print in one click.",
+      tags: ["Auto-branded", "Bulk print"],
+    },
+  ];
+
+  const tabs = [
+    { key: "all", label: "All", count: allFeatures.length },
+    {
+      key: "admin",
+      label: "Administration",
+      count: allFeatures.filter((f) => f.category === "admin").length,
+    },
+    {
+      key: "academic",
+      label: "Academic",
+      count: allFeatures.filter((f) => f.category === "academic").length,
+    },
+    {
+      key: "communication",
+      label: "Communication",
+      count: allFeatures.filter((f) => f.category === "communication").length,
+    },
+    {
+      key: "compliance",
+      label: "Compliance",
+      count: allFeatures.filter((f) => f.category === "compliance").length,
+    },
+  ];
+
+  const visible =
+    activeTab === "all"
+      ? allFeatures
+      : allFeatures.filter((f) => f.category === activeTab);
+
+  const categoryColors = {
+    admin: { bg: "#EEF3FB", color: "#2563EB" },
+    academic: { bg: "#F0FDF4", color: "#16A34A" },
+    communication: { bg: "#FFF7ED", color: "#EA580C" },
+    compliance: { bg: "#F5F3FF", color: "#7C3AED" },
+  };
+
+  return (
+    <section
+      id="dashboard"
+      style={{
+        background: T.bg,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
+    >
+      <div style={{ maxWidth: 1160, margin: "0 auto" }}>
+        <SectionHead
+          overline="Platform"
+          accent={config.accent}
+          title="Your entire school, in one dashboard"
+          sub="Beyond invoicing — Educare gives your school a complete operations hub from the moment you sign in."
+        />
+
+        {/* Zoho-style underline tabs */}
+        <div
+          style={{
+            display: "flex",
+            gap: 0,
+            justifyContent: "center",
+            marginBottom: 40,
+            borderBottom: `1px solid ${T.border}`,
+            paddingBottom: 0,
+          }}
+        >
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setActiveTab(t.key)}
+              style={{
+                padding: "10px 20px",
+                background: "none",
+                border: "none",
+                borderBottom:
+                  activeTab === t.key
+                    ? `2px solid ${config.color}`
+                    : "2px solid transparent",
+                marginBottom: -1,
+                color: activeTab === t.key ? config.color : T.muted,
+                fontSize: 13.5,
+                fontWeight: activeTab === t.key ? 700 : 500,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+                transition: "color 0.15s, border-color 0.15s",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              {t.label}
+              <span
+                style={{
+                  background:
+                    activeTab === t.key ? `${config.color}18` : T.bgAlt,
+                  color: activeTab === t.key ? config.color : T.muted,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: "1px 7px",
+                  borderRadius: 99,
+                }}
+              >
+                {t.count}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* 4-column card grid (Zoho style) */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+            gap: 14,
+          }}
+        >
+          {visible.map((f, i) => {
+            const cc = categoryColors[f.category] || {
+              bg: T.bgAlt,
+              color: config.color,
+            };
+            return (
+              <div
+                key={i}
+                style={{
+                  background: T.white,
+                  borderRadius: 8,
+                  padding: "20px 18px",
+                  border: `1px solid ${T.border}`,
+                  borderLeft: `3px solid ${cc.color}`,
+                  transition: "box-shadow 0.2s, transform 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = `0 4px 20px ${T.shadow}`;
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                {/* Icon */}
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                    background: cc.bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 18,
+                    marginBottom: 12,
+                  }}
+                >
+                  {f.icon}
+                </div>
+                <h3
+                  style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800,
+                    fontSize: 16,
+                    color: T.text,
+                    margin: "0 0 6px",
+                  }}
+                >
+                  {f.title}
+                </h3>
+                <p
+                  style={{
+                    color: T.muted,
+                    fontSize: 12.5,
+                    lineHeight: 1.6,
+                    margin: "0 0 12px",
+                    fontFamily: "'Barlow', sans-serif",
+                  }}
+                >
+                  {f.desc}
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                  {f.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: "2px 8px",
+                        borderRadius: 3,
+                        background: cc.bg,
+                        color: cc.color,
+                        fontFamily: "'Barlow', sans-serif",
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Connected-system callout bar */}
+        <div
+          style={{
+            marginTop: 48,
+            background: config.color,
+            borderRadius: 8,
+            padding: "28px 32px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 24,
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ flex: "1 1 260px" }}>
+            <h3
+              style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 900,
+                fontSize: 22,
+                color: T.white,
+                margin: "0 0 6px",
+              }}
+            >
+              Everything talks to each other
+            </h3>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.5)",
+                fontSize: 13,
+                margin: 0,
+                lineHeight: 1.65,
+                fontFamily: "'Barlow', sans-serif",
+                maxWidth: 380,
+              }}
+            >
+              Attendance links to reports, homework links to assessments,
+              notices reach parents instantly — one connected system.
+            </p>
+          </div>
+          <button
+            onClick={onRegister}
+            style={{
+              background: config.accent,
+              border: "none",
+              borderRadius: 7,
+              padding: "12px 26px",
+              color: T.white,
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: "'Barlow', sans-serif",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              boxShadow: `0 4px 14px ${config.accent}55`,
+            }}
+          >
+            See the dashboard →
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Features ── Zoho alternating rows ─────────────────────────────────── */
 function Features({ config }) {
   return (
     <section
       id="features"
-      style={{ background: T.surface, padding: "80px 24px" }}
+      style={{
+        background: T.white,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 52 }}>
-          <p
-            style={{
-              color: config.accent,
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: 3,
-              textTransform: "uppercase",
-              fontFamily: "'Barlow', sans-serif",
-              marginBottom: 10,
-            }}
-          >
-            Features
-          </p>
-          <h2
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(28px,4vw,46px)",
-              color: config.color,
-              margin: "0 0 12px",
-              letterSpacing: -0.5,
-            }}
-          >
-            Everything your {config.label.toLowerCase()} business needs
-          </h2>
-          <p
-            style={{
-              color: T.muted,
-              fontSize: 15,
-              maxWidth: 520,
-              margin: "0 auto",
-              fontFamily: "'Barlow', sans-serif",
-            }}
-          >
-            No unnecessary extras. Just the tools that matter for how you work.
-          </p>
-        </div>
-
+        <SectionHead
+          overline="Features"
+          accent={config.accent}
+          title={`Everything your ${config.label?.toLowerCase() || "education"} business needs`}
+          sub="No unnecessary extras. Just the tools that matter for how you work."
+        />
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: 18,
+            gridTemplateColumns: "repeat(auto-fill, minmax(300px,1fr))",
+            gap: 14,
           }}
         >
-          {config.features.map((f, i) => (
+          {config.features?.map((f, i) => (
             <div
               key={i}
               style={{
-                background: T.white,
-                borderRadius: 14,
-                padding: "24px 22px",
-                border: `1px solid ${T.border}`,
-                transition: "box-shadow .2s, transform .2s",
-                cursor: "default",
+                background: T.bg,
+                borderRadius: 8,
+                padding: "22px 20px",
+                border: `1px solid ${T.borderL}`,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 14,
+                transition: "box-shadow 0.2s",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.08)";
-                e.currentTarget.style.transform = "translateY(-2px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = "none";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.boxShadow = `0 4px 16px ${T.shadow}`)
+              }
+              onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
             >
               <div
                 style={{
                   width: 44,
                   height: 44,
-                  borderRadius: 10,
-                  background: config.lightBg || `${config.accent}18`,
+                  borderRadius: 8,
+                  flexShrink: 0,
+                  background: `${config.accent}12`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 22,
-                  marginBottom: 14,
+                  fontSize: 20,
                 }}
               >
                 {f.icon}
               </div>
-              <h3
-                style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 800,
-                  fontSize: 18,
-                  color: config.color,
-                  margin: "0 0 6px",
-                }}
-              >
-                {f.title}
-              </h3>
-              <p
-                style={{
-                  color: T.muted,
-                  fontSize: 13,
-                  lineHeight: 1.65,
-                  margin: 0,
-                  fontFamily: "'Barlow', sans-serif",
-                }}
-              >
-                {f.desc}
-              </p>
+              <div>
+                <h3
+                  style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800,
+                    fontSize: 17,
+                    color: T.text,
+                    margin: "0 0 5px",
+                  }}
+                >
+                  {f.title}
+                </h3>
+                <p
+                  style={{
+                    color: T.muted,
+                    fontSize: 13,
+                    lineHeight: 1.65,
+                    margin: 0,
+                    fontFamily: "'Barlow', sans-serif",
+                  }}
+                >
+                  {f.desc}
+                </p>
+              </div>
             </div>
           ))}
         </div>
@@ -1077,86 +1407,65 @@ function Features({ config }) {
   );
 }
 
-/* ─── Pricing ───────────────────────────────────────────────────────────── */
+/* ─── Pricing ── Zoho-style clean table cards ───────────────────────────── */
 function Pricing({ config, onRegister }) {
   return (
-    <section id="pricing" style={{ background: T.white, padding: "80px 24px" }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 52 }}>
-          <p
-            style={{
-              color: config.accent,
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: 3,
-              textTransform: "uppercase",
-              fontFamily: "'Barlow', sans-serif",
-              marginBottom: 10,
-            }}
-          >
-            Pricing
-          </p>
-          <h2
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(28px,4vw,46px)",
-              color: config.color,
-              margin: "0 0 12px",
-              letterSpacing: -0.5,
-            }}
-          >
-            Honest pricing. No surprises.
-          </h2>
-          <p
-            style={{
-              color: T.muted,
-              fontSize: 15,
-              fontFamily: "'Barlow', sans-serif",
-            }}
-          >
-            Start free. Upgrade when your business is ready to scale.
-          </p>
-        </div>
-
+    <section
+      id="pricing"
+      style={{
+        background: T.bg,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
+    >
+      <div style={{ maxWidth: 1020, margin: "0 auto" }}>
+        <SectionHead
+          overline="Pricing"
+          accent={config.accent}
+          title="Honest pricing. No surprises."
+          sub="Start free. Upgrade when your school is ready to scale."
+        />
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))",
-            gap: 20,
+            gridTemplateColumns: "repeat(auto-fit, minmax(270px,1fr))",
+            gap: 16,
           }}
         >
-          {config.pricing.map((p, i) => (
+          {config.pricing?.map((p, i) => (
             <div
               key={i}
               style={{
-                borderRadius: 16,
-                padding: "32px 28px",
-                background: p.highlight ? config.color : T.surface,
+                borderRadius: 10,
+                padding: "32px 26px",
+                background: p.highlight ? config.color : T.white,
                 border: p.highlight
                   ? `2px solid ${config.accent}`
                   : `1px solid ${T.border}`,
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
+                boxShadow: p.highlight
+                  ? `0 8px 32px ${config.color}30`
+                  : "none",
               }}
             >
               {p.highlight && (
                 <div
                   style={{
                     position: "absolute",
-                    top: -14,
+                    top: -13,
                     left: "50%",
                     transform: "translateX(-50%)",
                     background: config.accent,
                     color: T.white,
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: 800,
-                    padding: "5px 16px",
+                    padding: "4px 14px",
                     borderRadius: 99,
                     fontFamily: "'Barlow', sans-serif",
-                    letterSpacing: 0.5,
-                    boxShadow: `0 4px 12px ${config.accent}66`,
+                    letterSpacing: "0.06em",
+                    boxShadow: `0 3px 10px ${config.accent}55`,
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -1164,15 +1473,15 @@ function Pricing({ config, onRegister }) {
                 </div>
               )}
 
-              <div style={{ marginBottom: 20 }}>
+              <div style={{ marginBottom: 22 }}>
                 <p
                   style={{
-                    color: p.highlight ? "rgba(255,255,255,0.5)" : T.muted,
-                    fontSize: 12,
+                    color: p.highlight ? "rgba(255,255,255,0.55)" : T.muted,
+                    fontSize: 11,
                     fontWeight: 700,
                     textTransform: "uppercase",
-                    letterSpacing: 1,
-                    margin: "0 0 6px",
+                    letterSpacing: "0.08em",
+                    margin: "0 0 8px",
                     fontFamily: "'Barlow', sans-serif",
                   }}
                 >
@@ -1185,16 +1494,16 @@ function Pricing({ config, onRegister }) {
                     style={{
                       fontFamily: "'Barlow Condensed', sans-serif",
                       fontWeight: 900,
-                      fontSize: 40,
-                      color: p.highlight ? T.white : config.color,
+                      fontSize: 42,
+                      color: p.highlight ? T.white : T.text,
                     }}
                   >
                     {p.price}
                   </span>
                   <span
                     style={{
-                      color: p.highlight ? "rgba(255,255,255,0.4)" : T.muted,
-                      fontSize: 14,
+                      color: p.highlight ? "rgba(255,255,255,0.45)" : T.muted,
+                      fontSize: 13,
                       fontFamily: "'Barlow', sans-serif",
                     }}
                   >
@@ -1217,25 +1526,25 @@ function Pricing({ config, onRegister }) {
                 style={{
                   listStyle: "none",
                   padding: 0,
-                  margin: "0 0 28px",
+                  margin: "0 0 24px",
                   flex: 1,
                   display: "flex",
                   flexDirection: "column",
-                  gap: 10,
+                  gap: 9,
                 }}
               >
-                {p.features.map((f, j) => (
+                {p.features?.map((f, j) => (
                   <li
                     key={j}
                     style={{
                       display: "flex",
-                      gap: 10,
+                      gap: 9,
                       alignItems: "flex-start",
                     }}
                   >
                     <svg
-                      width="15"
-                      height="15"
+                      width="14"
+                      height="14"
                       viewBox="0 0 20 20"
                       fill={config.accent}
                       style={{ flexShrink: 0, marginTop: 2 }}
@@ -1248,7 +1557,7 @@ function Pricing({ config, onRegister }) {
                     </svg>
                     <span
                       style={{
-                        color: p.highlight ? "rgba(255,255,255,0.75)" : T.text,
+                        color: p.highlight ? "rgba(255,255,255,0.8)" : T.sub,
                         fontSize: 13,
                         fontFamily: "'Barlow', sans-serif",
                       }}
@@ -1262,18 +1571,19 @@ function Pricing({ config, onRegister }) {
               <button
                 onClick={onRegister}
                 style={{
-                  background: p.highlight ? config.accent : config.color,
-                  border: "none",
-                  borderRadius: 10,
-                  padding: "12px",
-                  color: T.white,
+                  background: p.highlight ? config.accent : "transparent",
+                  border: p.highlight ? "none" : `1.5px solid ${config.color}`,
+                  borderRadius: 7,
+                  padding: "11px",
+                  color: p.highlight ? T.white : config.color,
                   fontWeight: 700,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontFamily: "'Barlow', sans-serif",
                   cursor: "pointer",
                   boxShadow: p.highlight
-                    ? `0 6px 20px ${config.accent}59`
+                    ? `0 4px 14px ${config.accent}45`
                     : "none",
+                  transition: "background 0.2s",
                 }}
               >
                 {p.cta}
@@ -1289,8 +1599,8 @@ function Pricing({ config, onRegister }) {
 /* ─── Testimonials ──────────────────────────────────────────────────────── */
 function Testimonials({ config }) {
   const statsStrip = config.statsStrip || [
-    ["1 200+", "Active businesses"],
-    ["R 28M+", "Invoiced monthly"],
+    ["500+", "SA Schools onboarded"],
+    ["R 8M+", "Invoiced monthly"],
     ["4.9/5", "App store rating"],
     ["< 60s", "Avg invoice time"],
   ];
@@ -1298,68 +1608,53 @@ function Testimonials({ config }) {
   return (
     <section
       id="testimonials"
-      style={{ background: T.surface, padding: "80px 24px" }}
+      style={{
+        background: T.white,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 52 }}>
-          <p
-            style={{
-              color: config.accent,
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: 3,
-              textTransform: "uppercase",
-              fontFamily: "'Barlow', sans-serif",
-              marginBottom: 10,
-            }}
-          >
-            Testimonials
-          </p>
-          <h2
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(28px,4vw,46px)",
-              color: config.color,
-              margin: 0,
-              letterSpacing: -0.5,
-            }}
-          >
-            Loved by SA {config.label.toLowerCase()} businesses
-          </h2>
-        </div>
+        <SectionHead
+          overline="Testimonials"
+          accent={config.accent}
+          title={`Loved by SA ${config.label?.toLowerCase() || "education"} businesses`}
+          sub="Hear from school owners and principals across South Africa."
+        />
 
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))",
-            gap: 20,
+            gridTemplateColumns: "repeat(auto-fit, minmax(290px,1fr))",
+            gap: 16,
           }}
         >
-          {config.testimonials.map((t, i) => (
+          {config.testimonials?.map((t, i) => (
             <div
               key={i}
               style={{
-                background: T.white,
-                borderRadius: 16,
-                padding: "28px 24px",
-                border: `1px solid ${T.border}`,
+                background: T.bg,
+                borderRadius: 8,
+                padding: "26px 22px",
+                border: `1px solid ${T.borderL}`,
                 display: "flex",
                 flexDirection: "column",
-                gap: 16,
+                gap: 14,
               }}
             >
+              {/* Stars */}
               <div style={{ display: "flex", gap: 2 }}>
                 {[...Array(5)].map((_, j) => (
-                  <span key={j} style={{ color: config.accent, fontSize: 16 }}>
+                  <span key={j} style={{ color: "#F59E0B", fontSize: 14 }}>
                     ★
                   </span>
                 ))}
               </div>
+              {/* Quote */}
               <p
                 style={{
-                  color: T.text,
-                  fontSize: 14,
+                  color: T.sub,
+                  fontSize: 13.5,
                   lineHeight: 1.75,
                   fontFamily: "'Barlow', sans-serif",
                   margin: 0,
@@ -1368,19 +1663,20 @@ function Testimonials({ config }) {
               >
                 "{t.quote}"
               </p>
+              {/* Author */}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 12,
+                  gap: 10,
                   paddingTop: 12,
                   borderTop: `1px solid ${T.border}`,
                 }}
               >
                 <div
                   style={{
-                    width: 40,
-                    height: 40,
+                    width: 38,
+                    height: 38,
                     borderRadius: "50%",
                     background: config.color,
                     display: "flex",
@@ -1400,8 +1696,8 @@ function Testimonials({ config }) {
                     style={{
                       fontFamily: "'Barlow Condensed', sans-serif",
                       fontWeight: 700,
-                      fontSize: 15,
-                      color: config.color,
+                      fontSize: 14,
+                      color: T.text,
                       margin: 0,
                     }}
                   >
@@ -1410,7 +1706,7 @@ function Testimonials({ config }) {
                   <p
                     style={{
                       fontFamily: "'Barlow', sans-serif",
-                      fontSize: 12,
+                      fontSize: 11,
                       color: T.muted,
                       margin: 0,
                     }}
@@ -1423,14 +1719,14 @@ function Testimonials({ config }) {
           ))}
         </div>
 
-        {/* Stats strip */}
+        {/* Stats band */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px,1fr))",
             background: config.color,
-            borderRadius: 16,
-            marginTop: 48,
+            borderRadius: 8,
+            marginTop: 44,
             overflow: "hidden",
           }}
         >
@@ -1438,11 +1734,11 @@ function Testimonials({ config }) {
             <div
               key={i}
               style={{
-                padding: "28px 24px",
+                padding: "26px 22px",
                 textAlign: "center",
                 borderRight:
                   i < statsStrip.length - 1
-                    ? "1px solid rgba(255,255,255,0.07)"
+                    ? "1px solid rgba(255,255,255,0.08)"
                     : "none",
               }}
             >
@@ -1450,7 +1746,7 @@ function Testimonials({ config }) {
                 style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 900,
-                  fontSize: 36,
+                  fontSize: 34,
                   color: config.accent,
                 }}
               >
@@ -1459,9 +1755,9 @@ function Testimonials({ config }) {
               <div
                 style={{
                   fontFamily: "'Barlow', sans-serif",
-                  fontSize: 13,
+                  fontSize: 12,
                   color: "rgba(255,255,255,0.45)",
-                  marginTop: 4,
+                  marginTop: 3,
                 }}
               >
                 {l}
@@ -1479,46 +1775,30 @@ function FAQ({ config }) {
   const [open, setOpen] = useState(null);
 
   return (
-    <section id="faq" style={{ background: T.white, padding: "80px 24px" }}>
+    <section
+      id="faq"
+      style={{
+        background: T.bg,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
+    >
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <p
-            style={{
-              color: config.accent,
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: 3,
-              textTransform: "uppercase",
-              fontFamily: "'Barlow', sans-serif",
-              marginBottom: 10,
-            }}
-          >
-            FAQ
-          </p>
-          <h2
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(28px,4vw,46px)",
-              color: config.color,
-              margin: 0,
-              letterSpacing: -0.5,
-            }}
-          >
-            Common questions
-          </h2>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {config.faqs.map((faq, i) => (
+        <SectionHead
+          overline="FAQ"
+          accent={config.accent}
+          title="Common questions"
+        />
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {config.faqs?.map((faq, i) => (
             <div
               key={i}
               style={{
-                background: T.surface,
-                borderRadius: 12,
-                border: `1px solid ${open === i ? config.accent : T.border}`,
+                background: T.white,
+                borderRadius: 8,
+                border: `1px solid ${open === i ? config.color : T.border}`,
                 overflow: "hidden",
-                transition: "border-color .2s",
+                transition: "border-color 0.2s",
               }}
             >
               <button
@@ -1528,7 +1808,7 @@ function FAQ({ config }) {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  padding: "18px 22px",
+                  padding: "16px 20px",
                   background: "none",
                   border: "none",
                   cursor: "pointer",
@@ -1538,17 +1818,17 @@ function FAQ({ config }) {
               >
                 <span
                   style={{
-                    fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 700,
-                    fontSize: 17,
-                    color: config.color,
+                    fontFamily: "'Barlow', sans-serif",
+                    fontWeight: 600,
+                    fontSize: 15,
+                    color: T.text,
                   }}
                 >
                   {faq.q}
                 </span>
                 <svg
-                  width="18"
-                  height="18"
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke={config.accent}
@@ -1556,7 +1836,7 @@ function FAQ({ config }) {
                   style={{
                     flexShrink: 0,
                     transform: open === i ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform .2s",
+                    transition: "transform 0.2s",
                   }}
                 >
                   <path d="M19 9l-7 7-7-7" />
@@ -1565,8 +1845,8 @@ function FAQ({ config }) {
               {open === i && (
                 <div
                   style={{
-                    padding: "14px 22px 18px",
-                    borderTop: `1px solid ${T.border}`,
+                    padding: "12px 20px 18px",
+                    borderTop: `1px solid ${T.borderL}`,
                   }}
                 >
                   <p
@@ -1595,8 +1875,8 @@ function CTABanner({ config, onRegister }) {
   return (
     <section
       style={{
-        background: `linear-gradient(135deg, ${config.color} 0%, ${config.colorMid || config.color} 100%)`,
-        padding: "80px 24px",
+        background: `linear-gradient(135deg, ${config.color} 0%, ${config.colorDark || config.color} 100%)`,
+        padding: "80px 28px",
         position: "relative",
         overflow: "hidden",
       }}
@@ -1604,10 +1884,10 @@ function CTABanner({ config, onRegister }) {
       <div
         style={{
           position: "absolute",
-          bottom: -60,
-          left: -60,
-          width: 400,
-          height: 400,
+          bottom: -80,
+          right: -80,
+          width: 420,
+          height: 420,
           borderRadius: "50%",
           background: config.accent,
           opacity: 0.06,
@@ -1622,34 +1902,34 @@ function CTABanner({ config, onRegister }) {
           position: "relative",
         }}
       >
-        <div style={{ fontSize: 48, marginBottom: 16 }}>{config.icon}</div>
+        <div style={{ fontSize: 44, marginBottom: 14 }}>{config.icon}</div>
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",
             fontWeight: 900,
-            fontSize: "clamp(28px,4vw,52px)",
+            fontSize: "clamp(28px,4vw,50px)",
             color: T.white,
-            margin: "0 0 16px",
-            letterSpacing: -0.5,
+            margin: "0 0 14px",
+            letterSpacing: -0.4,
           }}
         >
-          Your business, running smarter.
+          Your school, running smarter.
         </h2>
         <p
           style={{
             color: "rgba(255,255,255,0.45)",
-            fontSize: 16,
-            margin: "0 0 36px",
+            fontSize: 15,
+            margin: "0 0 34px",
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join hundreds of South African {config.label.toLowerCase()} businesses
-          that bill professionally and get paid faster with SolidFlo.
+          Join hundreds of South African {config.label?.toLowerCase()}{" "}
+          businesses that bill professionally and get paid faster with Educare.
         </p>
         <div
           style={{
             display: "flex",
-            gap: 14,
+            gap: 12,
             justifyContent: "center",
             flexWrap: "wrap",
           }}
@@ -1659,15 +1939,15 @@ function CTABanner({ config, onRegister }) {
             style={{
               background: config.accent,
               border: "none",
-              borderRadius: 12,
-              padding: "16px 36px",
+              borderRadius: 8,
+              padding: "14px 34px",
               color: T.white,
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: 800,
               fontFamily: "'Barlow Condensed', sans-serif",
               cursor: "pointer",
-              letterSpacing: 0.5,
-              boxShadow: `0 8px 28px ${config.accent}73`,
+              letterSpacing: 0.3,
+              boxShadow: `0 6px 22px ${config.accent}60`,
             }}
           >
             START FOR FREE
@@ -1677,10 +1957,10 @@ function CTABanner({ config, onRegister }) {
             style={{
               background: "rgba(255,255,255,0.07)",
               border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: 12,
-              padding: "16px 28px",
+              borderRadius: 8,
+              padding: "14px 26px",
               color: "rgba(255,255,255,0.7)",
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: 600,
               fontFamily: "'Barlow', sans-serif",
               cursor: "pointer",
@@ -1692,24 +1972,24 @@ function CTABanner({ config, onRegister }) {
         <p
           style={{
             color: "rgba(255,255,255,0.2)",
-            fontSize: 12,
-            marginTop: 20,
+            fontSize: 11.5,
+            marginTop: 18,
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          No credit card required · Free plan available forever · Cancel anytime
+          No credit card required · Free plan forever · Cancel anytime
         </p>
       </div>
     </section>
   );
 }
 
-/* ─── Footer ────────────────────────────────────────────────────────────── */
+/* ─── Footer ── Zoho-style structured columns ───────────────────────────── */
 function Footer({ config, onLogin, onRegister }) {
   const cols = [
     {
       title: "Product",
-      links: ["Features", "Pricing", "Job Cards", "Inventory", "Reports"],
+      links: ["Features", "Pricing", "Report Cards", "Attendance", "Timetable"],
     },
     {
       title: "Resources",
@@ -1718,7 +1998,7 @@ function Footer({ config, onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About Educare",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -1730,9 +2010,9 @@ function Footer({ config, onLogin, onRegister }) {
   return (
     <footer
       style={{
-        background: config.footerBg || "#070F18",
-        borderTop: "1px solid rgba(255,255,255,0.05)",
-        padding: "56px 24px 32px",
+        background: "#0C1929",
+        borderTop: `1px solid rgba(255,255,255,0.05)`,
+        padding: "52px 28px 28px",
       }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -1741,57 +2021,37 @@ function Footer({ config, onLogin, onRegister }) {
             display: "grid",
             gridTemplateColumns: "2fr repeat(3, 1fr)",
             gap: 40,
-            marginBottom: 48,
+            marginBottom: 44,
           }}
         >
-          {/* Brand */}
           <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                marginBottom: 16,
-              }}
-            >
-              <div
-                style={{
-                  background: "transparent",
-                  width: 160,
-                  height: 40,
-                  borderRadius: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 16,
-                }}
-              >
-               <img src={logo} alt="" />
-              </div>
-             
-            </div>
+            <img
+              src={logo}
+              alt=""
+              style={{ height: 34, objectFit: "contain", marginBottom: 14 }}
+            />
             <p
               style={{
                 color: "rgba(255,255,255,0.3)",
                 fontSize: 13,
                 lineHeight: 1.7,
                 fontFamily: "'Barlow', sans-serif",
-                marginBottom: 20,
+                marginBottom: 18,
                 maxWidth: 220,
               }}
             >
-              Professional invoicing software built specifically for South
-              African {config.label.toLowerCase()} businesses.
+              Professional school management software built for South African
+              education businesses.
             </p>
             <button
               onClick={onRegister}
               style={{
                 background: config.accent,
                 border: "none",
-                borderRadius: 8,
-                padding: "10px 20px",
+                borderRadius: 6,
+                padding: "9px 18px",
                 color: T.white,
-                fontSize: 13,
+                fontSize: 12.5,
                 fontWeight: 700,
                 fontFamily: "'Barlow', sans-serif",
                 cursor: "pointer",
@@ -1800,25 +2060,22 @@ function Footer({ config, onLogin, onRegister }) {
               Get started free
             </button>
           </div>
-
           {cols.map((col, i) => (
             <div key={i}>
               <p
                 style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 800,
-                  fontSize: 14,
-                  color: "rgba(255,255,255,0.5)",
+                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 700,
+                  fontSize: 12,
+                  color: "rgba(255,255,255,0.45)",
                   textTransform: "uppercase",
-                  letterSpacing: 1,
-                  margin: "0 0 16px",
+                  letterSpacing: "0.08em",
+                  margin: "0 0 14px",
                 }}
               >
                 {col.title}
               </p>
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 10 }}
-              >
+              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
                 {col.links.map((l) => (
                   <a
                     key={l}
@@ -1828,7 +2085,7 @@ function Footer({ config, onLogin, onRegister }) {
                       fontSize: 13,
                       fontFamily: "'Barlow', sans-serif",
                       textDecoration: "none",
-                      transition: "color .15s",
+                      transition: "color 0.15s",
                     }}
                     onMouseEnter={(e) => (e.target.style.color = T.white)}
                     onMouseLeave={(e) =>
@@ -1842,16 +2099,15 @@ function Footer({ config, onLogin, onRegister }) {
             </div>
           ))}
         </div>
-
         <div
           style={{
             borderTop: "1px solid rgba(255,255,255,0.06)",
-            paddingTop: 24,
+            paddingTop: 22,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: 12,
+            gap: 10,
           }}
         >
           <p
@@ -1862,7 +2118,8 @@ function Footer({ config, onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} SolidFlo / Educare. All rights
+            reserved.
           </p>
           <p
             style={{
@@ -1892,10 +2149,18 @@ export default function SubdomainLandingPage() {
   return (
     <>
       <style>{fontStyle}</style>
-      <div style={{ minHeight: "100vh", fontFamily: "'Barlow', sans-serif" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          fontFamily: "'Barlow', sans-serif",
+          background: T.bg,
+          color: T.text,
+        }}
+      >
         <Navbar config={config} onLogin={goLogin} onRegister={goRegister} />
         <Hero config={config} onRegister={goRegister} />
         <HowItWorks config={config} />
+        <DashboardFeatures config={config} onRegister={goRegister} />
         <Features config={config} />
         <Pricing config={config} onRegister={goRegister} />
         <Testimonials config={config} />

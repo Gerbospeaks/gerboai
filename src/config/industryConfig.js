@@ -65,7 +65,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R299",
+        price: "R115",
         period: "/mo",
         desc: "For busy workshops",
         features: [
@@ -80,7 +80,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Workshop",
-        price: "R599",
+        price: "R200",
         period: "/mo",
         desc: "Multi-bay operations",
         features: [
@@ -199,7 +199,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Practice",
-        price: "R349",
+        price: "R149",
         period: "/mo",
         desc: "For small accounting firms",
         features: [
@@ -214,7 +214,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Firm",
-        price: "R699",
+        price: "R299",
         period: "/mo",
         desc: "Multi-staff practices",
         features: [
@@ -484,7 +484,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R279",
+        price: "R99",
         period: "/mo",
         desc: "For busy electricians",
         features: [
@@ -499,7 +499,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Team",
-        price: "R549",
+        price: "R199",
         period: "/mo",
         desc: "For electrical contractors",
         features: [
@@ -618,7 +618,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R279",
+        price: "R99",
         period: "/mo",
         desc: "For busy plumbers",
         features: [
@@ -633,7 +633,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Team",
-        price: "R549",
+        price: "R199",
         period: "/mo",
         desc: "For plumbing contractors",
         features: [
@@ -752,7 +752,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R349",
+        price: "R99",
         period: "/mo",
         desc: "For active installers",
         features: [
@@ -767,7 +767,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Company",
-        price: "R699",
+        price: "R199",
         period: "/mo",
         desc: "For solar companies",
         features: [
@@ -886,7 +886,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Craftsman",
-        price: "R299",
+        price: "R99",
         period: "/mo",
         desc: "For established carpentry businesses",
         features: [
@@ -902,7 +902,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Workshop",
-        price: "R599",
+        price: "R199",
         period: "/mo",
         desc: "For joinery shops with multiple staff",
         features: [
@@ -1022,7 +1022,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R279",
+        price: "R99",
         period: "/mo",
         desc: "For growing cleaning businesses",
         features: [
@@ -1037,7 +1037,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Company",
-        price: "R549",
+        price: "R199",
         period: "/mo",
         desc: "For cleaning companies with teams",
         features: [
@@ -1156,7 +1156,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Builder",
-        price: "R349",
+        price: "R99",
         period: "/mo",
         desc: "For active construction businesses",
         features: [
@@ -1171,7 +1171,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Contractor",
-        price: "R699",
+        price: "R199",
         period: "/mo",
         desc: "For construction companies",
         features: [
@@ -1232,6 +1232,7 @@ export const INDUSTRY_CONFIG = {
   education: {
     subdomain: "education",
     label: "Education",
+    heroVideo: "../assets/videos/education.mp4",
     headline: "School Management Made Easy for Schools & Tutors",
     subheadline:
       "Send term fees, tuition invoices and ad hoc charges professionally — and give parents a simple way to pay.",
@@ -1290,7 +1291,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "School",
-        price: "R349",
+        price: "R149",
         period: "/mo",
         desc: "For small schools & academies",
         features: [
@@ -1305,7 +1306,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Campus",
-        price: "R699",
+        price: "R299",
         period: "/mo",
         desc: "For larger institutions",
         features: [
@@ -1424,7 +1425,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Property",
-        price: "R299",
+        price: "R99",
         period: "/mo",
         desc: "For active guesthouses & lodges",
         features: [
@@ -1439,7 +1440,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Hotel",
-        price: "R599",
+        price: "R199",
         period: "/mo",
         desc: "For larger properties & groups",
         features: [
@@ -1558,7 +1559,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R299",
+        price: "R99",
         period: "/mo",
         desc: "For busy HVAC businesses",
         features: [
@@ -1573,7 +1574,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Company",
-        price: "R599",
+        price: "R199",
         period: "/mo",
         desc: "For HVAC companies",
         features: [
@@ -1692,7 +1693,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R279",
+        price: "R99",
         period: "/mo",
         desc: "For active landscaping businesses",
         features: [
@@ -1707,7 +1708,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Company",
-        price: "R549",
+        price: "R199",
         period: "/mo",
         desc: "For landscaping companies",
         features: [
@@ -1826,7 +1827,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Practice",
-        price: "R399",
+        price: "R99",
         period: "/mo",
         desc: "For small law firms",
         features: [
@@ -1841,7 +1842,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Firm",
-        price: "R799",
+        price: "R199",
         period: "/mo",
         desc: "For multi-attorney firms",
         features: [
@@ -1960,7 +1961,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Fleet",
-        price: "R299",
+        price: "R99",
         period: "/mo",
         desc: "For small logistics companies",
         features: [
@@ -1975,7 +1976,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Company",
-        price: "R599",
+        price: "R199",
         period: "/mo",
         desc: "For logistics operations",
         features: [
@@ -2094,7 +2095,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R249",
+        price: "R99",
         period: "/mo",
         desc: "For painting contractors",
         features: [
@@ -2109,7 +2110,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Company",
-        price: "R499",
+        price: "R199",
         period: "/mo",
         desc: "For painting companies",
         features: [
@@ -2228,7 +2229,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R279",
+        price: "R99",
         period: "/mo",
         desc: "For active pest control businesses",
         features: [
@@ -2243,7 +2244,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Company",
-        price: "R549",
+        price: "R199",
         period: "/mo",
         desc: "For pest control companies",
         features: [
@@ -2362,7 +2363,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R249",
+        price: "R99",
         period: "/mo",
         desc: "For active photographers",
         features: [
@@ -2377,7 +2378,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Studio",
-        price: "R499",
+        price: "R199",
         period: "/mo",
         desc: "For studios & production companies",
         features: [
@@ -2496,7 +2497,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R249",
+        price: "R99",
         period: "/mo",
         desc: "For active pool services",
         features: [
@@ -2511,7 +2512,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Company",
-        price: "R499",
+        price: "R199",
         period: "/mo",
         desc: "For pool service companies",
         features: [
@@ -2630,7 +2631,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Agent",
-        price: "R299",
+        price: "R99",
         period: "/mo",
         desc: "For active real estate professionals",
         features: [
@@ -2645,7 +2646,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Agency",
-        price: "R599",
+        price: "R199",
         period: "/mo",
         desc: "For property agencies",
         features: [
@@ -3032,7 +3033,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R349",
+        price: "R99",
         period: "/mo",
         desc: "For active security companies",
         features: [
@@ -3047,7 +3048,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Enterprise",
-        price: "R699",
+        price: "R199",
         period: "/mo",
         desc: "For large security operations",
         features: [
@@ -3166,7 +3167,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R249",
+        price: "R99",
         period: "/mo",
         desc: "For active towing businesses",
         features: [
@@ -3181,7 +3182,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Fleet",
-        price: "R499",
+        price: "R199",
         period: "/mo",
         desc: "For towing companies",
         features: [
@@ -3300,7 +3301,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R249",
+        price: "R99",
         period: "/mo",
         desc: "For active welding businesses",
         features: [
@@ -3315,7 +3316,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Workshop",
-        price: "R499",
+        price: "R199",
         period: "/mo",
         desc: "For fabrication workshops",
         features: [
@@ -3434,7 +3435,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R249",
+        price: "R99",
         period: "/mo",
         desc: "For active flooring businesses",
         features: [
@@ -3449,7 +3450,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Company",
-        price: "R499",
+        price: "R199",
         period: "/mo",
         desc: "For flooring companies",
         features: [
@@ -3568,7 +3569,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Pro",
-        price: "R249",
+        price: "R99",
         period: "/mo",
         desc: "For active glazing businesses",
         features: [
@@ -3583,7 +3584,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         name: "Company",
-        price: "R499",
+        price: "R199",
         period: "/mo",
         desc: "For glazing companies",
         features: [

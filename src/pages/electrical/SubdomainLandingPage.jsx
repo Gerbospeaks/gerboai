@@ -4,14 +4,12 @@ import logo from "../../assets/img/electrical-logo.png"
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
-
-/* ─── Design Tokens ────────────────────────────────────────────────────── */
 const C = {
-  ink: "#1A1400", // deep amber-black
-  ink2: "#2E2200", // mid amber-dark
-  surface: "#FAFAF4", // warm off-white
+  ink: "#1A1400", 
+  ink2: "#2E2200", 
+  surface: "#FAFAF4", 
   white: "#FFFFFF",
-  orange: "#F59E0B", // amber/electric yellow accent
+  orange: "#F59E0B", 
   orangeD: "#B45309",
   orangeL: "#FFFBEB",
   steel: "#64748B",
@@ -19,12 +17,8 @@ const C = {
   text: "#1E293B",
   muted: "#64748B",
 };
-
-/* ─── Scroll helper ─────────────────────────────────────────────────────── */
 const scrollTo = (id) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-
-/* ─── Mock Invoice UI ───────────────────────────────────────────────────── */
 function MockInvoice() {
   return (
     <div
@@ -562,16 +556,7 @@ function Hero({ onRegister }) {
         justifyContent: "center",
       }}
     >
-      {/* Grid texture */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          opacity: 0.04,
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)`,
-          backgroundSize: "48px 48px",
-        }}
-      />
+     
       {/* Glow */}
       <div
         style={{

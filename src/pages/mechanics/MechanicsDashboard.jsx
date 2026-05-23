@@ -8,6 +8,7 @@ import {
   getDocs,
   getFirestore,
   limit,
+  deleteDoc,
   orderBy,
   query,
   serverTimestamp,
@@ -34,6 +35,7 @@ import {
   Receipt,
   Save,
   Send,
+  Trash2,
   Sparkles,
   TrendingDown,
   TrendingUp,
@@ -119,6 +121,7 @@ const [customerApproved, setCustomerApproved] = useState(false);
 const [partsChecklist, setPartsChecklist]     = useState([]);
   const [jobCardNumber, setJobCardNumber] = useState("");
   const [jobCardId, setJobCardId] = useState(null);
+  const [isDirty, setIsDirty] = useState(false);
   const [savedJobCards, setSavedJobCards] = useState([]);
   const [showJobCardsList, setShowJobCardsList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -219,6 +222,10 @@ const [partsChecklist, setPartsChecklist]     = useState([]);
     ]);
     setNewPoItem({ description: "", qty: 1, unit: "ea", unitPrice: 0 });
   };
+  const dirtySet = (setter) => (val) => {
+  setter(val);
+  setIsDirty(true);
+};
   const handleSavePO = async () => {
     if (!user?.uid) return;
     try {
@@ -467,22 +474,48 @@ const [partsChecklist, setPartsChecklist]     = useState([]);
     setShowPaymentModal(false);
   };
 
-  const loadSavedJobCards = async () => {
-    if (!user?.uid) return;
-    const db = getFirestore();
-    const collectionName = documentType === "quote" ? "quotations" : "invoices";
-    const jobCardsRef = collection(db, "users", user.uid, collectionName);
-    const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(50));
-    const snapshot = await getDocs(q);
-    setSavedJobCards(
-      snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
-    );
-  };
+const loadSavedJobCards = async () => {
+  if (!user?.uid) return;
+  const db = getFirestore();
+  const collectionName = documentType === "quote" ? "quotations" : "invoices";
+  const jobCardsRef = collection(db, "users", user.uid, collectionName);
+  const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(50));
+  const snapshot = await getDocs(q);
+  
+  const cards = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
+  cards.sort((a, b) => {
+    const getTime = (card) => {
+      const t = card.updatedAt || card.createdAt;
+      if (!t) return 0;
+      if (t.toDate) return t.toDate().getTime();
+      if (t.seconds) return t.seconds * 1000;
+      return new Date(t).getTime();
+    };
+    return getTime(b) - getTime(a);
+  });
+
+  setSavedJobCards(cards);
+};
   const handleAddNewCustomer = () => {
     setSelectedCustomer(null);
     setShowCustomerModal(true);
   };
+  const handleDeleteJobCard = async (e, cardId) => {
+  e.stopPropagation(); // prevent row click from loading the card
+  if (!window.confirm("Are you sure you want to delete this record? This cannot be undone.")) return;
+  try {
+    const db = getFirestore();
+    const collectionName = documentType === "quote" ? "quotations" : "invoices";
+    await deleteDoc(doc(db, "users", user.uid, collectionName, cardId));
+    setSavedJobCards((prev) => prev.filter((c) => c.id !== cardId));
+    setInvoices((prev) => prev.filter((inv) => inv.id !== cardId));
+    // if the deleted card is currently open, reset the form
+    if (jobCardId === cardId) handleNewJobCard();
+  } catch (error) {
+    alert("Failed to delete record: " + error.message);
+  }
+};
   const handleEditCustomer = (customer) => {
     setSelectedCustomer(customer);
     setShowCustomerModal(true);
@@ -498,6 +531,7 @@ const [partsChecklist, setPartsChecklist]     = useState([]);
     setBillEmail(customer.email || "");
     setBillPhone(customer.phone || "");
     setBillAddress(customer.address || "");
+    setIsDirty(true);
   };
 
   const handleCustomerSaved = () => {
@@ -539,6 +573,7 @@ const [partsChecklist, setPartsChecklist]     = useState([]);
       balanceDue: jobCard.totals?.due || jobCard.totals?.total || 0,
       status: jobCard.status || "pending",
     });
+    setIsDirty(false);
     setActiveView("invoice");
   };
 
@@ -688,7 +723,7 @@ const [partsChecklist, setPartsChecklist]     = useState([]);
       const { publicUrl, key } = await uploadRes.json();
 
       // ── 7. Save to Firestore ──────────────────────────────────────────────
-      const docType =
+         const docType =
         activeView === "purchase-orders"
           ? "purchase_order"
           : documentType === "quote"
@@ -697,8 +732,13 @@ const [partsChecklist, setPartsChecklist]     = useState([]);
 
       const folder = DOC_CONFIG[docType]?.folder ?? docType;
       const firestoreDb = getFirestore();
+      if (!jobCardId || isDirty) {
 
-      await setDoc(doc(firestoreDb, "users", user.uid, folder, number), {
+  setIsDirty(false);
+} else {
+  
+  if (jobCardId) {
+    await setDoc(doc(firestoreDb, "users", user.uid, folder, number), {
         fileName,
         downloadUrl: publicUrl,
         r2Key: key,
@@ -709,6 +749,11 @@ const [partsChecklist, setPartsChecklist]     = useState([]);
         vehicleReg,
         total,
       });
+  }
+}
+    
+
+      
 
       const collectionName =
         activeView === "purchase-orders"
@@ -1031,12 +1076,18 @@ const printStyles = `@media print {
 
   const handleSaveJobCard = async () => {
     if (!user?.uid) return;
+      if (jobCardId && !isDirty) {
+    alert("No changes detected. Edit the invoice before saving again.");
+    return;
+  }
     const db = getFirestore();
     let numberToUse = jobCardNumber;
-    if (!jobCardId) {
-      numberToUse = await generateJobCardNumber(user.uid, documentType);
-      setJobCardNumber(numberToUse);
-    }
+   if (!jobCardId) {
+    numberToUse = await generateJobCardNumber(user.uid, documentType);
+    setJobCardNumber(numberToUse);
+  } else {
+    numberToUse = jobCardId; 
+  }
     const jobCardData = buildJobCardPayload(numberToUse);
     const collectionName = documentType === "quote" ? "quotations" : "invoices";
 
@@ -1048,6 +1099,7 @@ const printStyles = `@media print {
     );
 
     setJobCardId(numberToUse); // ← ID is now the number string
+    setIsDirty(false); 
     alert(
       `${documentType === "quote" ? "Quote" : "Job card"} saved — ${numberToUse}`,
     );
@@ -1105,6 +1157,7 @@ const printStyles = `@media print {
 
   const handleNewJobCard = () => {
     setJobCardId(null);
+    setIsDirty(false);
     setJobCardNumber("");
     setCustomerName("John Smith");
     setCustomerId("CUST-2026-1234");
@@ -1923,6 +1976,7 @@ const printStyles = `@media print {
                             "Paid",
                             "Status",
                             "PDF",
+                            "Delete"
                           ].map((h) => (
                             <th
                               key={h}
@@ -2036,6 +2090,16 @@ const printStyles = `@media print {
                                 </button>
                               )}
                             </td>
+                            <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
+      <button
+        onClick={(e) => handleDeleteJobCard(e, card.id)}
+        title="Delete"
+        className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#fee2e2] bg-[#fef2f2] hover:bg-[#fee2e2] text-[#dc2626] transition-all text-xs font-semibold"
+      >
+        <Trash2 className="w-3 h-3" />
+        Delete
+      </button>
+    </td>
                           </tr>
                         ))}
                       </tbody>
@@ -2326,7 +2390,10 @@ const printStyles = `@media print {
                         </div>
 
                         {/* Step content */}
-                        <div className="p-6">
+                        <div 
+                         onInput={() => setIsDirty(true)}   
+                        onChange={() => setIsDirty(true)}
+                        >
                           {activeView === "purchase-orders" ? (
                             <>
                               {/* PO Step 1 – Supplier */}
