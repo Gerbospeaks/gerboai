@@ -20,6 +20,7 @@ import {
   ArrowRight,
   Building2,
   Car,
+  Stamp,
   CheckSquare,
   ChevronLeft,
   ChevronRight,
@@ -45,6 +46,7 @@ import {
   Wrench,
   X,
 } from "lucide-react";
+import StampSignatureModal from "../StampSignatureModal";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/img/solidflo-logo.png";
@@ -107,6 +109,8 @@ const MechanicsDashboard = () => {
     if (action === "newCustomer") handleAddNewCustomer();
     if (view) setActiveView(view);
   };
+  const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState("JobCard");
   const [showJobCard, setShowJobCard] = useState(false);
@@ -1225,6 +1229,7 @@ const handleSaveJobCard = async () => {
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
+
     {
       label: "Print",
       icon: Printer,
@@ -1437,6 +1442,7 @@ const handleSaveJobCard = async () => {
       ...businessInfo,
       logoUrl: logoBase64 || businessInfo.logoUrl,
     },
+    stampConfig,
   };
   const jobCardTemplateProps = {
   ...templateProps, // inherit all base template props
@@ -1929,7 +1935,23 @@ const handleSaveJobCard = async () => {
               businessInfo={businessInfo}
             />
           )}
-
+           {showStampModal && (
+  <StampSignatureModal
+    isOpen={showStampModal}
+    onClose={() => setShowStampModal(false)}
+    onConfirm={(cfg) => {
+      setStampConfig(cfg);
+      setShowStampModal(false);
+    }}
+    previewContent={
+      activeView === "purchase-orders"
+        ? <POTemplateRenderer {...poTemplateProps} />
+        : <TemplateRenderer {...templateProps} />
+    }
+    businessInfo={businessInfo}
+    existingConfig={stampConfig}
+  />
+)}
           {/* All job cards modal */}
           {showJobCardsList && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -2353,7 +2375,7 @@ const handleSaveJobCard = async () => {
                     {inputMode === "manual" && (
                       <>
                         {/* Step indicator */}
-                        <div className="px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
+                        <div className="px-6 py-4 bg-[#f8fafc]">
                           <div className="flex items-center gap-0">
                             {steps.map((step, idx) => (
                               <React.Fragment key={step.number}>
@@ -3807,7 +3829,20 @@ const handleSaveJobCard = async () => {
 )}
                   </div>
                 </div>
+               
+
+{/* ── Stamp button footer ── */}
+<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+  <button
+    onClick={() => setShowStampModal(true)}
+    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+  >
+    <Stamp className="w-4 h-4" />
+    Stamp &amp; Signature
+  </button>
+</div>
               </div>
+              
             </div>
           )}
         </div>
