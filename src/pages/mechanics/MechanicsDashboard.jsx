@@ -1092,7 +1092,7 @@ const handleSaveJobCard = async () => {
   const jobCardData = buildJobCardPayload(numberToUse);
   const collectionName = documentType === "quote" ? "quotations" : "invoices";
 
-  const docId = jobCardId || numberToUse; // use existing ID or new number as ID
+  const docId = jobCardId || numberToUse; 
 
   await setDoc(
     doc(db, "users", user.uid, collectionName, docId),
@@ -1892,15 +1892,10 @@ const handleSaveJobCard = async () => {
   mobileActions={mobileDashboardActions}
   onSettingsOpen={() => setShowSettings(true)}
   onTeamOpen={() => setShowUserManagement(true)}
-  dashboardType="mechanics"
+ 
   sidebarOpen={sidebarOpen}
   setSidebarOpen={setSidebarOpen}
-  onQuickCreate={handleQuickCreate}
-  pageTitle="Job Cards"
-  plan="pro"
-  notifications={notifications}
-  showConvertButton={documentType === "quote" && !!jobCardId && activeView === "invoice"}  
-  onConvert={handleConvertToInvoice}  
+ 
 />
 
           {/* Modals */}

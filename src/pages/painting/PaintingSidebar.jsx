@@ -42,7 +42,7 @@ export default function PaintingSidebar({
   handleAddNewCustomer,
   documentType,
   isQuotesInvoicesOpen2,
-   newRequestCount,
+  newRequestCount,
   setIsQuotesInvoicesOpen2,
 }) {
   const [isClientsOpen, setIsClientsOpen] = useState(false);
@@ -262,9 +262,14 @@ export default function PaintingSidebar({
                     }}
                   />
                 </Accordion>
-<NavItem icon={ShoppingBag} label="Purchase Orders"
-  onClick={() => goTo("purchase-orders")}
-  active={activeView === "purchase-orders"} />
+
+                <NavItem
+                  icon={ShoppingBag}
+                  label="Purchase Orders"
+                  onClick={() => goTo("purchase-orders")}
+                  active={activeView === "purchase-orders"}
+                />
+
                 {/* Paint Projects accordion */}
                 <Accordion
                   icon={Paintbrush}
@@ -396,7 +401,150 @@ export default function PaintingSidebar({
           </div>
         </div>
       )}
+
+      {/* ── Mobile Bottom Navbar ───────────────────────────────────────── */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden print:hidden">
+          {/* Frosted top border glow */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+
+          <div className="bg-stone-900/95 backdrop-blur-xl border-t border-stone-700/60 shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center justify-around px-2 py-2 pb-[env(safe-area-inset-bottom,8px)]">
+              {/* Home */}
+              <BottomNavItem
+                icon={Home}
+                label="Home"
+                active={activeView === "home"}
+                onClick={() => {
+                  setActiveView("home");
+                  setSidebarOpen(false);
+                }}
+                activeColor="text-cyan-400"
+                activeGlow="shadow-cyan-500/40"
+              />
+
+              {/* Quotes */}
+              <BottomNavItem
+                icon={Receipt}
+                label="Quotes"
+                active={activeView === "quote"}
+                onClick={() => {
+                  handleNewInvoice();
+                  setActiveView("quote");
+                  setSidebarOpen(false);
+                }}
+                activeColor="text-amber-400"
+                activeGlow="shadow-amber-500/40"
+              />
+
+              {/* Centre FAB — Projects */}
+              <div className="relative flex flex-col items-center">
+                <button
+                  onClick={() => {
+                    setActiveView("projects");
+                    setSidebarOpen(false);
+                  }}
+                  className={`
+                    relative -mt-5 w-14 h-14 rounded-2xl flex items-center justify-center
+                    shadow-lg transition-all duration-300 active:scale-95
+                    ${
+                      activeView === "projects"
+                        ? "bg-gradient-to-br from-rose-500 to-orange-500 shadow-rose-500/50 scale-105"
+                        : "bg-gradient-to-br from-rose-600 to-amber-600 shadow-rose-600/30"
+                    }
+                  `}
+                >
+                  {/* Ring decoration */}
+                  <div className="absolute inset-0 rounded-2xl ring-2 ring-white/10" />
+                  <Paintbrush className="w-6 h-6 text-white drop-shadow" />
+                </button>
+                <span
+                  className={`text-[10px] mt-1 font-semibold tracking-wide transition-colors duration-200 ${activeView === "projects" ? "text-rose-400" : "text-stone-500"}`}
+                >
+                  Projects
+                </span>
+              </div>
+
+              {/* Clients */}
+              <BottomNavItem
+                icon={Users}
+                label="Clients"
+                active={false}
+                onClick={() => {
+                  setShowCustomersListModal(true);
+                  setSidebarOpen(false);
+                }}
+                activeColor="text-sky-400"
+                activeGlow="shadow-sky-500/40"
+                badge={
+                  savedCustomers?.length > 0 ? savedCustomers.length : null
+                }
+              />
+
+              {/* Menu (opens full sidebar) */}
+              <BottomNavItem
+                icon={({ className }) => (
+                  <div
+                    className={`flex flex-col gap-[3px] items-center justify-center ${className}`}
+                  >
+                    <span className="block w-4 h-0.5 bg-current rounded-full" />
+                    <span className="block w-3 h-0.5 bg-current rounded-full" />
+                    <span className="block w-4 h-0.5 bg-current rounded-full" />
+                  </div>
+                )}
+                label="Menu"
+                active={sidebarOpen}
+                onClick={() => setSidebarOpen((p) => !p)}
+                activeColor="text-amber-400"
+                activeGlow="shadow-amber-500/40"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
+  );
+}
+
+// ── Mobile Bottom Nav Item ────────────────────────────────────────────────────
+function BottomNavItem({
+  icon: Icon,
+  label,
+  active,
+  onClick,
+  activeColor,
+  activeGlow,
+  badge,
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="relative flex flex-col items-center justify-center gap-0.5 px-3 py-1 min-w-[52px] transition-all duration-200 active:scale-90"
+    >
+      {/* Active indicator pill */}
+      {active && (
+        <span
+          className={`absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-current ${activeColor} opacity-80`}
+        />
+      )}
+
+      <div
+        className={`relative p-1.5 rounded-xl transition-all duration-200 ${active ? `${activeColor} bg-white/5 shadow-lg ${activeGlow}` : "text-stone-500"}`}
+      >
+        <Icon className="w-5 h-5" />
+        {badge != null && (
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full text-[9px] font-bold text-white flex items-center justify-center leading-none">
+            {badge > 99 ? "99+" : badge}
+          </span>
+        )}
+      </div>
+
+      <span
+        className={`text-[10px] font-semibold tracking-wide transition-colors duration-200 ${active ? activeColor : "text-stone-500"}`}
+      >
+        {label}
+      </span>
+    </button>
   );
 }
 
