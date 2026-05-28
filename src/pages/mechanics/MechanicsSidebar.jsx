@@ -15,9 +15,10 @@ import {
   Package,
   LogOut,
   Menu,
-   History,    
-  StickyNote, 
+  History,
+  StickyNote,
   BarChart2,
+  Plus,
   X,
   Store,
 } from "lucide-react";
@@ -42,8 +43,8 @@ export default function MechanicsSidebar({
   setShowCustomersListModal,
   documentType,
   handleLogout,
-   newRequestCount,
-   isAdmin,
+  newRequestCount,
+  isAdmin,
   setShowUserManagement,
 }) {
   const [isJobCardsOpen, setIsJobCardsOpen] = useState(false);
@@ -69,7 +70,7 @@ export default function MechanicsSidebar({
     if (isMobile) setSidebarOpen(false);
   };
 
-  // ── Shared sidebar body (used in both mobile drawer & desktop panel) ──────
+  // ── Shared sidebar body ───────────────────────────────────────────────────
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -95,19 +96,19 @@ export default function MechanicsSidebar({
 
       {/* Scrollable nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-         <NavItem
+        <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
         <NavItem
-  icon={Store}
-  label="Find a Service"
-  onClick={() => goTo("marketplace")}
-  active={activeView === "marketplace"}
-  badge={newRequestCount > 0 ? newRequestCount : null}
-/>
+          icon={Store}
+          label="Find a Service"
+          onClick={() => goTo("marketplace")}
+          active={activeView === "marketplace"}
+          badge={newRequestCount > 0 ? newRequestCount : null}
+        />
         <NavItem
           icon={Settings}
           label="Settings"
@@ -125,9 +126,13 @@ export default function MechanicsSidebar({
           onClick={() => goTo("financial-overview")}
           active={activeView === "financial-overview"}
         />
-         <NavItem icon={ShoppingBag} label="Purchase Orders"
-  onClick={() => goTo("purchase-orders")}
-  active={activeView === "purchase-orders"} />
+        <NavItem
+          icon={ShoppingBag}
+          label="Purchase Orders"
+          onClick={() => goTo("purchase-orders")}
+          active={activeView === "purchase-orders"}
+        />
+
         {/* Job Cards */}
         <Accordion
           icon={ClipboardList}
@@ -135,7 +140,6 @@ export default function MechanicsSidebar({
           isOpen={isJobCardsOpen}
           onToggle={() => setIsJobCardsOpen((p) => !p)}
         >
-          
           <SubItem
             dot="bg-[#2563eb]"
             label="Create Quote"
@@ -211,33 +215,35 @@ export default function MechanicsSidebar({
           active={activeView === "parts-inventory"}
         />
         <NavItem
-  icon={History}
-  label="Job History"
-  onClick={() => goTo("history-view")}
-  active={activeView === "history-view"}
-/>
-<NavItem
-  icon={StickyNote}
-  label="Notes"
-  onClick={() => goTo("notes-view")}
-  active={activeView === "notes-view"}
-/>
-<NavItem
-  icon={BarChart2}
-  label="Reports & Analytics"
-  onClick={() => goTo("reports")}
-  active={activeView === "reports"}
-/>
+          icon={History}
+          label="Job History"
+          onClick={() => goTo("history-view")}
+          active={activeView === "history-view"}
+        />
+        <NavItem
+          icon={StickyNote}
+          label="Notes"
+          onClick={() => goTo("notes-view")}
+          active={activeView === "notes-view"}
+        />
+        <NavItem
+          icon={BarChart2}
+          label="Reports & Analytics"
+          onClick={() => goTo("reports")}
+          active={activeView === "reports"}
+        />
       </div>
-{isAdmin && (
-  <button
-    onClick={() => setShowUserManagement(true)}
-    className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg w-full"
-  >
-    <Shield className="w-4 h-4" />
-    Manage Team
-  </button>
-)}
+
+      {isAdmin && (
+        <button
+          onClick={() => setShowUserManagement(true)}
+          className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg w-full"
+        >
+          <Shield className="w-4 h-4" />
+          Manage Team
+        </button>
+      )}
+
       {/* Footer */}
       <div className="border-t border-[#253347] px-4 py-3 flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -272,23 +278,51 @@ export default function MechanicsSidebar({
     </div>
   );
 
+  // ── Mobile bottom nav items ───────────────────────────────────────────────
+  const bottomNavItems = [
+    {
+      icon: Home,
+      label: "Home",
+      action: () => goTo("home"),
+      active: activeView === "home",
+    },
+    {
+      icon: ClipboardList,
+      label: "Job Cards",
+      action: () => goTo("invoice"),
+      active: activeView === "invoice",
+    },
+    {
+      icon: Plus,
+      label: "New",
+      action: () => {
+        handleNewInvoice();
+        goTo("invoice");
+      },
+      active: false,
+      isPrimary: true,
+    },
+    {
+      icon: Store,
+      label: "Services",
+      action: () => goTo("marketplace"),
+      active: activeView === "marketplace",
+      badge: newRequestCount > 0 ? newRequestCount : null,
+    },
+    {
+      icon: Menu,
+      label: "More",
+      action: () => setSidebarOpen(true),
+      active: false,
+    },
+  ];
+
   return (
     <>
       {/* ════════════════════════════════════════════════════════════════
-          MOBILE  — fixed hamburger + slide-in drawer
+          MOBILE — bottom nav bar + slide-in drawer
       ════════════════════════════════════════════════════════════════ */}
       <div className="md:hidden print:hidden">
-        {/* Hamburger — fixed top-left, always visible when drawer closed */}
-        {!sidebarOpen && (
-          <button
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open menu"
-            className="fixed top-3 left-3 z-50 w-9 h-9 bg-[#1a2332] border border-[#253347] text-[#94a3b8] hover:text-white hover:bg-[#253347] rounded-lg flex items-center justify-center shadow-lg transition-all"
-          >
-            <Menu className="w-4 h-4" />
-          </button>
-        )}
-
         {/* Dim overlay */}
         <div
           className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
@@ -299,7 +333,7 @@ export default function MechanicsSidebar({
           onClick={() => setSidebarOpen(false)}
         />
 
-        {/* Drawer — slides in from left */}
+        {/* Drawer */}
         <div
           className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#1a2332] shadow-2xl transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -307,10 +341,64 @@ export default function MechanicsSidebar({
         >
           <SidebarContent />
         </div>
+
+        {/* ── Bottom nav bar ── */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#1a2332] border-t border-[#253347]">
+          <div className="flex items-center justify-around px-2 py-1 pb-safe">
+            {bottomNavItems.map(
+              ({ icon: Icon, label, action, active, badge, isPrimary }) =>
+                isPrimary ? (
+                  <button
+                    key={label}
+                    onClick={action}
+                    className="flex flex-col items-center justify-center -mt-5"
+                  >
+                    <div className="w-14 h-14 bg-[#059669] hover:bg-[#047857] rounded-full flex items-center justify-center shadow-lg shadow-[#059669]/30 border-4 border-[#1a2332] transition-all active:scale-95">
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-[10px] text-[#34d399] font-semibold mt-0.5">
+                      {label}
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    key={label}
+                    onClick={action}
+                    className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all active:scale-95 min-w-[56px]"
+                  >
+                    <div className="relative w-6 h-6 flex items-center justify-center">
+                      {active && (
+                        <span className="absolute inset-0 bg-[#059669]/10 rounded-lg" />
+                      )}
+                      <div className="relative">
+                        <Icon
+                          className={`w-5 h-5 transition-colors ${
+                            active ? "text-[#34d399]" : "text-[#64748b]"
+                          }`}
+                        />
+                        {badge != null && (
+                          <span className="absolute -top-1.5 -right-2 bg-[#059669] text-white text-[9px] font-bold px-1 py-px rounded-full leading-none">
+                            {badge}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span
+                      className={`text-[10px] font-medium transition-colors ${
+                        active ? "text-[#34d399]" : "text-[#64748b]"
+                      }`}
+                    >
+                      {label}
+                    </span>
+                  </button>
+                ),
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ════════════════════════════════════════════════════════════════
-          DESKTOP  — collapsed icon rail OR expanded panel
+          DESKTOP — collapsed icon rail OR expanded panel
       ════════════════════════════════════════════════════════════════ */}
       <div className="hidden md:flex print:hidden h-full">
         {/* Collapsed icon rail */}
@@ -354,9 +442,21 @@ export default function MechanicsSidebar({
                   title: "Customers",
                   action: () => setShowCustomersListModal(true),
                 },
-                { icon: History,    title: "Job History",         action: () => goTo("history-view") },
-{ icon: StickyNote, title: "Notes",               action: () => goTo("notes-view")   },
-{ icon: BarChart2,  title: "Reports & Analytics", action: () => goTo("reports")      },
+                {
+                  icon: History,
+                  title: "Job History",
+                  action: () => goTo("history-view"),
+                },
+                {
+                  icon: StickyNote,
+                  title: "Notes",
+                  action: () => goTo("notes-view"),
+                },
+                {
+                  icon: BarChart2,
+                  title: "Reports & Analytics",
+                  action: () => goTo("reports"),
+                },
               ].map(({ icon: Icon, title, action }) => (
                 <button
                   key={title}
@@ -368,15 +468,16 @@ export default function MechanicsSidebar({
                 </button>
               ))}
             </div>
-{isAdmin && (
-  <button
-    onClick={() => setShowUserManagement(true)}
-    className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg w-full"
-  >
-    <Shield className="w-4 h-4" />
-    Manage Team
-  </button>
-)}
+
+            {isAdmin && (
+              <button
+                onClick={() => setShowUserManagement(true)}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg w-full"
+              >
+                <Shield className="w-4 h-4" />
+              </button>
+            )}
+
             <div className="mt-auto pb-2">
               <div className="w-9 h-9 bg-[#253347] rounded-full flex items-center justify-center ring-1 ring-[#334155] overflow-hidden">
                 {businessInfo?.logoUrl ? (

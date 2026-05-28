@@ -596,7 +596,13 @@ const EducationDashboard = () => {
     () => notices.filter((n) => !n.read).length,
     [notices],
   );
-
+const bottomNavItems = [
+  { id: "home",       icon: Home,        label: "Home"       },
+  { id: "students",   icon: Baby,        label: "Students"   },
+  { id: "attendance", icon: UserCheck,   label: "Attendance" },
+  { id: "fees",       icon: CreditCard,  label: "Fees"       },
+  { id: "notices",    icon: Megaphone,   label: "Notices"    },
+];
   // ── Effects ──────────────────────────────────────────────────────────────────
 
   // Seed mock data once for new education users
@@ -878,7 +884,7 @@ const EducationDashboard = () => {
   return (
     <div
       style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif" }}
-      className="flex h-screen bg-slate-100 overflow-hidden"
+      className="flex h-[100dvh] bg-slate-100 overflow-hidden"
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display&display=swap');
@@ -1276,6 +1282,57 @@ const EducationDashboard = () => {
         onEdit={handleEditStudent}
         onDelete={handleDeleteStudent}
       />
+            {/* ── Mobile bottom nav ── */}
+<div
+  className="lg:hidden"
+  style={{
+    flexShrink: 0,
+    display: "flex",
+    alignItems: "stretch",
+    background: "#fff",
+    borderTop: "1px solid #e2e8f0",
+    zIndex: 40,
+  }}
+>
+  {bottomNavItems.map(({ id, icon: Icon, label }) => (
+    <button
+      key={id}
+      onClick={() => navigate(id)}
+      style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "8px 4px 10px",
+        gap: 3,
+        fontSize: 10,
+        fontWeight: 600,
+        border: "none",
+        background: "none",
+        cursor: "pointer",
+        color: activeView === id ? "var(--brand)" : "#94a3b8",
+        position: "relative",
+        transition: "color .15s",
+      }}
+    >
+      {activeView === id && (
+        <span style={{
+          position: "absolute",
+          top: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: 28,
+          height: 2,
+          background: "var(--brand)",
+          borderRadius: "0 0 4px 4px",
+        }} />
+      )}
+      <Icon style={{ width: 20, height: 20 }} />
+      <span>{label}</span>
+    </button>
+  ))}
+</div>
     </div>
   );
 };
@@ -3818,6 +3875,7 @@ const EventsView = ({ events, onAdd, onDelete }) => {
           })}
         </div>
       )}
+
     </div>
   );
 };

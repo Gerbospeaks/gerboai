@@ -19,9 +19,115 @@ import {
   Menu,
   X,
   Store,
+  Plus,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
+// ── Mobile Bottom Nav ─────────────────────────────────────────────────────────
+export function MobileBottomNav({
+  activeView,
+  setActiveView,
+  handleNewInvoiceDoc,
+  newRequestCount,
+  setShowInvoicesList,
+  savedInvoices,
+}) {
+  const navItems = [
+    {
+      icon: Home,
+      label: "Home",
+      action: () => setActiveView("home"),
+      active: activeView === "home",
+    },
+    {
+      icon: Store,
+      label: "Services",
+      action: () => setActiveView("marketplace"),
+      active: activeView === "marketplace",
+      badge: newRequestCount > 0 ? newRequestCount : null,
+    },
+    {
+      icon: Plus,
+      label: "Invoice",
+      action: () => {
+        handleNewInvoiceDoc?.();
+        setActiveView("invoice");
+      },
+      active: activeView === "invoice",
+      isPrimary: true,
+    },
+    {
+      icon: FolderOpen,
+      label: "Cases",
+      action: () => {
+        setShowInvoicesList?.(true);
+      },
+      active: false,
+      badge: savedInvoices?.length > 0 ? savedInvoices.length : null,
+    },
+    {
+      icon: Calendar,
+      label: "Calendar",
+      action: () => setActiveView("calendar"),
+      active: activeView === "calendar",
+    },
+  ];
+
+  return (
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#111320] border-t border-[#1e2130] print:hidden">
+      <div className="flex items-center justify-around px-2 py-1 pb-safe">
+        {navItems.map(
+          ({ icon: Icon, label, action, active, isPrimary, badge }) =>
+            isPrimary ? (
+              <button
+                key={label}
+                onClick={action}
+                className="flex flex-col items-center justify-center -mt-5"
+              >
+                <div className="w-14 h-14 bg-[#3b82f6] hover:bg-[#2563eb] rounded-full flex items-center justify-center shadow-lg shadow-[#3b82f6]/30 border-4 border-[#111320] transition-all active:scale-95">
+                  <Icon className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-[10px] text-[#60a5fa] font-semibold mt-0.5">
+                  {label}
+                </span>
+              </button>
+            ) : (
+              <button
+                key={label}
+                onClick={action}
+                className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all active:scale-95 min-w-[56px]"
+              >
+                <div className="relative w-6 h-6 flex items-center justify-center">
+                  {active && (
+                    <span className="absolute inset-0 bg-[#3b82f6]/10 rounded-lg" />
+                  )}
+                  <Icon
+                    className={`w-5 h-5 transition-colors ${
+                      active ? "text-[#60a5fa]" : "text-[#64748b]"
+                    }`}
+                  />
+                  {badge != null && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 bg-[#3b82f6] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
+                      {badge}
+                    </span>
+                  )}
+                </div>
+                <span
+                  className={`text-[10px] font-medium transition-colors ${
+                    active ? "text-[#60a5fa]" : "text-[#64748b]"
+                  }`}
+                >
+                  {label}
+                </span>
+              </button>
+            ),
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Main Sidebar ──────────────────────────────────────────────────────────────
 export default function LegalSidebar({
   user,
   activeView,
@@ -41,7 +147,7 @@ export default function LegalSidebar({
   setShowCustomersListModal,
   documentType,
   handleLogout,
-   newRequestCount,
+  newRequestCount,
 }) {
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
@@ -55,7 +161,9 @@ export default function LegalSidebar({
 
   useEffect(() => {
     document.body.style.overflow = isMobile && sidebarOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isMobile, sidebarOpen]);
 
   const goTo = (view) => {
@@ -63,7 +171,7 @@ export default function LegalSidebar({
     if (isMobile) setSidebarOpen(false);
   };
 
-  // ── Sidebar body ──────────────────────────────────────────────────────────
+  // ── Sidebar body ────────────────────────────────────────────────────────────
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -89,19 +197,19 @@ export default function LegalSidebar({
 
       {/* Scrollable nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-         <NavItem
+        <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
         <NavItem
-  icon={Store}
-  label="Find a Service"
-  onClick={() => goTo("marketplace")}
-  active={activeView === "marketplace"}
-  badge={newRequestCount > 0 ? newRequestCount : null}
-/>
+          icon={Store}
+          label="Find a Service"
+          onClick={() => goTo("marketplace")}
+          active={activeView === "marketplace"}
+          badge={newRequestCount > 0 ? newRequestCount : null}
+        />
         <NavItem
           icon={Settings}
           label="Settings"
@@ -444,6 +552,16 @@ export default function LegalSidebar({
           </div>
         )}
       </div>
+
+      {/* ── MOBILE BOTTOM NAV ─────────────────────────────────────────────── */}
+      <MobileBottomNav
+        activeView={activeView}
+        setActiveView={setActiveView}
+        handleNewInvoiceDoc={handleNewInvoiceDoc}
+        newRequestCount={newRequestCount}
+        setShowInvoicesList={setShowInvoicesList}
+        savedInvoices={savedInvoices}
+      />
     </>
   );
 }
@@ -459,18 +577,25 @@ function SectionLabel({ children }) {
   );
 }
 
-function NavItem({ icon: Icon, label, onClick, active = false }) {
+function NavItem({ icon: Icon, label, onClick, active = false, badge }) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${
+      className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${
         active
           ? "bg-[#1e2130] text-white"
           : "text-[#94a3b8] hover:bg-[#1e2130] hover:text-white"
       }`}
     >
-      <Icon className="w-4 h-4 flex-shrink-0" />
-      <span className="truncate">{label}</span>
+      <div className="flex items-center gap-3 min-w-0">
+        <Icon className="w-4 h-4 flex-shrink-0" />
+        <span className="truncate">{label}</span>
+      </div>
+      {badge != null && (
+        <span className="bg-[#3b82f6] text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
+          {badge}
+        </span>
+      )}
     </div>
   );
 }

@@ -116,6 +116,7 @@ export const DefaultTemplate = ({
   vat,
   total,
   serviceType,
+  documentType = "invoice",
   showStamp = false,
   stampText = "APPROVED",
   stampColor = "#1e40af",
@@ -171,7 +172,7 @@ export const DefaultTemplate = ({
 
           <div className="text-right">
             <div className="text-3xl font-bold mb-4 text-blue-900">
-              TAX INVOICE
+              {documentType === "estimate" ? "ESTIMATE" : "TAX INVOICE"}
             </div>
             <div className="text-xs space-y-1">
               <div className="flex justify-between gap-8">
@@ -389,7 +390,7 @@ export const ClassicTemplate = (props) => {
           </div>
           <div className="text-right">
             <div className="text-3xl font-serif font-bold mb-4 text-gray-900">
-              TAX INVOICE
+             {props.documentType === "estimate" ? "ESTIMATE" : "TAX INVOICE"}
             </div>
             <div className="text-xs space-y-1">
               <div className="flex justify-between gap-8">
@@ -549,7 +550,7 @@ export const CorporateTemplate = (props) => {
           </div>
           <div className="text-right">
             <div className="text-4xl font-bold text-indigo-900 mb-4">
-              FEE NOTE
+              {props.documentType === "estimate" ? "ESTIMATE" : "FEE NOTE"}
             </div>
             <div className="bg-indigo-50 border-2 border-indigo-900 p-3 rounded">
               <div className="text-sm">

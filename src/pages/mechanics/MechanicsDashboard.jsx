@@ -1029,7 +1029,7 @@ const printStyles = `@media print {
   }, [total, jobCardId]);
 
   const buildJobCardPayload = (numberToUse) => ({
-    jobCardNumber: numberToUse,
+    jobCardNumber: numberToUse || jobCardNumber,
     locked: true,
     status: "pending",
     documentType,
@@ -1107,44 +1107,46 @@ const printStyles = `@media print {
     fetchBusinessStats();
   };
 
-  const handleConvertToInvoice = async () => {
-    if (!user?.uid) return;
-    if (!jobCardId) {
-      alert("Please save the quote first before converting to invoice");
-      return;
-    }
-    if (!window.confirm("Convert this quote to an invoice?")) return;
-    try {
-      const db = getFirestore();
-      const newInvoiceNumber = await generateJobCardNumber(user.uid, "invoice");
-      const invoiceData = buildJobCardPayload(newInvoiceNumber);
-      invoiceData.documentType = "invoice";
-      invoiceData.convertedFromQuote = jobCardId;
-      invoiceData.convertedFromQuoteNumber = jobCardNumber;
-      invoiceData.convertedAt = serverTimestamp();
-      await setDoc(
-        doc(db, "users", user.uid, "invoices", newInvoiceNumber),
-        invoiceData,
-      );
+ const handleConvertToInvoice = async () => {
+  if (!user?.uid) return;
+  if (!jobCardId) {
+    alert("Please save the quote first before converting to invoice");
+    return;
+  }
+  if (!window.confirm("Convert this quote to an invoice?")) return;
+  try {
+    const db = getFirestore();
+    const newInvoiceNumber = await generateJobCardNumber(user.uid, "invoice");
+    const invoiceData = buildJobCardPayload(newInvoiceNumber);
+    invoiceData.documentType = "invoice";
+    invoiceData.jobCardNumber = newInvoiceNumber; // ← explicitly set
+    invoiceData.convertedFromQuote = jobCardId;
+    invoiceData.convertedFromQuoteNumber = jobCardNumber;
+    invoiceData.convertedAt = serverTimestamp();
+    
+    await setDoc(
+      doc(db, "users", user.uid, "invoices", newInvoiceNumber),
+      invoiceData,
+    );
 
-      // update the old quote — jobCardId is already its number
-      await updateDoc(doc(db, "users", user.uid, "quotations", jobCardId), {
-        convertedToInvoice: true,
-        convertedToInvoiceId: newInvoiceNumber,
-        convertedToInvoiceNumber: newInvoiceNumber,
-        convertedAt: serverTimestamp(),
-        status: "converted",
-      });
+    await updateDoc(doc(db, "users", user.uid, "quotations", jobCardId), {
+      convertedToInvoice: true,
+      convertedToInvoiceId: newInvoiceNumber,
+      convertedToInvoiceNumber: newInvoiceNumber,
+      convertedAt: serverTimestamp(),
+      status: "converted",
+    });
 
-      setDocumentType("invoice");
-      setJobCardId(newInvoiceNumber);
-      setJobCardNumber(newInvoiceNumber);
-      alert(`Converted to Invoice ${newInvoiceNumber}`);
-      loadSavedJobCards();
-    } catch (error) {
-      alert("Failed to convert quote to invoice");
-    }
-  };
+    setDocumentType("invoice");
+    setJobCardId(newInvoiceNumber);
+    setJobCardNumber(newInvoiceNumber); // ← already there, confirm it's correct
+    setIsDirty(false); // ← add this so no stale dirty flag
+    alert(`Converted to Invoice ${newInvoiceNumber}`);
+    loadSavedJobCards();
+  } catch (error) {
+    alert("Failed to convert quote to invoice");
+  }
+};
 
   const handleNewQuote = () => {
     setDocumentType("quote");

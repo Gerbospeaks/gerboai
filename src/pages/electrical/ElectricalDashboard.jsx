@@ -15,6 +15,7 @@ import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import ElectricalSidebar from "./ElectricalSidebar";
+import { MobileBottomNav } from "./ElectricalSidebar";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -1586,7 +1587,10 @@ const handleAddNewCustomer = () => {
               <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
                 {/* Panel header */}
                 <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
-                  <TemplateSelector/>
+                 <TemplateSelector
+  selectedTemplate={selectedTemplate}
+  onTemplateChange={setSelectedTemplate}
+/>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={handlePrint}
@@ -1624,6 +1628,13 @@ const handleAddNewCustomer = () => {
           )}
         </div>
       </div>
+      <MobileBottomNav
+    activeView={activeView}
+    setActiveView={setActiveView}
+    handleNewQuote={handleNewQuote}
+    handleNewInvoice={handleNewInvoice}
+    documentType={documentType}
+  />
     </div>
   );
 };

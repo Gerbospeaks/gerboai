@@ -118,6 +118,7 @@ export const DefaultTemplate = ({
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true,
+  documentType = "invoice",
 }) => (
   <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     {/* Header Section */}
@@ -157,10 +158,10 @@ export const DefaultTemplate = ({
         </div>
 
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
+          <div className="text-3xl font-bold mb-4">{documentType === "quote" ? "QUOTE" : "INVOICE"}</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">{documentType === "quote" ? "QUOTE NO." : "INVOICE NO."}</span>
               <span>{jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -362,10 +363,10 @@ export const ClassicTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
+          <div className="text-3xl font-bold mb-4">{props.documentType === "quote" ? "QUOTE" : "INVOICE"}</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold"> {props.documentType === "quote" ? "QUOTE NO." : "INVOICE NO."}</span>
               <span>{props.jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -493,7 +494,7 @@ export const ModernTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-5xl font-bold text-blue-500 mb-4">INVOICE</div>
+          <div className="text-5xl font-bold text-blue-500 mb-4">{props.documentType === "quote" ? "QUOTE" : "INVOICE"}</div>
           <div className="bg-blue-50 p-4 rounded-lg space-y-2">
             <div className="text-sm">
               <span className="font-semibold">Invoice #:</span>{" "}
@@ -619,7 +620,7 @@ export const ElegantTemplate = (props) => (
           {props.businessInfo.addressLine1} • {props.businessInfo.city}
         </div>
         <div className="text-2xl font-serif text-purple-700 mt-4">
-          SERVICE INVOICE
+          {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
         </div>
         <div className="text-sm text-gray-500 mt-1">#{props.jobCardNumber}</div>
       </div>
@@ -756,7 +757,7 @@ export const PremiumTemplate = (props) => (
             </div>
           </div>
           <div className="text-right">
-            <div className="text-5xl font-black mb-2">INVOICE</div>
+            <div className="text-5xl font-black mb-2"> {props.documentType === "quote" ? "QUOTE" : "INVOICE"}</div>
             <div className="bg-white text-amber-700 px-4 py-2 rounded font-bold">
               #{props.jobCardNumber}
             </div>
@@ -920,8 +921,8 @@ export const TechnicalTemplate = (props) => (
             <div className="text-sm opacity-90">{props.businessInfo.city}</div>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-bold mb-2">TECHNICAL SERVICE</div>
-            <div className="text-3xl font-mono">INVOICE</div>
+            <div className="text-4xl font-bold mb-2">{props.documentType === "quote" ? "QUOTE" : "TECHNICAL SERVICE"}</div>
+            <div className="text-3xl font-mono">{props.documentType === "quote" ? "" : "INVOICE"}</div>
             <div className="bg-white text-green-700 px-3 py-1 rounded mt-2 font-mono font-bold">
               {props.jobCardNumber}
             </div>
@@ -1108,6 +1109,8 @@ export const TechnicalTemplate = (props) => (
 export const TemplateRenderer = ({
   templateId,
   documentType = "invoice",
+  invoiceNumber,        
+  jobCardNumber, 
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true,
@@ -1121,6 +1124,7 @@ export const TemplateRenderer = ({
     stampColor,
     showStampDate,
     showStamp,
+    jobCardNumber: invoiceNumber || jobCardNumber,
   };
   switch (templateId) {
     case "default":

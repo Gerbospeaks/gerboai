@@ -39,7 +39,7 @@ import PatientsListModal from "./PatientsListModal";
 import PendingPayments from "./PendingPayments";
 import AppointmentsCalendar from "./AppointmentsCalendar";
 import SickNoteModal from "./SickNoteModal";
-import HealthSidebar from "./HealthSidebar";
+import HealthSidebar, { MobileBottomNav } from "./HealthSidebar";
 import Prescriptions from "./Prescriptions";
 import TreatmentPlans from "./TreatmentPlans";
 import MedicalRecords from "./MedicalRecords";
@@ -729,7 +729,7 @@ const HealthcareDashboard = () => {
 
           {/* ── View router ───────────────────────────────────────────── */}
           {activeView === "home" && (
-                      <div className="flex-1 overflow-y-auto p-4">
+                      <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
                         <HomeView
                           user={user}
                           onNavigate={(view, docType) => {
@@ -743,69 +743,69 @@ const HealthcareDashboard = () => {
                       </div>
                     )}
           {activeView === "practice-overview" && (
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <PracticeOverview onAddNewPatient={handleAddNewPatient} user={user} />
             </div>
           )}
           {activeView === "appointments" && (
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <AppointmentsCalendar user={user} />
             </div>
           )}
           {activeView === "financial-overview" && (
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <FinancialOverview user={user} />
             </div>
           )}
           {activeView === "pending" && (
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <PendingPayments user={user} />
             </div>
           )}
           {activeView === "templates" && (
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <Templates user={user} />
             </div>
           )}
           {activeView === "purchase-orders" && (
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 pb-16 md:pb-0">
               <PurchaseOrders user={user} />
             </div>
           )}
           {activeView === "medical-records" && (
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <MedicalRecords user={user} />
             </div>
           )}
           {activeView === "vitals" && (
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <PatientVitals user={user} />
             </div>
           )}
           {activeView === "treatment-plans" && (
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <TreatmentPlans user={user} />
             </div>
           )}
           {activeView === "prescriptions" && (
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <Prescriptions user={user} />
             </div>
           )}
 {activeView === "marketplace" && (
-  <div className="flex-1 overflow-y-auto p-6">
+  <div className="flex-1 overflow-y-auto p-6 p-4 sm:p-6">
     <ServiceMarketplaceView user={user} businessInfo={facilityInfo} />
   </div>
 )}
 
 {activeView === "incoming-requests" && (
-  <div className="flex-1 overflow-y-auto p-6">
+  <div className="flex-1 overflow-y-auto p-6 p-4 sm:p-6">
     <ServiceRequestsView user={user} businessInfo={facilityInfo} />
   </div>
 )}
           {/* ── Invoice view — split layout ────────────────────────────── */}
           {activeView === "invoice" && (
-            <div className="flex-1 overflow-hidden flex min-h-0">
+            <div className="flex-1 overflow-hidden flex min-h-0 pb-16 md:pb-0">
 
               {/* LEFT: Form panel */}
               <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
@@ -969,6 +969,12 @@ const HealthcareDashboard = () => {
           )}
         </div>
       </div>
+      <MobileBottomNav
+      activeView={activeView}
+      setActiveView={setActiveView}
+      handleNewInvoice={handleNewInvoice}
+      handleAddNewPatient={handleAddNewPatient}
+    />
     </div>
   );
 };

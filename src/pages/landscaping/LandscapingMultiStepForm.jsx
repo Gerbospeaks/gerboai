@@ -27,6 +27,7 @@ const LandscapingMultiStepForm = ({
   newItem,
   setNewItem,
   handleAddItem,
+  onSave,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3;
@@ -274,37 +275,49 @@ const LandscapingMultiStepForm = ({
         </div>
       )}
       {/* Navigation Buttons */}
-      <div className="flex justify-between items-center pt-4 border-t">
-        <button
-          onClick={prevStep}
-          disabled={currentStep === 1}
-          className={`flex items-center gap-2 px-6 py-2 rounded-lg transition-colors ${
-            currentStep === 1
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-gray-600 text-white hover:bg-gray-700"
-          }`}
-        >
-          <ChevronLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Previous</span>
-        </button>
+<div className="flex justify-between items-center pt-4 border-t">
+  <button
+    onClick={prevStep}
+    disabled={currentStep === 1}
+    className={`flex items-center gap-2 px-6 py-2 rounded-lg transition-colors ${
+      currentStep === 1
+        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+        : "bg-gray-600 text-white hover:bg-gray-700"
+    }`}
+  >
+    <ChevronLeft className="w-4 h-4" />
+    <span className="hidden sm:inline">Previous</span>
+  </button>
 
-        <div className="text-sm text-gray-600">
-          Step {currentStep} of {totalSteps}
-        </div>
+  <div className="text-sm text-gray-600">
+    Step {currentStep} of {totalSteps}
+  </div>
 
-        <button
-          onClick={nextStep}
-          disabled={currentStep === totalSteps}
-          className={`flex items-center gap-2 px-6 py-2 rounded-lg transition-colors ${
-            currentStep === totalSteps
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-green-600 text-white hover:bg-green-700"
-          }`}
-        >
-          <span className="hidden sm:inline">Next</span>
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
+  {currentStep === totalSteps ? (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => onSave?.("quote")}
+        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors text-sm font-medium"
+      >
+        Save Quote
+      </button>
+      <button
+        onClick={() => onSave?.("invoice")}
+        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors text-sm font-medium"
+      >
+        Save Invoice
+      </button>
+    </div>
+  ) : (
+    <button
+      onClick={nextStep}
+      className="flex items-center gap-2 px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+    >
+      <span className="hidden sm:inline">Next</span>
+      <ChevronRight className="w-4 h-4" />
+    </button>
+  )}
+</div>
     </div>
   );
 };

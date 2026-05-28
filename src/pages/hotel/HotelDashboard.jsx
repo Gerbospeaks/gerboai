@@ -38,7 +38,7 @@ import GuestsListModal from "./GuestsListModal";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 
 // ── New sidebar + new pages ────────────────────────────────────────────────
-import HotelSidebar   from "./HotelSidebar";
+import HotelSidebar, { MobileBottomNav }  from "./HotelSidebar";
 import RoomManagement from "./RoomManagement";
 import Reservations   from "./Reservations";
 import RestaurantBar  from "./RestaurantBar";
@@ -570,7 +570,7 @@ const HotelDashboard = () => {
 
           {/* ── View router ───────────────────────────────────────────── */}
          {activeView === "home" && (
-                     <div className="flex-1 overflow-y-auto p-4">
+                     <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
                        <HomeView
                          user={user}
                          onNavigate={(view, docType) => {
@@ -584,33 +584,33 @@ const HotelDashboard = () => {
                      </div>
                    )}
           {activeView === "financial-overview" && (
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <FinancialOverview user={user} />
             </div>
           )}
           {activeView === "templates" && (
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <Templates user={user} />
             </div>
           )}
           {activeView === "purchase-orders" && (
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 pb-16 md:pb-0">
               <PurchaseOrders user={user} />
             </div>
           )}
           {/* ── New pages ── */}
           {activeView === "rooms" && (
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-16 md:pb-0">
               <RoomManagement user={user} />
             </div>
           )}
           {activeView === "reservations" && (
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-16 md:pb-0">
               <Reservations user={user} />
             </div>
           )}
           {activeView === "restaurant" && (
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-16 md:pb-0">
               <RestaurantBar user={user} />
             </div>
           )}
@@ -626,19 +626,19 @@ const HotelDashboard = () => {
             </div>
           )}
 {activeView === "marketplace" && (
-  <div className="flex-1 overflow-y-auto p-6">
+  <div className="flex-1 overflow-y-auto p-6 pb-16 md:pb-0">
     <ServiceMarketplaceView user={user} businessInfo={propertyInfo} />
   </div>
 )}
 
 {activeView === "incoming-requests" && (
-  <div className="flex-1 overflow-y-auto p-6">
+  <div className="flex-1 overflow-y-auto p-6 pb-16 md:pb-0">
     <ServiceRequestsView user={user} businessInfo={propertyInfo} />
   </div>
 )}
           {/* ── Invoice split layout ──────────────────────────────────── */}
           {activeView === "invoice" && (
-            <div className="flex-1 overflow-hidden flex min-h-0">
+            <div className="flex-1 overflow-hidden flex min-h-0 pb-16 md:pb-0">
               {/* LEFT: Form */}
               <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
                 <div className="space-y-5">
@@ -771,6 +771,12 @@ const HotelDashboard = () => {
           )}
         </div>
       </div>
+      <MobileBottomNav
+      activeView={activeView}
+      setActiveView={setActiveView}
+      handleNewInvoice={handleNewInvoice}
+      setShowCheckInOutModal={setShowCheckInOutModal}
+    />
     </div>
   );
 };

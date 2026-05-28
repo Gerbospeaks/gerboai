@@ -532,27 +532,6 @@ export default function Home({
     <div className="zh">
       <style>{css}</style>
       <div className="zh-shell border">
-        {/* ── Top bar ── */}
-        <div className="zh-topbar">
-          <div className="zh-topbar-left">
-            {/* Sidebar hamburger — only shown when embedded in a dashboard */}
-            {onSidebarToggle && !sidebarOpen && (
-              <button
-                className="zh-topbar-sidebar-btn"
-                onClick={onSidebarToggle}
-                title="Open sidebar"
-              >
-                <Menu size={15} />
-              </button>
-            )}
-            <div className="zh-topbar-icon">
-              <LayoutDashboard size={14} color="#fff" />
-            </div>
-            <span className="zh-topbar-title">SolidFlo</span>
-            <span className="zh-topbar-sub">Home &rsaquo; Dashboard</span>
-          </div>
-        </div>
-
         {/* ── Scrollable body ── */}
         <div className="zh-body">
           {/* KPIs */}

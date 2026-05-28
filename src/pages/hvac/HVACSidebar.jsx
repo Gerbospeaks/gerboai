@@ -144,9 +144,9 @@ export default function HVACSidebar({
             label="All Quotes"
             badge={savedQuotes?.length ?? 0}
             onClick={() => {
-              setShowQuotesList?.(!showQuotesList);
-              if (isMobile) setSidebarOpen(false);
-            }}
+  setShowQuotesList?.(true);
+  if (isMobile) setSidebarOpen(false);
+}}
           />
         </Accordion>
 
@@ -170,9 +170,9 @@ export default function HVACSidebar({
             label="All Invoices"
             badge={savedServices?.length ?? 0}
             onClick={() => {
-              setShowServicesList?.(!showServicesList);
-              if (isMobile) setSidebarOpen(false);
-            }}
+  setShowServicesList?.(true);
+  if (isMobile) setSidebarOpen(false);
+}}
           />
         </Accordion>
            <NavItem icon={ShoppingBag} label="Purchase Orders"
@@ -444,18 +444,18 @@ function SectionLabel({ children }) {
   );
 }
 
-function NavItem({ icon: Icon, label, onClick, active = false }) {
+function NavItem({ icon: Icon, label, onClick, active = false, badge }) {
   return (
-    <div
-      onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${
-        active
-          ? "bg-[#1a2a3a] text-white"
-          : "text-[#94a3b8] hover:bg-[#1a2a3a] hover:text-white"
-      }`}
-    >
+    <div onClick={onClick} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${
+      active ? "bg-[#1a2a3a] text-white" : "text-[#94a3b8] hover:bg-[#1a2a3a] hover:text-white"
+    }`}>
       <Icon className="w-4 h-4 flex-shrink-0" />
-      <span className="truncate">{label}</span>
+      <span className="truncate flex-1">{label}</span>
+      {badge != null && (
+        <span className="bg-[#0e7490] text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
+          {badge}
+        </span>
+      )}
     </div>
   );
 }

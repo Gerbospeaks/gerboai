@@ -224,7 +224,13 @@ const CarpentryDashboard = () => {
   const subtotal = items.reduce((s, i) => s + i.amount, 0);
   const totalTax = items.reduce((s, i) => s + i.taxAmount, 0);
   const total = subtotal + totalTax;
-
+const bottomNavItems = [
+  { view: "home",               icon: Hammer,        label: "Home"      },
+  { view: "quote",              icon: FileText,       label: "Quote"     },
+  { view: "projects",           icon: ClipboardList,  label: "Projects"  },
+  { view: "inventory",          icon: Wrench,         label: "Inventory" },
+  { view: "financial-overview", icon: DollarSign,     label: "Finance"   },
+];
   const steps = [
     { number: 1, title: "Client Info", icon: Users },
     { number: 2, title: "Project Details", icon: Hammer },
@@ -1079,7 +1085,7 @@ const CarpentryDashboard = () => {
 
   // ── RENDER ─────────────────────────────────────────────────────────────────
   return (
-    <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
+    <div className="h-[100dvh] w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
       <div
         id="print-area"
@@ -2634,6 +2640,26 @@ const CarpentryDashboard = () => {
           </div>
         </div>
       )}
+      {/* ── Mobile bottom nav ── */}
+<div className="md:hidden flex-shrink-0 flex items-stretch bg-white border-t border-[#e2e8f0] z-40">
+  {bottomNavItems.map(({ view, icon: Icon, label }) => (
+    <button
+      key={view}
+      onClick={() => setActiveView(view)}
+      className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-medium transition-colors relative
+        ${activeView === view
+          ? "text-[#2563eb]"
+          : "text-[#94a3b8] active:text-[#2563eb]"
+        }`}
+    >
+      {activeView === view && (
+        <span className="absolute top-0 left-1/2 -translate-x-1/2 w-7 h-0.5 bg-[#2563eb] rounded-b" />
+      )}
+      <Icon className="w-5 h-5" />
+      <span>{label}</span>
+    </button>
+  ))}
+</div>
     </div>
   );
 };

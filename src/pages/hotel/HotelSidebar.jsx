@@ -15,6 +15,9 @@ import {
   CreditCard,
   ShoppingBag,
   Bed,
+  BedDouble,
+  CalendarCheck,
+  Plus,
   DoorOpen,
   KeyRound,
   Utensils,
@@ -599,6 +602,93 @@ function SubItem({ label, dot, onClick, badge, badgeBg = "bg-[#1d4ed8]" }) {
           {badge}
         </span>
       )}
+    </div>
+  );
+}
+export function MobileBottomNav({
+  activeView,
+  setActiveView,
+  handleNewInvoice,
+  setShowCheckInOutModal,
+}) {
+  const navItems = [
+    {
+      icon: Home,
+      label: "Home",
+      action: () => setActiveView("home"),
+      active: activeView === "home",
+    },
+    {
+      icon: BedDouble,
+      label: "Rooms",
+      action: () => setActiveView("rooms"),
+      active: activeView === "rooms",
+    },
+    {
+      icon: Plus,
+      label: "Invoice",
+      action: () => handleNewInvoice(),
+      active: activeView === "invoice",
+      isPrimary: true,
+    },
+    {
+      icon: CalendarCheck,
+      label: "Check-In",
+      action: () => setShowCheckInOutModal(true),
+      active: false,
+    },
+    {
+      icon: Receipt,
+      label: "Invoices",
+      action: () => setActiveView("reservations"),
+      active: activeView === "reservations",
+    },
+  ];
+
+  return (
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0f1e] border-t border-[#1e2a45] print:hidden">
+      <div className="flex items-center justify-around px-2 py-1 pb-safe">
+        {navItems.map(({ icon: Icon, label, action, active, isPrimary }) =>
+          isPrimary ? (
+            <button
+              key={label}
+              onClick={action}
+              className="flex flex-col items-center justify-center -mt-5"
+            >
+              <div className="w-14 h-14 bg-[#d97706] hover:bg-[#b45309] rounded-full flex items-center justify-center shadow-lg shadow-[#d97706]/30 border-4 border-[#0a0f1e] transition-all active:scale-95">
+                <Icon className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-[10px] text-[#d97706] font-semibold mt-0.5">
+                {label}
+              </span>
+            </button>
+          ) : (
+            <button
+              key={label}
+              onClick={action}
+              className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all active:scale-95 min-w-[56px]"
+            >
+              <div className="relative w-6 h-6 flex items-center justify-center">
+                {active && (
+                  <span className="absolute inset-0 bg-[#d97706]/10 rounded-lg" />
+                )}
+                <Icon
+                  className={`w-5 h-5 transition-colors ${
+                    active ? "text-[#d97706]" : "text-[#64748b]"
+                  }`}
+                />
+              </div>
+              <span
+                className={`text-[10px] font-medium transition-colors ${
+                  active ? "text-[#d97706]" : "text-[#64748b]"
+                }`}
+              >
+                {label}
+              </span>
+            </button>
+          )
+        )}
+      </div>
     </div>
   );
 }

@@ -1422,6 +1422,13 @@ const LandscapingDashboard = () => {
                           newItem={newItem}
                           setNewItem={setNewItem}
                           handleAddItem={handleAddItem}
+                          onSave={(type) => {
+    if (type === "invoice") handleSaveJobCard();
+                            else if (type === "quote") {
+                              setDocumentType("quote");
+                              handleSaveJobCard();
+                            }
+  }}
                         />
                       </div>
                     )}

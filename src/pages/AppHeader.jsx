@@ -728,7 +728,7 @@ const AppHeader = ({
 }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-
+  
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -1292,6 +1292,7 @@ const AppHeader = ({
           </div>
         </div>
       </header>
+      
     </div>
   );
 };

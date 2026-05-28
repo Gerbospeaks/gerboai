@@ -741,10 +741,16 @@ const CleaningDashboard = () => {
         : s === "pending"
           ? "bg-[#dbeafe] text-[#1e40af]"
           : "bg-[#fef2f2] text-[#991b1b]";
-
+const bottomNavItems = [
+  { view: "home",               icon: HomeIcon,      label: "Home"     },
+  { view: "quote",              icon: FileText,       label: "Quote"    },
+  { view: "jobs",               icon: ClipboardList,  label: "Jobs"     },
+  { view: "staff",              icon: Users,          label: "Staff"    },
+  { view: "financial-overview", icon: BarChart3,      label: "Finance"  },
+];
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
+    <div className="h-[100dvh] w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
       <div
         id="print-area"
@@ -1783,6 +1789,26 @@ const CleaningDashboard = () => {
           )}
         </div>
       </div>
+      {/* ── Mobile bottom nav ── */}
+<div className="md:hidden flex-shrink-0 flex items-stretch bg-white border-t border-[#e2e8f0] z-40">
+  {bottomNavItems.map(({ view, icon: Icon, label }) => (
+    <button
+      key={view}
+      onClick={() => setActiveView(view)}
+      className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-medium transition-colors relative
+        ${activeView === view
+          ? "text-[#0891b2]"
+          : "text-[#94a3b8] active:text-[#0891b2]"
+        }`}
+    >
+      {activeView === view && (
+        <span className="absolute top-0 left-1/2 -translate-x-1/2 w-7 h-0.5 bg-[#0891b2] rounded-b" />
+      )}
+      <Icon className="w-5 h-5" />
+      <span>{label}</span>
+    </button>
+  ))}
+</div>
     </div>
   );
 };

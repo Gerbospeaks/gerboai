@@ -25,6 +25,7 @@ import {
   Store,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
+import { Plus } from "lucide-react";
 
 export default function LogisticsSidebar({
   navigate,
@@ -44,7 +45,7 @@ export default function LogisticsSidebar({
   setShowCustomersListModal,
   handleAddNewCustomer,
   setShowInTransitModal,
-   newRequestCount,
+  newRequestCount,
 }) {
   const [isWaybillsOpen, setIsWaybillsOpen] = useState(false);
   const [isCustomersOpen, setIsCustomersOpen] = useState(false);
@@ -89,28 +90,28 @@ export default function LogisticsSidebar({
           </div>
         </div>
         <button
-  onClick={() => setSidebarOpen(false)}
-  className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#1a2535] rounded-lg transition-all flex-shrink-0"
->
-  <X className="w-4 h-4" />
-</button>
+          onClick={() => setSidebarOpen(false)}
+          className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#1a2535] rounded-lg transition-all flex-shrink-0"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Scrollable nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-         <NavItem
+        <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
         <NavItem
-  icon={Store}
-  label="Find a Service"
-  onClick={() => goTo("marketplace")}
-  active={activeView === "marketplace"}
-  badge={newRequestCount > 0 ? newRequestCount : null}
-/>
+          icon={Store}
+          label="Find a Service"
+          onClick={() => goTo("marketplace")}
+          active={activeView === "marketplace"}
+          badge={newRequestCount > 0 ? newRequestCount : null}
+        />
         <NavItem
           icon={Settings}
           label="Settings"
@@ -190,9 +191,12 @@ export default function LogisticsSidebar({
             onClick={() => goTo("invoices-overdue")}
           />
         </Accordion>
-          <NavItem icon={ShoppingBag} label="Purchase Orders"
-  onClick={() => goTo("purchase-orders")}
-  active={activeView === "purchase-orders"} />
+        <NavItem
+          icon={ShoppingBag}
+          label="Purchase Orders"
+          onClick={() => goTo("purchase-orders")}
+          active={activeView === "purchase-orders"}
+        />
         <SectionLabel>Customers</SectionLabel>
 
         {/* Customers accordion */}
@@ -353,24 +357,52 @@ export default function LogisticsSidebar({
       </div>
     </div>
   );
-console.log("sidebarOpen:", sidebarOpen);
+
+  // ── Mobile bottom nav items ─────────────────────────────────────────────────
+  const bottomNavItems = [
+    {
+      icon: Home,
+      label: "Home",
+      action: () => goTo("home"),
+      active: activeView === "home",
+    },
+    {
+      icon: ClipboardList,
+      label: "Waybills",
+      action: () => goTo("invoice"),
+      active: activeView === "invoice",
+    },
+    {
+      icon: Plus,
+      label: "New",
+      action: () => {
+        handleNewWaybill?.();
+        goTo("invoice");
+      },
+      active: false,
+      isPrimary: true,
+    },
+    {
+      icon: Store,
+      label: "Services",
+      action: () => goTo("marketplace"),
+      active: activeView === "marketplace",
+      badge: newRequestCount > 0 ? newRequestCount : null,
+    },
+    {
+      icon: Menu,
+      label: "More",
+      action: () => setSidebarOpen(true),
+      active: false,
+    },
+  ];
+
   return (
     <>
       {/* ════════════════════════════════════════════════════════════════
-          MOBILE — hamburger + slide-in drawer
+          MOBILE — bottom nav bar + slide-in drawer
       ════════════════════════════════════════════════════════════════ */}
       <div className="md:hidden print:hidden">
-        {/* Hamburger */}
-        {!sidebarOpen && (
-          <button
-  onClick={() => setSidebarOpen(true)}  
-  title="Expand"
-  className="p-2 text-[#64748b] hover:text-white hover:bg-[#1a2535] rounded-lg transition-all"
->
-  <ChevronRight className="w-5 h-5" />
-</button>
-        )}
-
         {/* Dim overlay */}
         <div
           className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
@@ -388,6 +420,60 @@ console.log("sidebarOpen:", sidebarOpen);
           }`}
         >
           <SidebarContent />
+        </div>
+
+        {/* ── Bottom nav bar ── */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#0d1520] border-t border-[#1a2535]">
+          <div className="flex items-center justify-around px-2 py-1 pb-safe">
+            {bottomNavItems.map(
+              ({ icon: Icon, label, action, active, badge, isPrimary }) =>
+                isPrimary ? (
+                  <button
+                    key={label}
+                    onClick={action}
+                    className="flex flex-col items-center justify-center -mt-5"
+                  >
+                    <div className="w-14 h-14 bg-[#1d4ed8] hover:bg-[#1e40af] rounded-full flex items-center justify-center shadow-lg shadow-[#1d4ed8]/30 border-4 border-[#0d1520] transition-all active:scale-95">
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-[10px] text-[#60a5fa] font-semibold mt-0.5">
+                      {label}
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    key={label}
+                    onClick={action}
+                    className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all active:scale-95 min-w-[56px]"
+                  >
+                    <div className="relative w-6 h-6 flex items-center justify-center">
+                      {active && (
+                        <span className="absolute inset-0 bg-[#1d4ed8]/10 rounded-lg" />
+                      )}
+                      <div className="relative">
+                        <Icon
+                          className={`w-5 h-5 transition-colors ${
+                            active ? "text-[#60a5fa]" : "text-[#64748b]"
+                          }`}
+                        />
+                        {badge != null && (
+                          <span className="absolute -top-1.5 -right-2 bg-[#1d4ed8] text-white text-[9px] font-bold px-1 py-px rounded-full leading-none">
+                            {badge}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span
+                      className={`text-[10px] font-medium transition-colors ${
+                        active ? "text-[#60a5fa]" : "text-[#64748b]"
+                      }`}
+                    >
+                      {label}
+                    </span>
+                  </button>
+                ),
+            )}
+          </div>
         </div>
       </div>
 
@@ -568,7 +654,7 @@ function SectionLabel({ children }) {
   );
 }
 
-function NavItem({ icon: Icon, label, onClick, active = false }) {
+function NavItem({ icon: Icon, label, onClick, active = false, badge }) {
   return (
     <div
       onClick={onClick}
@@ -579,7 +665,12 @@ function NavItem({ icon: Icon, label, onClick, active = false }) {
       }`}
     >
       <Icon className="w-4 h-4 flex-shrink-0" />
-      <span className="truncate">{label}</span>
+      <span className="truncate flex-1">{label}</span>
+      {badge != null && (
+        <span className="bg-[#1d4ed8] text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
+          {badge}
+        </span>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import HVACSidebar from "./HVACSidebar";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
@@ -109,7 +110,101 @@ const labelCls =
   "block text-xs font-semibold text-[#374151] uppercase tracking-wide mb-1.5";
 const selectCls =
   "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] transition-colors";
+// ─── Mobile Bottom Nav ────────────────────────────────────────────────────────
+const MobileBottomNav = ({
+  activeView,
+  setActiveView,
+  handleNewInvoice,
+  handleNewQuote,
+  setShowCustomersListModal,
+}) => {
+  const navItems = [
+    {
+      icon: Home,
+      label: "Home",
+      action: () => setActiveView("home"),
+      active: activeView === "home",
+    },
+    {
+      icon: Receipt,
+      label: "Invoices",
+      action: () => setActiveView("invoice"),
+      active: activeView === "invoice" ,
+    },
+    {
+      icon: Plus,
+      label: "New",
+      action: () => {
+        handleNewInvoice();
+        setActiveView("invoice");
+      },
+      active: false,
+      isPrimary: true,
+    },
+    {
+      icon: ClipboardList,
+      label: "Quotes",
+      action: () => {
+        handleNewQuote();
+        setActiveView("invoice");
+      },
+      active: false,
+    },
+    {
+      icon: Users,
+      label: "Clients",
+      action: () => setShowCustomersListModal(true),
+      active: false,
+    },
+  ];
 
+  return (
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-b from-slate-900 to-slate-950 border-t border-slate-700/60 print:hidden">
+      <div className="flex items-center justify-around px-2 py-1 pb-safe">
+        {navItems.map(({ icon: Icon, label, action, active, isPrimary }) =>
+          isPrimary ? (
+            <button
+              key={label}
+              onClick={action}
+              className="flex flex-col items-center justify-center -mt-5"
+            >
+              <div className="w-14 h-14 bg-[#0891b2] hover:bg-[#0e7490] rounded-full flex items-center justify-center shadow-lg shadow-[#0891b2]/40 border-4 border-slate-950 transition-all active:scale-95">
+                <Icon className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-[10px] text-[#0891b2] font-semibold mt-0.5">
+                {label}
+              </span>
+            </button>
+          ) : (
+            <button
+              key={label}
+              onClick={action}
+              className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all active:scale-95 min-w-[56px]"
+            >
+              <div className="relative w-6 h-6 flex items-center justify-center">
+                {active && (
+                  <span className="absolute inset-0 bg-[#0891b2]/15 rounded-lg" />
+                )}
+                <Icon
+                  className={`w-5 h-5 transition-colors ${
+                    active ? "text-[#0891b2]" : "text-slate-500"
+                  }`}
+                />
+              </div>
+              <span
+                className={`text-[10px] font-medium transition-colors ${
+                  active ? "text-[#0891b2]" : "text-slate-500"
+                }`}
+              >
+                {label}
+              </span>
+            </button>
+          )
+        )}
+      </div>
+    </div>
+  );
+};
 const HvacDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [inputMode, setInputMode] = useState("manual");
@@ -1073,341 +1168,31 @@ const HvacDashboard = () => {
         />
       )}
       <div className="flex-1 flex overflow-hidden min-h-0">
-        {/* ── Sidebar ───────────────────────────────────────────────────── */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        {/* Collapsed sidebar */}
-        <div
-          className={`${sidebarOpen ? "hidden" : "hidden md:flex"} fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden flex-col items-center py-4 space-y-4 shadow-xl`}
-        >
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-xl transition-all"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-          <div className="w-10 h-10">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-full h-full object-contain rounded-lg"
-            />
-          </div>
-          <div className="w-10 border-t border-slate-600" />
-          {[
-            { icon: Home, title: "Home", action: () => setActiveView("home") },
-            {
-              icon: Settings,
-              title: "Settings",
-              action: () => setShowSettings(true),
-            },
-            {
-              icon: TrendingUp,
-              title: "Overview",
-              action: () => setActiveView("financial-overview"),
-            },
-            { icon: ClipboardList, title: "Quotes" },
-            { icon: Receipt, title: "Invoices" },
-            { icon: Users, title: "Customers" },
-            {
-              icon: FileText,
-              title: "Templates",
-              action: () => setActiveView("templates"),
-            },
-            {
-              icon: Wind,
-              title: "HVAC Systems",
-              action: () => setActiveView("hvac-systems"),
-            },
-            {
-              icon: Package,
-              title: "Parts Inventory",
-              action: () => setActiveView("inventory"),
-            },
-            {
-              icon: Calendar,
-              title: "Maintenance",
-              action: () => setActiveView("maintenance"),
-            },
-          ].map(({ icon: Icon, title, action }) => (
-            <button
-              key={title}
-              onClick={action}
-              className="p-2 text-slate-400 hover:text-white hover:bg-blue-600/80 rounded-lg transition-all w-10 h-10 flex items-center justify-center"
-              title={title}
-            >
-              <Icon className="w-5 h-5" />
-            </button>
-          ))}
-        </div>
-
-        {/* Expanded sidebar */}
-        <div
-          className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto flex flex-col`}
-        >
-          <div className="p-4 md:p-5 flex-1">
-            <div className="flex items-center justify-between mb-6">
-              <img
-                src={logo}
-                alt="Logo"
-                className="w-16 h-12 object-contain rounded-lg"
-              />
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-            </div>
-
-            <nav className="space-y-1">
-              {[
-                {
-                  label: "Home",
-                  icon: Home,
-                  action: () => {
-                    setActiveView("home");
-                    setSidebarOpen(false);
-                  },
-                },
-                {
-                  label: "Settings",
-                  icon: Settings,
-                  action: () => {
-                    setShowSettings(true);
-                    setSidebarOpen(false);
-                  },
-                },
-              ].map(({ label, icon: Icon, action }) => (
-                <div
-                  key={label}
-                  onClick={action}
-                  className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all"
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-sm font-medium">{label}</span>
-                </div>
-              ))}
-
-              <div className="pt-3 mt-3 border-t border-slate-700/50 space-y-1">
-                <div
-                  onClick={() => {
-                    setActiveView("financial-overview");
-                    setSidebarOpen(false);
-                  }}
-                  className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-blue-600/20 rounded-lg cursor-pointer transition-all"
-                >
-                  <TrendingUp className="w-5 h-5" />
-                  <span className="text-sm font-medium">Business Overview</span>
-                </div>
-
-                {/* Quotes */}
-                <div>
-                  <div
-                    onClick={() => setIsQuotesOpen(!isQuotesOpen)}
-                    className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <ClipboardList className="w-5 h-5" />
-                      <span className="text-sm font-medium">Quotes</span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-300 ${isQuotesOpen ? "rotate-180" : ""}`}
-                    />
-                  </div>
-                  <div
-                    className={`ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4 overflow-hidden transition-all duration-300 ${isQuotesOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
-                  >
-                    <div
-                      onClick={() => {
-                        handleNewQuote();
-                        setSidebarOpen(false);
-                        setActiveView("invoice");
-                      }}
-                      className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all"
-                    >
-                      Create Quote
-                    </div>
-                    <div
-                      onClick={() => {
-                        setShowQuotesList(true);
-                        setSidebarOpen(false);
-                      }}
-                      className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>All Quotes</span>
-                        <span className="text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                          {savedQuotes.length}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Invoices */}
-                <div>
-                  <div
-                    onClick={() => setIsInvoicesOpen(!isInvoicesOpen)}
-                    className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <Receipt className="w-5 h-5" />
-                      <span className="text-sm font-medium">Invoices</span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-300 ${isInvoicesOpen ? "rotate-180" : ""}`}
-                    />
-                  </div>
-                  <div
-                    className={`ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4 overflow-hidden transition-all duration-300 ${isInvoicesOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
-                  >
-                    <div
-                      onClick={() => {
-                        handleNewInvoice();
-                        setSidebarOpen(false);
-                        setActiveView("invoice");
-                      }}
-                      className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all"
-                    >
-                      Create Invoice
-                    </div>
-                    <div
-                      onClick={() => {
-                        setShowServicesList(true);
-                        setSidebarOpen(false);
-                      }}
-                      className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>All Invoices</span>
-                        <span className="text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                          {savedServices.length}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Clients */}
-                <div>
-                  <div
-                    onClick={() => setIsClientsOpen(!isClientsOpen)}
-                    className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <Users className="w-5 h-5" />
-                      <span className="text-sm font-medium">Clients</span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-300 ${isClientsOpen ? "rotate-180" : ""}`}
-                    />
-                  </div>
-                  <div
-                    className={`ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4 overflow-hidden transition-all duration-300 ${isClientsOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
-                  >
-                    <div
-                      onClick={() => {
-                        handleAddNewCustomer();
-                        setSidebarOpen(false);
-                      }}
-                      className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all"
-                    >
-                      Add Client
-                    </div>
-                    <div
-                      onClick={() => {
-                        setShowCustomersListModal(true);
-                        setSidebarOpen(false);
-                      }}
-                      className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>All Clients</span>
-                        <span className="bg-gradient-to-r from-cyan-600 to-teal-600 text-white px-2 py-0.5 rounded-full text-xs font-bold">
-                          {savedCustomers.length}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {[
-                  {
-                    label: "Invoice Templates",
-                    icon: FileText,
-                    action: () => setActiveView("templates"),
-                  },
-                  {
-                    label: "HVAC Systems",
-                    icon: Wind,
-                    action: () => setActiveView("hvac-systems"),
-                  },
-                  {
-                    label: "Parts Inventory",
-                    icon: Package,
-                    action: () => setActiveView("inventory"),
-                  },
-                  {
-                    label: "Maintenance Schedule",
-                    icon: Calendar,
-                    action: () => setActiveView("schedule"),
-                  },
-                ].map(({ label, icon: Icon, action }) => (
-                  <div
-                    key={label}
-                    onClick={action}
-                    className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all"
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="text-sm font-medium">{label}</span>
-                  </div>
-                ))}
-              </div>
-            </nav>
-          </div>
-
-          {/* Sidebar footer */}
-          <div className="p-4 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent">
-            <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 bg-white rounded-full ring-2 ring-slate-700 shadow-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                {businessInfo.logoUrl ? (
-                  <img
-                    src={businessInfo.logoUrl}
-                    alt="Logo"
-                    className="max-h-[70%] max-w-[70%] object-contain"
-                  />
-                ) : (
-                  <Wind className="w-4 h-4 text-cyan-600" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold text-white truncate">
-                  {user?.name || "User"}
-                </div>
-                <div className="text-xs text-slate-400 truncate">
-                  {user?.email || "email@example.com"}
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="text-slate-400 hover:text-white hover:bg-red-600/20 p-2 rounded-xl transition-all flex-shrink-0"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+       <HVACSidebar
+  user={user}
+  activeView={activeView}
+  setActiveView={setActiveView}
+  sidebarOpen={sidebarOpen}
+  setSidebarOpen={setSidebarOpen}
+  setShowSettings={setShowSettings}
+  handleNewQuote={handleNewQuote}
+  handleNewService={handleNewInvoice}
+  handleAddNewCustomer={handleAddNewCustomer}
+  businessInfo={businessInfo}
+  savedQuotes={savedQuotes}
+  savedServices={savedServices}
+  savedCustomers={savedCustomers}
+  showServicesList={showInvoicesList}
+  setShowServicesList={setShowInvoicesList}
+  showQuotesList={showQuotesList}
+  setShowQuotesList={setShowQuotesList}
+  setShowCustomersListModal={setShowCustomersListModal}
+  handleLogout={handleLogout}
+  newRequestCount={0}
+/>
 
         {/* ── Main content ───────────────────────────────────────────────── */}
-        <div
-          className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-64" : "ml-0 md:ml-16"}`}
-        >
+       <div className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "md:ml-2" : "md:ml-4"}`}>
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
@@ -1867,6 +1652,13 @@ const HvacDashboard = () => {
           )}
         </div>
       </div>
+       <MobileBottomNav
+      activeView={activeView}
+      setActiveView={setActiveView}
+      handleNewInvoice={handleNewInvoice}
+      handleNewQuote={handleNewQuote}
+      setShowCustomersListModal={setShowCustomersListModal}
+    />
     </div>
   );
 };

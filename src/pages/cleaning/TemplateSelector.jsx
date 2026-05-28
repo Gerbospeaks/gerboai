@@ -191,7 +191,7 @@ export const ProfessionalTemplate = ({
               ? "INVOICE"
               : documentType === "estimate"
                 ? "QUOTE"
-                : "PURCHASE ORDER"}
+                : "ESTIMATE"}
           </div>
           <div className="text-xs space-y-1">
             {[
@@ -441,7 +441,7 @@ export const ClassicTemplate = ({
             {documentType === "estimate"
               ? "QUOTE"
               : documentType === "purchase_order"
-                ? "PURCHASE ORDER"
+                ? "ESTIMATE"
                 : "INVOICE"}
           </div>
           <div className="text-xs space-y-1">
@@ -847,7 +847,7 @@ export const ElegantTemplate = ({
           {documentType === "estimate"
             ? "SERVICE QUOTE"
             : documentType === "purchase_order"
-              ? "PURCHASE ORDER"
+              ? "ESTIMATE"
               : "SERVICE INVOICE"}
         </div>
         <div className="text-sm text-gray-500 mt-1">#{invoiceNumber}</div>
@@ -1237,7 +1237,7 @@ export const CommercialTemplate = ({
             {documentType === "estimate"
               ? "SERVICE QUOTE"
               : documentType === "purchase_order"
-                ? "PURCHASE ORDER"
+                ? "ESTIMATE"
                 : "SERVICE INVOICE"}
           </div>
           <div className="bg-indigo-50 border-2 border-indigo-600 p-3 rounded">

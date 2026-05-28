@@ -3585,7 +3585,10 @@ const LegalDashboard = () => {
         className="hidden print:block bg-white"
         style={{ width: "210mm", minHeight: "297mm" }}
       >
-        <TemplateRenderer {...templateProps} />
+        <TemplateRenderer 
+        templateId={selectedTemplate}
+         documentType={documentType}
+        {...templateProps} />
       </div>
       {showAIWindow && (
         <AIInvoiceWindow
@@ -3783,7 +3786,10 @@ const LegalDashboard = () => {
                     className="mx-auto bg-white shadow-xl"
                     style={{ width: "210mm", minHeight: "297mm" }}
                   >
-                    <TemplateRenderer {...templateProps} />
+                    <TemplateRenderer
+                    templateId={selectedTemplate}
+                    documentType={documentType}
+                    {...templateProps} />
                   </div>
                 </div>
               </div>
@@ -4183,7 +4189,10 @@ const LegalDashboard = () => {
                       marginBottom: "calc((297mm * 0.44) - 297mm)",
                     }}
                   >
-                    <TemplateRenderer {...templateProps} />
+                    <TemplateRenderer
+                    templateId={selectedTemplate}
+                    documentType={documentType}
+                    {...templateProps} />
                   </div>
                 </div>
               </div>

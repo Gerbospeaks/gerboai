@@ -22,6 +22,7 @@ import {
   Menu,
   X,
   Store,
+  Plus,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
@@ -42,7 +43,7 @@ export default function LandscapingSidebar({
   setShowJobCardsList,
   setShowCustomersListModal,
   handleAddNewCustomer,
-   newRequestCount,
+  newRequestCount,
 }) {
   const [isWorkOrdersOpen, setIsWorkOrdersOpen] = useState(false);
   const [isCustomersOpen, setIsCustomersOpen] = useState(false);
@@ -95,19 +96,19 @@ export default function LandscapingSidebar({
 
       {/* Scrollable nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-         <NavItem
+        <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
         <NavItem
-  icon={Store}
-  label="Find a Service"
-  onClick={() => goTo("marketplace")}
-  active={activeView === "marketplace"}
-  badge={newRequestCount > 0 ? newRequestCount : null}
-/>
+          icon={Store}
+          label="Find a Service"
+          onClick={() => goTo("marketplace")}
+          active={activeView === "marketplace"}
+          badge={newRequestCount > 0 ? newRequestCount : null}
+        />
         <NavItem
           icon={Settings}
           label="Settings"
@@ -116,9 +117,12 @@ export default function LandscapingSidebar({
             if (isMobile) setSidebarOpen(false);
           }}
         />
-        <NavItem icon={ShoppingBag} label="Purchase Orders"
-  onClick={() => goTo("purchase-orders")}
-  active={activeView === "purchase-orders"} />
+        <NavItem
+          icon={ShoppingBag}
+          label="Purchase Orders"
+          onClick={() => goTo("purchase-orders")}
+          active={activeView === "purchase-orders"}
+        />
 
         <SectionLabel>Finance</SectionLabel>
 
@@ -241,8 +245,6 @@ export default function LandscapingSidebar({
           onClick={() => goTo("equipment")}
           active={activeView === "equipment"}
         />
-
-       
       </div>
 
       {/* Footer */}
@@ -279,13 +281,52 @@ export default function LandscapingSidebar({
     </div>
   );
 
+  // ── Bottom nav items ────────────────────────────────────────────────────────
+  const bottomNavItems = [
+    {
+      icon: Home,
+      label: "Home",
+      action: () => goTo("home"),
+      active: activeView === "home",
+    },
+    {
+      icon: ClipboardList,
+      label: "Orders",
+      action: () => goTo("invoice"),
+      active: activeView === "invoice",
+    },
+    {
+      icon: Plus,
+      label: "New",
+      action: () => {
+        handleNewJobCard?.();
+        goTo("invoice");
+      },
+      active: false,
+      isPrimary: true,
+    },
+    {
+      icon: Store,
+      label: "Services",
+      action: () => goTo("marketplace"),
+      active: activeView === "marketplace",
+      badge: newRequestCount > 0 ? newRequestCount : null,
+    },
+    {
+      icon: Menu,
+      label: "More",
+      action: () => setSidebarOpen(true),
+      active: false,
+    },
+  ];
+
   return (
     <>
       {/* ════════════════════════════════════════════════════════════════
-          MOBILE — hamburger + slide-in drawer
+          MOBILE — hamburger + slide-in drawer + bottom nav
       ════════════════════════════════════════════════════════════════ */}
       <div className="md:hidden print:hidden">
-        {/* Hamburger */}
+        {/* Hamburger — only shown when drawer is closed AND bottom nav is not visible */}
         {!sidebarOpen && (
           <button
             onClick={() => setSidebarOpen(true)}
@@ -313,6 +354,57 @@ export default function LandscapingSidebar({
           }`}
         >
           <SidebarContent />
+        </div>
+
+        {/* ── Bottom navigation bar ── */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-b from-slate-900 to-slate-950 border-t border-slate-700/60 print:hidden">
+          <div className="flex items-center justify-around px-2 py-1 pb-safe">
+            {bottomNavItems.map(({ icon: Icon, label, action, active, isPrimary, badge }) =>
+              isPrimary ? (
+                <button
+                  key={label}
+                  onClick={action}
+                  className="flex flex-col items-center justify-center -mt-5"
+                >
+                  <div className="w-14 h-14 bg-[#16a34a] hover:bg-[#15803d] rounded-full flex items-center justify-center shadow-lg shadow-[#16a34a]/40 border-4 border-slate-950 transition-all active:scale-95">
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-[10px] text-[#4ade80] font-semibold mt-0.5">
+                    {label}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  key={label}
+                  onClick={action}
+                  className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all active:scale-95 min-w-[56px]"
+                >
+                  <div className="relative w-6 h-6 flex items-center justify-center">
+                    {active && (
+                      <span className="absolute inset-0 bg-[#16a34a]/20 rounded-lg" />
+                    )}
+                    {badge != null && (
+                      <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 bg-[#16a34a] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
+                        {badge}
+                      </span>
+                    )}
+                    <Icon
+                      className={`w-5 h-5 transition-colors ${
+                        active ? "text-[#4ade80]" : "text-slate-500"
+                      }`}
+                    />
+                  </div>
+                  <span
+                    className={`text-[10px] font-medium transition-colors ${
+                      active ? "text-[#4ade80]" : "text-slate-500"
+                    }`}
+                  >
+                    {label}
+                  </span>
+                </button>
+              )
+            )}
+          </div>
         </div>
       </div>
 
@@ -418,8 +510,6 @@ export default function LandscapingSidebar({
                   action: () => goTo("equipment"),
                   active: activeView === "equipment",
                 },
-                
-               
               ].map(({ icon: Icon, title, action, active }) => (
                 <button
                   key={title}
@@ -477,7 +567,7 @@ function SectionLabel({ children }) {
   );
 }
 
-function NavItem({ icon: Icon, label, onClick, active = false }) {
+function NavItem({ icon: Icon, label, onClick, active = false, badge }) {
   return (
     <div
       onClick={onClick}
@@ -488,7 +578,12 @@ function NavItem({ icon: Icon, label, onClick, active = false }) {
       }`}
     >
       <Icon className="w-4 h-4 flex-shrink-0" />
-      <span className="truncate">{label}</span>
+      <span className="truncate flex-1">{label}</span>
+      {badge != null && (
+        <span className="bg-[#16a34a] text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
+          {badge}
+        </span>
+      )}
     </div>
   );
 }

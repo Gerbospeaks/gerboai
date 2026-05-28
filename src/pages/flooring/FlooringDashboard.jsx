@@ -38,7 +38,7 @@ import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
 import AIInvoiceWindow from '../AIInvoiceWindow';
-import FlooringSidebar       from "./FlooringSidebar";
+import FlooringSidebar, { MobileBottomNav }  from "./FlooringSidebar";
 import FlooringProjectsView  from "./FlooringProjectsView";
 import FlooringInventoryView from "./FlooringInventoryView";
 import FlooringSuppliersView from "./FlooringSuppliersView";
@@ -789,16 +789,7 @@ const FlooringDashboard = () => {
   newRequestCount={0}
 />
  
-        {/*
-          ── Main content ───────────────────────────────────────────────────
-          FIX: When the sidebar is collapsed it renders as a fixed w-16 (64px)
-          icon rail at md+ breakpoints. Without an offset the main content
-          starts at x=0 and slides under the rail.
-
-          Solution: add `md:ml-16` whenever the expanded sidebar is closed.
-          When the expanded sidebar opens it is a full-screen overlay so no
-          offset is needed — we clear it with `md:ml-0`.
-        */}
+       
         <div
           className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-[margin] duration-300 ${
             sidebarOpen ? "md:ml-2" : "md:ml-4"
@@ -989,12 +980,12 @@ const FlooringDashboard = () => {
             </div>
           )}
           {activeView === "templates" && (
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <Templates user={user} />
             </div>
           )}
          {activeView === "home" && (
-                     <div className="flex-1 overflow-y-auto p-4">
+                     <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
                        <HomeView
                          user={user}
                          onNavigate={(view, docType) => {
@@ -1013,32 +1004,32 @@ const FlooringDashboard = () => {
   </div>
 )}
 {activeView === "schedule" && (
-  <div className="flex-1 overflow-y-auto p-6">
+  <div className="flex-1 overflow-y-auto p-6 pb-16 md:pb-0">
     <FlooringScheduleView user={user} />
   </div>
 )}
  
 {activeView === "reports" && (
-  <div className="flex-1 overflow-y-auto p-6">
+  <div className="flex-1 overflow-y-auto p-6 pb-16 md:pb-0">
     <FlooringReportsView user={user} />
   </div>
 )}
  
 {activeView === "inventory" && (
-  <div className="flex-1 overflow-y-auto p-6">
+  <div className="flex-1 overflow-y-auto p-6 pb-16 md:pb-0">
     <FlooringInventoryView user={user} />
   </div>
 )}
  
 {activeView === "suppliers" && (
-  <div className="flex-1 overflow-y-auto p-6">
+  <div className="flex-1 overflow-y-auto p-6 pb-16 md:pb-0">
     <FlooringSuppliersView user={user} />
   </div>
 )}
  
 {(activeView === "projects" || activeView === "measure" ||
   activeView === "work-orders" || activeView === "installations") && (
-  <div className="flex-1 overflow-y-auto p-6">
+  <div className="flex-1 overflow-y-auto p-6 pb-16 md:pb-0">
     <FlooringProjectsView user={user} defaultTab={activeView} />
   </div>
 )}
@@ -1055,7 +1046,7 @@ const FlooringDashboard = () => {
 )}
           {/* ── Quote / Invoice view ──────────────────────────────────────── */}
           {activeView === "quote" && (
-            <div className="flex-1 overflow-hidden flex min-h-0">
+            <div className="flex-1 overflow-hidden flex min-h-0 pb-16 md:pb-0">
               {/* LEFT: Form panel */}
               <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
                 <div className="space-y-5">
@@ -2009,6 +2000,13 @@ const FlooringDashboard = () => {
           )}
         </div>
       </div>
+       <MobileBottomNav
+      activeView={activeView}
+      setActiveView={setActiveView}
+      handleNewQuote={handleNewQuote}
+      handleNewInvoice={handleNewInvoice}
+      documentType={documentType}
+    />
     </div>
   );
 };

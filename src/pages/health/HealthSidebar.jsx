@@ -15,6 +15,8 @@ import {
   LogOut,
   Menu,
   X,
+  Plus,
+  BarChart3,
   Bell,
   Activity,
   UserCheck,
@@ -713,6 +715,93 @@ function SubItem({ label, dot, onClick, badge, badgeBg = "bg-[#0e7490]" }) {
           {badge}
         </span>
       )}
+    </div>
+  );
+}
+export function MobileBottomNav({
+  activeView,
+  setActiveView,
+  handleNewInvoice,
+  handleAddNewPatient,
+}) {
+  const navItems = [
+    {
+      icon: Home,
+      label: "Home",
+      action: () => setActiveView("home"),
+      active: activeView === "home",
+    },
+    {
+      icon: Users,
+      label: "Patients",
+      action: () => setActiveView("patients"),
+      active: activeView === "patients",
+    },
+    {
+      icon: Plus,
+      label: "Invoice",
+      action: () => { handleNewInvoice(); },
+      active: activeView === "invoice",
+      isPrimary: true,
+    },
+    {
+      icon: Calendar,
+      label: "Schedule",
+      action: () => setActiveView("appointments"),
+      active: activeView === "appointments",
+    },
+    {
+      icon: BarChart3,
+      label: "Overview",
+      action: () => setActiveView("practice-overview"),
+      active: activeView === "practice-overview",
+    },
+  ];
+
+  return (
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0c1628] border-t border-[#1e3a5f] print:hidden">
+      <div className="flex items-center justify-around px-2 py-1 pb-safe">
+        {navItems.map(({ icon: Icon, label, action, active, isPrimary }) =>
+          isPrimary ? (
+            <button
+              key={label}
+              onClick={action}
+              className="flex flex-col items-center justify-center -mt-5"
+            >
+              <div className="w-14 h-14 bg-[#2563eb] hover:bg-[#1d4ed8] rounded-full flex items-center justify-center shadow-lg shadow-[#2563eb]/30 border-4 border-[#0c1628] transition-all active:scale-95">
+                <Icon className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-[10px] text-[#3b82f6] font-semibold mt-0.5">
+                {label}
+              </span>
+            </button>
+          ) : (
+            <button
+              key={label}
+              onClick={action}
+              className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all active:scale-95 min-w-[56px]"
+            >
+              <div className="relative w-6 h-6 flex items-center justify-center">
+                {active && (
+                  <span className="absolute inset-0 bg-[#2563eb]/10 rounded-lg" />
+                )}
+                <Icon
+                  className={`w-5 h-5 transition-colors ${
+                    active ? "text-[#3b82f6]" : "text-[#64748b]"
+                  }`}
+                />
+              </div>
+              <span
+                className={`text-[10px] font-medium transition-colors ${
+                  active ? "text-[#3b82f6]" : "text-[#64748b]"
+                }`}
+              >
+                {label}
+              </span>
+            </button>
+          )
+        )}
+      </div>
     </div>
   );
 }
