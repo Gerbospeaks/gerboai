@@ -1295,12 +1295,7 @@ const printStyles = `@media print {
       className:
         "flex items-center gap-1.5 px-3 py-2 bg-[#2563eb] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
     },
-    {
-      label: "Send",
-      icon: Send,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-[#059669] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
-    },
+   
     {
       label: "PDF",
       icon: Download,
