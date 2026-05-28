@@ -1081,7 +1081,7 @@ const handleSaveJobCard = async () => {
     return;
   }
   const db = getFirestore();
-  let numberToUse = jobCardNumber; /
+  let numberToUse = jobCardNumber; 
 
   if (!jobCardId) {
     numberToUse = await generateJobCardNumber(user.uid, documentType);
