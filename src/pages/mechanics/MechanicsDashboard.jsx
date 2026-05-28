@@ -1074,38 +1074,38 @@ const printStyles = `@media print {
   },
   });
 
-  const handleSaveJobCard = async () => {
-    if (!user?.uid) return;
-      if (jobCardId && !isDirty) {
+const handleSaveJobCard = async () => {
+  if (!user?.uid) return;
+  if (jobCardId && !isDirty) {
     alert("No changes detected. Edit the invoice before saving again.");
     return;
   }
-    const db = getFirestore();
-    let numberToUse = jobCardNumber;
-   if (!jobCardId) {
+  const db = getFirestore();
+  let numberToUse = jobCardNumber; /
+
+  if (!jobCardId) {
     numberToUse = await generateJobCardNumber(user.uid, documentType);
     setJobCardNumber(numberToUse);
-  } else {
-    numberToUse = jobCardId; 
   }
-    const jobCardData = buildJobCardPayload(numberToUse);
-    const collectionName = documentType === "quote" ? "quotations" : "invoices";
+  
 
-    // ✅ setDoc with number as ID (works for both create and update)
-    await setDoc(
-      doc(db, "users", user.uid, collectionName, numberToUse),
-      { ...jobCardData, updatedAt: serverTimestamp() },
-      { merge: true }, // merge:true makes it safe to call on existing docs too
-    );
+  const jobCardData = buildJobCardPayload(numberToUse);
+  const collectionName = documentType === "quote" ? "quotations" : "invoices";
 
-    setJobCardId(numberToUse); // ← ID is now the number string
-    setIsDirty(false); 
-    alert(
-      `${documentType === "quote" ? "Quote" : "Job card"} saved — ${numberToUse}`,
-    );
-    loadSavedJobCards();
-    fetchBusinessStats();
-  };
+  const docId = jobCardId || numberToUse; // use existing ID or new number as ID
+
+  await setDoc(
+    doc(db, "users", user.uid, collectionName, docId),
+    { ...jobCardData, updatedAt: serverTimestamp() },
+    { merge: true },
+  );
+
+  setJobCardId(docId);
+  setIsDirty(false);
+  alert(`${documentType === "quote" ? "Quote" : "Job card"} saved — ${numberToUse}`);
+  loadSavedJobCards();
+  fetchBusinessStats();
+};
 
  const handleConvertToInvoice = async () => {
   if (!user?.uid) return;
