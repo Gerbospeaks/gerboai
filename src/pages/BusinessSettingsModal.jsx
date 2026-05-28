@@ -22,7 +22,7 @@ import {
   ChevronUp,
   Check,
 } from "lucide-react";
-import SignatureStamp from "./mechanics/SignatureStamp";
+import SignatureStamp from "./SignatureStamp";
 
 // ─── Gateway definitions ───────────────────────────────────────────────────────
 const GATEWAYS = [

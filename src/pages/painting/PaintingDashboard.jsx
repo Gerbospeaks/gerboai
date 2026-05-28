@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
@@ -59,7 +61,7 @@ import {
   Calendar,
   X,
   FileText,
-  BarChart3,
+  Stamp,
   Menu,
   Plus,
   Send,
@@ -170,7 +172,8 @@ const PaintingDashboard = () => {
     showDate: true,
     enabled: true,
   });
-
+  const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   // ── client / site fields ─────────────────────────────────────────────────
   const [customerName, setCustomerName] = useState("Meridian Developments");
   const [customerEmail, setCustomerEmail] = useState("projects@meridian.co.za");
@@ -251,6 +254,7 @@ const PaintingDashboard = () => {
     showStampDate: stampSettings.showDate,
     showStamp: stampSettings.enabled,
     paymentStatus,
+    stampConfig,
   };
 
   // ============================================================================
@@ -1008,7 +1012,23 @@ const PaintingDashboard = () => {
           existingCustomer={selectedCustomer}
           onCustomerSaved={handleCustomerSaved}
         />
-
+{showStampModal && (
+  <StampSignatureModal
+    isOpen={showStampModal}
+    onClose={() => setShowStampModal(false)}
+    onConfirm={(cfg) => {
+      setStampConfig(cfg);
+      setShowStampModal(false);
+    }}
+    previewContent={
+      activeView === "purchase-orders"
+        ? <POTemplateRenderer  />
+        : <TemplateRenderer {...templateProps} />
+    }
+    businessInfo={businessInfo}
+    existingConfig={stampConfig}
+  />
+)}
         {showPaymentModal && selectedQuoteForPayment && (
           <PaymentProcessor
             showModal={showPaymentModal}
@@ -2006,6 +2026,16 @@ const PaintingDashboard = () => {
                     <TemplateRenderer {...templateProps} />
                   </div>
                 </div>
+                {/* ── Stamp button footer ── */}
+<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+  <button
+    onClick={() => setShowStampModal(true)}
+    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+  >
+    <Stamp className="w-4 h-4" />
+    Stamp &amp; Signature
+  </button>
+</div>
               </div>
             </div>
           )}

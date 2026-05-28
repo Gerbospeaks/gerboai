@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement"; // ✅ ADDED
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
@@ -39,7 +41,7 @@ import {
   Printer,
   Download,
   Sparkles,
-  Trash2,
+  Stamp,
   Hammer,
   Eye, // ✅ ADDED
   TrendingUp, // ✅ ADDED
@@ -128,7 +130,8 @@ const CarpentryDashboard = () => {
       setActiveView(view);
     }
   };
-
+const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   const [quoteNumber, setQuoteNumber] = useState("");
   const [quoteId, setQuoteId] = useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
@@ -928,6 +931,7 @@ const bottomNavItems = [
     showStampDate: stampSettings.showDate,
     showStamp: stampSettings.enabled,
     paymentStatus,
+    stampConfig,
   };
 
   // ── Status badge helper ───────────────────────────────────────────────────
@@ -1180,6 +1184,23 @@ const bottomNavItems = [
               businessInfo={businessInfo}
             />
           )}
+          {showStampModal && (
+  <StampSignatureModal
+    isOpen={showStampModal}
+    onClose={() => setShowStampModal(false)}
+    onConfirm={(cfg) => {
+      setStampConfig(cfg);
+      setShowStampModal(false);
+    }}
+    previewContent={
+      activeView === "purchase-orders"
+        ? <POTemplateRenderer  />
+        : <TemplateRenderer {...templateProps} />
+    }
+    businessInfo={businessInfo}
+    existingConfig={stampConfig}
+  />
+)}
 
           {/* ✅ ADDED — SubUserManagement modal */}
           {showUserManagement && (
@@ -2511,6 +2532,16 @@ const bottomNavItems = [
                     <TemplateRenderer {...templateProps} />
                   </div>
                 </div>
+                {/* ── Stamp button footer ── */}
+<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+  <button
+    onClick={() => setShowStampModal(true)}
+    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+  >
+    <Stamp className="w-4 h-4" />
+    Stamp &amp; Signature
+  </button>
+</div>
               </div>
             </div>
           )}

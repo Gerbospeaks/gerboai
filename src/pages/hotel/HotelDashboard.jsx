@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
@@ -44,7 +46,7 @@ import Reservations   from "./Reservations";
 import RestaurantBar  from "./RestaurantBar";
 
 import {
-  Eye, Save, Plus, Send, X,
+  Eye, Save, Plus, Send, X, Stamp,
   CreditCard, Receipt, Wallet, DollarSign, CheckSquare,
 } from "lucide-react";
 
@@ -123,7 +125,8 @@ const HotelDashboard = () => {
   const [numberOfGuests, setNumberOfGuests] = useState("2");
   const [numberOfNights, setNumberOfNights] = useState("5");
   const [specialRequests, setSpecialRequests] = useState("Late check-in requested");
-
+  const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   // ── Items ──────────────────────────────────────────────────────────────
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState({ description: "", rate: "", qty: "", type: "Room Charge" });
@@ -381,6 +384,7 @@ const HotelDashboard = () => {
     showStamp: stampSettings.enabled, stampText: stampSettings.text,
     stampColor: stampSettings.color, showStampDate: stampSettings.showDate,
     paymentStatus,
+    stampConfig,
   };
 
   const headerActions = [
@@ -481,7 +485,23 @@ const HotelDashboard = () => {
               businessInfo={propertyInfo}
             />
           )}
-
+{showStampModal && (
+  <StampSignatureModal
+    isOpen={showStampModal}
+    onClose={() => setShowStampModal(false)}
+    onConfirm={(cfg) => {
+      setStampConfig(cfg);
+      setShowStampModal(false);
+    }}
+    previewContent={
+      activeView === "purchase-orders"
+        ? <POTemplateRenderer  />
+        : <TemplateRenderer {...templateProps} />
+    }
+    businessInfo={propertyInfo}
+    existingConfig={stampConfig}
+  />
+)}
           {/* ── Invoices list modal ───────────────────────────────────── */}
           {showInvoicesList && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -766,6 +786,16 @@ const HotelDashboard = () => {
                     <TemplateRenderer {...templateProps} />
                   </div>
                 </div>
+                {/* ── Stamp button footer ── */}
+<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+  <button
+    onClick={() => setShowStampModal(true)}
+    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+  >
+    <Stamp className="w-4 h-4" />
+    Stamp &amp; Signature
+  </button>
+</div>
               </div>
             </div>
           )}

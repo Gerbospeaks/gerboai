@@ -46,7 +46,6 @@ import {
   Wrench,
   X,
 } from "lucide-react";
-import StampSignatureModal from "../StampSignatureModal";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/img/solidflo-logo.png";
@@ -57,6 +56,8 @@ import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import HomeView from "../HomeView";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -65,7 +66,6 @@ import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import FinancialOverview from "../FinancialOverview";
 import ReportsView from "./ReportsView";
-import { POTemplateRenderer } from "../Purchaseordertemplates";
 import HistoryView from "./HistoryView";
 import MechanicsSidebar from "./MechanicsSidebar";
 import NotesView from "./NotesView";
@@ -75,6 +75,7 @@ import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
+import StampOverlay from "../StampOverlay";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import Vehicles from "./Vehicles";
 const WORKER_URL = process.env.REACT_APP_API_URL;
@@ -1795,12 +1796,14 @@ const handleSaveJobCard = async () => {
   style={{ width: "210mm", minHeight: "297mm" }}
 >
   {activeView === "purchase-orders" ? (
-    <div id="po-printable">
+    <div id="po-printable" style={{ position: "relative" }}>
       <POTemplateRenderer {...poTemplateProps} />
+      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
     </div>
   ) : (
-    <div id="invoice-printable">
+    <div id="invoice-printable" style={{ position: "relative" }}>
       <TemplateRenderer {...templateProps} />
+      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
     </div>
   )}
   {documentType === "jobcard" && (
@@ -2168,9 +2171,10 @@ const handleSaveJobCard = async () => {
                 <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                   <div
                     className="mx-auto bg-white shadow-xl"
-                    style={{ width: "210mm", minHeight: "297mm" }}
+                    style={{position: "relative", width: "210mm", minHeight: "297mm" }}
                   >
                     <TemplateRenderer {...templateProps} />
+  <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
                   </div>
                 </div>
               </div>
@@ -2375,7 +2379,7 @@ const handleSaveJobCard = async () => {
                     {inputMode === "manual" && (
                       <>
                         {/* Step indicator */}
-                        <div className="px-6 py-4 bg-[#f8fafc]">
+                        <div className="px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
                           <div className="flex items-center gap-0">
                             {steps.map((step, idx) => (
                               <React.Fragment key={step.number}>
@@ -3813,6 +3817,7 @@ const handleSaveJobCard = async () => {
                   <div
                     className="bg-white shadow-lg rounded origin-top"
                     style={{
+                      position: "relative",
                       width: "210mm",
                       minHeight: "297mm",
                       transform: "scale(0.44)",
@@ -3826,7 +3831,13 @@ const handleSaveJobCard = async () => {
   <POTemplateRenderer {...poTemplateProps} />
 ) : (
   <TemplateRenderer {...templateProps} />
+  
 )}
+ <StampOverlay
+    stampConfig={stampConfig}
+    pageNumber={1}
+    businessInfo={businessInfo}
+  />
                   </div>
                 </div>
                

@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
@@ -55,7 +57,7 @@ import {
   Home,
   Save,
   Eye,
-  Settings,
+  Stamp,
   Sparkles,
   Users,
   Calendar,
@@ -151,7 +153,8 @@ const LogisticsDashboard = () => {
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [isOperationsOpen, setIsOperationsOpen] = useState(false);
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
-
+  const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   // Misc
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -746,6 +749,7 @@ const LogisticsDashboard = () => {
     showStampDate: stampSettings.showDate,
     showStamp: stampSettings.enabled,
     paymentStatus,
+    stampConfig,
   };
 
   // ── Stat card ─────────────────────────────────────────────────────────────
@@ -1188,7 +1192,23 @@ const LogisticsDashboard = () => {
               onViewDetails={handleViewWaybillDetails}
               onPrintLabel={handlePrintWaybillLabel}
             />
-
+{showStampModal && (
+  <StampSignatureModal
+    isOpen={showStampModal}
+    onClose={() => setShowStampModal(false)}
+    onConfirm={(cfg) => {
+      setStampConfig(cfg);
+      setShowStampModal(false);
+    }}
+    previewContent={
+      activeView === "purchase-orders"
+        ? <POTemplateRenderer  />
+        : <TemplateRenderer {...templateProps} />
+    }
+    businessInfo={businessInfo}
+    existingConfig={stampConfig}
+  />
+)}
             {/* All waybills modal */}
             {showWaybillsList && (
               <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1631,6 +1651,16 @@ const LogisticsDashboard = () => {
                       <TemplateRenderer {...templateProps} />
                     </div>
                   </div>
+                  {/* ── Stamp button footer ── */}
+<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+  <button
+    onClick={() => setShowStampModal(true)}
+    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+  >
+    <Stamp className="w-4 h-4" />
+    Stamp &amp; Signature
+  </button>
+</div>
                 </div>
               </div>
             )}

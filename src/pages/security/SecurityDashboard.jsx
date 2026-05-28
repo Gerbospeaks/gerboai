@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
@@ -40,6 +42,7 @@ import {
   Users,
   Calendar,
   FileText,
+  Stamp,
   Shield,
   FileBarChart,
   BarChart3,
@@ -205,6 +208,8 @@ const SecurityDashboard = () => {
   const { can, isAdmin } = usePermissions();
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
+  const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -523,6 +528,7 @@ const SecurityDashboard = () => {
     stampText: stampSettings?.text || "APPROVED",
     stampColor: stampSettings?.color || "#d32f2f",
     showStampDate: stampSettings?.showDate || false,
+    stampConfig,
   };
 
   const headerActions = [
@@ -1282,7 +1288,23 @@ const SecurityDashboard = () => {
           {showSettings && (
             <BusinessSettingsModal onClose={() => setShowSettings(false)} />
           )}
-
+{showStampModal && (
+  <StampSignatureModal
+    isOpen={showStampModal}
+    onClose={() => setShowStampModal(false)}
+    onConfirm={(cfg) => {
+      setStampConfig(cfg);
+      setShowStampModal(false);
+    }}
+    previewContent={
+      activeView === "purchase-orders"
+        ? <POTemplateRenderer  />
+        : <TemplateRenderer {...templateProps} />
+    }
+    businessInfo={businessInfo}
+    existingConfig={stampConfig}
+  />
+)}
           {/* Incidents list modal */}
           {showIncidentsList && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1612,6 +1634,16 @@ const SecurityDashboard = () => {
                     <TemplateRenderer {...templateProps} />
                   </div>
                 </div>
+                {/* ── Stamp button footer ── */}
+<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+  <button
+    onClick={() => setShowStampModal(true)}
+    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+  >
+    <Stamp className="w-4 h-4" />
+    Stamp &amp; Signature
+  </button>
+</div>
               </div>
             </div>
           )}

@@ -50,6 +50,7 @@ import { TemplateRenderer } from "./TemplateSelector";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
 import CustomerModal from "../CustomerModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
 import TemplateSelector from "./TemplateSelector";
 
 // ─── Firestore helpers ────────────────────────────────────────────────────────

@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
@@ -53,6 +55,7 @@ import {
   Send,
   Save,
   LogOut,
+  Stamp,
   CheckSquare,
   CreditCard,
   Receipt,
@@ -112,7 +115,8 @@ const ElectricalDashboard = () => {
   const { can, isAdmin } = usePermissions();
   const [showUserManagement, setShowUserManagement] = useState(false);
   const location = useLocation();
-
+  const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   // ── Document state ────────────────────────────────────────────────────────
   const [documentType, setDocumentType] = useState("quote");
   const [quoteNumber, setQuoteNumber] = useState("");
@@ -582,6 +586,7 @@ const handleAddNewCustomer = () => {
     showStampDate: stampSettings.showDate,
     showStamp: stampSettings.enabled,
     paymentStatus,
+    stampConfig,
   };
 
   // ── Header actions ────────────────────────────────────────────────────────
@@ -770,6 +775,23 @@ const handleAddNewCustomer = () => {
               businessInfo={businessInfo}
             />
           )}
+          {showStampModal && (
+  <StampSignatureModal
+    isOpen={showStampModal}
+    onClose={() => setShowStampModal(false)}
+    onConfirm={(cfg) => {
+      setStampConfig(cfg);
+      setShowStampModal(false);
+    }}
+    previewContent={
+      activeView === "purchase-orders"
+        ? <POTemplateRenderer  />
+        : <TemplateRenderer {...templateProps} />
+    }
+    businessInfo={businessInfo}
+    existingConfig={stampConfig}
+  />
+)}
 
           {/* ── Quotes list modal ──────────────────────────────────────── */}
           {showQuotesList && (
@@ -1622,6 +1644,16 @@ const handleAddNewCustomer = () => {
                     <TemplateRenderer {...templateProps} />
                   </div>
                 </div>
+                {/* ── Stamp button footer ── */}
+<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+  <button
+    onClick={() => setShowStampModal(true)}
+    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+  >
+    <Stamp className="w-4 h-4" />
+    Stamp &amp; Signature
+  </button>
+</div>
               </div>
 
             </div>

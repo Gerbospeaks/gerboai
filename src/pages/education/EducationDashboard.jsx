@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
@@ -491,7 +493,8 @@ const EducationDashboard = () => {
   // ── Students: real Firebase with live listener ───────────────────────────────
   const [students, setStudents] = useState([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
-
+  const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   useEffect(() => {
     if (!user?.uid) return;
     setStudentsLoading(true);

@@ -4,6 +4,8 @@ import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
@@ -103,7 +105,8 @@ const RetailDashboard = () => {
     imageUrl: "",
   });
   const location = useLocation();
-
+  const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   useEffect(() => {
     if (location.state?.activeView) {
       setActiveView(location.state.activeView);

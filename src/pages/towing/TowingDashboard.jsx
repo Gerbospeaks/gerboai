@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
@@ -21,7 +23,6 @@ import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import PaymentReceipt from "../../components/dashboard/PaymentReceipt";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { POTemplateRenderer } from "../Purchaseordertemplates";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import TowingSidebar from "./TowingSidebar"; // adjust path as needed
@@ -53,7 +54,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,
-  Settings,
+  Stamp,
   Users,
   FileText,
   X,
@@ -184,6 +185,8 @@ const TowingDashboard = () => {
     const [poItems, setPoItems] = useState([
       { description: "", qty: 1, unit: "ea", unitPrice: 0, amount: 0 },
     ]);
+    const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   const [newPoItem, setNewPoItem] = useState({
     description: "",
     qty: 1,
@@ -1121,6 +1124,7 @@ const TowingDashboard = () => {
     stampColor: stampSettings.color,
     showStampDate: stampSettings.showDate,
     showStamp: stampSettings.enabled,
+    stampConfig,
   };
  const poTemplateProps = {
     templateId: selectedTemplate,
@@ -1473,7 +1477,23 @@ const TowingDashboard = () => {
             existingCustomer={selectedCustomer}
             onCustomerSaved={handleCustomerSaved}
           />
-
+     {showStampModal && (
+  <StampSignatureModal
+    isOpen={showStampModal}
+    onClose={() => setShowStampModal(false)}
+    onConfirm={(cfg) => {
+      setStampConfig(cfg);
+      setShowStampModal(false);
+    }}
+    previewContent={
+      activeView === "purchase-orders"
+        ? <POTemplateRenderer {...poTemplateProps} />
+        : <TemplateRenderer {...templateProps} />
+    }
+    businessInfo={businessInfo}
+    existingConfig={stampConfig}
+  />
+)}
           {showPaymentModal && selectedInvoiceForPayment && (
             <PaymentProcessor
               showModal={showPaymentModal}
@@ -2747,6 +2767,16 @@ const TowingDashboard = () => {
                     <TemplateRenderer {...templateProps} />
                   </div>
                 </div>
+                {/* ── Stamp button footer ── */}
+<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+  <button
+    onClick={() => setShowStampModal(true)}
+    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+  >
+    <Stamp className="w-4 h-4" />
+    Stamp &amp; Signature
+  </button>
+</div>
               </div>
             </div>
           )}

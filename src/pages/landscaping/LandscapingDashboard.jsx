@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import { usePermissions } from "../../hooks/usePermissions";
@@ -45,6 +47,7 @@ import {
   Save,
   Settings,
   Users,
+  Stamp,
   FileText,
   Sparkles,
   BarChart3,
@@ -105,7 +108,8 @@ const LandscapingDashboard = () => {
   const [showJobCardsList, setShowJobCardsList] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
-
+  const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   // Misc
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -657,6 +661,7 @@ const LandscapingDashboard = () => {
     serviceType: "LANDSCAPING",
     documentType: "landscaping",
     paymentStatus,
+    stampConfig,
   };
 
   // ── Stat card ─────────────────────────────────────────────────────────────
@@ -1018,7 +1023,23 @@ const LandscapingDashboard = () => {
             existingCustomer={selectedCustomer}
             onCustomerSaved={handleCustomerSaved}
           />
-
+{showStampModal && (
+  <StampSignatureModal
+    isOpen={showStampModal}
+    onClose={() => setShowStampModal(false)}
+    onConfirm={(cfg) => {
+      setStampConfig(cfg);
+      setShowStampModal(false);
+    }}
+    previewContent={
+      activeView === "purchase-orders"
+        ? <POTemplateRenderer  />
+        : <TemplateRenderer {...templateProps} />
+    }
+    businessInfo={businessInfo}
+    existingConfig={stampConfig}
+  />
+)}
           {/* All work orders modal */}
           {showInvoicesList && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1502,6 +1523,16 @@ const LandscapingDashboard = () => {
                     <TemplateRenderer {...templateProps} />
                   </div>
                 </div>
+                {/* ── Stamp button footer ── */}
+<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+  <button
+    onClick={() => setShowStampModal(true)}
+    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+  >
+    <Stamp className="w-4 h-4" />
+    Stamp &amp; Signature
+  </button>
+</div>
               </div>
             </div>
           )}

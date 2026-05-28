@@ -11,6 +11,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampSignatureModal from "../StampSignatureModal";
+import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
@@ -114,7 +116,8 @@ const RestaurantDashboard = () => {
       available: true,
     },
   ]);
-
+  const [showStampModal, setShowStampModal] = useState(false);
+const [stampConfig, setStampConfig] = useState(null);
   const [showMenuModal, setShowMenuModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [menuForm, setMenuForm] = useState({

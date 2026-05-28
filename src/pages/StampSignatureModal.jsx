@@ -8,215 +8,100 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
+  Circle,
+  Square,
 } from "lucide-react";
 
-/**
- * StampSignatureModal — multi-page version
- *
- * Props:
- *   isOpen          – boolean
- *   onClose         – () => void
- *   onConfirm       – (pageConfigs, sharedSignatureDataUrl) => void
- *   pages           – Array of React nodes, one per page (e.g. [<TemplateRenderer />, <JobCardTemplate />])
- *                     OR pass a single previewContent for backwards-compat (treated as page 1)
- *   previewContent  – React node (legacy single-page fallback)
- *   businessInfo    – { businessName, email, ... }
- *   existingConfigs – previously saved { pageConfigs: {1: cfg, 2: cfg}, signatureDataUrl } (optional)
- */
-export default function StampSignatureModal({
-  isOpen,
-  onClose,
-  onConfirm,
-  pages,
-  previewContent,
-  businessInfo,
-  existingConfigs,
+// ─── Rectangular stamp (customisable) ────────────────────────────────────────
+function RectStamp({
+  text = "APPROVED",
+  color = "#d32f2f",
+  showDate = true,
+  rotation = -5,
+  size = "medium",
 }) {
-  const FULL_W = 794;
-  const FULL_H = 1123;
-
-  // Normalise pages array — fall back to single previewContent
-  const pageList = pages?.length
-    ? pages
-    : previewContent
-      ? [previewContent]
-      : [];
-  const totalPages = pageList.length || 1;
-
-  // ── Per-page config ────────────────────────────────────────────────────
-  const defaultPageCfg = () => ({
-    stampEnabled: false,
-    stamp: { x: 550, y: 780, size: 160 },
-    sigEnabled: false,
-    sig: { x: 45, y: 740 },
+  const today = new Date().toLocaleDateString("en-ZA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   });
 
-  const initConfigs = () => {
-    if (existingConfigs?.pageConfigs) return existingConfigs.pageConfigs;
-    const c = {};
-    for (let i = 1; i <= totalPages; i++) c[i] = defaultPageCfg();
-    return c;
+  const sizes = {
+    small: {
+      padding: "8px 16px",
+      fontSize: "14px",
+      dateSize: "10px",
+      border: "2px",
+    },
+    medium: {
+      padding: "12px 22px",
+      fontSize: "18px",
+      dateSize: "11px",
+      border: "3px",
+    },
+    large: {
+      padding: "18px 28px",
+      fontSize: "22px",
+      dateSize: "13px",
+      border: "4px",
+    },
   };
+  const s = sizes[size] || sizes.medium;
 
-  const [pageConfigs, setPageConfigs] = useState(initConfigs);
-  const [signatureDataUrl, setSignatureDataUrl] = useState(
-    existingConfigs?.signatureDataUrl ?? null,
+  return (
+    <div
+      style={{
+        display: "inline-block",
+        padding: s.padding,
+        border: `${s.border} solid ${color}`,
+        borderRadius: "8px",
+        transform: `rotate(${rotation}deg)`,
+        background: `${color}14`,
+        fontFamily: "Courier New, monospace",
+        userSelect: "none",
+        pointerEvents: "none",
+      }}
+    >
+      <div
+        style={{
+          fontWeight: "bold",
+          outline: `0px solid ${color}`,
+          outlineOffset: "2px",
+          fontSize: s.fontSize,
+          color,
+          textTransform: "uppercase",
+          letterSpacing: "2px",
+          textAlign: "center",
+          padding: "2px 4px",
+        }}
+      >
+        {text}
+      </div>
+      {showDate && (
+        <div
+          style={{
+            fontSize: s.dateSize,
+            color,
+            textAlign: "center",
+            marginTop: "5px",
+          }}
+        >
+          {today}
+        </div>
+      )}
+    </div>
   );
-  const [currentPage, setCurrentPage] = useState(1);
-  const sigFileRef = useRef(null);
-  const containerRef = useRef(null);
+}
 
-  // Re-init if modal opens fresh or existingConfigs changes
-  useEffect(() => {
-    if (isOpen) {
-      setPageConfigs(initConfigs());
-      setSignatureDataUrl(existingConfigs?.signatureDataUrl ?? null);
-      setCurrentPage(1);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, existingConfigs]);
-
-  // ── Current page cfg helpers ───────────────────────────────────────────
-  const cfg = pageConfigs[currentPage] ?? defaultPageCfg();
-
-  const setCfg = (updater) =>
-    setPageConfigs((prev) => ({
-      ...prev,
-      [currentPage]:
-        typeof updater === "function"
-          ? updater(prev[currentPage] ?? defaultPageCfg())
-          : updater,
-    }));
-
-  // ── Coordinate helpers ─────────────────────────────────────────────────
-  const toPreviewX = useCallback(
-    (x) =>
-      containerRef.current
-        ? (x / FULL_W) * containerRef.current.clientWidth
-        : 0,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isOpen, currentPage],
-  );
-  const toPreviewY = useCallback(
-    (y) =>
-      containerRef.current
-        ? (y / FULL_H) * containerRef.current.clientHeight
-        : 0,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isOpen, currentPage],
-  );
-  const toFullX = (px) =>
-    containerRef.current
-      ? (px / containerRef.current.clientWidth) * FULL_W
-      : px;
-  const toFullY = (py) =>
-    containerRef.current
-      ? (py / containerRef.current.clientHeight) * FULL_H
-      : py;
-
-  // ── Drag handler ───────────────────────────────────────────────────────
-  const makeDragHandler = (cfgKey) => (e) => {
-    e.preventDefault();
-    const cont = containerRef.current;
-    if (!cont) return;
-    const rect = cont.getBoundingClientRect();
-    const getClient = (ev) => (ev.touches ? ev.touches[0] : ev);
-    const t = getClient(e);
-    const startX = t.clientX;
-    const startY = t.clientY;
-    const snap = pageConfigs[currentPage] ?? defaultPageCfg();
-    const startElX = (snap[cfgKey].x / FULL_W) * rect.width;
-    const startElY = (snap[cfgKey].y / FULL_H) * rect.height;
-
-    const onMove = (ev) => {
-      ev.preventDefault();
-      const tc = getClient(ev);
-      const dx = tc.clientX - startX;
-      const dy = tc.clientY - startY;
-      const newPxX = Math.max(0, Math.min(startElX + dx, rect.width));
-      const newPxY = Math.max(0, Math.min(startElY + dy, rect.height));
-      setCfg((prev) => ({
-        ...prev,
-        [cfgKey]: { ...prev[cfgKey], x: toFullX(newPxX), y: toFullY(newPxY) },
-      }));
-    };
-    const onUp = () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-      window.removeEventListener("touchmove", onMove);
-      window.removeEventListener("touchend", onUp);
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    window.addEventListener("touchmove", onMove, { passive: false });
-    window.addEventListener("touchend", onUp);
-  };
-
-  // ── Signature upload ───────────────────────────────────────────────────
-  const handleSigUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setSignatureDataUrl(ev.target.result);
-      setCfg((p) => ({ ...p, sigEnabled: true }));
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // ── Apply stamp/sig to ALL pages at once ──────────────────────────────
-  const applyToAllPages = () => {
-    setPageConfigs((prev) => {
-      const next = { ...prev };
-      const source = prev[currentPage] ?? defaultPageCfg();
-      for (let i = 1; i <= totalPages; i++) {
-        next[i] = { ...source };
-      }
-      return next;
-    });
-  };
-
-  // ── Remove stamp from a specific page ────────────────────────────────
-  const removeFromPage = (p) => {
-    setPageConfigs((prev) => ({
-      ...prev,
-      [p]: { ...prev[p], stampEnabled: false, sigEnabled: false },
-    }));
-  };
-
-  // ── Stamped pages list ────────────────────────────────────────────────
-  const stampedPageNumbers = Object.entries(pageConfigs)
-    .filter(([, c]) => c.stampEnabled || c.sigEnabled)
-    .map(([p]) => Number(p))
-    .sort((a, b) => a - b);
-
-  // ── Date string ───────────────────────────────────────────────────────
-  const dateStr = (() => {
-    const now = new Date();
-    const mo = [
-      "JAN",
-      "FEB",
-      "MAR",
-      "APR",
-      "MAY",
-      "JUN",
-      "JUL",
-      "AUG",
-      "SEP",
-      "OCT",
-      "NOV",
-      "DEC",
-    ];
-    return `${String(now.getDate()).padStart(2, "0")} ${mo[now.getMonth()]} ${now.getFullYear()}`;
-  })();
-
-  const companyName = businessInfo?.businessName ?? "MY COMPANY NAME";
-  const companyEmail = businessInfo?.email ?? businessInfo?.primaryEmail ?? "";
-
-  if (!isOpen) return null;
-
-  // ── Stamp SVG ─────────────────────────────────────────────────────────
-  const StampSVG = ({ size = 160 }) => (
+// ─── Circular stamp (original) ───────────────────────────────────────────────
+function CircleStamp({
+  size = 160,
+  companyName = "MY COMPANY NAME",
+  companyEmail = "",
+  dateStr = "",
+}) {
+  const uid = Math.random().toString(36).slice(2, 8);
+  return (
     <svg
       viewBox="0 0 300 300"
       width={size}
@@ -250,11 +135,7 @@ export default function StampSignatureModal({
         strokeWidth="3"
         opacity=".85"
       />
-      <path
-        id={`tc-modal-${currentPage}`}
-        d="M 40,150 A 110,110 0 0,1 260,150"
-        fill="none"
-      />
+      <path id={`tc-${uid}`} d="M 40,150 A 110,110 0 0,1 260,150" fill="none" />
       <text
         fill="#ce1414"
         fontSize="20"
@@ -263,19 +144,11 @@ export default function StampSignatureModal({
         fontFamily="Courier New,monospace"
         opacity=".85"
       >
-        <textPath
-          href={`#tc-modal-${currentPage}`}
-          startOffset="50%"
-          textAnchor="middle"
-        >
+        <textPath href={`#tc-${uid}`} startOffset="50%" textAnchor="middle">
           {companyName.toUpperCase()}
         </textPath>
       </text>
-      <path
-        id={`bc-modal-${currentPage}`}
-        d="M 30,150 A 110,110 0 0,0 270,150"
-        fill="none"
-      />
+      <path id={`bc-${uid}`} d="M 30,150 A 110,110 0 0,0 270,150" fill="none" />
       <text
         fill="#ce1414"
         fontSize="14"
@@ -284,11 +157,7 @@ export default function StampSignatureModal({
         fontFamily="Courier New,monospace"
         opacity=".85"
       >
-        <textPath
-          href={`#bc-modal-${currentPage}`}
-          startOffset="50%"
-          textAnchor="middle"
-        >
+        <textPath href={`#bc-${uid}`} startOffset="50%" textAnchor="middle">
           {companyEmail}
         </textPath>
       </text>
@@ -327,6 +196,251 @@ export default function StampSignatureModal({
       </text>
     </svg>
   );
+}
+
+// ─── Color presets ────────────────────────────────────────────────────────────
+const COLOR_PRESETS = [
+  { value: "#d32f2f", label: "Red", emoji: "🔴" },
+  { value: "#1976d2", label: "Blue", emoji: "🔵" },
+  { value: "#388e3c", label: "Green", emoji: "🟢" },
+  { value: "#7b1fa2", label: "Purple", emoji: "🟣" },
+  { value: "#000000", label: "Black", emoji: "⚫" },
+  { value: "#f57c00", label: "Orange", emoji: "🟠" },
+];
+
+/**
+ * StampSignatureModal — multi-page, dual stamp style
+ *
+ * New props via stampSettings (from BusinessSettingsModal):
+ *   stampSettings – { text, color, showDate, size, enabled, stampType: "circle"|"rect" }
+ */
+export default function StampSignatureModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  pages,
+  previewContent,
+  businessInfo,
+  existingConfigs,
+  stampSettings: externalStampSettings,
+}) {
+  const FULL_W = 794;
+  const FULL_H = 1123;
+
+  const pageList = pages?.length
+    ? pages
+    : previewContent
+      ? [previewContent]
+      : [];
+  const totalPages = pageList.length || 1;
+
+  // ── Default stamp customisation ───────────────────────────────────────
+  const defaultStampStyle = () => ({
+    stampType: externalStampSettings?.stampType ?? "circle", // "circle" | "rect"
+    text: externalStampSettings?.text ?? "APPROVED",
+    color: externalStampSettings?.color ?? "#d32f2f",
+    showDate: externalStampSettings?.showDate ?? true,
+    size: externalStampSettings?.size ?? "medium",
+    rotation: externalStampSettings?.rotation ?? -5,
+  });
+
+  const [stampStyle, setStampStyle] = useState(defaultStampStyle);
+
+  // ── Per-page config ───────────────────────────────────────────────────
+  const defaultPageCfg = () => ({
+    stampEnabled: false,
+    stamp: { x: 550, y: 780, size: 160 },
+    sigEnabled: false,
+    sig: { x: 45, y: 740 },
+  });
+
+  const initConfigs = () => {
+    if (existingConfigs?.pageConfigs) return existingConfigs.pageConfigs;
+    const c = {};
+    for (let i = 1; i <= totalPages; i++) c[i] = defaultPageCfg();
+    return c;
+  };
+
+  const [pageConfigs, setPageConfigs] = useState(initConfigs);
+  const [signatureDataUrl, setSignatureDataUrl] = useState(
+    existingConfigs?.signatureDataUrl ?? null,
+  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const sigFileRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setPageConfigs(initConfigs());
+      setSignatureDataUrl(existingConfigs?.signatureDataUrl ?? null);
+      setCurrentPage(1);
+      setStampStyle(defaultStampStyle());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, existingConfigs]);
+
+  // ── Current page cfg helpers ──────────────────────────────────────────
+  const cfg = pageConfigs[currentPage] ?? defaultPageCfg();
+
+  const setCfg = (updater) =>
+    setPageConfigs((prev) => ({
+      ...prev,
+      [currentPage]:
+        typeof updater === "function"
+          ? updater(prev[currentPage] ?? defaultPageCfg())
+          : updater,
+    }));
+
+  // ── Coordinate helpers ────────────────────────────────────────────────
+  const toPreviewX = useCallback(
+    (x) =>
+      containerRef.current
+        ? (x / FULL_W) * containerRef.current.clientWidth
+        : 0,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isOpen, currentPage],
+  );
+  const toPreviewY = useCallback(
+    (y) =>
+      containerRef.current
+        ? (y / FULL_H) * containerRef.current.clientHeight
+        : 0,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isOpen, currentPage],
+  );
+  const toFullX = (px) =>
+    containerRef.current
+      ? (px / containerRef.current.clientWidth) * FULL_W
+      : px;
+  const toFullY = (py) =>
+    containerRef.current
+      ? (py / containerRef.current.clientHeight) * FULL_H
+      : py;
+
+  // ── Drag handler ──────────────────────────────────────────────────────
+  const makeDragHandler = (cfgKey) => (e) => {
+    e.preventDefault();
+    const cont = containerRef.current;
+    if (!cont) return;
+    const rect = cont.getBoundingClientRect();
+    const getClient = (ev) => (ev.touches ? ev.touches[0] : ev);
+    const t = getClient(e);
+    const startX = t.clientX;
+    const startY = t.clientY;
+    const snap = pageConfigs[currentPage] ?? defaultPageCfg();
+    const startElX = (snap[cfgKey].x / FULL_W) * rect.width;
+    const startElY = (snap[cfgKey].y / FULL_H) * rect.height;
+
+    const onMove = (ev) => {
+      ev.preventDefault();
+      const tc = getClient(ev);
+      const dx = tc.clientX - startX;
+      const dy = tc.clientY - startY;
+      const newPxX = Math.max(0, Math.min(startElX + dx, rect.width));
+      const newPxY = Math.max(0, Math.min(startElY + dy, rect.height));
+      setCfg((prev) => ({
+        ...prev,
+        [cfgKey]: { ...prev[cfgKey], x: toFullX(newPxX), y: toFullY(newPxY) },
+      }));
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onUp);
+  };
+
+  // ── Signature upload ──────────────────────────────────────────────────
+  const handleSigUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setSignatureDataUrl(ev.target.result);
+      setCfg((p) => ({ ...p, sigEnabled: true }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const applyToAllPages = () => {
+    setPageConfigs((prev) => {
+      const next = { ...prev };
+      const source = prev[currentPage] ?? defaultPageCfg();
+      for (let i = 1; i <= totalPages; i++) next[i] = { ...source };
+      return next;
+    });
+  };
+
+  const removeFromPage = (p) => {
+    setPageConfigs((prev) => ({
+      ...prev,
+      [p]: { ...prev[p], stampEnabled: false, sigEnabled: false },
+    }));
+  };
+
+  const stampedPageNumbers = Object.entries(pageConfigs)
+    .filter(([, c]) => c.stampEnabled || c.sigEnabled)
+    .map(([p]) => Number(p))
+    .sort((a, b) => a - b);
+
+  const dateStr = (() => {
+    const now = new Date();
+    const mo = [
+      "JAN",
+      "FEB",
+      "MAR",
+      "APR",
+      "MAY",
+      "JUN",
+      "JUL",
+      "AUG",
+      "SEP",
+      "OCT",
+      "NOV",
+      "DEC",
+    ];
+    return `${String(now.getDate()).padStart(2, "0")} ${mo[now.getMonth()]} ${now.getFullYear()}`;
+  })();
+
+  const companyName = businessInfo?.businessName ?? "MY COMPANY NAME";
+  const companyEmail = businessInfo?.email ?? businessInfo?.primaryEmail ?? "";
+
+  if (!isOpen) return null;
+
+  // ── Stamp renderer (preview inside document) ──────────────────────────
+  const StampOverlay = () => {
+    if (stampStyle.stampType === "rect") {
+      return (
+        <RectStamp
+          text={stampStyle.text}
+          color={stampStyle.color}
+          showDate={stampStyle.showDate}
+          rotation={stampStyle.rotation}
+          size={stampStyle.size}
+        />
+      );
+    }
+    return (
+      <CircleStamp
+        size={toPreviewX(cfg.stamp.size)}
+        companyName={companyName}
+        companyEmail={companyEmail}
+        dateStr={dateStr}
+      />
+    );
+  };
+
+  // ── Sidebar section header ────────────────────────────────────────────
+  const SectionLabel = ({ children }) => (
+    <p className="text-xs font-semibold text-[#374151] uppercase tracking-wide mb-2">
+      {children}
+    </p>
+  );
 
   return (
     <div
@@ -336,7 +450,7 @@ export default function StampSignatureModal({
       }}
     >
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[96vh] flex flex-col overflow-hidden">
-        {/* ── Header ──────────────────────────────────────────────────── */}
+        {/* ── Header ────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 bg-[#ce1414] rounded-lg flex items-center justify-center">
@@ -359,15 +473,13 @@ export default function StampSignatureModal({
           </button>
         </div>
 
-        {/* ── Body ────────────────────────────────────────────────────── */}
+        {/* ── Body ──────────────────────────────────────────────────── */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
-          {/* ── Left sidebar ────────────────────────────────────────── */}
-          <div className="w-56 flex-shrink-0 border-r border-[#e2e8f0] bg-[#f8fafc] p-4 space-y-4 overflow-y-auto">
+          {/* ── Sidebar ───────────────────────────────────────────── */}
+          <div className="w-64 flex-shrink-0 border-r border-[#e2e8f0] bg-[#f8fafc] p-4 space-y-5 overflow-y-auto">
             {/* Page navigation */}
             <div>
-              <p className="text-xs font-semibold text-[#374151] uppercase tracking-wide mb-2">
-                Pages
-              </p>
+              <SectionLabel>Pages</SectionLabel>
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -393,9 +505,7 @@ export default function StampSignatureModal({
 
             {/* Stamp toggle */}
             <div>
-              <p className="text-xs font-semibold text-[#374151] uppercase tracking-wide mb-2">
-                Stamp
-              </p>
+              <SectionLabel>Stamp</SectionLabel>
               <label className="flex items-center gap-2 cursor-pointer mb-3">
                 <input
                   type="checkbox"
@@ -409,30 +519,182 @@ export default function StampSignatureModal({
                   Show on this page
                 </span>
               </label>
-              <label className="text-xs text-[#64748b] block mb-1">Size</label>
-              <input
-                type="range"
-                min="80"
-                max="240"
-                step="10"
-                value={cfg.stamp.size}
-                onChange={(e) =>
-                  setCfg((p) => ({
-                    ...p,
-                    stamp: { ...p.stamp, size: Number(e.target.value) },
-                  }))
-                }
-                className="w-full accent-[#ce1414]"
-                disabled={!cfg.stampEnabled}
-              />
-              <span className="text-xs text-[#94a3b8]">{cfg.stamp.size}px</span>
+
+              {/* ── Stamp type switcher ─────────────────────────── */}
+              <div className="flex gap-1.5 mb-3">
+                {[
+                  {
+                    value: "circle",
+                    icon: <Circle className="w-3.5 h-3.5" />,
+                    label: "Round",
+                  },
+                  {
+                    value: "rect",
+                    icon: <Square className="w-3.5 h-3.5" />,
+                    label: "Rectangle",
+                  },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() =>
+                      setStampStyle((s) => ({ ...s, stampType: opt.value }))
+                    }
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                      stampStyle.stampType === opt.value
+                        ? "bg-[#ce1414] text-white border-[#ce1414]"
+                        : "bg-white text-[#374151] border-[#e2e8f0] hover:bg-[#f1f5f9]"
+                    }`}
+                  >
+                    {opt.icon}
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* ── Circle-only: size slider ──────────────────────── */}
+              {stampStyle.stampType === "circle" && (
+                <>
+                  <label className="text-xs text-[#64748b] block mb-1">
+                    Size
+                  </label>
+                  <input
+                    type="range"
+                    min="80"
+                    max="240"
+                    step="10"
+                    value={cfg.stamp.size}
+                    onChange={(e) =>
+                      setCfg((p) => ({
+                        ...p,
+                        stamp: { ...p.stamp, size: Number(e.target.value) },
+                      }))
+                    }
+                    className="w-full accent-[#ce1414]"
+                    disabled={!cfg.stampEnabled}
+                  />
+                  <span className="text-xs text-[#94a3b8]">
+                    {cfg.stamp.size}px
+                  </span>
+                </>
+              )}
+
+              {/* ── Rect-only: customisation controls ────────────── */}
+              {stampStyle.stampType === "rect" && (
+                <div className="space-y-3 mt-1">
+                  {/* Stamp text */}
+                  <div>
+                    <label className="text-xs text-[#64748b] block mb-1">
+                      Stamp text
+                    </label>
+                    <input
+                      type="text"
+                      value={stampStyle.text}
+                      maxLength={15}
+                      onChange={(e) =>
+                        setStampStyle((s) => ({
+                          ...s,
+                          text: e.target.value.toUpperCase(),
+                        }))
+                      }
+                      className="w-full px-2.5 py-1.5 text-xs font-bold uppercase border border-[#e2e8f0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ce1414] bg-white"
+                      placeholder="APPROVED"
+                    />
+                    <span className="text-[10px] text-[#94a3b8]">
+                      Max 15 characters
+                    </span>
+                  </div>
+
+                  {/* Color */}
+                  <div>
+                    <label className="text-xs text-[#64748b] block mb-1.5">
+                      Color
+                    </label>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {COLOR_PRESETS.map((c) => (
+                        <button
+                          key={c.value}
+                          title={c.label}
+                          onClick={() =>
+                            setStampStyle((s) => ({ ...s, color: c.value }))
+                          }
+                          style={{ background: c.value }}
+                          className={`w-6 h-6 rounded-full border-2 transition-all ${
+                            stampStyle.color === c.value
+                              ? "border-[#1e293b] scale-110"
+                              : "border-transparent"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Size */}
+                  <div>
+                    <label className="text-xs text-[#64748b] block mb-1">
+                      Size
+                    </label>
+                    <div className="flex gap-1">
+                      {["small", "medium", "large"].map((sz) => (
+                        <button
+                          key={sz}
+                          onClick={() =>
+                            setStampStyle((s) => ({ ...s, size: sz }))
+                          }
+                          className={`flex-1 py-1 text-[11px] font-medium rounded-lg border capitalize transition-colors ${
+                            stampStyle.size === sz
+                              ? "bg-[#ce1414] text-white border-[#ce1414]"
+                              : "bg-white text-[#374151] border-[#e2e8f0] hover:bg-[#f1f5f9]"
+                          }`}
+                        >
+                          {sz}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Rotation */}
+                  <div>
+                    <label className="text-xs text-[#64748b] block mb-1">
+                      Rotation: {stampStyle.rotation}°
+                    </label>
+                    <input
+                      type="range"
+                      min="-30"
+                      max="30"
+                      step="1"
+                      value={stampStyle.rotation}
+                      onChange={(e) =>
+                        setStampStyle((s) => ({
+                          ...s,
+                          rotation: Number(e.target.value),
+                        }))
+                      }
+                      className="w-full accent-[#ce1414]"
+                    />
+                  </div>
+
+                  {/* Show date */}
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={stampStyle.showDate}
+                      onChange={(e) =>
+                        setStampStyle((s) => ({
+                          ...s,
+                          showDate: e.target.checked,
+                        }))
+                      }
+                      className="w-4 h-4 accent-[#ce1414]"
+                    />
+                    <span className="text-xs text-[#374151]">Include date</span>
+                  </label>
+                </div>
+              )}
             </div>
 
-            {/* Signature toggle */}
+            {/* Signature */}
             <div>
-              <p className="text-xs font-semibold text-[#374151] uppercase tracking-wide mb-2">
-                Signature
-              </p>
+              <SectionLabel>Signature</SectionLabel>
               <label className="flex items-center gap-2 cursor-pointer mb-3">
                 <input
                   type="checkbox"
@@ -465,12 +727,12 @@ export default function StampSignatureModal({
                 <img
                   src={signatureDataUrl}
                   alt="sig preview"
-                  className="mt-2 max-h-14 rounded border border-[#e2e8f0] object-contain w-full bg-[#f8fafc]"
+                  className="mt-2 max-h-14 rounded object-contain w-full bg-[#f8fafc]"
                 />
               )}
             </div>
 
-            {/* Apply to all + Reset */}
+            {/* Apply to all / Reset */}
             <div className="space-y-2">
               <button
                 onClick={applyToAllPages}
@@ -491,9 +753,7 @@ export default function StampSignatureModal({
             {/* Stamped pages list */}
             {stampedPageNumbers.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-[#374151] uppercase tracking-wide mb-2">
-                  Stamped pages
-                </p>
+                <SectionLabel>Stamped pages</SectionLabel>
                 <div className="space-y-1 max-h-28 overflow-y-auto">
                   {stampedPageNumbers.map((p) => (
                     <div
@@ -522,14 +782,14 @@ export default function StampSignatureModal({
             )}
 
             <p className="text-[11px] text-[#94a3b8] leading-relaxed">
-              Navigate pages above, enable stamp/sig per page, drag to position.
-              Click <strong>Apply</strong> when done.
+              Enable stamp/sig per page, drag to reposition. Click{" "}
+              <strong>Apply</strong> when done.
             </p>
           </div>
 
-          {/* ── Preview area ────────────────────────────────────────── */}
+          {/* ── Preview area ───────────────────────────────────────── */}
           <div className="flex-1 overflow-auto bg-[#e2e8f0] p-6 flex flex-col items-center gap-4">
-            {/* Page nav bar above preview */}
+            {/* Page nav bar */}
             {totalPages > 1 && (
               <div className="flex items-center gap-3 bg-white border border-[#e2e8f0] rounded-xl px-4 py-2 shadow-sm flex-shrink-0">
                 <button
@@ -575,7 +835,7 @@ export default function StampSignatureModal({
               </div>
             )}
 
-            {/* Document preview with draggable overlays */}
+            {/* Document preview */}
             <div
               style={{
                 position: "relative",
@@ -601,11 +861,7 @@ export default function StampSignatureModal({
                     width: FULL_W,
                     minHeight: FULL_H,
                     transformOrigin: "top left",
-                    transform: `scale(${
-                      containerRef.current
-                        ? containerRef.current.clientWidth / FULL_W
-                        : 1
-                    })`,
+                    transform: `scale(${containerRef.current ? containerRef.current.clientWidth / FULL_W : 1})`,
                     pointerEvents: "none",
                     userSelect: "none",
                   }}
@@ -622,16 +878,20 @@ export default function StampSignatureModal({
                       position: "absolute",
                       left: toPreviewX(cfg.stamp.x),
                       top: toPreviewY(cfg.stamp.y),
-                      width: toPreviewX(cfg.stamp.size),
-                      height: toPreviewY(cfg.stamp.size),
+                      ...(stampStyle.stampType === "circle"
+                        ? {
+                            width: toPreviewX(cfg.stamp.size),
+                            height: toPreviewY(cfg.stamp.size),
+                          }
+                        : {}),
                       cursor: "grab",
                       zIndex: 10,
-                      outline: "2px dashed #ce1414",
+                      outline: "0px dashed #ce1414",
                       outlineOffset: 2,
                     }}
                     title="Drag to reposition stamp"
                   >
-                    <StampSVG size={toPreviewX(cfg.stamp.size)} />
+                    <StampOverlay />
                   </div>
                 )}
 
@@ -646,7 +906,7 @@ export default function StampSignatureModal({
                       top: toPreviewY(cfg.sig.y),
                       cursor: "grab",
                       zIndex: 10,
-                      outline: "2px dashed #2563eb",
+                      outline: "0px dashed #2563eb",
                       outlineOffset: 2,
                     }}
                     title="Drag to reposition signature"
@@ -675,7 +935,7 @@ export default function StampSignatureModal({
           </div>
         </div>
 
-        {/* ── Footer ──────────────────────────────────────────────────── */}
+        {/* ── Footer ────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
           <div className="flex items-center gap-3">
             <button
@@ -692,7 +952,9 @@ export default function StampSignatureModal({
             )}
           </div>
           <button
-            onClick={() => onConfirm({ pageConfigs, signatureDataUrl })}
+            onClick={() =>
+              onConfirm({ pageConfigs, signatureDataUrl, stampStyle })
+            }
             className="flex items-center gap-2 px-5 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-semibold rounded-lg transition-colors"
           >
             <Check className="w-4 h-4" />
