@@ -1218,6 +1218,13 @@ useEffect(() => {
       text: "SolidFlo has completely transformed how we handle invoicing. We've cut our billing time by 70% and get paid 2× faster. The automation features are incredible!",
     },
     {
+    name: "Mark Moyo",
+    role: "Electrician",
+    rating: 5,
+    text: "Since using the stamp and signature feature, my invoices look far more professional. Clients take them seriously and I get paid without the back-and-forth.",
+    image: "https://i.pravatar.cc/150?u=markmoyo"
+  },
+    {
       name: "Gregquinn Lee",
       role: "Founder, Reelancestry Streaming",
       image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Gracious",
