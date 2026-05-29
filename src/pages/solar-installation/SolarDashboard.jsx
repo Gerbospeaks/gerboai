@@ -13,6 +13,7 @@ import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
+import StampOverlay from "../StampOverlay";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
@@ -763,8 +764,9 @@ const [stampConfig, setStampConfig] = useState(null);
   return (
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
-      <div id="print-area" className="hidden print:block bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
+      <div id="print-area" className="hidden print:block bg-white" style={{ position: "relative", width: "210mm", minHeight: "297mm" }}>
         <TemplateRenderer {...templateProps} />
+        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
       </div>
         {showAIWindow && (
   <AIInvoiceWindow

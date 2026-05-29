@@ -14,6 +14,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import CleaningSidebar from "./CleaningSidebar";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
+import StampOverlay from "../StampOverlay";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
@@ -760,9 +761,10 @@ const bottomNavItems = [
       <div
         id="print-area"
         className="hidden print:block bg-white"
-        style={{ width: "210mm", minHeight: "297mm" }}
+        style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
       >
         <TemplateRenderer {...templateProps} />
+        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
       </div>
       {showAIWindow && (
   <AIInvoiceWindow
@@ -993,9 +995,10 @@ const bottomNavItems = [
                 <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                   <div
                     className="mx-auto bg-white shadow-xl"
-                    style={{ width: "210mm", minHeight: "297mm" }}
+                    style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                   >
                     <TemplateRenderer {...templateProps} />
+                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
                   </div>
                 </div>
               </div>
@@ -1796,6 +1799,7 @@ const bottomNavItems = [
                   <div
                     className="bg-white shadow-lg rounded origin-top"
                     style={{
+                      position: "relative",
                       width: "210mm",
                       minHeight: "297mm",
                       transform: "scale(0.44)",
@@ -1804,6 +1808,7 @@ const bottomNavItems = [
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
+                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}

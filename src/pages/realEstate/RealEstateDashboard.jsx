@@ -40,6 +40,7 @@ import {
 } from "firebase/firestore";
 import { Printer, Download, Sparkles } from "lucide-react";
 import { db } from "../../firebase";
+import StampOverlay from "../StampOverlay";
 import CustomerModal from "../CustomerModal";
 import RealEstateMultiStepForm from "./RealEstateMultiStepForm";
 import CustomersListModal from "../CustomersListModal";
@@ -702,8 +703,9 @@ const [stampConfig, setStampConfig] = useState(null);
   return (
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
-      <div id="print-area" className="hidden print:block bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
+      <div id="print-area" className="hidden print:block bg-white" style={{ position: "relative", width: "210mm", minHeight: "297mm" }}>
         <TemplateRenderer {...templateProps} />
+        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
       </div>
         {showAIWindow && (
                 <AIInvoiceWindow
@@ -831,8 +833,9 @@ const [stampConfig, setStampConfig] = useState(null);
                   </div>
                 </div>
                 <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
-                  <div className="mx-auto bg-white shadow-xl" style={{ width: "210mm", minHeight: "297mm" }}>
+                  <div className="mx-auto bg-white shadow-xl" style={{ position: "relative", width: "210mm", minHeight: "297mm" }}>
                     <TemplateRenderer {...templateProps} />
+                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
                   </div>
                 </div>
               </div>
@@ -967,9 +970,10 @@ const [stampConfig, setStampConfig] = useState(null);
                 <div className="flex-1 overflow-y-auto p-4">
                   <div
                     className="bg-white shadow-lg rounded origin-top"
-                    style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.44)", transformOrigin: "top left", marginBottom: `calc((297mm * 0.44) - 297mm)` }}
+                    style={{ position: "relative", width: "210mm", minHeight: "297mm", transform: "scale(0.44)", transformOrigin: "top left", marginBottom: `calc((297mm * 0.44) - 297mm)` }}
                   >
                     <TemplateRenderer {...templateProps} />
+                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}

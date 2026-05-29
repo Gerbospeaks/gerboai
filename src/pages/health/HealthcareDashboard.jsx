@@ -21,6 +21,7 @@ import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getFunctions } from "firebase/functions";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import AIInvoiceWindow from "../AIInvoiceWindow";
+import StampOverlay from "../StampOverlay";
 import {
   getFirestore,
   collection,
@@ -501,8 +502,9 @@ const [stampConfig, setStampConfig] = useState(null);
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
 
       {/* Print area */}
-      <div id="print-area" className="hidden print:block bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
+      <div id="print-area" className="hidden print:block bg-white" style={{ position: "relative", width: "210mm", minHeight: "297mm" }}>
         <TemplateRenderer {...templateProps} />
+        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={facilityInfo} />
       </div>
        {showAIWindow && (
         <AIInvoiceWindow
@@ -740,8 +742,9 @@ const [stampConfig, setStampConfig] = useState(null);
                   </div>
                 </div>
                 <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
-                  <div className="mx-auto bg-white shadow-xl" style={{ width: "210mm", minHeight: "297mm" }}>
+                  <div className="mx-auto bg-white shadow-xl" style={{ position: "relative", width: "210mm", minHeight: "297mm" }}>
                     <TemplateRenderer {...templateProps} />
+                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={facilityInfo} />
                   </div>
                 </div>
               </div>
@@ -975,6 +978,7 @@ const [stampConfig, setStampConfig] = useState(null);
                   <div
                     className="bg-white shadow-lg rounded origin-top"
                     style={{
+                      position: "relative",
                       width: "210mm",
                       minHeight: "297mm",
                       transform: "scale(0.44)",
@@ -983,6 +987,7 @@ const [stampConfig, setStampConfig] = useState(null);
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
+                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={facilityInfo} />
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}

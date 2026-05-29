@@ -44,6 +44,7 @@ import {
   HardHat,
 } from "lucide-react";
 import { db } from "../../firebase";
+import StampOverlay from "../StampOverlay";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
@@ -1163,9 +1164,11 @@ const [stampConfig, setStampConfig] = useState(null);
               <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                 <div
                   className="mx-auto bg-white shadow-xl"
-                  style={{ width: "210mm", minHeight: "297mm" }}
+                  style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                 >
                   <TemplateRenderer {...templateProps} />
+                  <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+
                 </div>
               </div>
             </div>
@@ -2016,6 +2019,7 @@ const [stampConfig, setStampConfig] = useState(null);
                   <div
                     className="bg-white shadow-lg rounded origin-top"
                     style={{
+                      position: "relative",
                       width: "210mm",
                       minHeight: "297mm",
                       transform: "scale(0.44)",
@@ -2024,6 +2028,8 @@ const [stampConfig, setStampConfig] = useState(null);
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
+                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}
@@ -2049,11 +2055,14 @@ const [stampConfig, setStampConfig] = useState(null);
         style={{
           width: "210mm",
           minHeight: "297mm",
+          position: "relative",
           transform: "scale(0.75)",
           transformOrigin: "top center",
         }}
       >
         <TemplateRenderer {...templateProps} />
+        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+
       </div>
     </div>
   );

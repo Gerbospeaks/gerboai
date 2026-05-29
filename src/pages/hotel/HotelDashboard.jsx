@@ -30,6 +30,7 @@ import { db } from "../../firebase";
 import GuestModal from "./GuestModal";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
+import StampOverlay from "../StampOverlay";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
@@ -406,8 +407,10 @@ const [stampConfig, setStampConfig] = useState(null);
   return (
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
-      <div id="print-area" className="hidden print:block bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
+      <div id="print-area" className="hidden print:block bg-white" style={{ position: "relative", width: "210mm", minHeight: "297mm" }}>
         <TemplateRenderer {...templateProps} />
+        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={propertyInfo} />
+
       </div>
 
       {/* AI window */}
@@ -580,8 +583,9 @@ const [stampConfig, setStampConfig] = useState(null);
                   </div>
                 </div>
                 <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
-                  <div className="mx-auto bg-white shadow-xl" style={{ width: "210mm", minHeight: "297mm" }}>
+                  <div className="mx-auto bg-white shadow-xl" style={{ position: "relative", width: "210mm", minHeight: "297mm" }}>
                     <TemplateRenderer {...templateProps} />
+                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={propertyInfo} />
                   </div>
                 </div>
               </div>
@@ -782,8 +786,9 @@ const [stampConfig, setStampConfig] = useState(null);
                   </div>
                 </div>
                 <div className="flex-1 overflow-y-auto p-4">
-                  <div className="bg-white shadow-lg rounded origin-top" style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.44)", transformOrigin: "top left", marginBottom: `calc((297mm * 0.44) - 297mm)` }}>
+                  <div className="bg-white shadow-lg rounded origin-top" style={{ position: "relative", width: "210mm", minHeight: "297mm", transform: "scale(0.44)", transformOrigin: "top left", marginBottom: `calc((297mm * 0.44) - 297mm)` }}>
                     <TemplateRenderer {...templateProps} />
+                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={propertyInfo} />
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}

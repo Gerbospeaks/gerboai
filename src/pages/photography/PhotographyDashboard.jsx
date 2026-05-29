@@ -14,6 +14,7 @@ import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
+import StampOverlay from "../StampOverlay";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
@@ -1422,9 +1423,10 @@ const [stampConfig, setStampConfig] = useState(null);
                   <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                     <div
                       className="mx-auto bg-white shadow-xl"
-                      style={{ width: "210mm", minHeight: "297mm" }}
+                      style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                     >
                       <TemplateRenderer {...templateProps} />
+                      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
                     </div>
                   </div>
                   {/* ── Stamp button footer ── */}
@@ -1650,6 +1652,7 @@ const [stampConfig, setStampConfig] = useState(null);
                     <div
                       className="bg-white shadow-lg rounded origin-top"
                       style={{
+                        position: "relative",
                         width: "210mm",
                         minHeight: "297mm",
                         transform: "scale(0.44)",
@@ -1658,6 +1661,8 @@ const [stampConfig, setStampConfig] = useState(null);
                       }}
                     >
                       <TemplateRenderer {...templateProps} />
+                      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+
                     </div>
                   </div>
                 </div>
@@ -1672,6 +1677,7 @@ const [stampConfig, setStampConfig] = useState(null);
         id="print-area"
         className="hidden print:block bg-white shadow-2xl origin-top"
         style={{
+          position: "relative",
           width: "210mm",
           minHeight: "297mm",
           transform: "scale(0.75)",
@@ -1679,6 +1685,7 @@ const [stampConfig, setStampConfig] = useState(null);
         }}
       >
         <TemplateRenderer {...templateProps} />
+        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
       </div>
     </div>
   );

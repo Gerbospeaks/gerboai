@@ -16,6 +16,7 @@ import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
+import StampOverlay from "../StampOverlay";
 import { getAuth, signOut } from "firebase/auth";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import {
