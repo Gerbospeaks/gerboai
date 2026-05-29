@@ -97,7 +97,7 @@ function RectStamp({
 function CircleStamp({
   size = 160,
   companyName = "MY COMPANY NAME",
-  companyEmail = "",
+  companyAddress = "",
   dateStr = "",
 }) {
   const uid = Math.random().toString(36).slice(2, 8);
@@ -158,7 +158,7 @@ function CircleStamp({
         opacity=".85"
       >
         <textPath href={`#bc-${uid}`} startOffset="50%" textAnchor="middle">
-          {companyEmail}
+          {companyAddress}
         </textPath>
       </text>
       <text
@@ -408,7 +408,10 @@ export default function StampSignatureModal({
   })();
 
   const companyName = businessInfo?.businessName ?? "MY COMPANY NAME";
-  const companyEmail = businessInfo?.email ?? businessInfo?.primaryEmail ?? "";
+ const companyAddress = [
+  businessInfo?.city,
+  businessInfo?.postalCode,
+].filter(Boolean).join(", ");
 
   if (!isOpen) return null;
 
@@ -429,7 +432,7 @@ export default function StampSignatureModal({
       <CircleStamp
         size={toPreviewX(cfg.stamp.size)}
         companyName={companyName}
-        companyEmail={companyEmail}
+        companyAddress={companyAddress}
         dateStr={dateStr}
       />
     );
