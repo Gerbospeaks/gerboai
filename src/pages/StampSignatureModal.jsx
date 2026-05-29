@@ -409,6 +409,7 @@ export default function StampSignatureModal({
 
   const companyName = businessInfo?.businessName ?? "MY COMPANY NAME";
  const companyAddress = [
+  businessInfo?.addressLine2,
   businessInfo?.city,
   businessInfo?.postalCode,
 ].filter(Boolean).join(", ");
