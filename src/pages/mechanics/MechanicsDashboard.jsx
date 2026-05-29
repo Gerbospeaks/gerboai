@@ -479,16 +479,17 @@ const [partsChecklist, setPartsChecklist]     = useState([]);
     setShowPaymentModal(false);
   };
 
-const loadSavedJobCards = async () => {
+const loadSavedJobCards = async (overrideDocType) => {
   if (!user?.uid) return;
   const db = getFirestore();
-  const collectionName = documentType === "quote" ? "quotations" : "invoices";
+  // ✅ use the override if provided, otherwise fall back to current state
+  const resolvedType = overrideDocType ?? documentType;
+  const collectionName = resolvedType === "quote" ? "quotations" : "invoices";
   const jobCardsRef = collection(db, "users", user.uid, collectionName);
   const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(50));
   const snapshot = await getDocs(q);
   
   const cards = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
   cards.sort((a, b) => {
     const getTime = (card) => {
       const t = card.updatedAt || card.createdAt;
@@ -499,7 +500,6 @@ const loadSavedJobCards = async () => {
     };
     return getTime(b) - getTime(a);
   });
-
   setSavedJobCards(cards);
 };
   const handleAddNewCustomer = () => {
@@ -1086,18 +1086,19 @@ const handleSaveJobCard = async () => {
     return;
   }
   const db = getFirestore();
-  let numberToUse = jobCardNumber; 
+  let numberToUse = jobCardNumber;
 
   if (!jobCardId) {
     numberToUse = await generateJobCardNumber(user.uid, documentType);
     setJobCardNumber(numberToUse);
   }
-  
 
   const jobCardData = buildJobCardPayload(numberToUse);
-  const collectionName = documentType === "quote" ? "quotations" : "invoices";
-
-  const docId = jobCardId || numberToUse; 
+  
+  // ✅ trust the payload's documentType, not the potentially-stale state
+  const resolvedType = jobCardData.documentType || documentType;
+  const collectionName = resolvedType === "quote" ? "quotations" : "invoices";
+  const docId = jobCardId || numberToUse;
 
   await setDoc(
     doc(db, "users", user.uid, collectionName, docId),
@@ -1107,12 +1108,12 @@ const handleSaveJobCard = async () => {
 
   setJobCardId(docId);
   setIsDirty(false);
-  alert(`${documentType === "quote" ? "Quote" : "Job card"} saved — ${numberToUse}`);
-  loadSavedJobCards();
+  alert(`${resolvedType === "quote" ? "Quote" : "Invoice"} saved — ${numberToUse}`);
+  loadSavedJobCards(resolvedType);
   fetchBusinessStats();
 };
 
- const handleConvertToInvoice = async () => {
+const handleConvertToInvoice = async () => {
   if (!user?.uid) return;
   if (!jobCardId) {
     alert("Please save the quote first before converting to invoice");
@@ -1124,11 +1125,11 @@ const handleSaveJobCard = async () => {
     const newInvoiceNumber = await generateJobCardNumber(user.uid, "invoice");
     const invoiceData = buildJobCardPayload(newInvoiceNumber);
     invoiceData.documentType = "invoice";
-    invoiceData.jobCardNumber = newInvoiceNumber; // ← explicitly set
+    invoiceData.jobCardNumber = newInvoiceNumber;
     invoiceData.convertedFromQuote = jobCardId;
     invoiceData.convertedFromQuoteNumber = jobCardNumber;
     invoiceData.convertedAt = serverTimestamp();
-    
+
     await setDoc(
       doc(db, "users", user.uid, "invoices", newInvoiceNumber),
       invoiceData,
@@ -1144,10 +1145,14 @@ const handleSaveJobCard = async () => {
 
     setDocumentType("invoice");
     setJobCardId(newInvoiceNumber);
-    setJobCardNumber(newInvoiceNumber); // ← already there, confirm it's correct
-    setIsDirty(false); // ← add this so no stale dirty flag
+    setJobCardNumber(newInvoiceNumber);
+    setIsDirty(false);
+    
+    // ✅ pass "invoice" directly — don't rely on state having flushed yet
+    loadSavedJobCards("invoice");
+    fetchBusinessStats();
+    
     alert(`Converted to Invoice ${newInvoiceNumber}`);
-    loadSavedJobCards();
   } catch (error) {
     alert("Failed to convert quote to invoice");
   }
