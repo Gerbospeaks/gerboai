@@ -6,6 +6,7 @@ import IndustryPickerModal from "../components/IndustryPickerModal";
 import { useIndustryPicker } from "../hooks/useIndustryPicker";
 import TimelineNavigation from "./TimelineNavigation";
 import { Helmet } from "react-helmet";
+import InstallButton from '../components/InstallButton'
 import heroBg from "../assets/videos/world.mp4";
 import {
   Zap,
@@ -1344,6 +1345,7 @@ useEffect(() => {
                 Start Free <ArrowRight size={13} />
               </button>
             </div>
+            
             <button
               className="lp-hamburger"
               onClick={() => setMobileOpen(true)}

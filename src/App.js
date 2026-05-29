@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useNavigate,
   useLocation,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -634,8 +635,24 @@ const SUBDOMAIN_LANDING = {
   "window-repair": SolidWindowRepair,
 };
 
+// In App.jsx — replace your existing SubdomainRoot
 function SubdomainRoot() {
   const subdomain = getSubdomainFromHost();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loading) return;
+    if (user && user.emailVerified) {
+      // Logged-in user hitting "/" — send to DashboardRouter
+      // which already handles the industry redirect
+      navigate("/dashboard", { replace: true });
+    }
+  }, [loading, user, navigate]);
+
+  if (loading) return <AppLoader />;
+
+  // Not logged in → show industry landing as normal
   const Landing = SUBDOMAIN_LANDING[subdomain];
   return Landing ? <Landing /> : <LandingPage />;
 }

@@ -5,12 +5,12 @@ export default function PWAInstallPrompt({ appReady }) {
   const [visible, setVisible] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
-  const isInstalled = window.matchMedia("(display-mode: standalone)").matches;
+  
 
   useEffect(() => {
     if (!appReady || isInstalled) return;
 
-    // Detect iOS
+   const isInstalled = window.matchMedia("(display-mode: standalone)").matches;
     const ios = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
     setIsIOS(ios);
     if (ios) {
@@ -24,10 +24,14 @@ export default function PWAInstallPrompt({ appReady }) {
       setDeferredPrompt(e);
       setVisible(true);
     };
-
+const installed = () => setVisible(false);
+window.addEventListener("appinstalled", installed);
     window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, [appReady, isInstalled]);
+   return () => {
+  window.removeEventListener("beforeinstallprompt", handler);
+  window.removeEventListener("appinstalled", installed);  
+};
+  }, [appReady]);
 
   const handleInstall = async () => {
     if (isIOS) {
