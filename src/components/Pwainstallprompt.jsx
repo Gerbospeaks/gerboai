@@ -5,12 +5,12 @@ export default function PWAInstallPrompt({ appReady }) {
   const [visible, setVisible] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
-  
+   const isInstalled = window.matchMedia("(display-mode: standalone)").matches;
 
   useEffect(() => {
     if (!appReady || isInstalled) return;
 
-   const isInstalled = window.matchMedia("(display-mode: standalone)").matches;
+  
     const ios = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
     setIsIOS(ios);
     if (ios) {
