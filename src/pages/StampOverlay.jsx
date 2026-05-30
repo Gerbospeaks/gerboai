@@ -100,7 +100,7 @@ function RectStamp({
 function CircleStamp({
   size = 160,
   companyName = "MY COMPANY",
-  companyEmail = "",
+  companyAddress = "",
   dateStr = "",
 }) {
   const uid = React.useId().replace(/:/g, "");
@@ -169,7 +169,7 @@ function CircleStamp({
         opacity=".85"
       >
         <textPath href={`#bc-ov-${uid}`} startOffset="50%" textAnchor="middle">
-          {companyEmail}
+          {companyAddress}
         </textPath>
       </text>
       <text
@@ -245,7 +245,7 @@ export default function StampOverlay({
   const dateStr = `${String(now.getDate()).padStart(2, "0")} ${mo[now.getMonth()]} ${now.getFullYear()}`;
 
   const companyName = businessInfo?.businessName ?? "MY COMPANY";
-  const companyEmail = businessInfo?.email ?? businessInfo?.primaryEmail ?? "";
+  const companyAddress = businessInfo?.email ?? businessInfo?.primaryEmail ?? "";
 
   return (
     <>
@@ -272,7 +272,7 @@ export default function StampOverlay({
             <CircleStamp
               size={pageCfg.stamp.size * scaleX}
               companyName={companyName}
-              companyEmail={companyEmail}
+              companyAddress={companyAddress}
               dateStr={dateStr}
             />
           )}
