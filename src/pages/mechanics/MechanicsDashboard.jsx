@@ -111,19 +111,19 @@ const MechanicsDashboard = () => {
     if (view) setActiveView(view);
   };
   const [showStampModal, setShowStampModal] = useState(false);
-const [stampConfig, setStampConfig] = useState(null);
+  const [stampConfig, setStampConfig] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState("JobCard");
   const [showJobCard, setShowJobCard] = useState(false);
   const { user, authUser } = useAuth();
-  const [technicianName, setTechnicianName]     = useState("");
-const [bayNumber, setBayNumber]               = useState("");
-const [estimatedHours, setEstimatedHours]     = useState("");
-const [faultDescription, setFaultDescription] = useState("");
-const [diagnosisNotes, setDiagnosisNotes]     = useState("");
-const [workPerformed, setWorkPerformed]       = useState("");
-const [customerApproved, setCustomerApproved] = useState(false);
-const [partsChecklist, setPartsChecklist]     = useState([]);
+  const [technicianName, setTechnicianName] = useState("");
+  const [bayNumber, setBayNumber] = useState("");
+  const [estimatedHours, setEstimatedHours] = useState("");
+  const [faultDescription, setFaultDescription] = useState("");
+  const [diagnosisNotes, setDiagnosisNotes] = useState("");
+  const [workPerformed, setWorkPerformed] = useState("");
+  const [customerApproved, setCustomerApproved] = useState(false);
+  const [partsChecklist, setPartsChecklist] = useState([]);
   const [jobCardNumber, setJobCardNumber] = useState("");
   const [jobCardId, setJobCardId] = useState(null);
   const [isDirty, setIsDirty] = useState(false);
@@ -198,7 +198,6 @@ const [partsChecklist, setPartsChecklist]     = useState([]);
     sick_note: { prefix: "SN", folder: "sick_notes" },
     jobcard: { prefix: "JC", folder: "jobcards" },
     waybill: { prefix: "WB", folder: "waybills" },
-    
   };
   const location = useLocation();
   useEffect(() => {
@@ -228,9 +227,9 @@ const [partsChecklist, setPartsChecklist]     = useState([]);
     setNewPoItem({ description: "", qty: 1, unit: "ea", unitPrice: 0 });
   };
   const dirtySet = (setter) => (val) => {
-  setter(val);
-  setIsDirty(true);
-};
+    setter(val);
+    setIsDirty(true);
+  };
   const handleSavePO = async () => {
     if (!user?.uid) return;
     try {
@@ -479,48 +478,54 @@ const [partsChecklist, setPartsChecklist]     = useState([]);
     setShowPaymentModal(false);
   };
 
-const loadSavedJobCards = async (overrideDocType) => {
-  if (!user?.uid) return;
-  const db = getFirestore();
-  // ✅ use the override if provided, otherwise fall back to current state
-  const resolvedType = overrideDocType ?? documentType;
-  const collectionName = resolvedType === "quote" ? "quotations" : "invoices";
-  const jobCardsRef = collection(db, "users", user.uid, collectionName);
-  const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(50));
-  const snapshot = await getDocs(q);
-  
-  const cards = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  cards.sort((a, b) => {
-    const getTime = (card) => {
-      const t = card.updatedAt || card.createdAt;
-      if (!t) return 0;
-      if (t.toDate) return t.toDate().getTime();
-      if (t.seconds) return t.seconds * 1000;
-      return new Date(t).getTime();
-    };
-    return getTime(b) - getTime(a);
-  });
-  setSavedJobCards(cards);
-};
+  const loadSavedJobCards = async () => {
+    if (!user?.uid) return;
+    const db = getFirestore();
+    const collectionName = documentType === "quote" ? "quotations" : "invoices";
+    const jobCardsRef = collection(db, "users", user.uid, collectionName);
+    const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+
+    const cards = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    cards.sort((a, b) => {
+      const getTime = (card) => {
+        const t = card.updatedAt || card.createdAt;
+        if (!t) return 0;
+        if (t.toDate) return t.toDate().getTime();
+        if (t.seconds) return t.seconds * 1000;
+        return new Date(t).getTime();
+      };
+      return getTime(b) - getTime(a);
+    });
+
+    setSavedJobCards(cards);
+  };
   const handleAddNewCustomer = () => {
     setSelectedCustomer(null);
     setShowCustomerModal(true);
   };
   const handleDeleteJobCard = async (e, cardId) => {
-  e.stopPropagation(); // prevent row click from loading the card
-  if (!window.confirm("Are you sure you want to delete this record? This cannot be undone.")) return;
-  try {
-    const db = getFirestore();
-    const collectionName = documentType === "quote" ? "quotations" : "invoices";
-    await deleteDoc(doc(db, "users", user.uid, collectionName, cardId));
-    setSavedJobCards((prev) => prev.filter((c) => c.id !== cardId));
-    setInvoices((prev) => prev.filter((inv) => inv.id !== cardId));
-    // if the deleted card is currently open, reset the form
-    if (jobCardId === cardId) handleNewJobCard();
-  } catch (error) {
-    alert("Failed to delete record: " + error.message);
-  }
-};
+    e.stopPropagation(); // prevent row click from loading the card
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this record? This cannot be undone.",
+      )
+    )
+      return;
+    try {
+      const db = getFirestore();
+      const collectionName =
+        documentType === "quote" ? "quotations" : "invoices";
+      await deleteDoc(doc(db, "users", user.uid, collectionName, cardId));
+      setSavedJobCards((prev) => prev.filter((c) => c.id !== cardId));
+      setInvoices((prev) => prev.filter((inv) => inv.id !== cardId));
+      // if the deleted card is currently open, reset the form
+      if (jobCardId === cardId) handleNewJobCard();
+    } catch (error) {
+      alert("Failed to delete record: " + error.message);
+    }
+  };
   const handleEditCustomer = (customer) => {
     setSelectedCustomer(customer);
     setShowCustomerModal(true);
@@ -728,7 +733,7 @@ const loadSavedJobCards = async (overrideDocType) => {
       const { publicUrl, key } = await uploadRes.json();
 
       // ── 7. Save to Firestore ──────────────────────────────────────────────
-         const docType =
+      const docType =
         activeView === "purchase-orders"
           ? "purchase_order"
           : documentType === "quote"
@@ -738,27 +743,22 @@ const loadSavedJobCards = async (overrideDocType) => {
       const folder = DOC_CONFIG[docType]?.folder ?? docType;
       const firestoreDb = getFirestore();
       if (!jobCardId || isDirty) {
-
-  setIsDirty(false);
-} else {
-  
-  if (jobCardId) {
-    await setDoc(doc(firestoreDb, "users", user.uid, folder, number), {
-        fileName,
-        downloadUrl: publicUrl,
-        r2Key: key,
-        docType,
-        docNumber: number,
-        generatedAt: serverTimestamp(),
-        customerName,
-        vehicleReg,
-        total,
-      });
-  }
-}
-    
-
-      
+        setIsDirty(false);
+      } else {
+        if (jobCardId) {
+          await setDoc(doc(firestoreDb, "users", user.uid, folder, number), {
+            fileName,
+            downloadUrl: publicUrl,
+            r2Key: key,
+            docType,
+            docNumber: number,
+            generatedAt: serverTimestamp(),
+            customerName,
+            vehicleReg,
+            total,
+          });
+        }
+      }
 
       const collectionName =
         activeView === "purchase-orders"
@@ -988,7 +988,7 @@ const loadSavedJobCards = async (overrideDocType) => {
     }
   };
 
-const printStyles = `@media print { 
+  const printStyles = `@media print { 
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
   html,body { margin:0!important;padding:0!important;width:210mm!important;background:white!important; } 
   body * { visibility:hidden!important; } 
@@ -1067,96 +1067,92 @@ const printStyles = `@media print {
     totals: { subtotal, vat, total, paid: 0, due: total },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-     workshop: {
-    technicianName,
-    bayNumber,
-    estimatedHours,
-    faultDescription,
-    diagnosisNotes,
-    workPerformed,
-    partsChecklist,
-    customerApproved,
-  },
+    workshop: {
+      technicianName,
+      bayNumber,
+      estimatedHours,
+      faultDescription,
+      diagnosisNotes,
+      workPerformed,
+      partsChecklist,
+      customerApproved,
+    },
   });
 
-const handleSaveJobCard = async () => {
-  if (!user?.uid) return;
-  if (jobCardId && !isDirty) {
-    alert("No changes detected. Edit the invoice before saving again.");
-    return;
-  }
-  const db = getFirestore();
-  let numberToUse = jobCardNumber;
-
-  if (!jobCardId) {
-    numberToUse = await generateJobCardNumber(user.uid, documentType);
-    setJobCardNumber(numberToUse);
-  }
-
-  const jobCardData = buildJobCardPayload(numberToUse);
-  
-  // ✅ trust the payload's documentType, not the potentially-stale state
-  const resolvedType = jobCardData.documentType || documentType;
-  const collectionName = resolvedType === "quote" ? "quotations" : "invoices";
-  const docId = jobCardId || numberToUse;
-
-  await setDoc(
-    doc(db, "users", user.uid, collectionName, docId),
-    { ...jobCardData, updatedAt: serverTimestamp() },
-    { merge: true },
-  );
-
-  setJobCardId(docId);
-  setIsDirty(false);
-  alert(`${resolvedType === "quote" ? "Quote" : "Invoice"} saved — ${numberToUse}`);
-  loadSavedJobCards(resolvedType);
-  fetchBusinessStats();
-};
-
-const handleConvertToInvoice = async () => {
-  if (!user?.uid) return;
-  if (!jobCardId) {
-    alert("Please save the quote first before converting to invoice");
-    return;
-  }
-  if (!window.confirm("Convert this quote to an invoice?")) return;
-  try {
+  const handleSaveJobCard = async () => {
+    if (!user?.uid) return;
+    if (jobCardId && !isDirty) {
+      alert("No changes detected. Edit the invoice before saving again.");
+      return;
+    }
     const db = getFirestore();
-    const newInvoiceNumber = await generateJobCardNumber(user.uid, "invoice");
-    const invoiceData = buildJobCardPayload(newInvoiceNumber);
-    invoiceData.documentType = "invoice";
-    invoiceData.jobCardNumber = newInvoiceNumber;
-    invoiceData.convertedFromQuote = jobCardId;
-    invoiceData.convertedFromQuoteNumber = jobCardNumber;
-    invoiceData.convertedAt = serverTimestamp();
+    let numberToUse = jobCardNumber;
+
+    if (!jobCardId) {
+      numberToUse = await generateJobCardNumber(user.uid, documentType);
+      setJobCardNumber(numberToUse);
+    }
+
+    const jobCardData = buildJobCardPayload(numberToUse);
+    const collectionName = documentType === "quote" ? "quotations" : "invoices";
+
+    const docId = jobCardId || numberToUse;
 
     await setDoc(
-      doc(db, "users", user.uid, "invoices", newInvoiceNumber),
-      invoiceData,
+      doc(db, "users", user.uid, collectionName, docId),
+      { ...jobCardData, updatedAt: serverTimestamp() },
+      { merge: true },
     );
 
-    await updateDoc(doc(db, "users", user.uid, "quotations", jobCardId), {
-      convertedToInvoice: true,
-      convertedToInvoiceId: newInvoiceNumber,
-      convertedToInvoiceNumber: newInvoiceNumber,
-      convertedAt: serverTimestamp(),
-      status: "converted",
-    });
-
-    setDocumentType("invoice");
-    setJobCardId(newInvoiceNumber);
-    setJobCardNumber(newInvoiceNumber);
+    setJobCardId(docId);
     setIsDirty(false);
-    
-    // ✅ pass "invoice" directly — don't rely on state having flushed yet
-    loadSavedJobCards("invoice");
+    alert(
+      `${documentType === "quote" ? "Quote" : "Job card"} saved — ${numberToUse}`,
+    );
+    loadSavedJobCards();
     fetchBusinessStats();
-    
-    alert(`Converted to Invoice ${newInvoiceNumber}`);
-  } catch (error) {
-    alert("Failed to convert quote to invoice");
-  }
-};
+  };
+
+  const handleConvertToInvoice = async () => {
+    if (!user?.uid) return;
+    if (!jobCardId) {
+      alert("Please save the quote first before converting to invoice");
+      return;
+    }
+    if (!window.confirm("Convert this quote to an invoice?")) return;
+    try {
+      const db = getFirestore();
+      const newInvoiceNumber = await generateJobCardNumber(user.uid, "invoice");
+      const invoiceData = buildJobCardPayload(newInvoiceNumber);
+      invoiceData.documentType = "invoice";
+      invoiceData.jobCardNumber = newInvoiceNumber; // ← explicitly set
+      invoiceData.convertedFromQuote = jobCardId;
+      invoiceData.convertedFromQuoteNumber = jobCardNumber;
+      invoiceData.convertedAt = serverTimestamp();
+
+      await setDoc(
+        doc(db, "users", user.uid, "invoices", newInvoiceNumber),
+        invoiceData,
+      );
+
+      await updateDoc(doc(db, "users", user.uid, "quotations", jobCardId), {
+        convertedToInvoice: true,
+        convertedToInvoiceId: newInvoiceNumber,
+        convertedToInvoiceNumber: newInvoiceNumber,
+        convertedAt: serverTimestamp(),
+        status: "converted",
+      });
+
+      setDocumentType("invoice");
+      setJobCardId(newInvoiceNumber);
+      setJobCardNumber(newInvoiceNumber); // ← already there, confirm it's correct
+      setIsDirty(false); // ← add this so no stale dirty flag
+      alert(`Converted to Invoice ${newInvoiceNumber}`);
+      loadSavedJobCards();
+    } catch (error) {
+      alert("Failed to convert quote to invoice");
+    }
+  };
 
   const handleNewQuote = () => {
     setDocumentType("quote");
@@ -1250,10 +1246,11 @@ const handleConvertToInvoice = async () => {
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
     {
-      label: "Send",
-      icon: Send,
+      label: "Save",
+      icon: Save,
+      onClick: handleSaveJobCard,
       className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+        "flex items-center gap-1.5 px-3 py-1.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
     can("createInvoice") && {
       label: isSavingPDF ? "Saving..." : "Save PDF",
@@ -1306,7 +1303,7 @@ const handleConvertToInvoice = async () => {
       className:
         "flex items-center gap-1.5 px-3 py-2 bg-[#2563eb] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
     },
-   
+
     {
       label: "PDF",
       icon: Download,
@@ -1386,29 +1383,30 @@ const handleConvertToInvoice = async () => {
   );
 
   // ── Step definitions ──────────────────────────────────────────────────────
- const steps = documentType === "jobcard"
-  ? [
-      { number: 1, title: "Invoice To",  icon: Users      },
-      { number: 2, title: "Bill To",     icon: FileText   },
-      { number: 3, title: "Vehicle",     icon: Car        },
-      { number: 4, title: "Workshop",    icon: Wrench     },  
-      { number: 5, title: "Services",    icon: Package    },
-      { number: 6, title: "Sign-off",    icon: CheckSquare},
-    ]
-     : activeView === "purchase-orders"
-  ? [
-          { number: 1, title: "Supplier", icon: Truck },
-          { number: 2, title: "Delivery", icon: MapPin },
-          { number: 3, title: "Items", icon: Package },
-          { number: 4, title: "Summary", icon: FileText },
-        ]
-      : [
+  const steps =
+    documentType === "jobcard"
+      ? [
           { number: 1, title: "Invoice To", icon: Users },
           { number: 2, title: "Bill To", icon: FileText },
           { number: 3, title: "Vehicle", icon: Car },
-          { number: 4, title: "Services", icon: Wrench },
-          { number: 5, title: "Payment", icon: CreditCard },
-        ];
+          { number: 4, title: "Workshop", icon: Wrench },
+          { number: 5, title: "Services", icon: Package },
+          { number: 6, title: "Sign-off", icon: CheckSquare },
+        ]
+      : activeView === "purchase-orders"
+        ? [
+            { number: 1, title: "Supplier", icon: Truck },
+            { number: 2, title: "Delivery", icon: MapPin },
+            { number: 3, title: "Items", icon: Package },
+            { number: 4, title: "Summary", icon: FileText },
+          ]
+        : [
+            { number: 1, title: "Invoice To", icon: Users },
+            { number: 2, title: "Bill To", icon: FileText },
+            { number: 3, title: "Vehicle", icon: Car },
+            { number: 4, title: "Services", icon: Wrench },
+            { number: 5, title: "Payment", icon: CreditCard },
+          ];
   const totalSteps = steps.length;
 
   const templateProps = {
@@ -1451,17 +1449,17 @@ const handleConvertToInvoice = async () => {
     stampConfig,
   };
   const jobCardTemplateProps = {
-  ...templateProps, // inherit all base template props
-  technicianName,
-  bayNumber,
-  estimatedHours,
-  faultDescription,
-  diagnosisNotes,
-  workPerformed,
-  partsChecklist,
-  customerApproved,
-  sourceQuoteNumber: "",
-};
+    ...templateProps, // inherit all base template props
+    technicianName,
+    bayNumber,
+    estimatedHours,
+    faultDescription,
+    diagnosisNotes,
+    workPerformed,
+    partsChecklist,
+    customerApproved,
+    sourceQuoteNumber: "",
+  };
   const poTemplateProps = {
     templateId: selectedTemplate,
     businessInfo,
@@ -1796,55 +1794,75 @@ const handleConvertToInvoice = async () => {
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
       <div
-  id="print-area"
-  className="hidden print:block bg-white"
-  style={{ width: "210mm", minHeight: "297mm" }}
->
-  {activeView === "purchase-orders" ? (
-    <div id="po-printable" style={{ position: "relative" }}>
-      <POTemplateRenderer {...poTemplateProps} />
-      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
-    </div>
-  ) : (
-    <div id="invoice-printable" style={{ position: "relative" }}>
-      <TemplateRenderer {...templateProps} />
-      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
-    </div>
-  )}
-  {documentType === "jobcard" && (
-   <div 
-  id="jobcard-printable"
-  style={{ 
-    pageBreakBefore: "always", 
-    breakBefore: "page",
-    padding: "40px 0",
-    boxSizing: "border-box",
-    width: "210mm",
-  }}
->
-  <JobCardTemplate
-    jobCardNumber={jobCardNumber}
-    businessInfo={businessInfo}
-    customer={{ name: customerName, email: customerEmail, phone: customerPhone, address: customerAddress }}
-    vehicle={{ make: vehicleMake, model: vehicleModel, year: vehicleYear, registration: vehicleReg, vin: vehicleVin, mileage: vehicleMileage }}
-    technicianName={technicianName}
-    bayNumber={bayNumber}
-    estimatedHours={estimatedHours}
-    faultDescription={faultDescription}
-    diagnosisNotes={diagnosisNotes}
-    workPerformed={workPerformed}
-    items={items}
-    partsChecklist={partsChecklist}
-    customerApproved={customerApproved}
-    subtotal={subtotal}
-    vat={vat}
-    total={total}
-    logoBase64={logoBase64}
-    sourceQuoteNumber={""}
-  />
-</div>
-  )}
-</div>
+        id="print-area"
+        className="hidden print:block bg-white"
+        style={{ width: "210mm", minHeight: "297mm" }}
+      >
+        {activeView === "purchase-orders" ? (
+          <div id="po-printable" style={{ position: "relative" }}>
+            <POTemplateRenderer {...poTemplateProps} />
+            <StampOverlay
+              stampConfig={stampConfig}
+              pageNumber={1}
+              businessInfo={businessInfo}
+            />
+          </div>
+        ) : (
+          <div id="invoice-printable" style={{ position: "relative" }}>
+            <TemplateRenderer {...templateProps} />
+            <StampOverlay
+              stampConfig={stampConfig}
+              pageNumber={1}
+              businessInfo={businessInfo}
+            />
+          </div>
+        )}
+        {documentType === "jobcard" && (
+          <div
+            id="jobcard-printable"
+            style={{
+              pageBreakBefore: "always",
+              breakBefore: "page",
+              padding: "40px 0",
+              boxSizing: "border-box",
+              width: "210mm",
+            }}
+          >
+            <JobCardTemplate
+              jobCardNumber={jobCardNumber}
+              businessInfo={businessInfo}
+              customer={{
+                name: customerName,
+                email: customerEmail,
+                phone: customerPhone,
+                address: customerAddress,
+              }}
+              vehicle={{
+                make: vehicleMake,
+                model: vehicleModel,
+                year: vehicleYear,
+                registration: vehicleReg,
+                vin: vehicleVin,
+                mileage: vehicleMileage,
+              }}
+              technicianName={technicianName}
+              bayNumber={bayNumber}
+              estimatedHours={estimatedHours}
+              faultDescription={faultDescription}
+              diagnosisNotes={diagnosisNotes}
+              workPerformed={workPerformed}
+              items={items}
+              partsChecklist={partsChecklist}
+              customerApproved={customerApproved}
+              subtotal={subtotal}
+              vat={vat}
+              total={total}
+              logoBase64={logoBase64}
+              sourceQuoteNumber={""}
+            />
+          </div>
+        )}
+      </div>
       {showAIWindow && (
         <AIInvoiceWindow
           user={user}
@@ -1858,7 +1876,6 @@ const handleConvertToInvoice = async () => {
           industry="mechanics"
           TemplateRenderer={TemplateRenderer}
         />
-
       )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar */}
@@ -1901,16 +1918,14 @@ const handleConvertToInvoice = async () => {
 
         {/* Main content */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-         <AppHeader
-  actions={headerActions}
-  mobileActions={mobileDashboardActions}
-  onSettingsOpen={() => setShowSettings(true)}
-  onTeamOpen={() => setShowUserManagement(true)}
- 
-  sidebarOpen={sidebarOpen}
-  setSidebarOpen={setSidebarOpen}
- 
-/>
+          <AppHeader
+            actions={headerActions}
+            mobileActions={mobileDashboardActions}
+            onSettingsOpen={() => setShowSettings(true)}
+            onTeamOpen={() => setShowUserManagement(true)}
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+          />
 
           {/* Modals */}
           {showSettings && (
@@ -1943,23 +1958,25 @@ const handleConvertToInvoice = async () => {
               businessInfo={businessInfo}
             />
           )}
-           {showStampModal && (
-  <StampSignatureModal
-    isOpen={showStampModal}
-    onClose={() => setShowStampModal(false)}
-    onConfirm={(cfg) => {
-      setStampConfig(cfg);
-      setShowStampModal(false);
-    }}
-    previewContent={
-      activeView === "purchase-orders"
-        ? <POTemplateRenderer {...poTemplateProps} />
-        : <TemplateRenderer {...templateProps} />
-    }
-    businessInfo={businessInfo}
-    existingConfig={stampConfig}
-  />
-)}
+          {showStampModal && (
+            <StampSignatureModal
+              isOpen={showStampModal}
+              onClose={() => setShowStampModal(false)}
+              onConfirm={(cfg) => {
+                setStampConfig(cfg);
+                setShowStampModal(false);
+              }}
+              previewContent={
+                activeView === "purchase-orders" ? (
+                  <POTemplateRenderer {...poTemplateProps} />
+                ) : (
+                  <TemplateRenderer {...templateProps} />
+                )
+              }
+              businessInfo={businessInfo}
+              existingConfig={stampConfig}
+            />
+          )}
           {/* All job cards modal */}
           {showJobCardsList && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1998,7 +2015,7 @@ const handleConvertToInvoice = async () => {
                             "Paid",
                             "Status",
                             "PDF",
-                            "Delete"
+                            "Delete",
                           ].map((h) => (
                             <th
                               key={h}
@@ -2040,20 +2057,24 @@ const handleConvertToInvoice = async () => {
                             <td className="px-5 py-3 text-sm text-[#059669] font-medium">
                               {formatCurrency(card.totals?.paid || 0)}
                             </td>
-                            <td className="px-5 py-3" onClick={e => e.stopPropagation()}>
-  {card.documentType === "quote" && (
-    <button
-      onClick={() => {
-        loadJobCard(card);
-        setDocumentType("jobcard");  // switch type
-        setActiveView("invoice");    // reuse the form
-      }}
-      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#fed7aa] bg-[#fff7ed] text-[#ea580c] hover:bg-[#ffedd5] text-xs font-semibold transition-all">
-      <ClipboardList className="w-3 h-3" />
-      Job Card
-    </button>
-  )}
-</td>
+                            <td
+                              className="px-5 py-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {card.documentType === "quote" && (
+                                <button
+                                  onClick={() => {
+                                    loadJobCard(card);
+                                    setDocumentType("jobcard"); // switch type
+                                    setActiveView("invoice"); // reuse the form
+                                  }}
+                                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#fed7aa] bg-[#fff7ed] text-[#ea580c] hover:bg-[#ffedd5] text-xs font-semibold transition-all"
+                                >
+                                  <ClipboardList className="w-3 h-3" />
+                                  Job Card
+                                </button>
+                              )}
+                            </td>
                             <td className="px-5 py-3">
                               <span
                                 className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${statusBadge(card.status)}`}
@@ -2112,16 +2133,19 @@ const handleConvertToInvoice = async () => {
                                 </button>
                               )}
                             </td>
-                            <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
-      <button
-        onClick={(e) => handleDeleteJobCard(e, card.id)}
-        title="Delete"
-        className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#fee2e2] bg-[#fef2f2] hover:bg-[#fee2e2] text-[#dc2626] transition-all text-xs font-semibold"
-      >
-        <Trash2 className="w-3 h-3" />
-        Delete
-      </button>
-    </td>
+                            <td
+                              className="px-5 py-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                onClick={(e) => handleDeleteJobCard(e, card.id)}
+                                title="Delete"
+                                className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#fee2e2] bg-[#fef2f2] hover:bg-[#fee2e2] text-[#dc2626] transition-all text-xs font-semibold"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                                Delete
+                              </button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -2176,10 +2200,18 @@ const handleConvertToInvoice = async () => {
                 <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                   <div
                     className="mx-auto bg-white shadow-xl"
-                    style={{position: "relative", width: "210mm", minHeight: "297mm" }}
+                    style={{
+                      position: "relative",
+                      width: "210mm",
+                      minHeight: "297mm",
+                    }}
                   >
                     <TemplateRenderer {...templateProps} />
-  <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <StampOverlay
+                      stampConfig={stampConfig}
+                      pageNumber={1}
+                      businessInfo={businessInfo}
+                    />
                   </div>
                 </div>
               </div>
@@ -2413,9 +2445,9 @@ const handleConvertToInvoice = async () => {
                         </div>
 
                         {/* Step content */}
-                        <div 
-                         onInput={() => setIsDirty(true)}   
-                        onChange={() => setIsDirty(true)}
+                        <div
+                          onInput={() => setIsDirty(true)}
+                          onChange={() => setIsDirty(true)}
                         >
                           {activeView === "purchase-orders" ? (
                             <>
@@ -3311,7 +3343,7 @@ const handleConvertToInvoice = async () => {
                                   </div>
                                 </div>
                               )}
-                             
+
                               {/* Step 4 – Services & Parts */}
                               {currentStep === 4 && (
                                 <div>
@@ -3625,59 +3657,92 @@ const handleConvertToInvoice = async () => {
                                   )}
                                 </div>
                               )}
-                              {currentStep === 5 && documentType === "jobcard" && (
-  <div>
-    <div className="flex items-center gap-3 mb-5">
-      <div className="w-9 h-9 bg-[#f0fdf4] rounded-lg flex items-center justify-center">
-        <CheckSquare className="w-5 h-5 text-[#059669]" />
-      </div>
-      <div>
-        <h2 className="text-base font-semibold text-[#1e293b]">Customer Sign-off</h2>
-        <p className="text-xs text-[#64748b]">Confirm work authorisation and completion</p>
-      </div>
-    </div>
+                              {currentStep === 5 &&
+                                documentType === "jobcard" && (
+                                  <div>
+                                    <div className="flex items-center gap-3 mb-5">
+                                      <div className="w-9 h-9 bg-[#f0fdf4] rounded-lg flex items-center justify-center">
+                                        <CheckSquare className="w-5 h-5 text-[#059669]" />
+                                      </div>
+                                      <div>
+                                        <h2 className="text-base font-semibold text-[#1e293b]">
+                                          Customer Sign-off
+                                        </h2>
+                                        <p className="text-xs text-[#64748b]">
+                                          Confirm work authorisation and
+                                          completion
+                                        </p>
+                                      </div>
+                                    </div>
 
-    {/* Parts checklist — auto-generated from line items */}
-    <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-4 mb-5">
-      <p className="text-sm font-semibold text-[#374151] mb-3">Parts & Services Checklist</p>
-      {items.map((item, i) => (
-        <label key={i} className="flex items-center gap-3 py-2 border-b border-[#f1f5f9] cursor-pointer">
-          <input
-            type="checkbox"
-            checked={partsChecklist[i] ?? false}
-            onChange={e => {
-              const updated = [...partsChecklist];
-              updated[i] = e.target.checked;
-              setPartsChecklist(updated);
-            }}
-            className="w-4 h-4 accent-[#059669]"
-          />
-          <span className="text-sm text-[#374151] flex-1">{item.description}</span>
-          <span className="text-xs text-[#64748b]">{item.type} — R{item.amount?.toFixed(2)}</span>
-        </label>
-      ))}
-    </div>
+                                    {/* Parts checklist — auto-generated from line items */}
+                                    <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-4 mb-5">
+                                      <p className="text-sm font-semibold text-[#374151] mb-3">
+                                        Parts & Services Checklist
+                                      </p>
+                                      {items.map((item, i) => (
+                                        <label
+                                          key={i}
+                                          className="flex items-center gap-3 py-2 border-b border-[#f1f5f9] cursor-pointer"
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            checked={partsChecklist[i] ?? false}
+                                            onChange={(e) => {
+                                              const updated = [
+                                                ...partsChecklist,
+                                              ];
+                                              updated[i] = e.target.checked;
+                                              setPartsChecklist(updated);
+                                            }}
+                                            className="w-4 h-4 accent-[#059669]"
+                                          />
+                                          <span className="text-sm text-[#374151] flex-1">
+                                            {item.description}
+                                          </span>
+                                          <span className="text-xs text-[#64748b]">
+                                            {item.type} — R
+                                            {item.amount?.toFixed(2)}
+                                          </span>
+                                        </label>
+                                      ))}
+                                    </div>
 
-    {/* Approval toggle */}
-    <div className={`flex items-center justify-between p-4 rounded-xl border ${
-      customerApproved ? "bg-[#f0fdf4] border-[#bbf7d0]" : "bg-[#fff7ed] border-[#fed7aa]"}`}>
-      <div>
-        <p className="text-sm font-semibold text-[#1e293b]">Customer Authorisation</p>
-        <p className="text-xs text-[#64748b] mt-0.5">
-          {customerApproved ? "Customer has approved all work" : "Pending customer approval"}
-        </p>
-      </div>
-      <button
-        onClick={() => setCustomerApproved(p => !p)}
-        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-          customerApproved
-            ? "bg-[#059669] text-white hover:bg-[#047857]"
-            : "bg-white border border-[#e2e8f0] text-[#374151] hover:bg-[#f8fafc]"}`}>
-        {customerApproved ? "✓ Approved" : "Mark Approved"}
-      </button>
-    </div>
-  </div>
-)}
+                                    {/* Approval toggle */}
+                                    <div
+                                      className={`flex items-center justify-between p-4 rounded-xl border ${
+                                        customerApproved
+                                          ? "bg-[#f0fdf4] border-[#bbf7d0]"
+                                          : "bg-[#fff7ed] border-[#fed7aa]"
+                                      }`}
+                                    >
+                                      <div>
+                                        <p className="text-sm font-semibold text-[#1e293b]">
+                                          Customer Authorisation
+                                        </p>
+                                        <p className="text-xs text-[#64748b] mt-0.5">
+                                          {customerApproved
+                                            ? "Customer has approved all work"
+                                            : "Pending customer approval"}
+                                        </p>
+                                      </div>
+                                      <button
+                                        onClick={() =>
+                                          setCustomerApproved((p) => !p)
+                                        }
+                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                                          customerApproved
+                                            ? "bg-[#059669] text-white hover:bg-[#047857]"
+                                            : "bg-white border border-[#e2e8f0] text-[#374151] hover:bg-[#f8fafc]"
+                                        }`}
+                                      >
+                                        {customerApproved
+                                          ? "✓ Approved"
+                                          : "Mark Approved"}
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
                               {/* Step 5 – Payment */}
                               {currentStep === 6 && (
                                 <div>
@@ -3830,35 +3895,32 @@ const handleConvertToInvoice = async () => {
                       marginBottom: `calc((297mm * 0.44) - 297mm)`,
                     }}
                   >
-                   {documentType === "jobcard" ? (
-  <JobCardTemplate {...jobCardTemplateProps} />
-) : activeView === "purchase-orders" ? (
-  <POTemplateRenderer {...poTemplateProps} />
-) : (
-  <TemplateRenderer {...templateProps} />
-  
-)}
- <StampOverlay
-    stampConfig={stampConfig}
-    pageNumber={1}
-    businessInfo={businessInfo}
-  />
+                    {documentType === "jobcard" ? (
+                      <JobCardTemplate {...jobCardTemplateProps} />
+                    ) : activeView === "purchase-orders" ? (
+                      <POTemplateRenderer {...poTemplateProps} />
+                    ) : (
+                      <TemplateRenderer {...templateProps} />
+                    )}
+                    <StampOverlay
+                      stampConfig={stampConfig}
+                      pageNumber={1}
+                      businessInfo={businessInfo}
+                    />
                   </div>
                 </div>
-               
 
-{/* ── Stamp button footer ── */}
-<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-  <button
-    onClick={() => setShowStampModal(true)}
-    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
-  >
-    <Stamp className="w-4 h-4" />
-    Stamp &amp; Signature
-  </button>
-</div>
+                {/* ── Stamp button footer ── */}
+                <div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+                  <button
+                    onClick={() => setShowStampModal(true)}
+                    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    <Stamp className="w-4 h-4" />
+                    Stamp &amp; Signature
+                  </button>
+                </div>
               </div>
-              
             </div>
           )}
         </div>

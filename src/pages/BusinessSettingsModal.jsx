@@ -141,6 +141,11 @@ function GatewayRow({ gateway, saved, onSave }) {
   }
 
   async function handleSave() {
+    const empty = gateway.fields.find(f => !fields[f.key]?.trim());
+  if (empty) {
+    alert(`Please fill in ${empty.label}`);
+    return;
+  }
     setSaving(true);
     await onSave(gateway.id, { ...fields, enabled });
     setSaving(false);
@@ -344,15 +349,32 @@ const loadBusinessInfo = async () => {
   };
 
   const handleGatewaySave = async (gatewayId, fields) => {
-    if (!user?.uid) return;
-    const updated = { ...gatewayData, [gatewayId]: fields };
-    setGatewayData(updated);
-    await setDoc(
-      doc(db, "users", user.uid, "settings", "paymentGateways"),
-      updated,
-      { merge: true },
-    );
-  };
+  if (!user?.uid) return;
+  try {
+    const idToken = await getAuth().currentUser.getIdToken();
+
+    const res = await fetch('https://r2-upload-worker.v8-auto.workers.dev/save-gateway-credentials', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ gatewayId, fields }),
+    });
+
+    if (!res.ok) throw new Error('Failed to save');
+
+    // Only store enabled state locally — never raw keys
+    setGatewayData(prev => ({
+      ...prev,
+      [gatewayId]: { enabled: fields.enabled }
+    }));
+
+  } catch (err) {
+    console.error(err);
+    alert('Failed to save gateway: ' + err.message);
+  }
+};
 
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];

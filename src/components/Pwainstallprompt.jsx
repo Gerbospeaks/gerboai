@@ -5,7 +5,7 @@ export default function PWAInstallPrompt({ appReady }) {
   const [visible, setVisible] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
-   const isInstalled = window.matchMedia("(display-mode: standalone)").matches;
+  const isInstalled = window.matchMedia("(display-mode: standalone)").matches;
 
   useEffect(() => {
     if (!appReady || isInstalled) return;

@@ -6,7 +6,7 @@ import IndustryPickerModal from "../components/IndustryPickerModal";
 import { useIndustryPicker } from "../hooks/useIndustryPicker";
 import TimelineNavigation from "./TimelineNavigation";
 import { Helmet } from "react-helmet";
-import InstallButton from '../components/InstallButton'
+import InstallButton from "../components/InstallButton";
 import heroBg from "../assets/videos/world.mp4";
 import {
   Zap,
@@ -50,9 +50,7 @@ const fetchGeoInfo = async () => {
 const fetchExchangeRate = async (targetCurrency) => {
   if (targetCurrency === "USD") return 1;
   try {
-    const res = await fetch(
-      `https://open.er-api.com/v6/latest/USD`
-    );
+    const res = await fetch(`https://open.er-api.com/v6/latest/USD`);
     if (!res.ok) throw new Error();
     const data = await res.json();
     return data.rates?.[targetCurrency] ?? 1;
@@ -340,7 +338,102 @@ const css = `
   .lp-drawer-ctas { margin-top: 28px; display: flex; flex-direction: column; gap: 10px; }
   .lp-drawer-ctas .lp-btn-ghost,
   .lp-drawer-ctas .lp-btn-primary { width: 100%; justify-content: center; height: 44px; font-size: 14px; }
-
+/* ════════════════════════════════════════════════
+   ANALYTICS / CHARTS SECTION
+════════════════════════════════════════════════ */
+.lp-analytics {
+  background: var(--cream);
+  padding: 96px 24px;
+}
+.lp-analytics-inner {
+  max-width: 1060px;
+  margin: 0 auto;
+}
+.lp-analytics-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.lp-analytics-metric {
+  background: var(--cream-mid);
+  border: 1px solid var(--cream-dark);
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+.lp-analytics-metric-label {
+  font-size: 12px; color: var(--text-muted);
+  font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.lp-analytics-metric-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; font-weight: 700;
+  color: var(--navy); line-height: 1;
+}
+.lp-analytics-metric-delta {
+  font-size: 12px; color: #10b981;
+  margin-top: 6px; font-weight: 600;
+}
+.lp-analytics-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.lp-analytics-chart-card {
+  background: var(--card-bg);
+  border: 1px solid var(--cream-dark);
+  border-radius: 12px;
+  padding: 24px 24px 18px;
+}
+.lp-analytics-chart-card.full {
+  grid-column: 1 / -1;
+}
+.lp-analytics-chart-title {
+  font-size: 15px; font-weight: 700;
+  color: var(--navy); margin-bottom: 4px;
+}
+.lp-analytics-chart-sub {
+  font-size: 12px; color: var(--text-muted);
+  margin-bottom: 14px;
+}
+.lp-analytics-legend {
+  display: flex; flex-wrap: wrap;
+  gap: 14px; margin-bottom: 14px;
+  font-size: 12px; color: var(--text-mid);
+}
+.lp-analytics-legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 2px; display: inline-block;
+  margin-right: 4px; vertical-align: middle;
+}
+.lp-funnel-row {
+  display: flex; align-items: center;
+  gap: 12px; margin-bottom: 10px;
+}
+.lp-funnel-label {
+  font-size: 12px; color: var(--text-muted);
+  width: 100px; text-align: right; flex-shrink: 0;
+}
+.lp-funnel-bar-wrap {
+  flex: 1; background: var(--cream-mid);
+  border-radius: 4px; height: 30px;
+  overflow: hidden;
+}
+.lp-funnel-bar {
+  height: 100%; border-radius: 4px;
+  display: flex; align-items: center;
+  justify-content: flex-end; padding-right: 10px;
+}
+.lp-funnel-val {
+  font-size: 12px; font-weight: 700; color: #fff;
+}
+@media (max-width: 768px) {
+  .lp-analytics-metrics { grid-template-columns: repeat(2, 1fr); }
+  .lp-analytics-charts  { grid-template-columns: 1fr; }
+  .lp-analytics-chart-card.full { grid-column: auto; }
+}
   /* ════════════════════════════════════════════════
      HERO  (keeps dark navy — contrast with cream below)
   ════════════════════════════════════════════════ */
@@ -999,8 +1092,16 @@ const LandingPage = () => {
   const [cardsSwapped, setCardsSwapped] = useState(false);
   const words = ["Smarter", "Faster", "Simpler", "Powerful", "Professional"];
   const slides = [
-    { id: 1, src: require("../assets/images/healthcare.png"), alt: "Dashboard" },
-    { id: 2, src: require("../assets/images/construction.png"), alt: "Invoices" },
+    {
+      id: 1,
+      src: require("../assets/images/healthcare.png"),
+      alt: "Dashboard",
+    },
+    {
+      id: 2,
+      src: require("../assets/images/construction.png"),
+      alt: "Invoices",
+    },
     { id: 3, src: require("../assets/images/electrical.png"), alt: "Payments" },
   ];
   const ROTATING = [
@@ -1093,7 +1194,148 @@ const LandingPage = () => {
     );
     return () => clearInterval(t);
   }, []);
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src =
+      "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js";
+    script.async = true;
+    script.onload = () => {
+      const gridColor = "rgba(0,0,0,0.06)";
+      const tickColor = "rgba(0,0,0,0.45)";
 
+      new window.Chart(document.getElementById("sfRevenueChart"), {
+        type: "bar",
+        data: {
+          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+          datasets: [
+            {
+              label: "Revenue ($K)",
+              data: [320, 370, 410, 450, 495, 548],
+              backgroundColor: "#6366f1",
+              borderRadius: 5,
+              borderSkipped: false,
+            },
+            {
+              label: "Target",
+              data: [400, 400, 400, 400, 400, 400],
+              type: "line",
+              borderColor: "#a5b4fc",
+              borderWidth: 1.5,
+              borderDash: [5, 4],
+              pointRadius: 0,
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              grid: { color: gridColor },
+              ticks: { color: tickColor, font: { size: 11 } },
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: {
+                color: tickColor,
+                font: { size: 11 },
+                callback: (v) => "$" + v + "K",
+              },
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+
+      new window.Chart(document.getElementById("sfIndustryChart"), {
+        type: "doughnut",
+        data: {
+          labels: [
+            "Construction",
+            "Electrical",
+            "Healthcare",
+            "Plumbing",
+            "Other",
+          ],
+          datasets: [
+            {
+              data: [28, 22, 19, 16, 15],
+              backgroundColor: [
+                "#6366f1",
+                "#10b981",
+                "#f59e0b",
+                "#3b82f6",
+                "#ec4899",
+              ],
+              borderWidth: 0,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "65%",
+          plugins: { legend: { display: false } },
+        },
+      });
+
+      new window.Chart(document.getElementById("sfSpeedChart"), {
+        type: "bar",
+        data: {
+          labels: [
+            "Construction",
+            "Electrical",
+            "Healthcare",
+            "Plumbing",
+            "Security",
+            "Mechanical",
+          ],
+          datasets: [
+            {
+              label: "Before",
+              data: [18, 14, 21, 16, 12, 19],
+              backgroundColor: "#e2e8f0",
+              borderRadius: 4,
+              barPercentage: 0.6,
+            },
+            {
+              label: "After SolidFlo",
+              data: [5, 4, 6, 5, 3, 5],
+              backgroundColor: "#6366f1",
+              borderRadius: 4,
+              barPercentage: 0.6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              grid: { color: gridColor },
+              ticks: { color: tickColor, font: { size: 11 } },
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: {
+                color: tickColor,
+                font: { size: 11 },
+                callback: (v) => v + "d",
+              },
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+    };
+    document.body.appendChild(script);
+    return () => {
+      if (document.body.contains(script)) document.body.removeChild(script);
+    };
+  }, []);
   /* ── Slide rotation ── */
   useEffect(() => {
     const t = setInterval(
@@ -1134,17 +1376,16 @@ const LandingPage = () => {
     return () => obs.disconnect();
   }, []);
 
+  useEffect(() => {
+    const hero = document.querySelector(".lp-hero");
 
-useEffect(() => {
-  const hero = document.querySelector('.lp-hero');
+    const handleScroll = () => {
+      hero.classList.toggle("scrolled", window.scrollY > 50);
+    };
 
-  const handleScroll = () => {
-    hero.classList.toggle('scrolled', window.scrollY > 50);
-  };
-
-  window.addEventListener('scroll', handleScroll);
-  return () => window.removeEventListener('scroll', handleScroll);
-}, []);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const openCalendly = () => {
     if (window.Calendly)
       window.Calendly.initPopupWidget({
@@ -1218,12 +1459,12 @@ useEffect(() => {
       text: "SolidFlo has completely transformed how we handle invoicing. We've cut our billing time by 70% and get paid 2× faster. The automation features are incredible!",
     },
     {
-    name: "Mark Moyo",
-    role: "Electrician",
-    rating: 5,
-    text: "Since using the stamp and signature feature, my invoices look far more professional. Clients take them seriously and I get paid without the back-and-forth.",
-    image: "https://i.pravatar.cc/150?u=markmoyo"
-  },
+      name: "Mark Moyo",
+      role: "Electrician",
+      rating: 5,
+      text: "Since using the stamp and signature feature, my invoices look far more professional. Clients take them seriously and I get paid without the back-and-forth.",
+      image: "https://i.pravatar.cc/150?u=markmoyo",
+    },
     {
       name: "Gregquinn Lee",
       role: "Founder, Reelancestry Streaming",
@@ -1276,7 +1517,7 @@ useEffect(() => {
     },
     {
       name: "Enterprise",
-      usdPrice: 13.50,
+      usdPrice: 13.5,
       period: "per month",
       desc: "For large teams and businesses",
       popular: false,
@@ -1345,14 +1586,17 @@ useEffect(() => {
             </div>
             <div className="lp-nav-ctas">
               <button className="lp-btn-ghost" onClick={() => open("login")}>
-  Login
-</button>
+                Login
+              </button>
 
-              <button className="lp-btn-primary" onClick={() => open("register")}>
+              <button
+                className="lp-btn-primary"
+                onClick={() => open("register")}
+              >
                 Start Free <ArrowRight size={13} />
               </button>
             </div>
-            
+
             <button
               className="lp-hamburger"
               onClick={() => setMobileOpen(true)}
@@ -1390,8 +1634,8 @@ useEffect(() => {
           </div>
           <div className="lp-drawer-ctas">
             <button className="lp-btn-ghost" onClick={() => open("login")}>
-  Login
-</button>
+              Login
+            </button>
 
             <button className="lp-btn-primary" onClick={() => open("register")}>
               Start Free
@@ -1400,71 +1644,83 @@ useEffect(() => {
         </div>
 
         {/* ── Hero ── */}
-       <section className="lp-hero">
-  {/* Video background if you added it */}
-  <video autoPlay muted loop playsInline className="lp-hero-video" src={heroBg} />
-  <div className="lp-hero-video-overlay" />
+        <section className="lp-hero">
+          {/* Video background if you added it */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="lp-hero-video"
+            src={heroBg}
+          />
+          <div className="lp-hero-video-overlay" />
 
-  <div className="lp-hero-inner">
-    {/* LEFT — text */}
-    <div className="lp-hero-left">
-      <div className="lp-hero-badge">
-        <Sparkles size={12} />
-        Trusted by 10,000+ businesses worldwide
-      </div>
+          <div className="lp-hero-inner">
+            {/* LEFT — text */}
+            <div className="lp-hero-left">
+              <div className="lp-hero-badge">
+                <Sparkles size={12} />
+                Trusted by 10,000+ businesses worldwide
+              </div>
 
-      <h1>
-        Business Management<br />
-        Made <em key={currentWord}>{ROTATING[currentWord].word}</em>
-      </h1>
+              <h1>
+                Business Management
+                <br />
+                Made <em key={currentWord}>{ROTATING[currentWord].word}</em>
+              </h1>
 
-      <p className="lp-hero-sub">{ROTATING[currentWord].sub}</p>
+              <p className="lp-hero-sub">{ROTATING[currentWord].sub}</p>
 
-      <div className="lp-hero-ctas">
-        <button className="lp-hero-primary" onClick={open}>
-          Start Free Trial <ArrowRight size={15} />
-        </button>
-        <button className="lp-hero-secondary" onClick={openCalendly}>
-          <Play size={14} /> Book a Demo
-        </button>
-      </div>
+              <div className="lp-hero-ctas">
+                <button className="lp-hero-primary" onClick={open}>
+                  Start Free Trial <ArrowRight size={15} />
+                </button>
+                <button className="lp-hero-secondary" onClick={openCalendly}>
+                  <Play size={14} /> Book a Demo
+                </button>
+              </div>
 
-      <div className="lp-hero-trust">
-        {["No credit card required", "30-day free trial", "Cancel anytime"].map((t) => (
-          <div key={t} className="lp-hero-trust-item">
-            <CheckCircle size={13} /> {t}
+              <div className="lp-hero-trust">
+                {[
+                  "No credit card required",
+                  "30-day free trial",
+                  "Cancel anytime",
+                ].map((t) => (
+                  <div key={t} className="lp-hero-trust-item">
+                    <CheckCircle size={13} /> {t}
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ marginTop: 32 }}>
+                <TimelineNavigation variant="inline" />
+              </div>
+            </div>
+
+            {/* RIGHT — orb visual */}
+            <div className="lp-hero-right">
+              <div className="lp-hero-screen">
+                <div className="lp-hero-screen-frame">
+                  <img
+                    key={currentSlide}
+                    src={slides[currentSlide].src}
+                    alt={slides[currentSlide].alt}
+                  />
+                </div>
+                <div className="lp-slide-dots">
+                  {slides.map((_, i) => (
+                    <button
+                      key={i}
+                      className={`lp-slide-dot${i === currentSlide ? " active" : ""}`}
+                      onClick={() => setCurrentSlide(i)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-        ))}
-      </div>
-
-      <div style={{ marginTop: 32 }}>
-        <TimelineNavigation variant="inline" />
-      </div>
-    </div>
-
-    {/* RIGHT — orb visual */}
-   <div className="lp-hero-right">
-  <div className="lp-hero-screen">
-    <div className="lp-hero-screen-frame">
-      <img
-        key={currentSlide}
-        src={slides[currentSlide].src}
-        alt={slides[currentSlide].alt}
-      />
-    </div>
-    <div className="lp-slide-dots">
-      {slides.map((_, i) => (
-        <button
-          key={i}
-          className={`lp-slide-dot${i === currentSlide ? " active" : ""}`}
-          onClick={() => setCurrentSlide(i)}
-        />
-      ))}
-    </div>
-  </div>
-</div>
-  </div>
-</section>
+        </section>
 
         {/* ── Stats ── */}
         <section className="lp-stats">
@@ -1484,7 +1740,176 @@ useEffect(() => {
             ))}
           </div>
         </section>
+        {/* ── Analytics / Charts ── */}
+        <section className="lp-analytics">
+          <div className="lp-analytics-inner">
+            <div className="lp-section-head">
+              <div className="lp-section-eyebrow">Platform Analytics</div>
+              <h2>Numbers that speak for themselves</h2>
+              <p>
+                Real growth, real revenue — updated monthly across 10,000+
+                businesses.
+              </p>
+            </div>
 
+            {/* Metric cards */}
+            <div className="lp-analytics-metrics">
+              {[
+                {
+                  label: "Monthly Revenue",
+                  value: "$548K",
+                  delta: "↑ 18% vs last month",
+                },
+                {
+                  label: "Active Businesses",
+                  value: "10,240",
+                  delta: "↑ 9% vs last month",
+                },
+                {
+                  label: "Invoices Sent",
+                  value: "84,300",
+                  delta: "↑ 22% vs last month",
+                },
+                {
+                  label: "Avg. Payment Time",
+                  value: "3.1 days",
+                  delta: "↓ 40% faster",
+                },
+              ].map((m, i) => (
+                <div key={i} className="lp-analytics-metric">
+                  <div className="lp-analytics-metric-label">{m.label}</div>
+                  <div className="lp-analytics-metric-value">{m.value}</div>
+                  <div className="lp-analytics-metric-delta">{m.delta}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Charts */}
+            <div className="lp-analytics-charts">
+              <div className="lp-analytics-chart-card">
+                <div className="lp-analytics-chart-title">
+                  Monthly Revenue Processed
+                </div>
+                <div className="lp-analytics-chart-sub">
+                  Jan – Jun 2025 (USD thousands)
+                </div>
+                <div className="lp-analytics-legend">
+                  <span>
+                    <span
+                      className="lp-analytics-legend-dot"
+                      style={{ background: "#6366f1" }}
+                    />
+                    Revenue
+                  </span>
+                  <span>
+                    <span
+                      className="lp-analytics-legend-dot"
+                      style={{
+                        background: "#a5b4fc",
+                        border: "1px dashed #6366f1",
+                      }}
+                    />
+                    Target
+                  </span>
+                </div>
+                <div style={{ position: "relative", height: 200 }}>
+                  <canvas id="sfRevenueChart" />
+                </div>
+              </div>
+
+              <div className="lp-analytics-chart-card">
+                <div className="lp-analytics-chart-title">
+                  Users by Industry
+                </div>
+                <div className="lp-analytics-chart-sub">
+                  Share of active accounts
+                </div>
+                <div className="lp-analytics-legend">
+                  {[
+                    { label: "Construction 28%", color: "#6366f1" },
+                    { label: "Electrical 22%", color: "#10b981" },
+                    { label: "Healthcare 19%", color: "#f59e0b" },
+                    { label: "Plumbing 16%", color: "#3b82f6" },
+                    { label: "Other 15%", color: "#ec4899" },
+                  ].map((l) => (
+                    <span key={l.label}>
+                      <span
+                        className="lp-analytics-legend-dot"
+                        style={{ background: l.color }}
+                      />
+                      {l.label}
+                    </span>
+                  ))}
+                </div>
+                <div style={{ position: "relative", height: 200 }}>
+                  <canvas id="sfIndustryChart" />
+                </div>
+              </div>
+
+              <div className="lp-analytics-chart-card full">
+                <div className="lp-analytics-chart-title">
+                  Payment Speed Improvement
+                </div>
+                <div className="lp-analytics-chart-sub">
+                  Average days to payment — before vs. after SolidFlo
+                </div>
+                <div className="lp-analytics-legend">
+                  <span>
+                    <span
+                      className="lp-analytics-legend-dot"
+                      style={{
+                        background: "#e2e8f0",
+                        border: "1px solid #cbd5e1",
+                      }}
+                    />
+                    Before
+                  </span>
+                  <span>
+                    <span
+                      className="lp-analytics-legend-dot"
+                      style={{ background: "#6366f1" }}
+                    />
+                    After SolidFlo
+                  </span>
+                </div>
+                <div style={{ position: "relative", height: 180 }}>
+                  <canvas id="sfSpeedChart" />
+                </div>
+              </div>
+            </div>
+
+            {/* Funnel */}
+            <div className="lp-analytics-chart-card" style={{ marginTop: 20 }}>
+              <div className="lp-analytics-chart-title">
+                Invoice Conversion Funnel
+              </div>
+              <div className="lp-analytics-chart-sub">
+                From draft to collected — platform average across all users
+              </div>
+              <div style={{ marginTop: 16 }}>
+                {[
+                  { label: "Invoice sent", pct: 100, color: "#6366f1" },
+                  { label: "Opened", pct: 82, color: "#818cf8" },
+                  { label: "Clicked pay", pct: 61, color: "#10b981" },
+                  { label: "Paid on time", pct: 74, color: "#34d399" },
+                  { label: "Collected", pct: 97, color: "#059669" },
+                ].map((row) => (
+                  <div key={row.label} className="lp-funnel-row">
+                    <div className="lp-funnel-label">{row.label}</div>
+                    <div className="lp-funnel-bar-wrap">
+                      <div
+                        className="lp-funnel-bar"
+                        style={{ width: `${row.pct}%`, background: row.color }}
+                      >
+                        <span className="lp-funnel-val">{row.pct}%</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
         {/* ── Features ── */}
         <section id="features" className="lp-features">
           <div className="lp-section-head">
@@ -1517,108 +1942,114 @@ useEffect(() => {
             ))}
           </div>
         </section>
-          {/* ── Services / Marketplace ── */}
-<section className="lp-services">
-  <div className="lp-services-inner">
+        {/* ── Services / Marketplace ── */}
+        <section className="lp-services">
+          <div className="lp-services-inner">
+            <div className="lp-section-head">
+              <div className="lp-section-eyebrow">Marketplace</div>
+              <h2>Verified providers, every industry</h2>
+              <p>
+                Browse and book trusted service providers across Gauteng — or
+                list your own business and start getting clients today.
+              </p>
+            </div>
 
-    <div className="lp-section-head">
-      <div className="lp-section-eyebrow">Marketplace</div>
-      <h2>Verified providers, every industry</h2>
-      <p>
-        Browse and book trusted service providers across Gauteng —
-        or list your own business and start getting clients today.
-      </p>
-    </div>
+            <div className="lp-services-grid">
+              {[
+                {
+                  emoji: "🔧",
+                  title: "Mechanical",
+                  desc: "Fleet servicing, diagnostics, engine rebuilds and roadworthy inspections.",
+                  count: 2,
+                },
+                {
+                  emoji: "⚡",
+                  title: "Electrical",
+                  desc: "COC-certified electricians for residential, commercial and solar wiring.",
+                  count: 2,
+                },
+                {
+                  emoji: "🚿",
+                  title: "Plumbing",
+                  desc: "24/7 emergency callouts, leak detection and full bathroom renovations.",
+                  count: 1,
+                },
+                {
+                  emoji: "🏗️",
+                  title: "Construction",
+                  desc: "CIDB-accredited contractors for new builds, renovations and extensions.",
+                  count: 1,
+                },
+                {
+                  emoji: "❄️",
+                  title: "HVAC",
+                  desc: "Commercial and industrial HVAC installation, servicing and repairs.",
+                  count: 1,
+                },
+                {
+                  emoji: "🔒",
+                  title: "Security",
+                  desc: "PSiRA-registered armed response, site guarding and CCTV solutions.",
+                  count: 1,
+                },
+              ].map((ind, i) => (
+                <div
+                  key={ind.title}
+                  id={`svc-${i}`}
+                  data-anim
+                  className={`lp-services-card${visible[`svc-${i}`] ? " visible" : ""}`}
+                  style={{ transitionDelay: `${i * 60}ms` }}
+                  onClick={() =>
+                    window.open(
+                      "https://market.solidflo.co.za",
+                      "_blank",
+                      "noopener,noreferrer",
+                    )
+                  }
+                >
+                  <span className="lp-services-card-emoji">{ind.emoji}</span>
+                  <div className="lp-services-card-title">{ind.title}</div>
+                  <div className="lp-services-card-desc">{ind.desc}</div>
+                  <span className="lp-services-card-count">
+                    <span className="lp-services-card-count-dot" />
+                    {ind.count} provider{ind.count !== 1 ? "s" : ""} listed
+                  </span>
+                </div>
+              ))}
+            </div>
 
-    <div className="lp-services-grid">
-      {[
-        {
-          emoji: "🔧",
-          title: "Mechanical",
-          desc: "Fleet servicing, diagnostics, engine rebuilds and roadworthy inspections.",
-          count: 2,
-        },
-        {
-          emoji: "⚡",
-          title: "Electrical",
-          desc: "COC-certified electricians for residential, commercial and solar wiring.",
-          count: 2,
-        },
-        {
-          emoji: "🚿",
-          title: "Plumbing",
-          desc: "24/7 emergency callouts, leak detection and full bathroom renovations.",
-          count: 1,
-        },
-        {
-          emoji: "🏗️",
-          title: "Construction",
-          desc: "CIDB-accredited contractors for new builds, renovations and extensions.",
-          count: 1,
-        },
-        {
-          emoji: "❄️",
-          title: "HVAC",
-          desc: "Commercial and industrial HVAC installation, servicing and repairs.",
-          count: 1,
-        },
-        {
-          emoji: "🔒",
-          title: "Security",
-          desc: "PSiRA-registered armed response, site guarding and CCTV solutions.",
-          count: 1,
-        },
-      ].map((ind, i) => (
-        <div
-          key={ind.title}
-          id={`svc-${i}`}
-          data-anim
-          className={`lp-services-card${visible[`svc-${i}`] ? " visible" : ""}`}
-          style={{ transitionDelay: `${i * 60}ms` }}
-          onClick={() =>
-            window.open("https://market.solidflo.co.za", "_blank", "noopener,noreferrer")
-          }
-        >
-          <span className="lp-services-card-emoji">{ind.emoji}</span>
-          <div className="lp-services-card-title">{ind.title}</div>
-          <div className="lp-services-card-desc">{ind.desc}</div>
-          <span className="lp-services-card-count">
-            <span className="lp-services-card-count-dot" />
-            {ind.count} provider{ind.count !== 1 ? "s" : ""} listed
-          </span>
-        </div>
-      ))}
-    </div>
-
-    {/* CTA bar */}
-    <div className="lp-services-cta-row">
-      <div className="lp-services-cta-left">
-        <h3>26 industries. One marketplace.</h3>
-        <p>
-          Need a provider? Post a job and get quotes. Have a skill?
-          List your business free and start winning clients.
-        </p>
-      </div>
-      <div className="lp-services-cta-btns">
-        <button
-          className="lp-services-btn-primary"
-          onClick={() =>
-            window.open("https://market.solidflo.co.za", "_blank", "noopener,noreferrer")
-          }
-        >
-          Browse Marketplace <ArrowRight size={14} />
-        </button>
-        <button
-          className="lp-services-btn-ghost"
-          onClick={() => open("register")}
-        >
-          List My Business
-        </button>
-      </div>
-    </div>
-
-  </div>
-</section>
+            {/* CTA bar */}
+            <div className="lp-services-cta-row">
+              <div className="lp-services-cta-left">
+                <h3>26 industries. One marketplace.</h3>
+                <p>
+                  Need a provider? Post a job and get quotes. Have a skill? List
+                  your business free and start winning clients.
+                </p>
+              </div>
+              <div className="lp-services-cta-btns">
+                <button
+                  className="lp-services-btn-primary"
+                  onClick={() =>
+                    window.open(
+                      "https://market.solidflo.co.za",
+                      "_blank",
+                      "noopener,noreferrer",
+                    )
+                  }
+                >
+                  Browse Marketplace <ArrowRight size={14} />
+                </button>
+                <button
+                  className="lp-services-btn-ghost"
+                  onClick={() => open("register")}
+                >
+                  List My Business
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
         {/* ── Globe ── */}
         <section
           className="lp-globe"

@@ -10,6 +10,7 @@ export interface Env {
 	FIREBASE_CLIENT_EMAIL: string;
 	FIREBASE_PRIVATE_KEY_B64: string;
 	MYBROWSER: Fetcher; 
+	CREDENTIAL_ENCRYPTION_KEY: string;
 }
 
 const DOC_CONFIG: Record<string, { prefix: string; folder: string }> = {
@@ -102,6 +103,9 @@ const worker = {
 		if (url.pathname === '/invoice-extract') {
       return handleInvoiceExtract(request, env, corsHeaders);
 }
+if (url.pathname === '/save-gateway-credentials') {
+      return handleSaveGatewayCredentials(request, env, corsHeaders);
+    }
 
 		return new Response('Not Found', { status: 404, headers: corsHeaders });
 	},
@@ -345,7 +349,171 @@ async function saveDocumentRecord(env: Env, uid: string, folder: string, docNumb
 		throw new Error(`Firestore write failed: ${text}`);
 	}
 }
+async function handleSaveGatewayCredentials(
+  request: Request,
+  env: Env,
+  corsHeaders: Record<string, string>
+): Promise<Response> {
+  if (request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
+  }
 
+  try {
+    // ── Auth (same pattern as all your other handlers) ────────────────
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
+    }
+    const idToken = authHeader.split('Bearer ')[1];
+    const payload = JSON.parse(atob(idToken.split('.')[1]));
+    const userId = payload.user_id;
+    if (!userId) {
+      return new Response('Invalid token', { status: 401, headers: corsHeaders });
+    }
+
+    // ── Parse body ────────────────────────────────────────────────────
+    const { gatewayId, fields } = await request.json() as {
+      gatewayId: string;
+      fields: Record<string, any>;
+    };
+
+    if (!gatewayId || !fields) {
+      return Response.json(
+        { error: 'Missing gatewayId or fields' },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // ── Sensitive fields to encrypt ───────────────────────────────────
+    const SENSITIVE = [
+      'merchant_key',
+      'passphrase',
+      'secret_key',
+      'client_secret',
+      'webhook_secret',
+    ];
+
+    const encryptedFields: Record<string, any> = {};
+    for (const [key, value] of Object.entries(fields)) {
+      if (typeof value === 'string' && value && SENSITIVE.includes(key)) {
+        encryptedFields[key] = await encryptValue(value, env.CREDENTIAL_ENCRYPTION_KEY);
+      } else {
+        encryptedFields[key] = value;
+      }
+    }
+
+    // ── Build Firestore field map ──────────────────────────────────────
+    const innerFields: Record<string, any> = {};
+    for (const [key, value] of Object.entries(encryptedFields)) {
+      if (typeof value === 'boolean') {
+        innerFields[key] = { booleanValue: value };
+      } else if (typeof value === 'number') {
+        innerFields[key] = { integerValue: value };
+      } else {
+        innerFields[key] = { stringValue: String(value) };
+      }
+    }
+
+    // ── Save to Firestore (reuses your existing getFirebaseToken) ─────
+    const projectId = env.FIREBASE_PROJECT_ID;
+    const docUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}/settings/paymentGateways`;
+
+    const token = await getFirebaseToken(env); // ← your existing helper
+
+    const body = {
+      fields: {
+        [gatewayId]: {
+          mapValue: { fields: innerFields }
+        }
+      }
+    };
+
+    const fieldPaths = Object.keys(innerFields)
+      .map(k => `fields.${gatewayId}.mapValue.fields.${k}`)
+      .join('&updateMask.fieldPaths=');
+
+    const fsRes = await fetch(`${docUrl}?updateMask.fieldPaths=${fieldPaths}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!fsRes.ok) {
+      const err = await fsRes.text();
+      throw new Error(`Firestore write failed: ${err}`);
+    }
+
+    return Response.json(
+      { success: true },
+      { headers: corsHeaders }
+    );
+
+  } catch (err: any) {
+    console.error('save-gateway-credentials error:', err);
+    return Response.json(
+      { error: err.message },
+      { status: 500, headers: corsHeaders }
+    );
+  }
+}
+
+
+// ─── AES-256-CBC encrypt using Web Crypto (built into CF Workers) ─────────────
+async function encryptValue(plainText: string, base64Key: string): Promise<string> {
+  const keyBytes = Uint8Array.from(atob(base64Key), c => c.charCodeAt(0));
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyBytes,
+    { name: 'AES-CBC' },
+    false,
+    ['encrypt']
+  );
+
+  const iv = crypto.getRandomValues(new Uint8Array(16));
+  const encoded = new TextEncoder().encode(plainText);
+
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-CBC', iv },
+    cryptoKey,
+    encoded
+  );
+
+  const ivHex        = Array.from(iv).map(b => b.toString(16).padStart(2, '0')).join('');
+  const encryptedHex = Array.from(new Uint8Array(encrypted))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+
+  return `${ivHex}:${encryptedHex}`;
+}
+
+
+// ─── AES-256-CBC decrypt (used when building PayFast URLs server-side) ────────
+async function decryptValue(encryptedString: string, base64Key: string): Promise<string> {
+  const [ivHex, encryptedHex] = encryptedString.split(':');
+  const keyBytes = Uint8Array.from(atob(base64Key), c => c.charCodeAt(0));
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyBytes,
+    { name: 'AES-CBC' },
+    false,
+    ['decrypt']
+  );
+
+  const iv = new Uint8Array(ivHex.match(/.{2}/g)!.map(b => parseInt(b, 16)));
+  const encrypted = new Uint8Array(encryptedHex.match(/.{2}/g)!.map(b => parseInt(b, 16)));
+
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-CBC', iv },
+    cryptoKey,
+    encrypted
+  );
+
+  return new TextDecoder().decode(decrypted);
+}
 // ─────────────────────────────────────────────────────────────────────────────
 // HTML TEMPLATES — one per doc type
 // All styles are inlined so Puppeteer has no external deps to fetch.

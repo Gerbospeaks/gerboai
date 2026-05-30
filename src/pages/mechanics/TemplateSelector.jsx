@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FileText, Check, Loader2, ChevronDown } from "lucide-react";
 import SignatureStamp from "./SignatureStamp";
+import { PayNowButton } from "../../components/PayNowButton";
 import {
   getFirestore,
   doc,
@@ -243,6 +244,14 @@ export const DefaultTemplate = ({
           </div>
         </div>
         <div className="text-right">
+          {documentType !== "quote" && (
+  <PayNowButton
+    invoiceId={jobCardNumber}
+    amount={total}
+    paymentUrl={`https://pay.solidflo.co.za/${jobCardNumber}`}
+    color="#d32f2f"
+  />
+)}
           <div className="text-3xl font-bold mb-4">
             {documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -450,6 +459,14 @@ export const ClassicTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
+          {props.documentType !== "quote" && (
+  <PayNowButton
+    invoiceId={props.jobCardNumber}
+    amount={props.total}
+    paymentUrl={props.paymentUrl}
+    color="#3b82f6"
+  />
+)}
           <div className="text-3xl font-bold mb-4">
             {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -598,6 +615,14 @@ export const ModernTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
+          {props.documentType !== "quote" && (
+  <PayNowButton
+    invoiceId={props.jobCardNumber}
+    amount={props.total}
+    paymentUrl={props.paymentUrl}
+    color="#3b82f6"
+  />
+)}
           <div className="text-5xl font-bold text-blue-500 mb-4">
             {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -744,6 +769,14 @@ export const ElegantTemplate = (props) => (
         <div className="text-sm text-gray-600">
           {props.businessInfo.addressLine1} • {props.businessInfo.city}
         </div>
+        {props.documentType !== "quote" && (
+  <PayNowButton
+    invoiceId={props.jobCardNumber}
+    amount={props.total}
+    paymentUrl={props.paymentUrl}
+    color="#7e22ce"
+  />
+)}
         <div className="text-2xl font-serif text-purple-700 mt-4">
           {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
         </div>
@@ -883,6 +916,14 @@ export const SpeedTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
+          {props.documentType !== "quote" && (
+  <PayNowButton
+    invoiceId={props.jobCardNumber}
+    amount={props.total}
+    paymentUrl={props.paymentUrl}
+    color="#dc2626"
+  />
+)}
           <div className="text-5xl font-black text-red-600 mb-4 italic">
             {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -983,7 +1024,7 @@ export const SpeedTemplate = (props) => (
         </div>
       </div>
     </div>
-
+     
     <div className="mt-8 flex justify-between items-center">
       <div className="text-sm text-gray-500">
         <p className="font-semibold">Terms:</p>
@@ -1017,6 +1058,14 @@ export const DiagnosticTemplate = (props) => (
           <div className="text-sm text-gray-600">{props.businessInfo.city}</div>
         </div>
         <div className="text-right">
+          {props.documentType !== "quote" && (
+  <PayNowButton
+    invoiceId={props.jobCardNumber}
+    amount={props.total}
+    paymentUrl={props.paymentUrl}
+    color="#16a34a"
+  />
+)}
           <div className="text-4xl font-bold text-green-600 mb-4">
             {props.documentType === "quote"
               ? "SERVICE QUOTE"
@@ -1186,6 +1235,9 @@ export const TemplateRenderer = ({
   stampColor = "#d32f2f",
   showStampDate = false,
   showStamp = false,
+  invoiceId,         
+  paymentUrl, 
+  total,
   ...props
 }) => {
   const templateProps = {
@@ -1195,7 +1247,9 @@ export const TemplateRenderer = ({
     stampColor,
     showStampDate,
     showStamp,
-    
+    invoiceId,
+    paymentUrl,
+    total,
   };
   switch (templateId) {
     case "default":
