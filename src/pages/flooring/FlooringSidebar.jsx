@@ -98,13 +98,7 @@ export default function FlooringSidebar({
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
-        <NavItem
-  icon={Store}
-  label="Find a Service"
-  onClick={() => goTo("marketplace")}
-  active={activeView === "marketplace"}
-  badge={newRequestCount > 0 ? newRequestCount : null}
-/>
+        
         <NavItem
           icon={Settings}
           label="Settings"

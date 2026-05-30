@@ -101,13 +101,7 @@ export default function AccountingSidebar({
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
-        <NavItem
-  icon={Store}
-  label="Find a Service"
-  onClick={() => goTo("marketplace")}
-  active={activeView === "marketplace"}
-  badge={newRequestCount > 0 ? newRequestCount : null}
-/>
+        
         
         <NavItem
           icon={Settings}
@@ -374,11 +368,7 @@ export default function AccountingSidebar({
                   title: "Settings",
                   action: () => setShowSettings(true),
                 },
-                {
-  icon: Store,
-  title: "Find a Service",
-  action: () => goTo("marketplace"),
-},
+          
                 {
                   icon: TrendingUp,
                   title: "Financial Overview",
