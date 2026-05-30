@@ -245,7 +245,11 @@ export default function StampOverlay({
   const dateStr = `${String(now.getDate()).padStart(2, "0")} ${mo[now.getMonth()]} ${now.getFullYear()}`;
 
   const companyName = businessInfo?.businessName ?? "MY COMPANY";
-  const companyAddress = businessInfo?.email ?? businessInfo?.primaryEmail ?? "";
+ const companyAddress = [
+  businessInfo?.addressLine2,
+  businessInfo?.city,
+  businessInfo?.postalCode,
+].filter(Boolean).join(", ");       
 
   return (
     <>

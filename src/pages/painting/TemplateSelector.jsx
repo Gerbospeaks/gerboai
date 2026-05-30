@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FileText, Check } from "lucide-react";
 import SignatureStamp from "../SignatureStamp";
+import { PayNowButton } from "../../components/PayNowButton";
 import {
   getFirestore,
   doc,
