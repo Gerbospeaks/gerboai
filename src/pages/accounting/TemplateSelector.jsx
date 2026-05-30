@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Check, Eye, X } from "lucide-react";
 import SignatureStamp from "../SignatureStamp";
-
+import { PayNowButton } from "../../components/PayNowButton";
 const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
 const TemplatePreviewModal = ({ template, onClose, onSelect, isSelected }) => {
   return (
@@ -299,6 +299,14 @@ export const TemplateRenderer = ({
         </div>
 
         <div className="text-right">
+          {documentType !== "quote" && (
+  <PayNowButton
+    invoiceId={invoiceNumber}
+    amount={total}
+    
+    color="#1d4ed8"
+  />
+)}
           <h2 className="text-4xl font-bold text-blue-600 mb-4">
             {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
           </h2>
@@ -489,6 +497,7 @@ export const TemplateRenderer = ({
           </div>
 
           <div className="text-right">
+            
             <h2 className="text-5xl font-light text-slate-900 mb-6">
               {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
             </h2>
