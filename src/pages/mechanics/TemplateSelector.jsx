@@ -244,14 +244,7 @@ export const DefaultTemplate = ({
           </div>
         </div>
         <div className="text-right">
-          {documentType !== "quote" && (
-  <PayNowButton
-    invoiceId={jobCardNumber}
-    amount={total}
-    paymentUrl={`https://pay.solidflo.co.za/${jobCardNumber}`}
-    color="#d32f2f"
-  />
-)}
+         
           <div className="text-3xl font-bold mb-4">
             {documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -459,14 +452,7 @@ export const ClassicTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          {props.documentType !== "quote" && (
-  <PayNowButton
-    invoiceId={props.jobCardNumber}
-    amount={props.total}
-    paymentUrl={props.paymentUrl}
-    color="#3b82f6"
-  />
-)}
+        
           <div className="text-3xl font-bold mb-4">
             {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>

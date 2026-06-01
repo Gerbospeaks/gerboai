@@ -298,8 +298,11 @@ export default function MechanicsSidebar({
     },
     {
       icon: Store,
-      label: "Services",
-      action: () => goTo("marketplace"),
+      label: "Quotations",
+      action: () => {
+        handleNewInvoice();
+        goTo("invoice");
+      },
       active: activeView === "marketplace",
       badge: newRequestCount > 0 ? newRequestCount : null,
     },
