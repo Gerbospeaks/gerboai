@@ -1207,9 +1207,10 @@ const MechanicsDashboard = () => {
 
   // ── Header action buttons ─────────────────────────────────────────────────
   const headerActions = [
-    documentType === "quote" &&
-      jobCardId &&
-      activeView === "invoice" && {
+    can("createQuote") &&
+  documentType === "quote" &&
+  jobCardId &&
+  activeView === "invoice" && {
         label: "Convert to Invoice",
         icon: FileText,
         onClick: handleConvertToInvoice,
