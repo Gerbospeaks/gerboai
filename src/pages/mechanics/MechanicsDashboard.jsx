@@ -1207,8 +1207,7 @@ const MechanicsDashboard = () => {
 
   // ── Header action buttons ─────────────────────────────────────────────────
   const headerActions = [
-    can("createQuote") &&
-      documentType === "quote" &&
+    documentType === "quote" &&
       jobCardId &&
       activeView === "invoice" && {
         label: "Convert to Invoice",
@@ -1925,6 +1924,12 @@ const MechanicsDashboard = () => {
             onTeamOpen={() => setShowUserManagement(true)}
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
+            showConvertButton={
+              documentType === "quote" &&
+              !!jobCardId &&
+              activeView === "invoice"
+            }
+            onConvert={handleConvertToInvoice}
           />
 
           {/* Modals */}
