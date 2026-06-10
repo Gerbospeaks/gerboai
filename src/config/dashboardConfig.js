@@ -57,9 +57,9 @@ export const dashboards = [
 
   },
   { 
-    id: 'virtual',
+    id: 'virtual-services',
     name: 'Virtual Services', 
-    path: '/virtual',
+    path: '/virtual-services',
     icon: '🌐', 
     color: 'bg-indigo-500',
     description: 'Remote support & online consultations'

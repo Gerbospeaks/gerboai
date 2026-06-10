@@ -1,9 +1,9 @@
 {
-  "id": "/",
+  "id": "/login",
   "short_name": "Solidflo",
   "name": "SolidFlo Saas",
   "description": "Professional accounting, invoicing and payroll for your clients",
-  "start_url": "/",
+  "start_url": "/login",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -64,14 +64,14 @@
       "name": "New Invoice",
       "short_name": "Invoice",
       "description": "Create a new invoice",
-      "url": "/?action=newInvoice",
+      "url": "/dashboard?action=newInvoice",
       "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
     },
     {
       "name": "New Estimate",
       "short_name": "Estimate",
       "description": "Create a new estimate",
-      "url": "/?action=newEstimate",
+      "url": "/dashboard?action=newEstimate",
       "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
     }
   ]

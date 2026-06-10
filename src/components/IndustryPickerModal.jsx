@@ -1,15 +1,9 @@
-// components/IndustryPickerModal.jsx
-// Shown when the user clicks "Get Started" on the main landing page.
-// Lets them pick an industry → redirects to that industry's subdomain landing page.
-// No login or register happens here — that all lives on the subdomain.
-import React, { useState, useMemo } from "react";
+
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { dashboards } from "../config/dashboardConfig";
-import { X, Search, ArrowRight, Check } from "lucide-react";
+import { X, Search, ArrowRight, Check, ChevronDown } from "lucide-react";
 
-// ─── All industries ────────────────────────────────────────────────────────────
-// subdomain: the actual subdomain used in the URL (e.g. "mechanics.solidflo.co.za")
-// If your domain is different, change BASE_DOMAIN below.
 const BASE_DOMAIN = "solidflo.co.za";
 
 export const INDUSTRIES = [
@@ -225,15 +219,12 @@ export const INDUSTRIES = [
   },
 ];
 
-// Build the subdomain URL for an industry.
-// In dev (localhost) we use a query param instead so you can test without real subdomains.
 function getSubdomainUrl(subdomain) {
   const isDev =
     window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1";
 
   if (isDev) {
-    // Dev mode: stay on localhost but pass ?industry=mechanics so SubdomainAuthPage can pick it up
     return `http://localhost:${window.location.port}?industry=${subdomain}`;
   }
 
@@ -242,42 +233,52 @@ function getSubdomainUrl(subdomain) {
 }
 
 export default function IndustryPickerModal({ onClose, intent = "register" }) {
-  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("");
   const [query, setQuery] = useState("");
+  const dropdownRef = useRef(null);
 
   const filtered = dashboards.filter(
     (d) =>
       d.name.toLowerCase().includes(query.toLowerCase()) ||
       d.description?.toLowerCase().includes(query.toLowerCase()),
   );
-
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+        setQuery("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
   const selectedInfo = dashboards.find((d) => d.id === selected);
 
   const handleContinue = () => {
-  if (!selected) return;
-  const industry = dashboards.find((d) => d.id === selected);
-  if (!industry) return;
+    if (!selected) return;
+    const industry = dashboards.find((d) => d.id === selected);
+    if (!industry) return;
 
-  onClose();
+    onClose();
 
-  const isDev =
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1";
+    const isDev =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
 
-  if (isDev) {
-    // Dev: stay on localhost, pass industry + mode as query params
-    window.location.href = `http://localhost:${window.location.port}?industry=${industry.id}&mode=${intent}`;
-  } else {
-    const protocol = window.location.protocol;
-    if (intent === "login") {
-      window.location.href = `${protocol}//${industry.id}.solidflo.co.za/login`;
+    if (isDev) {
+      // Dev: stay on localhost, pass industry + mode as query params
+      window.location.href = `http://localhost:${window.location.port}?industry=${industry.id}&mode=${intent}`;
     } else {
-      // Pass dashboardId in the URL — localStorage doesn't work cross-origin
-      window.location.href = `${protocol}//${industry.id}.solidflo.co.za/register?industry=${industry.id}`;
+      const protocol = window.location.protocol;
+      if (intent === "login") {
+        window.location.href = `${protocol}//${industry.id}.solidflo.co.za/login`;
+      } else {
+        // Pass dashboardId in the URL — localStorage doesn't work cross-origin
+        window.location.href = `${protocol}//${industry.id}.solidflo.co.za/register?industry=${industry.id}`;
+      }
     }
-  }
-};
+  };
   return (
     <>
       {/* Backdrop */}
@@ -352,146 +353,136 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
           </button>
         </div>
 
-        {/* Search */}
-        <div style={{ position: "relative", marginBottom: 16 }}>
-          <Search
-            size={15}
-            style={{
-              position: "absolute",
-              left: 12,
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#9ca3af",
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Search industry..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "10px 14px 10px 36px",
-              border: "1px solid #d1d5db",
-              borderRadius: 8,
-              fontSize: 13,
-              outline: "none",
-              boxSizing: "border-box",
-              color: "#111827",
-            }}
-          />
-        </div>
-
-        {/* Selection banner */}
-        {selectedInfo && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 12px",
-              background: "#f0f4ff",
-              border: "1px solid #c7d5f8",
-              borderRadius: 8,
-              marginBottom: 14,
-              fontSize: 13,
-            }}
-          >
-            <span style={{ fontSize: 18 }}>{selectedInfo.icon}</span>
-            <span style={{ fontWeight: 700, color: "#1655e0" }}>
-              {selectedInfo.name}
-            </span>
-            {selectedInfo.description && (
-              <span style={{ color: "#6b7280", marginLeft: 2 }}>
-                — {selectedInfo.description}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Grid */}
         <div
-          style={{
-            overflowY: "auto",
-            flex: 1,
-            paddingRight: 4,
-            marginBottom: 20,
-          }}
+          ref={dropdownRef}
+          style={{ position: "relative", marginBottom: 16 }}
         >
-          {filtered.length === 0 ? (
-            <p
+          {/* Search/trigger input */}
+          <div style={{ position: "relative" }}>
+            <Search
+              size={15}
               style={{
-                textAlign: "center",
+                position: "absolute",
+                left: 12,
+                top: "50%",
+                transform: "translateY(-50%)",
                 color: "#9ca3af",
-                fontSize: 13,
-                padding: "32px 0",
               }}
-            >
-              No industries found for "{query}"
-            </p>
-          ) : (
+            />
+            <input
+              type="text"
+              placeholder="Search industry..."
+              value={isOpen ? query : (selectedInfo?.label ?? "")}
+              readOnly={!isOpen}
+              onClick={() => {
+                setIsOpen(true);
+                setQuery("");
+              }}
+              onChange={(e) => setQuery(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px 36px 10px 36px",
+                border: "1px solid #d1d5db",
+                borderRadius: 8,
+                fontSize: 13,
+                outline: "none",
+                boxSizing: "border-box",
+                color: "#111827",
+                background:"#ffffff",
+                cursor: "pointer",
+              }}
+            />
+            <ChevronDown
+              size={15}
+              onClick={() => setIsOpen((o) => !o)}
+              style={{
+                position: "absolute",
+                right: 12,
+                top: "50%",
+                transform: `translateY(-50%) rotate(${isOpen ? "180deg" : "0deg"})`,
+                color: "#9ca3af",
+                transition: "transform 0.2s",
+                cursor: "pointer",
+              }}
+            />
+          </div>
+
+          {/* Dropdown list */}
+          {isOpen && (
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
-                gap: 10,
+                position: "absolute",
+                top: "calc(100% + 4px)",
+                left: 0,
+                right: 0,
+                background: "#ffffff",
+                border: "1px solid #d1d5db",
+                borderRadius: 8,
+                maxHeight: 240,
+                overflowY: "auto",
+                zIndex: 950,
+                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
               }}
             >
-              {filtered.map((d) => {
-                const isSelected = selected === d.id;
-                return (
-                  <button
+              {filtered.length === 0 ? (
+                <p
+                  style={{
+                    padding: "20px",
+                    textAlign: "center",
+                    fontSize: 13,
+                    color: "#000000",
+                  }}
+                >
+                  No results for "{query}"
+                </p>
+              ) : (
+                filtered.map((d) => (
+                  <div
                     key={d.id}
-                    onClick={() => setSelected(d.id)}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setSelected(d.id);
+                      setIsOpen(false);
+                      setQuery("");
+                    }}
                     style={{
-                      position: "relative",
                       display: "flex",
-                      flexDirection: "column",
                       alignItems: "center",
-                      gap: 6,
-                      padding: "12px 8px",
-                      border: `2px solid ${isSelected ? "#1655e0" : "#e8eaf0"}`,
-                      borderRadius: 12,
-                      background: isSelected ? "#f0f4ff" : "#fff",
+                      gap: 10,
+                      padding: "10px 14px",
                       cursor: "pointer",
-                      transition: "all 0.15s",
+                      borderBottom: "1px solid #f3f4f6",
+                      background: selected === d.id ? "#ffffff" : "#ffffff", // ← force white bg
                     }}
                   >
-                    {isSelected && (
-                      <span
+                    <span style={{ fontSize: 18 }}></span>
+                    <div>
+                      <div
                         style={{
-                          position: "absolute",
-                          top: 6,
-                          right: 6,
-                          width: 16,
-                          height: 16,
-                          background: "#1655e0",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: selected === d.id ? "#1655e0" : "#111827",
                         }}
                       >
-                        <Check size={10} color="#fff" strokeWidth={3} />
-                      </span>
+                        {" "}
+                        {/* ← force dark text */}
+                        {d.name}
+                      </div>
+                      <div style={{ fontSize: 12, color: "#000000" }}>
+                       
+                      </div>{" "}
+                      {/* ← force gray text */}
+                    </div>
+                    {selected === d.id && (
+                      <Check
+                        size={14}
+                        color="#1655e0"
+                        style={{ marginLeft: "auto" }}
+                      />
                     )}
-                    <span style={{ fontSize: 24, lineHeight: 1 }}>
-                      {d.icon}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        textAlign: "center",
-                        color: isSelected ? "#1655e0" : "#374151",
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      {d.name}
-                    </span>
-                  </button>
-                );
-              })}
+                  </div>
+                ))
+              )}
             </div>
           )}
         </div>

@@ -135,6 +135,30 @@ export const INDUSTRY_CONFIG = {
     promptHint: "Extract property address, type, transaction type and commission details.",
     jsonExtra: `"property": {"address": null, "propertyType": null, "transactionType": null},`,
   },
+  technology: {
+    extraFields: {
+      project: { projectName: "", clientRef: "", hourlyRate: "", totalHours: "" },
+    },
+    itemCategories: ["Development", "Consulting", "Support", "Licence", "Other"],
+    promptHint: "Extract project name, client reference, hours worked, hourly rate and any software licences or subscriptions.",
+    jsonExtra: `"project": {"projectName": null, "clientRef": null, "hourlyRate": null, "totalHours": null},`,
+  },
+  upholstery: {
+    extraFields: {
+      job: { itemDescription: "", fabricType: "", fabricMetres: "", pickupDate: "" },
+    },
+    itemCategories: ["Labour", "Fabric", "Foam", "Materials", "Other"],
+    promptHint: "Extract item being upholstered, fabric type and metres required, foam/padding details and labour hours.",
+    jsonExtra: `"job": {"itemDescription": null, "fabricType": null, "fabricMetres": null, "pickupDate": null},`,
+  },
+  "virtual-services": {
+    extraFields: {
+      service: { serviceType: "", hoursWorked: "", period: "" },
+    },
+    itemCategories: ["Admin", "Social Media", "Research", "Design", "Retainer", "Other"],
+    promptHint: "Extract service type (VA, social media, admin), hours worked or package type, billing period and any ad hoc tasks.",
+    jsonExtra: `"service": {"serviceType": null, "hoursWorked": null, "period": null},`,
+  },
   // default fallback for any industry not listed
   default: {
     extraFields: {},

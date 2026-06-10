@@ -3640,7 +3640,406 @@ export const INDUSTRY_CONFIG = {
       },
     ],
   },
-
+technology: {
+  subdomain: "technology",
+  label: "Technology",
+  headline: "Invoicing & Project Billing for IT Professionals",
+  subheadline:
+    "Quote for projects, bill by the hour, and send professional invoices — purpose-built for South African IT consultants, developers and tech businesses.",
+  cta: "Start Free Today",
+  color: "#0d1117",
+  accent: "#6366f1",
+  accentDark: "#4f46e5",
+  lightBg: "#eef2ff",
+  icon: "💻",
+  features: [
+    {
+      icon: "⏱️",
+      title: "Hourly & Project Billing",
+      desc: "Bill by the hour, per milestone, or as a fixed-price project — or combine all three on one invoice.",
+    },
+    {
+      icon: "📋",
+      title: "Project Quotes & Proposals",
+      desc: "Send detailed scope-of-work quotes with deliverables, timelines and pricing before you start.",
+    },
+    {
+      icon: "🔁",
+      title: "Retainer Invoicing",
+      desc: "Set up monthly retainer invoices for managed services or ongoing support contracts.",
+    },
+    {
+      icon: "📊",
+      title: "Time Tracking",
+      desc: "Log hours per task and convert them directly into line items on your invoice.",
+    },
+    {
+      icon: "💳",
+      title: "Online Payments",
+      desc: "Accept EFT or card via payment links. Get paid on invoice, not 30 days later.",
+    },
+    {
+      icon: "📁",
+      title: "Client Project Files",
+      desc: "Keep all quotes, invoices and change requests organised per client and project.",
+    },
+  ],
+  pricing: [
+    {
+      name: "Starter",
+      price: "Free",
+      period: "",
+      desc: "For freelance developers",
+      features: [
+        "5 invoices/month",
+        "Project quotes",
+        "PDF export",
+        "Email support",
+      ],
+      cta: "Get Started",
+      highlight: false,
+    },
+    {
+      name: "Pro",
+      price: "R149",
+      period: "/mo",
+      desc: "For IT consultants & agencies",
+      features: [
+        "Unlimited invoices",
+        "Time tracking",
+        "Retainer billing",
+        "Online payments",
+        "Priority support",
+      ],
+      cta: "Start Free Trial",
+      highlight: true,
+    },
+    {
+      name: "Agency",
+      price: "R299",
+      period: "/mo",
+      desc: "For tech teams & MSPs",
+      features: [
+        "Everything in Pro",
+        "Staff logins",
+        "Client portals",
+        "Revenue reports",
+        "Dedicated support",
+      ],
+      cta: "Contact Us",
+      highlight: false,
+    },
+  ],
+  testimonials: [
+    {
+      name: "Luca van Rensburg",
+      role: "Freelance Developer, Cape Town",
+      quote:
+        "Hourly billing used to be a mess of spreadsheets. Now I log time as I work and the invoice builds itself. Clients pay the same day.",
+      avatar: "LV",
+    },
+    {
+      name: "Priya Reddy",
+      role: "IT Consultant, Johannesburg",
+      quote:
+        "My retainer clients are fully automated. Invoices go out on the 1st and I don't have to think about billing until I check my bank.",
+      avatar: "PR",
+    },
+    {
+      name: "Warren Jacobs",
+      role: "Managed Services Provider, Pretoria",
+      quote:
+        "Professional proposals with clear deliverables have helped us win bigger contracts. Clients know exactly what they're paying for.",
+      avatar: "WJ",
+    },
+  ],
+  faqs: [
+    {
+      q: "Can I bill hourly and add fixed-price items on the same invoice?",
+      a: "Yes — mix any line item types on a single invoice, including hours, flat fees and expenses.",
+    },
+    {
+      q: "Can I set up automatic monthly invoices for SLA clients?",
+      a: "Yes — recurring invoices send automatically on your chosen date each month.",
+    },
+    {
+      q: "Can I send a quote before starting a project?",
+      a: "Yes — create a detailed quote with scope and pricing, then convert it to an invoice on approval.",
+    },
+    {
+      q: "Can multiple team members create invoices?",
+      a: "The Agency plan supports multiple staff logins with individual billing histories.",
+    },
+  ],
+},
+ 
+// ─── UPHOLSTERY ───────────────────────────────────────────────────────────────
+upholstery: {
+  subdomain: "upholstery",
+  label: "Upholstery",
+  headline: "Quotes & Invoices for Upholsterers",
+  subheadline:
+    "Quote for reupholstery jobs, track fabric and materials, and get paid on collection — built for South African upholstery businesses.",
+  cta: "Start Free Today",
+  color: "#1a1008",
+  accent: "#b45309",
+  accentDark: "#92400e",
+  lightBg: "#fef3c7",
+  icon: "🪑",
+  features: [
+    {
+      icon: "📋",
+      title: "Job Quotes",
+      desc: "Quote per piece, per metre of fabric, or as a full job — whatever suits your pricing model.",
+    },
+    {
+      icon: "🧵",
+      title: "Fabric & Materials Billing",
+      desc: "List fabric, foam, webbing, thread and labour as separate line items on every invoice.",
+    },
+    {
+      icon: "📸",
+      title: "Job Notes",
+      desc: "Record fabric specs, colour references and client instructions against each job.",
+    },
+    {
+      icon: "💳",
+      title: "Collect on Completion",
+      desc: "Send a payment link when the job is ready for collection. Accept card or EFT.",
+    },
+    {
+      icon: "📦",
+      title: "Material Cost Tracking",
+      desc: "Log fabric and sundry costs per job to protect your margins.",
+    },
+    {
+      icon: "📊",
+      title: "Outstanding Invoice Tracker",
+      desc: "See all unpaid jobs at a glance so nothing leaves the workshop unpaid.",
+    },
+  ],
+  pricing: [
+    {
+      name: "Starter",
+      price: "Free",
+      period: "",
+      desc: "For sole upholsterers",
+      features: [
+        "5 invoices/month",
+        "Job quotes",
+        "PDF export",
+        "Email support",
+      ],
+      cta: "Get Started",
+      highlight: false,
+    },
+    {
+      name: "Pro",
+      price: "R99",
+      period: "/mo",
+      desc: "For active upholstery businesses",
+      features: [
+        "Unlimited invoices",
+        "Materials tracking",
+        "Online payments",
+        "Job notes",
+        "Priority support",
+      ],
+      cta: "Start Free Trial",
+      highlight: true,
+    },
+    {
+      name: "Workshop",
+      price: "R199",
+      period: "/mo",
+      desc: "For upholstery workshops with staff",
+      features: [
+        "Everything in Pro",
+        "Staff logins",
+        "Custom templates",
+        "Revenue reports",
+        "Dedicated support",
+      ],
+      cta: "Contact Us",
+      highlight: false,
+    },
+  ],
+  testimonials: [
+    {
+      name: "Chantelle du Plessis",
+      role: "Upholstery Studio, Pretoria",
+      quote:
+        "I used to hand-write quotes and clients would argue about the price. Now everything is itemised on a professional invoice and there are no disputes.",
+      avatar: "CD",
+    },
+    {
+      name: "Sipho Mhlongo",
+      role: "Auto & Furniture Upholstery, Durban",
+      quote:
+        "Tracking fabric costs per job finally showed me where I was losing money. My margins are healthier since I started using SolidFlo.",
+      avatar: "SM",
+    },
+    {
+      name: "Elise Cronje",
+      role: "Custom Upholstery, Cape Town",
+      quote:
+        "Clients pay the deposit before I order fabric and settle the balance on collection. Cash flow has never been this predictable.",
+      avatar: "EC",
+    },
+  ],
+  faqs: [
+    {
+      q: "Can I quote per metre of fabric?",
+      a: "Yes — create line items priced per metre, per piece, or as a lump-sum job cost.",
+    },
+    {
+      q: "Can I collect a deposit before ordering fabric?",
+      a: "Yes — send a deposit invoice and a final invoice per job, each with its own payment link.",
+    },
+    {
+      q: "Can I add fabric specs and colour codes to a job?",
+      a: "Yes — use the notes section to record any fabric details, references or client instructions.",
+    },
+    {
+      q: "Does it work on a phone?",
+      a: "Yes — fully mobile. Create and send quotes from anywhere.",
+    },
+  ],
+},
+ 
+// ─── VIRTUAL SERVICES ─────────────────────────────────────────────────────────
+"virtual-services": {
+  subdomain: "virtual-services",
+  label: "Virtual Services",
+  headline: "Professional Invoicing for Virtual Assistants & Remote Professionals",
+  subheadline:
+    "Invoice for hours worked, retainers and ad hoc tasks — and get paid on time, every time, no matter where your clients are.",
+  cta: "Start Free Today",
+  color: "#0f172a",
+  accent: "#0ea5e9",
+  accentDark: "#0284c7",
+  lightBg: "#f0f9ff",
+  icon: "🌐",
+  features: [
+    {
+      icon: "⏱️",
+      title: "Hourly & Retainer Billing",
+      desc: "Bill by the hour, per task package, or as a monthly retainer — whatever suits your client.",
+    },
+    {
+      icon: "🔁",
+      title: "Recurring Invoices",
+      desc: "Set monthly retainer invoices to go out automatically on the same date every month.",
+    },
+    {
+      icon: "📋",
+      title: "Service Packages",
+      desc: "Create reusable package templates — 10-hour blocks, social media management, admin bundles.",
+    },
+    {
+      icon: "💳",
+      title: "Online Payments",
+      desc: "Clients pay via card or EFT from a payment link — no matter where they're based.",
+    },
+    {
+      icon: "📊",
+      title: "Hours & Revenue Tracking",
+      desc: "See billable hours, outstanding invoices and monthly income at a glance.",
+    },
+    {
+      icon: "📱",
+      title: "Send via Email or WhatsApp",
+      desc: "Deliver invoices and quotes to clients through whichever channel they prefer.",
+    },
+  ],
+  pricing: [
+    {
+      name: "Starter",
+      price: "Free",
+      period: "",
+      desc: "For new virtual assistants",
+      features: [
+        "5 invoices/month",
+        "Service packages",
+        "PDF export",
+        "Email support",
+      ],
+      cta: "Get Started",
+      highlight: false,
+    },
+    {
+      name: "Pro",
+      price: "R99",
+      period: "/mo",
+      desc: "For established remote professionals",
+      features: [
+        "Unlimited invoices",
+        "Recurring billing",
+        "Online payments",
+        "Hours tracking",
+        "Priority support",
+      ],
+      cta: "Start Free Trial",
+      highlight: true,
+    },
+    {
+      name: "Agency",
+      price: "R199",
+      period: "/mo",
+      desc: "For VA agencies & remote teams",
+      features: [
+        "Everything in Pro",
+        "Staff logins",
+        "Custom branding",
+        "Revenue reports",
+        "Dedicated support",
+      ],
+      cta: "Contact Us",
+      highlight: false,
+    },
+  ],
+  testimonials: [
+    {
+      name: "Yolandi Fourie",
+      role: "Virtual Assistant, Johannesburg",
+      quote:
+        "My retainer clients are fully automated. Invoices go out on the 1st every month without me touching a thing. I just watch the payments come in.",
+      avatar: "YF",
+    },
+    {
+      name: "Kabelo Sithole",
+      role: "Remote Social Media Manager, Pretoria",
+      quote:
+        "Package invoices look so much more professional than the informal quotes I used to send. Clients respond faster and pay faster.",
+      avatar: "KS",
+    },
+    {
+      name: "Bianca Ferreira",
+      role: "Online Business Manager, Cape Town",
+      quote:
+        "I work with clients across three countries. Payment links make it easy for everyone to pay, regardless of where they bank.",
+      avatar: "BF",
+    },
+  ],
+  faqs: [
+    {
+      q: "Can I invoice per hour or per package?",
+      a: "Yes — create any line item structure, including hourly rates, task bundles or monthly retainers.",
+    },
+    {
+      q: "Can I set up automatic monthly invoices?",
+      a: "Yes — recurring invoices send automatically on any date you choose each month.",
+    },
+    {
+      q: "Can international clients pay online?",
+      a: "Yes — payment links via PayFast and Yoco support card payments accessible from anywhere.",
+    },
+    {
+      q: "Can I manage invoices for a team of VAs?",
+      a: "The Agency plan supports multiple staff logins, each with their own billing history.",
+    },
+  ],
+},
   // ─── FALLBACK / DEFAULT ───────────────────────────────────────────────────────
   default: {
     subdomain: null,
@@ -3784,7 +4183,9 @@ INDUSTRY_CONFIG["realEstate"] = INDUSTRY_CONFIG["realestate"];
 INDUSTRY_CONFIG["pestcontrol"] = INDUSTRY_CONFIG["pest-control"];
 INDUSTRY_CONFIG["poolservices"] = INDUSTRY_CONFIG["pool-services"];
 INDUSTRY_CONFIG["windowrepair"] = INDUSTRY_CONFIG["window-repair"];
-
+INDUSTRY_CONFIG["tech"] = INDUSTRY_CONFIG["technology"];
+INDUSTRY_CONFIG["virtualservices"] = INDUSTRY_CONFIG["virtual-services"];
+INDUSTRY_CONFIG["virtual_services"] = INDUSTRY_CONFIG["virtual-services"];
 export function getIndustryConfig(subdomain) {
   return INDUSTRY_CONFIG[subdomain] || INDUSTRY_CONFIG["default"];
 }

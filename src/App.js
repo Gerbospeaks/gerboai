@@ -7,6 +7,7 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
+import { injectDynamicManifest } from "./utils/generateManifest";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AdminProvider } from "./contexts/AdminContext";
 import { getSubdomainFromHost } from "./utils/subdomain";
@@ -14,6 +15,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PWAInstallPrompt from "./components/Pwainstallprompt";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
+import { useIsStandalone } from "./hooks/useIsStandalone";
 import ContactPage from "./pages/ContactPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -142,6 +144,10 @@ export const DASHBOARD_ID_TO_PATH = {
   welding: "/welding",
   carpentry: "/carpentry",
   "window-repair": "/window-repair",
+  technology:"/technology",
+  upholstery:"/upholstery",
+  "virtual-services":"/virtual-services",
+  "appliance-repair":"/appliance-repair"
 };
 
 // ─── Full-page spinner shown while Firebase resolves auth state ───────────────
@@ -640,27 +646,55 @@ function SubdomainRoot() {
   const subdomain = getSubdomainFromHost();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const isStandalone = useIsStandalone();
+
+  useEffect(() => {
+    if (loading) return;
+
+    if (user && user.emailVerified) {
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+
+    // Launched from home screen / desktop shortcut and not logged in
+    if (isStandalone) {
+      navigate("/login", { replace: true });
+    }
+  }, [loading, user, navigate, isStandalone]);
+
+  if (loading) return <AppLoader />;
+
+  // Browser visit (not standalone) → show landing page as normal
+  const Landing = SUBDOMAIN_LANDING[subdomain];
+  return Landing ? <Landing /> : <LandingPage />;
+}
+function MainDomainRoot() {
+  const { user, loading } = useAuth();
+  const isStandalone = useIsStandalone();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (loading) return;
     if (user && user.emailVerified) {
-      // Logged-in user hitting "/" — send to DashboardRouter
-      // which already handles the industry redirect
       navigate("/dashboard", { replace: true });
+      return;
     }
-  }, [loading, user, navigate]);
+    if (isStandalone) {
+      // Main domain has no login — redirect to your mechanics or default subdomain
+      window.location.href = "https://mechanics.solidflo.co.za/login";
+    }
+  }, [loading, user, navigate, isStandalone]);
 
   if (loading) return <AppLoader />;
-
-  // Not logged in → show industry landing as normal
-  const Landing = SUBDOMAIN_LANDING[subdomain];
-  return Landing ? <Landing /> : <LandingPage />;
+  return <LandingPage />;
 }
-
 // ─── Main App ─────────────────────────────────────────────────────────────────
 function App() {
   useSecurityLock();
-
+useEffect(() => {
+    const subdomain = getSubdomainFromHost();
+    if (subdomain) injectDynamicManifest(subdomain);
+  }, []);
   return (
     <Router>
       <AuthProvider>
@@ -715,7 +749,7 @@ function App() {
           ) : (
             // ── MAIN DOMAIN (solidflo.co.za) ──────────────────────────────
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<MainDomainRoot />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/blogs" element={<BlogPostPage />} />

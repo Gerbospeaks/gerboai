@@ -11,7 +11,7 @@ export const SUBDOMAIN_ROUTES = {
   landscaping:         '/landscaping',
   carpentry:           '/carpentry',
   technology:         '/technology',
-  virtual:            '/virtual',
+  'virtual-services':  '/virtual-services',
   upholstery:         '/upholstery',
   towing:              '/towing',
   retail:              '/retail',

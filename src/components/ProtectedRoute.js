@@ -29,11 +29,8 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  // ── Subdomain access guard ──────────────────────────────────────
-  // Prevent a mechanic from accessing healthcare.solidflo.co.za etc.
   const subdomain = getSubdomain();
   if (subdomain && userDashboard && subdomain !== userDashboard) {
-    // Wrong subdomain → bounce to their correct one
     window.location.href = `https://${userDashboard}.solidflo.co.za`;
     return null;
   }

@@ -32,6 +32,10 @@ const INDUSTRY_TEMPLATE_MAP = {
   welding:              () => import('../pages/welding/TemplateSelector'),
   carpentry:            () => import('../pages/carpentry/TemplateSelector'),
   'window-repair':      () => import('../pages/window-repair/TemplateSelector'),
+  technology:           () => import('../pages/technology/TemplateSelector'),
+  upholstery:           () => import('../pages/upholstery/TemplateSelector'),
+  'virtual-services':   () => import('../pages/virtual-services/TemplateSelector'),
+  'appliance-repair':   () => import('../pages/appliance-repair/TemplateSelector'),
 };
 
 /**
