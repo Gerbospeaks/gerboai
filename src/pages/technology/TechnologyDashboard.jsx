@@ -20,6 +20,7 @@ import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from "../SignatureStamp";
 import StampOverlay from "../StampOverlay";
 import TechnologyMultiStepForm from "./TechnologyMultiStepForm";
+import TechnologySidebar from "./TechnologySidebar";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
@@ -217,8 +218,8 @@ const TechnologyDashboardInner = () => {
   const [customers, setCustomers] = useState([]);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
     useState(null);
-    const [showStampModal, setShowStampModal] = useState(false);
-const [stampConfig, setStampConfig] = useState(null);
+  const [showStampModal, setShowStampModal] = useState(false);
+  const [stampConfig, setStampConfig] = useState(null);
   const { can, isAdmin } = usePermissions();
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
@@ -227,6 +228,10 @@ const [stampConfig, setStampConfig] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+  const [savedProjects, setSavedProjects] = useState([]);
+const [savedClients, setSavedClients] = useState([]);
+const [showProjectsList, setShowProjectsList] = useState(false);
+const [showClientsModal, setShowClientsModal] = useState(false);
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -248,10 +253,10 @@ const [stampConfig, setStampConfig] = useState(null);
   const [customerAddress, setCustomerAddress] = useState(
     "456 Oak Avenue, Johannesburg, 2000",
   );
-  const [eventDate, setEventDate] = useState("2026-06-15");
-  const [eventType, setEventType] = useState("Wedding");
-  const [eventLocation, setEventLocation] = useState(
-    "Silverstar Casino, Krugersdorp",
+  const [projectDate, setProjectDate] = useState("2026-06-15");
+  const [projectName, setProjectName] = useState("Website Redesign");
+  const [projectScope, setProjectScope] = useState(
+    "Full-stack development & deployment",
   );
 
   const [businessInfo, setBusinessInfo] = useState({
@@ -273,7 +278,9 @@ const [stampConfig, setStampConfig] = useState(null);
     qty: "",
     type: "Technology",
   });
-
+const handleAddNewClient = () => {
+  setShowClientsModal(true); 
+};
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
   const vat = subtotal * 0.15;
   const total = subtotal + vat;
@@ -289,14 +296,14 @@ const [stampConfig, setStampConfig] = useState(null);
     customerEmail,
     customerPhone,
     customerAddress,
-    eventType,
-    eventDate,
-    eventLocation,
+    projectName,
+    projectDate,
+    projectScope,
+    documentType,
     items,
     subtotal,
     vat,
     total,
-    documentType: "technology",
     serviceType: "TECHNOLOGY",
     showStamp: stampSettings?.enabled || false,
     stampText: stampSettings?.text || "APPROVED",
@@ -458,25 +465,27 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerId(customer.customerId || "");
   };
 
-  const loadInvoice = (invoice) => {
-    setInvoiceId(invoice.id);
-    setInvoiceNumber(invoice.invoiceNumber || "");
-    setCustomerName(invoice.customer?.name || "");
-    setCustomerEmail(invoice.customer?.email || "");
-    setCustomerPhone(invoice.customer?.phone || "");
-    setCustomerAddress(invoice.customer?.address || "");
-    setCustomerId(invoice.customer?.customerId || "");
-    setEventDate(invoice.event?.date || "");
-    setEventType(invoice.event?.type || "");
-    setEventLocation(invoice.event?.location || "");
-    setItems(invoice.items || []);
-    setShowInvoicesList(false);
-  };
+const loadInvoice = (invoice) => {
+  setInvoiceId(invoice.id);
+  setInvoiceNumber(invoice.invoiceNumber || "");
+  setDocumentType(invoice.documentType || "invoice");
+  setCustomerName(invoice.customer?.name || "");
+  setCustomerEmail(invoice.customer?.email || "");
+  setCustomerPhone(invoice.customer?.phone || "");
+  setCustomerAddress(invoice.customer?.address || "");
+  setCustomerId(invoice.customer?.customerId || "");
+  setProjectDate(invoice.project?.date || "");
+  setProjectName(invoice.project?.name || "");
+  setProjectScope(invoice.project?.scope || "");
+  setItems(invoice.items || []);
+  setShowInvoicesList(false);
+};
 
   const buildInvoicePayload = (numberToUse) => ({
     invoiceNumber: numberToUse,
+    documentType, // ← carries "quote" or "invoice"
     locked: true,
-    status: "pending",
+    status: documentType === "quote" ? "draft" : "pending",
     dates: { invoiceDate: new Date().toISOString(), dueDate: null },
     customer: {
       name: customerName,
@@ -485,13 +494,12 @@ const [stampConfig, setStampConfig] = useState(null);
       address: customerAddress,
       customerId,
     },
-    event: { date: eventDate, type: eventType, location: eventLocation },
+    project: { date: projectDate, name: projectName, scope: projectScope },
     items,
     totals: { subtotal, vat, total, paid: 0, due: total },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
-
   const handleSaveInvoice = async () => {
     if (!user?.uid) return;
     const db = getFirestore();
@@ -579,20 +587,20 @@ const [stampConfig, setStampConfig] = useState(null);
     setShowPaymentModal(false);
   };
 
-  const handleNewInvoice = () => {
-    setInvoiceId(null);
-    setInvoiceNumber("");
-    setCustomerName("Sarah Johnson");
-    setCustomerId("CUST-2026-5678");
-    setCustomerEmail("sarah.johnson@example.com");
-    setCustomerPhone("082 456 7890");
-    setCustomerAddress("456 Oak Avenue, Johannesburg, 2000");
-    setEventDate("2026-06-15");
-    setEventType("Wedding");
-    setEventLocation("Silverstar Casino, Krugersdorp");
-    setItems([]);
-    if (user?.uid) generateInvoiceNumber(user.uid).then(setInvoiceNumber);
-  };
+const handleNewInvoice = () => {
+  setInvoiceId(null);
+  setInvoiceNumber("");
+  setCustomerName("");
+  setCustomerId("");
+  setCustomerEmail("");
+  setCustomerPhone("");
+  setCustomerAddress("");
+  setProjectDate(new Date().toISOString().split("T")[0]);
+  setProjectName("");
+  setProjectScope("");
+  setItems([]);
+  if (user?.uid) generateInvoiceNumber(user.uid).then(setInvoiceNumber);
+};
 
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
@@ -677,9 +685,9 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerEmail(saved.customer.email);
     setCustomerPhone(saved.customer.phone);
     setCustomerAddress(saved.customer.address);
-    setEventDate(saved.event.date);
-    setEventType(saved.event.type);
-    setEventLocation(saved.event.location);
+    setProjectDate(saved.project?.date || "");
+    setProjectName(saved.project?.name || "");
+    setProjectScope(saved.project?.scope || "");
     setTimeout(() => window.print(), 300);
   };
 
@@ -689,9 +697,9 @@ const [stampConfig, setStampConfig] = useState(null);
     if (data.customer?.phone) setCustomerPhone(data.customer.phone);
     if (data.customer?.address) setCustomerAddress(data.customer.address);
     if (data.customer?.customerId) setCustomerId(data.customer.customerId);
-    if (data.event?.date) setEventDate(data.event.date);
-    if (data.event?.type) setEventType(data.event.type);
-    if (data.event?.location) setEventLocation(data.event.location);
+    if (data.project?.date) setProjectDate(data.project.date);
+    if (data.project?.name) setProjectName(data.project.name);
+    if (data.project?.scope) setProjectScope(data.project.scope);
     if (data.items?.length > 0) setItems(data.items);
     alert("✅ AI data populated!");
   };
@@ -833,444 +841,83 @@ const [stampConfig, setStampConfig] = useState(null);
   ].filter(Boolean);
 
   return (
-    <div className="flex h-screen w-screen bg-gradient-to-br from-slate-50 via-slate-100 to-gray-100 overflow-hidden">
-      {/* ── Upgrade modal (renders on top of everything) ─────────────────── */}
-      <UpgradeModal />
-
-      {/* ── Mobile Sidebar Backdrop ──────────────────────────────────────── */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* ── Collapsed Sidebar ────────────────────────────────────────────── */}
-      <div
-        className={`${sidebarOpen ? "hidden" : "hidden md:block"} fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
-      >
-        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-violet-600 hover:to-violet-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-violet-500/50 hover:scale-110"
-            title="Expand Sidebar"
-          >
-            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
-          </button>
-          <div className="w-10 h-10 mb-2">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-full h-full object-contain rounded-lg"
-            />
-          </div>
-          <div className="w-10 border-t border-slate-600"></div>
-          <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
-            <button
-              onClick={() => setActiveView("home")}
-              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-              title="Home"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-            </button>
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() =>
-                requirePlan("businessOverview", () => {}, "Business Overview")
-              }
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Business Overview"
-            >
-              <TrendingUp className="w-5 h-5" />
-              {!canAccess("businessOverview") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => {
-                handleNewInvoice();
-                setActiveView("invoice");
-              }}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Invoices"
-            >
-              <ClipboardList className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() =>
-                requirePlan(
-                  "allClients",
-                  () => setShowCustomersListModal(true),
-                  "All Clients",
-                )
-              }
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Clients"
-            >
-              <Users className="w-5 h-5" />
-              {!canAccess("allClients") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() =>
-                requirePlan(
-                  "templates",
-                  () => setActiveView("templates"),
-                  "Invoice Templates",
-                )
-              }
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Templates"
-            >
-              <FileText className="w-5 h-5" />
-              {!canAccess("templates") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => requirePlan("bookings", () => {}, "Bookings")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Bookings"
-            >
-              <Calendar className="w-5 h-5" />
-              {!canAccess("bookings") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => requirePlan("portfolio", () => {}, "Portfolio")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Portfolio"
-            >
-              <Image className="w-5 h-5" />
-              {!canAccess("portfolio") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => requirePlan("packages", () => {}, "Packages")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Packages"
-            >
-              <Package className="w-5 h-5" />
-              {!canAccess("packages") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-          </div>
-        </div>
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
-          <div className="relative group">
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center ring-2 ring-violet-700 shadow-lg group-hover:ring-4 group-hover:ring-violet-500/50 transition-all duration-300">
-              <img src={businessInfo.logoUrl} alt="" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Expanded Sidebar ─────────────────────────────────────────────── */}
-      <div
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 md:w-72 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
-      >
-        <div className="p-4 md:p-6">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <img
-              src={logo}
-              alt="Business Logo"
-              className="w-16 h-12 object-contain rounded-lg"
-            />
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
-              title="Collapse Sidebar"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* ── Plan badge in sidebar ──────────────────────────────────── */}
-          <div className="flex items-center justify-between mb-4 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
-            <span className="text-xs text-slate-400">Your plan</span>
-            <div className="flex items-center gap-2">
-              <PlanBadge />
-              {currentPlan !== "elite" && (
-                <button
-                  onClick={() => requirePlan("elite", () => {}, "Elite plan")}
-                  className="text-xs text-violet-400 hover:text-violet-300 font-semibold transition-colors"
-                >
-                  Upgrade ↑
-                </button>
-              )}
-            </div>
-          </div>
-
-          <nav className="space-y-1.5 md:space-y-2">
-            <div
-              onClick={() => {
-                setActiveView("home");
-                setSidebarOpen(false);
-              }}
-              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-slate-600/20 hover:to-slate-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
-            >
-              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-xs md:text-sm font-semibold">Home</span>
-            </div>
-            <div
-              onClick={() => {
-                setShowSettings(true);
-                setSidebarOpen(false);
-              }}
-              className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
-            >
-              <Settings className="w-5 h-5" />
-              <span className="text-sm font-medium">Settings</span>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-slate-700/50">
-              {/* Business Overview */}
-              <SidebarItem
-                icon={TrendingUp}
-                label="Business Overview"
-                featureKey="businessOverview"
-                featureLabel="Business Overview"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              {/* Invoices */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3">
-                    <ClipboardList className="w-5 h-5" />
-                    <span className="text-sm font-medium">Invoices</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-                  <div
-                    onClick={() => {
-                      handleNewInvoice();
-                      setSidebarOpen(false);
-                      setActiveView("invoice");
-                    }}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    Create Invoice
-                  </div>
-                  <div
-                    onClick={() =>
-                      requirePlan(
-                        "allInvoices",
-                        () => {
-                          setShowInvoicesList(!showInvoicesList);
-                          setSidebarOpen(false);
-                        },
-                        "All Invoices",
-                      )
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
-                        All Invoices
-                        {!canAccess("allInvoices") && (
-                          <Lock className="w-3 h-3 text-slate-600" />
-                        )}
-                      </span>
-                      <span className="text-violet-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        {savedInvoices.length}
-                      </span>
-                    </div>
-                  </div>
-                  <div
-                    onClick={() =>
-                      requirePlan("payments", () => {}, "Pending Payment")
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-1.5"
-                  >
-                    Pending Payment
-                    {!canAccess("payments") && (
-                      <Lock className="w-3 h-3 text-slate-600" />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Clients */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3">
-                    <Users className="w-5 h-5" />
-                    <span className="text-sm font-medium">Clients</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-                  <div
-                    onClick={() =>
-                      requirePlan(
-                        "addClient",
-                        () => {
-                          handleAddNewCustomer();
-                          setSidebarOpen(false);
-                        },
-                        "Add Client",
-                      )
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-1.5"
-                  >
-                    Add Client
-                    {!canAccess("addClient") && (
-                      <Lock className="w-3 h-3 text-slate-600" />
-                    )}
-                  </div>
-                  <div
-                    onClick={() =>
-                      requirePlan(
-                        "allClients",
-                        () => {
-                          setShowCustomersListModal(true);
-                          setSidebarOpen(false);
-                        },
-                        "All Clients",
-                      )
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
-                        All Clients
-                        {!canAccess("allClients") && (
-                          <Lock className="w-3 h-3 text-slate-600" />
-                        )}
-                      </span>
-                      <span className="text-violet-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        {savedCustomers.length}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Templates */}
-              <SidebarItem
-                icon={FileText}
-                label="Invoice Templates"
-                featureKey="templates"
-                featureLabel="Invoice Templates"
-                onClick={() => {
-                  setActiveView("templates");
-                  setSidebarOpen(false);
-                }}
-                className="mt-2"
-              />
-
-              {/* Bookings */}
-              <SidebarItem
-                icon={Calendar}
-                label="Bookings"
-                featureKey="bookings"
-                featureLabel="Bookings"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              {/* Portfolio */}
-              <SidebarItem
-                icon={Image}
-                label="Portfolio"
-                featureKey="portfolio"
-                featureLabel="Portfolio"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              {/* Packages */}
-              <SidebarItem
-                icon={Package}
-                label="Packages"
-                featureKey="packages"
-                featureLabel="Packages"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              {/* Payments */}
-              <SidebarItem
-                icon={CreditCard}
-                label="Payments"
-                featureKey="payments"
-                featureLabel="Payments"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <ChevronDown className="w-4 h-4" />
-              </SidebarItem>
-
-              {/* Reports */}
-              <SidebarItem
-                icon={FileBarChart}
-                label="Reports"
-                featureKey="reports"
-                featureLabel="Reports"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <ChevronDown className="w-4 h-4" />
-              </SidebarItem>
-
-              {/* Analytics */}
-              <SidebarItem
-                icon={BarChart3}
-                label="Analytics"
-                featureKey="analytics"
-                featureLabel="Analytics"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <ChevronDown className="w-4 h-4" />
-              </SidebarItem>
-            </div>
-          </nav>
-        </div>
-
-        {/* Sidebar footer */}
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
-          <div className="flex items-center space-x-2 md:space-x-3">
-            <div className="relative group flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-violet-500/50 transition-all duration-300">
-                <img
-                  src={businessInfo.logoUrl}
-                  alt="Business Logo"
-                  className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-                />
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent truncate">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-slate-400 truncate">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-            >
-              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-            </button>
-          </div>
-        </div>
-      </div>
-
+   <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
+         {/* Print area */}
+         <div
+           id="print-area"
+           className="hidden print:block bg-white"
+           style={{ width: "210mm", minHeight: "297mm" }}
+         >
+           {activeView === "purchase-orders" ? (
+             <div id="po-printable" style={{ position: "relative" }}>
+              
+               <StampOverlay
+                 stampConfig={stampConfig}
+                 pageNumber={1}
+                 businessInfo={businessInfo}
+               />
+             </div>
+           ) : (
+             <div id="invoice-printable" style={{ position: "relative" }}>
+               <TemplateRenderer {...templateProps} />
+               <StampOverlay
+                 stampConfig={stampConfig}
+                 pageNumber={1}
+                 businessInfo={businessInfo}
+               />
+             </div>
+           )}
+           {documentType === "jobcard" && (
+             <div
+               id="jobcard-printable"
+               style={{
+                 pageBreakBefore: "always",
+                 breakBefore: "page",
+                 padding: "40px 0",
+                 boxSizing: "border-box",
+                 width: "210mm",
+               }}
+             >
+              
+             </div>
+           )}
+         </div>
+         {showAIWindow && (
+           <AIInvoiceWindow
+             user={user}
+             businessInfo={businessInfo}
+             documentType={documentType}
+             onExit={() => setShowAIWindow(false)}
+             onNavigateTo={(view) => {
+              
+               setActiveView(view);
+             }}
+             industry="mechanics"
+             TemplateRenderer={TemplateRenderer}
+           />
+         )}
+          <div className="flex-1 flex overflow-hidden min-h-0">
+      
+      <TechnologySidebar
+        user={user}                              // from AuthContext
+        activeView={activeView}
+        setActiveView={setActiveView}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        setShowSettings={setShowSettings}
+        handleLogout={handleLogout}
+        businessInfo={businessInfo}              // { name, logoUrl }
+        savedProjects={savedProjects}            // array
+        savedClients={savedClients}              // array
+        showProjectsList={showProjectsList}
+        setShowProjectsList={setShowProjectsList}
+        setShowClientsModal={setShowClientsModal}
+        handleAddNewClient={handleAddNewClient}
+        newRequestCount={0}
+      />
       {/* ── Main Content Area ────────────────────────────────────────────── */}
-      <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-16"}`}
-      >
-        <div className="flex flex-col h-screen">
+
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
@@ -1297,22 +944,24 @@ const [stampConfig, setStampConfig] = useState(null);
               onCustomerSaved={handleCustomerSaved}
             />
             {showStampModal && (
-  <StampSignatureModal
-    isOpen={showStampModal}
-    onClose={() => setShowStampModal(false)}
-    onConfirm={(cfg) => {
-      setStampConfig(cfg);
-      setShowStampModal(false);
-    }}
-    previewContent={
-      activeView === "purchase-orders"
-        ? <POTemplateRenderer  />
-        : <TemplateRenderer {...templateProps} />
-    }
-    businessInfo={businessInfo}
-    existingConfig={stampConfig}
-  />
-)}
+              <StampSignatureModal
+                isOpen={showStampModal}
+                onClose={() => setShowStampModal(false)}
+                onConfirm={(cfg) => {
+                  setStampConfig(cfg);
+                  setShowStampModal(false);
+                }}
+                previewContent={
+                  activeView === "purchase-orders" ? (
+                    <POTemplateRenderer />
+                  ) : (
+                    <TemplateRenderer {...templateProps} />
+                  )
+                }
+                businessInfo={businessInfo}
+                existingConfig={stampConfig}
+              />
+            )}
             {showInvoicesList && (
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
@@ -1425,22 +1074,30 @@ const [stampConfig, setStampConfig] = useState(null);
                   <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                     <div
                       className="mx-auto bg-white shadow-xl"
-                      style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
+                      style={{
+                        position: "relative",
+                        width: "210mm",
+                        minHeight: "297mm",
+                      }}
                     >
                       <TemplateRenderer {...templateProps} />
-                      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                      <StampOverlay
+                        stampConfig={stampConfig}
+                        pageNumber={1}
+                        businessInfo={businessInfo}
+                      />
                     </div>
                   </div>
                   {/* ── Stamp button footer ── */}
-<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-  <button
-    onClick={() => setShowStampModal(true)}
-    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
-  >
-    <Stamp className="w-4 h-4" />
-    Stamp &amp; Signature
-  </button>
-</div>
+                  <div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+                    <button
+                      onClick={() => setShowStampModal(true)}
+                      className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      <Stamp className="w-4 h-4" />
+                      Stamp &amp; Signature
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -1472,16 +1129,19 @@ const [stampConfig, setStampConfig] = useState(null);
               </div>
             )}
             {activeView === "marketplace" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
-  </div>
-)}
+              <div className="flex-1 overflow-y-auto p-6">
+                <ServiceMarketplaceView
+                  user={user}
+                  businessInfo={businessInfo}
+                />
+              </div>
+            )}
 
-{activeView === "incoming-requests" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceRequestsView user={user} businessInfo={businessInfo} />
-  </div>
-)}
+            {activeView === "incoming-requests" && (
+              <div className="flex-1 overflow-y-auto p-6">
+                <ServiceRequestsView user={user} businessInfo={businessInfo} />
+              </div>
+            )}
 
             {activeView === "invoice" && (
               <div
@@ -1525,9 +1185,38 @@ const [stampConfig, setStampConfig] = useState(null);
                         </button>
                       </div>
                     </div>
-
+{documentType === "quote" && invoiceId && (
+  <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+    <div className="flex-1">
+      <p className="text-sm font-semibold text-amber-800">Quote ready to convert</p>
+      <p className="text-xs text-amber-600 mt-0.5">{invoiceNumber} · R{total.toFixed(2)}</p>
+    </div>
+    <button
+      onClick={() => requirePlan("convertToInvoice", handleConvertToInvoice, "Convert to Invoice")}
+      className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-lg transition-colors whitespace-nowrap"
+    >
+      <FileText className="w-4 h-4" />
+      Convert →
+    </button>
+  </div>
+)}
                     {inputMode === "manual" && (
                       <>
+                        <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1 w-fit">
+                          {["quote", "invoice"].map((type) => (
+                            <button
+                              key={type}
+                              onClick={() => setDocumentType(type)}
+                              className={`px-5 py-2 rounded-lg text-sm font-semibold capitalize transition-all duration-200 ${
+                                documentType === type
+                                  ? "bg-violet-600 text-white shadow-sm"
+                                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                              }`}
+                            >
+                              {type === "quote" ? "📋 Quote" : "🧾 Invoice"}
+                            </button>
+                          ))}
+                        </div>
                         <div className="bg-violet-50 border border-violet-200 rounded-lg px-4 py-3 flex items-center space-x-3">
                           <div className="w-2 h-2 bg-violet-500 rounded-full"></div>
                           <span className="text-violet-700 text-sm font-medium">
@@ -1564,55 +1253,41 @@ const [stampConfig, setStampConfig] = useState(null);
                         </div>
 
                         <TechnologyMultiStepForm
-                          customerName={customerName}
-                          setCustomerName={setCustomerName}
-                          customerId={customerId}
-                          setCustomerId={setCustomerId}
-                          customerEmail={customerEmail}
-                          setCustomerEmail={setCustomerEmail}
-                          customerPhone={customerPhone}
-                          setCustomerPhone={setCustomerPhone}
-                          customerAddress={customerAddress}
-                          setCustomerAddress={setCustomerAddress}
-                          eventDate={eventDate}
-                          setEventDate={setEventDate}
-                          eventType={eventType}
-                          setEventType={setEventType}
-                          eventLocation={eventLocation}
-                          setEventLocation={setEventLocation}
-                          items={items}
-                          newItem={newItem}
-                          setNewItem={setNewItem}
-                          handleAddItem={handleAddItem}
-                        />
-
-                        <div className="bg-white border border-gray-200 rounded-lg p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold">
-                              Payment Terms
-                            </h2>
-                          </div>
-                          <div className="space-y-3 text-sm">
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">
-                                Payment Method:
-                              </span>
-                              <span className="font-medium">EFT/Card/Cash</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">
-                                Deposit Required:
-                              </span>
-                              <span className="font-medium">50% Upfront</span>
-                            </div>
-                            <div className="flex justify-between py-2">
-                              <span className="text-gray-600">
-                                Balance Due:
-                              </span>
-                              <span className="font-medium">Day of Event</span>
-                            </div>
-                          </div>
-                        </div>
+  customerName={customerName}        setCustomerName={setCustomerName}
+  customerId={customerId}            setCustomerId={setCustomerId}
+  customerEmail={customerEmail}      setCustomerEmail={setCustomerEmail}
+  customerPhone={customerPhone}      setCustomerPhone={setCustomerPhone}
+  customerAddress={customerAddress}  setCustomerAddress={setCustomerAddress}
+  projectDate={projectDate}          setProjectDate={setProjectDate}
+  projectName={projectName}          setProjectName={setProjectName}
+  projectScope={projectScope}        setProjectScope={setProjectScope}
+  items={items}
+  newItem={newItem}
+  setNewItem={setNewItem}
+  handleAddItem={handleAddItem}
+  documentType={documentType}
+/>
+                       <div className="bg-white border border-gray-200 rounded-lg p-6">
+  <h2 className="text-lg font-semibold mb-4">Payment Terms</h2>
+  <div className="space-y-3 text-sm">
+    <div className="flex justify-between py-2 border-b">
+      <span className="text-gray-600">Payment Method:</span>
+      <span className="font-medium">EFT / Card / PayFast</span>
+    </div>
+    <div className="flex justify-between py-2 border-b">
+      <span className="text-gray-600">Deposit Required:</span>
+      <span className="font-medium">50% on Acceptance</span>
+    </div>
+    <div className="flex justify-between py-2 border-b">
+      <span className="text-gray-600">Balance Due:</span>
+      <span className="font-medium">On Project Completion</span>
+    </div>
+    <div className="flex justify-between py-2">
+      <span className="text-gray-600">Quote Valid For:</span>
+      <span className="font-medium">30 Days</span>
+    </div>
+  </div>
+</div>
                       </>
                     )}
                   </div>
@@ -1663,7 +1338,11 @@ const [stampConfig, setStampConfig] = useState(null);
                       }}
                     >
                       <TemplateRenderer {...templateProps} />
-                      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                      <StampOverlay
+                        stampConfig={stampConfig}
+                        pageNumber={1}
+                        businessInfo={businessInfo}
+                      />
                     </div>
                   </div>
                 </div>
@@ -1671,23 +1350,9 @@ const [stampConfig, setStampConfig] = useState(null);
             )}
           </div>
         </div>
-      </div>
+     
 
-      {/* Print area */}
-      <div
-        id="print-area"
-        className="hidden print:block bg-white shadow-2xl origin-top"
-        style={{
-          position: "relative",
-          width: "210mm",
-          minHeight: "297mm",
-          transform: "scale(0.75)",
-          transformOrigin: "top center",
-        }}
-      >
-        <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
-      </div>
+    </div>
     </div>
   );
 };

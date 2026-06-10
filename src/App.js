@@ -14,6 +14,7 @@ import { getSubdomainFromHost } from "./utils/subdomain";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PWAInstallPrompt from "./components/Pwainstallprompt";
 import LandingPage from "./pages/LandingPage";
+import { PlanProvider } from "./pages/technology/planGating";
 import AboutPage from "./pages/AboutPage";
 import { useIsStandalone } from "./hooks/useIsStandalone";
 import ContactPage from "./pages/ContactPage";
@@ -405,7 +406,9 @@ function DashboardRoutes() {
         path="/technology"
         element={
           <ProtectedRoute>
-            <TechnologyDashboard />
+           
+        <TechnologyDashboard />
+               
           </ProtectedRoute>
         }
       />

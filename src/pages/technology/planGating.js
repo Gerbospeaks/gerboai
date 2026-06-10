@@ -1,13 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// planGating.js  –  Drop this file next to PhotographyDashboard.jsx
-// ─────────────────────────────────────────────────────────────────────────────
-//
-// USAGE
-//   1. Import the hook + modal in PhotographyDashboard.jsx (see patch below)
-//   2. Wrap every gated action with  requirePlan('growth', () => doThing())
-//   3. Render <UpgradeModal /> once anywhere inside the component tree
-//
-// ─────────────────────────────────────────────────────────────────────────────
 
 import React, {
   createContext,
