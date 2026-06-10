@@ -29,6 +29,7 @@ import {
   addDoc,
   updateDoc,
   doc,
+  where,
   getDoc,
   setDoc,
   orderBy,
@@ -311,7 +312,21 @@ const handleAddNewClient = () => {
     showStampDate: stampSettings?.showDate || false,
     stampConfig,
   };
+ useEffect(() => {
+    if (!user) return;
+    const q = query(collection(db, "projects"), where("uid", "==", user.uid));
+    getDocs(q).then((snap) =>
+      setSavedProjects(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+    );
+  }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const q = query(collection(db, "clients"), where("uid", "==", user.uid));
+    getDocs(q).then((snap) =>
+      setSavedClients(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+    );
+  }, [user]);
   // ── Effects ────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!user?.uid) return;
