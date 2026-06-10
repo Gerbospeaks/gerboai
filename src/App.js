@@ -38,6 +38,9 @@ import SolidFlooring from "./pages/flooring/SubdomainLandingPage";
 import SolidHealth from "./pages/health/SubdomainLandingPage";
 import SolidHotel from "./pages/hotel/SubdomainLandingPage";
 import SolidHVAC from "./pages/hvac/SubdomainLandingPage";
+import SolidTechnology from "./pages/technology/SubdomainLandingPage";
+import SolidUpholstery from "./pages/upholstery/SubdomainLandingPage";
+import SolidVirtual from "./pages/virtual-services/SubdomainLandingPage";
 import SolidLandscaping from "./pages/landscaping/SubdomainLandingPage";
 import SolidLegal from "./pages/legal/SubdomainLandingPage";
 import SolidLogistics from "./pages/logistics/SubdomainLandingPage";
@@ -638,6 +641,9 @@ const SUBDOMAIN_LANDING = {
   "solar-installation": SolidSolar,
   towing: SolidTowing,
   welding: SolidWelder,
+  technology: SolidTechnology,
+  upholstery: SolidUpholstery,
+  "virtual-services": SolidVirtual,
   "window-repair": SolidWindowRepair,
 };
 

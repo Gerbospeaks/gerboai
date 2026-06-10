@@ -16,7 +16,7 @@ function VapiAssistant() {
       onClick={isSessionActive ? stop : startCall}
       style={{
         position: "fixed",
-        bottom: "30px",
+        bottom: "80px",
         right: "30px",
         width: "50px",
         height: "50px",

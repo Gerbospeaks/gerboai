@@ -622,17 +622,29 @@ const css = `
 }
 
 /* Remove old floating invoices on small screens */
-@media (max-width: 900px) {
-  .lp-hero-inner {
-    grid-template-columns: 1fr;
-    text-align: center;
+@media (max-width: 768px) {
+  .lp-hero {
+    padding: 90px 20px 48px;
+    min-height: auto;
+    background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%) !important;
   }
-  .lp-hero h1,
-  .lp-hero-sub { text-align: center; }
-  .lp-hero-ctas,
-  .lp-hero-trust { justify-content: center; }
-  .lp-hero-right { display: none; }
-  .lp-hero { padding: 120px 24px 60px; }
+  .lp-hero h1 { font-size: 2.2rem; text-align: center; }
+  .lp-hero-sub { text-align: center; font-size: 0.95rem; margin: 0 auto 28px; }
+  .lp-hero-badge { font-size: 10px; }
+  .lp-hero-ctas { flex-direction: column; gap: 10px; }
+  .lp-hero-primary,
+  .lp-hero-secondary {
+    width: 100%; height: 48px;
+    justify-content: center; border-radius: 10px;
+  }
+  .lp-hero-trust { flex-direction: column; align-items: center; gap: 8px; }
+  /* Hero image below text on mobile */
+  .lp-hero-right {
+    display: block !important;
+    margin: 0 -4px;
+  }
+  .lp-hero-screen-frame { border-radius: 14px; }
+  .lp-hero-inner { gap: 28px; }
 }
   .lp-hero-screen-glow {
     position: absolute; inset: -40px;
@@ -1038,7 +1050,22 @@ const css = `
     display: flex; align-items: center; justify-content: space-between;
     font-size: 12px; color: rgba(255,255,255,.3);
   }
+/* Hide Vapi widget button text, keep icon only */
+vapi-widget::part(button-text),
+vapi-widget::part(label),
+vapi-widget [part="button-text"],
+vapi-widget [part="label"] {
+  display: none !important;
+}
 
+/* Force the button to be a square icon circle */
+vapi-widget::part(button) {
+  width: 52px !important;
+  min-width: 52px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  justify-content: center !important;
+}
   /* ════════════════════════════════════════════════
      ANIMATIONS
   ════════════════════════════════════════════════ */
@@ -1046,7 +1073,40 @@ const css = `
   @keyframes lp-shimmer { 0% { background-position:200% 0 } 100% { background-position:-200% 0 } }
   @keyframes lp-float   { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-14px) } }
   .lp-float { animation: lp-float 5s ease-in-out infinite; }
-
+/* ════════════════════════════════════════════════
+   MOBILE BOTTOM NAV (app feel)
+════════════════════════════════════════════════ */
+.lp-bottom-nav {
+  display: none;
+}
+@media (max-width: 768px) {
+  .lp-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 200;
+    background: rgba(255,255,255,.97);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 0.5px solid #e2e8f0;
+    padding: 6px 0 max(12px, env(safe-area-inset-bottom));
+  }
+  .lp-bottom-tab {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 700;
+    color: #94a3b8; cursor: pointer;
+    background: none; border: none;
+    font-family: 'Lato', sans-serif;
+    letter-spacing: .03em;
+    transition: color .15s;
+    padding: 4px 0;
+  }
+  .lp-bottom-tab.active { color: #6366f1; }
+  .lp-bottom-tab svg { width: 22px; height: 22px; }
+  /* Push page content above the nav bar */
+  .lp { padding-bottom: 64px; }
+}
   /* ════════════════════════════════════════════════
      RESPONSIVE
   ════════════════════════════════════════════════ */
@@ -1055,7 +1115,20 @@ const css = `
     .lp-footer-grid  { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 768px) {
-    .lp-nav { padding: 0 20px; }
+    .lp-nav {
+    top: 0; /* remove the 40px gap on mobile */
+    height: 56px;
+    padding: 0 16px;
+    background: rgba(255,255,255,.97) !important;
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid #e2e8f0;
+  }
+  /* Always show on mobile regardless of scroll */
+  .lp-nav.scrolled,
+  .lp-nav:not(.scrolled) {
+    background: rgba(255,255,255,.97) !important;
+    box-shadow: none;
+  }
     .lp-nav-links, .lp-nav-ctas { display: none; }
     .lp-hamburger { display: block; }
     .lp-stats-inner { grid-template-columns: repeat(2,1fr); }
@@ -1131,7 +1204,12 @@ const LandingPage = () => {
     if (usd === 0) return "Free";
     return formatPrice(usd, exchangeRate, currencyCode);
   };
+const [activeTab, setActiveTab] = useState('home');
 
+// scroll helpers
+const scrollTo = (id) => {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+};
   /* ── Calendly ── */
   useEffect(() => {
     const link = document.createElement("link");
@@ -1171,7 +1249,8 @@ const LandingPage = () => {
         widget.setAttribute("base-bg-color", "#000000");
         widget.setAttribute("accent-color", "#2a83e8");
         widget.setAttribute("position", "bottom-right");
-        widget.setAttribute("title", "TALK WITH AARON");
+        widget.setAttribute("title", "Solidflo Assistant");
+       widget.setAttribute("label", "");
         widget.setAttribute(
           "chat-first-message",
           "Hey, How can I help you today?",
@@ -2576,7 +2655,25 @@ const LandingPage = () => {
           </div>
         </footer>
       </div>
-
+{/* Bottom Nav */}
+<nav className="lp-bottom-nav">
+  {[
+    { id: 'home',         label: 'Home',      icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>, action: () => window.scrollTo({top:0,behavior:'smooth'}) },
+    { id: 'features',     label: 'Features',  icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>, action: () => scrollTo('features') },
+    { id: 'market',       label: 'Market',    icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 19h6"/></svg>, action: () => scrollTo('pricing') },
+    { id: 'faq',          label: 'FAQ',       icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>, action: () => scrollTo('faq') },
+    { id: 'start',        label: 'Start',     icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>, action: () => open('register') },
+  ].map(tab => (
+    <button
+      key={tab.id}
+      className={`lp-bottom-tab${activeTab === tab.id ? ' active' : ''}`}
+      onClick={() => { setActiveTab(tab.id); tab.action(); }}
+    >
+      {tab.icon}
+      {tab.label}
+    </button>
+  ))}
+</nav>
       <div id="vapi-widget-container" />
     </>
   );

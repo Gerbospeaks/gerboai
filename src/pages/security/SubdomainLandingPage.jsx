@@ -1,173 +1,573 @@
 
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
-
+import logo from "../../assets/img/security-logo.png";
 // ─── Smooth scroll helper ─────────────────────────────────────────────────────
 function scrollTo(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 }
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
-function Navbar({ config, onLogin, onRegister }) {
+function Navbar({ onLogin, onRegister }) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", fn);
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  // Close menu on resize to desktop
+  useEffect(() => {
+    const fn = () => { if (window.innerWidth > 768) setOpen(false); };
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
+  const links = ["features", "pricing", "testimonials", "faq"];
+
+  const handleNavLink = (id) => {
+    scrollTo(id);
+    setOpen(false);
+  };
 
   return (
     <nav
-      style={{ background: config.color, borderBottom: `1px solid rgba(255,255,255,0.08)` }}
-      className="sticky top-0 z-50"
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        background: C.ink,
+        borderBottom: `1px solid rgba(255,255,255,0.06)`,
+        transition: "box-shadow .2s",
+        boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.3)" : "none",
+      }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: 60,
+        }}
+      >
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{config.icon}</span>
-          <div>
-            <span className="text-white font-bold text-sm">SolidFlo</span>
-            <span className="text-white/40 text-xs ml-1.5">{config.label}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div
+            style={{
+              background: "transparent",
+              width: 160,
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-6">
-          {["features", "pricing", "testimonials", "faq"].map((s) => (
+        {/* Desktop links */}
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+            {links.map((s) => (
+              <button
+                key={s}
+                onClick={() => scrollTo(s)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "rgba(255,255,255,0.55)",
+                  fontSize: 14,
+                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 500,
+                  textTransform: "capitalize",
+                  transition: "color .2s",
+                }}
+                onMouseEnter={(e) => (e.target.style.color = C.white)}
+                onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.55)")}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Desktop CTA */}
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <button
-              key={s}
-              onClick={() => scrollTo(s)}
-              className="text-white/60 hover:text-white text-sm capitalize transition-colors"
+              onClick={onLogin}
+              style={{
+                background: "none",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: 8,
+                padding: "7px 18px",
+                color: "rgba(255,255,255,0.75)",
+                fontSize: 13,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
             >
-              {s}
-            </button>
-          ))}
-        </div>
-
-        {/* CTA buttons */}
-        <div className="hidden md:flex items-center gap-2">
-          <button
-            onClick={onLogin}
-            className="px-4 py-1.5 text-sm text-white/70 hover:text-white transition-colors"
-          >
-            Sign In
-          </button>
-          <button
-            onClick={onRegister}
-            className="px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors"
-            style={{ background: config.accent, color: "#fff" }}
-          >
-            {config.cta}
-          </button>
-        </div>
-
-        {/* Mobile hamburger */}
-        <button onClick={() => setOpen(!open)} className="md:hidden p-2 text-white/60 hover:text-white">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            {open ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
-          </svg>
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {open && (
-        <div style={{ background: config.color }} className="md:hidden border-t border-white/10 px-4 pb-4 pt-2 space-y-2">
-          {["features", "pricing", "testimonials", "faq"].map((s) => (
-            <button
-              key={s}
-              onClick={() => { scrollTo(s); setOpen(false); }}
-              className="block w-full text-left text-white/60 hover:text-white py-1.5 text-sm capitalize"
-            >
-              {s}
-            </button>
-          ))}
-          <div className="flex gap-2 pt-2">
-            <button onClick={onLogin} className="flex-1 py-2 text-sm text-white border border-white/20 rounded-lg hover:border-white/40 transition-colors">
               Sign In
             </button>
             <button
               onClick={onRegister}
-              className="flex-1 py-2 text-sm font-semibold rounded-lg"
-              style={{ background: config.accent, color: "#fff" }}
+              style={{
+                background: C.orange,
+                border: "none",
+                borderRadius: 8,
+                padding: "8px 20px",
+                color: C.white,
+                fontSize: 13,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(249,115,22,0.4)",
+              }}
             >
-              Sign Up Free
+              Start Free →
             </button>
+          </div>
+        )}
+
+        {/* Hamburger button (mobile only) */}
+        {isMobile && (
+          <button
+            onClick={() => setOpen(!open)}
+            style={{
+              background: "none",
+              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: 8,
+              padding: "8px 10px",
+              cursor: "pointer",
+              display: "flex",
+              flexDirection: "column",
+              gap: 5,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            aria-label="Toggle menu"
+          >
+            {/* Animated hamburger lines */}
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                style={{
+                  display: "block",
+                  width: 22,
+                  height: 2,
+                  background: C.white,
+                  borderRadius: 2,
+                  transition: "transform .2s, opacity .2s",
+                  transformOrigin: "center",
+                  transform:
+                    open && i === 0 ? "translateY(7px) rotate(45deg)"
+                    : open && i === 1 ? "scaleX(0)"
+                    : open && i === 2 ? "translateY(-7px) rotate(-45deg)"
+                    : "none",
+                  opacity: open && i === 1 ? 0 : 1,
+                }}
+              />
+            ))}
+          </button>
+        )}
+      </div>
+
+      {/* Mobile dropdown menu */}
+      {isMobile && (
+        <div
+          style={{
+            maxHeight: open ? 400 : 0,
+            overflow: "hidden",
+            transition: "max-height .3s ease",
+            background: C.ink2,
+            borderTop: open ? `1px solid rgba(255,255,255,0.07)` : "none",
+          }}
+        >
+          <div style={{ padding: "12px 24px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
+            {links.map((s) => (
+              <button
+                key={s}
+                onClick={() => handleNavLink(s)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "rgba(255,255,255,0.65)",
+                  fontSize: 16,
+                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 500,
+                  textTransform: "capitalize",
+                  padding: "12px 0",
+                  textAlign: "left",
+                  borderBottom: `1px solid rgba(255,255,255,0.06)`,
+                  transition: "color .2s",
+                }}
+                onMouseEnter={(e) => (e.target.style.color = C.white)}
+                onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.65)")}
+              >
+                {s}
+              </button>
+            ))}
+
+            {/* Mobile CTAs */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+              <button
+                onClick={() => { onLogin(); setOpen(false); }}
+                style={{
+                  background: "none",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  borderRadius: 8,
+                  padding: "11px",
+                  color: "rgba(255,255,255,0.75)",
+                  fontSize: 14,
+                  fontFamily: "'Barlow', sans-serif",
+                  cursor: "pointer",
+                }}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => { onRegister(); setOpen(false); }}
+                style={{
+                  background: C.orange,
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "12px",
+                  color: C.white,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  fontFamily: "'Barlow', sans-serif",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 12px rgba(249,115,22,0.4)",
+                }}
+              >
+                Start Free →
+              </button>
+            </div>
           </div>
         </div>
       )}
     </nav>
   );
 }
-
-// ─── Hero ─────────────────────────────────────────────────────────────────────
-function Hero({ config, onRegister }) {
+const C = {
+  ink: "#0A1628",
+  ink2: "#0F2040",
+  surface: "#F4F7FA",
+  white: "#FFFFFF",
+  blue: "#2563EB",
+  blueD: "#1D4ED8",
+  blueL: "#EFF6FF",
+  steel: "#64748B",
+  border: "#E2E8F0",
+  text: "#1E293B",
+  muted: "#64748B",
+};
+/* ─── Hero ──────────────────────────────────────────────────────────────── */
+function Hero({ onRegister }) {
   return (
     <section
-      className="relative overflow-hidden py-20 sm:py-28"
-      style={{ background: config.color }}
+      style={{
+        background: `linear-gradient(135deg, ${C.ink} 0%, ${C.ink2} 60%, #0D1A35 100%)`,
+        padding: "72px 24px 80px",
+        position: "relative",
+        overflow: "hidden",
+        minHeight: "100vh",
+      }}
     >
-      {/* Subtle grid pattern */}
+      {/* Grid texture */}
+      
+      {/* Glow */}
       <div
-        className="absolute inset-0 opacity-5"
         style={{
-          backgroundImage: `linear-gradient(${config.accent}33 1px, transparent 1px), linear-gradient(90deg, ${config.accent}33 1px, transparent 1px)`,
-          backgroundSize: "40px 40px",
+          position: "absolute",
+          top: -60,
+          right: -80,
+          width: 500,
+          height: 500,
+          borderRadius: "50%",
+          background: C.blue,
+          opacity: 0.08,
+          filter: "blur(80px)",
         }}
       />
 
-      {/* Glow blob */}
       <div
-        className="absolute -top-20 -right-20 w-96 h-96 rounded-full blur-3xl opacity-20"
-        style={{ background: config.accent }}
-      />
-
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
-        {/* Industry badge */}
-        <div
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-6"
-          style={{ background: `${config.accent}22`, color: config.accent, border: `1px solid ${config.accent}44` }}
-        >
-          <span>{config.icon}</span>
-          <span>Built for {config.label} Businesses</span>
-        </div>
-
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight mb-5">
-          {config.headline}
-        </h1>
-        <p className="text-base sm:text-xl text-white/60 leading-relaxed max-w-2xl mx-auto mb-10">
-          {config.subheadline}
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={onRegister}
-            className="px-8 py-3.5 rounded-xl font-bold text-white text-base shadow-lg transition-transform hover:scale-105"
-            style={{ background: config.accent }}
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          gap: 60,
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Left */}
+        <div style={{ flex: "1 1 420px" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: "rgba(37,99,235,0.12)",
+              border: "1px solid rgba(37,99,235,0.3)",
+              borderRadius: 99,
+              padding: "5px 14px",
+              marginBottom: 22,
+            }}
           >
-            {config.cta}
-          </button>
-          <button
-            onClick={() => scrollTo("features")}
-            className="px-8 py-3.5 rounded-xl font-semibold text-sm text-white/70 border border-white/20 hover:border-white/40 transition-colors"
-          >
-            See how it works →
-          </button>
-        </div>
-
-        {/* Trust badges */}
-        <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-white/30 text-xs">
-          {["No credit card required", "Free plan available", "Cancel anytime", "South African business"].map((t) => (
-            <span key={t} className="flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5" style={{ color: config.accent }} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              {t}
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: C.blue,
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{
+                color: "#60A5FA",
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+              }}
+            >
+              Built for Security Companies &amp; Guarding Businesses
             </span>
-          ))}
+          </div>
+
+          <h1
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(40px, 5vw, 64px)",
+              lineHeight: 1.05,
+              color: C.white,
+              margin: "0 0 20px",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            Invoice your clients.
+            <br />
+            <span style={{ color: C.blue }}>Get paid faster.</span>
+            <br />
+            Run your security business.
+          </h1>
+
+          <p
+            style={{
+              color: "rgba(255,255,255,0.55)",
+              fontSize: 17,
+              lineHeight: 1.7,
+              margin: "0 0 36px",
+              fontFamily: "'Barlow', sans-serif",
+              maxWidth: 460,
+            }}
+          >
+            SolidFlo is purpose-built for SA security companies. Create
+            professional site contracts, track officers &amp; shifts, and send
+            VAT invoices in under 60 seconds.
+          </p>
+
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+            <button
+              onClick={onRegister}
+              style={{
+                background: C.blue,
+                border: "none",
+                borderRadius: 10,
+                padding: "14px 28px",
+                color: C.white,
+                fontSize: 15,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+                boxShadow: "0 8px 24px rgba(37,99,235,0.4)",
+                transition: "transform .15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.03)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
+              Start Free — No Card Needed
+            </button>
+            <button
+              onClick={() => scrollTo("features")}
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: 10,
+                padding: "14px 24px",
+                color: "rgba(255,255,255,0.75)",
+                fontSize: 15,
+                fontWeight: 600,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
+            >
+              See How It Works →
+            </button>
+          </div>
+
+          {/* Trust row */}
+          <div style={{ display: "flex", gap: 24, marginTop: 32, flexWrap: "wrap" }}>
+            {[
+              "Free plan forever",
+              "VAT-compliant invoices",
+              "WhatsApp invoicing",
+              "SA-built & hosted",
+            ].map((t) => (
+              <span
+                key={t}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  color: "rgba(255,255,255,0.35)",
+                  fontSize: 12,
+                  fontFamily: "'Barlow', sans-serif",
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 20 20" fill={C.blue}>
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {t}
+              </span>
+            ))}
+          </div>
         </div>
+
+        {/* Right: Invoice preview */}
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
+          <div style={{ position: "relative" }}>
+            {/* Floating badge */}
+            <div
+              style={{
+                position: "absolute",
+                top: -18,
+                right: -18,
+                zIndex: 2,
+                background: "#16A34A",
+                color: C.white,
+                borderRadius: 10,
+                padding: "8px 14px",
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span>💰</span> Payment received!
+            </div>
+            <MockInvoice />
+            {/* Stats row */}
+            <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
+              {[
+                ["R 86 400", "This Month"],
+                ["34", "Active Sites"],
+                ["4.8★", "Client Rating"],
+              ].map(([v, l]) => (
+                <div
+                  key={l}
+                  style={{
+                    flex: 1,
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 10,
+                    padding: "10px 12px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 800,
+                      fontSize: 18,
+                      color: C.white,
+                    }}
+                  >
+                    {v}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "rgba(255,255,255,0.4)",
+                      fontFamily: "'Barlow', sans-serif",
+                    }}
+                  >
+                    {l}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Trusted bar */}
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "48px auto 0",
+          borderTop: "1px solid rgba(255,255,255,0.07)",
+          paddingTop: 28,
+          display: "flex",
+          gap: 40,
+          flexWrap: "wrap",
+          alignItems: "center",
+        }}
+      >
+        <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 13, fontFamily: "'Barlow', sans-serif" }}>
+          TRUSTED BY SA SECURITY COMPANIES
+        </span>
+        {[
+          "Apex Security Solutions",
+          "Securiforce Gauteng",
+          "Cape Shield Guarding",
+          "Durban Armed Response Pro",
+        ].map((b) => (
+          <span
+            key={b}
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 700,
+              fontSize: 15,
+              color: "rgba(255,255,255,0.25)",
+              letterSpacing: 0.5,
+            }}
+          >
+            {b}
+          </span>
+        ))}
       </div>
     </section>
   );
 }
-
 // ─── Features ─────────────────────────────────────────────────────────────────
 function Features({ config }) {
   return (
@@ -210,7 +610,244 @@ function Features({ config }) {
     </section>
   );
 }
+/* ─── Mock Invoice UI ───────────────────────────────────────────────────── */
+function MockInvoice() {
+  return (
+    <div
+      style={{
+        background: C.white,
+        borderRadius: 16,
+        boxShadow: "0 32px 80px rgba(10,22,40,0.35)",
+        overflow: "hidden",
+        fontFamily: "'Barlow', sans-serif",
+        border: `1px solid ${C.border}`,
+        maxWidth: 520,
+        width: "100%",
+      }}
+    >
+      {/* Chrome bar */}
+      <div
+        style={{
+          background: "#F1F5F9",
+          padding: "10px 16px",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        {["#FF5F57", "#FEBC2E", "#28C840"].map((c) => (
+          <span
+            key={c}
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: c,
+              display: "inline-block",
+            }}
+          />
+        ))}
+        <div
+          style={{
+            flex: 1,
+            background: C.white,
+            borderRadius: 6,
+            height: 22,
+            margin: "0 12px",
+            display: "flex",
+            alignItems: "center",
+            paddingLeft: 10,
+          }}
+        >
+          <span style={{ fontSize: 11, color: C.muted }}>
+            solidflo.co.za/invoices/INV-2024
+          </span>
+        </div>
+      </div>
 
+      {/* Invoice header */}
+      <div
+        style={{
+          padding: "20px 24px 16px",
+          borderBottom: `2px solid ${C.blue}`,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 6,
+              }}
+            >
+              <span style={{ fontSize: 20 }}>🛡️</span>
+              <span
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 18,
+                  color: C.ink,
+                }}
+              >
+                SolidFlo
+              </span>
+            </div>
+            <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
+              Apex Security Solutions
+            </p>
+            <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
+              Pretoria, South Africa
+            </p>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div
+              style={{
+                background: "#DCFCE7",
+                color: "#16A34A",
+                fontSize: 11,
+                fontWeight: 700,
+                padding: "3px 10px",
+                borderRadius: 99,
+                marginBottom: 6,
+              }}
+            >
+              PAID
+            </div>
+            <p
+              style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 800,
+                fontSize: 20,
+                color: C.ink,
+                margin: 0,
+              }}
+            >
+              INV-0117
+            </p>
+            <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
+              Issued 28 Mar 2025
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Line items */}
+      <div style={{ padding: "0 24px" }}>
+        <table
+          style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}
+        >
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+              {["Description", "Qty", "Unit Price", "Total"].map((h) => (
+                <th
+                  key={h}
+                  style={{
+                    padding: "10px 0 8px",
+                    color: C.muted,
+                    fontWeight: 600,
+                    textAlign: h === "Description" ? "left" : "right",
+                    fontSize: 11,
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              {
+                desc: "Armed Response — Monthly Retainer",
+                qty: 1,
+                unit: "R2 800.00",
+                total: "R2 800.00",
+              },
+              {
+                desc: "Grade C Officer (Night Shift, 30 days)",
+                qty: 1,
+                unit: "R7 200.00",
+                total: "R7 200.00",
+              },
+              {
+                desc: "CCTV Monitoring — Remote 24/7",
+                qty: 1,
+                unit: "R1 500.00",
+                total: "R1 500.00",
+              },
+              {
+                desc: "Patrol Vehicle — Weekly Site Visit",
+                qty: 4,
+                unit: "R350.00",
+                total: "R1 400.00",
+              },
+            ].map((r, i) => (
+              <tr key={i} style={{ borderBottom: `1px solid ${C.border}` }}>
+                <td style={{ padding: "9px 0", color: C.text }}>{r.desc}</td>
+                <td style={{ padding: "9px 0", textAlign: "right", color: C.muted }}>
+                  {r.qty}
+                </td>
+                <td style={{ padding: "9px 0", textAlign: "right", color: C.muted }}>
+                  {r.unit}
+                </td>
+                <td style={{ padding: "9px 0", textAlign: "right", fontWeight: 600, color: C.ink }}>
+                  {r.total}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Totals */}
+      <div
+        style={{
+          padding: "12px 24px 20px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: 4,
+        }}
+      >
+        {[
+          ["Subtotal", "R12 900.00"],
+          ["VAT (15%)", "R1 935.00"],
+        ].map(([l, v]) => (
+          <div key={l} style={{ display: "flex", gap: 32, fontSize: 12 }}>
+            <span style={{ color: C.muted }}>{l}</span>
+            <span style={{ color: C.text, minWidth: 80, textAlign: "right" }}>
+              {v}
+            </span>
+          </div>
+        ))}
+        <div
+          style={{
+            display: "flex",
+            gap: 32,
+            background: C.ink,
+            borderRadius: 8,
+            padding: "6px 14px",
+            marginTop: 6,
+          }}
+        >
+          <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600 }}>
+            Total Due
+          </span>
+          <span style={{ color: C.white, fontWeight: 800, fontSize: 15, minWidth: 80, textAlign: "right" }}>
+            R14 835.00
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
 // ─── Pricing ──────────────────────────────────────────────────────────────────
 function Pricing({ config, onRegister }) {
   return (
