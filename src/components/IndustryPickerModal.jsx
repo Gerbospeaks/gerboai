@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import ReactDOM from "react-dom";
 import { dashboards } from "../config/dashboardConfig";
 import { X, Search, ArrowRight, Check, ChevronDown } from "lucide-react";
@@ -264,28 +264,64 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
-  const updateDropdownPosition = () => {
+  const updateDropdownPosition = useCallback(() => {
     if (!inputRef.current) return;
     const rect = inputRef.current.getBoundingClientRect();
-    setDropdownStyle({
-      position: "fixed",
-      left: rect.left,
-      width: rect.width,
-      bottom: window.innerHeight - rect.top + 3,
-      zIndex: 9999,
-    });
-  };
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const dropdownH = Math.min(230, 38 * 6); // approx max height
+    const isMobile = window.innerWidth < 540;
+
+    // Place above if not enough room below
+    const placeAbove = spaceBelow < dropdownH && spaceAbove > spaceBelow;
+
+    if (isMobile) {
+      setDropdownStyle({
+        position: "fixed",
+        left: 8,
+        right: 8,
+        zIndex: 9999,
+        ...(placeAbove
+          ? { bottom: window.innerHeight - rect.top + 3 }
+          : { top: rect.bottom + 3 }),
+      });
+    } else {
+      setDropdownStyle({
+        position: "fixed",
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
+        ...(placeAbove
+          ? { bottom: window.innerHeight - rect.top + 3 }
+          : { top: rect.bottom + 3 }),
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    updateDropdownPosition();
+    window.addEventListener("scroll", updateDropdownPosition, true);
+    window.addEventListener("resize", updateDropdownPosition);
+    return () => {
+      window.removeEventListener("scroll", updateDropdownPosition, true);
+      window.removeEventListener("resize", updateDropdownPosition);
+    };
+  }, [isOpen, updateDropdownPosition]);
 
   const filtered = dashboards.filter(
     (d) =>
       d.name.toLowerCase().includes(query.toLowerCase()) ||
-      d.description?.toLowerCase().includes(query.toLowerCase()),
+      d.description?.toLowerCase().includes(query.toLowerCase())
   );
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target) &&
+        !inputRef.current?.contains(e.target)
+      ) {
         setIsOpen(false);
         setQuery("");
       }
@@ -306,13 +342,10 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
     if (!selected) return;
     const industry = dashboards.find((d) => d.id === selected);
     if (!industry) return;
-
     onClose();
-
     const isDev =
       window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1";
-
     if (isDev) {
       window.location.href = `http://localhost:${window.location.port}?industry=${industry.id}&mode=${intent}`;
     } else {
@@ -329,7 +362,6 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
 
   return (
     <>
-      {/* Backdrop */}
       <div
         onClick={onClose}
         style={{
@@ -341,7 +373,6 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
         }}
       />
 
-      {/* Modal */}
       <div
         style={{
           position: "fixed",
@@ -356,12 +387,13 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
           display: "flex",
           flexDirection: "column",
           border: Z.border,
-          overflow: "hidden",
+          // ✅ overflow: visible so dropdown escapes the modal bounds
+          overflow: "visible",
           boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
           fontFamily: Z.fontFamily,
         }}
       >
-        {/* ── Header ── */}
+        {/* Header — needs overflow:hidden to clip the border-radius */}
         <div
           style={{
             padding: "18px 20px 14px",
@@ -369,6 +401,10 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "space-between",
+            borderRadius: `${Z.radius}px ${Z.radius}px 0 0`,
+            background: "#fff",
+            // Clip just the top corners
+            overflow: "hidden",
           }}
         >
           <div>
@@ -407,9 +443,8 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
           </button>
         </div>
 
-        {/* ── Body ── */}
-        <div style={{ padding: "16px 20px 20px", flex: 1 }}>
-          {/* Field label */}
+        {/* Body */}
+        <div style={{ padding: "16px 20px 20px", flex: 1, background: "#fff" }}>
           <label
             style={{
               fontSize: 12,
@@ -422,80 +457,76 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
             Industry <span style={{ color: Z.danger }}>*</span>
           </label>
 
-          {/* Dropdown wrapper */}
-          <div ref={dropdownRef} style={{ position: "relative" }}>
-            {/* Trigger input */}
-            <div style={{ position: "relative" }}>
-              <Search
-                size={14}
-                style={{
-                  position: "absolute",
-                  left: 10,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: Z.textMuted,
-                  pointerEvents: "none",
-                }}
-              />
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Search or select industry..."
-                value={inputDisplayValue}
-                readOnly={!isOpen}
-                onClick={() => {
-                  setIsOpen(true);
-                  setQuery("");
-                }}
-                onChange={(e) => setQuery(e.target.value)}
-                style={{
-                  width: "100%",
-                  height: Z.inputH,
-                  padding: "0 32px",
-                  border: isOpen ? `1px solid ${Z.blue}` : Z.border,
-                  borderRadius: Z.radiusSm,
-                  fontSize: 13,
-                  color: Z.textPrimary,
-                  background: "#fff",
-                  outline: "none",
-                  boxSizing: "border-box",
-                  cursor: "pointer",
-                  boxShadow: isOpen ? Z.blueFocusRing : "none",
-                  transition: "border-color 0.12s, box-shadow 0.12s",
-                }}
-              />
-              <ChevronDown
-                size={14}
-                onClick={() => {
-                  setIsOpen((o) => !o);
-                  if (!isOpen) setQuery("");
-                }}
-                style={{
-                  position: "absolute",
-                  right: 10,
-                  top: "50%",
-                  transform: `translateY(-50%) rotate(${isOpen ? "180deg" : "0deg"})`,
-                  color: Z.textMuted,
-                  transition: "transform 0.15s",
-                  cursor: "pointer",
-                }}
-              />
-            </div>
+          {/* Input trigger — NOT inside dropdownRef so outside-click works correctly */}
+          <div style={{ position: "relative" }}>
+            <Search
+              size={14}
+              style={{
+                position: "absolute",
+                left: 10,
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: Z.textMuted,
+                pointerEvents: "none",
+              }}
+            />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search or select industry..."
+              value={inputDisplayValue}
+              readOnly={!isOpen}
+              onClick={() => {
+                setIsOpen(true);
+                setQuery("");
+              }}
+              onChange={(e) => setQuery(e.target.value)}
+              style={{
+                width: "100%",
+                height: Z.inputH,
+                padding: "0 32px",
+                border: isOpen ? `1px solid ${Z.blue}` : Z.border,
+                borderRadius: Z.radiusSm,
+                fontSize: 13,
+                color: Z.textPrimary,
+                background: "#fff",
+                outline: "none",
+                boxSizing: "border-box",
+                cursor: "pointer",
+                boxShadow: isOpen ? Z.blueFocusRing : "none",
+                transition: "border-color 0.12s, box-shadow 0.12s",
+              }}
+            />
+            <ChevronDown
+              size={14}
+              onClick={() => {
+                setIsOpen((o) => !o);
+                if (!isOpen) setQuery("");
+              }}
+              style={{
+                position: "absolute",
+                right: 10,
+                top: "50%",
+                transform: `translateY(-50%) rotate(${isOpen ? "180deg" : "0deg"})`,
+                color: Z.textMuted,
+                transition: "transform 0.15s",
+                cursor: "pointer",
+              }}
+            />
+          </div>
 
-            {/* Dropdown list */}
-            {isOpen && (
+          {/* ✅ Dropdown rendered in a portal, positioned via fixed coords */}
+          {isOpen &&
+            ReactDOM.createPortal(
               <div
+                ref={dropdownRef}
                 style={{
-                  position: "absolute",
-                  top: "calc(100% + 3px)",
-                  left: 0,
-                  right: 0,
+                  ...dropdownStyle,
                   background: "#fff",
                   border: Z.border,
                   borderRadius: Z.radiusSm,
                   maxHeight: 230,
                   overflowY: "auto",
-                  zIndex: 950,
                   boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
                 }}
               >
@@ -576,12 +607,12 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
                     );
                   })
                 )}
-              </div>
+              </div>,
+              document.body
             )}
-          </div>
         </div>
 
-        {/* ── Footer ── */}
+        {/* Footer */}
         <div
           style={{
             padding: "12px 20px",
@@ -590,6 +621,7 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
             justifyContent: "flex-end",
             gap: 8,
             background: Z.footerBg,
+            borderRadius: `0 0 ${Z.radius}px ${Z.radius}px`,
           }}
         >
           <button

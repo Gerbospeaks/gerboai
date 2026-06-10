@@ -1246,8 +1246,8 @@ const scrollTo = (id) => {
         );
         widget.setAttribute("mode", "chat");
         widget.setAttribute("theme", "dark");
-        widget.setAttribute("base-bg-color", "#000000");
-        widget.setAttribute("accent-color", "#2a83e8");
+        widget.setAttribute("base-bg-color", "#aae6e1");
+        widget.setAttribute("accent-color", "#000000");
         widget.setAttribute("position", "bottom-right");
         widget.setAttribute("title", "Solidflo Assistant");
        widget.setAttribute("label", "");
