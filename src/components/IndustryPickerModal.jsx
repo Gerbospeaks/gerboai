@@ -1,6 +1,5 @@
-
-import React, { useState, useMemo, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
 import { dashboards } from "../config/dashboardConfig";
 import { X, Search, ArrowRight, Check, ChevronDown } from "lucide-react";
 
@@ -171,21 +170,21 @@ export const INDUSTRIES = [
   {
     id: "technology",
     label: "Technology",
-    icon: "�",
+    icon: "💻",
     desc: "IT services & software licensing",
     subdomain: "technology",
   },
   {
     id: "upholstery",
     label: "Upholstery",
-    icon: "�️",
+    icon: "🪑",
     desc: "Furniture repair & customization",
     subdomain: "upholstery",
   },
   {
     id: "virtual-services",
     label: "Virtual Services",
-    icon: "�",
+    icon: "🖥️",
     desc: "Remote support & online consultations",
     subdomain: "virtual-services",
   },
@@ -219,30 +218,71 @@ export const INDUSTRIES = [
   },
 ];
 
-function getSubdomainUrl(subdomain) {
-  const isDev =
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1";
+// ─── Zoho-style tokens ────────────────────────────────────────────────────────
+const Z = {
+  radius: 6,
+  radiusSm: 4,
+  blue: "#1a5ec8",
+  blueHover: "#1550b0",
+  blueFocusRing: "0 0 0 2px rgba(26,94,200,0.18)",
+  blueSelectedBg: "#eef3ff",
+  blueSelectedText: "#1a5ec8",
+  border: "1px solid #d1d5db",
+  borderLight: "1px solid #e5e7eb",
+  footerBg: "#f9fafb",
+  inputH: 34,
+  btnH: 32,
+  fontFamily: "'Zoho Puvi', 'DM Sans', -apple-system, sans-serif",
+  textPrimary: "#111827",
+  textSecondary: "#6b7280",
+  textMuted: "#9ca3af",
+  danger: "#e24b4a",
+  disabled: "#a0aec0",
+};
 
-  if (isDev) {
-    return `http://localhost:${window.location.port}?industry=${subdomain}`;
-  }
-
-  const protocol = window.location.protocol; // https:
-  return `${protocol}//${subdomain}.${BASE_DOMAIN}`;
-}
+// ─── Shared button base ───────────────────────────────────────────────────────
+const btnBase = {
+  height: Z.btnH,
+  padding: "0 16px",
+  borderRadius: Z.radiusSm,
+  fontSize: 13,
+  fontWeight: 500,
+  fontFamily: Z.fontFamily,
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 6,
+  border: "none",
+  transition: "background 0.12s",
+};
 
 export default function IndustryPickerModal({ onClose, intent = "register" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("");
   const [query, setQuery] = useState("");
+  const [dropdownStyle, setDropdownStyle] = useState({});
   const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const updateDropdownPosition = () => {
+    if (!inputRef.current) return;
+    const rect = inputRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: "fixed",
+      left: rect.left,
+      width: rect.width,
+      bottom: window.innerHeight - rect.top + 3,
+      zIndex: 9999,
+    });
+  };
 
   const filtered = dashboards.filter(
     (d) =>
       d.name.toLowerCase().includes(query.toLowerCase()) ||
       d.description?.toLowerCase().includes(query.toLowerCase()),
   );
+
+  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -253,7 +293,14 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
   const selectedInfo = dashboards.find((d) => d.id === selected);
+
+  const handleSelect = (id) => {
+    setSelected(id);
+    setIsOpen(false);
+    setQuery("");
+  };
 
   const handleContinue = () => {
     if (!selected) return;
@@ -267,18 +314,19 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
       window.location.hostname === "127.0.0.1";
 
     if (isDev) {
-      // Dev: stay on localhost, pass industry + mode as query params
       window.location.href = `http://localhost:${window.location.port}?industry=${industry.id}&mode=${intent}`;
     } else {
       const protocol = window.location.protocol;
       if (intent === "login") {
         window.location.href = `${protocol}//${industry.id}.solidflo.co.za/login`;
       } else {
-        // Pass dashboardId in the URL — localStorage doesn't work cross-origin
         window.location.href = `${protocol}//${industry.id}.solidflo.co.za/register?industry=${industry.id}`;
       }
     }
   };
+
+  const inputDisplayValue = isOpen ? query : (selectedInfo?.name ?? "");
+
   return (
     <>
       {/* Backdrop */}
@@ -287,9 +335,9 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
         style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(0,0,0,0.55)",
+          background: "rgba(0,0,0,0.35)",
           zIndex: 900,
-          backdropFilter: "blur(4px)",
+          backdropFilter: "blur(2px)",
         }}
       />
 
@@ -299,209 +347,261 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
           position: "fixed",
           top: "50%",
           left: "50%",
-          transform: "translate(-50%,-50%)",
+          transform: "translate(-50%, -50%)",
           zIndex: 910,
           background: "#fff",
-          borderRadius: 16,
-          padding: "32px 28px 28px",
-          width: "min(92vw, 680px)",
+          borderRadius: Z.radius,
+          width: "min(92vw, 520px)",
           maxHeight: "85vh",
           display: "flex",
           flexDirection: "column",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.22)",
-          fontFamily: "'DM Sans', sans-serif",
+          border: Z.border,
+          overflow: "hidden",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+          fontFamily: Z.fontFamily,
         }}
       >
-        {/* Header */}
+        {/* ── Header ── */}
         <div
           style={{
+            padding: "18px 20px 14px",
+            borderBottom: Z.borderLight,
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "space-between",
-            marginBottom: 20,
           }}
         >
           <div>
             <h2
               style={{
-                fontSize: 22,
-                fontWeight: 700,
-                color: "#111827",
+                fontSize: 16,
+                fontWeight: 600,
+                color: Z.textPrimary,
                 margin: 0,
-                marginBottom: 6,
+                marginBottom: 3,
               }}
             >
               Choose your industry
             </h2>
-            <p style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>
+            <p style={{ fontSize: 12, color: Z.textSecondary, margin: 0 }}>
               We'll tailor your dashboard to match your business type.
             </p>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             style={{
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "#9ca3af",
+              color: Z.textMuted,
               padding: 4,
               marginLeft: 12,
               flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              borderRadius: Z.radiusSm,
             }}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
-        <div
-          ref={dropdownRef}
-          style={{ position: "relative", marginBottom: 16 }}
-        >
-          {/* Search/trigger input */}
-          <div style={{ position: "relative" }}>
-            <Search
-              size={15}
-              style={{
-                position: "absolute",
-                left: 12,
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "#9ca3af",
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Search industry..."
-              value={isOpen ? query : (selectedInfo?.label ?? "")}
-              readOnly={!isOpen}
-              onClick={() => {
-                setIsOpen(true);
-                setQuery("");
-              }}
-              onChange={(e) => setQuery(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px 36px 10px 36px",
-                border: "1px solid #d1d5db",
-                borderRadius: 8,
-                fontSize: 13,
-                outline: "none",
-                boxSizing: "border-box",
-                color: "#111827",
-                background:"#ffffff",
-                cursor: "pointer",
-              }}
-            />
-            <ChevronDown
-              size={15}
-              onClick={() => setIsOpen((o) => !o)}
-              style={{
-                position: "absolute",
-                right: 12,
-                top: "50%",
-                transform: `translateY(-50%) rotate(${isOpen ? "180deg" : "0deg"})`,
-                color: "#9ca3af",
-                transition: "transform 0.2s",
-                cursor: "pointer",
-              }}
-            />
-          </div>
+        {/* ── Body ── */}
+        <div style={{ padding: "16px 20px 20px", flex: 1 }}>
+          {/* Field label */}
+          <label
+            style={{
+              fontSize: 12,
+              fontWeight: 500,
+              color: Z.textSecondary,
+              display: "block",
+              marginBottom: 6,
+            }}
+          >
+            Industry <span style={{ color: Z.danger }}>*</span>
+          </label>
 
-          {/* Dropdown list */}
-          {isOpen && (
-            <div
-              style={{
-                position: "absolute",
-                top: "calc(100% + 4px)",
-                left: 0,
-                right: 0,
-                background: "#ffffff",
-                border: "1px solid #d1d5db",
-                borderRadius: 8,
-                maxHeight: 240,
-                overflowY: "auto",
-                zIndex: 950,
-                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-              }}
-            >
-              {filtered.length === 0 ? (
-                <p
-                  style={{
-                    padding: "20px",
-                    textAlign: "center",
-                    fontSize: 13,
-                    color: "#000000",
-                  }}
-                >
-                  No results for "{query}"
-                </p>
-              ) : (
-                filtered.map((d) => (
-                  <div
-                    key={d.id}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      setSelected(d.id);
-                      setIsOpen(false);
-                      setQuery("");
-                    }}
+          {/* Dropdown wrapper */}
+          <div ref={dropdownRef} style={{ position: "relative" }}>
+            {/* Trigger input */}
+            <div style={{ position: "relative" }}>
+              <Search
+                size={14}
+                style={{
+                  position: "absolute",
+                  left: 10,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: Z.textMuted,
+                  pointerEvents: "none",
+                }}
+              />
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Search or select industry..."
+                value={inputDisplayValue}
+                readOnly={!isOpen}
+                onClick={() => {
+                  setIsOpen(true);
+                  setQuery("");
+                }}
+                onChange={(e) => setQuery(e.target.value)}
+                style={{
+                  width: "100%",
+                  height: Z.inputH,
+                  padding: "0 32px",
+                  border: isOpen ? `1px solid ${Z.blue}` : Z.border,
+                  borderRadius: Z.radiusSm,
+                  fontSize: 13,
+                  color: Z.textPrimary,
+                  background: "#fff",
+                  outline: "none",
+                  boxSizing: "border-box",
+                  cursor: "pointer",
+                  boxShadow: isOpen ? Z.blueFocusRing : "none",
+                  transition: "border-color 0.12s, box-shadow 0.12s",
+                }}
+              />
+              <ChevronDown
+                size={14}
+                onClick={() => {
+                  setIsOpen((o) => !o);
+                  if (!isOpen) setQuery("");
+                }}
+                style={{
+                  position: "absolute",
+                  right: 10,
+                  top: "50%",
+                  transform: `translateY(-50%) rotate(${isOpen ? "180deg" : "0deg"})`,
+                  color: Z.textMuted,
+                  transition: "transform 0.15s",
+                  cursor: "pointer",
+                }}
+              />
+            </div>
+
+            {/* Dropdown list */}
+            {isOpen && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 3px)",
+                  left: 0,
+                  right: 0,
+                  background: "#fff",
+                  border: Z.border,
+                  borderRadius: Z.radiusSm,
+                  maxHeight: 230,
+                  overflowY: "auto",
+                  zIndex: 950,
+                  boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
+                }}
+              >
+                {filtered.length === 0 ? (
+                  <p
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      padding: "10px 14px",
-                      cursor: "pointer",
-                      borderBottom: "1px solid #f3f4f6",
-                      background: selected === d.id ? "#ffffff" : "#ffffff", // ← force white bg
+                      padding: "18px",
+                      textAlign: "center",
+                      fontSize: 13,
+                      color: Z.textSecondary,
+                      margin: 0,
                     }}
                   >
-                    <span style={{ fontSize: 18 }}></span>
-                    <div>
+                    No results for "{query}"
+                  </p>
+                ) : (
+                  filtered.map((d) => {
+                    const isSelected = selected === d.id;
+                    return (
                       <div
+                        key={d.id}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleSelect(d.id);
+                        }}
                         style={{
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: selected === d.id ? "#1655e0" : "#111827",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          padding: "8px 12px",
+                          cursor: "pointer",
+                          borderBottom: "0.5px solid #f3f4f6",
+                          background: isSelected ? Z.blueSelectedBg : "#fff",
+                          transition: "background 0.1s",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected)
+                            e.currentTarget.style.background = "#f5f7ff";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = isSelected
+                            ? Z.blueSelectedBg
+                            : "#fff";
                         }}
                       >
-                        {" "}
-                        {/* ← force dark text */}
-                        {d.name}
+                        <div style={{ flex: 1 }}>
+                          <div
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 500,
+                              color: isSelected
+                                ? Z.blueSelectedText
+                                : Z.textPrimary,
+                            }}
+                          >
+                            {d.name}
+                          </div>
+                          {d.description && (
+                            <div
+                              style={{
+                                fontSize: 11,
+                                color: Z.textMuted,
+                                marginTop: 1,
+                              }}
+                            >
+                              {d.description}
+                            </div>
+                          )}
+                        </div>
+                        {isSelected && (
+                          <Check
+                            size={13}
+                            color={Z.blue}
+                            style={{ flexShrink: 0 }}
+                          />
+                        )}
                       </div>
-                      <div style={{ fontSize: 12, color: "#000000" }}>
-                       
-                      </div>{" "}
-                      {/* ← force gray text */}
-                    </div>
-                    {selected === d.id && (
-                      <Check
-                        size={14}
-                        color="#1655e0"
-                        style={{ marginLeft: "auto" }}
-                      />
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          )}
+                    );
+                  })
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Footer */}
-        <div style={{ display: "flex", gap: 10 }}>
+        {/* ── Footer ── */}
+        <div
+          style={{
+            padding: "12px 20px",
+            borderTop: Z.borderLight,
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 8,
+            background: Z.footerBg,
+          }}
+        >
           <button
             onClick={onClose}
             style={{
-              padding: "12px 20px",
-              border: "1px solid #d1d5db",
-              borderRadius: 10,
-              background: "none",
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#374151",
-              fontFamily: "'DM Sans', sans-serif",
+              ...btnBase,
+              background: "#fff",
+              border: Z.border,
+              color: Z.textSecondary,
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f4f6")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
           >
             Cancel
           </button>
@@ -509,26 +609,24 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
             onClick={handleContinue}
             disabled={!selected}
             style={{
-              flex: 1,
-              padding: "12px 20px",
-              background: selected ? "#1655e0" : "#a0aec0",
+              ...btnBase,
+              background: selected ? Z.blue : Z.disabled,
               color: "#fff",
-              border: "none",
-              borderRadius: 10,
               cursor: selected ? "pointer" : "not-allowed",
-              fontSize: 13,
-              fontWeight: 700,
-              fontFamily: "'DM Sans', sans-serif",
-              display: "flex",
-              alignItems: "center",
+              minWidth: 140,
               justifyContent: "center",
-              gap: 6,
-              transition: "background 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              if (selected) e.currentTarget.style.background = Z.blueHover;
+            }}
+            onMouseLeave={(e) => {
+              if (selected) e.currentTarget.style.background = Z.blue;
             }}
           >
             {selected ? (
               <>
-                Continue as {selectedInfo?.name} <ArrowRight size={14} />
+                Continue as {selectedInfo?.name}
+                <ArrowRight size={13} />
               </>
             ) : (
               "Select an Industry"

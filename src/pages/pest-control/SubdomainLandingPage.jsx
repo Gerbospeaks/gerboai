@@ -617,16 +617,7 @@ function Hero({ onRegister }) {
         }}
       />
 
-      {/* Grid lines */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage: `linear-gradient(rgba(58,125,68,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(58,125,68,0.05) 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-          pointerEvents: "none",
-        }}
-      />
+    
 
       <div
         style={{

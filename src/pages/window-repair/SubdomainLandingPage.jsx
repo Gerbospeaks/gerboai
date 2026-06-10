@@ -1,168 +1,873 @@
-
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
+import heroVideo from "../../assets/videos/education.mp4";
+import logo from "../../assets/img/windowrepair-logo.png"; 
+const fontStyle = `
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
+`;
 
-// ─── Smooth scroll helper ─────────────────────────────────────────────────────
+const C = {
+  ink: "#0D1B2A",
+  ink2: "#1B2E42",
+  surface: "#F4F7FA",
+  white: "#FFFFFF",
+  steel: "#64748B",
+  border: "#E2E8F0",
+  text: "#1E293B",
+  muted: "#64748B",
+};
+
 function scrollTo(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+}
+function MockInvoice({ config }) {
+  return (
+    <div
+      style={{
+        background: C.white,
+        borderRadius: 16,
+        boxShadow: "0 32px 80px rgba(13,27,42,0.22)",
+        overflow: "hidden",
+        fontFamily: "'Barlow', sans-serif",
+        border: `1px solid ${C.border}`,
+        maxWidth: 520,
+        width: "100%",
+      }}
+    >
+      {/* Chrome bar */}
+      <div
+        style={{
+          background: "#F1F5F9",
+          padding: "10px 16px",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        {["#FF5F57", "#FEBC2E", "#28C840"].map((c) => (
+          <span
+            key={c}
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: c,
+              display: "inline-block",
+            }}
+          />
+        ))}
+        <div
+          style={{
+            flex: 1,
+            background: C.white,
+            borderRadius: 6,
+            height: 22,
+            margin: "0 12px",
+            display: "flex",
+            alignItems: "center",
+            paddingLeft: 10,
+          }}
+        >
+          <span style={{ fontSize: 11, color: C.muted }}>
+            solidflo.co.za/jobs/INV-2024
+          </span>
+        </div>
+      </div>
+
+      {/* Invoice header */}
+      <div
+        style={{
+          padding: "20px 24px 16px",
+          borderBottom: `2px solid ${config.accent}`,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 6,
+              }}
+            >
+              <span style={{ fontSize: 20 }}>{config.icon}</span>
+              <span
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 18,
+                  color: C.ink,
+                }}
+              >
+                SolidFlo
+              </span>
+            </div>
+            <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
+              {config.label} Business
+            </p>
+            <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
+              South Africa
+            </p>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div
+              style={{
+                background: "#DCFCE7",
+                color: "#16A34A",
+                fontSize: 11,
+                fontWeight: 700,
+                padding: "3px 10px",
+                borderRadius: 99,
+                marginBottom: 6,
+              }}
+            >
+              PAID
+            </div>
+            <p
+              style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 800,
+                fontSize: 20,
+                color: C.ink,
+                margin: 0,
+              }}
+            >
+              INV-0086
+            </p>
+            <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
+              Issued 28 Mar 2025
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Line items */}
+      <div style={{ padding: "0 24px" }}>
+        <table
+          style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}
+        >
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+              {["Description", "Qty", "Unit Price", "Total"].map((h) => (
+                <th
+                  key={h}
+                  style={{
+                    padding: "10px 0 8px",
+                    color: C.muted,
+                    fontWeight: 600,
+                    textAlign: h === "Description" ? "left" : "right",
+                    fontSize: 11,
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              {
+                desc: "Labour – Glass Removal & Fit (2 hrs)",
+                qty: 1,
+                unit: "R600.00",
+                total: "R600.00",
+              },
+              {
+                desc: "Windscreen (OEM)",
+                qty: 1,
+                unit: "R2 450.00",
+                total: "R2 450.00",
+              },
+              {
+                desc: "Rubber Seal Kit",
+                qty: 1,
+                unit: "R180.00",
+                total: "R180.00",
+              },
+              {
+                desc: "ADAS Recalibration",
+                qty: 1,
+                unit: "R750.00",
+                total: "R750.00",
+              },
+            ].map((r, i) => (
+              <tr key={i} style={{ borderBottom: `1px solid ${C.border}` }}>
+                <td style={{ padding: "9px 0", color: C.text }}>{r.desc}</td>
+                <td
+                  style={{
+                    padding: "9px 0",
+                    textAlign: "right",
+                    color: C.muted,
+                  }}
+                >
+                  {r.qty}
+                </td>
+                <td
+                  style={{
+                    padding: "9px 0",
+                    textAlign: "right",
+                    color: C.muted,
+                  }}
+                >
+                  {r.unit}
+                </td>
+                <td
+                  style={{
+                    padding: "9px 0",
+                    textAlign: "right",
+                    fontWeight: 600,
+                    color: C.ink,
+                  }}
+                >
+                  {r.total}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Totals */}
+      <div
+        style={{
+          padding: "12px 24px 20px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: 4,
+        }}
+      >
+        {[
+          ["Subtotal", "R3 980.00"],
+          ["VAT (15%)", "R597.00"],
+        ].map(([l, v]) => (
+          <div key={l} style={{ display: "flex", gap: 32, fontSize: 12 }}>
+            <span style={{ color: C.muted }}>{l}</span>
+            <span style={{ color: C.text, minWidth: 80, textAlign: "right" }}>
+              {v}
+            </span>
+          </div>
+        ))}
+        <div
+          style={{
+            display: "flex",
+            gap: 32,
+            background: C.ink,
+            borderRadius: 8,
+            padding: "6px 14px",
+            marginTop: 6,
+          }}
+        >
+          <span
+            style={{
+              color: "rgba(255,255,255,0.7)",
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+          >
+            Total Due
+          </span>
+          <span
+            style={{
+              color: C.white,
+              fontWeight: 800,
+              fontSize: 15,
+              minWidth: 80,
+              textAlign: "right",
+            }}
+          >
+            R4 577.00
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 function Navbar({ config, onLogin, onRegister }) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 768) setOpen(false);
+    };
+    window.addEventListener("scroll", onScroll);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  const links = ["features", "pricing", "testimonials", "faq"];
 
   return (
     <nav
-      style={{ background: config.color, borderBottom: `1px solid rgba(255,255,255,0.08)` }}
-      className="sticky top-0 z-50"
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        background: C.ink,
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        transition: "box-shadow .2s",
+        boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.3)" : "none",
+      }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{config.icon}</span>
-          <div>
-            <span className="text-white font-bold text-sm">SolidFlo</span>
-            <span className="text-white/40 text-xs ml-1.5">{config.label}</span>
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: 60,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+         
+          <div
+            style={{
+              background: "transparent",
+              width: 120,
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
+       
         </div>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-6">
-          {["features", "pricing", "testimonials", "faq"].map((s) => (
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 28 }}>
+            {links.map((s) => (
+              <button
+                key={s}
+                onClick={() => scrollTo(s)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "rgba(255,255,255,0.55)",
+                  fontSize: 14,
+                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 500,
+                  textTransform: "capitalize",
+                }}
+                onMouseEnter={(e) => (e.target.style.color = C.white)}
+                onMouseLeave={(e) =>
+                  (e.target.style.color = "rgba(255,255,255,0.55)")
+                }
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 10 }}>
             <button
-              key={s}
-              onClick={() => scrollTo(s)}
-              className="text-white/60 hover:text-white text-sm capitalize transition-colors"
+              onClick={onLogin}
+              style={{
+                background: "none",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: 8,
+                padding: "7px 18px",
+                color: "rgba(255,255,255,0.75)",
+                fontSize: 13,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
             >
-              {s}
-            </button>
-          ))}
-        </div>
-
-        {/* CTA buttons */}
-        <div className="hidden md:flex items-center gap-2">
-          <button
-            onClick={onLogin}
-            className="px-4 py-1.5 text-sm text-white/70 hover:text-white transition-colors"
-          >
-            Sign In
-          </button>
-          <button
-            onClick={onRegister}
-            className="px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors"
-            style={{ background: config.accent, color: "#fff" }}
-          >
-            {config.cta}
-          </button>
-        </div>
-
-        {/* Mobile hamburger */}
-        <button onClick={() => setOpen(!open)} className="md:hidden p-2 text-white/60 hover:text-white">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            {open ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
-          </svg>
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {open && (
-        <div style={{ background: config.color }} className="md:hidden border-t border-white/10 px-4 pb-4 pt-2 space-y-2">
-          {["features", "pricing", "testimonials", "faq"].map((s) => (
-            <button
-              key={s}
-              onClick={() => { scrollTo(s); setOpen(false); }}
-              className="block w-full text-left text-white/60 hover:text-white py-1.5 text-sm capitalize"
-            >
-              {s}
-            </button>
-          ))}
-          <div className="flex gap-2 pt-2">
-            <button onClick={onLogin} className="flex-1 py-2 text-sm text-white border border-white/20 rounded-lg hover:border-white/40 transition-colors">
               Sign In
             </button>
             <button
               onClick={onRegister}
-              className="flex-1 py-2 text-sm font-semibold rounded-lg"
-              style={{ background: config.accent, color: "#fff" }}
+              style={{
+                background: config.accent,
+                border: "none",
+                borderRadius: 8,
+                padding: "8px 20px",
+                color: C.white,
+                fontSize: 13,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
             >
-              Sign Up Free
+              {config.cta}
             </button>
+          </div>
+        )}
+
+        {isMobile && (
+          <button
+            onClick={() => setOpen(!open)}
+            style={{
+              background: "none",
+              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: 8,
+              padding: "8px 10px",
+              cursor: "pointer",
+              display: "flex",
+              flexDirection: "column",
+              gap: 5,
+              alignItems: "center",
+            }}
+            aria-label="Toggle menu"
+          >
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                style={{
+                  display: "block",
+                  width: 22,
+                  height: 2,
+                  background: C.white,
+                  borderRadius: 2,
+                  transition: "transform .2s, opacity .2s",
+                  transform:
+                    open && i === 0
+                      ? "translateY(7px) rotate(45deg)"
+                      : open && i === 1
+                        ? "scaleX(0)"
+                        : open && i === 2
+                          ? "translateY(-7px) rotate(-45deg)"
+                          : "none",
+                  opacity: open && i === 1 ? 0 : 1,
+                }}
+              />
+            ))}
+          </button>
+        )}
+      </div>
+
+      {isMobile && (
+        <div
+          style={{
+            maxHeight: open ? 400 : 0,
+            overflow: "hidden",
+            transition: "max-height .3s ease",
+            background: C.ink2,
+            borderTop: open ? "1px solid rgba(255,255,255,0.07)" : "none",
+          }}
+        >
+          <div
+            style={{
+              padding: "12px 24px 20px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+            }}
+          >
+            {links.map((s) => (
+              <button
+                key={s}
+                onClick={() => {
+                  scrollTo(s);
+                  setOpen(false);
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "rgba(255,255,255,0.65)",
+                  fontSize: 16,
+                  fontFamily: "'Barlow', sans-serif",
+                  padding: "12px 0",
+                  textAlign: "left",
+                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  textTransform: "capitalize",
+                }}
+              >
+                {s}
+              </button>
+            ))}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                marginTop: 12,
+              }}
+            >
+              <button
+                onClick={() => {
+                  onLogin();
+                  setOpen(false);
+                }}
+                style={{
+                  background: "none",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  borderRadius: 8,
+                  padding: 11,
+                  color: "rgba(255,255,255,0.75)",
+                  fontSize: 14,
+                  fontFamily: "'Barlow', sans-serif",
+                  cursor: "pointer",
+                }}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => {
+                  onRegister();
+                  setOpen(false);
+                }}
+                style={{
+                  background: config.accent,
+                  border: "none",
+                  borderRadius: 8,
+                  padding: 12,
+                  color: C.white,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  fontFamily: "'Barlow', sans-serif",
+                  cursor: "pointer",
+                }}
+              >
+                Sign Up Free
+              </button>
+            </div>
           </div>
         </div>
       )}
     </nav>
   );
 }
-
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 function Hero({ config, onRegister }) {
   return (
     <section
-      className="relative overflow-hidden py-20 sm:py-28"
-      style={{ background: config.color }}
+      style={{
+        background: `linear-gradient(135deg, ${C.ink} 0%, ${C.ink2} 60%, #162033 100%)`,
+        padding: "72px 24px 80px",
+        position: "relative",
+        overflow: "hidden",
+        minHeight: "100vh",
+      }}
     >
-      {/* Subtle grid pattern */}
       <div
-        className="absolute inset-0 opacity-5"
         style={{
-          backgroundImage: `linear-gradient(${config.accent}33 1px, transparent 1px), linear-gradient(90deg, ${config.accent}33 1px, transparent 1px)`,
-          backgroundSize: "40px 40px",
+          position: "absolute",
+          top: -60,
+          right: -80,
+          width: 500,
+          height: 500,
+          borderRadius: "50%",
+          background: config.accent,
+          opacity: 0.07,
+          filter: "blur(80px)",
         }}
       />
 
-      {/* Glow blob */}
       <div
-        className="absolute -top-20 -right-20 w-96 h-96 rounded-full blur-3xl opacity-20"
-        style={{ background: config.accent }}
-      />
-
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
-        {/* Industry badge */}
-        <div
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-6"
-          style={{ background: `${config.accent}22`, color: config.accent, border: `1px solid ${config.accent}44` }}
-        >
-          <span>{config.icon}</span>
-          <span>Built for {config.label} Businesses</span>
-        </div>
-
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight mb-5">
-          {config.headline}
-        </h1>
-        <p className="text-base sm:text-xl text-white/60 leading-relaxed max-w-2xl mx-auto mb-10">
-          {config.subheadline}
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={onRegister}
-            className="px-8 py-3.5 rounded-xl font-bold text-white text-base shadow-lg transition-transform hover:scale-105"
-            style={{ background: config.accent }}
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          gap: 60,
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Left copy */}
+        <div style={{ flex: "1 1 420px" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: `${config.accent}1F`,
+              border: `1px solid ${config.accent}4D`,
+              borderRadius: 99,
+              padding: "5px 14px",
+              marginBottom: 22,
+            }}
           >
-            {config.cta}
-          </button>
-          <button
-            onClick={() => scrollTo("features")}
-            className="px-8 py-3.5 rounded-xl font-semibold text-sm text-white/70 border border-white/20 hover:border-white/40 transition-colors"
-          >
-            See how it works →
-          </button>
-        </div>
-
-        {/* Trust badges */}
-        <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-white/30 text-xs">
-          {["No credit card required", "Free plan available", "Cancel anytime", "South African business"].map((t) => (
-            <span key={t} className="flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5" style={{ color: config.accent }} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              {t}
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: config.accent,
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{
+                color: config.accent,
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+              }}
+            >
+              Built for {config.label} Businesses
             </span>
-          ))}
+          </div>
+
+          <h1
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(40px, 5vw, 64px)",
+              lineHeight: 1.05,
+              color: C.white,
+              margin: "0 0 20px",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            {config.headline
+              .split(".")
+              .filter(Boolean)
+              .map((line, i, arr) => (
+                <span key={i}>
+                  {line.trim()}.
+                  {i === arr.length - 2 ? (
+                    <>
+                      <br />
+                      <span style={{ color: config.accent }}></span>
+                    </>
+                  ) : i < arr.length - 1 ? (
+                    <br />
+                  ) : null}
+                </span>
+              ))}
+          </h1>
+
+          <p
+            style={{
+              color: "rgba(255,255,255,0.55)",
+              fontSize: 17,
+              lineHeight: 1.7,
+              margin: "0 0 36px",
+              fontFamily: "'Barlow', sans-serif",
+              maxWidth: 460,
+            }}
+          >
+            {config.subheadline}
+          </p>
+
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+            <button
+              onClick={onRegister}
+              style={{
+                background: config.accent,
+                border: "none",
+                borderRadius: 10,
+                padding: "14px 28px",
+                color: C.white,
+                fontSize: 15,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+                boxShadow: `0 8px 24px ${config.accent}66`,
+                transition: "transform .15s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "scale(1.03)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
+            >
+              {config.cta}
+            </button>
+            <button
+              onClick={() => scrollTo("features")}
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: 10,
+                padding: "14px 24px",
+                color: "rgba(255,255,255,0.75)",
+                fontSize: 15,
+                fontWeight: 600,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
+            >
+              See How It Works →
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 24,
+              marginTop: 32,
+              flexWrap: "wrap",
+            }}
+          >
+            {[
+              "No credit card required",
+              "Free plan available",
+              "VAT-compliant invoices",
+              "SA-built & hosted",
+            ].map((t) => (
+              <span
+                key={t}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  color: "rgba(255,255,255,0.35)",
+                  fontSize: 12,
+                  fontFamily: "'Barlow', sans-serif",
+                }}
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 20 20"
+                  fill={config.accent}
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {t}
+              </span>
+            ))}
+          </div>
         </div>
+
+        {/* Right: Invoice preview */}
+        <div
+          style={{
+            flex: "1 1 340px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <div style={{ position: "relative" }}>
+            <div
+              style={{
+                position: "absolute",
+                top: -18,
+                right: -18,
+                zIndex: 2,
+                background: "#16A34A",
+                color: C.white,
+                borderRadius: 10,
+                padding: "8px 14px",
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span>💰</span> Payment received!
+            </div>
+            <MockInvoice config={config} />
+            <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
+              {[
+                ["R 28 500", "This Month"],
+                ["12", "Open Jobs"],
+                ["4.8★", "Customer Rating"],
+              ].map(([v, l]) => (
+                <div
+                  key={l}
+                  style={{
+                    flex: 1,
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 10,
+                    padding: "10px 12px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 800,
+                      fontSize: 18,
+                      color: C.white,
+                    }}
+                  >
+                    {v}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "rgba(255,255,255,0.4)",
+                      fontFamily: "'Barlow', sans-serif",
+                    }}
+                  >
+                    {l}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Trusted bar */}
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "48px auto 0",
+          borderTop: "1px solid rgba(255,255,255,0.07)",
+          paddingTop: 28,
+          display: "flex",
+          gap: 40,
+          flexWrap: "wrap",
+          alignItems: "center",
+        }}
+      >
+        <span
+          style={{
+            color: "rgba(255,255,255,0.3)",
+            fontSize: 13,
+            fontFamily: "'Barlow', sans-serif",
+          }}
+        >
+          TRUSTED BY SA {config.label.toUpperCase()} BUSINESSES
+        </span>
+        {[
+          "Cape Clear Glass",
+          "JHB Auto Glazing",
+          "Pretoria Windscreen Pro",
+          "Durban Glass Centre",
+        ].map((b) => (
+          <span
+            key={b}
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 700,
+              fontSize: 15,
+              color: "rgba(255,255,255,0.25)",
+              letterSpacing: 0.5,
+            }}
+          >
+            {b}
+          </span>
+        ))}
       </div>
     </section>
   );
@@ -201,7 +906,9 @@ function Features({ config }) {
               >
                 {f.icon}
               </div>
-              <h3 className="font-bold text-gray-800 mb-1.5 text-sm">{f.title}</h3>
+              <h3 className="font-bold text-gray-800 mb-1.5 text-sm">
+                {f.title}
+              </h3>
               <p className="text-gray-400 text-xs leading-relaxed">{f.desc}</p>
             </div>
           ))}
@@ -214,13 +921,22 @@ function Features({ config }) {
 // ─── Pricing ──────────────────────────────────────────────────────────────────
 function Pricing({ config, onRegister }) {
   return (
-    <section id="pricing" style={{ background: config.lightBg }} className="py-16 sm:py-24">
+    <section
+      id="pricing"
+      style={{ background: config.lightBg }}
+      className="py-16 sm:py-24"
+    >
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>
+          <p
+            className="text-xs font-bold uppercase tracking-widest mb-3"
+            style={{ color: config.accent }}
+          >
             Pricing
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">Simple, honest pricing</h2>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
+            Simple, honest pricing
+          </h2>
           <p className="text-gray-500 mt-3 text-sm sm:text-base">
             Start free. Upgrade when you're ready. No hidden fees.
           </p>
@@ -247,18 +963,26 @@ function Pricing({ config, onRegister }) {
               )}
 
               <div className="mb-4">
-                <p className={`font-bold text-sm mb-0.5 ${plan.highlight ? "text-white/70" : "text-gray-500"}`}>
+                <p
+                  className={`font-bold text-sm mb-0.5 ${plan.highlight ? "text-white/70" : "text-gray-500"}`}
+                >
                   {plan.name}
                 </p>
                 <div className="flex items-baseline gap-1">
-                  <span className={`text-3xl font-extrabold ${plan.highlight ? "text-white" : "text-gray-900"}`}>
+                  <span
+                    className={`text-3xl font-extrabold ${plan.highlight ? "text-white" : "text-gray-900"}`}
+                  >
                     {plan.price}
                   </span>
-                  <span className={`text-sm ${plan.highlight ? "text-white/50" : "text-gray-400"}`}>
+                  <span
+                    className={`text-sm ${plan.highlight ? "text-white/50" : "text-gray-400"}`}
+                  >
                     {plan.period}
                   </span>
                 </div>
-                <p className={`text-xs mt-1 ${plan.highlight ? "text-white/50" : "text-gray-400"}`}>
+                <p
+                  className={`text-xs mt-1 ${plan.highlight ? "text-white/50" : "text-gray-400"}`}
+                >
                   {plan.desc}
                 </p>
               </div>
@@ -272,9 +996,19 @@ function Pricing({ config, onRegister }) {
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
                     </svg>
-                    <span className={plan.highlight ? "text-white/80" : "text-gray-600"}>{f}</span>
+                    <span
+                      className={
+                        plan.highlight ? "text-white/80" : "text-gray-600"
+                      }
+                    >
+                      {f}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -304,7 +1038,10 @@ function Testimonials({ config }) {
     <section id="testimonials" className="py-16 sm:py-24 bg-white">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>
+          <p
+            className="text-xs font-bold uppercase tracking-widest mb-3"
+            style={{ color: config.accent }}
+          >
             Testimonials
           </p>
           <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
@@ -314,17 +1051,28 @@ function Testimonials({ config }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {config.testimonials.map((t) => (
-            <div key={t.name} className="p-6 rounded-2xl border border-gray-100 flex flex-col gap-4">
+            <div
+              key={t.name}
+              className="p-6 rounded-2xl border border-gray-100 flex flex-col gap-4"
+            >
               {/* Stars */}
               <div className="flex gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-4 h-4" style={{ color: config.accent }} fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    key={i}
+                    className="w-4 h-4"
+                    style={{ color: config.accent }}
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
               </div>
 
-              <p className="text-gray-600 text-sm leading-relaxed flex-1">"{t.quote}"</p>
+              <p className="text-gray-600 text-sm leading-relaxed flex-1">
+                "{t.quote}"
+              </p>
 
               <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
                 <div
@@ -351,23 +1099,37 @@ function FAQ({ config }) {
   const [open, setOpen] = useState(null);
 
   return (
-    <section id="faq" style={{ background: config.lightBg }} className="py-16 sm:py-24">
+    <section
+      id="faq"
+      style={{ background: config.lightBg }}
+      className="py-16 sm:py-24"
+    >
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>
+          <p
+            className="text-xs font-bold uppercase tracking-widest mb-3"
+            style={{ color: config.accent }}
+          >
             FAQ
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">Common questions</h2>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
+            Common questions
+          </h2>
         </div>
 
         <div className="space-y-3">
           {config.faqs.map((faq, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div
+              key={i}
+              className="bg-white rounded-xl border border-gray-200 overflow-hidden"
+            >
               <button
                 className="w-full flex items-center justify-between px-5 py-4 text-left"
                 onClick={() => setOpen(open === i ? null : i)}
               >
-                <span className="text-sm font-semibold text-gray-800 pr-4">{faq.q}</span>
+                <span className="text-sm font-semibold text-gray-800 pr-4">
+                  {faq.q}
+                </span>
                 <svg
                   className="w-4 h-4 flex-shrink-0 transition-transform"
                   style={{
@@ -405,7 +1167,8 @@ function CTABanner({ config, onRegister }) {
           Ready to get paid faster?
         </h2>
         <p className="text-white/50 mb-8 text-sm sm:text-base">
-          Join hundreds of {config.label.toLowerCase()} businesses already using SolidFlo.
+          Join hundreds of {config.label.toLowerCase()} businesses already using
+          SolidFlo.
         </p>
         <button
           onClick={onRegister}
@@ -421,36 +1184,163 @@ function CTABanner({ config, onRegister }) {
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer({ config, onLogin, onRegister }) {
-  return (
-    <footer className="border-t border-gray-100 py-10 bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">{config.icon}</span>
-            <div>
-              <p className="font-bold text-gray-800 text-sm">SolidFlo {config.label}</p>
-              <p className="text-xs text-gray-400">Professional invoicing for SA businesses</p>
-            </div>
-          </div>
+  const cols = [
+    {
+      title: "Product",
+      links: ["Features", "Pricing", "Job Cards", "Inventory", "Reports"],
+    },
+    {
+      title: "Resources",
+      links: ["Help Centre", "Video Guides", "Blog", "API Docs", "Community"],
+    },
+    {
+      title: "Company",
+      links: [
+        "About SolidFlo",
+        "Contact Us",
+        "Privacy Policy",
+        "Terms of Service",
+        "Made in SA 🇿🇦",
+      ],
+    },
+  ];
 
-          <div className="flex items-center gap-6 text-xs text-gray-400">
-            <button onClick={() => scrollTo("features")} className="hover:text-gray-600 transition-colors">Features</button>
-            <button onClick={() => scrollTo("pricing")} className="hover:text-gray-600 transition-colors">Pricing</button>
-            <button onClick={() => scrollTo("faq")} className="hover:text-gray-600 transition-colors">FAQ</button>
-            <button onClick={onLogin} className="hover:text-gray-600 transition-colors">Sign In</button>
+  return (
+    <footer
+      style={{
+        background: "#070F18",
+        borderTop: "1px solid rgba(255,255,255,0.05)",
+        padding: "56px 24px 32px",
+      }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "2fr repeat(3, 1fr)",
+            gap: 40,
+            marginBottom: 48,
+            flexWrap: "wrap",
+          }}
+        >
+          {/* Brand */}
+          <div>
+             <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                marginBottom: 16,
+              }}
+            >
+              
+              <div>
+                <img src={logo} width={100} alt="" />
+              </div>
+            </div>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.3)",
+                fontSize: 13,
+                lineHeight: 1.7,
+                fontFamily: "'Barlow', sans-serif",
+                marginBottom: 20,
+                maxWidth: 220,
+              }}
+            >
+              Professional invoicing software built specifically for South
+              African {config.label.toLowerCase()} businesses.
+            </p>
             <button
               onClick={onRegister}
-              className="px-3 py-1.5 rounded-lg text-white text-xs font-semibold"
-              style={{ background: config.accent }}
+              style={{
+                background: config.accent,
+                border: "none",
+                borderRadius: 8,
+                padding: "10px 20px",
+                color: C.white,
+                fontSize: 13,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
             >
-              Sign Up
+              Get started free
             </button>
           </div>
+
+          {cols.map((col, i) => (
+            <div key={i}>
+              <p
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 800,
+                  fontSize: 14,
+                  color: "rgba(255,255,255,0.5)",
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                  margin: "0 0 16px",
+                }}
+              >
+                {col.title}
+              </p>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 10 }}
+              >
+                {col.links.map((l) => (
+                  <a
+                    key={l}
+                    href="#"
+                    style={{
+                      color: "rgba(255,255,255,0.35)",
+                      fontSize: 13,
+                      fontFamily: "'Barlow', sans-serif",
+                      textDecoration: "none",
+                    }}
+                    onMouseEnter={(e) => (e.target.style.color = C.white)}
+                    onMouseLeave={(e) =>
+                      (e.target.style.color = "rgba(255,255,255,0.35)")
+                    }
+                  >
+                    {l}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-300">
-          <p>© {new Date().getFullYear()} SolidFlo. All rights reserved.</p>
-          <p>Made in South Africa 🇿🇦</p>
+        <div
+          style={{
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            paddingTop: 24,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
+          <p
+            style={{
+              color: "rgba(255,255,255,0.2)",
+              fontSize: 12,
+              fontFamily: "'Barlow', sans-serif",
+              margin: 0,
+            }}
+          >
+            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+          </p>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.2)",
+              fontSize: 12,
+              fontFamily: "'Barlow', sans-serif",
+              margin: 0,
+            }}
+          >
+            Proudly South African 🇿🇦
+          </p>
         </div>
       </div>
     </footer>

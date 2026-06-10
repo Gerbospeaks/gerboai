@@ -1,30 +1,31 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/img/carpentry-logo.png";
+import logo from "../../assets/img/upholstery-logo.png";
+
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
 
 /* ─── Design Tokens ────────────────────────────────────────────────────── */
 const C = {
-  ink: "#1A1208", // deep wood dark
-  ink2: "#2D1F0E", // mid wood brown
-  surface: "#FAF5EE", // warm cream bg
+  ink: "#1A1014",        // deep plum-black
+  ink2: "#2A1820",       // mid plum
+  surface: "#FAF6F8",    // warm blush bg
   white: "#FFFFFF",
-  amber: "#C67C3A", // primary accent (warm amber/wood)
-  amberD: "#9B5A20", // darker accent
-  amberL: "#F0DCC8", // light tint
-  border: "#E8D9C4",
-  text: "#2D1F0E",
-  muted: "#8C7B6B",
+  plum: "#8B4A6B",       // primary accent (deep rose/plum)
+  plumD: "#6B3352",      // darker accent
+  plumL: "#F2E4EC",      // light tint
+  border: "#EDD9E6",
+  text: "#2A1820",
+  muted: "#8C6B7B",
 };
 
 /* ─── Scroll helper ─────────────────────────────────────────────────────── */
 const scrollTo = (id) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
-/* ─── Wood Grain SVG texture ────────────────────────────────────────────── */
-function WoodGrain({ opacity = 0.04 }) {
+/* ─── Fabric Texture SVG ─────────────────────────────────────────────────── */
+function FabricTexture({ opacity = 0.04 }) {
   return (
     <svg
       style={{
@@ -37,16 +38,16 @@ function WoodGrain({ opacity = 0.04 }) {
       }}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <filter id="wg">
+      <filter id="ft">
         <feTurbulence
           type="fractalNoise"
-          baseFrequency="0.65"
-          numOctaves="3"
+          baseFrequency="0.85"
+          numOctaves="4"
           stitchTiles="stitch"
         />
-        <feColorMatrix type="saturate" values="0" />
+        <feColorMatrix type="saturate" values="0.3" />
       </filter>
-      <rect width="100%" height="100%" filter="url(#wg)" />
+      <rect width="100%" height="100%" filter="url(#ft)" />
     </svg>
   );
 }
@@ -58,7 +59,7 @@ function MockInvoice() {
       style={{
         background: C.white,
         borderRadius: 16,
-        boxShadow: "0 32px 80px rgba(26,18,8,0.28)",
+        boxShadow: "0 32px 80px rgba(26,10,20,0.28)",
         overflow: "hidden",
         fontFamily: "'Barlow', sans-serif",
         border: `1px solid ${C.border}`,
@@ -69,7 +70,7 @@ function MockInvoice() {
       {/* Chrome bar */}
       <div
         style={{
-          background: "#F5EDE0",
+          background: "#F5EAF0",
           padding: "10px 16px",
           display: "flex",
           alignItems: "center",
@@ -101,7 +102,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/carpentry/INV-2024
+            solidflo.co.za/upholstery/INV-2024
           </span>
         </div>
       </div>
@@ -110,7 +111,7 @@ function MockInvoice() {
       <div
         style={{
           padding: "20px 24px 16px",
-          borderBottom: `2px solid ${C.amber}`,
+          borderBottom: `2px solid ${C.plum}`,
         }}
       >
         <div
@@ -132,13 +133,12 @@ function MockInvoice() {
               <span style={{ fontSize: 20 }}>
                 <img src={logo} alt="" width={80} />
               </span>
-              
             </div>
             <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
-              Van der Merwe Custom Furniture
+              Dlamini Fine Upholstery
             </p>
             <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
-              Cape Town, South Africa
+              Johannesburg, South Africa
             </p>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -164,10 +164,10 @@ function MockInvoice() {
                 margin: 0,
               }}
             >
-              INV-0019
+              INV-0031
             </p>
             <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
-              Issued 28 Mar 2025
+              Issued 5 May 2025
             </p>
           </div>
         </div>
@@ -199,28 +199,28 @@ function MockInvoice() {
           <tbody>
             {[
               {
-                desc: "Labour – Custom Oak Dining Table (14h)",
+                desc: "Labour – 3-Seater Sofa Reupholster (8h)",
                 qty: 1,
-                unit: "R4 200.00",
-                total: "R4 200.00",
+                unit: "R3 200.00",
+                total: "R3 200.00",
               },
               {
-                desc: "Solid Oak Timber (3m²)",
-                qty: 3,
-                unit: "R850.00",
-                total: "R2 550.00",
+                desc: "Belgian Linen Fabric (6m)",
+                qty: 6,
+                unit: "R420.00",
+                total: "R2 520.00",
               },
               {
-                desc: "Danish Oil Finish (1L)",
-                qty: 2,
+                desc: "High-Density Foam (seat & back)",
+                qty: 1,
+                unit: "R980.00",
+                total: "R980.00",
+              },
+              {
+                desc: "Piping, thread & staples",
+                qty: 1,
                 unit: "R180.00",
-                total: "R360.00",
-              },
-              {
-                desc: "Steel Hairpin Legs (set of 4)",
-                qty: 1,
-                unit: "R620.00",
-                total: "R620.00",
+                total: "R180.00",
               },
             ].map((r, i) => (
               <tr key={i} style={{ borderBottom: `1px solid ${C.border}` }}>
@@ -270,8 +270,8 @@ function MockInvoice() {
         }}
       >
         {[
-          ["Subtotal", "R7 730.00"],
-          ["VAT (15%)", "R1 159.50"],
+          ["Subtotal", "R6 880.00"],
+          ["VAT (15%)", "R1 032.00"],
         ].map(([l, v]) => (
           <div key={l} style={{ display: "flex", gap: 32, fontSize: 12 }}>
             <span style={{ color: C.muted }}>{l}</span>
@@ -292,7 +292,7 @@ function MockInvoice() {
         >
           <span
             style={{
-              color: "rgba(245,230,211,0.7)",
+              color: "rgba(242,228,236,0.7)",
               fontSize: 13,
               fontWeight: 600,
             }}
@@ -301,14 +301,14 @@ function MockInvoice() {
           </span>
           <span
             style={{
-              color: "#F5E6D3",
+              color: "#F2E4EC",
               fontWeight: 800,
               fontSize: 15,
               minWidth: 80,
               textAlign: "right",
             }}
           >
-            R8 889.50
+            R7 912.00
           </span>
         </div>
       </div>
@@ -327,7 +327,6 @@ function Navbar({ onLogin, onRegister }) {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  // Close menu on resize to desktop
   useEffect(() => {
     const fn = () => { if (window.innerWidth > 768) setOpen(false); };
     window.addEventListener("resize", fn);
@@ -371,7 +370,6 @@ function Navbar({ onLogin, onRegister }) {
           height: 60,
         }}
       >
-        {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
             style={{
@@ -387,7 +385,6 @@ function Navbar({ onLogin, onRegister }) {
           </div>
         </div>
 
-        {/* Desktop links */}
         {!isMobile && (
           <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
             {links.map((s) => (
@@ -414,7 +411,6 @@ function Navbar({ onLogin, onRegister }) {
           </div>
         )}
 
-        {/* Desktop CTA */}
         {!isMobile && (
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <button
@@ -435,7 +431,7 @@ function Navbar({ onLogin, onRegister }) {
             <button
               onClick={onRegister}
               style={{
-                background: C.orange,
+                background: C.plum,
                 border: "none",
                 borderRadius: 8,
                 padding: "8px 20px",
@@ -444,7 +440,7 @@ function Navbar({ onLogin, onRegister }) {
                 fontWeight: 700,
                 fontFamily: "'Barlow', sans-serif",
                 cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(249,115,22,0.4)",
+                boxShadow: "0 4px 12px rgba(139,74,107,0.4)",
               }}
             >
               Start Free →
@@ -452,7 +448,6 @@ function Navbar({ onLogin, onRegister }) {
           </div>
         )}
 
-        {/* Hamburger button (mobile only) */}
         {isMobile && (
           <button
             onClick={() => setOpen(!open)}
@@ -470,7 +465,6 @@ function Navbar({ onLogin, onRegister }) {
             }}
             aria-label="Toggle menu"
           >
-            {/* Animated hamburger lines */}
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
@@ -495,7 +489,6 @@ function Navbar({ onLogin, onRegister }) {
         )}
       </div>
 
-      {/* Mobile dropdown menu */}
       {isMobile && (
         <div
           style={{
@@ -531,8 +524,6 @@ function Navbar({ onLogin, onRegister }) {
                 {s}
               </button>
             ))}
-
-            {/* Mobile CTAs */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
               <button
                 onClick={() => { onLogin(); setOpen(false); }}
@@ -552,7 +543,7 @@ function Navbar({ onLogin, onRegister }) {
               <button
                 onClick={() => { onRegister(); setOpen(false); }}
                 style={{
-                  background: C.orange,
+                  background: C.plum,
                   border: "none",
                   borderRadius: 8,
                   padding: "12px",
@@ -561,7 +552,7 @@ function Navbar({ onLogin, onRegister }) {
                   fontWeight: 700,
                   fontFamily: "'Barlow', sans-serif",
                   cursor: "pointer",
-                  boxShadow: "0 4px 12px rgba(249,115,22,0.4)",
+                  boxShadow: "0 4px 12px rgba(139,74,107,0.4)",
                 }}
               >
                 Start Free →
@@ -589,7 +580,7 @@ function Hero({ onRegister }) {
         justifyContent: "center",
       }}
     >
-      <WoodGrain opacity={0.045} />
+      <FabricTexture opacity={0.045} />
 
       {/* Warm glow */}
       <div
@@ -601,13 +592,12 @@ function Hero({ onRegister }) {
           width: 700,
           height: 300,
           borderRadius: "50%",
-          background: C.amber,
-          opacity: 0.12,
+          background: C.plum,
+          opacity: 0.14,
           filter: "blur(80px)",
           pointerEvents: "none",
         }}
       />
-      {/* Decorative chisel lines */}
       <div
         style={{
           position: "absolute",
@@ -615,7 +605,7 @@ function Hero({ onRegister }) {
           right: 0,
           width: 64,
           height: "100%",
-          borderLeft: `1px solid rgba(198,124,58,0.06)`,
+          borderLeft: `1px solid rgba(139,74,107,0.06)`,
           pointerEvents: "none",
         }}
       />
@@ -626,7 +616,7 @@ function Hero({ onRegister }) {
           right: 32,
           width: 1,
           height: "100%",
-          background: "rgba(198,124,58,0.04)",
+          background: "rgba(139,74,107,0.04)",
           pointerEvents: "none",
         }}
       />
@@ -650,24 +640,24 @@ function Hero({ onRegister }) {
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: "rgba(198,124,58,0.12)",
-              border: "1px solid rgba(198,124,58,0.3)",
+              background: "rgba(139,74,107,0.12)",
+              border: "1px solid rgba(139,74,107,0.3)",
               borderRadius: 99,
               padding: "5px 14px",
               marginBottom: 22,
             }}
           >
-            <span style={{ fontSize: 14 }}>🪚</span>
+            <span style={{ fontSize: 14 }}>🧵</span>
             <span
               style={{
-                color: C.amber,
+                color: C.plum,
                 fontSize: 12,
                 fontWeight: 700,
                 fontFamily: "'Barlow', sans-serif",
                 letterSpacing: "0.05em",
               }}
             >
-              Purpose-Built for South African Carpenters
+              Purpose-Built for South African Upholsterers
             </span>
           </div>
 
@@ -677,21 +667,21 @@ function Hero({ onRegister }) {
               fontWeight: 900,
               fontSize: "clamp(40px, 5vw, 62px)",
               lineHeight: 1.05,
-              color: "#F5E6D3",
+              color: "#F5EAF0",
               margin: "0 0 20px",
               letterSpacing: "-0.5px",
             }}
           >
             Invoicing Built for
             <br />
-            <span style={{ color: C.amber }}>the Workshop,</span>
+            <span style={{ color: C.plum }}>the Studio,</span>
             <br />
-            Not the Boardroom.
+            Not the Spreadsheet.
           </h1>
 
           <p
             style={{
-              color: "rgba(245,230,211,0.5)",
+              color: "rgba(245,234,240,0.5)",
               fontSize: 17,
               lineHeight: 1.7,
               margin: "0 0 36px",
@@ -699,15 +689,16 @@ function Hero({ onRegister }) {
               maxWidth: 460,
             }}
           >
-            Send professional quotes, track materials, and get paid on time —
-            purpose-built for South African carpenters and joinery businesses.
+            Send professional quotes, track fabric and materials, and get paid
+            on time — purpose-built for South African upholstery and soft
+            furnishing businesses.
           </p>
 
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
             <button
               onClick={onRegister}
               style={{
-                background: C.amber,
+                background: C.plum,
                 border: "none",
                 borderRadius: 10,
                 padding: "14px 28px",
@@ -716,7 +707,7 @@ function Hero({ onRegister }) {
                 fontWeight: 700,
                 fontFamily: "'Barlow', sans-serif",
                 cursor: "pointer",
-                boxShadow: "0 8px 24px rgba(198,124,58,0.4)",
+                boxShadow: "0 8px 24px rgba(139,74,107,0.4)",
                 transition: "transform .15s",
               }}
               onMouseEnter={(e) =>
@@ -731,11 +722,11 @@ function Hero({ onRegister }) {
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(198,124,58,0.08)",
-                border: "1px solid rgba(198,124,58,0.3)",
+                background: "rgba(139,74,107,0.08)",
+                border: "1px solid rgba(139,74,107,0.3)",
                 borderRadius: 10,
                 padding: "14px 24px",
-                color: "rgba(245,230,211,0.7)",
+                color: "rgba(245,234,240,0.7)",
                 fontSize: 15,
                 fontWeight: 600,
                 fontFamily: "'Barlow', sans-serif",
@@ -767,12 +758,12 @@ function Hero({ onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(245,230,211,0.3)",
+                  color: "rgba(245,234,240,0.3)",
                   fontSize: 12,
                   fontFamily: "'Barlow', sans-serif",
                 }}
               >
-                <span style={{ color: C.amber, fontSize: 10 }}>✦</span>
+                <span style={{ color: C.plum, fontSize: 10 }}>✦</span>
                 {t}
               </span>
             ))}
@@ -788,7 +779,6 @@ function Hero({ onRegister }) {
           }}
         >
           <div style={{ position: "relative" }}>
-            {/* Badge floating */}
             <div
               style={{
                 position: "absolute",
@@ -811,19 +801,18 @@ function Hero({ onRegister }) {
               <span>💰</span> Payment received!
             </div>
             <MockInvoice />
-            {/* Stats row */}
             <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
               {[
-                ["R 56 200", "This Month"],
-                ["12", "Active Jobs"],
+                ["R 42 800", "This Month"],
+                ["9", "Active Jobs"],
                 ["4.9★", "Client Rating"],
               ].map(([v, l]) => (
                 <div
                   key={l}
                   style={{
                     flex: 1,
-                    background: "rgba(198,124,58,0.08)",
-                    border: "1px solid rgba(198,124,58,0.2)",
+                    background: "rgba(139,74,107,0.08)",
+                    border: "1px solid rgba(139,74,107,0.2)",
                     borderRadius: 10,
                     padding: "10px 12px",
                     textAlign: "center",
@@ -834,7 +823,7 @@ function Hero({ onRegister }) {
                       fontFamily: "'Barlow Condensed', sans-serif",
                       fontWeight: 800,
                       fontSize: 18,
-                      color: "#F5E6D3",
+                      color: "#F5EAF0",
                     }}
                   >
                     {v}
@@ -842,7 +831,7 @@ function Hero({ onRegister }) {
                   <div
                     style={{
                       fontSize: 11,
-                      color: "rgba(245,230,211,0.4)",
+                      color: "rgba(245,234,240,0.4)",
                       fontFamily: "'Barlow', sans-serif",
                     }}
                   >
@@ -860,7 +849,7 @@ function Hero({ onRegister }) {
         style={{
           maxWidth: 1200,
           margin: "48px auto 0",
-          borderTop: "1px solid rgba(198,124,58,0.1)",
+          borderTop: "1px solid rgba(139,74,107,0.1)",
           paddingTop: 28,
           display: "flex",
           gap: 40,
@@ -870,18 +859,18 @@ function Hero({ onRegister }) {
       >
         <span
           style={{
-            color: "rgba(245,230,211,0.25)",
+            color: "rgba(245,234,240,0.25)",
             fontSize: 13,
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          TRUSTED BY SA CARPENTERS
+          TRUSTED BY SA UPHOLSTERERS
         </span>
         {[
-          "Van der Merwe Custom Furniture",
-          "Nkosi Kitchen Installations",
-          "Botha Joinery & Shopfitting",
-          "Cape Craft Woodworks",
+          "Dlamini Fine Upholstery",
+          "Cape Stitch & Cushion Co.",
+          "Venter Sofas & Drapes",
+          "Pretoria Fabric Studio",
         ].map((b) => (
           <span
             key={b}
@@ -889,7 +878,7 @@ function Hero({ onRegister }) {
               fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 700,
               fontSize: 15,
-              color: "rgba(245,230,211,0.2)",
+              color: "rgba(245,234,240,0.2)",
               letterSpacing: 0.5,
             }}
           >
@@ -918,15 +907,15 @@ function CraftDivider() {
         style={{
           height: 1,
           flex: 1,
-          background: `linear-gradient(to right, transparent, rgba(198,124,58,0.3))`,
+          background: `linear-gradient(to right, transparent, rgba(139,74,107,0.3))`,
         }}
       />
-      <span style={{ color: C.amber, fontSize: 14 }}>✦</span>
+      <span style={{ color: C.plum, fontSize: 14 }}>✦</span>
       <div
         style={{
           height: 1,
           flex: 1,
-          background: `linear-gradient(to left, transparent, rgba(198,124,58,0.3))`,
+          background: `linear-gradient(to left, transparent, rgba(139,74,107,0.3))`,
         }}
       />
     </div>
@@ -937,9 +926,9 @@ function CraftDivider() {
 function HowItWorks() {
   const steps = [
     {
-      icon: "📐",
+      icon: "📏",
       title: "Build a Quote",
-      desc: "Log the client, timber grades, hardware, and labour time. Send a professional itemised quote in minutes — straight from your phone on site.",
+      desc: "Log the client, fabric grades, foam spec, labour time, and any trimmings. Send a professional itemised quote in minutes — straight from your phone at a client's home.",
     },
     {
       icon: "📩",
@@ -959,7 +948,7 @@ function HowItWorks() {
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <p
             style={{
-              color: C.amber,
+              color: C.plum,
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: 3,
@@ -1011,7 +1000,7 @@ function HowItWorks() {
                   fontWeight: 900,
                   fontSize: 48,
                   color:
-                    i === 1 ? "rgba(198,124,58,0.07)" : "rgba(26,18,8,0.06)",
+                    i === 1 ? "rgba(139,74,107,0.07)" : "rgba(26,10,20,0.06)",
                   lineHeight: 1,
                 }}
               >
@@ -1023,7 +1012,7 @@ function HowItWorks() {
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 800,
                   fontSize: 22,
-                  color: i === 1 ? "#F5E6D3" : C.ink,
+                  color: i === 1 ? "#F5EAF0" : C.ink,
                   margin: "0 0 10px",
                 }}
               >
@@ -1031,7 +1020,7 @@ function HowItWorks() {
               </h3>
               <p
                 style={{
-                  color: i === 1 ? "rgba(245,230,211,0.55)" : C.muted,
+                  color: i === 1 ? "rgba(245,234,240,0.55)" : C.muted,
                   fontSize: 14,
                   lineHeight: 1.7,
                   margin: 0,
@@ -1045,7 +1034,7 @@ function HowItWorks() {
                   style={{
                     marginTop: 20,
                     display: "inline-block",
-                    background: C.amber,
+                    background: C.plum,
                     borderRadius: 6,
                     padding: "5px 14px",
                     fontSize: 12,
@@ -1069,19 +1058,19 @@ function HowItWorks() {
 function Features() {
   const features = [
     {
-      icon: "📐",
+      icon: "📏",
       title: "Quote Builder",
-      desc: "Create itemised quotes with timber grades, hardware costs, and labour — all in minutes. Send from site before the client even gets home.",
+      desc: "Create itemised quotes with fabric types, foam grades, labour, and trimmings — all in minutes. Send from the client's lounge before you leave.",
     },
     {
-      icon: "🪚",
+      icon: "🧵",
       title: "Job Cost Tracking",
-      desc: "Log materials per project so you always know what a job actually costs you. Stop underquoting and start protecting your margins.",
+      desc: "Log materials per project so you always know what a job actually costs you. Stop underquoting on fabric-heavy commissions.",
     },
     {
       icon: "🗂️",
       title: "Client Records",
-      desc: "Full histories of every client, project, and payment in one place. See past jobs instantly when a client calls back for more work.",
+      desc: "Full histories of every client, project, and payment in one place. See past jobs instantly when a client calls back for a dining set.",
     },
     {
       icon: "💳",
@@ -1089,9 +1078,9 @@ function Features() {
       desc: "Accept EFT, PayFast, or SnapScan with payment links embedded on every invoice. Customers pay the moment they open it.",
     },
     {
-      icon: "📦",
-      title: "Stock & Materials",
-      desc: "Track sheet goods, solid timber, and consumables across your projects. Know what's in the workshop before you price the next job.",
+      icon: "🪡",
+      title: "Fabric & Stock Log",
+      desc: "Track rolls of fabric, foam, batting, and sundries across projects. Know exactly what's in the studio before you price the next job.",
     },
     {
       icon: "📊",
@@ -1101,12 +1090,12 @@ function Features() {
     {
       icon: "🔔",
       title: "Payment Reminders",
-      desc: "Automatically chase overdue invoices with polite reminders — so you can focus on the craft, not the admin.",
+      desc: "Automatically chase overdue invoices with polite reminders — so you can focus on the stitching, not the admin.",
     },
     {
       icon: "📱",
       title: "Mobile-First",
-      desc: "Send quotes and invoices from your phone on site. No laptop, no delay. Fully mobile-responsive from the ground up.",
+      desc: "Send quotes and invoices from your phone at a client's home. No laptop, no delay. Fully mobile-responsive from the ground up.",
     },
     {
       icon: "🧾",
@@ -1124,7 +1113,7 @@ function Features() {
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <p
             style={{
-              color: C.amber,
+              color: C.plum,
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: 3,
@@ -1145,7 +1134,7 @@ function Features() {
               letterSpacing: -0.5,
             }}
           >
-            Every tool your carpentry business needs
+            Every tool your upholstery business needs
           </h2>
           <p
             style={{
@@ -1156,7 +1145,7 @@ function Features() {
               fontFamily: "'Barlow', sans-serif",
             }}
           >
-            No bloat. No irrelevant features. Just what a carpenter actually
+            No bloat. No irrelevant features. Just what an upholsterer actually
             uses every day.
           </p>
         </div>
@@ -1175,20 +1164,20 @@ function Features() {
                 background: C.white,
                 borderRadius: 14,
                 padding: "24px 22px",
-                border: `1px solid rgba(198,124,58,0.15)`,
+                border: `1px solid rgba(139,74,107,0.15)`,
                 transition: "box-shadow .2s, transform .2s, border-color .2s",
                 cursor: "default",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow =
-                  "0 8px 32px rgba(198,124,58,0.12)";
+                  "0 8px 32px rgba(139,74,107,0.12)";
                 e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.borderColor = "rgba(198,124,58,0.45)";
+                e.currentTarget.style.borderColor = "rgba(139,74,107,0.45)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.boxShadow = "none";
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.borderColor = "rgba(198,124,58,0.15)";
+                e.currentTarget.style.borderColor = "rgba(139,74,107,0.15)";
               }}
             >
               <div
@@ -1196,7 +1185,7 @@ function Features() {
                   width: 44,
                   height: 44,
                   borderRadius: 10,
-                  background: C.amberL,
+                  background: C.plumL,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -1254,15 +1243,15 @@ function Pricing({ onRegister }) {
       cta: "Get Started Free",
     },
     {
-      name: "Craftsman",
+      name: "Studio",
       price: "R99",
       period: "/month",
-      desc: "For established carpentry businesses",
+      desc: "For established upholstery businesses",
       highlight: true,
       features: [
         "Unlimited invoices & quotes",
         "Job cost tracking",
-        "Material stock log",
+        "Fabric & stock log",
         "Payment links (EFT, PayFast)",
         "Monthly reports",
         "Email & WhatsApp delivery",
@@ -1274,9 +1263,9 @@ function Pricing({ onRegister }) {
       name: "Workshop",
       price: "R199",
       period: "/month",
-      desc: "For joinery shops with multiple staff",
+      desc: "For studios with multiple staff",
       features: [
-        "Everything in Craftsman",
+        "Everything in Studio",
         "Up to 5 users",
         "Multi-job dashboard",
         "Custom invoice branding",
@@ -1293,7 +1282,7 @@ function Pricing({ onRegister }) {
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <p
             style={{
-              color: C.amber,
+              color: C.plum,
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: 3,
@@ -1342,13 +1331,13 @@ function Pricing({ onRegister }) {
                 padding: "32px 28px",
                 background: p.highlight ? C.ink : C.surface,
                 border: p.highlight
-                  ? `2px solid ${C.amber}`
+                  ? `2px solid ${C.plum}`
                   : `1px solid ${C.border}`,
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
                 boxShadow: p.highlight
-                  ? "0 20px 60px rgba(26,18,8,0.35)"
+                  ? "0 20px 60px rgba(26,10,20,0.35)"
                   : "none",
               }}
             >
@@ -1359,7 +1348,7 @@ function Pricing({ onRegister }) {
                     top: -14,
                     left: "50%",
                     transform: "translateX(-50%)",
-                    background: C.amber,
+                    background: C.plum,
                     color: C.white,
                     fontSize: 11,
                     fontWeight: 800,
@@ -1367,7 +1356,7 @@ function Pricing({ onRegister }) {
                     borderRadius: 99,
                     fontFamily: "'Barlow', sans-serif",
                     letterSpacing: "0.08em",
-                    boxShadow: "0 4px 12px rgba(198,124,58,0.4)",
+                    boxShadow: "0 4px 12px rgba(139,74,107,0.4)",
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -1378,7 +1367,7 @@ function Pricing({ onRegister }) {
               <div style={{ marginBottom: 20 }}>
                 <p
                   style={{
-                    color: p.highlight ? "rgba(245,230,211,0.5)" : C.amber,
+                    color: p.highlight ? "rgba(245,234,240,0.5)" : C.plum,
                     fontSize: 11,
                     fontWeight: 700,
                     textTransform: "uppercase",
@@ -1397,14 +1386,14 @@ function Pricing({ onRegister }) {
                       fontFamily: "'Barlow Condensed', sans-serif",
                       fontWeight: 900,
                       fontSize: 40,
-                      color: p.highlight ? "#F5E6D3" : C.ink,
+                      color: p.highlight ? "#F5EAF0" : C.ink,
                     }}
                   >
                     {p.price}
                   </span>
                   <span
                     style={{
-                      color: p.highlight ? "rgba(245,230,211,0.4)" : C.muted,
+                      color: p.highlight ? "rgba(245,234,240,0.4)" : C.muted,
                       fontSize: 14,
                       fontFamily: "'Barlow', sans-serif",
                     }}
@@ -1414,7 +1403,7 @@ function Pricing({ onRegister }) {
                 </div>
                 <p
                   style={{
-                    color: p.highlight ? "rgba(245,230,211,0.4)" : C.muted,
+                    color: p.highlight ? "rgba(245,234,240,0.4)" : C.muted,
                     fontSize: 12,
                     margin: "4px 0 0",
                     fontFamily: "'Barlow', sans-serif",
@@ -1448,7 +1437,7 @@ function Pricing({ onRegister }) {
                       width="15"
                       height="15"
                       viewBox="0 0 20 20"
-                      fill={C.amber}
+                      fill={C.plum}
                       style={{ flexShrink: 0, marginTop: 2 }}
                     >
                       <path
@@ -1459,7 +1448,7 @@ function Pricing({ onRegister }) {
                     </svg>
                     <span
                       style={{
-                        color: p.highlight ? "rgba(245,230,211,0.75)" : C.text,
+                        color: p.highlight ? "rgba(245,234,240,0.75)" : C.text,
                         fontSize: 13,
                         fontFamily: "'Barlow', sans-serif",
                       }}
@@ -1473,17 +1462,17 @@ function Pricing({ onRegister }) {
               <button
                 onClick={onRegister}
                 style={{
-                  background: p.highlight ? C.amber : C.ink,
+                  background: p.highlight ? C.plum : C.ink,
                   border: "none",
                   borderRadius: 10,
                   padding: "12px",
-                  color: p.highlight ? C.white : "#F5E6D3",
+                  color: p.highlight ? C.white : "#F5EAF0",
                   fontWeight: 700,
                   fontSize: 14,
                   fontFamily: "'Barlow', sans-serif",
                   cursor: "pointer",
                   boxShadow: p.highlight
-                    ? "0 6px 20px rgba(198,124,58,0.35)"
+                    ? "0 6px 20px rgba(139,74,107,0.35)"
                     : "none",
                 }}
               >
@@ -1502,24 +1491,24 @@ function Testimonials() {
   const testimonials = [
     {
       quote:
-        "I used to spend Sunday evenings writing quotes in Word. Now I send them from site in under 5 minutes. Clients love how professional they look.",
-      name: "Riaan van der Merwe",
-      role: "Custom Furniture, Cape Town",
-      avatar: "RV",
+        "I used to quote on scraps of paper and pray the fabric cost worked out. Now I send a proper itemised quote before I leave the client's house. It's changed everything.",
+      name: "Sipho Dlamini",
+      role: "Fine Upholstery, Johannesburg",
+      avatar: "SD",
     },
     {
       quote:
-        "The material cost tracker alone saved my business. I was underquoting badly. Now I know exactly what every job costs before I start.",
-      name: "Themba Nkosi",
-      role: "Kitchen Installations, Johannesburg",
-      avatar: "TN",
+        "The fabric cost tracker is the feature I didn't know I needed. I was losing money on every sofa re-cover. Now I know exactly where I stand before I cut a single metre.",
+      name: "Anelle Venter",
+      role: "Sofas & Drapes, Cape Town",
+      avatar: "AV",
     },
     {
       quote:
-        "My outstanding invoices dropped by 60% in the first month. The payment link on the invoice just makes it too easy for clients to pay.",
-      name: "André Botha",
-      role: "Joinery & Shopfitting, Pretoria",
-      avatar: "AB",
+        "My overdue invoices dropped massively in the first month. Clients pay instantly when there's a PayFast link right there on the invoice.",
+      name: "Kobus Fourie",
+      role: "Automotive & Marine Trim, Pretoria",
+      avatar: "KF",
     },
   ];
 
@@ -1532,7 +1521,7 @@ function Testimonials() {
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <p
             style={{
-              color: C.amber,
+              color: C.plum,
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: 3,
@@ -1553,7 +1542,7 @@ function Testimonials() {
               letterSpacing: -0.5,
             }}
           >
-            Trusted by carpenters across SA
+            Trusted by upholsterers across SA
           </h2>
         </div>
 
@@ -1571,7 +1560,7 @@ function Testimonials() {
                 background: C.white,
                 borderRadius: 16,
                 padding: "28px 24px",
-                border: `1px solid rgba(198,124,58,0.15)`,
+                border: `1px solid rgba(139,74,107,0.15)`,
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
@@ -1579,7 +1568,7 @@ function Testimonials() {
             >
               <div style={{ display: "flex", gap: 2 }}>
                 {[...Array(5)].map((_, j) => (
-                  <span key={j} style={{ color: C.amber, fontSize: 16 }}>
+                  <span key={j} style={{ color: C.plum, fontSize: 16 }}>
                     ★
                   </span>
                 ))}
@@ -1602,7 +1591,7 @@ function Testimonials() {
                   alignItems: "center",
                   gap: 12,
                   paddingTop: 12,
-                  borderTop: `1px solid rgba(198,124,58,0.12)`,
+                  borderTop: `1px solid rgba(139,74,107,0.12)`,
                 }}
               >
                 <div
@@ -1610,7 +1599,7 @@ function Testimonials() {
                     width: 40,
                     height: 40,
                     borderRadius: "50%",
-                    background: C.amberD,
+                    background: C.plumD,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -1663,17 +1652,17 @@ function Testimonials() {
           }}
         >
           {[
-            ["500+", "Active carpenters"],
-            ["R 14M+", "Quoted monthly"],
+            ["400+", "Active upholsterers"],
+            ["R 9M+", "Quoted monthly"],
             ["4.9/5", "App store rating"],
-            ["60%", "Faster payments"],
+            ["55%", "Faster payments"],
           ].map(([v, l], i) => (
             <div
               key={i}
               style={{
                 padding: "28px 24px",
                 textAlign: "center",
-                borderRight: i < 3 ? "1px solid rgba(198,124,58,0.1)" : "none",
+                borderRight: i < 3 ? "1px solid rgba(139,74,107,0.1)" : "none",
               }}
             >
               <div
@@ -1681,7 +1670,7 @@ function Testimonials() {
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 900,
                   fontSize: 36,
-                  color: C.amber,
+                  color: C.plum,
                 }}
               >
                 {v}
@@ -1690,7 +1679,7 @@ function Testimonials() {
                 style={{
                   fontFamily: "'Barlow', sans-serif",
                   fontSize: 13,
-                  color: "rgba(245,230,211,0.4)",
+                  color: "rgba(245,234,240,0.4)",
                   marginTop: 4,
                 }}
               >
@@ -1709,12 +1698,12 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo built specifically for carpentry?",
-      a: "Yes. The quote templates, material tracking fields, and job costing tools are all designed around how carpentry and joinery businesses actually work — not adapted from generic invoicing software.",
+      q: "Is SolidFlo built specifically for upholstery?",
+      a: "Yes. The quote templates, fabric tracking fields, and job costing tools are all designed around how upholstery and soft furnishing businesses actually work — not adapted from generic invoicing software.",
     },
     {
-      q: "Can I use it on site from my phone?",
-      a: "Absolutely. SolidFlo is fully mobile-responsive. You can create and send quotes directly from a job site, no laptop needed. Most carpenters send their first quote within 10 minutes of signing up.",
+      q: "Can I use it on site at a client's home?",
+      a: "Absolutely. SolidFlo is fully mobile-responsive. You can create and send quotes directly from a client's lounge, no laptop needed. Most upholsterers send their first quote within 10 minutes of signing up.",
     },
     {
       q: "Does it handle VAT automatically?",
@@ -1722,11 +1711,11 @@ function FAQ() {
     },
     {
       q: "Is SolidFlo really free?",
-      a: "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Craftsman or Workshop for unlimited invoicing.",
+      a: "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Studio or Workshop for unlimited invoicing.",
     },
     {
-      q: "What if I have an apprentice or office assistant?",
-      a: "The Workshop plan supports up to 5 users, each with their own login and permissions. Your apprentice can log materials and time while you focus on the craft.",
+      q: "What if I have a cutter or assistant?",
+      a: "The Workshop plan supports up to 5 users, each with their own login and permissions. Your cutter can log fabric usage and labour while you focus on the craft.",
     },
     {
       q: "Can I import my existing client list?",
@@ -1740,7 +1729,7 @@ function FAQ() {
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <p
             style={{
-              color: C.amber,
+              color: C.plum,
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: 3,
@@ -1761,7 +1750,7 @@ function FAQ() {
               letterSpacing: -0.5,
             }}
           >
-            Questions carpenters ask
+            Questions upholsterers ask
           </h2>
         </div>
 
@@ -1770,9 +1759,9 @@ function FAQ() {
             <div
               key={i}
               style={{
-                background: open === i ? C.amberL : C.surface,
+                background: open === i ? C.plumL : C.surface,
                 borderRadius: 12,
-                border: `1px solid ${open === i ? C.amber : C.border}`,
+                border: `1px solid ${open === i ? C.plum : C.border}`,
                 overflow: "hidden",
                 transition: "border-color .2s, background .2s",
               }}
@@ -1807,7 +1796,7 @@ function FAQ() {
                   height="18"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke={C.amber}
+                  stroke={C.plum}
                   strokeWidth="2.5"
                   style={{
                     flexShrink: 0,
@@ -1822,7 +1811,7 @@ function FAQ() {
                 <div
                   style={{
                     padding: "0 22px 18px",
-                    borderTop: `1px solid rgba(198,124,58,0.2)`,
+                    borderTop: `1px solid rgba(139,74,107,0.2)`,
                     paddingTop: 14,
                   }}
                 >
@@ -1858,8 +1847,7 @@ function CTABanner({ onRegister }) {
         overflow: "hidden",
       }}
     >
-      <WoodGrain opacity={0.04} />
-      {/* Giant background icon */}
+      <FabricTexture opacity={0.04} />
       <div
         style={{
           position: "absolute",
@@ -1874,7 +1862,7 @@ function CTABanner({ onRegister }) {
           userSelect: "none",
         }}
       >
-        🪵
+        🪡
       </div>
       <div
         style={{
@@ -1886,7 +1874,7 @@ function CTABanner({ onRegister }) {
       >
         <p
           style={{
-            color: C.amber,
+            color: C.plum,
             fontSize: 12,
             fontWeight: 700,
             letterSpacing: "0.15em",
@@ -1902,23 +1890,23 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow Condensed', sans-serif",
             fontWeight: 900,
             fontSize: "clamp(28px,4vw,52px)",
-            color: "#F5E6D3",
+            color: "#F5EAF0",
             margin: "0 0 16px",
             letterSpacing: -0.5,
           }}
         >
-          Your workshop, running smarter.
+          Your studio, running smarter.
         </h2>
         <p
           style={{
-            color: "rgba(245,230,211,0.4)",
+            color: "rgba(245,234,240,0.4)",
             fontSize: 16,
             margin: "0 0 36px",
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 500+ South African carpenters and joinery businesses that quote
-          professionally and get paid faster with SolidFlo.
+          Join 400+ South African upholsterers and soft furnishing studios that
+          quote professionally and get paid faster with SolidFlo.
         </p>
         <div
           style={{
@@ -1931,7 +1919,7 @@ function CTABanner({ onRegister }) {
           <button
             onClick={onRegister}
             style={{
-              background: C.amber,
+              background: C.plum,
               border: "none",
               borderRadius: 12,
               padding: "16px 36px",
@@ -1941,7 +1929,7 @@ function CTABanner({ onRegister }) {
               fontFamily: "'Barlow Condensed', sans-serif",
               cursor: "pointer",
               letterSpacing: 0.5,
-              boxShadow: "0 8px 28px rgba(198,124,58,0.45)",
+              boxShadow: "0 8px 28px rgba(139,74,107,0.45)",
             }}
           >
             START FOR FREE
@@ -1949,11 +1937,11 @@ function CTABanner({ onRegister }) {
           <button
             onClick={() => scrollTo("pricing")}
             style={{
-              background: "rgba(198,124,58,0.1)",
-              border: "1px solid rgba(198,124,58,0.3)",
+              background: "rgba(139,74,107,0.1)",
+              border: "1px solid rgba(139,74,107,0.3)",
               borderRadius: 12,
               padding: "16px 28px",
-              color: "rgba(245,230,211,0.7)",
+              color: "rgba(245,234,240,0.7)",
               fontSize: 15,
               fontWeight: 600,
               fontFamily: "'Barlow', sans-serif",
@@ -1965,7 +1953,7 @@ function CTABanner({ onRegister }) {
         </div>
         <p
           style={{
-            color: "rgba(245,230,211,0.2)",
+            color: "rgba(245,234,240,0.2)",
             fontSize: 12,
             marginTop: 20,
             fontFamily: "'Barlow', sans-serif",
@@ -2004,8 +1992,8 @@ function Footer({ onLogin, onRegister }) {
   return (
     <footer
       style={{
-        background: "#0e0b06",
-        borderTop: "1px solid rgba(198,124,58,0.1)",
+        background: "#0e080c",
+        borderTop: "1px solid rgba(139,74,107,0.1)",
         padding: "56px 24px 32px",
       }}
     >
@@ -2031,9 +2019,7 @@ function Footer({ onLogin, onRegister }) {
               <div
                 style={{
                   background: "transparent",
-                  
                   width: 160,
-                  
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -2042,11 +2028,10 @@ function Footer({ onLogin, onRegister }) {
               >
                 <img src={logo} alt="" />
               </div>
-              
             </div>
             <p
               style={{
-                color: "rgba(245,230,211,0.25)",
+                color: "rgba(245,234,240,0.25)",
                 fontSize: 13,
                 lineHeight: 1.7,
                 fontFamily: "'Barlow', sans-serif",
@@ -2055,12 +2040,12 @@ function Footer({ onLogin, onRegister }) {
               }}
             >
               Professional invoicing software built specifically for South
-              African carpenters and joinery businesses.
+              African upholsterers and soft furnishing studios.
             </p>
             <button
               onClick={onRegister}
               style={{
-                background: C.amber,
+                background: C.plum,
                 border: "none",
                 borderRadius: 8,
                 padding: "10px 20px",
@@ -2082,7 +2067,7 @@ function Footer({ onLogin, onRegister }) {
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 800,
                   fontSize: 14,
-                  color: "rgba(245,230,211,0.4)",
+                  color: "rgba(245,234,240,0.4)",
                   textTransform: "uppercase",
                   letterSpacing: 1,
                   margin: "0 0 16px",
@@ -2098,15 +2083,15 @@ function Footer({ onLogin, onRegister }) {
                     key={l}
                     href="#"
                     style={{
-                      color: "rgba(245,230,211,0.3)",
+                      color: "rgba(245,234,240,0.3)",
                       fontSize: 13,
                       fontFamily: "'Barlow', sans-serif",
                       textDecoration: "none",
                       transition: "color .15s",
                     }}
-                    onMouseEnter={(e) => (e.target.style.color = "#F5E6D3")}
+                    onMouseEnter={(e) => (e.target.style.color = "#F5EAF0")}
                     onMouseLeave={(e) =>
-                      (e.target.style.color = "rgba(245,230,211,0.3)")
+                      (e.target.style.color = "rgba(245,234,240,0.3)")
                     }
                   >
                     {l}
@@ -2119,7 +2104,7 @@ function Footer({ onLogin, onRegister }) {
 
         <div
           style={{
-            borderTop: "1px solid rgba(198,124,58,0.08)",
+            borderTop: "1px solid rgba(139,74,107,0.08)",
             paddingTop: 24,
             display: "flex",
             justifyContent: "space-between",
@@ -2130,7 +2115,7 @@ function Footer({ onLogin, onRegister }) {
         >
           <p
             style={{
-              color: "rgba(245,230,211,0.2)",
+              color: "rgba(245,234,240,0.2)",
               fontSize: 12,
               fontFamily: "'Barlow', sans-serif",
               margin: 0,
@@ -2140,7 +2125,7 @@ function Footer({ onLogin, onRegister }) {
           </p>
           <p
             style={{
-              color: "rgba(245,230,211,0.2)",
+              color: "rgba(245,234,240,0.2)",
               fontSize: 12,
               fontFamily: "'Barlow', sans-serif",
               margin: 0,

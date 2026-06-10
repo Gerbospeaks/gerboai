@@ -1,30 +1,31 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/img/photography-logo.png";
+import logo from "../../assets/img/virtual-logo.png";
+
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
 
 /* ─── Design Tokens ─────────────────────────────────────────────────────── */
 const C = {
-  ink: "#0F0D0A",
-  ink2: "#1A1712",
-  surface: "#F5F0E8",
+  ink: "#0A0D14",
+  ink2: "#111520",
+  surface: "#F0F2F8",
   white: "#FFFFFF",
-  gold: "#C8973A",
-  goldD: "#9A6E22",
-  goldL: "#F0E0C0",
-  border: "#E8DECE",
-  text: "#1E1A14",
-  muted: "#7A7060",
+  blue: "#3A6FC8",
+  blueD: "#2250A0",
+  blueL: "#D6E2F7",
+  border: "#D4DCF0",
+  text: "#111520",
+  muted: "#5A6580",
 };
 
 /* ─── Scroll helper ─────────────────────────────────────────────────────── */
 const scrollTo = (id) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
-/* ─── Film grain texture ────────────────────────────────────────────────── */
-function GrainTexture({ opacity = 0.04 }) {
+/* ─── Digital grid texture ──────────────────────────────────────────────── */
+function GridTexture({ opacity = 0.04 }) {
   return (
     <svg
       style={{
@@ -37,16 +38,16 @@ function GrainTexture({ opacity = 0.04 }) {
       }}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <filter id="grain">
+      <filter id="grid">
         <feTurbulence
           type="fractalNoise"
-          baseFrequency="0.80"
-          numOctaves="4"
+          baseFrequency="0.75"
+          numOctaves="3"
           stitchTiles="stitch"
         />
-        <feColorMatrix type="saturate" values="0" />
+        <feColorMatrix type="saturate" values="0.1" />
       </filter>
-      <rect width="100%" height="100%" filter="url(#grain)" />
+      <rect width="100%" height="100%" filter="url(#grid)" />
     </svg>
   );
 }
@@ -58,7 +59,7 @@ function MockInvoice() {
       style={{
         background: C.white,
         borderRadius: 16,
-        boxShadow: "0 32px 80px rgba(15,13,10,0.38)",
+        boxShadow: "0 32px 80px rgba(10,13,20,0.38)",
         overflow: "hidden",
         fontFamily: "'Barlow', sans-serif",
         border: `1px solid ${C.border}`,
@@ -69,7 +70,7 @@ function MockInvoice() {
       {/* Chrome bar */}
       <div
         style={{
-          background: "#EDE8DF",
+          background: "#E8EDF5",
           padding: "10px 16px",
           display: "flex",
           alignItems: "center",
@@ -101,7 +102,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/photography/INV-0053
+            solidflo.co.za/virtual/INV-0088
           </span>
         </div>
       </div>
@@ -110,7 +111,7 @@ function MockInvoice() {
       <div
         style={{
           padding: "20px 24px 16px",
-          borderBottom: `2px solid ${C.gold}`,
+          borderBottom: `2px solid ${C.blue}`,
         }}
       >
         <div
@@ -129,7 +130,7 @@ function MockInvoice() {
                 marginBottom: 6,
               }}
             >
-              <span style={{ fontSize: 26 }}>📷</span>
+              <span style={{ fontSize: 26 }}>💻</span>
               <div>
                 <p
                   style={{
@@ -140,10 +141,10 @@ function MockInvoice() {
                     margin: 0,
                   }}
                 >
-                  Langa Frame Studios
+                  Nkosi Digital Studio
                 </p>
                 <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
-                  Johannesburg, South Africa
+                  Cape Town, South Africa
                 </p>
               </div>
             </div>
@@ -172,10 +173,10 @@ function MockInvoice() {
                 margin: 0,
               }}
             >
-              INV-0053
+              INV-0088
             </p>
             <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
-              Issued 03 Apr 2025
+              Issued 01 Jun 2025
             </p>
           </div>
         </div>
@@ -207,28 +208,28 @@ function MockInvoice() {
           <tbody>
             {[
               {
-                desc: "Wedding Photography – Full Day (10 hrs)",
+                desc: "Social Media Management – Monthly Retainer",
                 qty: 1,
-                unit: "R12 500.00",
-                total: "R12 500.00",
+                unit: "R6 500.00",
+                total: "R6 500.00",
               },
               {
-                desc: "Professional Photo Editing (350 images)",
+                desc: "Graphic Design – Brand Asset Pack (10 items)",
                 qty: 1,
-                unit: "R3 200.00",
-                total: "R3 200.00",
+                unit: "R3 800.00",
+                total: "R3 800.00",
               },
               {
-                desc: "Second Shooter – Ceremony & Reception",
-                qty: 1,
-                unit: "R2 800.00",
-                total: "R2 800.00",
+                desc: "Copywriting – 4 Blog Posts (800 words each)",
+                qty: 4,
+                unit: "R950.00",
+                total: "R3 800.00",
               },
               {
-                desc: "Premium Photo Album (30 spreads, lay-flat)",
-                qty: 1,
-                unit: "R4 500.00",
-                total: "R4 500.00",
+                desc: "Strategy Call – 60 min (Zoom)",
+                qty: 2,
+                unit: "R850.00",
+                total: "R1 700.00",
               },
             ].map((r, i) => (
               <tr key={i} style={{ borderBottom: `1px solid ${C.border}` }}>
@@ -278,8 +279,8 @@ function MockInvoice() {
         }}
       >
         {[
-          ["Subtotal", "R23 000.00"],
-          ["VAT (15%)", "R3 450.00"],
+          ["Subtotal", "R15 800.00"],
+          ["VAT (15%)", "R2 370.00"],
         ].map(([l, v]) => (
           <div key={l} style={{ display: "flex", gap: 32, fontSize: 12 }}>
             <span style={{ color: C.muted }}>{l}</span>
@@ -300,7 +301,7 @@ function MockInvoice() {
         >
           <span
             style={{
-              color: "rgba(245,240,232,0.7)",
+              color: "rgba(240,242,248,0.7)",
               fontSize: 13,
               fontWeight: 600,
             }}
@@ -309,7 +310,7 @@ function MockInvoice() {
           </span>
           <span
             style={{
-              color: "#F5F0E8",
+              color: "#F0F2F8",
               fontWeight: 800,
               fontSize: 15,
               minWidth: 80,
@@ -317,7 +318,7 @@ function MockInvoice() {
               fontFamily: "'Barlow Condensed', sans-serif",
             }}
           >
-            R26 450.00
+            R18 170.00
           </span>
         </div>
       </div>
@@ -325,6 +326,7 @@ function MockInvoice() {
   );
 }
 
+/* ─── Navbar ────────────────────────────────────────────────────────────── */
 function Navbar({ onLogin, onRegister }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -335,9 +337,10 @@ function Navbar({ onLogin, onRegister }) {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  // Close menu on resize to desktop
   useEffect(() => {
-    const fn = () => { if (window.innerWidth > 768) setOpen(false); };
+    const fn = () => {
+      if (window.innerWidth > 768) setOpen(false);
+    };
     window.addEventListener("resize", fn);
     return () => window.removeEventListener("resize", fn);
   }, []);
@@ -379,7 +382,6 @@ function Navbar({ onLogin, onRegister }) {
           height: 60,
         }}
       >
-        {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
             style={{
@@ -395,7 +397,6 @@ function Navbar({ onLogin, onRegister }) {
           </div>
         </div>
 
-        {/* Desktop links */}
         {!isMobile && (
           <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
             {links.map((s) => (
@@ -414,7 +415,9 @@ function Navbar({ onLogin, onRegister }) {
                   transition: "color .2s",
                 }}
                 onMouseEnter={(e) => (e.target.style.color = C.white)}
-                onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.55)")}
+                onMouseLeave={(e) =>
+                  (e.target.style.color = "rgba(255,255,255,0.55)")
+                }
               >
                 {s}
               </button>
@@ -422,7 +425,6 @@ function Navbar({ onLogin, onRegister }) {
           </div>
         )}
 
-        {/* Desktop CTA */}
         {!isMobile && (
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <button
@@ -443,7 +445,7 @@ function Navbar({ onLogin, onRegister }) {
             <button
               onClick={onRegister}
               style={{
-                background: C.orange,
+                background: C.blue,
                 border: "none",
                 borderRadius: 8,
                 padding: "8px 20px",
@@ -452,7 +454,7 @@ function Navbar({ onLogin, onRegister }) {
                 fontWeight: 700,
                 fontFamily: "'Barlow', sans-serif",
                 cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(249,115,22,0.4)",
+                boxShadow: "0 4px 12px rgba(58,111,200,0.4)",
               }}
             >
               Start Free →
@@ -460,7 +462,6 @@ function Navbar({ onLogin, onRegister }) {
           </div>
         )}
 
-        {/* Hamburger button (mobile only) */}
         {isMobile && (
           <button
             onClick={() => setOpen(!open)}
@@ -478,7 +479,6 @@ function Navbar({ onLogin, onRegister }) {
             }}
             aria-label="Toggle menu"
           >
-            {/* Animated hamburger lines */}
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
@@ -491,10 +491,13 @@ function Navbar({ onLogin, onRegister }) {
                   transition: "transform .2s, opacity .2s",
                   transformOrigin: "center",
                   transform:
-                    open && i === 0 ? "translateY(7px) rotate(45deg)"
-                    : open && i === 1 ? "scaleX(0)"
-                    : open && i === 2 ? "translateY(-7px) rotate(-45deg)"
-                    : "none",
+                    open && i === 0
+                      ? "translateY(7px) rotate(45deg)"
+                      : open && i === 1
+                        ? "scaleX(0)"
+                        : open && i === 2
+                          ? "translateY(-7px) rotate(-45deg)"
+                          : "none",
                   opacity: open && i === 1 ? 0 : 1,
                 }}
               />
@@ -503,7 +506,6 @@ function Navbar({ onLogin, onRegister }) {
         )}
       </div>
 
-      {/* Mobile dropdown menu */}
       {isMobile && (
         <div
           style={{
@@ -514,7 +516,14 @@ function Navbar({ onLogin, onRegister }) {
             borderTop: open ? `1px solid rgba(255,255,255,0.07)` : "none",
           }}
         >
-          <div style={{ padding: "12px 24px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
+          <div
+            style={{
+              padding: "12px 24px 20px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+            }}
+          >
             {links.map((s) => (
               <button
                 key={s}
@@ -534,16 +543,26 @@ function Navbar({ onLogin, onRegister }) {
                   transition: "color .2s",
                 }}
                 onMouseEnter={(e) => (e.target.style.color = C.white)}
-                onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.65)")}
+                onMouseLeave={(e) =>
+                  (e.target.style.color = "rgba(255,255,255,0.65)")
+                }
               >
                 {s}
               </button>
             ))}
-
-            {/* Mobile CTAs */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                marginTop: 12,
+              }}
+            >
               <button
-                onClick={() => { onLogin(); setOpen(false); }}
+                onClick={() => {
+                  onLogin();
+                  setOpen(false);
+                }}
                 style={{
                   background: "none",
                   border: "1px solid rgba(255,255,255,0.2)",
@@ -558,9 +577,12 @@ function Navbar({ onLogin, onRegister }) {
                 Sign In
               </button>
               <button
-                onClick={() => { onRegister(); setOpen(false); }}
+                onClick={() => {
+                  onRegister();
+                  setOpen(false);
+                }}
                 style={{
-                  background: C.orange,
+                  background: C.blue,
                   border: "none",
                   borderRadius: 8,
                   padding: "12px",
@@ -569,7 +591,7 @@ function Navbar({ onLogin, onRegister }) {
                   fontWeight: 700,
                   fontFamily: "'Barlow', sans-serif",
                   cursor: "pointer",
-                  boxShadow: "0 4px 12px rgba(249,115,22,0.4)",
+                  boxShadow: "0 4px 12px rgba(58,111,200,0.4)",
                 }}
               >
                 Start Free →
@@ -597,9 +619,9 @@ function Hero({ onRegister }) {
         justifyContent: "center",
       }}
     >
-      <GrainTexture opacity={0.05} />
+      <GridTexture opacity={0.05} />
 
-      {/* Warm cinematic glow */}
+      {/* Blue glow */}
       <div
         style={{
           position: "absolute",
@@ -609,7 +631,7 @@ function Hero({ onRegister }) {
           width: 800,
           height: 320,
           borderRadius: "50%",
-          background: C.gold,
+          background: C.blue,
           opacity: 0.09,
           filter: "blur(90px)",
           pointerEvents: "none",
@@ -623,23 +645,14 @@ function Hero({ onRegister }) {
           width: 500,
           height: 500,
           borderRadius: "50%",
-          background: C.gold,
+          background: C.blue,
           opacity: 0.05,
           filter: "blur(80px)",
           pointerEvents: "none",
         }}
       />
 
-      {/* Subtle grid */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage: `linear-gradient(rgba(200,151,58,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(200,151,58,0.04) 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-          pointerEvents: "none",
-        }}
-      />
+     
 
       <div
         style={{
@@ -660,24 +673,24 @@ function Hero({ onRegister }) {
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: "rgba(200,151,58,0.12)",
-              border: "1px solid rgba(200,151,58,0.3)",
+              background: "rgba(58,111,200,0.12)",
+              border: "1px solid rgba(58,111,200,0.3)",
               borderRadius: 99,
               padding: "5px 14px",
               marginBottom: 22,
             }}
           >
-            <span style={{ fontSize: 14 }}>📷</span>
+            <span style={{ fontSize: 14 }}>💻</span>
             <span
               style={{
-                color: C.gold,
+                color: C.blue,
                 fontSize: 12,
                 fontWeight: 700,
                 fontFamily: "'Barlow', sans-serif",
                 letterSpacing: "0.05em",
               }}
             >
-              Purpose-Built for South African Photographers
+              Purpose-Built for South African Virtual Service Providers
             </span>
           </div>
 
@@ -687,21 +700,21 @@ function Hero({ onRegister }) {
               fontWeight: 900,
               fontSize: "clamp(40px, 5vw, 62px)",
               lineHeight: 1.05,
-              color: "#F5F0E8",
+              color: "#F0F2F8",
               margin: "0 0 20px",
               letterSpacing: "-0.5px",
             }}
           >
             Spend More Time
             <br />
-            <span style={{ color: C.gold }}>Behind the Lens.</span>
+            <span style={{ color: C.blue }}>Delivering Value.</span>
             <br />
-            Less Chasing Cash.
+            Less Chasing Payment.
           </h1>
 
           <p
             style={{
-              color: "rgba(245,240,232,0.5)",
+              color: "rgba(240,242,248,0.5)",
               fontSize: 17,
               lineHeight: 1.7,
               margin: "0 0 36px",
@@ -709,16 +722,16 @@ function Hero({ onRegister }) {
               maxWidth: 460,
             }}
           >
-            Send polished quotes, collect deposits, deliver galleries, and get
-            fully paid — purpose-built for South African photographers,
-            videographers, and content creators.
+            Send polished quotes, collect retainers, deliver work, and get fully
+            paid — purpose-built for South African freelancers, consultants,
+            designers, copywriters, and digital agency owners.
           </p>
 
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
             <button
               onClick={onRegister}
               style={{
-                background: C.gold,
+                background: C.blue,
                 border: "none",
                 borderRadius: 10,
                 padding: "14px 28px",
@@ -727,7 +740,7 @@ function Hero({ onRegister }) {
                 fontWeight: 700,
                 fontFamily: "'Barlow', sans-serif",
                 cursor: "pointer",
-                boxShadow: `0 8px 24px ${C.gold}4D`,
+                boxShadow: "0 8px 24px rgba(58,111,200,0.4)",
                 transition: "transform .15s",
               }}
               onMouseEnter={(e) =>
@@ -742,11 +755,11 @@ function Hero({ onRegister }) {
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(200,151,58,0.1)",
-                border: "1px solid rgba(200,151,58,0.3)",
+                background: "rgba(58,111,200,0.1)",
+                border: "1px solid rgba(58,111,200,0.3)",
                 borderRadius: 10,
                 padding: "14px 24px",
-                color: "rgba(245,240,232,0.7)",
+                color: "rgba(240,242,248,0.7)",
                 fontSize: 15,
                 fontWeight: 600,
                 fontFamily: "'Barlow', sans-serif",
@@ -767,8 +780,8 @@ function Hero({ onRegister }) {
           >
             {[
               "Free plan forever",
-              "Deposit protection",
-              "Gallery delivery",
+              "Retainer protection",
+              "Work delivery links",
               "SA-built & hosted",
             ].map((t) => (
               <span
@@ -777,12 +790,12 @@ function Hero({ onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(245,240,232,0.3)",
+                  color: "rgba(240,242,248,0.3)",
                   fontSize: 12,
                   fontFamily: "'Barlow', sans-serif",
                 }}
               >
-                <span style={{ color: C.gold, fontSize: 10 }}>✦</span>
+                <span style={{ color: C.blue, fontSize: 10 }}>✦</span>
                 {t}
               </span>
             ))}
@@ -817,21 +830,21 @@ function Hero({ onRegister }) {
                 gap: 6,
               }}
             >
-              <span>💰</span> Deposit received!
+              <span>💰</span> Retainer received!
             </div>
             <MockInvoice />
             <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
               {[
-                ["R128 000", "This Month"],
-                ["31", "Active Bookings"],
+                ["R94 000", "This Month"],
+                ["18", "Active Clients"],
                 ["4.9★", "Client Rating"],
               ].map(([v, l]) => (
                 <div
                   key={l}
                   style={{
                     flex: 1,
-                    background: "rgba(200,151,58,0.1)",
-                    border: "1px solid rgba(200,151,58,0.22)",
+                    background: "rgba(58,111,200,0.1)",
+                    border: "1px solid rgba(58,111,200,0.22)",
                     borderRadius: 10,
                     padding: "10px 12px",
                     textAlign: "center",
@@ -842,7 +855,7 @@ function Hero({ onRegister }) {
                       fontFamily: "'Barlow Condensed', sans-serif",
                       fontWeight: 800,
                       fontSize: 18,
-                      color: "#F5F0E8",
+                      color: "#F0F2F8",
                     }}
                   >
                     {v}
@@ -850,7 +863,7 @@ function Hero({ onRegister }) {
                   <div
                     style={{
                       fontSize: 11,
-                      color: "rgba(245,240,232,0.4)",
+                      color: "rgba(240,242,248,0.4)",
                       fontFamily: "'Barlow', sans-serif",
                     }}
                   >
@@ -868,7 +881,7 @@ function Hero({ onRegister }) {
         style={{
           maxWidth: 1200,
           margin: "48px auto 0",
-          borderTop: "1px solid rgba(200,151,58,0.12)",
+          borderTop: "1px solid rgba(58,111,200,0.12)",
           paddingTop: 28,
           display: "flex",
           gap: 40,
@@ -880,18 +893,18 @@ function Hero({ onRegister }) {
       >
         <span
           style={{
-            color: "rgba(245,240,232,0.25)",
+            color: "rgba(240,242,248,0.25)",
             fontSize: 13,
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          TRUSTED BY SA PHOTOGRAPHERS & VIDEOGRAPHERS
+          TRUSTED BY SA FREELANCERS & DIGITAL AGENCIES
         </span>
         {[
-          "Langa Frame Studios",
+          "Nkosi Digital Studio",
           "Sithole Creative Co.",
-          "Cape Light Photography",
-          "Dube Film & Photo",
+          "Cape Copy & Content",
+          "Dube Design Agency",
         ].map((b) => (
           <span
             key={b}
@@ -899,7 +912,7 @@ function Hero({ onRegister }) {
               fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 700,
               fontSize: 15,
-              color: "rgba(245,240,232,0.2)",
+              color: "rgba(240,242,248,0.2)",
               letterSpacing: 0.5,
             }}
           >
@@ -928,15 +941,15 @@ function LayDivider() {
         style={{
           height: 1,
           flex: 1,
-          background: `linear-gradient(to right, transparent, ${C.gold}55)`,
+          background: `linear-gradient(to right, transparent, rgba(58,111,200,0.35))`,
         }}
       />
-      <span style={{ color: C.gold, fontSize: 14 }}>✦</span>
+      <span style={{ color: C.blue, fontSize: 14 }}>✦</span>
       <div
         style={{
           height: 1,
           flex: 1,
-          background: `linear-gradient(to left, transparent, ${C.gold}55)`,
+          background: `linear-gradient(to left, transparent, rgba(58,111,200,0.35))`,
         }}
       />
     </div>
@@ -949,17 +962,17 @@ function HowItWorks() {
     {
       icon: "📝",
       title: "Quote & Book",
-      desc: "Send a professional package quote with your rates, inclusions, and a deposit request — all in one link. Clients confirm and pay the deposit directly. No back-and-forth emails.",
+      desc: "Send a professional service quote with your rates, scope of work, and a retainer or deposit request — all in one link. Clients confirm and pay upfront. No back-and-forth emails.",
     },
     {
       icon: "📩",
       title: "Invoice the Balance",
-      desc: "When the shoot wraps, send the balance invoice instantly via email or WhatsApp PDF. Link it to the gallery delivery so clients pay before they download.",
+      desc: "When the work is done, send the balance invoice instantly via email or WhatsApp PDF. Link it to your deliverable so clients pay before they download.",
     },
     {
       icon: "💳",
       title: "Get Paid & Deliver",
-      desc: "Clients pay via EFT, PayFast, or SnapScan. You're notified immediately, and they unlock their gallery. No more chasing payment before releasing images.",
+      desc: "Clients pay via EFT, PayFast, or SnapScan. You're notified immediately and they unlock their files. No more releasing work before payment clears.",
     },
   ];
 
@@ -969,7 +982,7 @@ function HowItWorks() {
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <p
             style={{
-              color: C.gold,
+              color: C.blue,
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: 3,
@@ -990,7 +1003,7 @@ function HowItWorks() {
               letterSpacing: -0.5,
             }}
           >
-            Quote, shoot, deliver, repeat.
+            Quote, deliver, get paid — repeat.
           </h2>
         </div>
         <div
@@ -1020,17 +1033,27 @@ function HowItWorks() {
                   fontWeight: 900,
                   fontSize: 48,
                   color:
-                    i === 1 ? "rgba(200,151,58,0.07)" : "rgba(15,13,10,0.06)",
+                    i === 1 ? "rgba(58,111,200,0.07)" : "rgba(10,13,20,0.06)",
                   lineHeight: 1,
                 }}
               >
                 0{i + 1}
               </div>
-              <img src={logo} width={80} alt="" />
-
+              <div style={{ fontSize: 32, marginBottom: 16 }}>{s.icon}</div>
+              <h3
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 800,
+                  fontSize: 22,
+                  color: i === 1 ? "#F0F2F8" : C.ink,
+                  margin: "0 0 10px",
+                }}
+              >
+                {s.title}
+              </h3>
               <p
                 style={{
-                  color: i === 1 ? "rgba(245,240,232,0.55)" : C.muted,
+                  color: i === 1 ? "rgba(240,242,248,0.55)" : C.muted,
                   fontSize: 14,
                   lineHeight: 1.7,
                   margin: 0,
@@ -1044,7 +1067,7 @@ function HowItWorks() {
                   style={{
                     marginTop: 20,
                     display: "inline-block",
-                    background: C.gold,
+                    background: C.blue,
                     borderRadius: 6,
                     padding: "5px 14px",
                     fontSize: 12,
@@ -1069,43 +1092,43 @@ function Features() {
   const features = [
     {
       icon: "📦",
-      title: "Package Builder",
-      desc: "Create half-day, full-day, wedding, and portrait packages with custom inclusions. Send a single quote link — clients see exactly what they're paying for.",
+      title: "Service Package Builder",
+      desc: "Create starter, standard, and premium packages with custom deliverables and pricing. Send a single quote link — clients see exactly what they're paying for.",
     },
     {
       icon: "💰",
-      title: "Deposit & Balance Invoicing",
-      desc: "Split any booking into a deposit and balance invoice automatically. Protect yourself from cancellations and improve cash flow across every shoot.",
+      title: "Retainer & Balance Invoicing",
+      desc: "Split any project into an upfront retainer and a completion invoice automatically. Protect yourself from scope creep and improve cash flow across every client.",
     },
     {
       icon: "🗓️",
-      title: "Booking Calendar",
-      desc: "See all your confirmed shoots, pending quotes, and follow-ups in one view. Never double-book a date or forget a corporate shoot again.",
+      title: "Project Calendar",
+      desc: "See all active projects, pending quotes, and deadlines in one view. Never miss a delivery date or let a proposal go cold.",
     },
     {
-      icon: "🖼️",
-      title: "Gallery Delivery Links",
-      desc: "Link gallery delivery to invoice payment. Clients get access to their images the moment the balance clears — no more awkward payment conversations.",
+      icon: "🔗",
+      title: "Work Delivery Links",
+      desc: "Link your deliverable (Google Drive, Dropbox, Notion, or anywhere) to the invoice. Clients get access only once the balance clears — completely automatic.",
     },
     {
       icon: "📄",
-      title: "Shoot Contracts",
-      desc: "Send a professional contract alongside your quote. Clients sign digitally before the deposit is due. Disputes resolved before they start.",
+      title: "Service Contracts",
+      desc: "Send a professional contract alongside your quote. Clients sign digitally before the retainer is due. Disputes and scope creep resolved before they start.",
     },
     {
       icon: "📊",
       title: "Business Reports",
-      desc: "Monthly revenue, outstanding balances, and revenue per shoot type. Know your most profitable work so you can book more of it.",
+      desc: "Monthly revenue, outstanding balances, and revenue per service type. Know your most profitable work so you can pitch more of it.",
     },
     {
       icon: "🔔",
       title: "Automatic Reminders",
-      desc: "Automatically remind clients about unpaid balances before gallery delivery. Polite, professional, and completely hands-off.",
+      desc: "Automatically remind clients about unpaid balances before deliverables are released. Polite, professional, and completely hands-off.",
     },
     {
       icon: "📱",
       title: "Mobile-First",
-      desc: "Quote from a consultation, invoice at wrap, and share galleries from your phone. Fully responsive — no laptop, no delays.",
+      desc: "Quote from a discovery call, invoice on completion, and share work files from your phone. Fully responsive — no laptop, no delays.",
     },
     {
       icon: "🧾",
@@ -1123,7 +1146,7 @@ function Features() {
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <p
             style={{
-              color: C.gold,
+              color: C.blue,
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: 3,
@@ -1144,7 +1167,7 @@ function Features() {
               letterSpacing: -0.5,
             }}
           >
-            Every tool your photography business needs
+            Every tool your virtual services business needs
           </h2>
           <p
             style={{
@@ -1155,8 +1178,8 @@ function Features() {
               fontFamily: "'Barlow', sans-serif",
             }}
           >
-            No bloat. No generic invoicing software. Just what a photographer
-            actually uses on every booking.
+            No bloat. No generic invoicing software. Just what a freelancer or
+            digital agency actually uses on every client.
           </p>
         </div>
 
@@ -1174,19 +1197,20 @@ function Features() {
                 background: C.white,
                 borderRadius: 14,
                 padding: "24px 22px",
-                border: `1px solid rgba(200,151,58,0.15)`,
+                border: `1px solid rgba(58,111,200,0.15)`,
                 transition: "box-shadow .2s, transform .2s, border-color .2s",
                 cursor: "default",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = `0 8px 32px rgba(200,151,58,0.12)`;
+                e.currentTarget.style.boxShadow =
+                  "0 8px 32px rgba(58,111,200,0.12)";
                 e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.borderColor = "rgba(200,151,58,0.45)";
+                e.currentTarget.style.borderColor = "rgba(58,111,200,0.45)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.boxShadow = "none";
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.borderColor = "rgba(200,151,58,0.15)";
+                e.currentTarget.style.borderColor = "rgba(58,111,200,0.15)";
               }}
             >
               <div
@@ -1194,7 +1218,7 @@ function Features() {
                   width: 44,
                   height: 44,
                   borderRadius: 10,
-                  background: C.goldL,
+                  background: C.blueL,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -1241,10 +1265,10 @@ function Pricing({ onRegister }) {
       name: "Starter",
       price: "Free",
       period: "forever",
-      desc: "For photographers just starting out",
+      desc: "For freelancers just starting out",
       features: [
         "5 invoices / month",
-        "Basic package quotes",
+        "Basic service quotes",
         "Client records",
         "PDF export",
         "Email support",
@@ -1252,31 +1276,31 @@ function Pricing({ onRegister }) {
       cta: "Get Started Free",
     },
     {
-      name: "Shooter",
+      name: "Professional",
       price: "R299",
       period: "/month",
-      desc: "For professional photographers & videographers",
+      desc: "For established freelancers & consultants",
       highlight: true,
       features: [
         "Unlimited invoices & quotes",
-        "Deposit & balance invoicing",
-        "Shoot contracts (e-sign)",
-        "Gallery delivery links",
-        "Booking calendar",
+        "Retainer & balance invoicing",
+        "Service contracts (e-sign)",
+        "Work delivery links",
+        "Project calendar",
         "Payment links (EFT, PayFast)",
         "Automatic payment reminders",
       ],
       cta: "Start 14-Day Free Trial",
     },
     {
-      name: "Studio",
+      name: "Agency",
       price: "R599",
       period: "/month",
-      desc: "For photography studios with multiple photographers",
+      desc: "For digital agencies with multiple team members",
       features: [
-        "Everything in Shooter",
-        "Up to 5 photographer logins",
-        "Multi-shoot dashboard",
+        "Everything in Professional",
+        "Up to 5 team logins",
+        "Multi-client dashboard",
         "Custom branded contracts",
         "Xero / QuickBooks sync",
         "Priority support",
@@ -1291,7 +1315,7 @@ function Pricing({ onRegister }) {
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <p
             style={{
-              color: C.gold,
+              color: C.blue,
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: 3,
@@ -1321,7 +1345,7 @@ function Pricing({ onRegister }) {
               fontFamily: "'Barlow', sans-serif",
             }}
           >
-            Start free. Upgrade when your bookings are rolling.
+            Start free. Upgrade when your client list is growing.
           </p>
         </div>
 
@@ -1340,13 +1364,13 @@ function Pricing({ onRegister }) {
                 padding: "32px 28px",
                 background: p.highlight ? C.ink : C.surface,
                 border: p.highlight
-                  ? `2px solid ${C.gold}`
+                  ? `2px solid ${C.blue}`
                   : `1px solid ${C.border}`,
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
                 boxShadow: p.highlight
-                  ? "0 20px 60px rgba(15,13,10,0.35)"
+                  ? "0 20px 60px rgba(10,13,20,0.35)"
                   : "none",
               }}
             >
@@ -1357,7 +1381,7 @@ function Pricing({ onRegister }) {
                     top: -14,
                     left: "50%",
                     transform: "translateX(-50%)",
-                    background: C.gold,
+                    background: C.blue,
                     color: C.white,
                     fontSize: 11,
                     fontWeight: 800,
@@ -1365,7 +1389,7 @@ function Pricing({ onRegister }) {
                     borderRadius: 99,
                     fontFamily: "'Barlow', sans-serif",
                     letterSpacing: "0.08em",
-                    boxShadow: `0 4px 12px ${C.gold}66`,
+                    boxShadow: "0 4px 12px rgba(58,111,200,0.4)",
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -1375,7 +1399,7 @@ function Pricing({ onRegister }) {
               <div style={{ marginBottom: 20 }}>
                 <p
                   style={{
-                    color: p.highlight ? "rgba(245,240,232,0.5)" : C.gold,
+                    color: p.highlight ? "rgba(240,242,248,0.5)" : C.blue,
                     fontSize: 11,
                     fontWeight: 700,
                     textTransform: "uppercase",
@@ -1394,14 +1418,14 @@ function Pricing({ onRegister }) {
                       fontFamily: "'Barlow Condensed', sans-serif",
                       fontWeight: 900,
                       fontSize: 40,
-                      color: p.highlight ? "#F5F0E8" : C.ink,
+                      color: p.highlight ? "#F0F2F8" : C.ink,
                     }}
                   >
                     {p.price}
                   </span>
                   <span
                     style={{
-                      color: p.highlight ? "rgba(245,240,232,0.4)" : C.muted,
+                      color: p.highlight ? "rgba(240,242,248,0.4)" : C.muted,
                       fontSize: 14,
                       fontFamily: "'Barlow', sans-serif",
                     }}
@@ -1411,7 +1435,7 @@ function Pricing({ onRegister }) {
                 </div>
                 <p
                   style={{
-                    color: p.highlight ? "rgba(245,240,232,0.4)" : C.muted,
+                    color: p.highlight ? "rgba(240,242,248,0.4)" : C.muted,
                     fontSize: 12,
                     margin: "4px 0 0",
                     fontFamily: "'Barlow', sans-serif",
@@ -1445,7 +1469,7 @@ function Pricing({ onRegister }) {
                       width="15"
                       height="15"
                       viewBox="0 0 20 20"
-                      fill={C.gold}
+                      fill={C.blue}
                       style={{ flexShrink: 0, marginTop: 2 }}
                     >
                       <path
@@ -1456,7 +1480,7 @@ function Pricing({ onRegister }) {
                     </svg>
                     <span
                       style={{
-                        color: p.highlight ? "rgba(245,240,232,0.75)" : C.text,
+                        color: p.highlight ? "rgba(240,242,248,0.75)" : C.text,
                         fontSize: 13,
                         fontFamily: "'Barlow', sans-serif",
                       }}
@@ -1470,16 +1494,18 @@ function Pricing({ onRegister }) {
               <button
                 onClick={onRegister}
                 style={{
-                  background: p.highlight ? C.gold : C.ink,
+                  background: p.highlight ? C.blue : C.ink,
                   border: "none",
                   borderRadius: 10,
                   padding: "12px",
-                  color: "#F5F0E8",
+                  color: "#F0F2F8",
                   fontWeight: 700,
                   fontSize: 14,
                   fontFamily: "'Barlow', sans-serif",
                   cursor: "pointer",
-                  boxShadow: p.highlight ? `0 6px 20px ${C.gold}59` : "none",
+                  boxShadow: p.highlight
+                    ? "0 6px 20px rgba(58,111,200,0.35)"
+                    : "none",
                 }}
               >
                 {p.cta}
@@ -1497,23 +1523,23 @@ function Testimonials() {
   const testimonials = [
     {
       quote:
-        "I used to release galleries and then spend weeks chasing the balance. With SolidFlo the gallery link only activates after payment clears. I haven't had a single late payer since.",
-      name: "Lungelo Langa",
-      role: "Langa Frame Studios, Johannesburg",
-      avatar: "LL",
+        "I used to send work and then spend weeks waiting for EFTs to clear. With SolidFlo the download link only activates after payment. I haven't had a single late payer in three months.",
+      name: "Lungelo Nkosi",
+      role: "Nkosi Digital Studio, Cape Town",
+      avatar: "LN",
     },
     {
       quote:
-        "The deposit invoicing feature alone changed my business. I take 50% upfront on every wedding now — SolidFlo makes it feel completely normal to the client because it looks so professional.",
+        "The retainer invoicing changed my entire cash flow. I now take 50% upfront on every project — SolidFlo makes it feel completely standard to the client because the quote looks so professional.",
       name: "Carla du Plessis",
-      role: "Cape Light Photography, Cape Town",
+      role: "Cape Copy & Content, Cape Town",
       avatar: "CD",
     },
     {
       quote:
-        "I photograph 8–10 corporates a month. Sending the invoice with a PayFast link the moment the shoot wraps means I'm usually paid before I've even culled the images.",
+        "I manage 12 ongoing social media clients. Sending a monthly retainer invoice in one click means I'm always paid before I start the next month's work. It's transformed how I run the business.",
       name: "Zanele Dube",
-      role: "Dube Film & Photo, Pretoria",
+      role: "Dube Design Agency, Pretoria",
       avatar: "ZD",
     },
   ];
@@ -1527,7 +1553,7 @@ function Testimonials() {
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <p
             style={{
-              color: C.gold,
+              color: C.blue,
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: 3,
@@ -1548,7 +1574,7 @@ function Testimonials() {
               letterSpacing: -0.5,
             }}
           >
-            Trusted by photographers across SA
+            Trusted by freelancers & agencies across SA
           </h2>
         </div>
 
@@ -1566,7 +1592,7 @@ function Testimonials() {
                 background: C.white,
                 borderRadius: 16,
                 padding: "28px 24px",
-                border: `1px solid rgba(200,151,58,0.15)`,
+                border: `1px solid rgba(58,111,200,0.15)`,
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
@@ -1574,7 +1600,7 @@ function Testimonials() {
             >
               <div style={{ display: "flex", gap: 2 }}>
                 {[...Array(5)].map((_, j) => (
-                  <span key={j} style={{ color: C.gold, fontSize: 16 }}>
+                  <span key={j} style={{ color: C.blue, fontSize: 16 }}>
                     ★
                   </span>
                 ))}
@@ -1597,7 +1623,7 @@ function Testimonials() {
                   alignItems: "center",
                   gap: 12,
                   paddingTop: 12,
-                  borderTop: `1px solid rgba(200,151,58,0.12)`,
+                  borderTop: `1px solid rgba(58,111,200,0.12)`,
                 }}
               >
                 <div
@@ -1605,7 +1631,7 @@ function Testimonials() {
                     width: 40,
                     height: 40,
                     borderRadius: "50%",
-                    background: C.goldD,
+                    background: C.blueD,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -1658,17 +1684,17 @@ function Testimonials() {
           }}
         >
           {[
-            ["700+", "Active photographers"],
-            ["R 28M+", "Quoted monthly"],
+            ["600+", "Active freelancers"],
+            ["R 22M+", "Invoiced monthly"],
             ["4.9/5", "App store rating"],
-            ["72%", "Faster payments"],
+            ["68%", "Faster payments"],
           ].map(([v, l], i) => (
             <div
               key={i}
               style={{
                 padding: "28px 24px",
                 textAlign: "center",
-                borderRight: i < 3 ? `1px solid rgba(200,151,58,0.1)` : "none",
+                borderRight: i < 3 ? `1px solid rgba(58,111,200,0.1)` : "none",
               }}
             >
               <div
@@ -1676,7 +1702,7 @@ function Testimonials() {
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 900,
                   fontSize: 36,
-                  color: C.gold,
+                  color: C.blue,
                 }}
               >
                 {v}
@@ -1685,7 +1711,7 @@ function Testimonials() {
                 style={{
                   fontFamily: "'Barlow', sans-serif",
                   fontSize: 13,
-                  color: "rgba(245,240,232,0.4)",
+                  color: "rgba(240,242,248,0.4)",
                   marginTop: 4,
                 }}
               >
@@ -1704,28 +1730,28 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo built specifically for photographers?",
-      a: "Yes. The package builder, deposit/balance split invoicing, shoot contracts, and gallery delivery links are designed around how photographers actually manage bookings — not adapted from generic small business software.",
+      q: "Is SolidFlo built specifically for virtual service providers?",
+      a: "Yes. The service package builder, retainer/balance split invoicing, contracts, and work delivery links are designed around how freelancers, consultants, and digital agencies actually manage clients — not adapted from generic small business software.",
     },
     {
-      q: "How does the gallery delivery link work?",
-      a: "You paste your gallery link (from Pixieset, Google Drive, Dropbox, or anywhere else) into the invoice. The client only sees the active link once their balance invoice is marked as paid. It's automatic and completely hands-off.",
+      q: "How does the work delivery link work?",
+      a: "You paste your deliverable link (from Google Drive, Dropbox, Notion, or anywhere) into the invoice. The client only sees the active link once their balance invoice is marked as paid. It's automatic and completely hands-off.",
     },
     {
-      q: "Can I collect deposits before the shoot?",
-      a: "Yes. The Shooter plan lets you split any booking into a deposit invoice and a balance invoice. Send the deposit quote when the client confirms, then send the balance invoice after the shoot wraps.",
+      q: "Can I collect a retainer before starting work?",
+      a: "Yes. The Professional plan lets you split any project into a retainer invoice and a balance invoice. Send the retainer quote when the client confirms, then send the balance invoice on completion.",
     },
     {
       q: "Do clients need to sign a contract?",
-      a: "Yes — the Shooter plan includes digital shoot contracts. Clients sign before the deposit is due. Your signed contract and invoice are stored together on every booking.",
+      a: "Yes — the Professional plan includes digital service contracts. Clients sign before the retainer is due. Your signed contract and invoice are stored together on every project.",
     },
     {
       q: "Is SolidFlo really free?",
-      a: "Yes — the Starter plan is free forever with 5 invoices per month and no credit card required. Upgrade to Shooter when you need unlimited invoicing, deposit splitting, contracts, and gallery links.",
+      a: "Yes — the Starter plan is free forever with 5 invoices per month and no credit card required. Upgrade to Professional when you need unlimited invoicing, retainer splitting, contracts, and delivery links.",
     },
     {
-      q: "Can I manage multiple photographers in my studio?",
-      a: "Yes. The Studio plan supports up to 5 photographer logins, each with their own bookings and invoices. You see everything from one dashboard while your team works independently.",
+      q: "Can I manage multiple team members in my agency?",
+      a: "Yes. The Agency plan supports up to 5 team logins, each with their own clients and invoices. You see everything from one dashboard while your team works independently.",
     },
   ];
 
@@ -1735,7 +1761,7 @@ function FAQ() {
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <p
             style={{
-              color: C.gold,
+              color: C.blue,
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: 3,
@@ -1756,7 +1782,7 @@ function FAQ() {
               letterSpacing: -0.5,
             }}
           >
-            Questions photographers ask
+            Questions freelancers ask
           </h2>
         </div>
 
@@ -1765,9 +1791,9 @@ function FAQ() {
             <div
               key={i}
               style={{
-                background: open === i ? C.goldL : C.surface,
+                background: open === i ? C.blueL : C.surface,
                 borderRadius: 12,
-                border: `1px solid ${open === i ? C.gold : C.border}`,
+                border: `1px solid ${open === i ? C.blue : C.border}`,
                 overflow: "hidden",
                 transition: "border-color .2s, background .2s",
               }}
@@ -1802,7 +1828,7 @@ function FAQ() {
                   height="18"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke={C.gold}
+                  stroke={C.blue}
                   strokeWidth="2.5"
                   style={{
                     flexShrink: 0,
@@ -1817,7 +1843,7 @@ function FAQ() {
                 <div
                   style={{
                     padding: "0 22px 18px",
-                    borderTop: `1px solid rgba(200,151,58,0.2)`,
+                    borderTop: `1px solid rgba(58,111,200,0.2)`,
                     paddingTop: 14,
                   }}
                 >
@@ -1853,7 +1879,7 @@ function CTABanner({ onRegister }) {
         overflow: "hidden",
       }}
     >
-      <GrainTexture opacity={0.045} />
+      <GridTexture opacity={0.045} />
       <div
         style={{
           position: "absolute",
@@ -1868,7 +1894,7 @@ function CTABanner({ onRegister }) {
           userSelect: "none",
         }}
       >
-        📷
+        💻
       </div>
       <div
         style={{
@@ -1880,7 +1906,7 @@ function CTABanner({ onRegister }) {
       >
         <p
           style={{
-            color: C.gold,
+            color: C.blue,
             fontSize: 12,
             fontWeight: 700,
             letterSpacing: "0.15em",
@@ -1896,25 +1922,25 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow Condensed', sans-serif",
             fontWeight: 900,
             fontSize: "clamp(28px,4vw,52px)",
-            color: "#F5F0E8",
+            color: "#F0F2F8",
             margin: "0 0 16px",
             letterSpacing: -0.5,
           }}
         >
-          Focus on the art.
+          Focus on the work.
           <br />
           Let us handle the admin.
         </h2>
         <p
           style={{
-            color: "rgba(245,240,232,0.4)",
+            color: "rgba(240,242,248,0.4)",
             fontSize: 16,
             margin: "0 0 36px",
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 700+ South African photographers and videographers who quote
-          professionally and get paid faster with SolidFlo.
+          Join 600+ South African freelancers, consultants, and digital agencies
+          who quote professionally and get paid faster with SolidFlo.
         </p>
         <div
           style={{
@@ -1927,7 +1953,7 @@ function CTABanner({ onRegister }) {
           <button
             onClick={onRegister}
             style={{
-              background: C.gold,
+              background: C.blue,
               border: "none",
               borderRadius: 12,
               padding: "16px 36px",
@@ -1937,7 +1963,7 @@ function CTABanner({ onRegister }) {
               fontFamily: "'Barlow Condensed', sans-serif",
               cursor: "pointer",
               letterSpacing: 0.5,
-              boxShadow: `0 8px 28px ${C.gold}73`,
+              boxShadow: "0 8px 28px rgba(58,111,200,0.45)",
             }}
           >
             START FOR FREE
@@ -1945,11 +1971,11 @@ function CTABanner({ onRegister }) {
           <button
             onClick={() => scrollTo("pricing")}
             style={{
-              background: "rgba(200,151,58,0.1)",
-              border: "1px solid rgba(200,151,58,0.3)",
+              background: "rgba(58,111,200,0.1)",
+              border: "1px solid rgba(58,111,200,0.3)",
               borderRadius: 12,
               padding: "16px 28px",
-              color: "rgba(245,240,232,0.7)",
+              color: "rgba(240,242,248,0.7)",
               fontSize: 15,
               fontWeight: 600,
               fontFamily: "'Barlow', sans-serif",
@@ -1961,7 +1987,7 @@ function CTABanner({ onRegister }) {
         </div>
         <p
           style={{
-            color: "rgba(245,240,232,0.2)",
+            color: "rgba(240,242,248,0.2)",
             fontSize: 12,
             marginTop: 20,
             fontFamily: "'Barlow', sans-serif",
@@ -1983,7 +2009,7 @@ function Footer({ onLogin, onRegister }) {
         "Features",
         "Pricing",
         "Package Builder",
-        "Gallery Links",
+        "Delivery Links",
         "Reports",
       ],
     },
@@ -2006,8 +2032,8 @@ function Footer({ onLogin, onRegister }) {
   return (
     <footer
       style={{
-        background: "#090806",
-        borderTop: `1px solid rgba(200,151,58,0.12)`,
+        background: "#060810",
+        borderTop: `1px solid rgba(58,111,200,0.12)`,
         padding: "56px 24px 32px",
       }}
     >
@@ -2029,13 +2055,21 @@ function Footer({ onLogin, onRegister }) {
                 marginBottom: 16,
               }}
             >
-              <div>
-                <img src={logo} width={160} alt="" />
+              <div
+                style={{
+                  background: "transparent",
+                  width: 160,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <img src={logo} alt="" width={160} />
               </div>
             </div>
             <p
               style={{
-                color: "rgba(245,240,232,0.25)",
+                color: "rgba(240,242,248,0.25)",
                 fontSize: 13,
                 lineHeight: 1.7,
                 fontFamily: "'Barlow', sans-serif",
@@ -2043,13 +2077,13 @@ function Footer({ onLogin, onRegister }) {
                 maxWidth: 220,
               }}
             >
-              Professional invoicing and booking management built for South
-              African photographers and videographers.
+              Professional invoicing and project management built for South
+              African freelancers and digital agencies.
             </p>
             <button
               onClick={onRegister}
               style={{
-                background: C.gold,
+                background: C.blue,
                 border: "none",
                 borderRadius: 8,
                 padding: "10px 20px",
@@ -2071,7 +2105,7 @@ function Footer({ onLogin, onRegister }) {
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 800,
                   fontSize: 14,
-                  color: "rgba(245,240,232,0.4)",
+                  color: "rgba(240,242,248,0.4)",
                   textTransform: "uppercase",
                   letterSpacing: 1,
                   margin: "0 0 16px",
@@ -2087,15 +2121,15 @@ function Footer({ onLogin, onRegister }) {
                     key={l}
                     href="#"
                     style={{
-                      color: "rgba(245,240,232,0.3)",
+                      color: "rgba(240,242,248,0.3)",
                       fontSize: 13,
                       fontFamily: "'Barlow', sans-serif",
                       textDecoration: "none",
                       transition: "color .15s",
                     }}
-                    onMouseEnter={(e) => (e.target.style.color = "#F5F0E8")}
+                    onMouseEnter={(e) => (e.target.style.color = "#F0F2F8")}
                     onMouseLeave={(e) =>
-                      (e.target.style.color = "rgba(245,240,232,0.3)")
+                      (e.target.style.color = "rgba(240,242,248,0.3)")
                     }
                   >
                     {l}
@@ -2108,7 +2142,7 @@ function Footer({ onLogin, onRegister }) {
 
         <div
           style={{
-            borderTop: `1px solid rgba(200,151,58,0.1)`,
+            borderTop: `1px solid rgba(58,111,200,0.1)`,
             paddingTop: 24,
             display: "flex",
             justifyContent: "space-between",
@@ -2119,7 +2153,7 @@ function Footer({ onLogin, onRegister }) {
         >
           <p
             style={{
-              color: "rgba(245,240,232,0.2)",
+              color: "rgba(240,242,248,0.2)",
               fontSize: 12,
               fontFamily: "'Barlow', sans-serif",
               margin: 0,
@@ -2129,7 +2163,7 @@ function Footer({ onLogin, onRegister }) {
           </p>
           <p
             style={{
-              color: "rgba(245,240,232,0.2)",
+              color: "rgba(240,242,248,0.2)",
               fontSize: 12,
               fontFamily: "'Barlow', sans-serif",
               margin: 0,
@@ -2144,10 +2178,8 @@ function Footer({ onLogin, onRegister }) {
 }
 
 /* ─── App ───────────────────────────────────────────────────────────────── */
-export default function PhotographyLandingPage() {
-  
+export default function VirtualServicesLandingPage() {
   const navigate = useNavigate();
-
   const goLogin = () => navigate("/login");
   const goRegister = () => navigate("/register");
 
