@@ -1447,6 +1447,9 @@ const MechanicsDashboard = () => {
       logoUrl: logoBase64 || businessInfo.logoUrl,
     },
     stampConfig,
+     totalPaid: paymentStatus.totalPaid,
+  balanceDue: paymentStatus.balanceDue,
+  paymentStatusLabel: paymentStatus.status,
   };
   const jobCardTemplateProps = {
     ...templateProps, // inherit all base template props

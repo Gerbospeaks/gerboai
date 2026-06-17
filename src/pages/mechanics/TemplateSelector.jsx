@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 
 const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
+
 const TEMPLATE_NAMES = {
   default: "Default (Original)",
   classic: "Classic Workshop",
@@ -179,7 +180,40 @@ export const TemplateSelector = ({
     </div>
   );
 };
-
+const PaymentBanner = ({ totalPaid, balanceDue, paymentStatusLabel, total }) => {
+  if (!totalPaid || totalPaid <= 0) return null;
+  const isPaid = paymentStatusLabel === "paid";
+  const isPartial = paymentStatusLabel === "partially_paid";
+  if (!isPaid && !isPartial) return null;
+  return (
+    <div style={{
+      margin: "8px 10mm",
+      padding: "10px 14px",
+      border: `2px solid ${isPaid ? "#059669" : "#d97706"}`,
+      borderRadius: 6,
+      background: isPaid ? "#f0fdf4" : "#fffbeb",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+    }}>
+      <div>
+        <div style={{ fontWeight: "bold", fontSize: 12,
+          color: isPaid ? "#166534" : "#92400e" }}>
+          {isPaid ? "✓ PAID IN FULL" : "⚠ PARTIAL PAYMENT RECEIVED"}
+        </div>
+        {isPartial && (
+          <div style={{ fontSize: 11, color: "#92400e", marginTop: 2 }}>
+            Paid: R {sf(totalPaid)} — Balance due: R {sf(balanceDue)}
+          </div>
+        )}
+      </div>
+      <div style={{ textAlign: "right", fontSize: 11,
+        color: isPaid ? "#166634" : "#92400e" }}>
+        {isPaid ? `R ${sf(totalPaid)}` : `R ${sf(balanceDue)} outstanding`}
+      </div>
+    </div>
+  );
+};
 // ─── Template components (unchanged — kept in same file) ──────────────────────
 
 export const DefaultTemplate = ({
@@ -212,6 +246,9 @@ export const DefaultTemplate = ({
   stampText = "APPROVED",
   stampColor = "#d32f2f",
   showStampDate = true,
+  totalPaid,        
+  balanceDue,       
+  paymentStatusLabel, 
 }) => (
   <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     <div className="border-b-2 border-black pb-4 mb-4">
@@ -365,6 +402,11 @@ export const DefaultTemplate = ({
           ))}
         </tbody>
       </table>
+      <PaymentBanner 
+      totalPaid={totalPaid} 
+      balanceDue={balanceDue} 
+      paymentStatusLabel={paymentStatusLabel} 
+      total={total} />
     </div>
 
     <div className="flex justify-end mb-6">
@@ -530,7 +572,12 @@ export const ClassicTemplate = (props) => (
         ))}
       </tbody>
     </table>
-
+<PaymentBanner
+  totalPaid={props.totalPaid}
+  balanceDue={props.balanceDue}
+  paymentStatusLabel={props.paymentStatusLabel}
+  total={props.total}
+/>
     <div className="flex justify-end">
       <div className="w-64 text-xs">
         <div className="flex justify-between py-1">
@@ -691,7 +738,12 @@ export const ModernTemplate = (props) => (
         ))}
       </tbody>
     </table>
-
+<PaymentBanner
+  totalPaid={props.totalPaid}
+  balanceDue={props.balanceDue}
+  paymentStatusLabel={props.paymentStatusLabel}
+  total={props.total}
+/>
     <div className="flex justify-end">
       <div className="w-80 space-y-2">
         <div className="flex justify-between py-2 text-gray-600">
@@ -824,7 +876,12 @@ export const ElegantTemplate = (props) => (
           ))}
         </tbody>
       </table>
-
+<PaymentBanner
+  totalPaid={props.totalPaid}
+  balanceDue={props.balanceDue}
+  paymentStatusLabel={props.paymentStatusLabel}
+  total={props.total}
+/>
       <div className="flex justify-end">
         <div className="w-64">
           <div className="flex justify-between py-2">
@@ -969,7 +1026,12 @@ export const SpeedTemplate = (props) => (
         ))}
       </tbody>
     </table>
-
+<PaymentBanner
+  totalPaid={props.totalPaid}
+  balanceDue={props.balanceDue}
+  paymentStatusLabel={props.paymentStatusLabel}
+  total={props.total}
+/>
     <div className="flex justify-end">
       <div className="w-80">
         <div className="flex justify-between py-2 text-gray-400">
@@ -1153,6 +1215,12 @@ export const DiagnosticTemplate = (props) => (
           ))}
         </tbody>
       </table>
+      <PaymentBanner
+  totalPaid={props.totalPaid}
+  balanceDue={props.balanceDue}
+  paymentStatusLabel={props.paymentStatusLabel}
+  total={props.total}
+/>
     </div>
 
     <div className="flex justify-end">
