@@ -29,9 +29,7 @@ import {
 import { db } from "../../firebase";
 import styles from "./SolidFloAgent.module.css";
 
-// ── Config ────────────────────────────────────────────────────────────────────
-// Replace with your actual Cloudflare Worker URL
-const WORKER_URL = "https://your-worker.your-subdomain.workers.dev/ai-agent";
+const WORKER_URL = "https://r2-upload-worker.v8-auto.workers.dev/ai-agent";
 
 const QUICK_ACTIONS = [
   { label: "📄 New invoice", prompt: "I want to create a new invoice" },
